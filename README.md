@@ -1,5 +1,5 @@
 # Axion
-My high-level programming language.
+High-level general-purposed programming language.
 ## Objectives
 - **_simplicity_**
 - **_readability_**
