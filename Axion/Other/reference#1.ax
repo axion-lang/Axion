@@ -1,0 +1,122 @@
+## two-pounds comment at first line is file header or something.
+
+# 'use' is like 'import', 'include' or 'using'
+use math, io, web
+
+# 'open' is like 'public', 'close' is like 'private' and 'inner' is 'internal' as access modifiers like in c#.
+# it's recommended to write all in lowercase and separate names with '-' as follows: 'some-value', 'useful-int' etc.
+# maybe later function names 'll be case-insensitive so user can write: 'do-Some-FuncTioN' and ide will fix it to 'do-some-function'.
+
+# some variable definition.
+# use 'var var-name' or 'builtintypename var-name' for value types and 'new type var-name' for reference types.
+# ide should help with it.
+# value types is numbers, arrays and ....
+var all-objects-count = 0
+
+## any comment starting with two pounds interpreted as class, function or field description/reference.
+open class object
+
+	# 'u' is uint number postfix, all other types is
+	# 'f' for float
+	# 'd' for decimal
+	uint some-object-value = 9u
+
+	## object class constructor. always named as 'init'.
+	open init
+		# '++' is increment and '--' is decrement.
+		all-objects-count++
+		# split string by '+'
+		out.writeln 'object ' + all-objects-count + '\'s constructor was called.'
+		# or write it with interpolation like so:
+		out.writeln $'object @all-objects-count@\'s constructor was called.'
+		# or simple verbatim string:
+		out.writeln
+
+	## description of simple 'void' function
+	open do-something
+		# you can write any count of variables with commas
+		var first = 'Hello, world!', some-str = 'Some value.'
+		# there are no double-precision float, just floating-point number.
+		var num1 = 1, num2 = 4.5
+
+		# "out" is console window here.
+		out.writeln num1 + num2
+		# when you use 1 or 0 arguments you can bypass brackets.
+		out.writeln first
+		# just printing new line here.
+		out.writeln
+		out.write(first, num1, num2)
+
+# inner modifier means type is open only in this assembly.
+# ':' here is inheriting from some class.
+inner class number : object
+	# some operator definition. It haven't access modifiers (except 'impilcit' and 'explicit' maybe)
+	## plus operator description
+	operator + (num num1, num num2)
+		some-code-to-sum-numbers(num1, num2)
+
+	# it's recommended to leave 1 blank line around classes and functions.
+	# I don't know how try-parse works so I 'll just print some code to show lang's syntax.
+	# ': num' here is returned type. it can be bypassed if type specified in 'return var' and compiler will add it itself.
+	open int try-parse(string str)
+		# 'new type()' initializes new object. after using, it will be removed by 'delete' operator.
+		# if you need to initialize variable later just assign it to null like 'new list<int> digits = null'
+		# and if you need to specify initializer parameters, add them in brackets like:
+		# new list<int>(firstparam, 2, nonsense) digits
+		# or to initialize values:
+		# new list<int>(firstparam, 2, nonsense) { value1, value2, other-value } digits
+
+		# new list<int> digits - is shorter and more clear than c# below, isn't it?
+		# List<int> digits = new List<int>();
+
+		## you can add description to local variables too.
+		new list<int> digits
+
+		# simple loop
+		for int i = 0 < str.length
+
+			# simple switch. it 'll be converted to if-else at compile time.
+			switch str[i]
+				case '1'
+					digits.add 1
+				case '2'
+					digits.add 2
+				case '3'
+					digits.add 3
+				# .......
+				default
+					digits.add 0
+			# this 'switch' block 'll be compiled to:
+			#
+			# '==' operator is absolutely analog of equal(value1, value2)
+			# if str[i] == '1'
+			# 	digits.add 1
+			# elif str[i] == '2'
+			# 	digits.add 2
+			# elif str[i] == 3
+			# 	digits.add 3
+			# else
+			# 	digits.add 0
+		int result = digits.some-func-to-join-digits-to-number
+		# free the memory from digits list by the 'delete' operator.
+		# this action will be called automatically at the end of it's local region.
+		# so that's why language don't have garbage collector:
+		# all memory will be automatically cleared at the end of it's local region by 
+		# appending 'delete' operator at the compile time.
+		delete digits
+		return result
+
+# this function don't have any access modifiers, it's available from the whole program.
+some-whole-program-function()
+	out.write 'whole program function was called.'
+	new object some-obj
+	some-obj.do-something
+	# compiler will append 'delete some-obj' here (if there is no links to it).
+
+# other assembly method invocation:
+# if assembly name don't match code style, you can write:
+@name = 'doSomethingInMyDll', use-last-error = true
+outer bool do-something-in-outer-asm(uint arg1, int arg2)
+
+# so to just print 'hello, world!' you need to write:
+out.write 'hello, world'

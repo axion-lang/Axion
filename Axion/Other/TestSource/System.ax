@@ -1,0 +1,12 @@
+use SomeClass, Comparator
+use Disco, Nonsense
+
+open Digit: 4896925217
+open RedLight: 230`b
+
+open Main:
+	DoSomeStuff('hello, world!', 92365`s)
+	Sleep 1000
+	GoAway
+
+Main()

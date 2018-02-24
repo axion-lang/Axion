@@ -1,0 +1,45 @@
+# operator	description
+
++			# addition
+-			# substraction
+*			# multiplication
+/			# division
+
+# usage of above operators is evident:
+
+simple: 1				# define variable
+other-var: simple + 5	# other-var now 6
+other-var + 9			# incorrect expression! (result is 15 but it's not used anywhere)
+
+# and the usage of variable value modifying operators:
+
+some-var: 6		# define variable
+some-var += 2	# correct! increases variable value by 2 (some-var now 8)
+some-var /= 4	# dividing variable value by 4 (some-var now 2)
+some-var *= 9	# multiplicating variable value by 4 (some-var now 18)
+some-var -= 9	# substracting 6 from variable value (some-var now 12)
+
+# unary operatots:
+
+++			# variable value increment
+--			# variable value decrement
+
+# usage:
+
+some-var-2: 3
+some-var-2++	# some-var-2 now 4
+some-var-2--	# some-var-2 now 3
+
+=			# equal to
+!=			# not equal to
+
+||			# boolean OR
+&&			# boolean AND
+
+>			# more than
+<			# less than
+
+>=			# more than or equal to
+<=			# less than or equal to
+
+is			# type equality check

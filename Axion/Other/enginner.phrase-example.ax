@@ -1,0 +1,25 @@
+use system, newtonsoft.json
+
+## speech command trigger
+module engineer.grammar
+	@json-object(member-serialization.opt-in)
+	open class phrase
+
+		open str[] phrases = null
+
+		@json-property
+		open redefine str text
+			get => phrases.join ','
+			set:
+				phrases = value.split(',', string-split-options.remove-empty-entries)
+				while i = 0 < phrases.length
+					i++
+					phrases[i].trim
+				property-changed!
+
+		@json-constructor
+		local init phrase()
+
+		open init phrase(str phrase, bool is-optional)
+			text = phrases
+			self.is-optional = is-optional
