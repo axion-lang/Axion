@@ -1,0 +1,43 @@
+# referenced assemblies separated by commas
+use math, io
+
+# access modifiers types:
+
+# name		whence can be accessed
+
+# open		from all code and outer assemblies.
+# inner		from all code in object's assembly.
+# local		only from its local space (e.g class).
+
+# redefine	member is overridden from parent class.
+
+## object description starts with 2 '##'
+## and can be multiline.
+open class Object
+	
+	# this function returned type is 'void'.
+	local DoSomething()
+
+		# variable values		descriptive name			short name (keyword)
+
+		var someStr = '\'escaped string\'' # string		str
+		var v1 = 105637			# integer					int
+		var v2 = 10567u			# unsigned integer			uint
+		var v3 = 148014734		# long integer				long
+		var v4 = 470174820ul	# long unsigned integer		ulong
+		var v5 = 35000s			# short integer				short
+		var v6 = 35000us		# short unsigned integer	ushort
+		var v7 = 35.64			# floating-point integer	float
+		var v8 = true			# boolean					bool
+		var v9 = "c"			# character					char
+		# use number postfix is optional when type is specified (e.g. 'ushort' instead of 'var').
+
+		# when function takes 1 or 0 arguments then brackets is optional.
+		Out.WriteLn 'some text'
+		# out.writeln('some text') - is the same
+		Out.Write('some text', v1, 0) # brackets are necessary here.
+
+		# var some-func = fn(x) => x += 2 # lambda function (experimental)
+		# event handler invocation:
+		PropertyChanged!
+

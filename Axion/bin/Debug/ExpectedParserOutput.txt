@@ -1,0 +1,15 @@
+IN: 
+WriteLine('Hello, world!', 1 + 2)
+
+OUT:
+(Call,
+	(Identifier, 'WriteLine'),
+	(
+		(String, 'Hello, world!'),
+		(Operation,
+			"+",
+			(Number_Int, '1'),
+			(Number_Int, '2')
+		)
+	)
+)

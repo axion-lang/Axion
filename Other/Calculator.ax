@@ -1,0 +1,33 @@
+# Calculator, written in Axion.
+
+out.write('Write a first number: ')
+
+firstNum = out.readLine()
+while int.parse(firstNum) is not number
+	out.writeLine('\nPlease write correct number: ')
+	firstNum = out.readLine()
+
+out.write('Write a second number: ')
+
+secondNum = out.readLine()
+while int.parse(secondNum) is not Number
+	out.writeLine('\nPlease write correct number: ')
+	secondNum = out.readLine()
+
+allowedOperations = ['+', '-', '*', '/']
+out.write('Write an operation (+, -, *, /): ')
+
+opChar = out.readKey()
+while opChar not in allowedOperations
+	out.writeLine('\nPlease write only one of: (+, -, *, /): ')
+	opChar = out.readKey()
+
+switch opChar
+	case '+'
+		out.writeLine(firstNum + secondNum)
+	case '-'
+		out.writeLine(firstNum - secondNum)
+	case '*'
+		out.writeLine(firstNum * secondNum)
+	case '/'
+		out.writeLine(firstNum / secondNum)
