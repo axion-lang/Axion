@@ -20,14 +20,14 @@ _High-level general-purposed programming language. **(under construction)**_
 out.write('Write a first number: ')
 
 firstNum = out.readLine()
-while int.parse(firstNum) is not number
+while parseType(firstNum) is not number
 	out.writeLine('\nPlease write correct number: ')
 	firstNum = out.readLine()
 
 out.write('Write a second number: ')
 
 secondNum = out.readLine()
-while int.parse(secondNum) is not Number
+while parseType(secondNum) is not number
 	out.writeLine('\nPlease write correct number: ')
 	secondNum = out.readLine()
 
