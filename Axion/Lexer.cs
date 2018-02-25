@@ -65,7 +65,7 @@ namespace Axion
 		public static void Tokenize(string[] lines)
 		{
 			var lineIndentLevel = 0;
-		
+
 			for (; LineIndex < lines.Length; LineIndex++)
 			{
 				var line = lines[LineIndex];
@@ -76,7 +76,7 @@ namespace Axion
 				{
 					continue;
 				}
-				
+
 				for (var charIndex = 0; charIndex < line.Length; charIndex++)
 				{
 					var ch = line[charIndex];
@@ -84,7 +84,7 @@ namespace Axion
 					{
 						continue;
 					}
-					
+
 					#region indentation (creates block bodies)
 
 					var tabsCount = 0;
