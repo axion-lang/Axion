@@ -1,8 +1,0 @@
-(Identifier, 'WriteLine'),
-(OpenParenthese),
-(String, 'Hello, world!'),
-(Comma),
-(Number_Int, '1'),
-(Operator, '+'),
-(Number_Int, '2'),
-(CloseParenthese)
