@@ -1,4 +1,4 @@
-# Axion <img align="right" src="https://github.com/F1uctus/Axion/blob/master/Other/Axion_logo.png" width="200" height="200" />
+# Axion <img align="right" src="https://github.com/F1uctus/Axion/blob/master/Other/Axion_logo.png" width="152" height="152" />
 
 _High-level general-purposed programming language. **(under construction)**_
 ## Objectives:
