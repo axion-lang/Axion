@@ -4,6 +4,7 @@
 
 High-level general-purposed programming language.
 ## Objectives
+- **_fast work_**
 - **_simplicity_**
 - **_readability_**
 - **_multifunctionality_**
