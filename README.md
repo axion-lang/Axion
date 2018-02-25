@@ -2,13 +2,13 @@
 
 _High-level general-purposed programming language. **(under construction)**_
 ## Objectives:
-- **Multifunctionality**
-- **Static typization**
+- **Multifunctional**
+- **Static typed**
 - **With interpreter & compiler**
 - **High-performance**
-- **Safe work with memory**
-- **Simplicity**
-- **Readability**
+- **Safe working with memory**
+- **Simple**
+- **Readable**
 
 ## Things that have been done:
 - **Lexer**
