@@ -1,4 +1,5 @@
 # Axion
+![](https://github.com/F1uctus/Axion/blob/master/Other/Axion_logo.png = 500x500)
 High-level general-purposed programming language.
 ## Objectives
 - **_simplicity_**
