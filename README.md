@@ -2,7 +2,7 @@
 
 _High-level general-purposed programming language. **(under construction)**_
 ## Objectives
-- **fast work**
+- **performance**
 - **simplicity**
 - **readability**
 - **multifunctionality**
