@@ -1,15 +1,13 @@
 # Axion <img align="right" src="https://github.com/F1uctus/Axion/blob/master/Other/Axion_logo.png" width="200" height="200" />
 
-## UNDER CONSTRUCTION
-
-High-level general-purposed programming language.
+## High-level general-purposed programming language. (under construction)
 ## Objectives
-- **_fast work_**
-- **_simplicity_**
-- **_readability_**
-- **_multifunctionality_**
+### - fast work
+### - simplicity
+### - readability
+### - multifunctionality
 
-### Example
+## Example
 #### (not an exact version of the language yet)
 ```python
 # Calculator, written in Axion.
