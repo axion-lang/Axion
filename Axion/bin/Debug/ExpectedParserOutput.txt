@@ -1,9 +1,9 @@
 IN: 
-WriteLine('Hello, world!', 1 + 2)
+writeLine('Hello, world!', 1 + 2)
 
 OUT:
 (Call,
-	(Identifier, 'WriteLine'),
+	(Identifier, 'writeLine'),
 	(
 		(String, 'Hello, world!'),
 		(Operation,
