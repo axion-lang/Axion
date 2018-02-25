@@ -1,11 +1,16 @@
 # Axion <img align="right" src="https://github.com/F1uctus/Axion/blob/master/Other/Axion_logo.png" width="200" height="200" />
 
 _High-level general-purposed programming language. **(under construction)**_
-## Objectives
+## Objectives:
 - **performance**
 - **simplicity**
 - **readability**
 - **multifunctionality**
+
+## Things that have been done:
+- **Lexer**
+- **Parser is still under construction**
+- **Next thing will be interpreter**
 
 ## Example
 (not an exact version of the language yet)
