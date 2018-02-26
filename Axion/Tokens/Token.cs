@@ -2,7 +2,7 @@
 {
 	internal class Token
 	{
-		public readonly TokenType Type = TokenType.Unknown;
+		public TokenType Type = TokenType.Unknown;
 		public readonly string Value;
 
 		internal Token() { }

@@ -14,7 +14,7 @@ namespace Axion
 		private static readonly Regex RegexIdentifierStart = new Regex("[_a-zA-Z]");
 		private static readonly Regex RegexIdentifier = new Regex("[_a-zA-Z0-9]");
 		private static readonly Regex RegexNumberStart = new Regex("[0-9]");
-		private static readonly Regex RegexNumber = new Regex("[.0-9`BSLbsl]"); // B - byte, S - short, L - long 
+		private static readonly Regex RegexNumber = new Regex("[0-9`BSLbsl]"); // B - byte, S - short, L - long 
 
 		private static readonly char[] OperatorChars =
 		{
@@ -107,8 +107,12 @@ namespace Axion
 
 					#endregion
 
+					if (ch == '#')
+					{
+						goto NextLine;
+					}
 					// operator
-					if (OperatorChars.Contains(ch))
+					else if (OperatorChars.Contains(ch))
 					{
 						var operatorBuilder = new StringBuilder();
 						while (charIndex < line.Length && OperatorChars.Contains(line[charIndex]))
@@ -195,11 +199,11 @@ namespace Axion
 						Program.LogError($"Unknown character: {ch} ", false, LineIndex, charIndex);
 					}
 				}
+				NextLine:
 				if (LineIndex != lines.Length - 1)
 				{
 					Tokens.Add(new Token(TokenType.Newline));
 				}
-			NextLine:;
 			}
 			LineIndex = 0;
 		}
@@ -239,18 +243,30 @@ namespace Axion
 			// float number
 			if (number.Contains("."))
 			{
-				// short
-				if (number.EndsWith("`s"))
-				{
-					return new Token(TokenType.Number_SFloat, number.Replace("`s", ""));
-				}
-				// long
+				// long float
 				if (number.EndsWith("`l"))
 				{
-					return new Token(TokenType.Number_LFloat, number.Replace("`l", ""));
+					if (!double.TryParse(number.Replace("`l", ""), out var longFloat))
+					{
+						Program.LogError("Invalid 'lfloat' value", true, LineIndex, charIndex);
+					}
+					else
+					{
+						return new Token(TokenType.Number_SFloat, longFloat.ToString());
+					}
 				}
 				// float
-				return new Token(TokenType.Number_Float, number);
+				else
+				{
+					if (!float.TryParse(number, out var @float))
+					{
+						Program.LogError("Invalid 'float' value", true, LineIndex, charIndex);
+					}
+					else
+					{
+						return new Token(TokenType.Number_LFloat, @float.ToString());
+					}
+				}
 			}
 			// integer
 			else
@@ -258,21 +274,53 @@ namespace Axion
 				// byte
 				if (number.EndsWith("`b"))
 				{
-					return new Token(TokenType.Number_Byte, number.Replace("`b", ""));
+					if (!byte.TryParse(number.Replace("`b", ""), out var @byte))
+					{
+						Program.LogError("Invalid 'byte' value", true, LineIndex, charIndex);
+					}
+					else
+					{
+						return new Token(TokenType.Number_Byte, @byte.ToString());
+					}
 				}
 				// short
-				if (number.EndsWith("`s"))
+				else if (number.EndsWith("`s"))
 				{
-					return new Token(TokenType.Number_SInt, number.Replace("`s", ""));
+					if (!short.TryParse(number.Replace("`s", ""), out var sint))
+					{
+						Program.LogError("Invalid 'sint' value", true, LineIndex, charIndex);
+					}
+					else
+					{
+						return new Token(TokenType.Number_SInt, sint.ToString());
+					}
 				}
 				// long
-				if (number.EndsWith("`l"))
+				else if(number.EndsWith("`l"))
 				{
-					return new Token(TokenType.Number_LInt, number.Replace("`l", ""));
+					if (!long.TryParse(number.Replace("`l", ""), out var lint))
+					{
+						Program.LogError("Invalid 'lint' value", true, LineIndex, charIndex);
+					}
+					else
+					{
+						return new Token(TokenType.Number_LInt, lint.ToString());
+					}
 				}
 				// integer
-				return new Token(TokenType.Number_Int, number);
+				else
+				{
+					if (!int.TryParse(number, out var @int))
+					{
+						Program.LogError("Invalid 'int' value", true, LineIndex, charIndex);
+					}
+					else
+					{
+						return new Token(TokenType.Number_Int, @int.ToString());
+					}
+				}
 			}
+			return null;
 		}
 	}
 }

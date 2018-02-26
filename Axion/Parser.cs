@@ -10,7 +10,7 @@ namespace Axion
 		private readonly TokenType[] EndTokenTypes;
 		private readonly List<Token> Tokens;
 		public readonly List<Token> SyntaxTree = new List<Token>();
-		private int TokenIndex;
+		internal int TokenIndex;
 
 		internal Parser(List<Token> tokens, params TokenType[] endTokenTypes)
 		{
@@ -46,20 +46,21 @@ namespace Axion
 			}
 
 			TokenIndex++;
-
+			// Number, String, Identifier
 			if (previousToken is null && (type.ToString("G").ToLower().StartsWith("number") ||
 										  type == TokenType.String ||
 										  type == TokenType.Identifier))
 			{
 				return NextExpression(token);
 			}
-			// OPERATION
+			// Operation
 			if (type == TokenType.Operator)
 			{
+				// get right operand
 				var nextToken = NextExpression(null);
 				return NextExpression(new OperationToken(token.Value, previousToken, nextToken));
 			}
-			// FUNCTION CALL
+			// Function call
 			if (type == TokenType.OpenParenthese && previousToken?.Type == TokenType.Identifier)
 			{
 				var arguments = MultipleExpressions(TokenType.Comma, TokenType.CloseParenthese);
@@ -74,24 +75,26 @@ namespace Axion
 		{
 			var ret = new List<Token>();
 			var type = Tokens[TokenIndex].Type;
-			if (type == endTokenType)
+			if (type == endTokenType) // when 'call()'
 			{
 				TokenIndex++;
 			}
 			else
 			{
-				var parser = new Parser(Tokens.GetRange(0, TokenIndex), separatorType, endTokenType);
+				var argsParser = new Parser(Tokens, separatorType, endTokenType) { TokenIndex = TokenIndex };
 				while (type != endTokenType)
 				{
-					var token = parser.NextExpression(null);
-					if (token != null)
+					var token = argsParser.NextExpression(null);
+					if (token != null && token.Type != separatorType && token.Type != endTokenType)
 					{
 						ret.Add(token);
 					}
-					else break;
-					type = token.Type;
-					TokenIndex++;
+
+					argsParser.TokenIndex++;
+					if (argsParser.TokenIndex >= Tokens.Count) break;
+					type = Tokens[argsParser.TokenIndex].Type;
 				}
+				TokenIndex = argsParser.TokenIndex;
 			}
 			return ret;
 		}

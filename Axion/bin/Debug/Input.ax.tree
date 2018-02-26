@@ -1,8 +1,0 @@
-[Operation,
-    "+",
-    [Call,
-    "[Identifier, 'WriteLine']",
-    System.Collections.Generic.List`1[Axion.Tokenizing.Token]
-],,
-    [CloseParenthese]
-],

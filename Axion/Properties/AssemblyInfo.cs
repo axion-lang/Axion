@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Axion")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("NAIT")]
+[assembly: AssemblyCompany("Nikitin Advanced Intelligence Technologies")]
 [assembly: AssemblyProduct("Axion")]
 [assembly: AssemblyCopyright("Copyright © Nikitin Advanced Intelligence Technologies 2018")]
 [assembly: AssemblyTrademark("")]
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // Можно задать все значения или принять номер сборки и номер редакции по умолчанию.
 // используя "*", как показано ниже:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.2.1.2")]
+[assembly: AssemblyFileVersion("0.2.1.2")]

@@ -35,7 +35,7 @@ namespace Axion
 			{
 				File.Delete(fileName);
 			}
-			File.WriteAllText(fileName, string.Join(",\n", Lexer.Tokens.Select(token => token.ToString())));
+			File.WriteAllText(fileName, string.Join(",\r\n", Lexer.Tokens.Select(token => token.ToString())));
 		}
 
 		private static void Parse()
@@ -53,11 +53,11 @@ namespace Axion
 			Console.ForegroundColor = ConsoleColor.White;
 			if (lineIndex != -1 && charIndex != -1)
 			{
-				Console.WriteLine($"\nAt line {lineIndex + 1}, column {charIndex + 1}.\n");
+				Console.WriteLine($"\r\nAt line {lineIndex + 1}, column {charIndex + 1}.\r\n");
 			}
 			if (critical)
 			{
-				Console.WriteLine("Press any key to close app.");
+				Console.WriteLine("\r\nPress any key to close app.");
 				Console.ReadKey();
 				Environment.Exit(0);
 			}
