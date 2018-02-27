@@ -18,9 +18,15 @@
 			Value = value;
 		}
 
-		public override string ToString()
+		public virtual string ToString(int tabLevel)
 		{
-			return Value == null ? $"({Type})" : $"({Type:G}, '{Value}')";
+			var tabs = "";
+			for (int i = 0; i < tabLevel; i++)
+			{
+				tabs += "    ";
+			}
+
+			return Value == null ? $"{tabs}({Type})" : $"{tabs}({Type:G}, '{Value}')";
 		}
 	}
 }

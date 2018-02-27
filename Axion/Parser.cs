@@ -7,15 +7,15 @@ namespace Axion
 {
 	internal class Parser
 	{
-		private readonly TokenType[] EndTokenTypes;
+		private readonly List<TokenType> EndTokenTypes = new List<TokenType>();
 		private readonly List<Token> Tokens;
 		public readonly List<Token> SyntaxTree = new List<Token>();
-		internal int TokenIndex;
+		private int TokenIndex;
 
 		internal Parser(List<Token> tokens, params TokenType[] endTokenTypes)
 		{
 			Tokens = tokens;
-			EndTokenTypes = endTokenTypes;
+			EndTokenTypes.AddRange(endTokenTypes);
 		}
 
 		internal void Parse()
@@ -81,20 +81,21 @@ namespace Axion
 			}
 			else
 			{
-				var argsParser = new Parser(Tokens, separatorType, endTokenType) { TokenIndex = TokenIndex };
+				EndTokenTypes.Add(separatorType);
+				EndTokenTypes.Add(endTokenType);
 				while (type != endTokenType)
 				{
-					var token = argsParser.NextExpression(null);
+					var token = NextExpression(null);
 					if (token != null && token.Type != separatorType && token.Type != endTokenType)
 					{
 						ret.Add(token);
 					}
-
-					argsParser.TokenIndex++;
-					if (argsParser.TokenIndex >= Tokens.Count) break;
-					type = Tokens[argsParser.TokenIndex].Type;
+					type = Tokens[TokenIndex].Type;
+					TokenIndex++;
+					if (TokenIndex >= Tokens.Count) break;
 				}
-				TokenIndex = argsParser.TokenIndex;
+				EndTokenTypes.Remove(endTokenType);
+				EndTokenTypes.Remove(separatorType);
 			}
 			return ret;
 		}
@@ -106,7 +107,7 @@ namespace Axion
 				File.Delete(fileName);
 			}
 
-			File.WriteAllLines(fileName, SyntaxTree.Select(token => token?.ToString()));
+			File.WriteAllLines(fileName, SyntaxTree.Select(token => token?.ToString(0)));
 		}
 	}
 }

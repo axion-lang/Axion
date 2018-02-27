@@ -15,34 +15,19 @@ namespace Axion.Tokens
 			RightOperand = rightOperand;
 		}
 
-		public override string ToString()
+		public override string ToString(int tabLevel)
 		{
-			var str = new StringBuilder($"(Operation,\r\n    '{Operator ?? "Unknown"}',\r\n");
-			if (LeftOperand is OperationToken opToken)
+			var tabs = "";
+			for (int i = 0; i < tabLevel; i++)
 			{
-				str.AppendLine("    (Operation,");
-				str.AppendLine($"        '{opToken.Operator ?? "Unknown"}',");
-				str.AppendLine($"        {opToken.LeftOperand?.ToString() ?? "Null"},");
-				str.AppendLine($"        {opToken.RightOperand?.ToString() ?? "Null"}");
-				str.AppendLine("    ),");
+				tabs += "    ";
 			}
-			else
-			{
-				str.AppendLine($"    {LeftOperand},");
-			}
-			if (RightOperand is OperationToken opToken2)
-			{
-				str.AppendLine("    (Operation,");
-				str.AppendLine($"        '{opToken2.Operator ?? "Unknown"}',");
-				str.AppendLine($"        {opToken2.LeftOperand?.ToString() ?? "Null"},");
-				str.AppendLine($"        {opToken2.RightOperand?.ToString() ?? "Null"}");
-				str.AppendLine("    )");
-			}
-			else
-			{
-				str.AppendLine($"    {RightOperand}");
-			}
-			str.Append("),");
+
+			var str = new StringBuilder($"{tabs}(Operation,\r\n" +
+			                            $"{tabs}    '{Operator ?? "Unknown"}',\r\n");
+			str.AppendLine($"{LeftOperand.ToString(tabLevel + 1)},");
+			str.AppendLine($"{RightOperand.ToString(tabLevel + 1)}");
+			str.Append($"{tabs})");
 			return str.ToString();
 		}
 	}

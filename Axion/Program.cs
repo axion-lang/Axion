@@ -35,7 +35,7 @@ namespace Axion
 			{
 				File.Delete(fileName);
 			}
-			File.WriteAllText(fileName, string.Join(",\r\n", Lexer.Tokens.Select(token => token.ToString())));
+			File.WriteAllText(fileName, string.Join(",\r\n", Lexer.Tokens.Select(token => token.ToString(0))));
 		}
 
 		private static void Parse()
