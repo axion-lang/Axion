@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion", "Axion\Axion.csproj", "{2CD20D00-06E5-4A74-8239-75286728506A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion", "Axion\Axion.csproj", "{7648AC3F-C629-47FF-ABC9-7E8063F589B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2CD20D00-06E5-4A74-8239-75286728506A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2CD20D00-06E5-4A74-8239-75286728506A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2CD20D00-06E5-4A74-8239-75286728506A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2CD20D00-06E5-4A74-8239-75286728506A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7648AC3F-C629-47FF-ABC9-7E8063F589B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7648AC3F-C629-47FF-ABC9-7E8063F589B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7648AC3F-C629-47FF-ABC9-7E8063F589B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7648AC3F-C629-47FF-ABC9-7E8063F589B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4AB8D22A-48DC-4133-8655-ED325EB3C6E3}
+		SolutionGuid = {204AFB47-69DC-411F-8AEF-F3D38B6A7B4F}
 	EndGlobalSection
 EndGlobal

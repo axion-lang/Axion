@@ -13,6 +13,7 @@ namespace Axion
 
 		private static readonly Regex RegexIdentifierStart = new Regex("[_a-zA-Z]");
 		private static readonly Regex RegexIdentifier = new Regex("[_a-zA-Z0-9]");
+
 		private static readonly Regex RegexNumberStart = new Regex("[0-9]");
 		private static readonly Regex RegexNumber = new Regex("[0-9`BSLbsl]"); // B - byte, S - short, L - long 
 
@@ -36,15 +37,20 @@ namespace Axion
 			"|=", "^=", "&=", "~="
 		};
 
-		private static readonly char[] SpecialChars =
+		private static readonly Dictionary<char, Token> SpecialTokens = new Dictionary<char, Token>
 		{
-			'(', ')', ',', ';'
+			{ '(', new Token(TokenType.OpenParenthese) },
+			{ ')', new Token(TokenType.CloseParenthese) },
+			{ '[', new Token(TokenType.OpenBracket) },
+			{ ']', new Token(TokenType.CloseBracket) },
+			{ ',', new Token(TokenType.Comma) },
+			{ ';', new Token(TokenType.Semicolon) }
 		};
 
 		private static readonly string[] Keywords =
 		{
             // loops
-            "for", "while", "break", "continue",
+            "for", "while", "out", "next",
             // conditions
             "if", "elif", "else", "switch", "case",
 			"is", "not", "and", "or",
@@ -52,12 +58,15 @@ namespace Axion
             "new", "delete", "null", "as",
             // errors
             "try", "catch", "throw",
-            // Objects
-            "module", "open", "local",
-			"class", "struct", "enum", "self",
-            // Built-In Types
-            "byte", "int", "lint", "sint",
-			"float", "lfloat", "sfloat", "bool", "str"
+            // Objects && access modifiers
+            "module", "open", "local", "inner",
+			"class", "struct", "enum", "self"
+		};
+
+		private static readonly string[] BuiltInTypes =
+		{
+			"bool", "byte", "sint", "int", "lint",
+			"float", "lfloat", "str"
 		};
 
 		private static int LineIndex;
@@ -77,42 +86,47 @@ namespace Axion
 					continue;
 				}
 
+				#region indentation (creates block bodies)
+
+				var tabsCount = 0;
+				while (line[tabsCount] == '\t')
+				{
+					tabsCount++;
+				}
+				// if indent increased
+				while (tabsCount > lineIndentLevel)
+				{
+					Tokens.Add(new Token(TokenType.Indent));
+					lineIndentLevel++;
+				}
+				// if indent decreased
+				while (tabsCount < lineIndentLevel)
+				{
+					Tokens.Add(new Token(TokenType.Outdent));
+					lineIndentLevel--;
+				}
+
+				#endregion
+
 				for (var charIndex = 0; charIndex < line.Length; charIndex++)
 				{
 					var ch = line[charIndex];
-					if (ch == ' ')
+
+					if (ch == ' ' || ch == '\t')
 					{
 						continue;
 					}
-
-					#region indentation (creates block bodies)
-
-					var tabsCount = 0;
-					while (line[tabsCount] == '\t')
-					{
-						tabsCount++;
-					}
-					// if indent increased
-					while (tabsCount > lineIndentLevel)
-					{
-						Tokens.Add(new Token(TokenType.Indent));
-						lineIndentLevel++;
-					}
-					// if indent decreased
-					while (tabsCount < lineIndentLevel)
-					{
-						Tokens.Add(new Token(TokenType.Outdent));
-						lineIndentLevel--;
-					}
-
-					#endregion
-
+					// TODO add inline comments
 					if (ch == '#')
 					{
-						goto NextLine;
+						while (charIndex < line.Length && line[charIndex] != '#')
+						{
+							charIndex++;
+						}
 					}
+
 					// operator
-					else if (OperatorChars.Contains(ch))
+					if (OperatorChars.Contains(ch))
 					{
 						var operatorBuilder = new StringBuilder();
 						while (charIndex < line.Length && OperatorChars.Contains(line[charIndex]))
@@ -130,31 +144,10 @@ namespace Axion
 						Tokens.Add(new Token(TokenType.Operator, operatorBuilder.ToString()));
 					}
 					// special operators
-					else if (SpecialChars.Contains(ch))
+					else if (SpecialTokens.ContainsKey(ch))
 					{
-						switch (ch)
-						{
-							case '(':
-								{
-									Tokens.Add(new Token(TokenType.OpenParenthese));
-									break;
-								}
-							case ')':
-								{
-									Tokens.Add(new Token(TokenType.CloseParenthese));
-									break;
-								}
-							case ',':
-								{
-									Tokens.Add(new Token(TokenType.Comma));
-									break;
-								}
-							case ';':
-								{
-									Tokens.Add(new Token(TokenType.Semicolon));
-									break;
-								}
-						}
+						SpecialTokens.TryGetValue(ch, out Token SpecialToken);
+						Tokens.Add(SpecialToken);
 					}
 					// string
 					else if (ch == '"' || ch == '\'')
@@ -167,7 +160,7 @@ namespace Axion
 						Tokens.Add(ParseNumber(ref line, ref charIndex));
 						charIndex--;
 					}
-					// keyword / identifier
+					// keyword / built-in type / identifier
 					else if (RegexIdentifierStart.IsMatch(ch.ToString()))
 					{
 						var identifierBuilder = new StringBuilder();
@@ -177,6 +170,7 @@ namespace Axion
 							charIndex++;
 						}
 						var identifier = identifierBuilder.ToString();
+
 						// special keyword
 						if (identifier == "use")
 						{
@@ -185,21 +179,27 @@ namespace Axion
 							{
 								Tokens.Add(new Token(TokenType.Reference, references[i].Trim()));
 							}
-							goto NextLine;
-						}
 
-						Tokens.Add(Keywords.Contains(identifier)
-							? new Token(TokenType.Keyword, identifier)
-							: new Token(TokenType.Identifier, identifier));
+							break;
+						}
+						if (BuiltInTypes.Contains(identifier))
+						{
+							Tokens.Add(new Token(TokenType.BuiltInType, identifier));
+						}
+						else
+						{
+							Tokens.Add(Keywords.Contains(identifier)
+								? new Token(TokenType.Keyword, identifier)
+								: new Token(TokenType.Identifier, identifier));
+						}
 
 						charIndex--;
 					}
-					else if (ch != '.' && ch != '\t')
+					else
 					{
 						Program.LogError($"Unknown character: {ch} ", false, LineIndex, charIndex);
 					}
 				}
-				NextLine:
 				if (LineIndex != lines.Length - 1)
 				{
 					Tokens.Add(new Token(TokenType.Newline));
@@ -252,7 +252,7 @@ namespace Axion
 					}
 					else
 					{
-						return new Token(TokenType.Number_SFloat, longFloat.ToString());
+						return new Token(TokenType.Number_LFloat, longFloat.ToString());
 					}
 				}
 				// float
@@ -264,7 +264,7 @@ namespace Axion
 					}
 					else
 					{
-						return new Token(TokenType.Number_LFloat, @float.ToString());
+						return new Token(TokenType.Number_Float, @float.ToString());
 					}
 				}
 			}
@@ -296,7 +296,7 @@ namespace Axion
 					}
 				}
 				// long
-				else if(number.EndsWith("`l"))
+				else if (number.EndsWith("`l"))
 				{
 					if (!long.TryParse(number.Replace("`l", ""), out var lint))
 					{

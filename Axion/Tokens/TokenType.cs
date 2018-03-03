@@ -4,27 +4,29 @@
 	{
 		Unknown,
 
-		// Special operators:
+		// Special characters
 		OpenParenthese,
 		CloseParenthese,
+		OpenBracket,
+		CloseBracket,
 		Comma,
 		Semicolon,
 		Indent,
 		Outdent,
 		Newline,
 
-		// Types:
+		// Numbers
 		Number_Float,
-		Number_SFloat,
 		Number_LFloat,
 		Number_Int,
 		Number_SInt,
 		Number_LInt,
 		Number_Byte,
+
+		//
 		String,
 		Identifier,
-
-		// Other parts:
+		BuiltInType,
 		Operator,
 		Reference,
 		Keyword

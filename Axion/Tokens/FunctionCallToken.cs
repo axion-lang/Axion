@@ -5,14 +5,14 @@ namespace Axion.Tokens
 {
 	internal class FunctionCallToken : Token
 	{
-		internal readonly Token FuncNameToken;
-		internal readonly List<Token> ArgumentTokens;
+		internal readonly Token NameToken;
+		internal readonly List<Token> ArgumentsTokens;
 
-		internal FunctionCallToken(Token functionToken, List<Token> argumentTokens)
+		internal FunctionCallToken(Token nameToken, List<Token> argumentTokens)
 		{
 			Type = TokenType.Identifier;
-			FuncNameToken = functionToken;
-			ArgumentTokens = argumentTokens;
+			NameToken = nameToken;
+			ArgumentsTokens = argumentTokens;
 		}
 
 		public override string ToString(int tabLevel)
@@ -24,23 +24,19 @@ namespace Axion.Tokens
 			}
 
 			var str = new StringBuilder($"{tabs}(Call,\r\n" +
-			                            $"{tabs}    '{FuncNameToken.Value ?? "Unknown"}',\r\n" +
-			                            $"{tabs}    (\r\n");
-			if (ArgumentTokens.Count != 0)
+										$"{tabs}    '{NameToken.Value ?? "Unknown"}',\r\n" +
+										$"{tabs}    (\r\n");
+			for (int i = 0; i < ArgumentsTokens.Count; i++)
 			{
-				for (int i = 0; i < ArgumentTokens.Count; i++)
+				if (i == ArgumentsTokens.Count - 1)
 				{
-					if (i == ArgumentTokens.Count - 1)
-					{
-						str.AppendLine($"{ArgumentTokens[i].ToString(tabLevel + 2)}");
-						break;
-					}
-					str.AppendLine($"{ArgumentTokens[i].ToString(tabLevel + 2)},");
+					str.AppendLine($"{ArgumentsTokens[i].ToString(tabLevel + 2)}");
+					break;
 				}
+				str.AppendLine($"{ArgumentsTokens[i].ToString(tabLevel + 2)},");
 			}
-
 			str.Append($"{tabs}    )\r\n" +
-			           $"{tabs})");
+					   $"{tabs})");
 			return str.ToString();
 		}
 	}

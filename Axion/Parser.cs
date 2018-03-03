@@ -1,24 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Axion.Tokens;
 
 namespace Axion
 {
-	internal class Parser
+	internal static class Parser
 	{
-		private readonly List<TokenType> EndTokenTypes = new List<TokenType>();
-		private readonly List<Token> Tokens;
-		public readonly List<Token> SyntaxTree = new List<Token>();
-		private int TokenIndex;
+		private static readonly List<TokenType> EndTokenTypes = new List<TokenType> { TokenType.Newline };
+		private static readonly List<Token> Tokens = Lexer.Tokens;
+		public static readonly List<Token> SyntaxTree = new List<Token>();
+		private static int TokenIndex;
 
-		internal Parser(List<Token> tokens, params TokenType[] endTokenTypes)
-		{
-			Tokens = tokens;
-			EndTokenTypes.AddRange(endTokenTypes);
-		}
-
-		internal void Parse()
+		internal static void Parse()
 		{
 			for (; TokenIndex < Tokens.Count; TokenIndex++)
 			{
@@ -30,7 +22,7 @@ namespace Axion
 			}
 		}
 
-		private Token NextExpression(Token previousToken)
+		private static Token NextExpression(Token previousToken)
 		{
 			if (TokenIndex >= Tokens.Count)
 			{
@@ -46,34 +38,70 @@ namespace Axion
 			}
 
 			TokenIndex++;
+
 			// Number, String, Identifier
 			if (previousToken is null && (type.ToString("G").ToLower().StartsWith("number") ||
 										  type == TokenType.String ||
-										  type == TokenType.Identifier))
+										  type == TokenType.Identifier ||
+			                              type == TokenType.BuiltInType))
 			{
 				return NextExpression(token);
 			}
-			// Operation
-			if (type == TokenType.Operator)
+
+			// Collections + items
+			if (type == TokenType.OpenBracket)
+			{
+				if (previousToken == null)
+				{
+					Program.LogError($"Bracket position invalid.\r\nDebug Info: {token}", true);
+					return null;
+				}
+
+				CollectionType collectionType;
+
+				// array
+				if (previousToken.Type == TokenType.BuiltInType)
+				{
+					collectionType = CollectionType.Array;
+				}
+				// list
+				else if (previousToken.Value == "*")
+				{
+					collectionType = CollectionType.List;
+				}
+				else // bracket position invalid then
+				{
+					Program.LogError($"Bracket position invalid.\r\nDebug Info:\r\n{previousToken}\r\n{token}", true);
+					return null;
+				}
+
+				var items = GetTokensList(TokenType.Comma, TokenType.CloseBracket);
+
+				return NextExpression(new CollectionToken(previousToken, collectionType, items));
+			}
+
+			// Operation TODO add operands on different lines support
+			if (type == TokenType.Operator && previousToken.Type != TokenType.BuiltInType)
 			{
 				// get right operand
 				var nextToken = NextExpression(null);
 				return NextExpression(new OperationToken(token.Value, previousToken, nextToken));
 			}
+
 			// Function call
 			if (type == TokenType.OpenParenthese && previousToken?.Type == TokenType.Identifier)
 			{
-				var arguments = MultipleExpressions(TokenType.Comma, TokenType.CloseParenthese);
+				var arguments = GetTokensList(TokenType.Comma, TokenType.CloseParenthese);
 				return NextExpression(new FunctionCallToken(previousToken, arguments));
 			}
 
-			Program.LogError("ERROR: Unknown token type: " + type.ToString("G"));
+			Program.LogError("Unknown token type: " + type.ToString("G"));
 			return NextExpression(token);
 		}
 
-		private List<Token> MultipleExpressions(TokenType separatorType, TokenType endTokenType)
+		private static List<Token> GetTokensList(TokenType separatorType, TokenType endTokenType)
 		{
-			var ret = new List<Token>();
+			var tokens = new List<Token>();
 			var type = Tokens[TokenIndex].Type;
 			if (type == endTokenType) // when 'call()'
 			{
@@ -88,7 +116,7 @@ namespace Axion
 					var token = NextExpression(null);
 					if (token != null && token.Type != separatorType && token.Type != endTokenType)
 					{
-						ret.Add(token);
+						tokens.Add(token);
 					}
 					type = Tokens[TokenIndex].Type;
 					TokenIndex++;
@@ -97,17 +125,7 @@ namespace Axion
 				EndTokenTypes.Remove(endTokenType);
 				EndTokenTypes.Remove(separatorType);
 			}
-			return ret;
-		}
-
-		public void SaveFile(string fileName)
-		{
-			if (File.Exists(fileName))
-			{
-				File.Delete(fileName);
-			}
-
-			File.WriteAllLines(fileName, SyntaxTree.Select(token => token?.ToString(0)));
+			return tokens;
 		}
 	}
 }

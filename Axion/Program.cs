@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Axion.Tokens;
 
 namespace Axion
 {
@@ -30,6 +29,7 @@ namespace Axion
 		private static void Tokenize()
 		{
 			Lexer.Tokenize(ScriptLines);
+
 			var fileName = ScriptFileName + ".lex";
 			if (File.Exists(fileName))
 			{
@@ -40,14 +40,19 @@ namespace Axion
 
 		private static void Parse()
 		{
-			var parser = new Parser(Lexer.Tokens, TokenType.Newline);
-			parser.Parse();
-			parser.SaveFile(ScriptFileName + ".tree");
+			Parser.Parse();
+
+			var fileName = ScriptFileName + ".tree";
+			if (File.Exists(fileName))
+			{
+				File.Delete(fileName);
+			}
+			File.WriteAllLines(fileName, Parser.SyntaxTree.Select(token => token?.ToString(0)));
 		}
 
 		public static void LogError(string message, bool critical = false, int lineIndex = -1, int charIndex = -1)
 		{
-			Console.ForegroundColor = critical ? ConsoleColor.Red : ConsoleColor.DarkYellow;
+			Console.ForegroundColor = critical ? ConsoleColor.Red : ConsoleColor.Yellow;
 			var prefix = critical ? "ERROR" : "WARNING";
 			Console.Write($"{prefix}: {message}.");
 			Console.ForegroundColor = ConsoleColor.White;
