@@ -23,8 +23,9 @@ namespace Axion.Tokens
 				tabs += "    ";
 			}
 
-			var str = new StringBuilder($"{tabs}(Operation,\r\n" +
-			                            $"{tabs}    '{Operator ?? "Unknown"}',\r\n");
+			var str = new StringBuilder();
+			str.AppendLine($"{tabs}(Operation,");
+			str.AppendLine($"{tabs}    '{Operator ?? "Unknown"}',");
 			str.AppendLine($"{LeftOperand.ToString(tabLevel + 1)},");
 			str.AppendLine($"{RightOperand.ToString(tabLevel + 1)}");
 			str.Append($"{tabs})");

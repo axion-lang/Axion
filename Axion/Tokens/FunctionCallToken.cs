@@ -23,9 +23,10 @@ namespace Axion.Tokens
 				tabs += "    ";
 			}
 
-			var str = new StringBuilder($"{tabs}(Call,\r\n" +
-										$"{tabs}    '{NameToken.Value ?? "Unknown"}',\r\n" +
-										$"{tabs}    (\r\n");
+			var str = new StringBuilder();
+			str.AppendLine($"{tabs}(Call,");
+			str.AppendLine($"{tabs}    '{NameToken.Value ?? "Unknown"}',");
+			str.AppendLine($"{tabs}    (");
 			for (int i = 0; i < ArgumentsTokens.Count; i++)
 			{
 				if (i == ArgumentsTokens.Count - 1)
@@ -35,8 +36,8 @@ namespace Axion.Tokens
 				}
 				str.AppendLine($"{ArgumentsTokens[i].ToString(tabLevel + 2)},");
 			}
-			str.Append($"{tabs}    )\r\n" +
-					   $"{tabs})");
+			str.AppendLine($"{tabs}    )");
+			str.Append($"{tabs})");
 			return str.ToString();
 		}
 	}

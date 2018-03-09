@@ -5,14 +5,14 @@ namespace Axion.Tokens
 {
 	internal class CollectionToken : Token
 	{
-		internal readonly Token ItemTypeToken;
+		internal readonly Token ItemType;
 		internal readonly CollectionType CollectionType;
 		internal readonly List<Token> ItemsTokens;
 
-		internal CollectionToken(Token itemTypeToken, CollectionType collectionType, List<Token> itemsTokens)
+		internal CollectionToken(Token itemType, CollectionType collectionType, List<Token> itemsTokens)
 		{
 			Type = TokenType.Identifier;
-			ItemTypeToken = itemTypeToken;
+			ItemType = itemType;
 			CollectionType = collectionType;
 			ItemsTokens = itemsTokens;
 		}
@@ -25,10 +25,11 @@ namespace Axion.Tokens
 				tabs += "    ";
 			}
 
-			var str = new StringBuilder($"{tabs}(Collection,\r\n" +
-										$"{tabs}	'{CollectionType:G}',\r\n" +
-										$"{tabs}    '{ItemTypeToken?.Value ?? "Unknown"}',\r\n" +
-										$"{tabs}    (\r\n");
+			var str = new StringBuilder();
+			str.AppendLine($"{tabs}(Collection,");
+			str.AppendLine($"{tabs}    '{CollectionType:G}',");
+			str.AppendLine($"{ItemType?.ToString(tabLevel + 1) ?? "\tUnknown"},");
+			str.AppendLine($"{tabs}    (\r\n");
 			for (int i = 0; i < ItemsTokens.Count; i++)
 			{
 				if (i == ItemsTokens.Count - 1)
@@ -38,8 +39,9 @@ namespace Axion.Tokens
 				}
 				str.AppendLine($"{ItemsTokens[i].ToString(tabLevel + 2)},");
 			}
-			str.Append($"{tabs}    )\r\n" +
-					   $"{tabs})");
+
+			str.AppendLine($"{tabs}    )");
+			str.Append($"{tabs})");
 			return str.ToString();
 		}
 	}

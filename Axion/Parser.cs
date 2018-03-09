@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Axion.Tokens;
 
 namespace Axion
@@ -39,45 +40,73 @@ namespace Axion
 
 			TokenIndex++;
 
-			// Number, String, Identifier
-			if (previousToken is null && (type.ToString("G").ToLower().StartsWith("number") ||
-										  type == TokenType.String ||
-										  type == TokenType.Identifier ||
-			                              type == TokenType.BuiltInType))
+			// Number, String, Identifier, Built-in type
+			if ((type.ToString("G").ToLower().StartsWith("number") ||
+				 type == TokenType.String ||
+				 type == TokenType.Identifier ||
+				 type == TokenType.BuiltInType) &&
+				previousToken is null)
 			{
 				return NextExpression(token);
 			}
 
-			// Collections + items
+			// Collection indexer - []
 			if (type == TokenType.OpenBracket)
+			{
+				switch (previousToken.Type)
+				{
+					case TokenType.String:
+					case TokenType.Identifier:
+						{
+							return NextExpression(new IndexerToken(previousToken, Tokens[TokenIndex]));
+						}
+					default:
+						{
+							Program.LogError($"Indexer cannot be applied to type : {previousToken.Type:G}", ErrorOrigin.Parser);
+							return null;
+						}
+				}
+			}
+
+			// Collections + items
+			if (type == TokenType.OpenCurly)
 			{
 				if (previousToken == null)
 				{
-					Program.LogError($"Bracket position invalid.\r\nDebug Info: {token}", true);
+					Program.LogError("Collection initializer without identifier. At line 1, column 1", ErrorOrigin.Parser);
 					return null;
 				}
 
+				Token itemType;
 				CollectionType collectionType;
 
-				// array
+				// array - int{ 1, 2, 3 }
 				if (previousToken.Type == TokenType.BuiltInType)
 				{
+					itemType = previousToken;
 					collectionType = CollectionType.Array;
 				}
-				// list
-				else if (previousToken.Value == "*")
+				// list - int*{ 1, 2, 3 }
+				else if (previousToken.Value == "*" && Tokens.Count > 3)
 				{
+					itemType = Tokens[TokenIndex - 3];
 					collectionType = CollectionType.List;
 				}
-				else // bracket position invalid then
+				// 'array() {}', 'list() {}', 'matrix() {}', etc.
+				else if (!(previousToken is FunctionCallToken collectionInitCallToken &&
+						   Enum.TryParse(collectionInitCallToken.NameToken.Value, true, out collectionType)))
 				{
-					Program.LogError($"Bracket position invalid.\r\nDebug Info:\r\n{previousToken}\r\n{token}", true);
+					Program.LogError($"'{{' is at invalid position.\r\nDebug Info:\r\n{previousToken}\r\n{token}", ErrorOrigin.Parser);
 					return null;
 				}
+				else
+				{
+					itemType = collectionInitCallToken;
+				}
 
-				var items = GetTokensList(TokenType.Comma, TokenType.CloseBracket);
+				var items = GetTokensList(TokenType.Comma, TokenType.CloseCurly);
 
-				return NextExpression(new CollectionToken(previousToken, collectionType, items));
+				return NextExpression(new CollectionToken(itemType, collectionType, items));
 			}
 
 			// Operation TODO add operands on different lines support
@@ -95,7 +124,7 @@ namespace Axion
 				return NextExpression(new FunctionCallToken(previousToken, arguments));
 			}
 
-			Program.LogError("Unknown token type: " + type.ToString("G"));
+			Program.LogError("Invalid position of token: " + type.ToString("G"), ErrorOrigin.Parser, false);
 			return NextExpression(token);
 		}
 

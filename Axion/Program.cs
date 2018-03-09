@@ -14,7 +14,8 @@ namespace Axion
 		{
 			if (args.Length < 1 || !File.Exists(args[0]))
 			{
-				LogError("Input file doesn't exists", true);
+				LogError("Input file doesn't exists", ErrorOrigin.Input);
+				return;
 			}
 			ScriptFileName = args[0];
 			ScriptLines = File.ReadAllLines(ScriptFileName);
@@ -22,7 +23,7 @@ namespace Axion
 			Tokenize();
 			LogInfo("Syntax tree generation...");
 			Parse();
-			Console.WriteLine("Ready. " + AnyKeyToClose);
+			Console.WriteLine("\r\nReady. " + AnyKeyToClose);
 			Console.ReadKey();
 		}
 
@@ -35,7 +36,7 @@ namespace Axion
 			{
 				File.Delete(fileName);
 			}
-			File.WriteAllText(fileName, string.Join(",\r\n", Lexer.Tokens.Select(token => token.ToString(0))));
+			File.WriteAllText(fileName, string.Join(",\r\n", Lexer.Tokens.Where(token => token != null).Select(token => token.ToString(0))));
 		}
 
 		private static void Parse()
@@ -50,19 +51,21 @@ namespace Axion
 			File.WriteAllLines(fileName, Parser.SyntaxTree.Select(token => token?.ToString(0)));
 		}
 
-		public static void LogError(string message, bool critical = false, int lineIndex = -1, int charIndex = -1)
+		public static void LogError(string message, ErrorOrigin errorOrigin, bool critical = true, int lineIndex = -1, int charIndex = -1)
 		{
-			Console.ForegroundColor = critical ? ConsoleColor.Red : ConsoleColor.Yellow;
-			var prefix = critical ? "ERROR" : "WARNING";
-			Console.Write($"{prefix}: {message}.");
+			Console.ForegroundColor = critical ? ConsoleColor.Red : ConsoleColor.DarkYellow;
+			var prefix = critical ? "error" : "warning";
+			var origin = errorOrigin.ToString("G");
+			Console.Write($"{origin} {prefix}: {message}.");
 			Console.ForegroundColor = ConsoleColor.White;
 			if (lineIndex != -1 && charIndex != -1)
 			{
-				Console.WriteLine($"\r\nAt line {lineIndex + 1}, column {charIndex + 1}.\r\n");
+				Console.WriteLine($"\r\nAt line {lineIndex + 1}, column {charIndex + 1}.");
 			}
+			Console.WriteLine();
 			if (critical)
 			{
-				Console.WriteLine("\r\nPress any key to close app.");
+				Console.WriteLine("Press any key to close app.");
 				Console.ReadKey();
 				Environment.Exit(0);
 			}
