@@ -2,28 +2,27 @@
 {
 	internal class Token
 	{
-		public TokenType Type = TokenType.Unknown;
-		public readonly string Value;
+		public readonly string    Value;
+		internal        int       ColumnPosition;
+		internal        int       LinePosition;
+		public          TokenType Type = TokenType.Unknown;
 
 		internal Token() { }
 
-		internal Token(TokenType type)
+		internal Token(TokenType type, string value = null, int linePosition = 0, int columnPosition = 0)
 		{
-			Type = type;
-		}
-
-		internal Token(TokenType type, string value)
-		{
-			Type = type;
-			Value = value;
+			Type           = type;
+			Value          = value;
+			LinePosition   = linePosition;
+			ColumnPosition = columnPosition;
 		}
 
 		public virtual string ToString(int tabLevel)
 		{
 			var tabs = "";
-			for (int i = 0; i < tabLevel; i++)
+			for (var i = 0; i < tabLevel; i++)
 			{
-				tabs += "    ";
+				tabs += "  ";
 			}
 
 			return Value == null ? $"{tabs}({Type})" : $"{tabs}({Type:G}, '{Value}')";

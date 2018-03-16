@@ -1,10 +1,10 @@
 ﻿namespace Axion
 {
-    internal enum ErrorOrigin
-    {
+	internal enum ErrorOrigin
+	{
 		Unknown,
 		Input,
 		Lexer,
 		Parser
-    }
+	}
 }

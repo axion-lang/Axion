@@ -1,10 +1,10 @@
 ﻿namespace Axion.Tokens
 {
-    internal enum CollectionType
-    {
+	internal enum CollectionType
+	{
 		Array,
 		Matrix,
 		List,
 		Map
-    }
+	}
 }

@@ -10,55 +10,65 @@ namespace Axion
 	{
 		public static readonly List<Token> Tokens = new List<Token>();
 
-		private static readonly Regex RegexIdStart = new Regex("[_a-zA-Z]");
-		private static readonly Regex RegexId = new Regex("[_a-zA-Z0-9]");
+		#region Regular expressions
+
+		private static readonly Regex RegexIdStart  = new Regex("[_a-zA-Z]");
+		private static readonly Regex RegexId       = new Regex("[_a-zA-Z0-9]");
 		private static readonly Regex RegexNumStart = new Regex("[0-9]");
-		private static readonly Regex RegexNum = new Regex("[0-9`BSLbsl]"); // B - byte, S - short, L - long 
+		private static readonly Regex RegexNum      = new Regex("[0-9BSLbsl]"); // B - byte, S - short, L - long 
+
+		#endregion
+
+		#region Operators
 
 		private static readonly char[] OperatorChars =
 		{
-			'+', '-', '*', '/', '%', '!', '>', '<', '=', '|', '&', '^', '~', '.'
+			'+', '-', '*', '/', '%', '!', '>', '<', '=', '|', '&', '^', '~', '.', '?'
 		};
 
-		private static readonly string[] AllowedOperators =
+		private static readonly string[] AssigningOperators =
 		{
 			// default
 			"=", "+", "-", "*", "/", "%", "**", ".",
 			// self-assignment
 			"+=", "-=", "*=", "/=", "%=", "**=", "++", "--",
-			// comparison
-			"!", ">", "<", ">=", "<=", "==", "!=",
 			// bitwise
 			"|", "^", "&", "~",
 			"|=", "^=", "&=", "~="
 		};
 
-		private static readonly Dictionary<char, Token> SpecialTokens = new Dictionary<char, Token>
+		internal static readonly string[] ConditionalOperators =
 		{
-			{ '(', new Token(TokenType.OpenParenthese) },
-			{ ')', new Token(TokenType.CloseParenthese) },
-			{ '[', new Token(TokenType.OpenBracket) },
-			{ ']', new Token(TokenType.CloseBracket) },
-			{ '{', new Token(TokenType.OpenCurly) },
-			{ '}', new Token(TokenType.CloseCurly) },
-			{ ',', new Token(TokenType.Comma) },
-			{ ':', new Token(TokenType.Colon) },
-			{ ';', new Token(TokenType.Semicolon) }
+			"!", ">", "<", ">=", "<=", "==", "!=", "&&", "||", "?"
+		};
+
+		#endregion
+
+		private static readonly Dictionary<char, TokenType> SpecialTypes = new Dictionary<char, TokenType>
+		{
+			{ '(', TokenType.OpenParenthese },
+			{ ')', TokenType.CloseParenthese },
+			{ '[', TokenType.OpenBracket },
+			{ ']', TokenType.CloseBracket },
+			{ '{', TokenType.OpenCurly },
+			{ '}', TokenType.CloseCurly },
+			{ ',', TokenType.Comma },
+			{ ':', TokenType.Colon },
+			{ ';', TokenType.Semicolon }
 		};
 
 		private static readonly string[] Keywords =
 		{
-            // loops
-            "for", "while", "out", "next",
-            // conditions
-            "if", "elif", "else", "switch", "case",
-			"is", "not", "and", "or",
-            // variables
-            "new", "delete", "null", "as",
-            // errors
-            "try", "catch", "throw",
-            // Objects && access modifiers
-            "module", "global", "local", "inner",
+			// loops
+			"for", "while", "out", "next",
+			// conditions
+			"if", "elif", "else", "switch", "case", "other",
+			// variables
+			"new", "delete", "null", "as",
+			// errors
+			"try", "catch", "throw",
+			// Objects & access modifiers
+			"module", "global", "inner", "local",
 			"class", "struct", "enum", "self"
 		};
 
@@ -72,9 +82,9 @@ namespace Axion
 		{
 			var lineIndentLevel = 0;
 
-			for (int lineIndex = 0; lineIndex < lines.Length; lineIndex++)
+			for (var lineIndex = 0; lineIndex < lines.Length; lineIndex++)
 			{
-				var line = lines[lineIndex];
+				string line = lines[lineIndex];
 
 				if (string.IsNullOrWhiteSpace(line))
 				{
@@ -88,16 +98,18 @@ namespace Axion
 				{
 					tabsCount++;
 				}
+
 				// if indent increased
 				while (tabsCount > lineIndentLevel)
 				{
-					Tokens.Add(new Token(TokenType.Indent));
+					Tokens.Add(new Token(TokenType.Indent, null, lineIndex));
 					lineIndentLevel++;
 				}
+
 				// if indent decreased
 				while (tabsCount < lineIndentLevel)
 				{
-					Tokens.Add(new Token(TokenType.Outdent));
+					Tokens.Add(new Token(TokenType.Outdent, null, lineIndex));
 					lineIndentLevel--;
 				}
 
@@ -105,10 +117,11 @@ namespace Axion
 
 				for (var charIndex = 0; charIndex < line.Length; charIndex++)
 				{
-					var ch = line[charIndex];
+					char ch = line[charIndex];
 
 					// whitespaces
-					if (ch == ' ' || ch == '\t')
+					if (ch == ' ' ||
+					    ch == '\t')
 					{
 						// to next char
 					}
@@ -130,25 +143,30 @@ namespace Axion
 							operatorBuilder.Append(line[charIndex]);
 							charIndex++;
 						}
+
 						// return to previous char ( in cases 'functionCall(1+2)' )
 						charIndex--;
 						string op = operatorBuilder.ToString();
-						if (!AllowedOperators.Contains(op))
+						if (!AssigningOperators.Contains(op) &&
+						    !ConditionalOperators.Contains(op))
 						{
 							Program.LogError($"Unknown operator: {op} ", ErrorOrigin.Lexer, true, lineIndex, charIndex);
 						}
-						Tokens.Add(new Token(TokenType.Operator, operatorBuilder.ToString()));
+
+						Tokens.Add(new Token(TokenType.Operator, operatorBuilder.ToString(), lineIndex, charIndex));
 					}
 					// special operators
-					else if (SpecialTokens.ContainsKey(ch))
+					else if (SpecialTypes.ContainsKey(ch))
 					{
-						SpecialTokens.TryGetValue(ch, out Token SpecialToken);
-						Tokens.Add(SpecialToken);
+						SpecialTypes.TryGetValue(ch, out TokenType SpecialType);
+						Tokens.Add(new Token(SpecialType, null, lineIndex, charIndex));
 					}
 					// string
-					else if (ch == '\"' || ch == '\'')
+					else if (ch == '\"' ||
+					         ch == '\'')
 					{
-						if (line.Length > charIndex + 2 && ch.ToString() + line[charIndex + 1] + line[charIndex + 2] == "\"\"\"")
+						if (line.Length > charIndex + 2 &&
+						    ch.ToString() + line[charIndex + 1] + line[charIndex + 2] == "\"\"\"")
 						{
 							Tokens.Add(ParseString("\"\"\"", lines, ref charIndex, ref lineIndex));
 						}
@@ -172,28 +190,34 @@ namespace Axion
 							identifierBuilder.Append(line[charIndex]);
 							charIndex++;
 						}
-						var identifier = identifierBuilder.ToString();
+
+						string identifier = identifierBuilder.ToString();
 
 						// special keyword
 						if (identifier == "use")
 						{
-							var references = line.Substring(charIndex).Split(',');
+							string[] references = line.Substring(charIndex).Split(',');
 							for (var i = 0; i < references.Length; i++)
 							{
-								Tokens.Add(new Token(TokenType.Reference, references[i].Trim()));
+								Tokens.Add(new Token(TokenType.Reference, references[i].Trim(), lineIndex, charIndex));
 							}
 
 							break;
 						}
+
 						if (BuiltInTypes.Contains(identifier))
 						{
-							Tokens.Add(new Token(TokenType.BuiltInType, identifier));
+							Tokens.Add(new Token(TokenType.BuiltInType, identifier, lineIndex, charIndex));
 						}
 						else
 						{
+							/*
+							Tokens.Add(Enum.TryParse(identifier, true, out TokenType KeywordType)
+										   ? new Token(KeywordType, null, lineIndex, charIndex)
+										   : new Token(TokenType.Identifier, identifier, lineIndex, charIndex));*/
 							Tokens.Add(Keywords.Contains(identifier)
-								? new Token(TokenType.Keyword, identifier)
-								: new Token(TokenType.Identifier, identifier));
+								           ? new Token(TokenType.Keyword, identifier, lineIndex, charIndex)
+								           : new Token(TokenType.Identifier, identifier, lineIndex, charIndex));
 						}
 
 						charIndex--;
@@ -203,14 +227,18 @@ namespace Axion
 						Program.LogError($"Unknown character: {ch} ", ErrorOrigin.Lexer, false, lineIndex, charIndex);
 					}
 				}
+
 				if (lineIndex != lines.Length - 1)
 				{
 					Tokens.Add(new Token(TokenType.Newline));
 				}
 			}
+
+			Tokens.Add(new Token(TokenType.EOF));
 		}
 
-		private static Token ParseString(string delimiter, IReadOnlyList<string> lines, ref int charIndex, ref int lineIndex)
+		private static Token ParseString(string delimiter, IReadOnlyList<string> lines, ref int charIndex,
+		                                 ref int lineIndex)
 		{
 			var stringBuilder = new StringBuilder();
 			// skipping string delimiter
@@ -223,16 +251,19 @@ namespace Axion
 					line = lines[lineIndex];
 					for (; charIndex < line.Length; charIndex++)
 					{
-						if (line.Length - charIndex < delimiter.Length || line.Substring(charIndex, delimiter.Length) != delimiter)
+						if (line.Length - charIndex < delimiter.Length ||
+						    line.Substring(charIndex, delimiter.Length) != delimiter)
 						{
 							stringBuilder.Append(line[charIndex]);
 						}
-						else if (charIndex == 0 || line[charIndex - 1] != '\\')
+						else if (charIndex == 0 ||
+						         line[charIndex - 1] != '\\')
 						{
-							charIndex += delimiter.Length;
-							return new Token(TokenType.String, stringBuilder.ToString());
+							charIndex += delimiter.Length - 1;
+							return new Token(TokenType.String, stringBuilder.ToString(), lineIndex, charIndex);
 						}
 					}
+
 					charIndex = 0;
 				}
 			}
@@ -240,17 +271,20 @@ namespace Axion
 			{
 				for (; charIndex < line.Length; charIndex++)
 				{
-					if (line.Length - charIndex < delimiter.Length || line.Substring(charIndex, delimiter.Length) != delimiter)
+					if (line.Length - charIndex < delimiter.Length ||
+					    line.Substring(charIndex, delimiter.Length) != delimiter)
 					{
 						stringBuilder.Append(line[charIndex]);
 					}
-					else if (charIndex == 0 || line[charIndex - 1] != '\\')
+					else if (charIndex == 0 ||
+					         line[charIndex - 1] != '\\')
 					{
-						charIndex += delimiter.Length;
-						return new Token(TokenType.String, stringBuilder.ToString());
+						charIndex += delimiter.Length - 1;
+						return new Token(TokenType.String, stringBuilder.ToString(), lineIndex, charIndex);
 					}
 				}
 			}
+
 			// if not passed, there is some error
 			Program.LogError("Unclosed string", ErrorOrigin.Lexer, true, lineIndex, charIndex);
 			return null;
@@ -264,33 +298,34 @@ namespace Axion
 				numberBuilder.Append(line[charIndex]);
 				charIndex++;
 			}
-			var number = numberBuilder.ToString().ToLower();
+
+			string number = numberBuilder.ToString().ToLower();
 
 			// float number
 			if (number.Contains("."))
 			{
 				// long float
-				if (number.EndsWith("`l"))
+				if (number.EndsWith("l"))
 				{
-					if (!double.TryParse(number.Replace("`l", ""), out var longFloat))
+					if (!double.TryParse(number.Replace("l", ""), out double longFloat))
 					{
 						Program.LogError("Invalid 'lfloat' value", ErrorOrigin.Lexer, true, lineIndex, charIndex);
 					}
 					else
 					{
-						return new Token(TokenType.Number_LFloat, longFloat.ToString());
+						return new Token(TokenType.Number_LFloat, longFloat.ToString(), lineIndex, charIndex);
 					}
 				}
 				// float
 				else
 				{
-					if (!float.TryParse(number, out var @float))
+					if (!float.TryParse(number, out float @float))
 					{
 						Program.LogError("Invalid 'float' value", ErrorOrigin.Lexer, true, lineIndex, charIndex);
 					}
 					else
 					{
-						return new Token(TokenType.Number_Float, @float.ToString());
+						return new Token(TokenType.Number_Float, @float.ToString(), lineIndex, charIndex);
 					}
 				}
 			}
@@ -298,54 +333,55 @@ namespace Axion
 			else
 			{
 				// byte
-				if (number.EndsWith("`b"))
+				if (number.EndsWith("b"))
 				{
-					if (!byte.TryParse(number.Replace("`b", ""), out var @byte))
+					if (!byte.TryParse(number.Replace("b", ""), out byte @byte))
 					{
 						Program.LogError("Invalid 'byte' value", ErrorOrigin.Lexer, true, lineIndex, charIndex);
 					}
 					else
 					{
-						return new Token(TokenType.Number_Byte, @byte.ToString());
+						return new Token(TokenType.Number_Byte, @byte.ToString(), lineIndex, charIndex);
 					}
 				}
 				// short
-				else if (number.EndsWith("`s"))
+				else if (number.EndsWith("s"))
 				{
-					if (!short.TryParse(number.Replace("`s", ""), out var sint))
+					if (!short.TryParse(number.Replace("s", ""), out short sint))
 					{
 						Program.LogError("Invalid 'sint' value", ErrorOrigin.Lexer, true, lineIndex, charIndex);
 					}
 					else
 					{
-						return new Token(TokenType.Number_SInt, sint.ToString());
+						return new Token(TokenType.Number_SInt, sint.ToString(), lineIndex, charIndex);
 					}
 				}
 				// long
-				else if (number.EndsWith("`l"))
+				else if (number.EndsWith("l"))
 				{
-					if (!long.TryParse(number.Replace("`l", ""), out var lint))
+					if (!long.TryParse(number.Replace("l", ""), out long lint))
 					{
 						Program.LogError("Invalid 'lint' value", ErrorOrigin.Lexer, true, lineIndex, charIndex);
 					}
 					else
 					{
-						return new Token(TokenType.Number_LInt, lint.ToString());
+						return new Token(TokenType.Number_LInt, lint.ToString(), lineIndex, charIndex);
 					}
 				}
 				// integer
 				else
 				{
-					if (!int.TryParse(number, out var @int))
+					if (!int.TryParse(number, out int @int))
 					{
 						Program.LogError("Invalid 'int' value", ErrorOrigin.Lexer, true, lineIndex, charIndex);
 					}
 					else
 					{
-						return new Token(TokenType.Number_Int, @int.ToString());
+						return new Token(TokenType.Number_Int, @int.ToString(), lineIndex, charIndex);
 					}
 				}
 			}
+
 			return null;
 		}
 	}

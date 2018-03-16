@@ -3,6 +3,7 @@
 	internal enum TokenType
 	{
 		Unknown,
+		EOF,
 
 		// Special characters
 		OpenParenthese,
