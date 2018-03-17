@@ -2,10 +2,10 @@
 {
 	internal class Token
 	{
-		public readonly string    Value;
-		internal        int       ColumnPosition;
-		internal        int       LinePosition;
-		public          TokenType Type = TokenType.Unknown;
+		internal int       ColumnPosition;
+		internal int       LinePosition;
+		public   TokenType Type = TokenType.Unknown;
+		public   string    Value;
 
 		internal Token() { }
 

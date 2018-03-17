@@ -41,7 +41,8 @@ namespace Axion
 
 			File.WriteAllText(
 				fileName,
-				string.Join(",\r\n", Lexer.Tokens.Where(token => token != null).Select(token => token.ToString(0))));
+				string.Join(
+					",\r\n", Lexer.Tokens.Where(token => token != null).Select(token => token.ToString(0))));
 		}
 
 		private static void Parse()

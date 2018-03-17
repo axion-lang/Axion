@@ -11,7 +11,12 @@ namespace Axion
 	internal static class Parser
 	{
 		// expressions usually splitted by new lines or semicolons
-		private static readonly List<TokenType> EndTokenTypes = new List<TokenType> { TokenType.Newline, TokenType.EOF };
+		private static readonly List<TokenType> EndTokenTypes = new List<TokenType>
+		{
+			TokenType.Newline,
+			TokenType.Semicolon,
+			TokenType.EOF
+		};
 
 		/// <summary>
 		///     Simplified access to lexer's tokens.
@@ -55,6 +60,7 @@ namespace Axion
 
 			Token     token = Tokens[TokenIndex];
 			TokenType type  = token.Type;
+			string    value = token.Value;
 
 			if (EndTokenTypes.Contains(type))
 			{
@@ -62,50 +68,55 @@ namespace Axion
 			}
 
 			TokenIndex++;
-			Token nextToken = Peek();
 
 			switch (type)
 			{
-				// Number, String, Identifier, Built-in type
 				case TokenType.Identifier when previousToken == null:
+				case TokenType.Number when previousToken == null:
 				case TokenType.String when previousToken == null:
-				case TokenType.Number_Byte when previousToken == null:
-				case TokenType.Number_Float when previousToken == null:
-				case TokenType.Number_LFloat when previousToken == null:
-				case TokenType.Number_Int when previousToken == null:
-				case TokenType.Number_SInt when previousToken == null:
-				case TokenType.Number_LInt when previousToken == null:
 				{
 					return NextExpression(token);
 				}
 				case TokenType.Keyword:
 				{
-					switch (token.Value)
+					switch (value)
 					{
 						case "if":
 						{
-							List<OperationToken> conditions = ParseIfConditions();
-							List<Token>          thenTokens = ParseBlock();
-							return NextExpression(new BranchingToken(conditions, thenTokens));
+							var conditions = ParseIfConditions();
+							var block      = ParseBlock();
+							return NextExpression(new BranchingToken(conditions, block));
 						}
 						case "elif" when previousToken is BranchingToken parentBranch:
 						{
-							List<OperationToken> conditions = ParseIfConditions();
-							List<Token>          thenTokens = ParseBlock();
-							parentBranch.ElseIfs.Add(conditions, thenTokens);
+							var conditions = ParseIfConditions();
+							var block      = ParseBlock();
+							parentBranch.ElseIfs.Add(conditions, block);
 							return NextExpression(parentBranch);
 						}
 						case "else" when previousToken is BranchingToken parentBranch:
 						{
-							// skip 'else:'
+							if (Peek().Type != TokenType.Colon)
+							{
+								Program.LogError("'else' block can't have any tokens before colon",
+								                 ErrorOrigin.Parser, true,
+								                 token.LinePosition,
+								                 token.ColumnPosition);
+								return null;
+							}
+
+							// skiping 'else' colon because there is no conditions
 							TokenIndex++;
-							List<Token> thenTokens = ParseBlock();
-							parentBranch.ElseTokens.AddRange(thenTokens);
-							return NextExpression(parentBranch);
+
+							var block = ParseBlock();
+							// offset
+							TokenIndex--;
+							parentBranch.ElseTokens.AddRange(block);
+							return parentBranch;
 						}
 						default:
 						{
-							Program.LogError("Unknown keyword: " + token.Value,
+							Program.LogError($"Invalid position of keyword: '{value}'",
 							                 ErrorOrigin.Parser, true,
 							                 token.LinePosition,
 							                 token.ColumnPosition);
@@ -173,7 +184,7 @@ namespace Axion
 						itemType = collectionInitCallToken;
 					}
 
-					List<Token> items = GetTokensList(new[] { TokenType.Comma }, new[] { TokenType.CloseCurly });
+					var items = GetTokensList(new[] { TokenType.Comma }, new[] { TokenType.CloseCurly });
 
 					return NextExpression(new CollectionToken(itemType, collectionType, items));
 				}
@@ -181,12 +192,12 @@ namespace Axion
 				case TokenType.Operator when previousToken?.Type != TokenType.BuiltInType:
 				{
 					Token rightOperand = NextExpression();
-					return NextExpression(new OperationToken(token.Value, previousToken, rightOperand));
+					return NextExpression(new OperationToken(value, previousToken, rightOperand));
 				}
 				// Function call
 				case TokenType.OpenParenthese when previousToken != null && previousToken.Type == TokenType.Identifier:
 				{
-					List<Token> arguments = GetTokensList(new[] { TokenType.Comma }, new[] { TokenType.CloseParenthese });
+					var arguments = GetTokensList(new[] { TokenType.Comma }, new[] { TokenType.CloseParenthese });
 					return NextExpression(new FunctionCallToken(previousToken, arguments));
 				}
 				default:
@@ -217,13 +228,16 @@ namespace Axion
 			{
 				TokenIndex += 2;
 				tokens     =  GetTokensList(new[] { TokenType.Outdent });
-				if (Peek()?.Type == TokenType.Outdent) TokenIndex++;
 			}
 			// single line block (until first semicolon)
 			else
 			{
-				tokens = GetTokensList(new[] { TokenType.Semicolon });
-				if (Peek()?.Type == TokenType.Newline) TokenIndex++;
+				tokens = GetTokensList(new[] { TokenType.Newline, TokenType.Semicolon });
+			}
+
+			while (Tokens.Count > TokenIndex && EndTokenTypes.Contains(Tokens[TokenIndex].Type))
+			{
+				TokenIndex++;
 			}
 
 			return tokens;
@@ -231,7 +245,7 @@ namespace Axion
 
 		private static List<OperationToken> ParseIfConditions()
 		{
-			List<Token> conditions = GetTokensList(new[] { TokenType.Colon });
+			var conditions = GetTokensList(new[] { TokenType.Colon });
 
 			// if some condition doesn't return a bool
 			Token invalidCondition = conditions
@@ -273,12 +287,11 @@ namespace Axion
 				{
 					EndTokenTypes.AddRange(separatorTypes);
 					EndTokenTypes.AddRange(endTokenTypes);
-					while (!EndTokenTypes.Contains(type) && TokenIndex < Tokens.Count)
+					while (!endTokenTypes.Contains(type) && TokenIndex < Tokens.Count)
 					{
 						Token token = NextExpression();
 						if (token == null ||
-						    separatorTypes.Contains(type) ||
-						    EndTokenTypes.Contains(type))
+						    endTokenTypes.Contains(type))
 						{
 							return tokens;
 						}
@@ -296,7 +309,7 @@ namespace Axion
 
 					EndTokenTypes.RemoveRange(
 						EndTokenTypes.Count - separatorTypes.Count - endTokenTypes.Count,
-						separatorTypes.Count + endTokenTypes.Count);
+						endTokenTypes.Count);
 				}
 			}
 
@@ -316,11 +329,11 @@ namespace Axion
 				else
 				{
 					EndTokenTypes.AddRange(endTokenTypes);
-					while (!EndTokenTypes.Contains(type) && TokenIndex < Tokens.Count)
+					while (!endTokenTypes.Contains(type) && TokenIndex < Tokens.Count)
 					{
 						Token token = NextExpression();
 						if (token == null ||
-						    EndTokenTypes.Contains(type))
+						    endTokenTypes.Contains(type))
 						{
 							return tokens;
 						}

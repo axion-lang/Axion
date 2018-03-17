@@ -60,29 +60,30 @@ namespace Axion.Tokens
 			{
 				str.AppendLine($"{tabs}  (ElseIf,");
 				str.AppendLine($"{tabs}    (Conditions,");
-				for (var I = 0; I < Conditions.Count; I++)
+				var elifConditions = ElseIfs.ElementAt(i).Key;
+				for (var I = 0; I < elifConditions.Count; I++)
 				{
-					if (I == Conditions.Count - 1)
+					if (I == elifConditions.Count - 1)
 					{
-						str.AppendLine($"{Conditions[I].ToString(tabLevel + 3)}");
+						str.AppendLine($"{elifConditions[I].ToString(tabLevel + 3)}");
 						break;
 					}
 
-					str.AppendLine($"{Conditions[I].ToString(tabLevel + 3)},");
+					str.AppendLine($"{elifConditions[I].ToString(tabLevel + 3)},");
 				}
 
 				str.AppendLine($"{tabs}    ),");
 				str.AppendLine($"{tabs}    (Then,");
-				List<Token> actions = ElseIfs.ElementAt(i).Value;
-				for (var I = 0; I < actions.Count; I++)
+				var elifTokens = ElseIfs.ElementAt(i).Value;
+				for (var I = 0; I < elifTokens.Count; I++)
 				{
-					if (I == actions.Count - 1)
+					if (I == elifTokens.Count - 1)
 					{
-						str.AppendLine($"{actions[I].ToString(tabLevel + 3)}");
+						str.AppendLine($"{elifTokens[I].ToString(tabLevel + 3)}");
 						break;
 					}
 
-					str.AppendLine($"{actions[I].ToString(tabLevel + 3)},");
+					str.AppendLine($"{elifTokens[I].ToString(tabLevel + 3)},");
 				}
 
 				str.AppendLine($"{tabs}    ),");

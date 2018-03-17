@@ -5,12 +5,13 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <Company>Nikitin Advanced Intelligence Technologies</Company>
     <Authors>Nikitin Ilya</Authors>
-    <Description>Axion programming language compiler</Description>
-    <AssemblyVersion>0.2.3.3</AssemblyVersion>
-    <FileVersion>0.2.3.3</FileVersion>
+    <Description>Axion programming language library.</Description>
+    <AssemblyVersion>0.2.3.6</AssemblyVersion>
+    <FileVersion>0.2.3.6</FileVersion>
     <RepositoryUrl>https://github.com/F1uctus/Axion</RepositoryUrl>
-    <Version>0.2.3.3</Version>
+    <Version>0.2.3.6</Version>
     <Copyright>Nikitin Advanced Intelligence Technologies, 2018</Copyright>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
 </Project>

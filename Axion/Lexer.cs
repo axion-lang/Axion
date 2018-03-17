@@ -23,7 +23,9 @@ namespace Axion
 
 		private static readonly char[] OperatorChars =
 		{
-			'+', '-', '*', '/', '%', '!', '>', '<', '=', '|', '&', '^', '~', '.', '?'
+			'+', '-', '*', '/', '%', 
+			'!', '>', '<', '=', '|', 
+			'&', '^', '~', '.', '?'
 		};
 
 		private static readonly string[] AssigningOperators =
@@ -39,7 +41,8 @@ namespace Axion
 
 		internal static readonly string[] ConditionalOperators =
 		{
-			"!", ">", "<", ">=", "<=", "==", "!=", "&&", "||", "?"
+			"!", ">", "<", ">=", "<=", 
+			"==", "!=", "&&", "||", "?"
 		};
 
 		#endregion
@@ -62,13 +65,16 @@ namespace Axion
 			// loops
 			"for", "while", "out", "next",
 			// conditions
-			"if", "elif", "else", "switch", "case", "other",
+			"if", "elif", "else",
+			"switch", "case", "other", "in",
 			// variables
-			"new", "delete", "null", "as",
+			"new", "delete", "null", "as", "ref",
 			// errors
 			"try", "catch", "throw",
 			// Objects & access modifiers
-			"module", "global", "inner", "local",
+			"use", "module",
+			"global", "inner", "local", "readonly",
+			"static",
 			"class", "struct", "enum", "self"
 		};
 
@@ -135,7 +141,8 @@ namespace Axion
 						}
 					}
 					// operator
-					else if (OperatorChars.Contains(ch))
+					else 
+					if (OperatorChars.Contains(ch))
 					{
 						var operatorBuilder = new StringBuilder();
 						while (charIndex < line.Length && OperatorChars.Contains(line[charIndex]))
@@ -162,11 +169,11 @@ namespace Axion
 						Tokens.Add(new Token(SpecialType, null, lineIndex, charIndex));
 					}
 					// string
-					else if (ch == '\"' ||
-					         ch == '\'')
+					else 
+					if (ch == '\"' || ch == '\'')
 					{
 						if (line.Length > charIndex + 2 &&
-						    ch.ToString() + line[charIndex + 1] + line[charIndex + 2] == "\"\"\"")
+						    line.Substring(charIndex, 3) == "\"\"\"")
 						{
 							Tokens.Add(ParseString("\"\"\"", lines, ref charIndex, ref lineIndex));
 						}
@@ -193,31 +200,17 @@ namespace Axion
 
 						string identifier = identifierBuilder.ToString();
 
-						// special keyword
-						if (identifier == "use")
-						{
-							string[] references = line.Substring(charIndex).Split(',');
-							for (var i = 0; i < references.Length; i++)
-							{
-								Tokens.Add(new Token(TokenType.Reference, references[i].Trim(), lineIndex, charIndex));
-							}
-
-							break;
-						}
-
 						if (BuiltInTypes.Contains(identifier))
 						{
 							Tokens.Add(new Token(TokenType.BuiltInType, identifier, lineIndex, charIndex));
 						}
+						else if (Keywords.Contains(identifier))
+						{
+							Tokens.Add(new Token(TokenType.Keyword, identifier, lineIndex, charIndex));
+						}
 						else
 						{
-							/*
-							Tokens.Add(Enum.TryParse(identifier, true, out TokenType KeywordType)
-										   ? new Token(KeywordType, null, lineIndex, charIndex)
-										   : new Token(TokenType.Identifier, identifier, lineIndex, charIndex));*/
-							Tokens.Add(Keywords.Contains(identifier)
-								           ? new Token(TokenType.Keyword, identifier, lineIndex, charIndex)
-								           : new Token(TokenType.Identifier, identifier, lineIndex, charIndex));
+							Tokens.Add(new Token(TokenType.Identifier, identifier, lineIndex, charIndex));
 						}
 
 						charIndex--;
@@ -237,8 +230,8 @@ namespace Axion
 			Tokens.Add(new Token(TokenType.EOF));
 		}
 
-		private static Token ParseString(string delimiter, IReadOnlyList<string> lines, ref int charIndex,
-		                                 ref int lineIndex)
+		private static Token ParseString(string delimiter, IReadOnlyList<string> lines, 
+		                                 ref int charIndex, ref int lineIndex)
 		{
 			var stringBuilder = new StringBuilder();
 			// skipping string delimiter
@@ -256,7 +249,8 @@ namespace Axion
 						{
 							stringBuilder.Append(line[charIndex]);
 						}
-						else if (charIndex == 0 ||
+						else 
+						if (charIndex == 0 ||
 						         line[charIndex - 1] != '\\')
 						{
 							charIndex += delimiter.Length - 1;
@@ -276,8 +270,9 @@ namespace Axion
 					{
 						stringBuilder.Append(line[charIndex]);
 					}
-					else if (charIndex == 0 ||
-					         line[charIndex - 1] != '\\')
+					else 
+					if (charIndex == 0 ||
+					         line[charIndex - 1] != '\\') // BUG with escaped delimiter at end of string
 					{
 						charIndex += delimiter.Length - 1;
 						return new Token(TokenType.String, stringBuilder.ToString(), lineIndex, charIndex);
@@ -313,7 +308,7 @@ namespace Axion
 					}
 					else
 					{
-						return new Token(TokenType.Number_LFloat, longFloat.ToString(), lineIndex, charIndex);
+						return new NumberToken(NumberType.LFloat, longFloat.ToString(), lineIndex, charIndex);
 					}
 				}
 				// float
@@ -325,7 +320,7 @@ namespace Axion
 					}
 					else
 					{
-						return new Token(TokenType.Number_Float, @float.ToString(), lineIndex, charIndex);
+						return new NumberToken(NumberType.Float, @float.ToString(), lineIndex, charIndex);
 					}
 				}
 			}
@@ -341,7 +336,7 @@ namespace Axion
 					}
 					else
 					{
-						return new Token(TokenType.Number_Byte, @byte.ToString(), lineIndex, charIndex);
+						return new NumberToken(NumberType.Byte, @byte.ToString(), lineIndex, charIndex);
 					}
 				}
 				// short
@@ -353,7 +348,7 @@ namespace Axion
 					}
 					else
 					{
-						return new Token(TokenType.Number_SInt, sint.ToString(), lineIndex, charIndex);
+						return new NumberToken(NumberType.SInt, sint.ToString(), lineIndex, charIndex);
 					}
 				}
 				// long
@@ -365,7 +360,7 @@ namespace Axion
 					}
 					else
 					{
-						return new Token(TokenType.Number_LInt, lint.ToString(), lineIndex, charIndex);
+						return new NumberToken(NumberType.LInt, lint.ToString(), lineIndex, charIndex);
 					}
 				}
 				// integer
@@ -377,7 +372,7 @@ namespace Axion
 					}
 					else
 					{
-						return new Token(TokenType.Number_Int, @int.ToString(), lineIndex, charIndex);
+						return new NumberToken(NumberType.Int, @int.ToString(), lineIndex, charIndex);
 					}
 				}
 			}
