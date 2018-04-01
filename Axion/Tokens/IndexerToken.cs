@@ -9,11 +9,11 @@ namespace Axion.Tokens
 
 		internal IndexerToken(Token parent, Token index)
 		{
-			LinePosition   = parent.LinePosition;
+			LinePosition = parent.LinePosition;
 			ColumnPosition = parent.ColumnPosition;
-			Type           = TokenType.Identifier;
-			Parent         = parent;
-			Index          = index;
+			Type = TokenType.Identifier;
+			Parent = parent;
+			Index = index;
 		}
 
 		public override string ToString(int tabLevel)

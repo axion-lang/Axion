@@ -6,17 +6,17 @@ namespace Axion.Tokens
 {
 	internal class BranchingToken : Token
 	{
-		internal readonly List<OperationToken>                          Conditions;
+		internal readonly List<OperationToken> Conditions;
+		internal readonly List<Token> ElseBlock;
 		internal readonly Dictionary<List<OperationToken>, List<Token>> ElseIfs;
-		internal readonly List<Token>                                   ElseTokens;
-		internal readonly List<Token>                                   ThenTokens;
+		internal readonly List<Token> ThenBlock;
 
-		internal BranchingToken(List<OperationToken> conditions, List<Token> thenTokens)
+		internal BranchingToken(List<OperationToken> conditions, List<Token> thenBlock)
 		{
 			Conditions = conditions;
-			ThenTokens = thenTokens;
-			ElseIfs    = new Dictionary<List<OperationToken>, List<Token>>();
-			ElseTokens = new List<Token>();
+			ThenBlock = thenBlock;
+			ElseIfs = new Dictionary<List<OperationToken>, List<Token>>();
+			ElseBlock = new List<Token>();
 		}
 
 		public override string ToString(int tabLevel)
@@ -32,26 +32,30 @@ namespace Axion.Tokens
 			str.AppendLine($"{tabs}  (Conditions,");
 			for (var i = 0; i < Conditions.Count; i++)
 			{
-				if (i == Conditions.Count - 1)
+				str.Append(Conditions[i].ToString(tabLevel + 2));
+				if (i != Conditions.Count - 1)
 				{
-					str.AppendLine($"{Conditions[i].ToString(tabLevel + 2)}");
-					break;
+					str.AppendLine(",");
 				}
-
-				str.AppendLine($"{Conditions[i].ToString(tabLevel + 2)},");
+				else
+				{
+					str.AppendLine();
+				}
 			}
 
 			str.AppendLine($"{tabs}  ),");
 			str.AppendLine($"{tabs}  (Then,");
-			for (var i = 0; i < ThenTokens.Count; i++)
+			for (var i = 0; i < ThenBlock.Count; i++)
 			{
-				if (i == ThenTokens.Count - 1)
+				str.Append(ThenBlock[i].ToString(tabLevel + 2));
+				if (i != ThenBlock.Count - 1)
 				{
-					str.AppendLine($"{ThenTokens[i].ToString(tabLevel + 2)}");
-					break;
+					str.AppendLine(",");
 				}
-
-				str.AppendLine($"{ThenTokens[i].ToString(tabLevel + 2)},");
+				else
+				{
+					str.AppendLine();
+				}
 			}
 
 			str.AppendLine($"{tabs}  ),");
@@ -60,30 +64,34 @@ namespace Axion.Tokens
 			{
 				str.AppendLine($"{tabs}  (ElseIf,");
 				str.AppendLine($"{tabs}    (Conditions,");
-				var elifConditions = ElseIfs.ElementAt(i).Key;
+				List<OperationToken> elifConditions = ElseIfs.ElementAt(i).Key;
 				for (var I = 0; I < elifConditions.Count; I++)
 				{
-					if (I == elifConditions.Count - 1)
+					str.Append(elifConditions[I].ToString(tabLevel + 3));
+					if (I != elifConditions.Count - 1)
 					{
-						str.AppendLine($"{elifConditions[I].ToString(tabLevel + 3)}");
-						break;
+						str.AppendLine(",");
 					}
-
-					str.AppendLine($"{elifConditions[I].ToString(tabLevel + 3)},");
+					else
+					{
+						str.AppendLine();
+					}
 				}
 
 				str.AppendLine($"{tabs}    ),");
 				str.AppendLine($"{tabs}    (Then,");
-				var elifTokens = ElseIfs.ElementAt(i).Value;
-				for (var I = 0; I < elifTokens.Count; I++)
+				List<Token> elifBlock = ElseIfs.ElementAt(i).Value;
+				for (var I = 0; I < elifBlock.Count; I++)
 				{
-					if (I == elifTokens.Count - 1)
+					str.Append(elifBlock[I].ToString(tabLevel + 3));
+					if (I != elifBlock.Count - 1)
 					{
-						str.AppendLine($"{elifTokens[I].ToString(tabLevel + 3)}");
-						break;
+						str.AppendLine(",");
 					}
-
-					str.AppendLine($"{elifTokens[I].ToString(tabLevel + 3)},");
+					else
+					{
+						str.AppendLine();
+					}
 				}
 
 				str.AppendLine($"{tabs}    ),");
@@ -91,15 +99,17 @@ namespace Axion.Tokens
 			}
 
 			str.AppendLine($"{tabs}  (Else,");
-			for (var i = 0; i < ElseTokens.Count; i++)
+			for (var i = 0; i < ElseBlock.Count; i++)
 			{
-				if (i == ElseTokens.Count - 1)
+				str.Append(ElseBlock[i].ToString(tabLevel + 2));
+				if (i != ElseBlock.Count - 1)
 				{
-					str.AppendLine($"{ElseTokens[i].ToString(tabLevel + 2)}");
-					break;
+					str.AppendLine(",");
 				}
-
-				str.AppendLine($"{ElseTokens[i].ToString(tabLevel + 2)},");
+				else
+				{
+					str.AppendLine();
+				}
 			}
 
 			str.AppendLine($"{tabs}  )");

@@ -1,90 +1,103 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Axion.Processing;
 
 namespace Axion
 {
 	internal static class Program
 	{
-		public const   string   AnyKeyToClose = "Press any key to close app.";
-		private static string   ScriptFileName;
-		private static string[] ScriptLines;
+		public const string AnyKeyToClose = "Press any key to close app.";
+		private static string ScriptFileName;
+		public static readonly ScriptFile OutFile = new ScriptFile();
 
 		private static void Main(string[] args)
 		{
 			if (args.Length < 1 ||
-			    !File.Exists(args[0]))
+				!File.Exists(args[0]))
 			{
 				LogError("Input file doesn't exists", ErrorOrigin.Input);
 				return;
 			}
 
 			ScriptFileName = args[0];
-			ScriptLines    = File.ReadAllLines(ScriptFileName);
+
 			LogInfo("Tokens list generation...");
-			Tokenize();
+			Lexer.Tokenize(File.ReadAllText(ScriptFileName).ToCharArray());
+			LogInfo($"Saving tokens list to: {ScriptFileName}.lex ...");
+			Save("lex");
+
 			LogInfo("Syntax tree generation...");
-			Parse();
-			Console.WriteLine("\r\nReady. " + AnyKeyToClose);
+			Parser.Parse();
+			LogInfo($"Saving tree to: {ScriptFileName}.tree ...");
+			Save("tree");
+
+			LogInfo("\r\nReady!");
+			Console.WriteLine();
+			Console.WriteLine("Imported libraries:");
+			Console.WriteLine(string.Join(",\r\n", OutFile.Imports.Select(t => t.ToString())));
+
+			Console.WriteLine(AnyKeyToClose);
 			Console.ReadKey();
 		}
 
-		private static void Tokenize()
+		private static void Save(string postfix)
 		{
-			Lexer.Tokenize(ScriptLines);
-
-			string fileName = ScriptFileName + ".lex";
+			var fileName = $"{ScriptFileName}.{postfix}";
 			if (File.Exists(fileName))
 			{
 				File.Delete(fileName);
 			}
 
-			File.WriteAllText(
-				fileName,
-				string.Join(
-					",\r\n", Lexer.Tokens.Where(token => token != null).Select(token => token.ToString(0))));
+			File.WriteAllText(fileName,
+							  string.Join(",\r\n",
+										  OutFile.Tokens.Select(token => token.ToString())));
 		}
 
-		private static void Parse()
+		public static void LogError(string message,
+									ErrorOrigin errorOrigin,
+									int lineIndex = -1,
+									int charIndex = -1)
 		{
-			Parser.Parse();
+			Console.ForegroundColor = ConsoleColor.Red;
+			Console.WriteLine($"{errorOrigin:G} error: {message}.");
 
-			string fileName = ScriptFileName + ".tree";
-			if (File.Exists(fileName))
-			{
-				File.Delete(fileName);
-			}
-
-			File.WriteAllLines(fileName, Parser.SyntaxTree.Select(token => token?.ToString(0)));
-		}
-
-		public static void LogError(string message, ErrorOrigin errorOrigin, bool critical = true, int lineIndex = -1,
-		                            int charIndex = -1)
-		{
-			Console.ForegroundColor = critical ? ConsoleColor.Red : ConsoleColor.DarkYellow;
-			string prefix = critical ? "error" : "warning";
-			string origin = errorOrigin.ToString("G");
-			Console.Write($"{origin} {prefix}: {message}.");
-			Console.ForegroundColor = ConsoleColor.White;
 			if (lineIndex != -1 &&
-			    charIndex != -1)
+				charIndex != -1)
 			{
-				Console.WriteLine($"\r\nAt line {lineIndex + 1}, column {charIndex + 1}.");
+				Console.WriteLine($"At line {lineIndex}, column {charIndex}.");
 			}
-
 			Console.WriteLine();
-			if (critical)
+			Console.ForegroundColor = ConsoleColor.White;
+
+			LogInfo($"Saving traceback to: {ScriptFileName}.traceback ...");
+			Save("traceback");
+			Console.Write(AnyKeyToClose);
+			Console.ReadKey();
+			Environment.Exit(0);
+		}
+
+		public static void LogWarning(string message,
+									  ErrorOrigin errorOrigin,
+									  int lineIndex = -1,
+									  int charIndex = -1)
+		{
+			Console.ForegroundColor = ConsoleColor.DarkYellow;
+			Console.WriteLine($"{errorOrigin:G} warning: {message}.");
+
+			if (lineIndex != -1 &&
+				charIndex != -1)
 			{
-				Console.WriteLine("Press any key to close app.");
-				Console.ReadKey();
-				Environment.Exit(0);
+				Console.WriteLine($"At line {lineIndex + 1}, column {charIndex + 1}.");
 			}
+			Console.WriteLine();
+			Console.ForegroundColor = ConsoleColor.White;
 		}
 
 		public static void LogInfo(string message)
 		{
 			Console.ForegroundColor = ConsoleColor.DarkCyan;
-			Console.WriteLine($"STATUS: {message}.");
+			Console.WriteLine(message);
 			Console.ForegroundColor = ConsoleColor.White;
 		}
 	}

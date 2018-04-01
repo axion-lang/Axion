@@ -6,10 +6,10 @@
 
 		internal NumberToken(NumberType numberType, string value, int linePosition = 0, int columnPosition = 0)
 		{
-			Type           = TokenType.Number;
-			NumberType     = numberType;
-			Value          = value;
-			LinePosition   = linePosition;
+			Type = TokenType.Number;
+			NumberType = numberType;
+			Value = value;
+			LinePosition = linePosition;
 			ColumnPosition = columnPosition;
 		}
 

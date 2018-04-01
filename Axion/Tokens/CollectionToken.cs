@@ -6,8 +6,8 @@ namespace Axion.Tokens
 	internal class CollectionToken : Token
 	{
 		internal readonly CollectionType CollectionType;
-		internal readonly List<Token>    ItemsTokens;
-		internal readonly Token          ItemType;
+		internal readonly List<Token> ItemsTokens;
+		internal readonly Token ItemType;
 
 		internal CollectionToken(Token itemType, CollectionType collectionType, List<Token> itemsTokens)
 		{
@@ -34,13 +34,15 @@ namespace Axion.Tokens
 			str.AppendLine($"{tabs}  (\r\n");
 			for (var i = 0; i < ItemsTokens.Count; i++)
 			{
-				if (i == ItemsTokens.Count - 1)
+				str.Append(ItemsTokens[i].ToString(tabLevel + 2));
+				if (i != ItemsTokens.Count - 1)
 				{
-					str.AppendLine($"{ItemsTokens[i].ToString(tabLevel + 2)}");
-					break;
+					str.AppendLine(",");
 				}
-
-				str.AppendLine($"{ItemsTokens[i].ToString(tabLevel + 2)},");
+				else
+				{
+					str.AppendLine();
+				}
 			}
 
 			str.AppendLine($"{tabs}  )");

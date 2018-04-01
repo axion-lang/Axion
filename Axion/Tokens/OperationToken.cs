@@ -5,21 +5,25 @@ namespace Axion.Tokens
 {
 	internal class OperationToken : Token
 	{
-		internal readonly Token  LeftOperand;
+		internal readonly Token LeftOperand;
 		internal readonly string Operator;
-		internal readonly Token  RightOperand;
+		internal readonly Token RightOperand;
 
 		internal OperationToken(string op, Token leftOperand, Token rightOperand)
 		{
-			LinePosition   = leftOperand.LinePosition;
-			ColumnPosition = leftOperand.ColumnPosition;
-			Operator       = op;
-			if (Lexer.ConditionalOperators.Contains(Operator))
+			LinePosition = leftOperand?.LinePosition 
+			               ?? rightOperand?.LinePosition 
+			               ?? 0;
+			ColumnPosition = leftOperand?.ColumnPosition 
+			                 ?? rightOperand?.ColumnPosition 
+			                 ?? 0;
+			Operator = op;
+			if (Defs.ConditionalOperators.Contains(Operator) || Operator == ".")
 			{
 				Type = TokenType.Identifier;
 			}
 
-			LeftOperand  = leftOperand;
+			LeftOperand = leftOperand;
 			RightOperand = rightOperand;
 		}
 
