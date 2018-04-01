@@ -14,4 +14,8 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Tokens\IndexerToken.cs" />
+  </ItemGroup>
+
 </Project>

@@ -1,54 +1,63 @@
-# Axion <img align="right" src="https://github.com/F1uctus/Axion/blob/master/Other/Axion_logo.png" width="152" height="152" />
+# Axion programming language <img align="right" src="https://github.com/F1uctus/Axion/blob/master/Other/Axion_logo.png" width="152" height="152" />
 
-_High-level general-purposed programming language. **(under construction)**_
+## **Under construction**
+
 ## Objectives:
-- **_Multifunctional_**
+- **General-purposed**
 - **Static typed**
-- **With interpreter & compiler**
-- **_High-performance_**
-- **Safe working with memory**
-- **_Simple_**
+- **High-performance**
+- **Safe**
+- **Simple**
 - **Readable**
 
-## Things that have been done:
+## Progress:
 - **Lexer**
-- **Parser is still under construction**
+- **Parser is still under construction.**
+	Now supports:
+	- Binary operations:
+	```python
+	1 + 2, variable += "string", otherVar = 90.0, etc.
+	```
+	- Branching (if, elif, else):
+	```python 
+	if condition: 
+		doSomething()
+	elif condition: 
+		doSomethingElse()
+	else: call()
+	```
+	- Collections indexers:
+	```python
+	` invoke same way as object's field
+	item = collection.index
+	item = collection.0
+	value = someMap."key"
+	```
+	- Collections initializing (partly):
+	```python
+	` inaccurate version yet
+	# ARRAY
+	collection = int[5]
+	collection = { 1, 2, 3, 4, 5 }
+	collection = int { 1, 2, 3, 4, 5 }
+	
+	# MATRIX
+	collection = int[3, 2]
+	collection = { {1, 2}, {3, 4}, {5, 6} }
+	collection = int { {1, 2}, {3, 4}, {5, 6} }
+	
+	# LIST
+	collection = int[*]
+	collection = int* { 1, 2, 3, 4, 5 }
+	
+	# MAP
+	collection = { int, str }
+	collection = { 1: "Text1", 2: "Hello, world!", 55: "Other string" }
+	```
+	- Function calls (partly):
+	```javascript
+	call(arg1, arg2, arg3)
+	functionCall(nestedCall(arg1, arg2), 12345)
+	```
 - **Next thing will be interpreter**
-
-## Example
-(not an exact version of the language yet)
-```python
-# Calculator, written in Axion.
-
-out.write('Write a first number: ')
-
-firstNum = out.readLine()
-while parseType(firstNum) is not number
-	out.writeLine('\nPlease write correct number: ')
-	firstNum = out.readLine()
-
-out.write('Write a second number: ')
-
-secondNum = out.readLine()
-while parseType(secondNum) is not number
-	out.writeLine('\nPlease write correct number: ')
-	secondNum = out.readLine()
-
-allowedOperations = ['+', '-', '*', '/']
-out.write('Write an operation (+, -, *, /): ')
-
-opChar = out.readKey()
-while opChar not in allowedOperations
-	out.writeLine('\nPlease write only one of: (+, -, *, /): ')
-	opChar = out.readKey()
-
-switch opChar
-	case '+'
-		out.writeLine(firstNum + secondNum)
-	case '-'
-		out.writeLine(firstNum - secondNum)
-	case '*'
-		out.writeLine(firstNum * secondNum)
-	case '/'
-		out.writeLine(firstNum / secondNum)
-```
+- **Then translator to "C", or own compiler, or both**
