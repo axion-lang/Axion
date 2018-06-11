@@ -46,8 +46,24 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# =========================
+# Developer-defined Files
+# =========================
+
+# Visual Studio files
 /.vs
-/Axion/obj
-/Axion/bin
-/Axion/Axion.csproj.user
-/Axion/Properties/launchSettings.json
+/.vscode
+
+# ReSharper configuration files
+*.DotSettings.user
+*.user
+*.DotSettings
+
+# Binaries and Visual Studio files
+/AxionOnCore/obj
+/AxionOnCore/bin
+/AxionOnCore/Testing
+/AxionOnCore/Properties/launchSettings.json
+/AxionStandard/obj
+/AxionStandard/bin
+/AxionStandard/Properties/launchSettings.json
