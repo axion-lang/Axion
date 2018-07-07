@@ -6,17 +6,21 @@
 - **General-purposed**
 - **Static typed**
 - **High-performance**
-- **Reactive programming support**
 - **Safe**
 - **Simple**
 - **Readable**
 
+## Paradigms (alpha):
+- Object-oriented (built-in)
+- Reactive
+- Functional (extension)
+
 ## Progress:
-- **Lexer (Tokenizer) fully supported**
+- **Lexer (Tokenizer) works mostly correct**
 - **Parser is still under construction.**
 	_(Not working by last release time)_
 	
-	Now supports:
+	Now parser supports:
 	- Binary operations:
 	```python
 	1 + 2, variable += "string", otherVar = 90.0, etc.

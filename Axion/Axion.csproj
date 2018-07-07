@@ -5,7 +5,7 @@
     <Version>0.2.8.4</Version>
     <Authors>Nikitin Ilya</Authors>
     <Company>Fluctus Technologies</Company>
-    <Description>Axion programming language compiler's standard DLL library
+    <Description>Axion programming language compiler's standard DLL library.
 Written on .NET Standard.</Description>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
