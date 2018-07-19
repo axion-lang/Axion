@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Axion.Enums;
 using Axion.Processing.Tokens;
 
@@ -114,18 +115,22 @@ namespace Axion.Processing {
                      AdvanceChar();
                   }
                }
-
+               
                // skip indentation if line is blank or commented
-               Token[] next = PeekNextTokens(1);
-               if (next.Length > 1 &&
-                   // next token is multiline comment
-                   (next[0].Value.StartsWith("/*") &&
-                   // check that comment is not INline
-                   (next[1].ID == TokenID.Newline || next[1].ID == TokenID.Comment)
+               var next = lines[lnI].Substring(clI).TrimStart();
+                    
+               if (// string is empty
+                   string.IsNullOrWhiteSpace(next)
                    // or next token is one-line comment
-                   || next[0].Value.StartsWith("//"))) {
-                  return null;
+                   || next[0] == '#'
+                   // or next token is multiline comment
+                   || (next.Substring(0, 2) == "/*"
+                      // and goes through end of line
+                      && Regex.Matches(next, "/\\*").Count >
+                      Regex.Matches(next, "\\*/").Count)) {
+                   return null;
                }
+
                Token indentationToken = null;
                // indent increased
                if (indentLength > lastIndentLength) {
@@ -392,28 +397,6 @@ namespace Axion.Processing {
                   lnI, clI);
             }
          }
-      }
-
-      private static Token[] PeekNextTokens(uint count) {
-         if (count == 0) {
-            return new Token[0];
-         }
-         // save values
-         char b_c = c;
-         int b_lnI = lnI;
-         int b_clI = clI;
-         int b_lastIndentLength = lastIndentLength;
-         // get next tokens
-         var nextTokens = new Token[count];
-         for (int i = 0; i < count; i++) {
-            nextTokens[i] = MakeNextToken();
-         }
-         // restore values
-         c = b_c;
-         lnI = b_lnI;
-         clI = b_clI;
-         lastIndentLength = b_lastIndentLength;
-         return nextTokens.Where(t => t != null).ToArray();
       }
 
       private static char PeekChar(int position = 1) {
