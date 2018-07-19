@@ -43,20 +43,21 @@
 	- Collections initializing (partly):
 	```csharp
 	// inaccurate version yet
+	//
 	// ARRAY
 	collection = int[5]
 	collection = { 1, 2, 3, 4, 5 }
 	collection = int { 1, 2, 3, 4, 5 }
-	
+	//
 	// MATRIX
 	collection = int[3, 2]
 	collection = { {1, 2}, {3, 4}, {5, 6} }
 	collection = int { {1, 2}, {3, 4}, {5, 6} }
-	
+	//
 	// LIST
 	collection = int[*]
 	collection = int* { 1, 2, 3, 4, 5 }
-	
+	//
 	// MAP
 	collection = { int, str }
 	collection = { 1: "Text1", 2: "Hello, world!", 55: "Other string" }
