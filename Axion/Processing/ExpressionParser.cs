@@ -116,7 +116,6 @@
 //                    }
 //                }
 
-
 //                double value;
 //                if (item.Length == 0 && ch == '(') {
 //                    // expression in parentheses
@@ -148,19 +147,19 @@
 //                   return item.Length == 0 && (ch == '-' || ch == ')') ||
 //                          !(ValidAction(ch) || ch == '(' || ch == stopCollecting);
 //               }
- 
+
 //               private static OperatorToken UpdateAction(string item, ref int from, char ch, char to) {
 //                   if (from >= item.Length || item[from] == ')' || item[from] == to) {
 //                       return ')';
 //                   }
- 
+
 //                   int index = from;
 //                   char res = ch;
 //                   while (!ValidAction(res) && index < item.Length) {
 //                       // Look for the next character in string until a valid action is found.
 //                       res = item[index++];
 //                   }
- 
+
 //                   if (ValidAction(res)) {
 //                       @from = index;
 //                   }
@@ -172,7 +171,7 @@
 //                           @from = @from;
 //                       }
 //                   }
- 
+
 //                   return res;
 //               }*/
 
@@ -239,3 +238,4 @@
 //      }
 //   }
 //}
+
