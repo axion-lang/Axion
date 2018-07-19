@@ -2,7 +2,7 @@
 using Axion.Enums;
 using Newtonsoft.Json;
 
-namespace Axion.Processing.Tokens {
+namespace Axion.Tokens {
     [JsonObject]
     public class Token {
         [JsonProperty(Order = 1004)] internal int     EndClPos;

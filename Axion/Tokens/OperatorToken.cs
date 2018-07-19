@@ -3,7 +3,7 @@ using Axion.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Axion.Processing.Tokens {
+namespace Axion.Tokens {
     public class OperatorToken : Token {
         public Operator Operator;
 

@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Axion.Enums;
-using Axion.Processing.Tokens;
+using Axion.Tokens;
 
 namespace Axion.Processing {
     public static class Lexer {

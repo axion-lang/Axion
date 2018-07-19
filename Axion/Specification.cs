@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Axion.Processing.Tokens;
+using Axion.Tokens;
 
 namespace Axion {
     /// <summary>
