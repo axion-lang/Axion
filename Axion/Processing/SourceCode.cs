@@ -11,7 +11,7 @@ namespace Axion.Processing {
       private readonly string[] sourceLines;
       private readonly string sourceFileName;
       public readonly List<Token> SyntaxTree = new List<Token>();
-      public readonly Chain<Token> Tokens = new Chain<Token>();
+      public readonly LinkedList<Token> Tokens = new LinkedList<Token>();
 
       public SourceCode(string sourceCode) {
          sourceFileName = "testsource.ax";

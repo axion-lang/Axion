@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Axion.Enums;
@@ -39,12 +40,12 @@ namespace Axion.Processing {
       /// </summary>
       private static int lastIndentLength;
 
-      private static Chain<Token> tokens;
+      private static LinkedList<Token> tokens;
 
       /// <summary>
       ///    Splits characters stream into tokens chain (linked list).
       /// </summary>
-      public static void Tokenize(string[] sourceLines, Chain<Token> tokensChain) {
+      public static void Tokenize(string[] sourceLines, LinkedList<Token> tokensChain) {
          // remove carriage returns (in Windows),
          // append newline statement
          lines = sourceLines;
