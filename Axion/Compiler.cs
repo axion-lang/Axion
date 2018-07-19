@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
-using AxionStandard.Enums;
-using AxionStandard.Processing;
+using Axion.Enums;
+using Axion.Processing;
 using Newtonsoft.Json;
 
-namespace AxionStandard {
+namespace Axion {
    public static class Compiler {
       internal const string AnyKeyToClose = "Press any key to close app.";
       internal const string Version = "0.3.0.0";

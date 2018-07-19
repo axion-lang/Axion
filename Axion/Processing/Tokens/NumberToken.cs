@@ -1,7 +1,7 @@
-﻿using AxionStandard.Enums;
+﻿using Axion.Enums;
 using Newtonsoft.Json;
 
-namespace AxionStandard.Processing.Tokens {
+namespace Axion.Processing.Tokens {
    public class NumberToken : Token {
       [JsonProperty(Order = 1)] public readonly NumberType NumberType;
 

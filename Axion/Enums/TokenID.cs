@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace AxionStandard.Enums {
+namespace Axion.Enums {
    [JsonConverter(typeof(StringEnumConverter))]
    public enum TokenID {
       Newline,

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using AxionStandard.Enums;
-using AxionStandard.Processing.Tokens;
+using Axion.Enums;
+using Axion.Processing.Tokens;
 using Newtonsoft.Json;
 
-namespace AxionStandard.Processing {
+namespace Axion.Processing {
    public sealed class SourceCode {
       private readonly string debugFilePath;
       private readonly string[] sourceLines;

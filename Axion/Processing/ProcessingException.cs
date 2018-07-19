@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using AxionStandard.Enums;
-using AxionStandard.Processing.Tokens;
+using Axion.Enums;
+using Axion.Processing.Tokens;
 using Newtonsoft.Json;
 
-namespace AxionStandard.Processing {
+namespace Axion.Processing {
    [JsonObject]
    internal class ProcessingException : Exception {
       [JsonProperty] public new string Message;

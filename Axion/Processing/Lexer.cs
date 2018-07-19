@@ -1,9 +1,9 @@
 ﻿using System.Globalization;
 using System.Linq;
-using AxionStandard.Enums;
-using AxionStandard.Processing.Tokens;
+using Axion.Enums;
+using Axion.Processing.Tokens;
 
-namespace AxionStandard.Processing {
+namespace Axion.Processing {
    public static class Lexer {
       /// <summary>
       ///    'End of file' mark.

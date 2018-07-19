@@ -1,7 +1,7 @@
 ﻿using System;
-using AxionStandard.Enums;
+using Axion.Enums;
 
-namespace AxionStandard.Processing {
+namespace Axion.Processing {
    internal static class Logger {
       internal static void LogWarning(string message, ErrorOrigin errorOrigin,
                                       int lnPos = -1, int clPos = -1) {

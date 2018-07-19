@@ -1,4 +1,4 @@
-﻿namespace AxionStandard.Enums {
+﻿namespace Axion.Enums {
    public enum ProcessingType {
       Tokenize,
       BuildSyntaxTree,

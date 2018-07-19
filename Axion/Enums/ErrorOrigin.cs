@@ -1,4 +1,4 @@
-﻿namespace AxionStandard.Enums {
+﻿namespace Axion.Enums {
    internal enum ErrorOrigin {
       Unknown,
       Input,

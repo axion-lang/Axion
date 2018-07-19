@@ -1,8 +1,8 @@
 ﻿//using System;
 //using System.Collections.Generic;
-//using AxionStandard.Enums;
+//using Axion.Enums;
 
-//namespace AxionStandard.Processing.Tokens.Blocks {
+//namespace Axion.Processing.Tokens.Blocks {
 //   internal class FunctionCallToken : Token {
 //      internal readonly List<Token> Arguments;
 //      internal readonly Token NameToken;

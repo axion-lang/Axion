@@ -1,9 +1,9 @@
 ﻿using System;
-using AxionStandard.Enums;
+using Axion.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace AxionStandard.Processing.Tokens {
+namespace Axion.Processing.Tokens {
    public class OperatorToken : Token {
       public Operator Operator;
 

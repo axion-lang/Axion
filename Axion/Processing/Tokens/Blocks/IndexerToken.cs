@@ -1,7 +1,7 @@
 ﻿//using System;
-//using AxionStandard.Enums;
+//using Axion.Enums;
 
-//namespace AxionStandard.Processing.Tokens.Blocks {
+//namespace Axion.Processing.Tokens.Blocks {
 //   internal class IndexerToken : Token {
 //      internal readonly Token Index;
 //      internal readonly Token Subject;

@@ -1,6 +1,6 @@
-﻿//using AxionStandard.Enums;
+﻿//using Axion.Enums;
 
-//namespace AxionStandard.Processing.Tokens.Blocks {
+//namespace Axion.Processing.Tokens.Blocks {
 //   internal class LoopToken : BlockToken {
 //      internal readonly OperationToken Condition;
 //      internal readonly OperationToken Iterator;

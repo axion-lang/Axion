@@ -1,8 +1,8 @@
 ﻿using System;
-using AxionStandard.Enums;
+using Axion.Enums;
 using Newtonsoft.Json;
 
-namespace AxionStandard.Processing.Tokens {
+namespace Axion.Processing.Tokens {
    [JsonObject]
    public class Token {
       [JsonProperty(Order = 0)] public TokenID ID;

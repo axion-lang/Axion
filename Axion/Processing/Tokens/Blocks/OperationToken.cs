@@ -1,8 +1,8 @@
 ﻿//using System;
 //using System.Linq;
-//using AxionStandard.Enums;
+//using Axion.Enums;
 
-//namespace AxionStandard.Processing.Tokens.Blocks {
+//namespace Axion.Processing.Tokens.Blocks {
 //   public class OperationToken : Token {
 //      internal readonly Token LeftOperand;
 //      internal readonly OperatorToken OperatorToken;

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AxionStandard.Processing.Tokens {
+namespace Axion.Processing.Tokens {
 
    /// <summary>
    ///   Standard <see cref="LinkedList{T}" /> implementation

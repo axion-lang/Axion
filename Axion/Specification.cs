@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using AxionStandard.Processing.Tokens;
+using Axion.Processing.Tokens;
 
-namespace AxionStandard {
+namespace Axion {
    /// <summary>
    ///    Static class, contains all language's syntax definitions (allowed operators, keywords, etc.)
    /// </summary>
