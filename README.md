@@ -1,21 +1,22 @@
 
+
 ## Welcome to Axion programming language toolset
 ### ::::::::::::::::::::::::::::::::::::: Under construction :::::::::::::::::::::::::::::::::::::
 
 ### Objectives
 
-- ***General-purposed***
-- ***High-performance***
-- ***Static typed***
-- ***Safe***
-- ***Simple***
-- ***Readable***
+- **General-purposed**
+- **High-performance**
+- **Static typed**
+- **Safe**
+- **Simple**
+- **Readable**
 
 ### Paradigms
 
-- ***Object-oriented***
-- ***Reactive***
-- ***Functional (extension)***
+- **Object-oriented**
+- **Reactive**
+- **Functional (extension)**
 
 ### Progress
 
@@ -74,5 +75,5 @@
 	```
 
 ### Licensed code usage
-- This project uses some code from [IronPython 2 compiler](https://github.com/IronLanguages/ironpython2)
-   that is licensed under Apache License 2.0
+- **This project uses some code from [IronPython 2 compiler](https://github.com/IronLanguages/ironpython2)
+   that is licensed under Apache License 2.0**
