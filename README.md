@@ -1,4 +1,4 @@
-# Axion programming language <img align="right" src="https://github.com/F1uctus/Axion/blob/master/Other/Axion_logo.png" width="152" height="152" />
+# Axion programming language toolset <img align="right" src="https://github.com/F1uctus/Axion/blob/master/Other/Axion_logo.png" width="152" height="152" />
 
 ## **Under construction**
 
