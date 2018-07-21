@@ -1,7 +1,7 @@
 <img align="center" src="Other/Axion_Mini.png" />
 
 <h2 align="center">Welcome to Axion programming language toolset</h2>
-<h3 align="center">:::::::::: Under construction ::::::::::</h3>
+<h3 align="center">:\:\:\:\:\:\:\:\:\: Under construction :/:/:/:/:/:/:/:/:/:</h3>
 
 <h3 align="center">Objectives</h3>
 
