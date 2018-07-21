@@ -75,5 +75,6 @@
 	```
 
 <h3 align="center">Licensed code usage</h3>
+
 - **This project uses some code from [IronPython 2 compiler](https://github.com/IronLanguages/ironpython2)
    that is licensed under Apache License 2.0**
