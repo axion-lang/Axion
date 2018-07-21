@@ -1,4 +1,4 @@
-<img src="https://github.com/F1uctus/Axion/blob/master/Other/Axion_Mini.png" />
+<img src="Other/Axion_Mini.png" />
 
 ## Welcome to Axion programming language toolset
 ### ::::::::::::::::::::::::::::::::::::: Under construction :::::::::::::::::::::::::::::::::::::
