@@ -1,9 +1,9 @@
-<img src="Other/Axion_Mini.png" />
+<img align="center" src="Other/Axion_Mini.png" />
 
-## Welcome to Axion programming language toolset
-### ::::::::::::::::::::::::::::::::::::: Under construction :::::::::::::::::::::::::::::::::::::
+<h2 align="center">Welcome to Axion programming language toolset</h2>
+<h3 align="center">:::::::::: Under construction ::::::::::</h3>
 
-### Objectives
+<h3 align="center">Objectives</h3>
 
 - **General-purposed**
 - **High-performance**
@@ -12,13 +12,13 @@
 - **Simple**
 - **Readable**
 
-### Paradigms
+<h3 align="center">Paradigms</h3>
 
 - **Object-oriented**
 - **Reactive**
 - **Functional (extension)**
 
-### Progress
+<h3 align="center">Progress</h3>
 
 - **Console interactive interpreter**
 - **Lexer (Tokenizer)**
@@ -26,7 +26,7 @@
 	*(Not working by last release time)*
 - **Transpiling to C or C++ is planned**
 	
-### Syntax examples
+<h3 align="center">Syntax examples</h3>
 
 - ***Basic operations***
 	```python
@@ -74,6 +74,6 @@
 	functionCall(nestedCall(arg1, arg2), 12345)
 	```
 
-### Licensed code usage
+<h3 align="center">Licensed code usage</h3>
 - **This project uses some code from [IronPython 2 compiler](https://github.com/IronLanguages/ironpython2)
    that is licensed under Apache License 2.0**
