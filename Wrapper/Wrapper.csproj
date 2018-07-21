@@ -4,6 +4,13 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <GenerateProgramFile>false</GenerateProgramFile>
+    <Authors>Nikitin Ilya</Authors>
+    <Company>Fluctus Studios</Company>
+    <Product>Axion_Wrapper</Product>
+    <PackageId>Axion_Wrapper</PackageId>
+    <Description>.NET Core wrapper around Axion programming language toolset.
+Used to provide launching, debugging and unit-testing.</Description>
+    <Version>1.0.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

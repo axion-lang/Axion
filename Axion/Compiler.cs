@@ -1,114 +1,272 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using Axion.Enums;
+using System.Linq;
 using Axion.Processing;
+using Fclp;
 using Newtonsoft.Json;
 
 namespace Axion {
+    /// <summary>
+    ///     Main class to work with Axion source code.
+    /// </summary>
     public static class Compiler {
-        internal const string AnyKeyToClose = "Press any key to close app.";
-        internal const string Version       = "0.3.0.0";
+        private const string typeHelp = "Type '-?' or '--help' to get documentation about launch arguments.";
+        private const string version  = "0.2.9.3-alpha [unstable]";
 
-        internal static readonly string AppFolder = AppDomain.CurrentDomain.BaseDirectory + "\\";
+        /// <summary>
+        ///     Returns path to directory where compiler executable is located.
+        /// </summary>
+        internal static readonly string WorkDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-        public static SourceCode ProcessingSource;
-        //internal static readonly Parser Parser = new Parser();
+        /// <summary>
+        ///     Compiler files to process.
+        /// </summary>
+        private static FileInfo[] inputFiles;
 
-        internal static readonly string[] ConsoleArgumentPrefixes = { "/", "-", "--", "---" };
-        internal static          bool     FlagDebug;
-        internal static          bool     FlagScript;
-        internal static          string   FileNameOrScript;
+        public static void Process(SourceCode code, SourceProcessingMode mode) {
+            code.Process(mode);
+        }
 
-        public static JsonSerializerSettings JsonSerializerSettings { get; } = new JsonSerializerSettings {
-            Formatting = Formatting.Indented
-        };
-
-        public static void EntryPoint(string[] args) {
-            Console.WriteLine($"Axion programming language compiler v. {Version}");
-            Console.WriteLine($"Launched at '{AppFolder}'");
-            Console.WriteLine("Type 'help' or '?' to get arguments support.");
+        /// <summary>
+        ///     Main compiler method that enters into infinite working loop
+        ///     (input -> response).
+        /// </summary>
+        /// <param name="arguments">Command line arguments compiler was launched with.</param>
+        public static void Launch(string[] arguments) {
+            Console.Write("Axion programming language compiler v. ");
+            Logger.ColoredLine(version, ConsoleColor.Yellow);
+            Console.Write("Working in '");
+            Logger.Colored(WorkDirectory, ConsoleColor.Yellow);
+            Console.WriteLine("'\n" + typeHelp);
             Console.WriteLine();
 
-            var ffProcessing = ProcessingType.Compilation;
-            for (var i = 0; i < args.Length; i++) {
-                // removing argument prefixes
-                for (var j = 0; j < ConsoleArgumentPrefixes.Length; j++) {
-                    var prefix = ConsoleArgumentPrefixes[j];
-                    if (args[i].StartsWith(prefix)) {
-                        args[i] = args[i].Remove(0, prefix.Length);
+            // main processing loop
+            while (true) {
+                if (arguments.Length > 0) {
+                    var cliParser = InitCLIParser();
+                    var result    = cliParser.Parse(arguments);
+                    // if launch arguments not modified
+                    // TODO Synchronize launch arguments count with UnmatchedOptions
+                    if (result.UnMatchedOptions.Count() == 8) {
+                        Logger.Error("Invalid argument.\n" + typeHelp);
+                    }
+                    else if (result.HasErrors) {
+                        Logger.Error(result.ErrorText);
+                    }
+                    else {
+                        HandleLaunchArguments(cliParser.Object);
                     }
                 }
+                // wait for next command
+                var command = Logger.ReadLine(">>> ");
+                arguments = GetUserArguments(command).ToArray();
+            }
+            // It is infinite loop, breaks only by 'exit' command.
+            // ReSharper disable once FunctionNeverReturns
+        }
 
-                if (i == args.Length - 1) {
-                    FileNameOrScript = args[i];
-                    break;
-                }
+        private static void HandleLaunchArguments(LaunchArguments args) {
+            if (args.Exit) {
+                Environment.Exit(0);
+            }
+            if (args.Version) {
+                Console.WriteLine(version);
+                return;
+            }
+            if (args.Help) {
+                DisplayHelpScreen();
+                return;
+            }
+            Options.Debug = args.Debug;
 
-                switch (args[i]) {
-                    case "help":
-                    case "?": {
-                        Console.WriteLine();
-                        Console.WriteLine("path to file should be the last argument.");
-                        Console.WriteLine("======================Input modes=====================");
-                        Console.WriteLine("(no argument)        Process input file.");
-                        Console.WriteLine("-s  -script          Process input script.");
-                        Console.WriteLine("====================Compiler modes====================");
-                        Console.WriteLine("-t  -tokenize        Create tokens list from input script.");
-                        Console.WriteLine("-p  -parse           Create tokens from input script and abstract syntax tree (AST) from tokens.");
-                        Console.WriteLine("-i  -interpret       Create tokens, AST, then interpret input script.");
-                        Console.WriteLine("-d  -debug           Save JSON debug information to file.");
-                        break;
+            // Interactive mode: jump into interpreter processing loop
+            if (args.Interactive) {
+                Logger.Info(
+                    "Interactive interpreter mode.\n" +
+                    "Now your input will be processed by Axion interpreter.\n" +
+                    "Type 'exit' to close interpreter environment;\n" +
+                    "Type 'cls' to clear screen."
+                );
+                while (true) {
+                    var input      = Logger.ReadLine(">>> ");
+                    var lowerInput = input.Trim().ToLower();
+                    // skip empty commands
+                    if (lowerInput == "") {
+                        continue;
                     }
-                    case "s": {
-                        FlagScript = true;
-                        break;
+                    // exit from interpreter to main loop
+                    if (lowerInput == "exit") {
+                        Logger.Info("Interactive interpreter closed.");
+                        return;
                     }
-                    case "t": {
-                        ffProcessing = ProcessingType.Tokenize;
-                        break;
+                    if (lowerInput == "cls") {
+                        Console.Clear();
+                        continue;
                     }
-                    case "p": {
-                        ffProcessing = ProcessingType.BuildSyntaxTree;
-                        break;
+                    var script = "";
+                    while (!string.IsNullOrEmpty(input)) {
+                        script += input + "\n";
+                        input  =  Logger.ReadLine("... ");
                     }
-                    case "i": {
-                        ffProcessing = ProcessingType.Interpretation;
-                        break;
-                    }
-                    case "d": {
-                        FlagDebug = true;
-                        break;
-                    }
-                    default: {
-                        Console.WriteLine("Invalid argument. type 'help' or '?' to get support about launch arguments.");
-                        break;
-                    }
+                    // TODO parse "help(module)" argument
+                    //if (lowerInput == "help" || lowerInput == "h" || lowerInput == "?") {
+                    //    // give help about some module/function.
+                    //    // should have control about all standard library documentation.
+                    //}
+
+                    // interpret as Axion source and output result
+                    new SourceCode(script).Process(SourceProcessingMode.Interpret);
                 }
             }
 
-            if (FlagDebug) {
-                if (!Directory.Exists(AppFolder + "output")) {
-                    Directory.CreateDirectory(AppFolder + "output");
+            SourceCode source;
+            // get source code
+            if (args.Files != null) {
+                if (args.Files.Count > 1) {
+                    Logger.Error("Compiler doesn't support multiple files processing yet.");
+                    return;
                 }
+                inputFiles = new FileInfo[args.Files.Count];
+                for (var i = 0; i < args.Files.Count; i++) {
+                    inputFiles[i] = new FileInfo(args.Files[i]);
+                }
+                source = new SourceCode(inputFiles[0]);
             }
-
-            if (FlagScript) {
-                ProcessingSource = new SourceCode(FileNameOrScript);
+            else if (args.Script != null) {
+                source = new SourceCode(args.Script);
             }
             else {
-                var fileInfo = new FileInfo(FileNameOrScript);
-                if (!fileInfo.Exists) {
-                    throw new FileNotFoundException("Input file doesn't exists.");
-                }
-
-                var sourceFile = new SourceCode(fileInfo);
-                ProcessingSource = sourceFile;
-                sourceFile.Compile(ffProcessing);
+                Logger.Error("Neither script nor path to script file not specified.\n" + typeHelp);
+                return;
             }
 
-            Logger.LogInfo("Ready.");
-            Console.WriteLine(AnyKeyToClose);
-            Console.Read();
+            // process source
+            source.Process(args.Mode);
         }
+
+        /// <summary>
+        ///     Initializes command line parser with allowed arguments.
+        /// </summary>
+        /// <returns>Ready parser instance.</returns>
+        private static FluentCommandLineParser<LaunchArguments> InitCLIParser() {
+            var cliParser = new FluentCommandLineParser<LaunchArguments> { IsCaseSensitive = false };
+            cliParser.Setup(arg => arg.Files)
+                     .As('f', nameof(LaunchArguments.Files));
+            cliParser.Setup(arg => arg.Script)
+                     .As('s', nameof(LaunchArguments.Script));
+            cliParser.Setup(arg => arg.Mode)
+                     .As('m', nameof(LaunchArguments.Mode));
+            cliParser.Setup(arg => arg.Interactive)
+                     .As('i', nameof(LaunchArguments.Interactive));
+            cliParser.Setup(arg => arg.Debug)
+                     .As('d', nameof(LaunchArguments.Debug));
+            cliParser.Setup(arg => arg.Help)
+                     .As('?', nameof(LaunchArguments.Help));
+            cliParser.Setup(arg => arg.Version)
+                     .As('v', nameof(LaunchArguments.Version));
+            cliParser.Setup(arg => arg.Exit)
+                     .As('x', nameof(LaunchArguments.Exit));
+            return cliParser;
+        }
+
+        /// <summary>
+        ///     Displays a table with documentation about launch arguments.
+        /// </summary>
+        private static void DisplayHelpScreen() {
+            Console.Write(
+                $@"
+┌─────────────────────────────┬───────────────────────────────────────────────────────────────┐
+│        Argument name        │                                                               │
+├───────┬─────────────────────┤                       Usage description                       │
+│ short │        full         │                                                               │
+├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤
+│  -i   │ --{nameof(LaunchArguments.Interactive)}       │ Launch compiler's interactive interpreter mode.               │
+├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤
+│  -f   │ --{nameof(LaunchArguments.Files)}=""<path>""    │ Input files to process.                                       │
+│  -s   │ --{nameof(LaunchArguments.Script)}=""<code>""   │ Input script to process.                                      │
+├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤
+│  -m   │ --mode=<value>      │ Source code processing mode (Default: compile). Available:    ├──┬── not available yet
+│       │ {nameof(SourceProcessingMode.Interpret)}           │     Interpret source code.                                    │  │
+│       │ {nameof(SourceProcessingMode.Compile)}             │     Compile source into machine code.                         │  │
+│       │ {nameof(SourceProcessingMode.ConvertC)}            │     Convert source to 'C' language.                           │  │
+│       │ {nameof(SourceProcessingMode.ConvertCpp)}          │     Convert source to 'C++' language.                         │  │
+│       │ {nameof(SourceProcessingMode.ConvertCSharp)}       │     Convert source to 'C#' language.                          │  │
+│       │ {nameof(SourceProcessingMode.ConvertJavaScript)}   │     Convert source to 'JavaScript' language.                  │  │
+│       │ {nameof(SourceProcessingMode.ConvertPython)}       │     Convert source to 'Python' language.                      ├──┘
+│       │ {nameof(SourceProcessingMode.Lex)}                 │     Create tokens (lexemes) list from.                        │
+│       │ {nameof(SourceProcessingMode.Parsing)}             │     Create tokens list and Abstract Syntax Tree from source.  │
+├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤
+│  -d   │ --{nameof(LaunchArguments.Debug)}             │ Save debug information to '<compilerDir>\output' directory.   │
+│  -?   │ --{nameof(LaunchArguments.Help)}              │ Display this help screen.                                     │
+│  -v   │ --{nameof(LaunchArguments.Version)}           │ Display information about compiler version.                   │
+│  -x   │ --{nameof(LaunchArguments.Exit)}              │ Exit the compiler.                                            │
+└───────┴─────────────────────┴───────────────────────────────────────────────────────────────┘
+ (Argument names are not case-sensitive)
+"
+            );
+        }
+
+        public static class Options {
+            /// <summary>
+            ///     Main settings of JSON debug information formatting.
+            /// </summary>
+            public static readonly JsonSerializerSettings JsonSerializer =
+                new JsonSerializerSettings { Formatting = Formatting.Indented };
+
+            /// <summary>
+            ///     Determines if compiler should save JSON debug information.
+            /// </summary>
+            public static bool Debug = true;
+
+            /// <summary>
+            ///     Determines if compiler should check that script use consistent indentation.
+            ///     (e. g. only spaces or only tabs).
+            /// </summary>
+            public static bool CheckIndentationConsistency = true;
+        }
+
+        #region Get user input and split it into arguments
+
+        /// <summary>
+        ///     Splits user command line input to arguments.
+        /// </summary>
+        /// <returns>Collection of arguments passed into command line.</returns>
+        private static IEnumerable<string> GetUserArguments(string input) {
+            var inQuotes = false;
+            return Split(
+                       input, c => {
+                                  if (c == '\"') {
+                                      inQuotes = !inQuotes;
+                                  }
+                                  return !inQuotes && char.IsWhiteSpace(c);
+                              }
+                   )
+                   .Select(arg => TrimMatchingQuotes(arg.Trim(), '\"'))
+                   .Where(arg => !string.IsNullOrEmpty(arg));
+        }
+
+        private static IEnumerable<string> Split(string str, Func<char, bool> controller) {
+            var nextPiece = 0;
+            for (var c = 0; c < str.Length; c++) {
+                if (controller(str[c])) {
+                    yield return str.Substring(nextPiece, c - nextPiece);
+
+                    nextPiece = c + 1;
+                }
+            }
+            yield return str.Substring(nextPiece);
+        }
+
+        private static string TrimMatchingQuotes(string input, char quote) {
+            if (input.Length >= 2
+             && input[0] == quote
+             && input[input.Length - 1] == quote) {
+                return input.Substring(1, input.Length - 2);
+            }
+            return input;
+        }
+
+        #endregion
     }
 }

@@ -1,241 +1,308 @@
 ﻿//using System;
 //using System.Collections.Generic;
 //using System.Globalization;
-//using System.Linq;
-//using Axion.Processing.Tokens;
-//using Axion.Processing.Tokens.Blocks;
+//using Axion.Tokens;
+//using Axion.Tokens.Ast;
 
 //namespace Axion.Processing {
-//   public class EParser {
-//      private static TokenCollection inputTokens;
+//    /// <summary>
+//    ///     Experimental operator-precedence based syntax tree builder.
+//    ///     [UNSTABLE]
+//    /// </summary>
+//    public class EParser {
+//        private static LinkedList<Token>     inputTokens;
+//        private static LinkedListNode<Token> node;
 
-//      public static OperationToken Process(TokenCollection input) {
-//         inputTokens = input;
+//        public static OperationToken Process(LinkedList<Token> input) {
+//            inputTokens = input;
+//            node        = inputTokens.First;
 
-//         // check parenthesis count
-//         Token[] inputOperators = input.Where(t => t is OperatorToken).ToArray();
-//         var missingParenthesesCount = 0;
-//         for (int i = 0; i < inputOperators.Length; i++) {
-//            switch (inputOperators[i].Value) {
-//               case "(":
-//                  missingParenthesesCount++;
-//                  break;
-//               case ")":
-//                  missingParenthesesCount--;
-//                  break;
-//            }
-//         }
+//            return LoadAndCalculate(input.Last.Value.Value);
+//        }
 
-//         if (missingParenthesesCount != 0) {
-//            throw new ArgumentException("Uneven parenthesis");
-//         }
-
-//         var from = 0;
-//         return LoadAndCalculate(ref from, input.Last.Value.Value);
-//      }
-
-//      public static Token recf(ref int from, string toValue) {
-//         while (from < inputTokens.Count && inputTokens[from].Value != toValue) {
-//            Token ct = inputTokens[from++];
-//            switch (ct) {
-//               case NumberToken num: {
-//                  if (from < inputTokens.Count || !(inputTokens[from] is OperatorToken op)) {
-//                     throw new Exception();
-//                  }
-
-//                  return new OperationToken(op, num, recf(ref from, toValue));
-//               }
-//               case OperatorToken op: {
-//                  // prefix unary if previous token is null or operator and operator can be unary
-//                  bool prefixUnaryOp = (from == 1 || inputTokens[from - 2] is OperatorToken) &&
-//                                       op.Operator.InputSide == InputSide.SomeOne;
-//                  // postfix unary if next token is null or operator
-//                  // prefix unary if previous token is null or operator and operator can be unary
-//                  bool postfixUnaryOp = (from >= inputTokens.Count || inputTokens[from] is OperatorToken) &&
-//                                        op.Operator.InputSide == InputSide.SomeOne;
-//                  if (!prefixUnaryOp  && from == 1 ||
-//                      !postfixUnaryOp && from >= inputTokens.Count) {
-//                     throw new Exception();
-//                  }
-
-//                  OperatorToken[] nextOperators = inputTokens.Skip(from - 1).OfType<OperatorToken>().ToArray();
-//                  if (nextOperators.Length > 0) {
-//                     if (op.Operator.IsOpenBrace) {
-//                        return new OperationToken(op, num, recf(ref from, op.Operator.GetMatchingBrace()));
-//                     }
-//                  }
-
-//                  break;
-//               }
-//            }
-//         }
-//      }
-
-//      public static OperationToken LoadAndCalculate(ref int i, string toValue) {
-//         var cells = new List<Cell>();
-//         do {
-//            NumberToken value = null;
-//            OperatorToken action = null;
-//            Token token = inputTokens[i++];
-//            switch (token) {
-//               case OperatorToken opToken: {
-//                  // if extracted item is a function or if the next item is starting with a '('
-//                  if (opToken.Value == "(") {
-//                     value = (NumberToken) LoadAndCalculate(ref i, ")").LeftOperand;
-//                  }
-
-//                  break;
-//               }
-//               case NumberToken numToken: {
-//                  value = numToken;
-
-//                  action = (OperatorToken) inputTokens[i++];
-//                  break;
-//               }
-//               default: {
-//                  throw new ArgumentException("Could not parse token: " + token);
-//               }
-//            }
-
-//            cells.Add(new Cell(value, action));
-//         } while (i < inputTokens.Count && inputTokens[i].Value != toValue);
-
-//         if (i < inputTokens.Count && inputTokens[i].Value == toValue) {
-//            // This happens when called recursively: move one char forward.
-//            i++;
-//         }
-
-//         var index = 1;
-//         return Merge(cells[0], ref index, cells); /*
-//            do { // Main processing cycle of the first part.
-//                char ch = data[from++];
-//                if (StillCollecting(item.ToString(), ch, to)) { // The char still belongs to the previous operand.
-//                    item.Append(ch);
-//                    if (from < data.Length && data[from] != to) {
-//                        continue;
+//        internal static OperationToken LoadAndCalculate(string toValue) {
+//            var cells = new List<Cell>();
+//            do {
+//                Token         value;
+//                OperatorToken action;
+//                switch (node.Value) {
+//                    case OperatorToken tk_op: {
+//                        action = tk_op;
+//                        // TODO ExprParser: mark op as unary case
+//                        // for prefix operators
+//                        // ++i - 40
+//                        if (node.Previous == null ||
+//                            node.Previous.Value is OperatorToken prevOp) {
+//                        }
+//                        // for postfix operators
+//                        // i++ - 40
+//                        if (node.Next == null ||
+//                            node.Next.Value is OperatorToken nextOp) {
+//                        }
+//                        // if extracted item is a function or if the next item is starting with a '('
+//                        if (tk_op.Value == "(") {
+//                            node  = node.Next;
+//                            value = LoadAndCalculate(")").LeftOperand;
+//                        }
+//                        else {
+//                            node  = node.Next;
+//                            value = node.Value;
+//                            node  = node.Next;
+//                        }
+//                        break;
+//                    }
+//                    case Token tk_val: {
+//                        value = tk_val;
+//                        if (!(node.Next.Value is OperatorToken)) {
+//                            throw new Exception("val follows val.");
+//                        }
+//                        node   = node.Next;
+//                        action = (OperatorToken) node.Value;
+//                        node   = node.Next;
+//                        break;
+//                    }
+//                    default: {
+//                        throw new ArgumentException("Could not parse token: " + node.Value);
 //                    }
 //                }
-
-//                double value;
-//                if (item.Length == 0 && ch == '(') {
-//                    // expression in parentheses
-//                    value = LoadAndCalculate(')');
-//                }
-
-//                // try to parse this as a number.
-//                else if (!double.TryParse(item.ToString(), out value)) {
-//                    throw new ArgumentException("Could not parse token [" + item + "]");
-//                }
-
-//                char action = ValidAction(ch)
-//                    ? ch
-//                    : UpdateAction(data, ref from, ch, to);
-
 //                cells.Add(new Cell(value, action));
-//                item.Clear();
-//            } while (from < data.Length && data[from] != to);
+//            } while (node.Next != null && node.Value.Value != toValue);
+//            var ind = 1;
+//            return Merge(cells[0], ref ind, cells);
+//        }
 
-//            if (from < data.Length &&
-//                (data[from] == '\n' || data[from] == to)) { // This happens when called recursively: move one char forward.
-//                from++;
-//            }*/
-//      }
-//      /*
-//               private static bool StillCollecting(string item, char ch, char to) {
-//                   // Stop collecting if either got ')' or to char, e.g. ','.
-//                   char stopCollecting = to == ')' || to == '\n' ? ')' : to;
-//                   return item.Length == 0 && (ch == '-' || ch == ')') ||
-//                          !(ValidAction(ch) || ch == '(' || ch == stopCollecting);
-//               }
+//        //private static OperationToken output = new OperationToken(null, null, null);
 
-//               private static OperatorToken UpdateAction(string item, ref int from, char ch, char to) {
-//                   if (from >= item.Length || item[from] == ')' || item[from] == to) {
-//                       return ')';
+//        /*internal static OperationToken recf(string toValue) {
+//          while (node.Value.Value != toValue) {
+//             node = node.Next;
+//             switch (node.Value) {
+//                case OperatorToken op: {
+//                   // if previous token is null or operator and operator can be unary
+//                   bool prefixUnaryOp =
+//                      // if token is first (-5 + 2)
+//                      (node == inputTokens.First ||
+//                       // or if previous token is operator  (2 + -5)
+//                       node.Previous.Value is OperatorToken) &&
+//                      // and if operator can be unary
+//                      op.Properties.InputSide == InputSide.SomeOne;
+ 
+//                   // if next token is null or operator and operator can be unary
+//                   bool postfixUnaryOp =
+//                      // if token is last (5 + 2++)
+//                      (node == inputTokens.Last ||
+//                       // or if previous token is operator  (5++ - 2)
+//                       node.Next.Value is OperatorToken) &&
+//                      // and if operator can be unary 
+//                      op.Properties.InputSide == InputSide.SomeOne;
+//                   if (!prefixUnaryOp && node == inputTokens.First) {
+//                      throw new Exception("prefix operator at invalid place.");
 //                   }
-
-//                   int index = from;
-//                   char res = ch;
-//                   while (!ValidAction(res) && index < item.Length) {
-//                       // Look for the next character in string until a valid action is found.
-//                       res = item[index++];
+//                   if (!postfixUnaryOp && node == inputTokens.Last) {
+//                      throw new Exception("postfix operator at invalid place.");
 //                   }
-
-//                   if (ValidAction(res)) {
-//                       @from = index;
+ 
+//                   // ++i (- 40)
+//                   if (prefixUnaryOp) {
+//                      output.OperatorToken = op;
+//                      return new OperationToken(op, null, recf(ref from, toValue));
 //                   }
-//                   else {
-//                       if (index > @from) {
-//                           @from = index - 1;
-//                       }
-//                       else {
-//                           @from = @from;
-//                       }
+//                   // i++ (- 40)
+//                   if (postfixUnaryOp) {
+//                      return new OperationToken(op, recf(ref from, toValue), null);
 //                   }
+ 
+//                   // if it is expression in parentheses
+//                   if (op.Properties.IsOpenBrace) {
+//                      return new OperationToken(op, num, recf(ref from, op.Properties.GetMatchingBrace()));
+//                   }
+//                   break;
+//                }
+//                // if number or variable or constant.
+//                default: {
+//                   break;
+//                }
+//             }
+//          }
+//       }*/
 
-//                   return res;
-//               }*/
+//        /*private static List<Cell> Split(ParsingScript script, char[] to) {
+//          var listToMerge = new List<Cell>(16);
+ 
+//          if (!script.StillValid() || to.Contains(script.Current)) {
+//             listToMerge.Add(Cell.EmptyInstance);
+//             script.Forward();
+//             return listToMerge;
+//          }
+//          int arrayIndexDepth = 0;
+//          bool inQuotes = false;
+//          int negated = 0;
+ 
+//          do { // Main processing cycle of the first part.
+//             // process prefix operators
+//             if (inputTokens[i++] is OperatorToken opT && (
+//                 opT.Properties.Value == "-" ||
+//                 opT.Properties.Value == "--" ||
+//                 opT.Properties.Value == "++")) {
+ 
+//             }
+//             string negateSymbol = Utils.IsNotSign(script.Rest);
+//             if (negateSymbol != null && !inQuotes) {
+//                negated++;
+//                script.Forward(negateSymbol.Length);
+//                continue;
+//             }
+ 
+//             char ch = script.CurrentAndForward();
+//             CheckQuotesIndices(script, ch, ref inQuotes, ref arrayIndexDepth);
+//             string action = null;
+ 
+//             bool keepCollecting = inQuotes || arrayIndexDepth > 0 ||
+//                                   StillCollecting(item.ToString(), to, script, ref action);
+//             if (keepCollecting) {
+//                // The char still belongs to the previous operand.
+//                item.Append(ch);
+ 
+//                bool goForMore = script.StillValid() &&
+//                                 (inQuotes || arrayIndexDepth > 0 || !to.Contains(script.Current));
+//                if (goForMore) {
+//                   continue;
+//                }
+//             }
+ 
+//             if (SkipOrAppendIfNecessary(item, ch, to)) {
+//                continue;
+//             }
+ 
+//             string token = item.ToString();
+ 
+//             bool ternary = UpdateIfTernary(script, token, ch, ref listToMerge);
+//             if (ternary) {
+//                return listToMerge;
+//             }
+ 
+//             CheckConsistency(token, listToMerge, script);
+ 
+//             script.MoveForwardIf(Constants.SPACE);
+ 
+//             if (action != null && action.Length > 1) {
+//                script.Forward(action.Length - 1);
+//             }
+ 
+//             // We are done getting the next token. The getValue() call below may
+//             // recursively call loadAndCalculate(). This will happen if extracted
+//             // item is a function or if the next item is starting with a START_ARG '('.
+//             var func = new ParserFunction(script, token, ch, ref action);
+//             Cell current = func.GetValue(script);
+//             if (current == null) {
+//                current = Cell.EmptyInstance;
+//             }
+//             current.ParsingToken = token;
+ 
+//             if (negated > 0 && current.Type == Cell.VarType.NUMBER) {
+//                // If there has been a NOT sign, this is a boolean.
+//                // Use XOR (true if exactly one of the arguments is true).
+//                bool neg = !((negated % 2 == 0) ^ Convert.ToBoolean(current.Value));
+//                current = new Cell(Convert.ToDouble(neg));
+//                negated = 0;
+//             }
+ 
+//             if (action == null) {
+//                action = UpdateAction(script, to);
+//             }
+//             else {
+//                script.MoveForwardIf(action[0]);
+//             }
+ 
+//             char next = script.TryCurrent(); // we've already moved forward
+//             bool done = listToMerge.Count == 0 &&
+//                         (next == Constants.END_STATEMENT ||
+//                          action == Constants.NULL_ACTION && current.Type != Cell.VarType.NUMBER ||
+//                          current.IsReturn);
+//             if (done) {
+//                if (action != null && action != Constants.END_ARG_STR) {
+//                   throw new ArgumentException("Action [" +
+//                                               action + "] without an argument.");
+//                }
+//                // If there is no numerical result, we are not in a math expression.
+//                listToMerge.Add(current);
+//                return listToMerge;
+//             }
+ 
+//             Cell cell = current.Clone();
+//             cell.Action = action;
+ 
+//             bool addIt = UpdateIfBool(script, ref cell, ref listToMerge);
+//             if (addIt) {
+//                listToMerge.Add(cell);
+//             }
+//             item.Clear();
+//          } while (script.StillValid() &&
+//                   (inQuotes || arrayIndexDepth > 0 || !to.Contains(script.Current)));
+ 
+//          // This happens when called recursively inside of the math expression:
+//          script.MoveForwardIf(Constants.END_ARG);
+ 
+//          return listToMerge;
+//       }*/
 
-//      /// <summary>
-//      ///    From outside this function is called with mergeOneOnly = false.
-//      ///    It also calls itself recursively with mergeOneOnly = true, meaning
-//      ///    that it will return after only one merge.
-//      /// </summary>
-//      private static OperationToken Merge(Cell current, ref int index, List<Cell> listToMerge,
-//                                          bool mergeOneOnly = false) {
-//         OperationToken operation = null;
-//         while (index < listToMerge.Count) {
-//            Cell next = listToMerge[index++];
+//        /// <summary>
+//        ///     From outside this function is called with mergeOneOnly = false.
+//        ///     It also calls itself recursively with mergeOneOnly = true, meaning
+//        ///     that it will return after only one merge.
+//        /// </summary>
+//        private static OperationToken Merge(Cell current, ref int index, IReadOnlyList<Cell> cells,
+//                                            bool mergeOneOnly = false) {
+//            OperationToken operation = null;
+//            while (index < cells.Count) {
+//                var next = cells[index++];
+//                while (current.OperatorToken.Properties.Precedence < next.OperatorToken.Properties.Precedence
+//                    ) // If we cannot merge cells yet, go to the next cell and merge
+//                    // next cells first. E.g. if we have 1+2*3, we first merge next
+//                    // cells, i.e. 2*3, getting 6, and then we can merge 1+6.
+//                {
+//                    Merge(next, ref index, cells, true);
+//                }
 
-//            while (current.OperatorToken.Operator.Precedence < next.OperatorToken.Operator.Precedence) {
-//               // If we cannot merge cells yet, go to the next cell and merge
-//               // next cells first. E.g. if we have 1+2*3, we first merge next
-//               // cells, i.e. 2*3, getting 6, and then we can merge 1+6.
-//               Merge(next, ref index, listToMerge, true);
+//                // simplifying
+//                if (current.Value is ConstToken numT1 && next.Value is ConstToken numT2) {
+//                    var num1 = double.Parse(numT1.Value);
+//                    var num2 = double.Parse(numT2.Value);
+//                    switch (current.OperatorToken.Value) {
+//                        case "*":
+//                            current.Value.Value = (num1 * num2).ToString(CultureInfo.InvariantCulture);
+//                            break;
+//                        case "/":
+//                            if (num2.Equals(0d)) {
+//                                throw new ArgumentException("Division by zero");
+//                            }
+//                            current.Value.Value = (num1 / num2).ToString(CultureInfo.InvariantCulture);
+//                            break;
+//                        case "+":
+//                            current.Value.Value = (num1 + num2).ToString(CultureInfo.InvariantCulture);
+//                            break;
+//                        case "-":
+//                            current.Value.Value = (num1 - num2).ToString(CultureInfo.InvariantCulture);
+//                            break;
+//                    }
+//                }
+//                current.OperatorToken = next.OperatorToken;
+//                operation             = new OperationToken(current.OperatorToken, current.Value, operation);
+//                if (mergeOneOnly) {
+//                    break;
+//                }
+//            }
+//            return operation;
+//        }
+
+//        private class Cell {
+//            internal Cell(Token value, OperatorToken opToken) {
+//                Value         = value;
+//                OperatorToken = opToken;
 //            }
 
-//            // simplifying
-//            if (current.Value is NumberToken numT1 && next.Value is NumberToken numT2) {
-//               double num1 = double.Parse(numT1.Value);
-//               double num2 = double.Parse(numT2.Value);
-//               switch (current.OperatorToken.Value) {
-//                  case "*":
-//                     current.Value.Value = (num1 * num2).ToString(CultureInfo.InvariantCulture);
-//                     break;
-//                  case "/":
-//                     if (num2.Equals(0d)) {
-//                        throw new ArgumentException("Division by zero");
-//                     }
-
-//                     current.Value.Value = (num1 / num2).ToString(CultureInfo.InvariantCulture);
-//                     break;
-//                  case "+":
-//                     current.Value.Value = (num1 + num2).ToString(CultureInfo.InvariantCulture);
-//                     break;
-//                  case "-":
-//                     current.Value.Value = (num1 - num2).ToString(CultureInfo.InvariantCulture);
-//                     break;
-//               }
-//            }
-
-//            current.OperatorToken = next.OperatorToken;
-//            operation = new OperationToken(current.OperatorToken, current.Value, operation);
-//            if (mergeOneOnly) {
-//               break;
-//            }
-//         }
-
-//         return operation;
-//      }
-
-//      private class Cell {
-//         internal Cell(Token value, OperatorToken opToken) {
-//            Value = value;
-//            OperatorToken = opToken;
-//         }
-
-//         internal Token Value { get; }
-//         internal OperatorToken OperatorToken { get; set; }
-//      }
-//   }
+//            internal Token         Value         { get; }
+//            internal OperatorToken OperatorToken { get; set; }
+//        }
+//    }
 //}
-

@@ -1,70 +1,90 @@
 ﻿using System;
-using Axion.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace Axion.Tokens {
     public class OperatorToken : Token {
-        public Operator Operator;
+        internal readonly OperatorProperties Properties;
 
-        public OperatorToken(Operator @operator, int linePosition, int columnPosition)
-            : base(TokenID.Operator, @operator.Value, linePosition, columnPosition) {
-            Operator = @operator;
+        public OperatorToken(OperatorProperties properties, (int, int) position)
+            : base(properties.Type, position) {
+            Properties = properties;
+        }
+
+        public OperatorToken(string value, (int, int) position)
+            : base(TokenType.Unknown, position, value) {
+            Spec.Operators.TryGetValue(value, out Properties);
+            Type = Properties.Type;
         }
     }
 
     [JsonObject]
-    public class Operator {
-        [JsonProperty] internal readonly InputSide InputSide;
-        [JsonProperty] internal readonly bool      Overloadable;
-        [JsonProperty] internal readonly int       Precedence;
-        [JsonProperty] internal readonly string    Value;
+    public struct OperatorProperties {
+        [JsonProperty] internal readonly InputSide     InputSide;
+        [JsonProperty] internal readonly Associativity Associativity;
+        [JsonProperty] internal readonly bool          Overloadable;
+        [JsonProperty] internal readonly int           Precedence;
+        [JsonProperty] internal readonly TokenType     Type;
 
-        public Operator(string value, InputSide inputType, bool overloadable, int precedence) {
-            Value        = value;
-            InputSide    = inputType;
-            Overloadable = overloadable;
-            Precedence   = precedence;
+        internal OperatorProperties(
+            TokenType     type,
+            InputSide     inputSide,
+            Associativity associativity,
+            bool          overloadable,
+            int           precedence
+        ) {
+            Type          = type;
+            InputSide     = inputSide;
+            Associativity = associativity;
+            Overloadable  = overloadable;
+            Precedence    = precedence;
         }
 
-        internal bool IsOpenBrace => Value == "(" ||
-                                     Value == "[" ||
-                                     Value == "{";
+        internal bool IsOpenBrace => Type == TokenType.OpLeftParenthesis ||
+                                     Type == TokenType.OpLeftBracket ||
+                                     Type == TokenType.OpLeftBrace;
 
-        internal bool IsCloseBrace => Value == ")" ||
-                                      Value == "]" ||
-                                      Value == "}";
+        internal bool IsCloseBrace => Type == TokenType.OpRightParenthesis ||
+                                      Type == TokenType.OpRightBracket ||
+                                      Type == TokenType.OpRightBrace;
 
-        internal string GetMatchingBrace() {
-            if (IsOpenBrace) {
-                switch (Value) {
-                    case "(": return ")";
-                    case "[": return "]";
-                    case "{": return "}";
-                    // should be never
+        internal TokenType MatchingBrace {
+            get {
+                switch (Type) {
+                    // open : close
+                    case TokenType.OpLeftParenthesis: return TokenType.OpRightParenthesis;
+                    case TokenType.OpLeftBracket:     return TokenType.OpRightBracket;
+                    case TokenType.OpLeftBrace:       return TokenType.OpRightBrace;
+                    // close : open
+                    case TokenType.OpRightParenthesis: return TokenType.OpLeftParenthesis;
+                    case TokenType.OpRightBracket:     return TokenType.OpLeftBracket;
+                    case TokenType.OpRightBrace:       return TokenType.OpLeftBrace;
+                    // should never be
                     default: throw new Exception();
                 }
             }
+        }
 
-            if (IsCloseBrace) {
-                switch (Value) {
-                    case ")": return "(";
-                    case "]": return "[";
-                    case "}": return "{";
-                    // should be never
-                    default: throw new Exception();
-                }
-            }
-
-            throw new Exception();
+        internal bool Equals(OperatorProperties other) {
+            return InputSide == other.InputSide
+                && Overloadable == other.Overloadable
+                && Precedence == other.Precedence
+                && Type == other.Type;
         }
     }
 
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum InputSide {
+    internal enum InputSide {
         Left,
         Right,
         Both,
         SomeOne
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    internal enum Associativity {
+        RightToLeft,
+        LeftToRight,
+        None
     }
 }
