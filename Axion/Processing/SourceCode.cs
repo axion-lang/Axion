@@ -13,7 +13,7 @@ namespace Axion.Processing {
         /// <summary>
         ///     File extension of <see cref="debugFilePath" />.
         /// </summary>
-        private const string debugExtension = "_debugInfo.json";
+        private const string debugExtension = ".debugInfo.json";
 
         /// <summary>
         ///     Tokens list generated from source.
@@ -52,9 +52,8 @@ namespace Axion.Processing {
         public SourceCode(string sourceCode, string fileName = null) {
             sourceFileName = fileName ?? "latest.unittest.ax";
             debugFilePath = Path.IsPathRooted(sourceFileName)
-                                ? ""
-                                : Compiler.WorkDirectory + "output\\";
-            debugFilePath += sourceFileName + debugExtension;
+                                ? sourceFileName + debugExtension
+                                : Compiler.WorkDirectory + "output\\" + sourceFileName + debugExtension;
             Content = sourceCode.Split(
                 Spec.Newlines,
                 StringSplitOptions.RemoveEmptyEntries
@@ -65,7 +64,7 @@ namespace Axion.Processing {
         ///     Creates new <see cref="SourceCode" /> instance
         ///     using specified &lt;<paramref name="file" />&gt; info.
         /// </summary>
-        public SourceCode(FileInfo file) {
+        public SourceCode(FileInfo file, string outFileName = null) {
             if (!file.Exists) {
                 throw new FileNotFoundException("Source file doesn't exists", file.FullName);
             }
@@ -73,7 +72,11 @@ namespace Axion.Processing {
                 throw new ArgumentException("Source file must have \".ax\" extension");
             }
             sourceFileName = file.Name;
-            debugFilePath  = file.FullName + debugExtension;
+            debugFilePath = outFileName != null
+                                ? Path.IsPathRooted(outFileName)
+                                      ? outFileName + debugExtension
+                                      : Compiler.WorkDirectory + "output\\" + outFileName + debugExtension
+                                : file.FullName + debugExtension;
             Content = File.ReadAllText(file.FullName).Split(
                 Spec.Newlines,
                 StringSplitOptions.RemoveEmptyEntries

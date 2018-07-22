@@ -60,10 +60,9 @@ Temporary Items
 *.DotSettings
 
 # Binaries and Visual Studio files
-/Wrapper/obj
-/Wrapper/bin
-/Wrapper/Testing
-/Wrapper/Properties/launchSettings.json
-/Axion/obj
-/Axion/bin
-/Axion/Properties/launchSettings.json
+/wrapper/obj
+/wrapper/bin
+/wrapper/properties/launchSettings.json
+/axion/obj
+/axion/bin
+/axion/properties/launchSettings.json

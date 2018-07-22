@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 using System.Text.RegularExpressions;
 using Axion.Tokens;
 
@@ -159,14 +158,14 @@ namespace Axion.Processing {
 
             // end of file;
             if (C == Spec.EndFile) {
-                tokenValue += C;
+                tokenValue += Spec.EndFile;
                 tokenType  =  TokenType.EndOfFile;
                 Move();
             }
 
             // newline;
             else if (C == Spec.EndLine) {
-                tokenValue += C;
+                tokenValue += Spec.EndLine;
                 tokenType  =  TokenType.Newline;
                 Move();
                 // don't add newline as first token
@@ -382,16 +381,16 @@ namespace Axion.Processing {
                     }
                 }
                 // TODO rewrite BUG string skips if piece long
-                var nextPiece = new StringBuilder();
                 while (true) {
+                    var  nextPiece           = "";
                     char charBeforeDelimiter = C;
                     // get next piece of string
                     for (var i = 0; i < delimiter.Length; i++) {
-                        nextPiece.Append(C);
+                        nextPiece += C;
                         Move();
                     }
                     // compare with non-escaped delimiter
-                    if (nextPiece.ToString() == delimiter &&
+                    if (nextPiece == delimiter &&
                         charBeforeDelimiter != '\\') {
                         break;
                     }
@@ -406,7 +405,6 @@ namespace Axion.Processing {
                         );
                     }
                     tokenValue += nextPiece;
-                    nextPiece.Clear();
                 }
             }
 
@@ -745,23 +743,15 @@ namespace Axion.Processing {
         #region Source stream control functions
 
         private static char Peek() {
-            // if last char was EOF
-            // or line out of range
-            if (C == Spec.EndFile
-             || pos.line > lines.Length) {
-                return Spec.EndFile;
+            if (pos.column + 1 < Line.Length) {
+                return Line[pos.column + 1];
             }
-            // if column out of range
-            if (pos.column + 1 >= Line.Length) {
-                // range of line
-                if (pos.line < lines.Length) {
-                    return Spec.EndLine;
-                }
-                // range of last line
-                return Spec.EndFile;
+            // column out of line
+            if (pos.line < lines.Length) {
+                return Spec.EndLine;
             }
-            // else just return next char
-            return Line[pos.column + 1];
+            // line out of lines range
+            return Spec.EndFile;
         }
 
         private static string Peek(uint length) {
@@ -781,34 +771,21 @@ namespace Axion.Processing {
         }
 
         /// <summary>
-        ///     Moves <see cref="C" /> value by
-        ///     &lt;<paramref name="position" />&gt; in code
-        ///     and updates <see cref="pos" /> values.
+        ///     Moves <see cref="pos" /> values by
+        ///     &lt;<paramref name="position" />&gt;.
         /// </summary>
         private static void Move(int position = 1) {
-            if (position == 0) {
-                return;
+            if (position <= 0) {
+                throw new Exception($"Internal error: function {nameof(Move)} was called with {nameof(position)} argument <= 0.");
             }
-            if (position > 0) {
-                for (var i = 0; i < position; i++) {
-                    if (C == Spec.EndLine) {
-                        pos.line++;
-                        pos.column = 0;
-                    }
-                    else {
-                        pos.column++;
-                    }
+
+            for (var i = 0; i < position; i++) {
+                if (C == Spec.EndLine) {
+                    pos.line++;
+                    pos.column = 0;
                 }
-            }
-            else {
-                for (int i = position; i > 0; i--) {
-                    if (C == Spec.EndLine) {
-                        pos.line--;
-                        pos.column = lines[pos.line].Length - 2;
-                    }
-                    else {
-                        pos.column--;
-                    }
+                else {
+                    pos.column++;
                 }
             }
         }

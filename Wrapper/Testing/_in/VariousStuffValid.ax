@@ -1,0 +1,32 @@
+result = ""sertyuikmnbvcftyuikl,mnjikol""[c1(index+2+43465786342)]
+someVar = 54321 + 12345
+c2(variable, ""string"", 's', """"""string"""""", cnest1(123456789, cnest2(""""""string""""""), 123456789), 123456789, 987654321)
+otherVar = c3()
+n++
+++n
+n2 = n++ + ++n
+# comment
+if val in collection:
+    ++n
+    c_if(val)
+    while i = 0, i < 123456789, i++:
+        print(collection[i])
+        nextloop()
+    n2 = n++ + ++n
+
+main(entryValue = if n2 == null: value1 else: value2, 12345)
+
+if val in collection and val in collection:
+	++n
+	call(val, c_if_nest())
+	while i = 0, 
+	      i < 123456789, 
+	      i++:
+		print(collection[i])
+	++n
+else if condition and condition:
+	c_else_if()
+	n++
+else:
+	c_else(12345678)
+	n++

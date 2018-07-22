@@ -1,0 +1,1869 @@
+{
+  "tokens": [
+    {
+      "Type": "Identifier",
+      "Value": "result",
+      "StartLnPos": 0,
+      "StartClPos": 0,
+      "EndLnPos": 0,
+      "EndClPos": 5
+    },
+    {
+      "Type": "OpAssign",
+      "Value": "=",
+      "StartLnPos": 0,
+      "StartClPos": 7,
+      "EndLnPos": 0,
+      "EndClPos": 7
+    },
+    {
+      "Type": "StringLiteral",
+      "Value": "",
+      "StartLnPos": 0,
+      "StartClPos": 11,
+      "EndLnPos": 0,
+      "EndClPos": 10
+    },
+    {
+      "Type": "Identifier",
+      "Value": "sertyuikmnbvcftyuikl",
+      "StartLnPos": 0,
+      "StartClPos": 11,
+      "EndLnPos": 0,
+      "EndClPos": 30
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 0,
+      "StartClPos": 31,
+      "EndLnPos": 0,
+      "EndClPos": 31
+    },
+    {
+      "Type": "Identifier",
+      "Value": "mnjikol",
+      "StartLnPos": 0,
+      "StartClPos": 32,
+      "EndLnPos": 0,
+      "EndClPos": 38
+    },
+    {
+      "Type": "StringLiteral",
+      "Value": "",
+      "StartLnPos": 0,
+      "StartClPos": 41,
+      "EndLnPos": 0,
+      "EndClPos": 40
+    },
+    {
+      "Type": "OpLeftBracket",
+      "Value": "[",
+      "StartLnPos": 0,
+      "StartClPos": 41,
+      "EndLnPos": 0,
+      "EndClPos": 41
+    },
+    {
+      "Type": "Identifier",
+      "Value": "c1",
+      "StartLnPos": 0,
+      "StartClPos": 42,
+      "EndLnPos": 0,
+      "EndClPos": 43
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 0,
+      "StartClPos": 44,
+      "EndLnPos": 0,
+      "EndClPos": 44
+    },
+    {
+      "Type": "Identifier",
+      "Value": "index",
+      "StartLnPos": 0,
+      "StartClPos": 45,
+      "EndLnPos": 0,
+      "EndClPos": 49
+    },
+    {
+      "Type": "OpAdd",
+      "Value": "+",
+      "StartLnPos": 0,
+      "StartClPos": 50,
+      "EndLnPos": 0,
+      "EndClPos": 50
+    },
+    {
+      "Type": "Unknown",
+      "Value": "2",
+      "StartLnPos": 0,
+      "StartClPos": 51,
+      "EndLnPos": 0,
+      "EndClPos": 51
+    },
+    {
+      "Type": "OpAdd",
+      "Value": "+",
+      "StartLnPos": 0,
+      "StartClPos": 52,
+      "EndLnPos": 0,
+      "EndClPos": 52
+    },
+    {
+      "Type": "Unknown",
+      "Value": "43465786342",
+      "StartLnPos": 0,
+      "StartClPos": 53,
+      "EndLnPos": 0,
+      "EndClPos": 63
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 0,
+      "StartClPos": 64,
+      "EndLnPos": 0,
+      "EndClPos": 64
+    },
+    {
+      "Type": "OpRightBracket",
+      "Value": "]",
+      "StartLnPos": 0,
+      "StartClPos": 65,
+      "EndLnPos": 0,
+      "EndClPos": 65
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 0,
+      "StartClPos": 66,
+      "EndLnPos": 1,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "someVar",
+      "StartLnPos": 1,
+      "StartClPos": 0,
+      "EndLnPos": 1,
+      "EndClPos": 6
+    },
+    {
+      "Type": "OpAssign",
+      "Value": "=",
+      "StartLnPos": 1,
+      "StartClPos": 8,
+      "EndLnPos": 1,
+      "EndClPos": 8
+    },
+    {
+      "Type": "Unknown",
+      "Value": "54321",
+      "StartLnPos": 1,
+      "StartClPos": 10,
+      "EndLnPos": 1,
+      "EndClPos": 14
+    },
+    {
+      "Type": "OpAdd",
+      "Value": "+",
+      "StartLnPos": 1,
+      "StartClPos": 16,
+      "EndLnPos": 1,
+      "EndClPos": 16
+    },
+    {
+      "Type": "Unknown",
+      "Value": "12345",
+      "StartLnPos": 1,
+      "StartClPos": 18,
+      "EndLnPos": 1,
+      "EndClPos": 22
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 1,
+      "StartClPos": 23,
+      "EndLnPos": 2,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "c2",
+      "StartLnPos": 2,
+      "StartClPos": 0,
+      "EndLnPos": 2,
+      "EndClPos": 1
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 2,
+      "StartClPos": 2,
+      "EndLnPos": 2,
+      "EndClPos": 2
+    },
+    {
+      "Type": "Identifier",
+      "Value": "variable",
+      "StartLnPos": 2,
+      "StartClPos": 3,
+      "EndLnPos": 2,
+      "EndClPos": 10
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 2,
+      "StartClPos": 11,
+      "EndLnPos": 2,
+      "EndClPos": 11
+    },
+    {
+      "Type": "StringLiteral",
+      "Value": "",
+      "StartLnPos": 2,
+      "StartClPos": 15,
+      "EndLnPos": 2,
+      "EndClPos": 14
+    },
+    {
+      "Type": "Identifier",
+      "Value": "string",
+      "StartLnPos": 2,
+      "StartClPos": 15,
+      "EndLnPos": 2,
+      "EndClPos": 20
+    },
+    {
+      "Type": "StringLiteral",
+      "Value": "",
+      "StartLnPos": 2,
+      "StartClPos": 23,
+      "EndLnPos": 2,
+      "EndClPos": 22
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 2,
+      "StartClPos": 23,
+      "EndLnPos": 2,
+      "EndClPos": 23
+    },
+    {
+      "Type": "CharLiteral",
+      "Value": "s",
+      "StartLnPos": 2,
+      "StartClPos": 25,
+      "EndLnPos": 2,
+      "EndClPos": 25
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 2,
+      "StartClPos": 28,
+      "EndLnPos": 2,
+      "EndClPos": 28
+    },
+    {
+      "Type": "StringLiteral",
+      "Value": "",
+      "StartLnPos": 2,
+      "StartClPos": 30,
+      "EndLnPos": 2,
+      "EndClPos": 29
+    },
+    {
+      "Type": "Identifier",
+      "Value": "string",
+      "StartLnPos": 2,
+      "StartClPos": 36,
+      "EndLnPos": 2,
+      "EndClPos": 41
+    },
+    {
+      "Type": "StringLiteral",
+      "Value": "",
+      "StartLnPos": 2,
+      "StartClPos": 42,
+      "EndLnPos": 2,
+      "EndClPos": 41
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 2,
+      "StartClPos": 48,
+      "EndLnPos": 2,
+      "EndClPos": 48
+    },
+    {
+      "Type": "Identifier",
+      "Value": "cnest1",
+      "StartLnPos": 2,
+      "StartClPos": 50,
+      "EndLnPos": 2,
+      "EndClPos": 55
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 2,
+      "StartClPos": 56,
+      "EndLnPos": 2,
+      "EndClPos": 56
+    },
+    {
+      "Type": "Unknown",
+      "Value": "123456789",
+      "StartLnPos": 2,
+      "StartClPos": 57,
+      "EndLnPos": 2,
+      "EndClPos": 65
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 2,
+      "StartClPos": 66,
+      "EndLnPos": 2,
+      "EndClPos": 66
+    },
+    {
+      "Type": "Identifier",
+      "Value": "cnest2",
+      "StartLnPos": 2,
+      "StartClPos": 68,
+      "EndLnPos": 2,
+      "EndClPos": 73
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 2,
+      "StartClPos": 74,
+      "EndLnPos": 2,
+      "EndClPos": 74
+    },
+    {
+      "Type": "StringLiteral",
+      "Value": "",
+      "StartLnPos": 2,
+      "StartClPos": 75,
+      "EndLnPos": 2,
+      "EndClPos": 74
+    },
+    {
+      "Type": "Identifier",
+      "Value": "string",
+      "StartLnPos": 2,
+      "StartClPos": 81,
+      "EndLnPos": 2,
+      "EndClPos": 86
+    },
+    {
+      "Type": "StringLiteral",
+      "Value": "",
+      "StartLnPos": 2,
+      "StartClPos": 87,
+      "EndLnPos": 2,
+      "EndClPos": 86
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 2,
+      "StartClPos": 93,
+      "EndLnPos": 2,
+      "EndClPos": 93
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 2,
+      "StartClPos": 94,
+      "EndLnPos": 2,
+      "EndClPos": 94
+    },
+    {
+      "Type": "Unknown",
+      "Value": "123456789",
+      "StartLnPos": 2,
+      "StartClPos": 96,
+      "EndLnPos": 2,
+      "EndClPos": 104
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 2,
+      "StartClPos": 105,
+      "EndLnPos": 2,
+      "EndClPos": 105
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 2,
+      "StartClPos": 106,
+      "EndLnPos": 2,
+      "EndClPos": 106
+    },
+    {
+      "Type": "Unknown",
+      "Value": "123456789",
+      "StartLnPos": 2,
+      "StartClPos": 108,
+      "EndLnPos": 2,
+      "EndClPos": 116
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 2,
+      "StartClPos": 117,
+      "EndLnPos": 2,
+      "EndClPos": 117
+    },
+    {
+      "Type": "Unknown",
+      "Value": "987654321",
+      "StartLnPos": 2,
+      "StartClPos": 119,
+      "EndLnPos": 2,
+      "EndClPos": 127
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 2,
+      "StartClPos": 128,
+      "EndLnPos": 2,
+      "EndClPos": 128
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 2,
+      "StartClPos": 129,
+      "EndLnPos": 3,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "otherVar",
+      "StartLnPos": 3,
+      "StartClPos": 0,
+      "EndLnPos": 3,
+      "EndClPos": 7
+    },
+    {
+      "Type": "OpAssign",
+      "Value": "=",
+      "StartLnPos": 3,
+      "StartClPos": 9,
+      "EndLnPos": 3,
+      "EndClPos": 9
+    },
+    {
+      "Type": "Identifier",
+      "Value": "c3",
+      "StartLnPos": 3,
+      "StartClPos": 11,
+      "EndLnPos": 3,
+      "EndClPos": 12
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 3,
+      "StartClPos": 13,
+      "EndLnPos": 3,
+      "EndClPos": 13
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 3,
+      "StartClPos": 14,
+      "EndLnPos": 3,
+      "EndClPos": 14
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 3,
+      "StartClPos": 15,
+      "EndLnPos": 4,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n",
+      "StartLnPos": 4,
+      "StartClPos": 0,
+      "EndLnPos": 4,
+      "EndClPos": 0
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 4,
+      "StartClPos": 1,
+      "EndLnPos": 4,
+      "EndClPos": 2
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 4,
+      "StartClPos": 3,
+      "EndLnPos": 5,
+      "EndClPos": -1
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 5,
+      "StartClPos": 0,
+      "EndLnPos": 5,
+      "EndClPos": 1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n",
+      "StartLnPos": 5,
+      "StartClPos": 2,
+      "EndLnPos": 5,
+      "EndClPos": 2
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 5,
+      "StartClPos": 3,
+      "EndLnPos": 6,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n2",
+      "StartLnPos": 6,
+      "StartClPos": 0,
+      "EndLnPos": 6,
+      "EndClPos": 1
+    },
+    {
+      "Type": "OpAssign",
+      "Value": "=",
+      "StartLnPos": 6,
+      "StartClPos": 3,
+      "EndLnPos": 6,
+      "EndClPos": 3
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n",
+      "StartLnPos": 6,
+      "StartClPos": 5,
+      "EndLnPos": 6,
+      "EndClPos": 5
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 6,
+      "StartClPos": 6,
+      "EndLnPos": 6,
+      "EndClPos": 7
+    },
+    {
+      "Type": "OpAdd",
+      "Value": "+",
+      "StartLnPos": 6,
+      "StartClPos": 9,
+      "EndLnPos": 6,
+      "EndClPos": 9
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 6,
+      "StartClPos": 11,
+      "EndLnPos": 6,
+      "EndClPos": 12
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n",
+      "StartLnPos": 6,
+      "StartClPos": 13,
+      "EndLnPos": 6,
+      "EndClPos": 13
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 6,
+      "StartClPos": 14,
+      "EndLnPos": 7,
+      "EndClPos": -1
+    },
+    {
+      "Type": "CommentLiteral",
+      "Value": "# comment",
+      "StartLnPos": 7,
+      "StartClPos": 0,
+      "EndLnPos": 7,
+      "EndClPos": 8
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 7,
+      "StartClPos": 9,
+      "EndLnPos": 8,
+      "EndClPos": -1
+    },
+    {
+      "Type": "KeywordIf",
+      "Value": "if",
+      "StartLnPos": 8,
+      "StartClPos": 0,
+      "EndLnPos": 8,
+      "EndClPos": 1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "val",
+      "StartLnPos": 8,
+      "StartClPos": 3,
+      "EndLnPos": 8,
+      "EndClPos": 5
+    },
+    {
+      "Type": "KeywordIn",
+      "Value": "in",
+      "StartLnPos": 8,
+      "StartClPos": 7,
+      "EndLnPos": 8,
+      "EndClPos": 8
+    },
+    {
+      "Type": "Identifier",
+      "Value": "collection",
+      "StartLnPos": 8,
+      "StartClPos": 10,
+      "EndLnPos": 8,
+      "EndClPos": 19
+    },
+    {
+      "Type": "OpColon",
+      "Value": ":",
+      "StartLnPos": 8,
+      "StartClPos": 20,
+      "EndLnPos": 8,
+      "EndClPos": 20
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 8,
+      "StartClPos": 21,
+      "EndLnPos": 9,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Indent",
+      "Value": "",
+      "StartLnPos": 9,
+      "StartClPos": 0,
+      "EndLnPos": 9,
+      "EndClPos": -1
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 9,
+      "StartClPos": 4,
+      "EndLnPos": 9,
+      "EndClPos": 5
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n",
+      "StartLnPos": 9,
+      "StartClPos": 6,
+      "EndLnPos": 9,
+      "EndClPos": 6
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 9,
+      "StartClPos": 7,
+      "EndLnPos": 10,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Unknown",
+      "Value": "",
+      "StartLnPos": 10,
+      "StartClPos": 0,
+      "EndLnPos": 10,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "c_if",
+      "StartLnPos": 10,
+      "StartClPos": 4,
+      "EndLnPos": 10,
+      "EndClPos": 7
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 10,
+      "StartClPos": 8,
+      "EndLnPos": 10,
+      "EndClPos": 8
+    },
+    {
+      "Type": "Identifier",
+      "Value": "val",
+      "StartLnPos": 10,
+      "StartClPos": 9,
+      "EndLnPos": 10,
+      "EndClPos": 11
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 10,
+      "StartClPos": 12,
+      "EndLnPos": 10,
+      "EndClPos": 12
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 10,
+      "StartClPos": 13,
+      "EndLnPos": 11,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Unknown",
+      "Value": "",
+      "StartLnPos": 11,
+      "StartClPos": 0,
+      "EndLnPos": 11,
+      "EndClPos": -1
+    },
+    {
+      "Type": "KeywordWhile",
+      "Value": "while",
+      "StartLnPos": 11,
+      "StartClPos": 4,
+      "EndLnPos": 11,
+      "EndClPos": 8
+    },
+    {
+      "Type": "Identifier",
+      "Value": "i",
+      "StartLnPos": 11,
+      "StartClPos": 10,
+      "EndLnPos": 11,
+      "EndClPos": 10
+    },
+    {
+      "Type": "OpAssign",
+      "Value": "=",
+      "StartLnPos": 11,
+      "StartClPos": 12,
+      "EndLnPos": 11,
+      "EndClPos": 12
+    },
+    {
+      "Type": "Unknown",
+      "Value": "0",
+      "StartLnPos": 11,
+      "StartClPos": 14,
+      "EndLnPos": 11,
+      "EndClPos": 14
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 11,
+      "StartClPos": 15,
+      "EndLnPos": 11,
+      "EndClPos": 15
+    },
+    {
+      "Type": "Identifier",
+      "Value": "i",
+      "StartLnPos": 11,
+      "StartClPos": 17,
+      "EndLnPos": 11,
+      "EndClPos": 17
+    },
+    {
+      "Type": "OpLessThan",
+      "Value": "<",
+      "StartLnPos": 11,
+      "StartClPos": 19,
+      "EndLnPos": 11,
+      "EndClPos": 19
+    },
+    {
+      "Type": "Unknown",
+      "Value": "123456789",
+      "StartLnPos": 11,
+      "StartClPos": 21,
+      "EndLnPos": 11,
+      "EndClPos": 29
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 11,
+      "StartClPos": 30,
+      "EndLnPos": 11,
+      "EndClPos": 30
+    },
+    {
+      "Type": "Identifier",
+      "Value": "i",
+      "StartLnPos": 11,
+      "StartClPos": 32,
+      "EndLnPos": 11,
+      "EndClPos": 32
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 11,
+      "StartClPos": 33,
+      "EndLnPos": 11,
+      "EndClPos": 34
+    },
+    {
+      "Type": "OpColon",
+      "Value": ":",
+      "StartLnPos": 11,
+      "StartClPos": 35,
+      "EndLnPos": 11,
+      "EndClPos": 35
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 11,
+      "StartClPos": 36,
+      "EndLnPos": 12,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Indent",
+      "Value": "",
+      "StartLnPos": 12,
+      "StartClPos": 0,
+      "EndLnPos": 12,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "print",
+      "StartLnPos": 12,
+      "StartClPos": 8,
+      "EndLnPos": 12,
+      "EndClPos": 12
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 12,
+      "StartClPos": 13,
+      "EndLnPos": 12,
+      "EndClPos": 13
+    },
+    {
+      "Type": "Identifier",
+      "Value": "collection",
+      "StartLnPos": 12,
+      "StartClPos": 14,
+      "EndLnPos": 12,
+      "EndClPos": 23
+    },
+    {
+      "Type": "OpLeftBracket",
+      "Value": "[",
+      "StartLnPos": 12,
+      "StartClPos": 24,
+      "EndLnPos": 12,
+      "EndClPos": 24
+    },
+    {
+      "Type": "Identifier",
+      "Value": "i",
+      "StartLnPos": 12,
+      "StartClPos": 25,
+      "EndLnPos": 12,
+      "EndClPos": 25
+    },
+    {
+      "Type": "OpRightBracket",
+      "Value": "]",
+      "StartLnPos": 12,
+      "StartClPos": 26,
+      "EndLnPos": 12,
+      "EndClPos": 26
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 12,
+      "StartClPos": 27,
+      "EndLnPos": 12,
+      "EndClPos": 27
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 12,
+      "StartClPos": 28,
+      "EndLnPos": 13,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Unknown",
+      "Value": "",
+      "StartLnPos": 13,
+      "StartClPos": 0,
+      "EndLnPos": 13,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "nextloop",
+      "StartLnPos": 13,
+      "StartClPos": 8,
+      "EndLnPos": 13,
+      "EndClPos": 15
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 13,
+      "StartClPos": 16,
+      "EndLnPos": 13,
+      "EndClPos": 16
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 13,
+      "StartClPos": 17,
+      "EndLnPos": 13,
+      "EndClPos": 17
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 13,
+      "StartClPos": 18,
+      "EndLnPos": 14,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Outdent",
+      "Value": "",
+      "StartLnPos": 14,
+      "StartClPos": 0,
+      "EndLnPos": 14,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n2",
+      "StartLnPos": 14,
+      "StartClPos": 4,
+      "EndLnPos": 14,
+      "EndClPos": 5
+    },
+    {
+      "Type": "OpAssign",
+      "Value": "=",
+      "StartLnPos": 14,
+      "StartClPos": 7,
+      "EndLnPos": 14,
+      "EndClPos": 7
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n",
+      "StartLnPos": 14,
+      "StartClPos": 9,
+      "EndLnPos": 14,
+      "EndClPos": 9
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 14,
+      "StartClPos": 10,
+      "EndLnPos": 14,
+      "EndClPos": 11
+    },
+    {
+      "Type": "OpAdd",
+      "Value": "+",
+      "StartLnPos": 14,
+      "StartClPos": 13,
+      "EndLnPos": 14,
+      "EndClPos": 13
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 14,
+      "StartClPos": 15,
+      "EndLnPos": 14,
+      "EndClPos": 16
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n",
+      "StartLnPos": 14,
+      "StartClPos": 17,
+      "EndLnPos": 14,
+      "EndClPos": 17
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 14,
+      "StartClPos": 18,
+      "EndLnPos": 15,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "main",
+      "StartLnPos": 15,
+      "StartClPos": 0,
+      "EndLnPos": 15,
+      "EndClPos": 3
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 15,
+      "StartClPos": 4,
+      "EndLnPos": 15,
+      "EndClPos": 4
+    },
+    {
+      "Type": "Identifier",
+      "Value": "entryValue",
+      "StartLnPos": 15,
+      "StartClPos": 5,
+      "EndLnPos": 15,
+      "EndClPos": 14
+    },
+    {
+      "Type": "OpAssign",
+      "Value": "=",
+      "StartLnPos": 15,
+      "StartClPos": 16,
+      "EndLnPos": 15,
+      "EndClPos": 16
+    },
+    {
+      "Type": "KeywordIf",
+      "Value": "if",
+      "StartLnPos": 15,
+      "StartClPos": 18,
+      "EndLnPos": 15,
+      "EndClPos": 19
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n2",
+      "StartLnPos": 15,
+      "StartClPos": 21,
+      "EndLnPos": 15,
+      "EndClPos": 22
+    },
+    {
+      "Type": "OpEquals",
+      "Value": "==",
+      "StartLnPos": 15,
+      "StartClPos": 24,
+      "EndLnPos": 15,
+      "EndClPos": 25
+    },
+    {
+      "Type": "KeywordNull",
+      "Value": "null",
+      "StartLnPos": 15,
+      "StartClPos": 27,
+      "EndLnPos": 15,
+      "EndClPos": 30
+    },
+    {
+      "Type": "OpColon",
+      "Value": ":",
+      "StartLnPos": 15,
+      "StartClPos": 31,
+      "EndLnPos": 15,
+      "EndClPos": 31
+    },
+    {
+      "Type": "Identifier",
+      "Value": "value1",
+      "StartLnPos": 15,
+      "StartClPos": 33,
+      "EndLnPos": 15,
+      "EndClPos": 38
+    },
+    {
+      "Type": "KeywordElse",
+      "Value": "else",
+      "StartLnPos": 15,
+      "StartClPos": 40,
+      "EndLnPos": 15,
+      "EndClPos": 43
+    },
+    {
+      "Type": "OpColon",
+      "Value": ":",
+      "StartLnPos": 15,
+      "StartClPos": 44,
+      "EndLnPos": 15,
+      "EndClPos": 44
+    },
+    {
+      "Type": "Identifier",
+      "Value": "value2",
+      "StartLnPos": 15,
+      "StartClPos": 46,
+      "EndLnPos": 15,
+      "EndClPos": 51
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 15,
+      "StartClPos": 52,
+      "EndLnPos": 15,
+      "EndClPos": 52
+    },
+    {
+      "Type": "Unknown",
+      "Value": "12345",
+      "StartLnPos": 15,
+      "StartClPos": 54,
+      "EndLnPos": 15,
+      "EndClPos": 58
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 15,
+      "StartClPos": 59,
+      "EndLnPos": 15,
+      "EndClPos": 59
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 15,
+      "StartClPos": 60,
+      "EndLnPos": 16,
+      "EndClPos": -1
+    },
+    {
+      "Type": "KeywordIf",
+      "Value": "if",
+      "StartLnPos": 16,
+      "StartClPos": 0,
+      "EndLnPos": 16,
+      "EndClPos": 1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "val",
+      "StartLnPos": 16,
+      "StartClPos": 3,
+      "EndLnPos": 16,
+      "EndClPos": 5
+    },
+    {
+      "Type": "KeywordIn",
+      "Value": "in",
+      "StartLnPos": 16,
+      "StartClPos": 7,
+      "EndLnPos": 16,
+      "EndClPos": 8
+    },
+    {
+      "Type": "Identifier",
+      "Value": "collection",
+      "StartLnPos": 16,
+      "StartClPos": 10,
+      "EndLnPos": 16,
+      "EndClPos": 19
+    },
+    {
+      "Type": "FirstKeyword",
+      "Value": "and",
+      "StartLnPos": 16,
+      "StartClPos": 21,
+      "EndLnPos": 16,
+      "EndClPos": 23
+    },
+    {
+      "Type": "Identifier",
+      "Value": "val",
+      "StartLnPos": 16,
+      "StartClPos": 25,
+      "EndLnPos": 16,
+      "EndClPos": 27
+    },
+    {
+      "Type": "KeywordIn",
+      "Value": "in",
+      "StartLnPos": 16,
+      "StartClPos": 29,
+      "EndLnPos": 16,
+      "EndClPos": 30
+    },
+    {
+      "Type": "Identifier",
+      "Value": "collection",
+      "StartLnPos": 16,
+      "StartClPos": 32,
+      "EndLnPos": 16,
+      "EndClPos": 41
+    },
+    {
+      "Type": "OpColon",
+      "Value": ":",
+      "StartLnPos": 16,
+      "StartClPos": 42,
+      "EndLnPos": 16,
+      "EndClPos": 42
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 16,
+      "StartClPos": 43,
+      "EndLnPos": 17,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Indent",
+      "Value": "",
+      "StartLnPos": 17,
+      "StartClPos": 0,
+      "EndLnPos": 17,
+      "EndClPos": -1
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 17,
+      "StartClPos": 1,
+      "EndLnPos": 17,
+      "EndClPos": 2
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n",
+      "StartLnPos": 17,
+      "StartClPos": 3,
+      "EndLnPos": 17,
+      "EndClPos": 3
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 17,
+      "StartClPos": 4,
+      "EndLnPos": 18,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Unknown",
+      "Value": "",
+      "StartLnPos": 18,
+      "StartClPos": 0,
+      "EndLnPos": 18,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "call",
+      "StartLnPos": 18,
+      "StartClPos": 1,
+      "EndLnPos": 18,
+      "EndClPos": 4
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 18,
+      "StartClPos": 5,
+      "EndLnPos": 18,
+      "EndClPos": 5
+    },
+    {
+      "Type": "Identifier",
+      "Value": "val",
+      "StartLnPos": 18,
+      "StartClPos": 6,
+      "EndLnPos": 18,
+      "EndClPos": 8
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 18,
+      "StartClPos": 9,
+      "EndLnPos": 18,
+      "EndClPos": 9
+    },
+    {
+      "Type": "Identifier",
+      "Value": "c_if_nest",
+      "StartLnPos": 18,
+      "StartClPos": 11,
+      "EndLnPos": 18,
+      "EndClPos": 19
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 18,
+      "StartClPos": 20,
+      "EndLnPos": 18,
+      "EndClPos": 20
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 18,
+      "StartClPos": 21,
+      "EndLnPos": 18,
+      "EndClPos": 21
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 18,
+      "StartClPos": 22,
+      "EndLnPos": 18,
+      "EndClPos": 22
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 18,
+      "StartClPos": 23,
+      "EndLnPos": 19,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Unknown",
+      "Value": "",
+      "StartLnPos": 19,
+      "StartClPos": 0,
+      "EndLnPos": 19,
+      "EndClPos": -1
+    },
+    {
+      "Type": "KeywordWhile",
+      "Value": "while",
+      "StartLnPos": 19,
+      "StartClPos": 1,
+      "EndLnPos": 19,
+      "EndClPos": 5
+    },
+    {
+      "Type": "Identifier",
+      "Value": "i",
+      "StartLnPos": 19,
+      "StartClPos": 7,
+      "EndLnPos": 19,
+      "EndClPos": 7
+    },
+    {
+      "Type": "OpAssign",
+      "Value": "=",
+      "StartLnPos": 19,
+      "StartClPos": 9,
+      "EndLnPos": 19,
+      "EndClPos": 9
+    },
+    {
+      "Type": "Unknown",
+      "Value": "0",
+      "StartLnPos": 19,
+      "StartClPos": 11,
+      "EndLnPos": 19,
+      "EndClPos": 11
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 19,
+      "StartClPos": 12,
+      "EndLnPos": 19,
+      "EndClPos": 12
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 19,
+      "StartClPos": 14,
+      "EndLnPos": 20,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Indent",
+      "Value": "",
+      "StartLnPos": 20,
+      "StartClPos": 0,
+      "EndLnPos": 20,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "i",
+      "StartLnPos": 20,
+      "StartClPos": 7,
+      "EndLnPos": 20,
+      "EndClPos": 7
+    },
+    {
+      "Type": "OpLessThan",
+      "Value": "<",
+      "StartLnPos": 20,
+      "StartClPos": 9,
+      "EndLnPos": 20,
+      "EndClPos": 9
+    },
+    {
+      "Type": "Unknown",
+      "Value": "123456789",
+      "StartLnPos": 20,
+      "StartClPos": 11,
+      "EndLnPos": 20,
+      "EndClPos": 19
+    },
+    {
+      "Type": "OpComma",
+      "Value": ",",
+      "StartLnPos": 20,
+      "StartClPos": 20,
+      "EndLnPos": 20,
+      "EndClPos": 20
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 20,
+      "StartClPos": 22,
+      "EndLnPos": 21,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Unknown",
+      "Value": "",
+      "StartLnPos": 21,
+      "StartClPos": 0,
+      "EndLnPos": 21,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "i",
+      "StartLnPos": 21,
+      "StartClPos": 7,
+      "EndLnPos": 21,
+      "EndClPos": 7
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 21,
+      "StartClPos": 8,
+      "EndLnPos": 21,
+      "EndClPos": 9
+    },
+    {
+      "Type": "OpColon",
+      "Value": ":",
+      "StartLnPos": 21,
+      "StartClPos": 10,
+      "EndLnPos": 21,
+      "EndClPos": 10
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 21,
+      "StartClPos": 11,
+      "EndLnPos": 22,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Indent",
+      "Value": "",
+      "StartLnPos": 22,
+      "StartClPos": 0,
+      "EndLnPos": 22,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "print",
+      "StartLnPos": 22,
+      "StartClPos": 2,
+      "EndLnPos": 22,
+      "EndClPos": 6
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 22,
+      "StartClPos": 7,
+      "EndLnPos": 22,
+      "EndClPos": 7
+    },
+    {
+      "Type": "Identifier",
+      "Value": "collection",
+      "StartLnPos": 22,
+      "StartClPos": 8,
+      "EndLnPos": 22,
+      "EndClPos": 17
+    },
+    {
+      "Type": "OpLeftBracket",
+      "Value": "[",
+      "StartLnPos": 22,
+      "StartClPos": 18,
+      "EndLnPos": 22,
+      "EndClPos": 18
+    },
+    {
+      "Type": "Identifier",
+      "Value": "i",
+      "StartLnPos": 22,
+      "StartClPos": 19,
+      "EndLnPos": 22,
+      "EndClPos": 19
+    },
+    {
+      "Type": "OpRightBracket",
+      "Value": "]",
+      "StartLnPos": 22,
+      "StartClPos": 20,
+      "EndLnPos": 22,
+      "EndClPos": 20
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 22,
+      "StartClPos": 21,
+      "EndLnPos": 22,
+      "EndClPos": 21
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 22,
+      "StartClPos": 22,
+      "EndLnPos": 23,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Outdent",
+      "Value": "",
+      "StartLnPos": 23,
+      "StartClPos": 0,
+      "EndLnPos": 23,
+      "EndClPos": -1
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 23,
+      "StartClPos": 1,
+      "EndLnPos": 23,
+      "EndClPos": 2
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n",
+      "StartLnPos": 23,
+      "StartClPos": 3,
+      "EndLnPos": 23,
+      "EndClPos": 3
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 23,
+      "StartClPos": 4,
+      "EndLnPos": 24,
+      "EndClPos": -1
+    },
+    {
+      "Type": "KeywordElse",
+      "Value": "else",
+      "StartLnPos": 24,
+      "StartClPos": 0,
+      "EndLnPos": 24,
+      "EndClPos": 3
+    },
+    {
+      "Type": "KeywordIf",
+      "Value": "if",
+      "StartLnPos": 24,
+      "StartClPos": 5,
+      "EndLnPos": 24,
+      "EndClPos": 6
+    },
+    {
+      "Type": "Identifier",
+      "Value": "condition",
+      "StartLnPos": 24,
+      "StartClPos": 8,
+      "EndLnPos": 24,
+      "EndClPos": 16
+    },
+    {
+      "Type": "FirstKeyword",
+      "Value": "and",
+      "StartLnPos": 24,
+      "StartClPos": 18,
+      "EndLnPos": 24,
+      "EndClPos": 20
+    },
+    {
+      "Type": "Identifier",
+      "Value": "condition",
+      "StartLnPos": 24,
+      "StartClPos": 22,
+      "EndLnPos": 24,
+      "EndClPos": 30
+    },
+    {
+      "Type": "OpColon",
+      "Value": ":",
+      "StartLnPos": 24,
+      "StartClPos": 31,
+      "EndLnPos": 24,
+      "EndClPos": 31
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 24,
+      "StartClPos": 32,
+      "EndLnPos": 25,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Unknown",
+      "Value": "",
+      "StartLnPos": 25,
+      "StartClPos": 0,
+      "EndLnPos": 25,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "c_else_if",
+      "StartLnPos": 25,
+      "StartClPos": 1,
+      "EndLnPos": 25,
+      "EndClPos": 9
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 25,
+      "StartClPos": 10,
+      "EndLnPos": 25,
+      "EndClPos": 10
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 25,
+      "StartClPos": 11,
+      "EndLnPos": 25,
+      "EndClPos": 11
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 25,
+      "StartClPos": 12,
+      "EndLnPos": 26,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Unknown",
+      "Value": "",
+      "StartLnPos": 26,
+      "StartClPos": 0,
+      "EndLnPos": 26,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n",
+      "StartLnPos": 26,
+      "StartClPos": 1,
+      "EndLnPos": 26,
+      "EndClPos": 1
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 26,
+      "StartClPos": 2,
+      "EndLnPos": 26,
+      "EndClPos": 3
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 26,
+      "StartClPos": 4,
+      "EndLnPos": 27,
+      "EndClPos": -1
+    },
+    {
+      "Type": "KeywordElse",
+      "Value": "else",
+      "StartLnPos": 27,
+      "StartClPos": 0,
+      "EndLnPos": 27,
+      "EndClPos": 3
+    },
+    {
+      "Type": "OpColon",
+      "Value": ":",
+      "StartLnPos": 27,
+      "StartClPos": 4,
+      "EndLnPos": 27,
+      "EndClPos": 4
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 27,
+      "StartClPos": 5,
+      "EndLnPos": 28,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Unknown",
+      "Value": "",
+      "StartLnPos": 28,
+      "StartClPos": 0,
+      "EndLnPos": 28,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "c_else",
+      "StartLnPos": 28,
+      "StartClPos": 1,
+      "EndLnPos": 28,
+      "EndClPos": 6
+    },
+    {
+      "Type": "OpLeftParenthesis",
+      "Value": "(",
+      "StartLnPos": 28,
+      "StartClPos": 7,
+      "EndLnPos": 28,
+      "EndClPos": 7
+    },
+    {
+      "Type": "Unknown",
+      "Value": "12345678",
+      "StartLnPos": 28,
+      "StartClPos": 8,
+      "EndLnPos": 28,
+      "EndClPos": 15
+    },
+    {
+      "Type": "OpRightParenthesis",
+      "Value": ")",
+      "StartLnPos": 28,
+      "StartClPos": 16,
+      "EndLnPos": 28,
+      "EndClPos": 16
+    },
+    {
+      "Type": "Newline",
+      "Value": "\n",
+      "StartLnPos": 28,
+      "StartClPos": 17,
+      "EndLnPos": 29,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Unknown",
+      "Value": "",
+      "StartLnPos": 29,
+      "StartClPos": 0,
+      "EndLnPos": 29,
+      "EndClPos": -1
+    },
+    {
+      "Type": "Identifier",
+      "Value": "n",
+      "StartLnPos": 29,
+      "StartClPos": 1,
+      "EndLnPos": 29,
+      "EndClPos": 1
+    },
+    {
+      "Type": "OpIncrement",
+      "Value": "++",
+      "StartLnPos": 29,
+      "StartClPos": 2,
+      "EndLnPos": 29,
+      "EndClPos": 3
+    },
+    {
+      "Type": "EndOfFile",
+      "Value": "￿",
+      "StartLnPos": 29,
+      "StartClPos": 4,
+      "EndLnPos": 29,
+      "EndClPos": 4
+    }
+  ],
+  "syntaxTree": []
+}

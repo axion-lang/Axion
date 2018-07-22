@@ -1,0 +1,11 @@
+/* Multiline comments test.
+	/* Any nested comment should be parsed correctly.
+		/* Each comment start sign must be followed by end sign.
+			/* 1: some more text.
+				/* 2: some more text.
+					/* 3: some more text.
+				*/
+			*/
+		*/
+	*/
+*/
