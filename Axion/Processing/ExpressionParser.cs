@@ -86,7 +86,7 @@
 //                       node.Previous.Value is OperatorToken) &&
 //                      // and if operator can be unary
 //                      op.Properties.InputSide == InputSide.SomeOne;
- 
+
 //                   // if next token is null or operator and operator can be unary
 //                   bool postfixUnaryOp =
 //                      // if token is last (5 + 2++)
@@ -101,7 +101,7 @@
 //                   if (!postfixUnaryOp && node == inputTokens.Last) {
 //                      throw new Exception("postfix operator at invalid place.");
 //                   }
- 
+
 //                   // ++i (- 40)
 //                   if (prefixUnaryOp) {
 //                      output.OperatorToken = op;
@@ -111,7 +111,7 @@
 //                   if (postfixUnaryOp) {
 //                      return new OperationToken(op, recf(ref from, toValue), null);
 //                   }
- 
+
 //                   // if it is expression in parentheses
 //                   if (op.Properties.IsOpenBrace) {
 //                      return new OperationToken(op, num, recf(ref from, op.Properties.GetMatchingBrace()));
@@ -128,7 +128,7 @@
 
 //        /*private static List<Cell> Split(ParsingScript script, char[] to) {
 //          var listToMerge = new List<Cell>(16);
- 
+
 //          if (!script.StillValid() || to.Contains(script.Current)) {
 //             listToMerge.Add(Cell.EmptyInstance);
 //             script.Forward();
@@ -137,14 +137,14 @@
 //          int arrayIndexDepth = 0;
 //          bool inQuotes = false;
 //          int negated = 0;
- 
+
 //          do { // Main processing cycle of the first part.
 //             // process prefix operators
 //             if (inputTokens[i++] is OperatorToken opT && (
 //                 opT.Properties.Value == "-" ||
 //                 opT.Properties.Value == "--" ||
 //                 opT.Properties.Value == "++")) {
- 
+
 //             }
 //             string negateSymbol = Utils.IsNotSign(script.Rest);
 //             if (negateSymbol != null && !inQuotes) {
@@ -152,43 +152,43 @@
 //                script.Forward(negateSymbol.Length);
 //                continue;
 //             }
- 
+
 //             char ch = script.CurrentAndForward();
 //             CheckQuotesIndices(script, ch, ref inQuotes, ref arrayIndexDepth);
 //             string action = null;
- 
+
 //             bool keepCollecting = inQuotes || arrayIndexDepth > 0 ||
 //                                   StillCollecting(item.ToString(), to, script, ref action);
 //             if (keepCollecting) {
 //                // The char still belongs to the previous operand.
 //                item.Append(ch);
- 
+
 //                bool goForMore = script.StillValid() &&
 //                                 (inQuotes || arrayIndexDepth > 0 || !to.Contains(script.Current));
 //                if (goForMore) {
 //                   continue;
 //                }
 //             }
- 
+
 //             if (SkipOrAppendIfNecessary(item, ch, to)) {
 //                continue;
 //             }
- 
+
 //             string token = item.ToString();
- 
+
 //             bool ternary = UpdateIfTernary(script, token, ch, ref listToMerge);
 //             if (ternary) {
 //                return listToMerge;
 //             }
- 
+
 //             CheckConsistency(token, listToMerge, script);
- 
+
 //             script.MoveForwardIf(Constants.SPACE);
- 
+
 //             if (action != null && action.Length > 1) {
 //                script.Forward(action.Length - 1);
 //             }
- 
+
 //             // We are done getting the next token. The getValue() call below may
 //             // recursively call loadAndCalculate(). This will happen if extracted
 //             // item is a function or if the next item is starting with a START_ARG '('.
@@ -198,7 +198,7 @@
 //                current = Cell.EmptyInstance;
 //             }
 //             current.ParsingToken = token;
- 
+
 //             if (negated > 0 && current.Type == Cell.VarType.NUMBER) {
 //                // If there has been a NOT sign, this is a boolean.
 //                // Use XOR (true if exactly one of the arguments is true).
@@ -206,14 +206,14 @@
 //                current = new Cell(Convert.ToDouble(neg));
 //                negated = 0;
 //             }
- 
+
 //             if (action == null) {
 //                action = UpdateAction(script, to);
 //             }
 //             else {
 //                script.MoveForwardIf(action[0]);
 //             }
- 
+
 //             char next = script.TryCurrent(); // we've already moved forward
 //             bool done = listToMerge.Count == 0 &&
 //                         (next == Constants.END_STATEMENT ||
@@ -228,10 +228,10 @@
 //                listToMerge.Add(current);
 //                return listToMerge;
 //             }
- 
+
 //             Cell cell = current.Clone();
 //             cell.Action = action;
- 
+
 //             bool addIt = UpdateIfBool(script, ref cell, ref listToMerge);
 //             if (addIt) {
 //                listToMerge.Add(cell);
@@ -239,10 +239,10 @@
 //             item.Clear();
 //          } while (script.StillValid() &&
 //                   (inQuotes || arrayIndexDepth > 0 || !to.Contains(script.Current)));
- 
+
 //          // This happens when called recursively inside of the math expression:
 //          script.MoveForwardIf(Constants.END_ARG);
- 
+
 //          return listToMerge;
 //       }*/
 
@@ -306,3 +306,4 @@
 //        }
 //    }
 //}
+

@@ -5,7 +5,8 @@
         public readonly Token         RightOperand;
 
         public OperationToken(OperatorToken @operator, Token leftOperand, Token rightOperand) :
-            base(TokenType.Identifier,
+            base(
+                TokenType.Identifier,
                 (leftOperand?.StartLnPos
               ?? @operator.StartLnPos,
                  leftOperand?.StartClPos

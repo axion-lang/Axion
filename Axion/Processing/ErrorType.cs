@@ -1,6 +1,6 @@
 ﻿namespace Axion.Processing {
     /// <summary>
-    ///     Contains all error IDs that can happen while processing <see cref="SourceCode"/>.
+    ///     Contains all error IDs that can happen while processing <see cref="SourceCode" />.
     /// </summary>
     internal enum ErrorType {
         // unfinished expression

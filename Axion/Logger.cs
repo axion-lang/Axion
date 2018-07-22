@@ -13,8 +13,8 @@ namespace Axion {
         internal static void Colored(string       message,
                                      ConsoleColor fontColor = ConsoleColor.White,
                                      ConsoleColor backColor = ConsoleColor.Black) {
-            var prevBack = Console.BackgroundColor;
-            var prevFont = Console.ForegroundColor;
+            ConsoleColor prevBack = Console.BackgroundColor;
+            ConsoleColor prevFont = Console.ForegroundColor;
 
             Console.ForegroundColor = fontColor;
             Console.BackgroundColor = backColor;
@@ -32,8 +32,8 @@ namespace Axion {
         internal static void ColoredLine(string       message,
                                          ConsoleColor fontColor = ConsoleColor.White,
                                          ConsoleColor backColor = ConsoleColor.Black) {
-            var prevBack = Console.BackgroundColor;
-            var prevFont = Console.ForegroundColor;
+            ConsoleColor prevBack = Console.BackgroundColor;
+            ConsoleColor prevFont = Console.ForegroundColor;
 
             Console.ForegroundColor = fontColor;
             Console.BackgroundColor = backColor;
@@ -45,14 +45,14 @@ namespace Axion {
         }
 
         internal static void Error(string message) {
-            var prevFont = Console.ForegroundColor;
+            ConsoleColor prevFont = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Error: {message}");
             Console.ForegroundColor = prevFont;
         }
 
         internal static void Warn(ErrorType errorType, (int line, int column) position) {
-            var prevFont = Console.ForegroundColor;
+            ConsoleColor prevFont = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine($"Warning: {errorType:G}");
             Console.WriteLine($"At line {position.line}, column {position.column}.");
@@ -60,7 +60,7 @@ namespace Axion {
         }
 
         internal static void Info(string message) {
-            var prevFont = Console.ForegroundColor;
+            ConsoleColor prevFont = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine(message);
             Console.ForegroundColor = prevFont;
@@ -68,9 +68,9 @@ namespace Axion {
 
         internal static string ReadLine(string prompt, ConsoleColor color = ConsoleColor.Yellow) {
             Console.Write(prompt);
-            var prevColor = Console.ForegroundColor;
+            ConsoleColor prevColor = Console.ForegroundColor;
             Console.ForegroundColor = color;
-            var line = Console.ReadLine();
+            string line = Console.ReadLine();
             Console.ForegroundColor = prevColor;
             return line;
         }

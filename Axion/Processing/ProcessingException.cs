@@ -28,11 +28,11 @@ namespace Axion.Processing {
              * 8| variable ~~ "string"
              *             ^^
              */
-            var sourceLine         = source.Content[Token.StartLnPos];
-            var pointer            = ""; // upside arrows (^), should be red-colored
-            var sourceIndentLength = sourceLine.TakeWhile(char.IsWhiteSpace).Count();
+            string sourceLine         = source.Content[Token.StartLnPos];
+            var    pointer            = ""; // upside arrows (^), should be red-colored
+            int    sourceIndentLength = sourceLine.TakeWhile(char.IsWhiteSpace).Count();
             // render space before pointer
-            var pointerPosition =
+            int pointerPosition =
                 LinePosition.ToString().Length + 1 + ColumnPosition - sourceIndentLength;
             for (var i = 0; i < pointerPosition; i++) {
                 pointer += " ";

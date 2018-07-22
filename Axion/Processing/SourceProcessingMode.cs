@@ -1,7 +1,7 @@
 ﻿namespace Axion.Processing {
     /// <summary>
     ///     Determines that compiler need to do with
-    ///     <see cref="SourceCode"/> (e.g. <see cref="Compile" /> or <see cref="Interpret" />)
+    ///     <see cref="SourceCode" /> (e.g. <see cref="Compile" /> or <see cref="Interpret" />)
     /// </summary>
     public enum SourceProcessingMode {
         /// <summary>

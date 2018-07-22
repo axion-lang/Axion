@@ -17,22 +17,7 @@ namespace Axion {
         /// </summary>
         public const char EndLine = '\n';
 
-        internal const char   CharLiteralQuote             = '\'';
-        internal const char   CommentOnelineStart          = '#';
-        internal const string CommentMultilineStart        = "/*";
-        internal const string CommentMultilineStartPattern = "/\\*";
-        internal const string CommentMultilineEnd          = "*/";
-        internal const string CommentMultilineEndPattern   = "*\\*";
-
-        internal const int AssignPrecedence = 5;
-
         public static readonly string[] Newlines = { "\r\n", "\n" };
-
-        internal static readonly char[] StringQuotes = { '"', '`' };
-
-        internal static readonly char[] StringPrefixes = { 'f', 'r' };
-
-        internal static readonly char[] ValidEscapeChars = { 'a', 'b', 'f', 'n', 'r', 't', 'v', '0', '\\', '\'' };
 
         public static readonly Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType> {
             // testing
@@ -94,6 +79,10 @@ namespace Axion {
             { "true", TokenType.KeywordTrue },
             { "false", TokenType.KeywordFalse }
         };
+
+        internal static readonly char[] StringQuotes     = { '"', '`' };
+        internal static readonly char[] StringPrefixes   = { 'f', 'r' };
+        internal static readonly char[] ValidEscapeChars = { 'a', 'b', 'f', 'n', 'r', 't', 'v', '0', '\\', '\'' };
 
         public static readonly Dictionary<string, OperatorProperties> Operators = new Dictionary<string, OperatorProperties> {
             //{ "**",  new OperatorProperties("**",  InputSide.Both,    false,     38) },
@@ -161,6 +150,15 @@ namespace Axion {
         public static readonly string[] OperatorsValues = Operators.Keys.OrderByDescending(val => val.Length).ToArray();
 
         public static readonly HashSet<char> OperatorChars = new HashSet<char>(OperatorsValues.Select(val => val[0]));
+
+        internal const char   CharLiteralQuote             = '\'';
+        internal const char   CommentOnelineStart          = '#';
+        internal const string CommentMultilineStart        = "/*";
+        internal const string CommentMultilineStartPattern = "/\\*";
+        internal const string CommentMultilineEnd          = "*/";
+        internal const string CommentMultilineEndPattern   = "*\\*";
+
+        internal const int AssignPrecedence = 5;
 
         internal static bool IsValidIdStart(char start) {
             return char.IsLetter(start) || start == '_';

@@ -37,10 +37,10 @@ namespace Axion.Processing {
                 return new string(text, start, length);
             }
             StringBuilder buf = null;
-            var           i   = start;
-            var           l   = start + length;
+            int           i   = start;
+            int           l   = start + length;
             while (i < l) {
-                var ch = text[i++];
+                char ch = text[i++];
                 if (ch == '\\') {
                     if (buf == null) {
                         buf = new StringBuilder(length);
@@ -56,7 +56,7 @@ namespace Axion.Processing {
                     ch = text[i++];
                     int val;
                     if (ch == 'u' || ch == 'U') {
-                        var len = ch == 'u' ? 4 : 8;
+                        int len = ch == 'u' ? 4 : 8;
                         var max = 16;
                         if (!isRaw) {
                             if (TryParseInt(text, i, len, max, out val)) {
@@ -129,7 +129,7 @@ namespace Axion.Processing {
                                     var namebuf      = new StringBuilder();
                                     var namecomplete = false;
                                     while (i < l) {
-                                        var namech = text[i++];
+                                        char namech = text[i++];
                                         if (namech != '}') {
                                             namebuf.Append(namech);
                                         }
@@ -144,8 +144,8 @@ namespace Axion.Processing {
                                         );
                                     }
                                     try {
-                                        var uval = "";
-                                        var udef = namebuf.ToString();
+                                        var    uval = "";
+                                        string udef = namebuf.ToString();
                                         for (var k = 0; k < udef.Length; k++) {
                                             uval += char.ConvertFromUtf32(udef[k]);
                                         }
@@ -178,7 +178,7 @@ namespace Axion.Processing {
                             case '6':
                             case '7': {
                                 val = ch - '0';
-                                if (i < l && HexValue(text[i], out var onechar) && onechar < 8) {
+                                if (i < l && HexValue(text[i], out int onechar) && onechar < 8) {
                                     val = val * 8 + onechar;
                                     i++;
                                     if (i < l && HexValue(text[i], out onechar) && onechar < 8) {
@@ -218,14 +218,235 @@ namespace Axion.Processing {
             return new string(text, start, length);
         }
 
+        public static object ParseInteger(string text, int b) {
+            Debug.Assert(b != 0);
+            if (!ParseInt(text, b, out int iret)) {
+                BigInteger ret = ParseBigInteger(text, b);
+                if (!int.TryParse(ret.ToString(), out iret)) {
+                    return ret;
+                }
+            }
+            return iret;
+        }
+
+        public static object ParseIntegerSign(string text, int b, int start = 0) {
+            int end = text.Length, saveb = b, savestart = start;
+            if (start < 0 || start > end) {
+                throw new ArgumentOutOfRangeException(nameof(start));
+            }
+            short sign = 1;
+            if (b < 0 || b == 1 || b > 36) {
+                throw new Exception("base must be >= 2 and <= 36");
+            }
+            ParseIntegerStart(text, ref b, ref start, end, ref sign);
+            var ret = 0;
+            try {
+                int saveStart = start;
+                for (;;) {
+                    if (start >= end) {
+                        if (saveStart == start) {
+                            throw new Exception($"invalid literal for int() with base {b}: '{text}'");
+                        }
+                        break;
+                    }
+                    if (!HexValue(text[start], out int digit)) {
+                        break;
+                    }
+                    if (!(digit < b)) {
+                        if (text[start] == 'l' || text[start] == 'L') {
+                            break;
+                        }
+                        throw new Exception($"invalid literal for int() with base {b}: '{text}'");
+                    }
+                    checked {
+                        // include sign here so that System.Int32.MinValue won't overflow
+                        ret = ret * b + sign * digit;
+                    }
+                    start++;
+                }
+            }
+            catch (OverflowException) {
+                return ParseBigIntegerSign(text, saveb, savestart);
+            }
+            ParseIntegerEnd(text, start, end);
+            return ret;
+        }
+
+        public static BigInteger ParseBigInteger(string text, int b) {
+            Debug.Assert(b != 0);
+            BigInteger ret = BigInteger.Zero;
+            BigInteger m   = BigInteger.One;
+            int        i   = text.Length - 1;
+            if (text[i] == 'l' || text[i] == 'L') {
+                i -= 1;
+            }
+            var groupMax = 7;
+            if (b <= 10) {
+                groupMax = 9; // 2 147 483 647
+            }
+            while (i >= 0) {
+                // extract digits in a batch
+                var  smallMultiplier = 1;
+                uint uval            = 0;
+                for (var j = 0; j < groupMax && i >= 0; j++) {
+                    uval            =  (uint) (CharValue(text[i--], b) * smallMultiplier + uval);
+                    smallMultiplier *= b;
+                }
+
+                // this is more generous than needed
+                ret += m * uval;
+                if (i >= 0) {
+                    m = m * smallMultiplier;
+                }
+            }
+            return ret;
+        }
+
+        public static BigInteger ParseBigIntegerSign(string text, int b, int start = 0) {
+            int end = text.Length;
+            if (start < 0 || start > end) {
+                throw new ArgumentOutOfRangeException(nameof(start));
+            }
+            short sign = 1;
+            if (b < 0 || b == 1 || b > 36) {
+                throw new Exception("base must be >= 2 and <= 36");
+            }
+            ParseIntegerStart(text, ref b, ref start, end, ref sign);
+            BigInteger ret       = BigInteger.Zero;
+            int        saveStart = start;
+            for (;;) {
+                if (start >= end) {
+                    if (start == saveStart) {
+                        throw new Exception($"invalid literal for int() with base {b}: {text}");
+                    }
+                    break;
+                }
+                if (!HexValue(text[start], out int digit)) {
+                    break;
+                }
+                if (!(digit < b)) {
+                    if (text[start] == 'l' || text[start] == 'L') {
+                        break;
+                    }
+                    throw new Exception($"invalid literal for int() with base {b}: {text}");
+                }
+                ret = ret * b + digit;
+                start++;
+            }
+            if (start < end && (text[start] == 'l' || text[start] == 'L')) {
+                start++;
+            }
+            ParseIntegerEnd(text, start, end);
+            return sign < 0 ? -ret : ret;
+        }
+
+        public static double ParseFloat(string text) {
+            try {
+                //
+                // Strings that end with '\0' is the specific case that CLR libraries allow,
+                // however Python doesn't. Since we use CLR floating point number parser,
+                // we must check explicitly for the strings that end with '\0'
+                //
+                if (!string.IsNullOrEmpty(text) && text[text.Length - 1] == '\0') {
+                    throw new Exception("null byte in float literal");
+                }
+                return ParseFloatNoCatch(text);
+            }
+            catch (OverflowException) {
+                return text.TrimStart().StartsWith("-") ? double.NegativeInfinity : double.PositiveInfinity;
+            }
+        }
+
+        public static Complex ParseComplex(string s) {
+            // remove no-meaning spaces and convert to lowercase
+            string text = s.Trim().ToLower();
+            if (string.IsNullOrEmpty(text) || text.IndexOf(' ') != -1) {
+                throw ExnMalformed();
+            }
+
+            // remove 1 layer of parens
+            if (text.StartsWith("(") && text.EndsWith(")")) {
+                text = text.Substring(1, text.Length - 2);
+            }
+            try {
+                int    len = text.Length;
+                string real, imag;
+                if (text[len - 1] == 'j') {
+                    // last sign delimits real and imaginary...
+                    int signPos = text.LastIndexOfAny(signs);
+                    // ... unless it's after 'e', so we bypass up to 2 of those here
+                    for (var i = 0; signPos > 0 && text[signPos - 1] == 'e'; i++) {
+                        if (i == 2) {
+                            // too many 'e's
+                            throw ExnMalformed();
+                        }
+                        signPos = text.Substring(0, signPos - 1).LastIndexOfAny(signs);
+                    }
+
+                    // no real component
+                    if (signPos < 0) {
+                        return new Complex(0.0, len == 1 ? 1 : ParseFloatNoCatch(text.Substring(0, len - 1)));
+                    }
+                    real = text.Substring(0,       signPos);
+                    imag = text.Substring(signPos, len - signPos - 1);
+                    if (imag.Length == 1) {
+                        imag += "1"; // convert +/- to +1/-1
+                    }
+                }
+                else {
+                    // 'j' delimits real and imaginary
+                    string[] splitText = text.Split('j');
+
+                    // no imaginary component
+                    if (splitText.Length == 1) {
+                        return new Complex(ParseFloatNoCatch(text), 0.0);
+                    }
+
+                    // there should only be one j
+                    if (splitText.Length != 2) {
+                        throw ExnMalformed();
+                    }
+                    real = splitText[1];
+                    imag = splitText[0];
+
+                    // a sign must follow the 'j'
+                    if (!(real.StartsWith("+") || real.StartsWith("-"))) {
+                        throw ExnMalformed();
+                    }
+                }
+                return new Complex(string.IsNullOrEmpty(real) ? 0 : ParseFloatNoCatch(real), ParseFloatNoCatch(imag));
+            }
+            catch (OverflowException) {
+                throw new Exception("complex() literal too large to convert");
+            }
+            catch {
+                throw ExnMalformed();
+            }
+        }
+
+        public static Complex ParseImaginary(string text) {
+            try {
+                return new Complex(
+                    0.0,
+                    double.Parse(
+                        text.Substring(0, text.Length - 1),
+                        CultureInfo.InvariantCulture.NumberFormat
+                    )
+                );
+            }
+            catch (OverflowException) {
+                return new Complex(0, double.PositiveInfinity);
+            }
+        }
+
         internal static List<byte> ParseBytes(char[] text, int start, int length, bool isRaw,
                                               bool   normalizeLineEndings) {
             Debug.Assert(text != null);
             var buf = new List<byte>(length);
-            var i   = start;
-            var l   = start + length;
+            int i   = start;
+            int l   = start + length;
             while (i < l) {
-                var ch = text[i++];
+                char ch = text[i++];
                 if (!isRaw && ch == '\\') {
                     if (i >= l) {
                         throw new Exception("Trailing \\ in string");
@@ -285,7 +506,7 @@ namespace Axion.Processing {
                         case '6':
                         case '7': {
                             val = ch - '0';
-                            if (i < l && HexValue(text[i], out var onechar) && onechar < 8) {
+                            if (i < l && HexValue(text[i], out int onechar) && onechar < 8) {
                                 val = val * 8 + onechar;
                                 i++;
                                 if (i < l && HexValue(text[i], out onechar) && onechar < 8) {
@@ -375,14 +596,14 @@ namespace Axion.Processing {
         }
 
         private static int HexValue(char ch) {
-            if (!HexValue(ch, out var value)) {
+            if (!HexValue(ch, out int value)) {
                 throw new Exception("bad char for integer value: " + ch);
             }
             return value;
         }
 
         private static int CharValue(char ch, int b) {
-            var val = HexValue(ch);
+            int val = HexValue(ch);
             if (val >= b) {
                 throw new Exception($"bad char for the integer value: '{ch}' (base {b})");
             }
@@ -392,10 +613,10 @@ namespace Axion.Processing {
         private static bool ParseInt(string text, int b, out int ret) {
             ret = 0;
             long m = 1;
-            for (var i = text.Length - 1; i >= 0; i--) {
+            for (int i = text.Length - 1; i >= 0; i--) {
                 // avoid the exception here.  Not only is throwing it expensive,
                 // but loading the resources for it is also expensive 
-                var lret = ret + m * CharValue(text[i], b);
+                long lret = ret + m * CharValue(text[i], b);
                 if (int.MinValue <= lret && lret <= int.MaxValue) {
                     ret = (int) lret;
                 }
@@ -416,7 +637,7 @@ namespace Axion.Processing {
                 return false;
             }
             for (int i = start, end = start + length; i < end; i++) {
-                if (HexValue(text[i], out var onechar) && onechar < b) {
+                if (HexValue(text[i], out int onechar) && onechar < b) {
                     value = value * b + onechar;
                 }
                 else {
@@ -424,60 +645,6 @@ namespace Axion.Processing {
                 }
             }
             return true;
-        }
-
-        public static object ParseInteger(string text, int b) {
-            Debug.Assert(b != 0);
-            if (!ParseInt(text, b, out var iret)) {
-                var ret = ParseBigInteger(text, b);
-                if (!int.TryParse(ret.ToString(), out iret)) {
-                    return ret;
-                }
-            }
-            return iret;
-        }
-
-        public static object ParseIntegerSign(string text, int b, int start = 0) {
-            int end = text.Length, saveb = b, savestart = start;
-            if (start < 0 || start > end) {
-                throw new ArgumentOutOfRangeException(nameof(start));
-            }
-            short sign = 1;
-            if (b < 0 || b == 1 || b > 36) {
-                throw new Exception("base must be >= 2 and <= 36");
-            }
-            ParseIntegerStart(text, ref b, ref start, end, ref sign);
-            var ret = 0;
-            try {
-                var saveStart = start;
-                for (;;) {
-                    if (start >= end) {
-                        if (saveStart == start) {
-                            throw new Exception($"invalid literal for int() with base {b}: '{text}'");
-                        }
-                        break;
-                    }
-                    if (!HexValue(text[start], out var digit)) {
-                        break;
-                    }
-                    if (!(digit < b)) {
-                        if (text[start] == 'l' || text[start] == 'L') {
-                            break;
-                        }
-                        throw new Exception($"invalid literal for int() with base {b}: '{text}'");
-                    }
-                    checked {
-                        // include sign here so that System.Int32.MinValue won't overflow
-                        ret = ret * b + sign * digit;
-                    }
-                    start++;
-                }
-            }
-            catch (OverflowException) {
-                return ParseBigIntegerSign(text, saveb, savestart);
-            }
-            ParseIntegerEnd(text, start, end);
-            return ret;
         }
 
         private static void ParseIntegerStart(string text, ref int b, ref int start, int end, ref short sign) {
@@ -546,93 +713,8 @@ namespace Axion.Processing {
             }
         }
 
-        public static BigInteger ParseBigInteger(string text, int b) {
-            Debug.Assert(b != 0);
-            var ret = BigInteger.Zero;
-            var m   = BigInteger.One;
-            var i   = text.Length - 1;
-            if (text[i] == 'l' || text[i] == 'L') {
-                i -= 1;
-            }
-            var groupMax = 7;
-            if (b <= 10) {
-                groupMax = 9; // 2 147 483 647
-            }
-            while (i >= 0) {
-                // extract digits in a batch
-                var  smallMultiplier = 1;
-                uint uval            = 0;
-                for (var j = 0; j < groupMax && i >= 0; j++) {
-                    uval            =  (uint) (CharValue(text[i--], b) * smallMultiplier + uval);
-                    smallMultiplier *= b;
-                }
-
-                // this is more generous than needed
-                ret += m * uval;
-                if (i >= 0) {
-                    m = m * smallMultiplier;
-                }
-            }
-            return ret;
-        }
-
-        public static BigInteger ParseBigIntegerSign(string text, int b, int start = 0) {
-            var end = text.Length;
-            if (start < 0 || start > end) {
-                throw new ArgumentOutOfRangeException(nameof(start));
-            }
-            short sign = 1;
-            if (b < 0 || b == 1 || b > 36) {
-                throw new Exception("base must be >= 2 and <= 36");
-            }
-            ParseIntegerStart(text, ref b, ref start, end, ref sign);
-            var ret       = BigInteger.Zero;
-            var saveStart = start;
-            for (;;) {
-                if (start >= end) {
-                    if (start == saveStart) {
-                        throw new Exception($"invalid literal for int() with base {b}: {text}");
-                    }
-                    break;
-                }
-                if (!HexValue(text[start], out var digit)) {
-                    break;
-                }
-                if (!(digit < b)) {
-                    if (text[start] == 'l' || text[start] == 'L') {
-                        break;
-                    }
-                    throw new Exception($"invalid literal for int() with base {b}: {text}");
-                }
-                ret = ret * b + digit;
-                start++;
-            }
-            if (start < end && (text[start] == 'l' || text[start] == 'L')) {
-                start++;
-            }
-            ParseIntegerEnd(text, start, end);
-            return sign < 0 ? -ret : ret;
-        }
-
-        public static double ParseFloat(string text) {
-            try {
-                //
-                // Strings that end with '\0' is the specific case that CLR libraries allow,
-                // however Python doesn't. Since we use CLR floating point number parser,
-                // we must check explicitly for the strings that end with '\0'
-                //
-                if (!string.IsNullOrEmpty(text) && text[text.Length - 1] == '\0') {
-                    throw new Exception("null byte in float literal");
-                }
-                return ParseFloatNoCatch(text);
-            }
-            catch (OverflowException) {
-                return text.TrimStart().StartsWith("-") ? double.NegativeInfinity : double.PositiveInfinity;
-            }
-        }
-
         private static double ParseFloatNoCatch(string text) {
-            var s = ReplaceUnicodeDigits(text);
+            string s = ReplaceUnicodeDigits(text);
             switch (s.ToLower(CultureInfo.InvariantCulture).TrimStart()) {
                 case "nan":
                 case "+nan":
@@ -642,7 +724,7 @@ namespace Axion.Processing {
                 case "-inf": return double.NegativeInfinity;
                 default:
                     // pass NumberStyles to disallow ,'s in float strings.
-                    var res = double.Parse(s, NumberStyles.Float, CultureInfo.InvariantCulture);
+                    double res = double.Parse(s, NumberStyles.Float, CultureInfo.InvariantCulture);
                     return res == 0.0 && text.TrimStart().StartsWith("-") ? 0.0 : res;
             }
         }
@@ -665,88 +747,6 @@ namespace Axion.Processing {
 
         private static Exception ExnMalformed() {
             return new Exception("complex() arg is a malformed string");
-        }
-
-        public static Complex ParseComplex(string s) {
-            // remove no-meaning spaces and convert to lowercase
-            var text = s.Trim().ToLower();
-            if (string.IsNullOrEmpty(text) || text.IndexOf(' ') != -1) {
-                throw ExnMalformed();
-            }
-
-            // remove 1 layer of parens
-            if (text.StartsWith("(") && text.EndsWith(")")) {
-                text = text.Substring(1, text.Length - 2);
-            }
-            try {
-                var    len = text.Length;
-                string real, imag;
-                if (text[len - 1] == 'j') {
-                    // last sign delimits real and imaginary...
-                    var signPos = text.LastIndexOfAny(signs);
-                    // ... unless it's after 'e', so we bypass up to 2 of those here
-                    for (var i = 0; signPos > 0 && text[signPos - 1] == 'e'; i++) {
-                        if (i == 2) {
-                            // too many 'e's
-                            throw ExnMalformed();
-                        }
-                        signPos = text.Substring(0, signPos - 1).LastIndexOfAny(signs);
-                    }
-
-                    // no real component
-                    if (signPos < 0) {
-                        return new Complex(0.0, len == 1 ? 1 : ParseFloatNoCatch(text.Substring(0, len - 1)));
-                    }
-                    real = text.Substring(0,       signPos);
-                    imag = text.Substring(signPos, len - signPos - 1);
-                    if (imag.Length == 1) {
-                        imag += "1"; // convert +/- to +1/-1
-                    }
-                }
-                else {
-                    // 'j' delimits real and imaginary
-                    var splitText = text.Split('j');
-
-                    // no imaginary component
-                    if (splitText.Length == 1) {
-                        return new Complex(ParseFloatNoCatch(text), 0.0);
-                    }
-
-                    // there should only be one j
-                    if (splitText.Length != 2) {
-                        throw ExnMalformed();
-                    }
-                    real = splitText[1];
-                    imag = splitText[0];
-
-                    // a sign must follow the 'j'
-                    if (!(real.StartsWith("+") || real.StartsWith("-"))) {
-                        throw ExnMalformed();
-                    }
-                }
-                return new Complex(string.IsNullOrEmpty(real) ? 0 : ParseFloatNoCatch(real), ParseFloatNoCatch(imag));
-            }
-            catch (OverflowException) {
-                throw new Exception("complex() literal too large to convert");
-            }
-            catch {
-                throw ExnMalformed();
-            }
-        }
-
-        public static Complex ParseImaginary(string text) {
-            try {
-                return new Complex(
-                    0.0,
-                    double.Parse(
-                        text.Substring(0, text.Length - 1),
-                        CultureInfo.InvariantCulture.NumberFormat
-                    )
-                );
-            }
-            catch (OverflowException) {
-                return new Complex(0, double.PositiveInfinity);
-            }
         }
     }
 }

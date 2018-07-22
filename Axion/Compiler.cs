@@ -11,13 +11,13 @@ namespace Axion {
     ///     Main class to work with Axion source code.
     /// </summary>
     public static class Compiler {
-        private const string typeHelp = "Type '-?' or '--help' to get documentation about launch arguments.";
-        private const string version  = "0.2.9.3-alpha [unstable]";
-
         /// <summary>
         ///     Returns path to directory where compiler executable is located.
         /// </summary>
         internal static readonly string WorkDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+        private const string typeHelp = "Type '-?' or '--help' to get documentation about launch arguments.";
+        private const string version  = "0.2.9.3-alpha [unstable]";
 
         /// <summary>
         ///     Compiler files to process.
@@ -44,8 +44,8 @@ namespace Axion {
             // main processing loop
             while (true) {
                 if (arguments.Length > 0) {
-                    var cliParser = InitCLIParser();
-                    var result    = cliParser.Parse(arguments);
+                    FluentCommandLineParser<LaunchArguments> cliParser = InitCLIParser();
+                    ICommandLineParserResult                 result    = cliParser.Parse(arguments);
                     // if launch arguments not modified
                     // TODO Synchronize launch arguments count with UnmatchedOptions
                     if (result.UnMatchedOptions.Count() == 8) {
@@ -59,7 +59,7 @@ namespace Axion {
                     }
                 }
                 // wait for next command
-                var command = Logger.ReadLine(">>> ");
+                string command = Logger.ReadLine(">>> ");
                 arguments = GetUserArguments(command).ToArray();
             }
             // It is infinite loop, breaks only by 'exit' command.
@@ -89,8 +89,8 @@ namespace Axion {
                     "Type 'cls' to clear screen."
                 );
                 while (true) {
-                    var input      = Logger.ReadLine(">>> ");
-                    var lowerInput = input.Trim().ToLower();
+                    string input      = Logger.ReadLine(">>> ");
+                    string lowerInput = input.Trim().ToLower();
                     // skip empty commands
                     if (lowerInput == "") {
                         continue;

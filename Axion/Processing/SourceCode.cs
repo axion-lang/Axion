@@ -11,6 +11,11 @@ namespace Axion.Processing {
     /// </summary>
     public sealed class SourceCode {
         /// <summary>
+        ///     File extension of <see cref="debugFilePath" />.
+        /// </summary>
+        private const string debugExtension = "_debugInfo.json";
+
+        /// <summary>
         ///     Tokens list generated from source.
         /// </summary>
         public readonly LinkedList<Token> Tokens = new LinkedList<Token>();
@@ -21,7 +26,7 @@ namespace Axion.Processing {
         public readonly LinkedList<Token> SyntaxTree = new LinkedList<Token>();
 
         /// <summary>
-        ///     Contains all errors that happened while processing <see cref="SourceCode"/>.
+        ///     Contains all errors that happened while processing <see cref="SourceCode" />.
         /// </summary>
         public readonly List<ProcessingException> Errors = new List<ProcessingException>();
 
@@ -34,11 +39,6 @@ namespace Axion.Processing {
         ///     Path to file with source code.
         /// </summary>
         private readonly string sourceFileName;
-
-        /// <summary>
-        ///     File extension of <see cref="debugFilePath" />.
-        /// </summary>
-        private const string debugExtension = "_debugInfo.json";
 
         /// <summary>
         ///     Path to file with processing debug output.
@@ -81,8 +81,24 @@ namespace Axion.Processing {
         }
 
         /// <summary>
-        ///     Performs <see cref="SourceCode"/> processing
-        ///     due to <see cref="processingMode"/>.
+        ///     Saves <see cref="SourceCode" /> debug information
+        ///     in JSON format.
+        /// </summary>
+        public void SaveDebugInfoToFile() {
+            string debugInfo =
+                "{" + Environment.NewLine +
+                "\"tokens\": " +
+                JsonConvert.SerializeObject(Tokens, Compiler.Options.JsonSerializer) +
+                "," + Environment.NewLine +
+                "\"syntaxTree\": " +
+                JsonConvert.SerializeObject(SyntaxTree, Compiler.Options.JsonSerializer) +
+                Environment.NewLine + "}";
+            File.WriteAllText(debugFilePath, debugInfo);
+        }
+
+        /// <summary>
+        ///     Performs <see cref="SourceCode" /> processing
+        ///     due to <see cref="processingMode" />.
         /// </summary>
         internal void Process(SourceProcessingMode processingMode) {
             Logger.Info($"## Compiling '{sourceFileName}' ...");
@@ -133,22 +149,6 @@ namespace Axion.Processing {
             }
             Logger.Info($"Compilation of \"{sourceFileName}\" completed.");
             Console.WriteLine();
-        }
-
-        /// <summary>
-        ///     Saves <see cref="SourceCode"/> debug information
-        ///     in JSON format.
-        /// </summary>
-        public void SaveDebugInfoToFile() {
-            var debugInfo =
-                "{" + Environment.NewLine +
-                "\"tokens\": " +
-                JsonConvert.SerializeObject(Tokens, Compiler.Options.JsonSerializer) +
-                "," + Environment.NewLine +
-                "\"syntaxTree\": " +
-                JsonConvert.SerializeObject(SyntaxTree, Compiler.Options.JsonSerializer) +
-                Environment.NewLine + "}";
-            File.WriteAllText(debugFilePath, debugInfo);
         }
 
         /// <summary>
