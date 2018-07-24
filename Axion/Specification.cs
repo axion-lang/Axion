@@ -141,6 +141,7 @@ namespace Axion {
             { "=>", new OperatorProperties(TokenType.OpRightArrow,       InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
 
             { ",", new OperatorProperties(TokenType.OpComma, InputSide.Both, Associativity.LeftToRight, false, 3) },
+            { ";", new OperatorProperties(TokenType.OpSemicolon, InputSide.Both, Associativity.LeftToRight, false, 2) },
             { ":", new OperatorProperties(TokenType.OpColon, InputSide.Both, Associativity.LeftToRight, false, 1) },
 
             { "{", new OperatorProperties(TokenType.OpLeftBrace,  InputSide.Both, Associativity.LeftToRight, false, 0) },

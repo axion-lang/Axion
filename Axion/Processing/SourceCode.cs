@@ -56,7 +56,7 @@ namespace Axion.Processing {
                                 : Compiler.WorkDirectory + "output\\" + sourceFileName + debugExtension;
             Content = sourceCode.Split(
                 Spec.Newlines,
-                StringSplitOptions.RemoveEmptyEntries
+                StringSplitOptions.None
             );
         }
 
@@ -79,7 +79,7 @@ namespace Axion.Processing {
                                 : file.FullName + debugExtension;
             Content = File.ReadAllText(file.FullName).Split(
                 Spec.Newlines,
-                StringSplitOptions.RemoveEmptyEntries
+                StringSplitOptions.None
             );
         }
 
@@ -104,20 +104,20 @@ namespace Axion.Processing {
         ///     due to <see cref="processingMode" />.
         /// </summary>
         internal void Process(SourceProcessingMode processingMode) {
-            Logger.Info($"## Compiling '{sourceFileName}' ...");
+            Log.Info($"## Compiling '{sourceFileName}' ...");
             if (Content.Length == 0) {
-                Logger.Error("# Source is empty. Lexical analysis aborted.");
+                Log.Error("# Source is empty. Lexical analysis aborted.");
                 goto COMPILATION_END;
             }
-            Logger.Info("# Tokens list generation...");
+            Log.Info("# Tokens list generation...");
             {
                 CorrectFormat();
-                Lexer.Tokenize(this);
+                new Lexer(this).Tokenize();
                 if (processingMode == SourceProcessingMode.Lex) {
                     goto COMPILATION_END;
                 }
             }
-            Logger.Info("# Abstract Syntax Tree generation...");
+            Log.Info("# Abstract Syntax Tree generation...");
             {
                 // Program.Parser.Process(Tokens, SyntaxTree);
                 if (processingMode == SourceProcessingMode.Parsing) {
@@ -126,15 +126,15 @@ namespace Axion.Processing {
             }
             switch (processingMode) {
                 case SourceProcessingMode.Interpret: {
-                    Logger.Error("Interpretation support is in progress!");
+                    Log.Error("Interpretation support is in progress!");
                     break;
                 }
                 case SourceProcessingMode.ConvertC: {
-                    Logger.Error("Transpiling to 'C' is not implemented yet.");
+                    Log.Error("Transpiling to 'C' is not implemented yet.");
                     break;
                 }
                 default: {
-                    Logger.Error($"'{processingMode:G}' mode not implemented yet.");
+                    Log.Error($"'{processingMode:G}' mode not implemented yet.");
                     break;
                 }
             }
@@ -147,10 +147,10 @@ namespace Axion.Processing {
             }
 
             if (Compiler.Options.Debug) {
-                Logger.Info($"# Saving debugging information to '{debugFilePath}' ...");
+                Log.Info($"# Saving debugging information to '{debugFilePath}' ...");
                 SaveDebugInfoToFile();
             }
-            Logger.Info($"Compilation of \"{sourceFileName}\" completed.");
+            Log.Info($"Compilation of \"{sourceFileName}\" completed.");
             Console.WriteLine();
         }
 

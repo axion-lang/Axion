@@ -53,11 +53,15 @@ Temporary Items
 # Visual Studio files
 /.vs
 /.vscode
+*.vspx
 
 # ReSharper configuration files
 *.DotSettings.user
 *.user
 *.DotSettings
+
+# performance session
+*.psess
 
 # Binaries and Visual Studio files
 /wrapper/obj
@@ -66,3 +70,7 @@ Temporary Items
 /axion/obj
 /axion/bin
 /axion/properties/launchSettings.json
+
+# unit test results
+/wrapper/testing/_out
+*.ax.debugInfo.json

@@ -1,21 +1,21 @@
 {
-  "tokens": [
-    {
-      "Type": "CommentLiteral",
-      "Value": "/*/*/*/*/*/*\n*/*/*/*/*/*/",
-      "StartLnPos": 0,
-      "StartClPos": 0,
-      "EndLnPos": 1,
-      "EndClPos": 11
-    },
-    {
-      "Type": "EndOfFile",
-      "Value": "￿",
-      "StartLnPos": 1,
-      "StartClPos": 12,
-      "EndLnPos": 1,
-      "EndClPos": 12
-    }
-  ],
-  "syntaxTree": []
+"tokens": [
+  {
+    "Type": "CommentLiteral",
+    "Value": "/*/*/*/*/*/*\n*/*/*/*/*/*/",
+    "StartLnPos": 0,
+    "StartClPos": 0,
+    "EndLnPos": 1,
+    "EndClPos": 11
+  },
+  {
+    "Type": "EndOfFile",
+    "Value": "￿",
+    "StartLnPos": 1,
+    "StartClPos": 12,
+    "EndLnPos": 1,
+    "EndClPos": 12
+  }
+],
+"syntaxTree": []
 }

@@ -9,39 +9,38 @@ namespace Axion.Processing {
     /// <summary>
     ///     Static tool for splitting Axion code into tokens <see cref="LinkedList{T}" />.
     /// </summary>
-    internal static class Lexer {
+    internal class Lexer {
         /// <summary>
         ///     Reference to current processing <see cref="SourceCode" /> instance.
         /// </summary>
-        private static SourceCode src;
+        private readonly SourceCode src;
 
         /// <summary>
-        ///     Resulting <see cref="LinkedList{T}" /> of tokens.
-        ///     Reference is equal to chain specified in <see cref="Tokenize" /> method.
+        ///     Reference to outgoing <see cref="LinkedList{T}" /> of tokens.
         /// </summary>
-        private static LinkedList<Token> tokens;
+        private readonly LinkedList<Token> tokens;
+
+        /// <summary>
+        ///     Reference to current processing code divided by lines.
+        /// </summary>
+        private readonly string[] lines;
 
         #region Input source values
 
         /// <summary>
-        ///     Current processing code divided by lines.
-        /// </summary>
-        private static string[] lines;
-
-        /// <summary>
         ///     Current line and column index in code. 0-based.
         /// </summary>
-        private static (int line, int column) pos;
+        private (int line, int column) pos = (0, 0);
 
         /// <summary>
         ///     Current evaluating code line.
         /// </summary>
-        private static string Line => lines[pos.line];
+        private string Line => lines[pos.line];
 
         /// <summary>
         ///     Current evaluating character in code.
         /// </summary>
-        private static char C =>
+        private char C =>
             pos.line < lines.Length
                 ? pos.column < Line.Length
                       ? Line[pos.column]
@@ -55,17 +54,17 @@ namespace Axion.Processing {
         /// <summary>
         ///     Type of current reading <see cref="Token" />.
         /// </summary>
-        private static TokenType tokenType;
+        private TokenType tokenType;
 
         /// <summary>
         ///     Value of current reading <see cref="Token" />
         /// </summary>
-        private static string tokenValue;
+        private string tokenValue;
 
         /// <summary>
         ///     Start position of current reading <see cref="Token" />.
         /// </summary>
-        private static (int line, int column) tokenPos;
+        private (int line, int column) tokenPos = (0, 0);
 
         #endregion
 
@@ -74,36 +73,40 @@ namespace Axion.Processing {
         /// <summary>
         ///     Last code line indentation length.
         /// </summary>
-        private static int indentLevel;
+        private int indentLevel;
 
         /// <summary>
         ///     Indentation character used in current code.
         /// </summary>
-        private static char indentChar;
+        private char indentChar;
 
         /// <summary>
         ///     Returns <see langword="true" /> if code use mixed indentation
         ///     (partly by spaces, partly by tabs).
         /// </summary>
-        private static bool inconsistentIndentation;
+        private bool inconsistentIndentation;
 
         #endregion
 
         /// <summary>
         ///     Contains unmatched unpaired parenthesis, brackets and braces.
         /// </summary>
-        private static readonly List<Token> mismatchingPairs = new List<Token>();
+        private readonly List<Token> mismatchingPairs = new List<Token>();
+
+        /// <summary>
+        ///     Initializes a new instance of <see cref="Lexer"/>
+        ///     for specified <see cref="SourceCode"/>.
+        /// </summary>
+        internal Lexer(SourceCode source) {
+            src    = source;
+            lines  = src.Content;
+            tokens = src.Tokens;
+        }
 
         /// <summary>
         ///     Divides &lt;<see cref="SourceCode.Content" />&gt; into &lt;<see cref="SourceCode.Tokens" />&gt; list of tokens.
         /// </summary>
-        internal static void Tokenize(SourceCode source) {
-            src    = source;
-            lines  = src.Content;
-            tokens = src.Tokens;
-
-            Reset();
-
+        internal void Tokenize() {
             while (pos.line < lines.Length && pos.column < Line.Length) {
                 Token token = ReadToken();
                 if (token != null) {
@@ -138,19 +141,7 @@ namespace Axion.Processing {
             }
         }
 
-        /// <summary>
-        ///     Resets all <see cref="Lexer" /> values to work with next file.
-        /// </summary>
-        private static void Reset() {
-            pos.line        = 0;
-            pos.column      = 0;
-            tokenPos.line   = 0;
-            tokenPos.column = 0;
-            indentLevel     = 0;
-            indentChar      = '\0';
-        }
-
-        private static Token ReadToken() {
+        private Token ReadToken() {
             // reset token properties
             tokenType  = TokenType.Unknown;
             tokenPos   = pos;
@@ -193,7 +184,7 @@ namespace Axion.Processing {
                         if (!inconsistentIndentation) {
                             // check for consistency
                             if (indentChar != C && !inconsistentIndentation) {
-                                Logger.Warn(ErrorType.WarnInconsistentIndentation, pos);
+                                Log.Warn(ErrorType.WarnInconsistentIndentation, pos);
                                 inconsistentIndentation = true;
                             }
                         }
@@ -228,6 +219,9 @@ namespace Axion.Processing {
                     else if (indentLength < indentLevel) {
                         // indent decreased
                         tokenType = TokenType.Outdent;
+                    }
+                    else {
+                        return null;
                     }
                     indentLevel = indentLength;
                 }
@@ -365,34 +359,37 @@ namespace Axion.Processing {
                     Move();
                 }
                 string delimiter = C.ToString();
-                {
-                    char firstQuote = C;
+                char   quote     = C;
+                Move();
+                // add next 2 quotes for multiline strings
+                if (C == quote) {
+                    delimiter += C;
                     Move();
-                    // add next 2 quotes for multiline strings
-                    if (C == firstQuote) {
-                        delimiter += C;
-                        Move();
-                        if (C != firstQuote) {
-                            // got empty one-quoted string
-                            return new Token(TokenType.StringLiteral, pos);
-                        }
-                        delimiter += C;
-                        Move();
+                    if (C != quote) {
+                        // got empty one-quoted string
+                        return new Token(TokenType.StringLiteral, pos);
                     }
+                    delimiter += C;
+                    Move();
                 }
-                // TODO rewrite BUG string skips if piece long
+
                 while (true) {
-                    var  nextPiece           = "";
-                    char charBeforeDelimiter = C;
-                    // get next piece of string
-                    for (var i = 0; i < delimiter.Length; i++) {
-                        nextPiece += C;
+                    string piece = C.ToString();
+                    // if got non-escaped quote
+                    if (C == quote && tokenValue[tokenValue.Length - 1] != '\\') {
                         Move();
-                    }
-                    // compare with non-escaped delimiter
-                    if (nextPiece == delimiter &&
-                        charBeforeDelimiter != '\\') {
-                        break;
+                        piece += C;
+                        // " `
+                        if (delimiter.Length == 1) {
+                            return new Token(TokenType.StringLiteral, tokenPos, tokenValue);
+                        }
+                        // """ ```
+                        if (C == quote && Peek() == quote) {
+                            Move(2);
+                            return new Token(TokenType.StringLiteral, tokenPos, tokenValue);
+                        }
+                        Move();
+                        piece += C;
                     }
 
                     // if not matched, check for end of line/file
@@ -404,7 +401,8 @@ namespace Axion.Processing {
                             new Token(TokenType.StringLiteral, tokenPos, tokenValue)
                         );
                     }
-                    tokenValue += nextPiece;
+                    tokenValue += piece;
+                    Move();
                 }
             }
 
@@ -449,12 +447,13 @@ namespace Axion.Processing {
                         new Token(TokenType.Unknown, pos, C.ToString())
                     )
                 );
+                Move();
             }
 
             return new Token(tokenType, tokenPos, tokenValue);
         }
 
-        private static Token ReadNumber() {
+        private Token ReadNumber() {
             var isPrefix0 = false;
             if (C == '0') {
                 tokenValue += C;
@@ -542,7 +541,7 @@ namespace Axion.Processing {
             }
         }
 
-        private static Token ReadBinaryNumber() {
+        private Token ReadBinaryNumber() {
             var        bits      = 0;
             var        iVal      = 0;
             var        useBigInt = false;
@@ -594,7 +593,7 @@ namespace Axion.Processing {
             }
         }
 
-        private static Token ReadOctalNumber() {
+        private Token ReadOctalNumber() {
             var first = true;
             while (true) {
                 Move();
@@ -631,7 +630,7 @@ namespace Axion.Processing {
             }
         }
 
-        private static Token ReadHexNumber() {
+        private Token ReadHexNumber() {
             var first = true;
             while (true) {
                 Move();
@@ -663,7 +662,7 @@ namespace Axion.Processing {
             }
         }
 
-        private static Token ReadFraction() {
+        private Token ReadFraction() {
             while (true) {
                 Move();
                 tokenValue += C;
@@ -688,7 +687,7 @@ namespace Axion.Processing {
             }
         }
 
-        private static Token ReadExponent() {
+        private Token ReadExponent() {
             (int line, int column) startPos = pos;
             Move();
             tokenValue += C;
@@ -716,7 +715,7 @@ namespace Axion.Processing {
             return new ConstToken(TokenType.Unknown, tokenPos, value);
         }
 
-        private static object ParseInteger(string s, int radix) {
+        private object ParseInteger(string s, int radix) {
             try {
                 return LiteralParser.ParseInteger(s, radix);
             }
@@ -728,7 +727,7 @@ namespace Axion.Processing {
             }
         }
 
-        private static object ParseFloat(string s) {
+        private object ParseFloat(string s) {
             try {
                 return LiteralParser.ParseFloat(s);
             }
@@ -742,7 +741,7 @@ namespace Axion.Processing {
 
         #region Source stream control functions
 
-        private static char Peek() {
+        private char Peek() {
             if (pos.column + 1 < Line.Length) {
                 return Line[pos.column + 1];
             }
@@ -754,7 +753,7 @@ namespace Axion.Processing {
             return Spec.EndFile;
         }
 
-        private static string Peek(uint length) {
+        private string Peek(uint length) {
             // save values
             (int line, int column) savedPos         = pos;
             int                    savedIndentLevel = indentLevel;
@@ -774,7 +773,7 @@ namespace Axion.Processing {
         ///     Moves <see cref="pos" /> values by
         ///     &lt;<paramref name="position" />&gt;.
         /// </summary>
-        private static void Move(int position = 1) {
+        private void Move(int position = 1) {
             if (position <= 0) {
                 throw new Exception($"Internal error: function {nameof(Move)} was called with {nameof(position)} argument <= 0.");
             }

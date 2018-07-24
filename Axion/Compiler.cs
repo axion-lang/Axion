@@ -17,7 +17,7 @@ namespace Axion {
         internal static readonly string WorkDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
         private const string typeHelp = "Type '-?' or '--help' to get documentation about launch arguments.";
-        private const string version  = "0.2.9.3-alpha [unstable]";
+        private const string version  = "0.2.9.5-alpha [unstable]";
 
         /// <summary>
         ///     Compiler files to process.
@@ -34,12 +34,9 @@ namespace Axion {
         /// </summary>
         /// <param name="arguments">Command line arguments compiler was launched with.</param>
         public static void Launch(string[] arguments) {
-            Console.Write("Axion programming language compiler v. ");
-            Logger.ColoredLine(version, ConsoleColor.Yellow);
-            Console.Write("Working in '");
-            Logger.Colored(WorkDirectory, ConsoleColor.Yellow);
-            Console.WriteLine("'\n" + typeHelp);
-            Console.WriteLine();
+            Log.WriteLine("Axion programming language compiler v. ", version, ConsoleColor.Yellow);
+            Log.WriteLine("Working in ", WorkDirectory, ConsoleColor.Yellow);
+            Log.WriteLine(typeHelp + Environment.NewLine);
 
             // main processing loop
             while (true) {
@@ -49,17 +46,17 @@ namespace Axion {
                     // if launch arguments not modified
                     // TODO Synchronize launch arguments count with UnmatchedOptions
                     if (result.UnMatchedOptions.Count() == 8) {
-                        Logger.Error("Invalid argument.\n" + typeHelp);
+                        Log.Error("Invalid argument.\n" + typeHelp);
                     }
                     else if (result.HasErrors) {
-                        Logger.Error(result.ErrorText);
+                        Log.Error(result.ErrorText);
                     }
                     else {
                         HandleLaunchArguments(cliParser.Object);
                     }
                 }
                 // wait for next command
-                string command = Logger.ReadLine(">>> ");
+                string command = Log.ReadLine(">>> ");
                 arguments = GetUserArguments(command).ToArray();
             }
             // It is infinite loop, breaks only by 'exit' command.
@@ -82,14 +79,14 @@ namespace Axion {
 
             // Interactive mode: jump into interpreter processing loop
             if (args.Interactive) {
-                Logger.Info(
+                Log.Info(
                     "Interactive interpreter mode.\n" +
                     "Now your input will be processed by Axion interpreter.\n" +
                     "Type 'exit' to close interpreter environment;\n" +
                     "Type 'cls' to clear screen."
                 );
                 while (true) {
-                    string input      = Logger.ReadLine(">>> ");
+                    string input      = Log.ReadLine(">>> ");
                     string lowerInput = input.Trim().ToLower();
                     // skip empty commands
                     if (lowerInput == "") {
@@ -97,7 +94,7 @@ namespace Axion {
                     }
                     // exit from interpreter to main loop
                     if (lowerInput == "exit") {
-                        Logger.Info("Interactive interpreter closed.");
+                        Log.Info("Interactive interpreter closed.");
                         return;
                     }
                     if (lowerInput == "cls") {
@@ -107,7 +104,7 @@ namespace Axion {
                     var script = "";
                     while (!string.IsNullOrEmpty(input)) {
                         script += input + "\n";
-                        input  =  Logger.ReadLine("... ");
+                        input  =  Log.ReadLine("... ");
                     }
                     // TODO parse "help(module)" argument
                     //if (lowerInput == "help" || lowerInput == "h" || lowerInput == "?") {
@@ -124,7 +121,7 @@ namespace Axion {
             // get source code
             if (args.Files != null) {
                 if (args.Files.Count > 1) {
-                    Logger.Error("Compiler doesn't support multiple files processing yet.");
+                    Log.Error("Compiler doesn't support multiple files processing yet.");
                     return;
                 }
                 inputFiles = new FileInfo[args.Files.Count];
@@ -137,7 +134,7 @@ namespace Axion {
                 source = new SourceCode(args.Script);
             }
             else {
-                Logger.Error("Neither script nor path to script file not specified.\n" + typeHelp);
+                Log.Error("Neither script nor path to script file not specified.\n" + typeHelp);
                 return;
             }
 

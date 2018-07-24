@@ -1,22 +1,21 @@
 {
-  "tokens": [
-    {
-      "Type": "CommentLiteral",
-      "Value":
-        "/* Multiline comments test.\n\t/* Any nested comment should be parsed correctly.\n\t\t/* Each comment start sign must be followed by end sign.\n\t\t\t/* 1: some more text.\n\t\t\t\t/* 2: some more text.\n\t\t\t\t\t/* 3: some more text.\n\t\t\t\t\t*/\n\t\t\t\t*/\n\t\t\t*/\n\t\t*/\n\t*/\n*/",
-      "StartLnPos": 0,
-      "StartClPos": 0,
-      "EndLnPos": 11,
-      "EndClPos": 1
-    },
-    {
-      "Type": "EndOfFile",
-      "Value": "￿",
-      "StartLnPos": 11,
-      "StartClPos": 2,
-      "EndLnPos": 11,
-      "EndClPos": 2
-    }
-  ],
-  "syntaxTree": []
+"tokens": [
+  {
+    "Type": "CommentLiteral",
+    "Value": "/* Multiline comments test.\n\t/* Any nested comment should be parsed correctly.\n\t\t/* Each comment start sign must be followed by end sign.\n\t\t\t/* 1: some more text.\n\t\t\t\t/* 2: some more text.\n\t\t\t\t\t/* 3: some more text.\n\t\t\t\t\t*/\n\t\t\t\t*/\n\t\t\t*/\n\t\t*/\n\t*/\n*/",
+    "StartLnPos": 0,
+    "StartClPos": 0,
+    "EndLnPos": 11,
+    "EndClPos": 1
+  },
+  {
+    "Type": "EndOfFile",
+    "Value": "￿",
+    "StartLnPos": 11,
+    "StartClPos": 2,
+    "EndLnPos": 11,
+    "EndClPos": 2
+  }
+],
+"syntaxTree": []
 }

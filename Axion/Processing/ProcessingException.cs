@@ -17,17 +17,20 @@ namespace Axion.Processing {
         }
 
         internal ProcessingException(ErrorType type, SourceCode source, Token errorToken) {
+            /* -----Error template-----
+             *
+             * Error: Invalid operator.
+             *
+             * 8| variable ~~ "string"
+             *             ^^
+             *
+             */
+            // TODO add string representations for <ErrorType>
             Message = type.ToString("G");
             Token   = errorToken;
             // line positions need offset
             LinePosition   = errorToken.StartLnPos + 1;
             ColumnPosition = errorToken.StartClPos + 1;
-            /*  ----Error template----
-             * Error: Invalid operator.
-             *
-             * 8| variable ~~ "string"
-             *             ^^
-             */
             string sourceLine         = source.Content[Token.StartLnPos];
             var    pointer            = ""; // upside arrows (^), should be red-colored
             int    sourceIndentLength = sourceLine.TakeWhile(char.IsWhiteSpace).Count();
@@ -43,13 +46,13 @@ namespace Axion.Processing {
             }
 
             // Write message
-            Logger.Colored("Error: ", ConsoleColor.Red);
+            Log.Write("Error: ", ConsoleColor.Red);
             Console.WriteLine(Message + ".");
             Console.WriteLine($"{LinePosition}| {sourceLine.Trim()}");
             // Write pointer
-            Logger.ColoredLine(pointer, ConsoleColor.Red);
+            Log.WriteLine(pointer, ConsoleColor.Red);
             // Traceback
-            Logger.Info("Saving full traceback to file ...");
+            Log.Info("Saving full traceback to file ...");
             source.SaveDebugInfoToFile();
             //Console.WriteLine(JsonConvert.SerializeObject(this, Compiler.JsonSerializerSettings));
             Console.Write("Press any key to close app.");

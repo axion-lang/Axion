@@ -1,126 +1,125 @@
 {
-  "tokens": [
-    {
-      "Type": "CommentLiteral",
-      "Value": "# comments parsing check",
-      "StartLnPos": 0,
-      "StartClPos": 0,
-      "EndLnPos": 0,
-      "EndClPos": 23
-    },
-    {
-      "Type": "Newline",
-      "Value": "\n",
-      "StartLnPos": 0,
-      "StartClPos": 24,
-      "EndLnPos": 1,
-      "EndClPos": -1
-    },
-    {
-      "Type": "KeywordUse",
-      "Value": "use",
-      "StartLnPos": 1,
-      "StartClPos": 0,
-      "EndLnPos": 1,
-      "EndClPos": 2
-    },
-    {
-      "Type": "OpLeftBrace",
-      "Value": "{",
-      "StartLnPos": 1,
-      "StartClPos": 4,
-      "EndLnPos": 1,
-      "EndClPos": 4
-    },
-    {
-      "Type": "Identifier",
-      "Value": "nonsense",
-      "StartLnPos": 1,
-      "StartClPos": 6,
-      "EndLnPos": 1,
-      "EndClPos": 13
-    },
-    {
-      "Type": "OpRightBrace",
-      "Value": "}",
-      "StartLnPos": 1,
-      "StartClPos": 15,
-      "EndLnPos": 1,
-      "EndClPos": 15
-    },
-    {
-      "Type": "Newline",
-      "Value": "\n",
-      "StartLnPos": 1,
-      "StartClPos": 16,
-      "EndLnPos": 2,
-      "EndClPos": -1
-    },
-    {
-      "Type": "CommentLiteral",
-      "Value":
-        "/* Multiline comments test.\n\t/* Any nested comment should be parsed correctly.\n\t\t/* Each comment start sign must be followed by end sign.\n\t\t\t/* 1: some more text.\n\t\t\t\t/* 2: some more text.\n\t\t\t\t\t/* 3: some more text.\n\t\t\t\t\t*/\n\t\t\t\t*/\n\t\t\t*/\n\t\t*/\n\t*/\n*/",
-      "StartLnPos": 2,
-      "StartClPos": 0,
-      "EndLnPos": 13,
-      "EndClPos": 1
-    },
-    {
-      "Type": "Newline",
-      "Value": "\n",
-      "StartLnPos": 13,
-      "StartClPos": 2,
-      "EndLnPos": 14,
-      "EndClPos": -1
-    },
-    {
-      "Type": "CommentLiteral",
-      "Value": "/*/*/*/*/*/*\n*/*/*/*/*/*/",
-      "StartLnPos": 14,
-      "StartClPos": 0,
-      "EndLnPos": 15,
-      "EndClPos": 11
-    },
-    {
-      "Type": "Newline",
-      "Value": "\n",
-      "StartLnPos": 15,
-      "StartClPos": 12,
-      "EndLnPos": 16,
-      "EndClPos": -1
-    },
-    {
-      "Type": "CommentLiteral",
-      "Value": "/*/*/*/*/**/*/*/*/*/",
-      "StartLnPos": 16,
-      "StartClPos": 0,
-      "EndLnPos": 16,
-      "EndClPos": 19
-    },
-    {
-      "Type": "Newline",
-      "Value": "\n",
-      "StartLnPos": 16,
-      "StartClPos": 20,
-      "EndLnPos": 17,
-      "EndClPos": -1
-    },
-    {
-      "Type": "CommentLiteral",
-      "Value": "# trailing one-line comment",
-      "StartLnPos": 17,
-      "StartClPos": 0,
-      "EndLnPos": 17,
-      "EndClPos": 26
-    },
-    {
-      "Type": "EndOfFile",
-      "Value": "￿",
-      "StartLnPos": 17,
-      "StartClPos": 27,
-      "EndLnPos": 17,
-      "EndClPos": 27
-    }
-  ],
-  "syntaxTree": []
+"tokens": [
+  {
+    "Type": "CommentLiteral",
+    "Value": "# comments parsing check",
+    "StartLnPos": 0,
+    "StartClPos": 0,
+    "EndLnPos": 0,
+    "EndClPos": 23
+  },
+  {
+    "Type": "Newline",
+    "Value": "\n",
+    "StartLnPos": 0,
+    "StartClPos": 24,
+    "EndLnPos": 1,
+    "EndClPos": -1
+  },
+  {
+    "Type": "KeywordUse",
+    "Value": "use",
+    "StartLnPos": 1,
+    "StartClPos": 0,
+    "EndLnPos": 1,
+    "EndClPos": 2
+  },
+  {
+    "Type": "OpLeftBrace",
+    "Value": "{",
+    "StartLnPos": 1,
+    "StartClPos": 4,
+    "EndLnPos": 1,
+    "EndClPos": 4
+  },
+  {
+    "Type": "Identifier",
+    "Value": "nonsense",
+    "StartLnPos": 1,
+    "StartClPos": 6,
+    "EndLnPos": 1,
+    "EndClPos": 13
+  },
+  {
+    "Type": "OpRightBrace",
+    "Value": "}",
+    "StartLnPos": 1,
+    "StartClPos": 15,
+    "EndLnPos": 1,
+    "EndClPos": 15
+  },
+  {
+    "Type": "Newline",
+    "Value": "\n",
+    "StartLnPos": 1,
+    "StartClPos": 16,
+    "EndLnPos": 2,
+    "EndClPos": -1
+  },
+  {
+    "Type": "CommentLiteral",
+    "Value": "/* Multiline comments test.\n\t/* Any nested comment should be parsed correctly.\n\t\t/* Each comment start sign must be followed by end sign.\n\t\t\t/* 1: some more text.\n\t\t\t\t/* 2: some more text.\n\t\t\t\t\t/* 3: some more text.\n\t\t\t\t\t*/\n\t\t\t\t*/\n\t\t\t*/\n\t\t*/\n\t*/\n*/",
+    "StartLnPos": 2,
+    "StartClPos": 0,
+    "EndLnPos": 13,
+    "EndClPos": 1
+  },
+  {
+    "Type": "Newline",
+    "Value": "\n",
+    "StartLnPos": 13,
+    "StartClPos": 2,
+    "EndLnPos": 14,
+    "EndClPos": -1
+  },
+  {
+    "Type": "CommentLiteral",
+    "Value": "/*/*/*/*/*/*\n*/*/*/*/*/*/",
+    "StartLnPos": 14,
+    "StartClPos": 0,
+    "EndLnPos": 15,
+    "EndClPos": 11
+  },
+  {
+    "Type": "Newline",
+    "Value": "\n",
+    "StartLnPos": 15,
+    "StartClPos": 12,
+    "EndLnPos": 16,
+    "EndClPos": -1
+  },
+  {
+    "Type": "CommentLiteral",
+    "Value": "/*/*/*/*/**/*/*/*/*/",
+    "StartLnPos": 16,
+    "StartClPos": 0,
+    "EndLnPos": 16,
+    "EndClPos": 19
+  },
+  {
+    "Type": "Newline",
+    "Value": "\n",
+    "StartLnPos": 16,
+    "StartClPos": 20,
+    "EndLnPos": 17,
+    "EndClPos": -1
+  },
+  {
+    "Type": "CommentLiteral",
+    "Value": "# trailing one-line comment",
+    "StartLnPos": 17,
+    "StartClPos": 0,
+    "EndLnPos": 17,
+    "EndClPos": 26
+  },
+  {
+    "Type": "EndOfFile",
+    "Value": "￿",
+    "StartLnPos": 17,
+    "StartClPos": 27,
+    "EndLnPos": 17,
+    "EndClPos": 27
+  }
+],
+"syntaxTree": []
 }

@@ -1,37 +1,37 @@
 {
-  "tokens": [
-    {
-      "Type": "CommentLiteral",
-      "Value": "/* /* /*  */ */ */",
-      "StartLnPos": 0,
-      "StartClPos": 0,
-      "EndLnPos": 0,
-      "EndClPos": 17
-    },
-    {
-      "Type": "OpMultiply",
-      "Value": "*",
-      "StartLnPos": 0,
-      "StartClPos": 21,
-      "EndLnPos": 0,
-      "EndClPos": 21
-    },
-    {
-      "Type": "OpTrueDivide",
-      "Value": "/",
-      "StartLnPos": 0,
-      "StartClPos": 22,
-      "EndLnPos": 0,
-      "EndClPos": 22
-    },
-    {
-      "Type": "EndOfFile",
-      "Value": "￿",
-      "StartLnPos": 0,
-      "StartClPos": 23,
-      "EndLnPos": 0,
-      "EndClPos": 23
-    }
-  ],
-  "syntaxTree": []
+"tokens": [
+  {
+    "Type": "CommentLiteral",
+    "Value": "/* /* /*  */ */ */",
+    "StartLnPos": 0,
+    "StartClPos": 0,
+    "EndLnPos": 0,
+    "EndClPos": 17
+  },
+  {
+    "Type": "OpMultiply",
+    "Value": "*",
+    "StartLnPos": 0,
+    "StartClPos": 21,
+    "EndLnPos": 0,
+    "EndClPos": 21
+  },
+  {
+    "Type": "OpTrueDivide",
+    "Value": "/",
+    "StartLnPos": 0,
+    "StartClPos": 22,
+    "EndLnPos": 0,
+    "EndClPos": 22
+  },
+  {
+    "Type": "EndOfFile",
+    "Value": "￿",
+    "StartLnPos": 0,
+    "StartClPos": 23,
+    "EndLnPos": 0,
+    "EndClPos": 23
+  }
+],
+"syntaxTree": []
 }

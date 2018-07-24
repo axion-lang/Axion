@@ -1,61 +1,61 @@
 {
-  "tokens": [
-    {
-      "Type": "CommentLiteral",
-      "Value": "# comments parsing check",
-      "StartLnPos": 0,
-      "StartClPos": 0,
-      "EndLnPos": 0,
-      "EndClPos": 23
-    },
-    {
-      "Type": "Newline",
-      "Value": "\n",
-      "StartLnPos": 0,
-      "StartClPos": 24,
-      "EndLnPos": 1,
-      "EndClPos": -1
-    },
-    {
-      "Type": "KeywordUse",
-      "Value": "use",
-      "StartLnPos": 1,
-      "StartClPos": 0,
-      "EndLnPos": 1,
-      "EndClPos": 2
-    },
-    {
-      "Type": "OpLeftBrace",
-      "Value": "{",
-      "StartLnPos": 1,
-      "StartClPos": 4,
-      "EndLnPos": 1,
-      "EndClPos": 4
-    },
-    {
-      "Type": "Identifier",
-      "Value": "nonsense",
-      "StartLnPos": 1,
-      "StartClPos": 6,
-      "EndLnPos": 1,
-      "EndClPos": 13
-    },
-    {
-      "Type": "OpRightBrace",
-      "Value": "}",
-      "StartLnPos": 1,
-      "StartClPos": 15,
-      "EndLnPos": 1,
-      "EndClPos": 15
-    },
-    {
-      "Type": "Newline",
-      "Value": "\n",
-      "StartLnPos": 1,
-      "StartClPos": 16,
-      "EndLnPos": 2,
-      "EndClPos": -1
-    }
-  ],
-  "syntaxTree": []
+"tokens": [
+  {
+    "Type": "CommentLiteral",
+    "Value": "# comments parsing check",
+    "StartLnPos": 0,
+    "StartClPos": 0,
+    "EndLnPos": 0,
+    "EndClPos": 23
+  },
+  {
+    "Type": "Newline",
+    "Value": "\n",
+    "StartLnPos": 0,
+    "StartClPos": 24,
+    "EndLnPos": 1,
+    "EndClPos": -1
+  },
+  {
+    "Type": "KeywordUse",
+    "Value": "use",
+    "StartLnPos": 1,
+    "StartClPos": 0,
+    "EndLnPos": 1,
+    "EndClPos": 2
+  },
+  {
+    "Type": "OpLeftBrace",
+    "Value": "{",
+    "StartLnPos": 1,
+    "StartClPos": 4,
+    "EndLnPos": 1,
+    "EndClPos": 4
+  },
+  {
+    "Type": "Identifier",
+    "Value": "nonsense",
+    "StartLnPos": 1,
+    "StartClPos": 6,
+    "EndLnPos": 1,
+    "EndClPos": 13
+  },
+  {
+    "Type": "OpRightBrace",
+    "Value": "}",
+    "StartLnPos": 1,
+    "StartClPos": 15,
+    "EndLnPos": 1,
+    "EndClPos": 15
+  },
+  {
+    "Type": "Newline",
+    "Value": "\n",
+    "StartLnPos": 1,
+    "StartClPos": 16,
+    "EndLnPos": 2,
+    "EndClPos": -1
+  }
+],
+"syntaxTree": []
 }
