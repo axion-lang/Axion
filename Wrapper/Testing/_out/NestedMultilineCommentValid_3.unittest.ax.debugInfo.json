@@ -5,8 +5,8 @@
     "Value": "/*/*/*/*/*/*\n*/*/*/*/*/*/",
     "StartLnPos": 0,
     "StartClPos": 0,
-    "EndLnPos": 1,
-    "EndClPos": 11
+    "EndLnPos": 2,
+    "EndClPos": 12
   },
   {
     "Type": "EndOfFile",
@@ -14,7 +14,7 @@
     "StartLnPos": 1,
     "StartClPos": 12,
     "EndLnPos": 1,
-    "EndClPos": 12
+    "EndClPos": 13
   }
 ],
 "syntaxTree": []

@@ -6,7 +6,7 @@
     "StartLnPos": 0,
     "StartClPos": 0,
     "EndLnPos": 0,
-    "EndClPos": 2
+    "EndClPos": 3
   },
   {
     "Type": "OpLeftBrace",
@@ -14,15 +14,15 @@
     "StartLnPos": 0,
     "StartClPos": 4,
     "EndLnPos": 0,
-    "EndClPos": 4
+    "EndClPos": 5
   },
   {
     "Type": "Newline",
     "Value": "\n",
     "StartLnPos": 0,
     "StartClPos": 5,
-    "EndLnPos": 1,
-    "EndClPos": -1
+    "EndLnPos": 2,
+    "EndClPos": 0
   },
   {
     "Type": "Identifier",
@@ -30,7 +30,7 @@
     "StartLnPos": 1,
     "StartClPos": 3,
     "EndLnPos": 1,
-    "EndClPos": 13
+    "EndClPos": 14
   },
   {
     "Type": "OpDot",
@@ -38,7 +38,7 @@
     "StartLnPos": 1,
     "StartClPos": 14,
     "EndLnPos": 1,
-    "EndClPos": 14
+    "EndClPos": 15
   },
   {
     "Type": "Identifier",
@@ -46,7 +46,7 @@
     "StartLnPos": 1,
     "StartClPos": 15,
     "EndLnPos": 1,
-    "EndClPos": 24
+    "EndClPos": 25
   },
   {
     "Type": "OpComma",
@@ -54,15 +54,15 @@
     "StartLnPos": 1,
     "StartClPos": 25,
     "EndLnPos": 1,
-    "EndClPos": 25
+    "EndClPos": 26
   },
   {
     "Type": "Newline",
     "Value": "\n",
     "StartLnPos": 1,
     "StartClPos": 26,
-    "EndLnPos": 2,
-    "EndClPos": -1
+    "EndLnPos": 3,
+    "EndClPos": 0
   },
   {
     "Type": "Identifier",
@@ -70,7 +70,7 @@
     "StartLnPos": 2,
     "StartClPos": 3,
     "EndLnPos": 2,
-    "EndClPos": 8
+    "EndClPos": 9
   },
   {
     "Type": "OpDot",
@@ -78,7 +78,7 @@
     "StartLnPos": 2,
     "StartClPos": 9,
     "EndLnPos": 2,
-    "EndClPos": 9
+    "EndClPos": 10
   },
   {
     "Type": "Identifier",
@@ -86,7 +86,7 @@
     "StartLnPos": 2,
     "StartClPos": 10,
     "EndLnPos": 2,
-    "EndClPos": 18
+    "EndClPos": 19
   },
   {
     "Type": "OpComma",
@@ -94,15 +94,15 @@
     "StartLnPos": 2,
     "StartClPos": 19,
     "EndLnPos": 2,
-    "EndClPos": 19
+    "EndClPos": 20
   },
   {
     "Type": "Newline",
     "Value": "\n",
     "StartLnPos": 2,
     "StartClPos": 20,
-    "EndLnPos": 3,
-    "EndClPos": -1
+    "EndLnPos": 4,
+    "EndClPos": 0
   },
   {
     "Type": "Identifier",
@@ -110,7 +110,7 @@
     "StartLnPos": 3,
     "StartClPos": 3,
     "EndLnPos": 3,
-    "EndClPos": 6
+    "EndClPos": 7
   },
   {
     "Type": "OpDot",
@@ -118,7 +118,7 @@
     "StartLnPos": 3,
     "StartClPos": 7,
     "EndLnPos": 3,
-    "EndClPos": 7
+    "EndClPos": 8
   },
   {
     "Type": "Identifier",
@@ -126,7 +126,7 @@
     "StartLnPos": 3,
     "StartClPos": 8,
     "EndLnPos": 3,
-    "EndClPos": 12
+    "EndClPos": 13
   },
   {
     "Type": "OpDot",
@@ -134,7 +134,7 @@
     "StartLnPos": 3,
     "StartClPos": 13,
     "EndLnPos": 3,
-    "EndClPos": 13
+    "EndClPos": 14
   },
   {
     "Type": "Identifier",
@@ -142,7 +142,7 @@
     "StartLnPos": 3,
     "StartClPos": 14,
     "EndLnPos": 3,
-    "EndClPos": 19
+    "EndClPos": 20
   },
   {
     "Type": "OpDot",
@@ -150,7 +150,7 @@
     "StartLnPos": 3,
     "StartClPos": 20,
     "EndLnPos": 3,
-    "EndClPos": 20
+    "EndClPos": 21
   },
   {
     "Type": "Identifier",
@@ -158,7 +158,7 @@
     "StartLnPos": 3,
     "StartClPos": 21,
     "EndLnPos": 3,
-    "EndClPos": 29
+    "EndClPos": 30
   },
   {
     "Type": "OpDot",
@@ -166,7 +166,7 @@
     "StartLnPos": 3,
     "StartClPos": 30,
     "EndLnPos": 3,
-    "EndClPos": 30
+    "EndClPos": 31
   },
   {
     "Type": "Identifier",
@@ -174,15 +174,15 @@
     "StartLnPos": 3,
     "StartClPos": 31,
     "EndLnPos": 3,
-    "EndClPos": 33
+    "EndClPos": 34
   },
   {
     "Type": "Newline",
     "Value": "\n",
     "StartLnPos": 3,
     "StartClPos": 34,
-    "EndLnPos": 4,
-    "EndClPos": -1
+    "EndLnPos": 5,
+    "EndClPos": 0
   },
   {
     "Type": "OpRightBrace",
@@ -190,7 +190,7 @@
     "StartLnPos": 4,
     "StartClPos": 0,
     "EndLnPos": 4,
-    "EndClPos": 0
+    "EndClPos": 1
   },
   {
     "Type": "EndOfFile",
@@ -198,7 +198,7 @@
     "StartLnPos": 4,
     "StartClPos": 1,
     "EndLnPos": 4,
-    "EndClPos": 1
+    "EndClPos": 2
   }
 ],
 "syntaxTree": []

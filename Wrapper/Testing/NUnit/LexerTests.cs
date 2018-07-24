@@ -60,8 +60,7 @@ namespace Wrapper.Testing.NUnit {
         public static void UseBlockValid() {
             Compiler.Options.Debug = true;
             var source = new SourceCode(
-                @"
-use {
+                @"use {
    collections.enumerable,
    dotnet.namespace,
    some.multi.nested.namespace.end
@@ -111,6 +110,17 @@ use {
             string t1 = JsonConvert.SerializeObject(source.Tokens, Compiler.Options.JsonSerializer);
             string t2 = JsonConvert.SerializeObject(expected,      Compiler.Options.JsonSerializer);
             Assert.AreEqual(t1, t2);
+        }
+
+        [Test]
+        public static void StringsValidation() {
+            Compiler.Options.Debug = true;
+            var source = new SourceCode(
+                new FileInfo(InPath + nameof(StringsValidation) + axionExtension),
+                OutPath + nameof(StringsValidation) + testExtension
+            );
+
+            Assert.DoesNotThrow(() => Compiler.Process(source, SourceProcessingMode.Lex));
         }
 
         [Test]

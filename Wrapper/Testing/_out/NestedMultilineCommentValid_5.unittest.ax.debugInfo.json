@@ -6,7 +6,7 @@
     "StartLnPos": 0,
     "StartClPos": 0,
     "EndLnPos": 0,
-    "EndClPos": 17
+    "EndClPos": 18
   },
   {
     "Type": "OpMultiply",
@@ -14,7 +14,7 @@
     "StartLnPos": 0,
     "StartClPos": 21,
     "EndLnPos": 0,
-    "EndClPos": 21
+    "EndClPos": 22
   },
   {
     "Type": "OpTrueDivide",
@@ -22,7 +22,7 @@
     "StartLnPos": 0,
     "StartClPos": 22,
     "EndLnPos": 0,
-    "EndClPos": 22
+    "EndClPos": 23
   },
   {
     "Type": "EndOfFile",
@@ -30,7 +30,7 @@
     "StartLnPos": 0,
     "StartClPos": 23,
     "EndLnPos": 0,
-    "EndClPos": 23
+    "EndClPos": 24
   }
 ],
 "syntaxTree": []

@@ -16,14 +16,15 @@ namespace Axion.Tokens {
             Value      = value;
             StartLnPos = location.line;
             StartClPos = location.column;
-            // TODO debug token lines computation
-            string[] lines = value.Split(Spec.Newlines, StringSplitOptions.None);
-            EndLnPos = StartLnPos + lines.Length - 1;
-            if (lines.Length == 1) {
-                EndClPos = StartClPos + value.Length - 1;
+            string[] valueLines = value.Split(Spec.Newlines, StringSplitOptions.None);
+            // compute end line & end column
+            if (valueLines.Length == 1) {
+                EndLnPos = StartLnPos;
+                EndClPos = StartClPos + value.Length;
             }
             else {
-                EndClPos = lines[lines.Length - 1].Length - 1;
+                EndLnPos = StartLnPos + valueLines.Length;
+                EndClPos = valueLines[valueLines.Length - 1].Length;
             }
         }
 

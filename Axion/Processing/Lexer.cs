@@ -172,19 +172,21 @@ namespace Axion.Processing {
                 if (tokens.Count != 0
                  && mismatchingPairs.Count == 0
                  && tokens.Last.Value.Type == TokenType.Newline) {
-                    // compute indentation length
-                    var indentLength = 0;
-
                     // set indent character if it is unknown
                     if (indentChar == '\0') {
                         indentChar = C;
                     }
 
+                    // compute indentation length
+                    var indentLength = 0;
                     while (C == ' ' || C == '\t') {
                         if (!inconsistentIndentation) {
                             // check for consistency
                             if (indentChar != C && !inconsistentIndentation) {
-                                Log.Warn(ErrorType.WarnInconsistentIndentation, pos);
+                                // warn user about inconsistency
+                                if (Compiler.Options.CheckIndentationConsistency) {
+                                    Log.Warn(ErrorType.WarnInconsistentIndentation, pos);
+                                }
                                 inconsistentIndentation = true;
                             }
                         }
@@ -199,15 +201,21 @@ namespace Axion.Processing {
                         Move();
                     }
 
-                    // skip indentation if line is commented
+                    // return if indent level not changed
+                    if (indentLength == indentLevel) {
+                        return null;
+                    }
+
+                    // return if line is empty/commented
                     string restOfLine = Line.Substring(pos.column);
                     if ( // rest of line is blank
-                        // next token is one-line comment
-                        restOfLine.StartsWith(Spec.CommentOnelineStart.ToString())
-                        // or next token is multiline comment
-                     || restOfLine.StartsWith(Spec.CommentMultilineStart) &&
+                        string.IsNullOrWhiteSpace(restOfLine)
+                        // rest is one-line comment
+                     || restOfLine.StartsWith(Spec.CommentOnelineStart.ToString())
+                        // or rest is multiline comment
+                     || restOfLine.StartsWith(Spec.CommentMultilineStart)
                         // and comment goes through end of line
-                        Regex.Matches(restOfLine, Spec.CommentMultilineStartPattern).Count >
+                     && Regex.Matches(restOfLine, Spec.CommentMultilineStartPattern).Count >
                         Regex.Matches(restOfLine, Spec.CommentMultilineEndPattern).Count) {
                         return null;
                     }
@@ -219,9 +227,6 @@ namespace Axion.Processing {
                     else if (indentLength < indentLevel) {
                         // indent decreased
                         tokenType = TokenType.Outdent;
-                    }
-                    else {
-                        return null;
                     }
                     indentLevel = indentLength;
                 }
@@ -349,8 +354,8 @@ namespace Axion.Processing {
 
             // string
             else if (Spec.StringQuotes.Contains(C) ||
-                     Spec.StringPrefixes.Contains(C) &&
-                     Spec.StringQuotes.Contains(Peek())) {
+                     (Spec.StringPrefixes.Contains(C) &&
+                      Spec.StringQuotes.Contains(Peek()))) {
                 tokenType = TokenType.StringLiteral;
                 // TODO add string prefixes processing support
                 //bool strFormat = false;
@@ -376,7 +381,7 @@ namespace Axion.Processing {
                 while (true) {
                     string piece = C.ToString();
                     // if got non-escaped quote
-                    if (C == quote && tokenValue[tokenValue.Length - 1] != '\\') {
+                    if (C == quote && (tokenValue.Length == 0 || tokenValue[tokenValue.Length - 1] != '\\')) {
                         Move();
                         piece += C;
                         // " `
@@ -745,7 +750,7 @@ namespace Axion.Processing {
             if (pos.column + 1 < Line.Length) {
                 return Line[pos.column + 1];
             }
-            // column out of line
+            // column out of line range
             if (pos.line < lines.Length) {
                 return Spec.EndLine;
             }

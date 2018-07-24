@@ -6,15 +6,15 @@
     "StartLnPos": 0,
     "StartClPos": 0,
     "EndLnPos": 0,
-    "EndClPos": 23
+    "EndClPos": 24
   },
   {
     "Type": "Newline",
     "Value": "\n",
     "StartLnPos": 0,
     "StartClPos": 24,
-    "EndLnPos": 1,
-    "EndClPos": -1
+    "EndLnPos": 2,
+    "EndClPos": 0
   },
   {
     "Type": "KeywordUse",
@@ -22,7 +22,7 @@
     "StartLnPos": 1,
     "StartClPos": 0,
     "EndLnPos": 1,
-    "EndClPos": 2
+    "EndClPos": 3
   },
   {
     "Type": "OpLeftBrace",
@@ -30,7 +30,7 @@
     "StartLnPos": 1,
     "StartClPos": 4,
     "EndLnPos": 1,
-    "EndClPos": 4
+    "EndClPos": 5
   },
   {
     "Type": "Identifier",
@@ -38,7 +38,7 @@
     "StartLnPos": 1,
     "StartClPos": 6,
     "EndLnPos": 1,
-    "EndClPos": 13
+    "EndClPos": 14
   },
   {
     "Type": "OpRightBrace",
@@ -46,47 +46,47 @@
     "StartLnPos": 1,
     "StartClPos": 15,
     "EndLnPos": 1,
-    "EndClPos": 15
+    "EndClPos": 16
   },
   {
     "Type": "Newline",
     "Value": "\n",
     "StartLnPos": 1,
     "StartClPos": 16,
-    "EndLnPos": 2,
-    "EndClPos": -1
+    "EndLnPos": 3,
+    "EndClPos": 0
   },
   {
     "Type": "CommentLiteral",
     "Value": "/* Multiline comments test.\n\t/* Any nested comment should be parsed correctly.\n\t\t/* Each comment start sign must be followed by end sign.\n\t\t\t/* 1: some more text.\n\t\t\t\t/* 2: some more text.\n\t\t\t\t\t/* 3: some more text.\n\t\t\t\t\t*/\n\t\t\t\t*/\n\t\t\t*/\n\t\t*/\n\t*/\n*/",
     "StartLnPos": 2,
     "StartClPos": 0,
-    "EndLnPos": 13,
-    "EndClPos": 1
+    "EndLnPos": 14,
+    "EndClPos": 2
   },
   {
     "Type": "Newline",
     "Value": "\n",
     "StartLnPos": 13,
     "StartClPos": 2,
-    "EndLnPos": 14,
-    "EndClPos": -1
+    "EndLnPos": 15,
+    "EndClPos": 0
   },
   {
     "Type": "CommentLiteral",
     "Value": "/*/*/*/*/*/*\n*/*/*/*/*/*/",
     "StartLnPos": 14,
     "StartClPos": 0,
-    "EndLnPos": 15,
-    "EndClPos": 11
+    "EndLnPos": 16,
+    "EndClPos": 12
   },
   {
     "Type": "Newline",
     "Value": "\n",
     "StartLnPos": 15,
     "StartClPos": 12,
-    "EndLnPos": 16,
-    "EndClPos": -1
+    "EndLnPos": 17,
+    "EndClPos": 0
   },
   {
     "Type": "CommentLiteral",
@@ -94,15 +94,15 @@
     "StartLnPos": 16,
     "StartClPos": 0,
     "EndLnPos": 16,
-    "EndClPos": 19
+    "EndClPos": 20
   },
   {
     "Type": "Newline",
     "Value": "\n",
     "StartLnPos": 16,
     "StartClPos": 20,
-    "EndLnPos": 17,
-    "EndClPos": -1
+    "EndLnPos": 18,
+    "EndClPos": 0
   },
   {
     "Type": "CommentLiteral",
@@ -110,7 +110,7 @@
     "StartLnPos": 17,
     "StartClPos": 0,
     "EndLnPos": 17,
-    "EndClPos": 26
+    "EndClPos": 27
   },
   {
     "Type": "EndOfFile",
@@ -118,7 +118,7 @@
     "StartLnPos": 17,
     "StartClPos": 27,
     "EndLnPos": 17,
-    "EndClPos": 27
+    "EndClPos": 28
   }
 ],
 "syntaxTree": []

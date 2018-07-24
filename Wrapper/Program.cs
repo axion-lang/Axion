@@ -1,7 +1,7 @@
 ﻿using Axion;
 
 namespace Wrapper {
-    internal class Program {
+    internal static class Program {
         public static void Main(string[] args) {
             //try {
             Compiler.Launch(args);

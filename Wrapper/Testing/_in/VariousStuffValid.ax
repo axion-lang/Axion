@@ -1,7 +1,8 @@
-result = ""sertyuikmnbvcftyuikl,mnjikol""[c1(index+2+43465786342)]
+result = "sertyuikmnbvcftyuikl,mnjikol"[c1(index+2+43465786342)]
 someVar = 54321 + 12345
-c2(variable, ""string"", 's', """"""string"""""", cnest1(123456789, cnest2(""""""string""""""), 123456789), 123456789, 987654321)
+c2(variable, "string", 's', """string""", cnest1(123456789, cnest2("""string"""), 123456789), 123456789, 987654321)
 otherVar = c3()
+v2 = """"""
 n++
 ++n
 n2 = n++ + ++n
