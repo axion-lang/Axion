@@ -17,7 +17,7 @@ namespace Axion {
         internal static readonly string WorkDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
         private const string typeHelp = "Type '-?' or '--help' to get documentation about launch arguments.";
-        private const string version  = "0.2.9.6-alpha [unstable]";
+        private const string version  = "0.2.9.7-alpha [unstable]";
 
         /// <summary>
         ///     Compiler files to process.
@@ -33,9 +33,9 @@ namespace Axion {
         ///     (input -> response).
         /// </summary>
         /// <param name="arguments">Command line arguments compiler was launched with.</param>
-        public static void Launch(string[] arguments) {
-            Log.WriteLine("Axion programming language compiler v. ", version, ConsoleColor.Yellow);
-            Log.WriteLine("Working in ", WorkDirectory, ConsoleColor.Yellow);
+        public static void Init(string[] arguments) {
+            Log.WriteLine("Axion programming language compiler v. ", version,       ConsoleColor.Yellow);
+            Log.WriteLine("Working in ",                             WorkDirectory, ConsoleColor.Yellow);
             Console.WriteLine(typeHelp + Environment.NewLine);
 
             // main processing loop

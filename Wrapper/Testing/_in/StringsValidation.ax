@@ -10,11 +10,11 @@ str2m = ```multiline literal```
 str1fm = f"""{str1} formatted multiline literal {str2}"""
 str2fm = f```{str1} formatted multiline literal {str2}```
 
-str1fm = f"""
+str1fm_ = f"""
 {str1} formatted multiline literal {str2}
 """
 
-str2fm = f```
+str2fm_ = f```
 {str1} formatted multiline literal {str2}
 ```
 
@@ -27,17 +27,17 @@ str2fe = f``
 str1me = """"""
 str2me = ``````
 
-str1me = """
+str1me_ = """
 """
 
-str2me = ```
+str2me_ = ```
 ```
 
 str1fme = f""""""
 str2fme = f``````
 
-str1fme = """
+str1fme_ = f"""
 """
 
-str2fme = ```
+str2fme_ = f```
 ```

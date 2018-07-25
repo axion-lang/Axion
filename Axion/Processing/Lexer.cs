@@ -25,7 +25,7 @@ namespace Axion.Processing {
         /// </summary>
         private readonly string[] lines;
 
-        #region Input source values
+        #region Input source properties
 
         /// <summary>
         ///     Current line and column index in code. 0-based.
@@ -45,16 +45,11 @@ namespace Axion.Processing {
                 ? pos.column < Line.Length
                       ? Line[pos.column]
                       : Spec.EndLine
-                : Spec.EndFile;
+                : Spec.EndStream;
 
         #endregion
 
-        #region Current token values
-
-        /// <summary>
-        ///     Type of current reading <see cref="Token" />.
-        /// </summary>
-        private TokenType tokenType;
+        #region Current token properties
 
         /// <summary>
         ///     Value of current reading <see cref="Token" />
@@ -94,8 +89,8 @@ namespace Axion.Processing {
         private readonly List<Token> mismatchingPairs = new List<Token>();
 
         /// <summary>
-        ///     Initializes a new instance of <see cref="Lexer"/>
-        ///     for specified <see cref="SourceCode"/>.
+        ///     Initializes a new instance of <see cref="Lexer" />
+        ///     for specified <see cref="SourceCode" />.
         /// </summary>
         internal Lexer(SourceCode source) {
             src    = source;
@@ -143,31 +138,28 @@ namespace Axion.Processing {
 
         private Token ReadToken() {
             // reset token properties
-            tokenType  = TokenType.Unknown;
             tokenPos   = pos;
             tokenValue = "";
 
             // end of file;
-            if (C == Spec.EndFile) {
-                tokenValue += Spec.EndFile;
-                tokenType  =  TokenType.EndOfFile;
+            if (C == Spec.EndStream) {
                 Move();
+                return new EndOfStreamToken(tokenPos);
             }
 
             // newline;
-            else if (C == Spec.EndLine) {
-                tokenValue += Spec.EndLine;
-                tokenType  =  TokenType.Newline;
+            if (C == Spec.EndLine) {
                 Move();
                 // don't add newline as first token
                 // and don't create multiple newline tokens.
                 if (tokens.Count == 0 || tokens.Last.Value.Type == TokenType.Newline) {
                     return null;
                 }
+                return new EndOfLineToken(tokenPos);
             }
 
             // whitespaces & indentation;
-            else if (C == ' ' || C == '\t') {
+            if (C == ' ' || C == '\t') {
                 // check if we're at line beginning
                 if (tokens.Count != 0
                  && mismatchingPairs.Count == 0
@@ -180,6 +172,7 @@ namespace Axion.Processing {
                     // compute indentation length
                     var indentLength = 0;
                     while (C == ' ' || C == '\t') {
+                        tokenValue += C;
                         if (!inconsistentIndentation) {
                             // check for consistency
                             if (indentChar != C && !inconsistentIndentation) {
@@ -201,17 +194,12 @@ namespace Axion.Processing {
                         Move();
                     }
 
-                    // return if indent level not changed
-                    if (indentLength == indentLevel) {
-                        return null;
-                    }
-
                     // return if line is empty/commented
                     string restOfLine = Line.Substring(pos.column);
                     if ( // rest of line is blank
                         string.IsNullOrWhiteSpace(restOfLine)
                         // rest is one-line comment
-                     || restOfLine.StartsWith(Spec.CommentOnelineStart.ToString())
+                     || restOfLine.StartsWith(Spec.CommentOnelineStart)
                         // or rest is multiline comment
                      || restOfLine.StartsWith(Spec.CommentMultilineStart)
                         // and comment goes through end of line
@@ -222,52 +210,51 @@ namespace Axion.Processing {
 
                     if (indentLength > indentLevel) {
                         // indent increased
-                        tokenType = TokenType.Indent;
+                        indentLevel = indentLength;
+                        return new IndentToken(tokenPos, tokenValue);
                     }
-                    else if (indentLength < indentLevel) {
+                    if (indentLength < indentLevel) {
                         // indent decreased
-                        tokenType = TokenType.Outdent;
+                        indentLevel = indentLength;
+                        return new OutdentToken(tokenPos, tokenValue);
                     }
-                    indentLevel = indentLength;
-                }
-                // just whitespace
-                else {
-                    Move();
+                    // return if indent level not changed
                     return null;
                 }
+                // just whitespace
+                Move();
+                return null;
             }
 
             // one-line comment;
-            else if (C == Spec.CommentOnelineStart) {
-                tokenValue += Spec.CommentOnelineStart;
-                tokenType  =  TokenType.CommentLiteral;
+            if (C.ToString() == Spec.CommentOnelineStart) {
                 Move();
+
                 // skip all until end of line or end of file
-                while (C != Spec.EndLine && C != Spec.EndFile) {
+                while (C != Spec.EndLine && C != Spec.EndStream) {
                     tokenValue += C;
                     Move();
                 }
+                return new SingleCommentToken(tokenPos, tokenValue);
             }
 
             // multiline comment;
-            else if (C.ToString() + Peek() == Spec.CommentMultilineStart) {
-                tokenValue += Spec.CommentMultilineStart;
-                tokenType  =  TokenType.CommentLiteral;
+            if (C.ToString() + Peek() == Spec.CommentMultilineStart) {
                 Move(2);
-
-                // multiline comment level variable.
-                // FEATURE: support for nested multiline comments
                 var commentLevel = 1;
                 while (commentLevel > 0) {
                     string nextPiece = C.ToString() + Peek();
-                    // comment end
+                    // found comment end
                     if (nextPiece == Spec.CommentMultilineEnd) {
-                        tokenValue += Spec.CommentMultilineEnd;
+                        // don't add last comment '*/'
+                        if (commentLevel != 1) {
+                            tokenValue += Spec.CommentMultilineEnd;
+                        }
                         Move(2);
                         // decrease comment level
                         commentLevel--;
                     }
-                    // nested multiline comment start
+                    // found nested multiline comment start
                     else if (nextPiece == Spec.CommentMultilineStart) {
                         tokenValue += Spec.CommentMultilineStart;
                         Move(2);
@@ -275,28 +262,144 @@ namespace Axion.Processing {
                         commentLevel++;
                     }
                     // went through end of file
-                    else if (C == Spec.EndFile) {
+                    else if (C == Spec.EndStream) {
                         throw new ProcessingException(
                             ErrorType.UnclosedMultilineComment,
                             src,
-                            new Token(TokenType.CommentLiteral, tokenPos, tokenValue)
+                            new MultipleCommentToken(tokenPos, tokenValue)
                         );
                     }
-                    // any other character
+                    // found any other character
                     else {
                         tokenValue += C;
                         Move();
                     }
                 }
+                return new MultipleCommentToken(tokenPos, tokenValue);
+            }
+
+            // character literal
+            if (C == Spec.CharLiteralQuote) {
+                Move();
+                // got escape-sequence
+                if (C == '\\') {
+                    tokenValue += '\\';
+                    Move();
+                    // got invalid sequence
+                    if (!Spec.ValidEscapeChars.Contains(C)) {
+                        tokenValue += C;
+                        src.Errors.Add(
+                            new ProcessingException(
+                                ErrorType.InvalidEscapeSequence,
+                                src,
+                                new CharacterToken(tokenPos, tokenValue)
+                            )
+                        );
+                    }
+                }
+                tokenValue += C;
+                Move();
+                if (C != Spec.CharLiteralQuote) {
+                    throw new ProcessingException(
+                        ErrorType.CharacterLiteralTooLong,
+                        src,
+                        new CharacterToken(tokenPos, tokenValue)
+                    );
+                }
+                Move();
+                return new CharacterToken(tokenPos, tokenValue);
             }
 
             // number;
-            else if (char.IsDigit(C)) {
+            if (char.IsDigit(C)) {
                 return ReadNumber();
             }
 
+            // string
+            if (Spec.StringQuotes.Contains(C) ||
+                Spec.StringPrefixes.Contains(C) &&
+                Spec.StringQuotes.Contains(Peek())) {
+                // TODO add string prefixes processing support
+                var stringOptions = StringLiteralOptions.None;
+                if (C == 'f') {
+                    stringOptions |= StringLiteralOptions.Format;
+                    Move();
+                }
+                if (C == 'r') {
+                    stringOptions |= StringLiteralOptions.Raw;
+                    Move();
+                }
+                string delimiter = C.ToString();
+                char   quote     = C;
+                Move();
+                // add next 2 quotes for multiline strings
+                if (C == quote) {
+                    delimiter += C;
+                    Move();
+                    if (C != quote) {
+                        // got empty one-quoted string
+                        return new StringToken(
+                            tokenPos,
+                            "",
+                            stringOptions,
+                            false
+                        );
+                    }
+                    delimiter += C;
+                    Move();
+                }
+
+                while (true) {
+                    string piece = C.ToString();
+                    // TODO add string escape sequences
+                    // if got non-escaped quote
+                    if (C == quote && (tokenValue.Length == 0 || tokenValue[tokenValue.Length - 1] != '\\')) {
+                        Move();
+                        piece += C;
+                        // " `
+                        if (delimiter.Length == 1) {
+                            return new StringToken(
+                                tokenPos,
+                                tokenValue,
+                                stringOptions,
+                                false
+                            );
+                        }
+                        // """ ```
+                        if (C == quote && Peek() == quote) {
+                            Move(2);
+                            return new StringToken(
+                                tokenPos,
+                                tokenValue,
+                                stringOptions,
+                                true
+                            );
+                        }
+                        Move();
+                        piece += C;
+                    }
+
+                    // if not matched, check for end of line/file
+                    if (C == Spec.EndLine && delimiter.Length == 1 ||
+                        C == Spec.EndStream) {
+                        throw new ProcessingException(
+                            ErrorType.UnclosedString,
+                            src,
+                            new StringToken(
+                                tokenPos,
+                                tokenValue,
+                                stringOptions,
+                                delimiter.Length == 3
+                            )
+                        );
+                    }
+                    tokenValue += piece;
+                    Move();
+                }
+            }
+
             // identifier;
-            else if (Spec.IsValidIdStart(C)) {
+            if (Spec.IsValidIdStart(C)) {
                 tokenValue += C;
                 Move();
                 while (Spec.IsValidIdChar(C)) {
@@ -304,20 +407,22 @@ namespace Axion.Processing {
                     Move();
                 }
 
-                if (!Spec.Keywords.TryGetValue(tokenValue, out tokenType)) {
-                    tokenType = TokenType.Identifier;
+                if (!Spec.Keywords.TryGetValue(tokenValue, out TokenType tokenType)) {
+                    return new IdentifierToken(tokenPos, tokenValue);
                 }
+                return new KeywordToken(tokenPos, tokenType, tokenValue);
             }
 
             // operator;
-            else if (Spec.OperatorChars.Contains(C)) {
-                int    longestLength = Spec.OperatorsValues[0].Length;
-                string next          = C + Peek((uint) longestLength - 1u);
+            if (Spec.OperatorChars.Contains(C)) {
+                int           longestLength = Spec.OperatorsValues[0].Length;
+                string        next          = C + Peek((uint) longestLength - 1u);
+                OperatorToken op;
                 for (int length = longestLength; length > 0; length--) {
                     string piece = next.Substring(0, length);
                     if (Spec.OperatorsValues.Contains(piece)) {
                         Move(length);
-                        var op = new OperatorToken(piece, tokenPos);
+                        op = new OperatorToken(piece, tokenPos);
                         // got open brace
                         if (op.Properties.IsOpenBrace) {
                             mismatchingPairs.Add(op);
@@ -335,127 +440,16 @@ namespace Axion.Processing {
                         return op;
                     }
                 }
-                src.Errors.Add(
-                    new ProcessingException(
-                        ErrorType.InvalidOperator,
-                        src,
-                        new OperatorToken(
-                            new OperatorProperties(
-                                TokenType.Unknown,
-                                InputSide.Both,
-                                Associativity.None,
-                                false, 0
-                            ),
-                            tokenPos
-                        )
-                    )
-                );
-            }
-
-            // string
-            else if (Spec.StringQuotes.Contains(C) ||
-                     (Spec.StringPrefixes.Contains(C) &&
-                      Spec.StringQuotes.Contains(Peek()))) {
-                tokenType = TokenType.StringLiteral;
-                // TODO add string prefixes processing support
-                //bool strFormat = false;
-                if (C == 'f') {
-                    //strFormat = true;
-                    Move();
-                }
-                string delimiter = C.ToString();
-                char   quote     = C;
-                Move();
-                // add next 2 quotes for multiline strings
-                if (C == quote) {
-                    delimiter += C;
-                    Move();
-                    if (C != quote) {
-                        // got empty one-quoted string
-                        return new Token(TokenType.StringLiteral, pos);
-                    }
-                    delimiter += C;
-                    Move();
-                }
-
-                while (true) {
-                    string piece = C.ToString();
-                    // if got non-escaped quote
-                    if (C == quote && (tokenValue.Length == 0 || tokenValue[tokenValue.Length - 1] != '\\')) {
-                        Move();
-                        piece += C;
-                        // " `
-                        if (delimiter.Length == 1) {
-                            return new Token(TokenType.StringLiteral, tokenPos, tokenValue);
-                        }
-                        // """ ```
-                        if (C == quote && Peek() == quote) {
-                            Move(2);
-                            return new Token(TokenType.StringLiteral, tokenPos, tokenValue);
-                        }
-                        Move();
-                        piece += C;
-                    }
-
-                    // if not matched, check for end of line/file
-                    if (C == Spec.EndLine && delimiter.Length == 1 ||
-                        C == Spec.EndFile) {
-                        throw new ProcessingException(
-                            ErrorType.UnclosedString,
-                            src,
-                            new Token(TokenType.StringLiteral, tokenPos, tokenValue)
-                        );
-                    }
-                    tokenValue += piece;
-                    Move();
-                }
-            }
-
-            // character literal
-            else if (C == Spec.CharLiteralQuote) {
-                tokenType = TokenType.CharLiteral;
-                Move();
-                // got escape-sequence
-                if (C == '\\') {
-                    tokenValue += '\\';
-                    Move();
-                    // got invalid sequence
-                    if (!Spec.ValidEscapeChars.Contains(C)) {
-                        tokenValue += C;
-                        src.Errors.Add(
-                            new ProcessingException(
-                                ErrorType.InvalidEscapeSequence,
-                                src,
-                                new Token(TokenType.Invalid, tokenPos, tokenValue)
-                            )
-                        );
-                    }
-                }
-                tokenValue += C;
-                Move();
-                if (C != Spec.CharLiteralQuote) {
-                    throw new ProcessingException(
-                        ErrorType.CharacterLiteralTooLong,
-                        src,
-                        new Token(TokenType.Invalid, tokenPos, tokenValue)
-                    );
-                }
-                Move();
+                op = new OperatorToken(Spec.InvalidOperatorProperties, tokenPos);
+                src.Errors.Add(new ProcessingException(ErrorType.InvalidOperator, src, op));
+                return op;
             }
 
             // invalid
-            else {
-                src.Errors.Add(
-                    new ProcessingException(
-                        ErrorType.InvalidSymbol,
-                        src,
-                        new Token(TokenType.Unknown, pos, C.ToString())
-                    )
-                );
-                Move();
-            }
-
-            return new Token(tokenType, tokenPos, tokenValue);
+            var token = new Token(TokenType.Unknown, pos, C.ToString());
+            src.Errors.Add(new ProcessingException(ErrorType.InvalidSymbol, src, token));
+            Move();
+            return token;
         }
 
         private Token ReadNumber() {
@@ -495,18 +489,18 @@ namespace Axion.Processing {
                         if (exp != null) {
                             return exp;
                         }
-                        return new ConstToken(
+                        return new Token(
                             TokenType.Unknown,
                             tokenPos,
-                            ParseInteger(tokenValue, 10)
+                            ParseInteger(tokenValue, 10).ToString()
                         );
                     }
                     case 'j':
                     case 'J': {
-                        return new ConstToken(
+                        return new Token(
                             TokenType.Unknown,
                             tokenPos,
-                            LiteralParser.ParseImaginary(tokenValue)
+                            LiteralParser.ParseImaginary(tokenValue).ToString()
                         );
                     }
                     case '0':
@@ -534,10 +528,10 @@ namespace Axion.Processing {
                                 )
                             );
                         }
-                        return new ConstToken(
+                        return new Token(
                             TokenType.Unknown,
                             tokenPos,
-                            ParseInteger(tokenValue, 10)
+                            ParseInteger(tokenValue, 10).ToString()
                         );
                     }
                 }
@@ -580,7 +574,7 @@ namespace Axion.Processing {
                     case 'l':
                     case 'L': {
                         BigInteger value = useBigInt ? bigInt : iVal;
-                        return new ConstToken(TokenType.Unknown, tokenPos, value);
+                        return new Token(TokenType.Unknown, tokenPos, value.ToString());
                     }
                     default: {
                         if (first) {
@@ -591,7 +585,7 @@ namespace Axion.Processing {
                             );
                         }
                         object value = useBigInt ? bigInt : (object) iVal;
-                        return new ConstToken(TokenType.Unknown, tokenPos, value);
+                        return new Token(TokenType.Unknown, tokenPos, value.ToString());
                     }
                 }
                 first = false;
@@ -617,7 +611,7 @@ namespace Axion.Processing {
                     case 'l':
                     case 'L': {
                         BigInteger value = LiteralParser.ParseBigInteger(tokenValue.Substring(2, tokenValue.Length - 2), 8);
-                        return new ConstToken(TokenType.Unknown, tokenPos, value);
+                        return new Token(TokenType.Unknown, tokenPos, value.ToString());
                     }
                     default: {
                         if (first) {
@@ -628,7 +622,7 @@ namespace Axion.Processing {
                             );
                         }
                         object value = ParseInteger(tokenValue.Substring(2), 8);
-                        return new ConstToken(TokenType.Unknown, tokenPos, value);
+                        return new Token(TokenType.Unknown, tokenPos, value.ToString());
                     }
                 }
                 first = false;
@@ -650,7 +644,7 @@ namespace Axion.Processing {
                             tokenValue
                                 .Substring(2, tokenValue.Length - 3), 16
                         );
-                    return new ConstToken(TokenType.Unknown, tokenPos, value);
+                    return new Token(TokenType.Unknown, tokenPos, value.ToString());
                 }
                 else {
                     if (first) {
@@ -661,7 +655,7 @@ namespace Axion.Processing {
                         );
                     }
                     object value = ParseInteger(tokenValue.Substring(2), 16);
-                    return new ConstToken(TokenType.Unknown, tokenPos, value);
+                    return new Token(TokenType.Unknown, tokenPos, value.ToString());
                 }
                 first = false;
             }
@@ -679,15 +673,15 @@ namespace Axion.Processing {
                         return exp;
                     }
                     object value = ParseFloat(tokenValue);
-                    return new ConstToken(TokenType.Unknown, tokenPos, value);
+                    return new Token(TokenType.Unknown, tokenPos, value.ToString());
                 }
                 else if (C == 'j' || C == 'J') {
                     Complex value = LiteralParser.ParseImaginary(tokenValue);
-                    return new ConstToken(TokenType.Unknown, tokenPos, value);
+                    return new Token(TokenType.Unknown, tokenPos, value.ToString());
                 }
                 else {
                     object value = ParseFloat(tokenValue);
-                    return new ConstToken(TokenType.Unknown, tokenPos, value);
+                    return new Token(TokenType.Unknown, tokenPos, value.ToString());
                 }
             }
         }
@@ -717,7 +711,7 @@ namespace Axion.Processing {
                     break;
                 }
             }
-            return new ConstToken(TokenType.Unknown, tokenPos, value);
+            return new Token(TokenType.Unknown, tokenPos, value.ToString());
         }
 
         private object ParseInteger(string s, int radix) {
@@ -755,7 +749,7 @@ namespace Axion.Processing {
                 return Spec.EndLine;
             }
             // line out of lines range
-            return Spec.EndFile;
+            return Spec.EndStream;
         }
 
         private string Peek(uint length) {

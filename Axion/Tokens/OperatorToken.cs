@@ -3,6 +3,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace Axion.Tokens {
+    /// <summary>
+    ///     Represents a &lt;operator&gt; <see cref="Token" />.
+    /// </summary>
     public class OperatorToken : Token {
         internal readonly OperatorProperties Properties;
 
@@ -75,6 +78,7 @@ namespace Axion.Tokens {
 
     [JsonConverter(typeof(StringEnumConverter))]
     internal enum InputSide {
+        None,
         Left,
         Right,
         Both,

@@ -4,7 +4,7 @@ namespace Wrapper {
     internal static class Program {
         public static void Main(string[] args) {
             //try {
-            Compiler.Launch(args);
+            Compiler.Init(args);
             //}
             //catch(Exception ex) {
             //   Console.WriteLine("Error: " + ex.Message);

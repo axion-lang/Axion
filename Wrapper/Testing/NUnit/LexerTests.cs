@@ -9,22 +9,45 @@ using NUnit.Framework;
 namespace Wrapper.Testing.NUnit {
     [TestFixture]
     internal static class LexerTests {
-        private static string OutPath =>
-            Directory.Exists(__outPath)
-                ? __outPath
-                : throw new DirectoryNotFoundException("Unit tests output directory not found.");
+        private static string OutPath {
+            get {
+                if (!Directory.Exists(__outPath)) {
+                    Directory.CreateDirectory(__outPath);
+                }
+                return __outPath;
+            }
+        }
 
         private const string __outPath = "C:\\Users\\Fluctus\\Documents\\Code\\CSharp\\Axion\\Wrapper\\Testing\\_out\\";
 
-        private static string InPath =>
-            Directory.Exists(__inPath)
-                ? __inPath
-                : throw new DirectoryNotFoundException("Unit tests input directory not found.");
+        private static string InPath {
+            get {
+                if (!Directory.Exists(__inPath)) {
+                    Directory.CreateDirectory(__inPath);
+                }
+                return __inPath;
+            }
+        }
 
         private const string __inPath = "C:\\Users\\Fluctus\\Documents\\Code\\CSharp\\Axion\\Wrapper\\Testing\\_in\\";
 
         private const string testExtension  = ".unittest.ax";
         private const string axionExtension = ".ax";
+
+        /// <summary>
+        ///     a quick way to clear unit tests debug output.
+        /// </summary>
+        [Test]
+        public static void _ClearDebugDirectory() {
+            Assert.DoesNotThrow(
+                () => {
+                    var di = new DirectoryInfo(__outPath);
+                    foreach (FileInfo file in di.EnumerateFiles()) {
+                        file.Delete();
+                    }
+                }
+            );
+        }
 
         [Test]
         public static void NestedMultilineCommentInvalid() {
@@ -54,6 +77,17 @@ namespace Wrapper.Testing.NUnit {
                 );
                 Assert.DoesNotThrow(() => Compiler.Process(source, SourceProcessingMode.Lex));
             }
+        }
+
+        [Test]
+        public static void StringsValidation() {
+            Compiler.Options.Debug = true;
+            var source = new SourceCode(
+                new FileInfo(InPath + nameof(StringsValidation) + axionExtension),
+                OutPath + nameof(StringsValidation) + testExtension
+            );
+
+            Assert.DoesNotThrow(() => Compiler.Process(source, SourceProcessingMode.Lex));
         }
 
         [Test]
@@ -103,24 +137,13 @@ namespace Wrapper.Testing.NUnit {
             expected.AddLast(new Token(TokenType.Newline,    (3, 34), Spec.EndLine.ToString()));
             // line 5
             expected.AddLast(new OperatorToken("}", (4, 0)));
-            expected.AddLast(new Token(TokenType.EndOfFile, (4, 1), Spec.EndFile.ToString()));
+            expected.AddLast(new Token(TokenType.EndOfFile, (4, 1), Spec.EndStream.ToString()));
 
             #endregion
 
             string t1 = JsonConvert.SerializeObject(source.Tokens, Compiler.Options.JsonSerializer);
             string t2 = JsonConvert.SerializeObject(expected,      Compiler.Options.JsonSerializer);
             Assert.AreEqual(t1, t2);
-        }
-
-        [Test]
-        public static void StringsValidation() {
-            Compiler.Options.Debug = true;
-            var source = new SourceCode(
-                new FileInfo(InPath + nameof(StringsValidation) + axionExtension),
-                OutPath + nameof(StringsValidation) + testExtension
-            );
-
-            Assert.DoesNotThrow(() => Compiler.Process(source, SourceProcessingMode.Lex));
         }
 
         [Test]

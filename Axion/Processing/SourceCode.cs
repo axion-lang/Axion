@@ -156,7 +156,7 @@ namespace Axion.Processing {
 
         /// <summary>
         ///     Appends newline statements on each line and
-        ///     adds <see cref="Spec.EndFile" /> mark at last line end.
+        ///     adds <see cref="Spec.EndStream" /> mark at last line end.
         /// </summary>
         private void CorrectFormat() {
             // append newline statements
@@ -165,7 +165,7 @@ namespace Axion.Processing {
             }
 
             // append end of file mark to last source line.
-            Content[Content.Length - 1] += Spec.EndFile;
+            Content[Content.Length - 1] += Spec.EndStream;
         }
     }
 }

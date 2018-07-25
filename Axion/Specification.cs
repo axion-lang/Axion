@@ -10,7 +10,7 @@ namespace Axion {
         /// <summary>
         ///     End of file mark.
         /// </summary>
-        public const char EndFile = '\uffff';
+        public const char EndStream = '\uffff';
 
         /// <summary>
         ///     End of line mark.
@@ -140,9 +140,9 @@ namespace Axion {
             { "^=", new OperatorProperties(TokenType.OpExclusiveOrEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
             { "=>", new OperatorProperties(TokenType.OpRightArrow,       InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
 
-            { ",", new OperatorProperties(TokenType.OpComma, InputSide.Both, Associativity.LeftToRight, false, 3) },
+            { ",", new OperatorProperties(TokenType.OpComma,     InputSide.Both, Associativity.LeftToRight, false, 3) },
             { ";", new OperatorProperties(TokenType.OpSemicolon, InputSide.Both, Associativity.LeftToRight, false, 2) },
-            { ":", new OperatorProperties(TokenType.OpColon, InputSide.Both, Associativity.LeftToRight, false, 1) },
+            { ":", new OperatorProperties(TokenType.OpColon,     InputSide.Both, Associativity.LeftToRight, false, 1) },
 
             { "{", new OperatorProperties(TokenType.OpLeftBrace,  InputSide.Both, Associativity.LeftToRight, false, 0) },
             { "}", new OperatorProperties(TokenType.OpRightBrace, InputSide.Both, Associativity.LeftToRight, false, 0) }
@@ -152,8 +152,15 @@ namespace Axion {
 
         public static readonly HashSet<char> OperatorChars = new HashSet<char>(OperatorsValues.Select(val => val[0]));
 
+        internal static readonly OperatorProperties InvalidOperatorProperties = new OperatorProperties(
+            TokenType.Invalid,
+            InputSide.None,
+            Associativity.None,
+            false, -1
+        );
+
         internal const char   CharLiteralQuote             = '\'';
-        internal const char   CommentOnelineStart          = '#';
+        internal const string CommentOnelineStart          = "#";
         internal const string CommentMultilineStart        = "/*";
         internal const string CommentMultilineStartPattern = "/\\*";
         internal const string CommentMultilineEnd          = "*/";

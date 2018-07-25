@@ -4,13 +4,34 @@ using Newtonsoft.Json;
 namespace Axion.Tokens {
     [JsonObject]
     public class Token {
-        [JsonProperty(Order = 2)]    public   string    Value;
-        [JsonProperty(Order = 1004)] internal int       EndClPos;
-        [JsonProperty(Order = 1003)] internal int       EndLnPos;
-        [JsonProperty(Order = 1002)] internal int       StartClPos;
-        [JsonProperty(Order = 1001)] internal int       StartLnPos;
-        [JsonProperty(Order = 0)]    internal TokenType Type;
+        /// <summary>
+        ///     Line position of <see cref="Token" /> start in the input stream.
+        /// </summary>
+        [JsonProperty(Order = 1001)]
+        public int StartLnPos { get; protected internal set; }
 
+        /// <summary>
+        ///     Column position of <see cref="Token" /> start in the input stream.
+        /// </summary>
+        [JsonProperty(Order = 1002)]
+        public int StartClPos { get; protected internal set; }
+
+        /// <summary>
+        ///     Line position of <see cref="Token" /> end in the input stream.
+        /// </summary>
+        [JsonProperty(Order = 1003)]
+        public int EndLnPos { get; protected internal set; }
+
+        /// <summary>
+        ///     Column position of <see cref="Token" /> end in the input stream.
+        /// </summary>
+        [JsonProperty(Order = 1004)]
+        public int EndClPos { get; protected internal set; }
+
+        [JsonProperty(Order = 1)] internal TokenType Type;
+
+        [JsonProperty(Order = 2)] public string Value;
+        
         public Token(TokenType type, (int line, int column) location, string value = "") {
             Type       = type;
             Value      = value;
@@ -23,7 +44,7 @@ namespace Axion.Tokens {
                 EndClPos = StartClPos + value.Length;
             }
             else {
-                EndLnPos = StartLnPos + valueLines.Length;
+                EndLnPos = StartLnPos + valueLines.Length - 1;
                 EndClPos = valueLines[valueLines.Length - 1].Length;
             }
         }

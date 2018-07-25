@@ -2,6 +2,9 @@
 using Newtonsoft.Json.Converters;
 
 namespace Axion.Tokens {
+    /// <summary>
+    ///     Represents a &lt;<see cref="Token.Type" />&gt;.
+    /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum TokenType {
         Unknown,
@@ -117,6 +120,6 @@ namespace Axion.Tokens {
         Newline,
         Indent,
         Outdent,
-        EndOfFile,
+        EndOfFile
     }
 }
