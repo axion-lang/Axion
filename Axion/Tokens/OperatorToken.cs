@@ -1,4 +1,5 @@
 ﻿using System;
+using Axion.Processing;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -41,6 +42,20 @@ namespace Axion.Tokens {
             Associativity = associativity;
             Overloadable  = overloadable;
             Precedence    = precedence;
+        }
+
+        internal ErrorType PossibleErrorType {
+            get {
+                switch (Type) {
+                    case TokenType.OpLeftParenthesis:
+                    case TokenType.OpRightParenthesis: return ErrorType.MismatchedParenthesis;
+                    case TokenType.OpLeftBracket:
+                    case TokenType.OpRightBracket: return ErrorType.MismatchedBracket;
+                    case TokenType.OpLeftBrace:
+                    case TokenType.OpRightBrace: return ErrorType.MismatchedBrace;
+                    default: return ErrorType.InvalidOperator;
+                }
+            }
         }
 
         internal bool IsOpenBrace => Type == TokenType.OpLeftParenthesis ||

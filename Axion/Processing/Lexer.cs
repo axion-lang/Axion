@@ -86,7 +86,7 @@ namespace Axion.Processing {
         /// <summary>
         ///     Contains unmatched unpaired parenthesis, brackets and braces.
         /// </summary>
-        private readonly List<Token> mismatchingPairs = new List<Token>();
+        private readonly List<LinkedListNode<Token>> mismatchingPairs = new List<LinkedListNode<Token>>();
 
         /// <summary>
         ///     Initializes a new instance of <see cref="Lexer" />
@@ -94,25 +94,50 @@ namespace Axion.Processing {
         /// </summary>
         internal Lexer(SourceCode source) {
             src    = source;
-            lines  = src.Content;
+            lines  = src.Lines;
             tokens = src.Tokens;
         }
 
         /// <summary>
-        ///     Divides &lt;<see cref="SourceCode.Content" />&gt; into &lt;<see cref="SourceCode.Tokens" />&gt; list of tokens.
+        ///     Divides &lt;<see cref="SourceCode.Lines" />&gt; into &lt;<see cref="SourceCode.Tokens" />&gt; list of tokens.
         /// </summary>
         internal void Tokenize() {
             while (pos.line < lines.Length && pos.column < Line.Length) {
-                Token token = ReadToken();
+                Token token = ReadToken(out ErrorType occurredErrorType);
                 if (token != null) {
                     tokens.AddLast(token);
+                }
+                if (token is OperatorToken op) {
+                    // got open brace
+                    if (op.Properties.IsOpenBrace) {
+                        mismatchingPairs.Add(tokens.Last);
+                    }
+                    else if (op.Properties.IsCloseBrace) {
+                        // got mismatching close brace
+                        if (mismatchingPairs.Count == 0) {
+                            mismatchingPairs.Add(tokens.Last);
+                        }
+                        // got matching close brace
+                        else if (op.Properties.MatchingBrace == mismatchingPairs.Last().Value.Type) {
+                            mismatchingPairs.RemoveAt(mismatchingPairs.Count - 1);
+                        }
+                    }
+                }
+                if (occurredErrorType != ErrorType.None) {
+                    src.Errors.Add(
+                        new ProcessingException(
+                            occurredErrorType, 
+                            src,
+                            tokens.Last
+                        )
+                    );
                 }
             }
 
             for (var i = 0; i < mismatchingPairs.Count; i++) {
-                Token     mismatch = mismatchingPairs[i];
-                ErrorType errorType;
-                switch (mismatch.Type) {
+                LinkedListNode<Token> mismatch = mismatchingPairs[i];
+                ErrorType             errorType;
+                switch (mismatch.Value.Type) {
                     case TokenType.OpLeftParenthesis:
                     case TokenType.OpRightParenthesis: {
                         errorType = ErrorType.MismatchedParenthesis;
@@ -129,17 +154,18 @@ namespace Axion.Processing {
                         break;
                     }
                     default: {
-                        throw new Exception($"Internal error: {nameof(mismatchingPairs)} grabbed invalid {nameof(TokenType)}: {mismatch.Type}.");
+                        throw new Exception($"Internal error: {nameof(mismatchingPairs)} grabbed invalid {nameof(TokenType)}: {mismatch.Value.Type}.");
                     }
                 }
                 src.Errors.Add(new ProcessingException(errorType, src, mismatch));
             }
         }
 
-        private Token ReadToken() {
+        private Token ReadToken(out ErrorType occurredErrorType) {
             // reset token properties
             tokenPos   = pos;
             tokenValue = "";
+            occurredErrorType = ErrorType.None;
 
             // end of file;
             if (C == Spec.EndStream) {
@@ -288,13 +314,8 @@ namespace Axion.Processing {
                     // got invalid sequence
                     if (!Spec.ValidEscapeChars.Contains(C)) {
                         tokenValue += C;
-                        src.Errors.Add(
-                            new ProcessingException(
-                                ErrorType.InvalidEscapeSequence,
-                                src,
-                                new CharacterToken(tokenPos, tokenValue)
-                            )
-                        );
+                        occurredErrorType = ErrorType.InvalidEscapeSequence;
+                        return new CharacterToken(tokenPos, tokenValue);
                     }
                 }
                 tokenValue += C;
@@ -417,39 +438,21 @@ namespace Axion.Processing {
             if (Spec.OperatorChars.Contains(C)) {
                 int           longestLength = Spec.OperatorsValues[0].Length;
                 string        next          = C + Peek((uint) longestLength - 1u);
-                OperatorToken op;
                 for (int length = longestLength; length > 0; length--) {
                     string piece = next.Substring(0, length);
                     if (Spec.OperatorsValues.Contains(piece)) {
                         Move(length);
-                        op = new OperatorToken(piece, tokenPos);
-                        // got open brace
-                        if (op.Properties.IsOpenBrace) {
-                            mismatchingPairs.Add(op);
-                        }
-                        else if (op.Properties.IsCloseBrace) {
-                            // got mismatching close brace
-                            if (mismatchingPairs.Count == 0) {
-                                mismatchingPairs.Add(op);
-                            }
-                            // got matching close brace
-                            else if (op.Properties.MatchingBrace == mismatchingPairs.Last().Type) {
-                                mismatchingPairs.RemoveAt(mismatchingPairs.Count - 1);
-                            }
-                        }
-                        return op;
+                        return new OperatorToken(piece, tokenPos);
                     }
                 }
-                op = new OperatorToken(Spec.InvalidOperatorProperties, tokenPos);
-                src.Errors.Add(new ProcessingException(ErrorType.InvalidOperator, src, op));
-                return op;
+                occurredErrorType = ErrorType.InvalidOperator;
+                return new OperatorToken(Spec.InvalidOperatorProperties, tokenPos);
             }
 
             // invalid
-            var token = new Token(TokenType.Unknown, pos, C.ToString());
-            src.Errors.Add(new ProcessingException(ErrorType.InvalidSymbol, src, token));
+            occurredErrorType = ErrorType.InvalidSymbol;
             Move();
-            return token;
+            return new Token(TokenType.Unknown, pos, C.ToString());
         }
 
         private Token ReadNumber() {
@@ -541,17 +544,17 @@ namespace Axion.Processing {
         }
 
         private Token ReadBinaryNumber() {
-            var        bits      = 0;
-            var        iVal      = 0;
-            var        useBigInt = false;
-            BigInteger bigInt    = BigInteger.Zero;
-            var        first     = true;
+            var        bits       = 0;
+            long       longValue  = 0L;
+            var        numOptions = NumberOptions.Bit8;
+            BigInteger bigInt     = BigInteger.Zero;
+            var        first      = true;
             while (true) {
                 Move();
                 tokenValue += C;
                 switch (C) {
                     case '0': {
-                        if (iVal != 0) {
+                        if (longValue != 0L) {
                             // ignore leading 0's...
                             goto case '1';
                         }
@@ -559,33 +562,44 @@ namespace Axion.Processing {
                     }
                     case '1': {
                         bits++;
-                        if (bits == 32) {
-                            useBigInt = true;
-                            bigInt    = iVal;
+                        if (bits == 8) {
+                            numOptions |= NumberOptions.Bit16;
                         }
-                        if (bits >= 32) {
-                            bigInt = (bigInt << 1) | (C - '0');
+                        else if (bits == 16) {
+                            numOptions |= NumberOptions.Bit32;
+                        }
+                        else if (bits == 32) {
+                            numOptions |= NumberOptions.Bit64;
+                        }
+                        else if (bits == 64) {
+                            numOptions |= NumberOptions.ArbitraryLarge;
+                            bigInt     =  longValue;
+                        }
+                        // TODO debug
+                        var or = (byte) (C - '0');
+                        if (bits >= 64) {
+                            bigInt = (bigInt << 1) | or;
                         }
                         else {
-                            iVal = (iVal << 1) | (C - '0');
+                            longValue = (longValue << 1) | or;
                         }
                         break;
                     }
                     case 'l':
                     case 'L': {
-                        BigInteger value = useBigInt ? bigInt : iVal;
-                        return new Token(TokenType.Unknown, tokenPos, value.ToString());
+                        BigInteger value = numOptions.HasFlag(NumberOptions.ArbitraryLarge) ? bigInt : longValue;
+                        return new NumberToken(tokenPos, value, numOptions);
                     }
                     default: {
                         if (first) {
                             throw new ProcessingException(
                                 ErrorType.InvalidBinaryLiteral,
                                 src,
-                                new Token(TokenType.Unknown, tokenPos, tokenValue)
+                                new Token(TokenType.Invalid, tokenPos, tokenValue)
                             );
                         }
-                        object value = useBigInt ? bigInt : (object) iVal;
-                        return new Token(TokenType.Unknown, tokenPos, value.ToString());
+                        object value = numOptions.HasFlag(NumberOptions.ArbitraryLarge) ? bigInt : (object) longValue;
+                        return new NumberToken(tokenPos, value, numOptions);
                     }
                 }
                 first = false;
@@ -618,7 +632,7 @@ namespace Axion.Processing {
                             throw new ProcessingException(
                                 ErrorType.InvalidOctalLiteral,
                                 src,
-                                new Token(TokenType.Unknown, tokenPos, tokenValue)
+                                new Token(TokenType.Invalid, tokenPos, tokenValue)
                             );
                         }
                         object value = ParseInteger(tokenValue.Substring(2), 8);
@@ -651,7 +665,7 @@ namespace Axion.Processing {
                         throw new ProcessingException(
                             ErrorType.InvalidHexadecimalLiteral,
                             src,
-                            new Token(TokenType.Unknown, tokenPos, tokenValue)
+                            new Token(TokenType.Invalid, tokenPos, tokenValue)
                         );
                     }
                     object value = ParseInteger(tokenValue.Substring(2), 16);
@@ -719,10 +733,12 @@ namespace Axion.Processing {
                 return LiteralParser.ParseInteger(s, radix);
             }
             catch (ArgumentException ex) {
-                throw new ProcessingException(
-                    ex, ErrorType.InvalidIntegerLiteral,
-                    Line, new Token(TokenType.Unknown, tokenPos, s)
-                );
+                throw;
+
+                //new ProcessingException(
+                //    ex, ErrorType.InvalidIntegerLiteral,
+                //    Line, new Token(TokenType.Invalid, tokenPos, s)
+                //);
             }
         }
 
@@ -731,10 +747,11 @@ namespace Axion.Processing {
                 return LiteralParser.ParseFloat(s);
             }
             catch (Exception ex) {
-                throw new ProcessingException(
-                    ex, ErrorType.InvalidFloatLiteral,
-                    Line, new Token(TokenType.Unknown, tokenPos, s)
-                );
+                throw;
+                //    new ProcessingException(
+                //    ex, ErrorType.InvalidFloatLiteral,
+                //    Line, new Token(TokenType.Invalid, tokenPos, s)
+                //);
             }
         }
 

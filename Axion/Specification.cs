@@ -17,6 +17,15 @@ namespace Axion {
         /// </summary>
         public const char EndLine = '\n';
 
+        internal const char   CharLiteralQuote             = '\'';
+        internal const string CommentOnelineStart          = "#";
+        internal const string CommentMultilineStart        = "/*";
+        internal const string CommentMultilineStartPattern = "/\\*";
+        internal const string CommentMultilineEnd          = "*/";
+        internal const string CommentMultilineEndPattern   = "*\\*";
+
+        internal const int AssignPrecedence = 5;
+
         public static readonly string[] Newlines = { "\r\n", "\n" };
 
         public static readonly Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType> {
@@ -158,15 +167,6 @@ namespace Axion {
             Associativity.None,
             false, -1
         );
-
-        internal const char   CharLiteralQuote             = '\'';
-        internal const string CommentOnelineStart          = "#";
-        internal const string CommentMultilineStart        = "/*";
-        internal const string CommentMultilineStartPattern = "/\\*";
-        internal const string CommentMultilineEnd          = "*/";
-        internal const string CommentMultilineEndPattern   = "*\\*";
-
-        internal const int AssignPrecedence = 5;
 
         internal static bool IsValidIdStart(char start) {
             return char.IsLetter(start) || start == '_';

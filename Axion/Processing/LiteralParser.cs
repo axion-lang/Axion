@@ -61,7 +61,7 @@ namespace Axion.Processing {
                         if (!isRaw) {
                             if (TryParseInt(text, i, len, max, out val)) {
                                 if (val < 0 || val > 0x10ffff) {
-                                    throw new Exception($@"'unicodeescape' codec can't decode bytes in position {i}: illegal Unicode character");
+                                    throw new Exception($@"Can't decode bytes in position {i}: illegal Unicode character");
                                 }
                                 if (val < 0x010000) {
                                     buf.Append((char) val);
@@ -72,7 +72,7 @@ namespace Axion.Processing {
                                 i += len;
                             }
                             else {
-                                throw new Exception($@"'unicodeescape' codec can't decode bytes in position {i}: truncated \uXXXX escape");
+                                throw new Exception($@"Can't decode bytes in position {i}: truncated \uXXXX escape");
                             }
                         }
                         else {
@@ -140,7 +140,7 @@ namespace Axion.Processing {
                                     }
                                     if (!namecomplete || namebuf.Length == 0) {
                                         throw new Exception(
-                                            $@"'unicodeescape' codec can't decode bytes in position {i}: malformed \N character escape"
+                                            $@"Can't decode bytes in position {i}: malformed \N character escape"
                                         );
                                     }
                                     try {
@@ -153,12 +153,12 @@ namespace Axion.Processing {
                                     }
                                     catch (KeyNotFoundException) {
                                         throw new Exception(
-                                            $@"'unicodeescape' codec can't decode bytes in position {i}: unknown Unicode character name"
+                                            $@"Can't decode bytes in position {i}: unknown Unicode character name"
                                         );
                                     }
                                 }
                                 else {
-                                    throw new Exception($@"'unicodeescape' codec can't decode bytes in position {i}: malformed \N character escape");
+                                    throw new Exception($@"Can't decode bytes in position {i}: malformed \N character escape");
                                 }
                             }
                                 continue;

@@ -16,6 +16,11 @@ namespace Axion {
         /// </summary>
         internal static readonly string WorkDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
+        /// <summary>
+        ///     Returns path to directory where compiler executable is located.
+        /// </summary>
+        internal static readonly string DebugDirectory = WorkDirectory + "output\\";
+
         private const string typeHelp = "Type '-?' or '--help' to get documentation about launch arguments.";
         private const string version  = "0.2.9.7-alpha [unstable]";
 
@@ -37,6 +42,10 @@ namespace Axion {
             Log.WriteLine("Axion programming language compiler v. ", version,       ConsoleColor.Yellow);
             Log.WriteLine("Working in ",                             WorkDirectory, ConsoleColor.Yellow);
             Console.WriteLine(typeHelp + Environment.NewLine);
+
+            if (!Directory.Exists(DebugDirectory)) {
+                Directory.CreateDirectory(DebugDirectory);
+            }
 
             // main processing loop
             while (true) {

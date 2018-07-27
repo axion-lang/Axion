@@ -31,9 +31,9 @@ namespace Axion.Processing {
         public readonly List<ProcessingException> Errors = new List<ProcessingException>();
 
         /// <summary>
-        ///     Source code picked from string or file.
+        ///     Lines of source code picked from string or file.
         /// </summary>
-        public readonly string[] Content;
+        public readonly string[] Lines;
 
         /// <summary>
         ///     Path to file with source code.
@@ -53,8 +53,8 @@ namespace Axion.Processing {
             sourceFileName = fileName ?? "latest.unittest.ax";
             debugFilePath = Path.IsPathRooted(sourceFileName)
                                 ? sourceFileName + debugExtension
-                                : Compiler.WorkDirectory + "output\\" + sourceFileName + debugExtension;
-            Content = sourceCode.Split(
+                                : Compiler.DebugDirectory + sourceFileName + debugExtension;
+            Lines = sourceCode.Split(
                 Spec.Newlines,
                 StringSplitOptions.None
             );
@@ -75,9 +75,9 @@ namespace Axion.Processing {
             debugFilePath = outFileName != null
                                 ? Path.IsPathRooted(outFileName)
                                       ? outFileName + debugExtension
-                                      : Compiler.WorkDirectory + "output\\" + outFileName + debugExtension
+                                      : Compiler.DebugDirectory + outFileName + debugExtension
                                 : file.FullName + debugExtension;
-            Content = File.ReadAllText(file.FullName).Split(
+            Lines = File.ReadAllText(file.FullName).Split(
                 Spec.Newlines,
                 StringSplitOptions.None
             );
@@ -105,7 +105,7 @@ namespace Axion.Processing {
         /// </summary>
         internal void Process(SourceProcessingMode processingMode) {
             Log.Info($"## Compiling '{sourceFileName}' ...");
-            if (Content.Length == 0) {
+            if (Lines.Length == 0) {
                 Log.Error("# Source is empty. Lexical analysis aborted.");
                 goto COMPILATION_END;
             }
@@ -143,7 +143,9 @@ namespace Axion.Processing {
 
             // TODO show all exceptions
             if (Errors.Count > 0) {
-                throw Errors[0];
+                for (int i = 0; i < Errors.Count; i++) {
+                    Errors[i].Render();
+                }
             }
 
             if (Compiler.Options.Debug) {
@@ -160,12 +162,12 @@ namespace Axion.Processing {
         /// </summary>
         private void CorrectFormat() {
             // append newline statements
-            for (var i = 0; i < Content.Length - 1; i++) {
-                Content[i] += Spec.EndLine;
+            for (var i = 0; i < Lines.Length - 1; i++) {
+                Lines[i] += Spec.EndLine;
             }
 
             // append end of file mark to last source line.
-            Content[Content.Length - 1] += Spec.EndStream;
+            Lines[Lines.Length - 1] += Spec.EndStream;
         }
     }
 }
