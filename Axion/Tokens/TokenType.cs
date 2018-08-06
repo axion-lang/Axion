@@ -13,7 +13,6 @@ namespace Axion.Tokens {
         Operator,
         Identifier,
 
-        // TODO resolve literals
         CommentLiteral,
         CharLiteral,
         StringLiteral,

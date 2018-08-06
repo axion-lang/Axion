@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Axion.Tokens;
+using Axion.Tokens.Ast;
 using Newtonsoft.Json;
 
 namespace Axion.Processing {
@@ -23,7 +25,7 @@ namespace Axion.Processing {
         /// <summary>
         ///     Abstract Syntax Tree generated from <see cref="Tokens" />.
         /// </summary>
-        public readonly LinkedList<Token> SyntaxTree = new LinkedList<Token>();
+        public readonly Ast SyntaxTree;
 
         /// <summary>
         ///     Contains all errors that happened while processing <see cref="SourceCode" />.
@@ -49,22 +51,36 @@ namespace Axion.Processing {
         ///     Creates new <see cref="SourceCode" /> instance
         ///     using specified &lt;<paramref name="sourceCode" />&gt;.
         /// </summary>
-        public SourceCode(string sourceCode, string fileName = null) {
-            sourceFileName = fileName ?? "latest.unittest.ax";
+        public SourceCode(string sourceCode, string filePath = null) :
+            this(
+                sourceCode.Split(
+                    Spec.Newlines,
+                    StringSplitOptions.None
+                ), filePath
+            ) {
+        }
+
+        /// <summary>
+        ///     Creates new <see cref="SourceCode" /> instance
+        ///     using specified &lt;<paramref name="sourceLines" />&gt;.
+        /// </summary>
+        public SourceCode(IEnumerable<string> sourceLines, string filePath = null) {
+            SyntaxTree = new Ast(this);
+
+            sourceFileName = filePath ?? "latest.unittest.ax";
             debugFilePath = Path.IsPathRooted(sourceFileName)
                                 ? sourceFileName + debugExtension
                                 : Compiler.DebugDirectory + sourceFileName + debugExtension;
-            Lines = sourceCode.Split(
-                Spec.Newlines,
-                StringSplitOptions.None
-            );
+            Lines = sourceLines.ToArray();
         }
 
         /// <summary>
         ///     Creates new <see cref="SourceCode" /> instance
         ///     using specified &lt;<paramref name="file" />&gt; info.
         /// </summary>
-        public SourceCode(FileInfo file, string outFileName = null) {
+        public SourceCode(FileInfo file, string outFilePath = null) {
+            SyntaxTree = new Ast(this);
+
             if (!file.Exists) {
                 throw new FileNotFoundException("Source file doesn't exists", file.FullName);
             }
@@ -72,10 +88,10 @@ namespace Axion.Processing {
                 throw new ArgumentException("Source file must have \".ax\" extension");
             }
             sourceFileName = file.Name;
-            debugFilePath = outFileName != null
-                                ? Path.IsPathRooted(outFileName)
-                                      ? outFileName + debugExtension
-                                      : Compiler.DebugDirectory + outFileName + debugExtension
+            debugFilePath = outFilePath != null
+                                ? Path.IsPathRooted(outFilePath)
+                                      ? outFilePath + debugExtension
+                                      : Compiler.DebugDirectory + outFilePath + debugExtension
                                 : file.FullName + debugExtension;
             Lines = File.ReadAllText(file.FullName).Split(
                 Spec.Newlines,
@@ -87,7 +103,7 @@ namespace Axion.Processing {
         ///     Saves <see cref="SourceCode" /> debug information
         ///     in JSON format.
         /// </summary>
-        public void SaveDebugInfoToFile() {
+        private void SaveDebugInfoToFile() {
             string debugInfo =
                 "{" + Environment.NewLine +
                 "\"tokens\": " +
@@ -112,14 +128,14 @@ namespace Axion.Processing {
             Log.Info("# Tokens list generation...");
             {
                 CorrectFormat();
-                new Lexer(this).Tokenize();
+                new Lexer(this).Process();
                 if (processingMode == SourceProcessingMode.Lex) {
                     goto COMPILATION_END;
                 }
             }
             Log.Info("# Abstract Syntax Tree generation...");
             {
-                // Program.Parser.Process(Tokens, SyntaxTree);
+                // new Parser(this).Process();
                 if (processingMode == SourceProcessingMode.Parsing) {
                     goto COMPILATION_END;
                 }
@@ -141,8 +157,8 @@ namespace Axion.Processing {
 
             COMPILATION_END:
 
-            // TODO show all exceptions
-            if (Errors.Count > 0) {
+            bool hasErrors = Errors.Count > 0;
+            if (hasErrors) {
                 for (int i = 0; i < Errors.Count; i++) {
                     Errors[i].Render();
                 }
@@ -152,8 +168,12 @@ namespace Axion.Processing {
                 Log.Info($"# Saving debugging information to '{debugFilePath}' ...");
                 SaveDebugInfoToFile();
             }
-            Log.Info($"Compilation of \"{sourceFileName}\" completed.");
-            Console.WriteLine();
+            if (hasErrors) {
+                Log.WriteLine("# Compilation aborted due to errors above.", ConsoleColor.Red);
+            }
+            else {
+                Log.Info("# Compilation completed.");
+            }
         }
 
         /// <summary>

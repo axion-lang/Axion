@@ -101,7 +101,7 @@ namespace Axion.Processing {
         /// <summary>
         ///     Divides &lt;<see cref="SourceCode.Lines" />&gt; into &lt;<see cref="SourceCode.Tokens" />&gt; list of tokens.
         /// </summary>
-        internal void Tokenize() {
+        internal void Process() {
             while (pos.line < lines.Length && pos.column < Line.Length) {
                 Token token = ReadToken(out ErrorType occurredErrorType);
                 if (token != null) {
@@ -261,7 +261,7 @@ namespace Axion.Processing {
                     tokenValue += C;
                     Move();
                 }
-                return new SingleCommentToken(tokenPos, tokenValue);
+                return new OneLineCommentToken(tokenPos, tokenValue);
             }
 
             // multiline comment;
@@ -292,7 +292,7 @@ namespace Axion.Processing {
                         throw new ProcessingException(
                             ErrorType.UnclosedMultilineComment,
                             src,
-                            new MultipleCommentToken(tokenPos, tokenValue)
+                            new MultilineCommentToken(tokenPos, tokenValue)
                         );
                     }
                     // found any other character
@@ -301,7 +301,7 @@ namespace Axion.Processing {
                         Move();
                     }
                 }
-                return new MultipleCommentToken(tokenPos, tokenValue);
+                return new MultilineCommentToken(tokenPos, tokenValue);
             }
 
             // character literal
@@ -572,7 +572,7 @@ namespace Axion.Processing {
                             numOptions |= NumberOptions.Bit64;
                         }
                         else if (bits == 64) {
-                            numOptions |= NumberOptions.ArbitraryLarge;
+                            numOptions |= NumberOptions.BitNoLimit;
                             bigInt     =  longValue;
                         }
                         // TODO debug
@@ -587,7 +587,7 @@ namespace Axion.Processing {
                     }
                     case 'l':
                     case 'L': {
-                        BigInteger value = numOptions.HasFlag(NumberOptions.ArbitraryLarge) ? bigInt : longValue;
+                        BigInteger value = numOptions.HasFlag(NumberOptions.BitNoLimit) ? bigInt : longValue;
                         return new NumberToken(tokenPos, value, numOptions);
                     }
                     default: {
@@ -598,7 +598,7 @@ namespace Axion.Processing {
                                 new Token(TokenType.Invalid, tokenPos, tokenValue)
                             );
                         }
-                        object value = numOptions.HasFlag(NumberOptions.ArbitraryLarge) ? bigInt : (object) longValue;
+                        object value = numOptions.HasFlag(NumberOptions.BitNoLimit) ? bigInt : (object) longValue;
                         return new NumberToken(tokenPos, value, numOptions);
                     }
                 }

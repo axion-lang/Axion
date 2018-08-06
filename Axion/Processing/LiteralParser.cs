@@ -359,7 +359,7 @@ namespace Axion.Processing {
 
         public static Complex ParseComplex(string s) {
             // remove no-meaning spaces and convert to lowercase
-            string text = s.Trim().ToLower();
+            string text = s.Trim().ToUpper();
             if (string.IsNullOrEmpty(text) || text.IndexOf(' ') != -1) {
                 throw ExnMalformed();
             }
@@ -371,11 +371,11 @@ namespace Axion.Processing {
             try {
                 int    len = text.Length;
                 string real, imag;
-                if (text[len - 1] == 'j') {
+                if (text[len - 1] == 'J') {
                     // last sign delimits real and imaginary...
                     int signPos = text.LastIndexOfAny(signs);
                     // ... unless it's after 'e', so we bypass up to 2 of those here
-                    for (var i = 0; signPos > 0 && text[signPos - 1] == 'e'; i++) {
+                    for (var i = 0; signPos > 0 && text[signPos - 1] == 'E'; i++) {
                         if (i == 2) {
                             // too many 'e's
                             throw ExnMalformed();
@@ -395,7 +395,7 @@ namespace Axion.Processing {
                 }
                 else {
                     // 'j' delimits real and imaginary
-                    string[] splitText = text.Split('j');
+                    string[] splitText = text.Split('J');
 
                     // no imaginary component
                     if (splitText.Length == 1) {
@@ -715,13 +715,13 @@ namespace Axion.Processing {
 
         private static double ParseFloatNoCatch(string text) {
             string s = ReplaceUnicodeDigits(text);
-            switch (s.ToLower(CultureInfo.InvariantCulture).TrimStart()) {
-                case "nan":
-                case "+nan":
-                case "-nan": return double.NaN;
-                case "inf":
-                case "+inf": return double.PositiveInfinity;
-                case "-inf": return double.NegativeInfinity;
+            switch (s.ToUpper(CultureInfo.InvariantCulture).TrimStart()) {
+                case "NAN":
+                case "+NAN":
+                case "-NAN": return double.NaN;
+                case "INF":
+                case "+INF": return double.PositiveInfinity;
+                case "-INF": return double.NegativeInfinity;
                 default:
                     // pass NumberStyles to disallow ,'s in float strings.
                     double res = double.Parse(s, NumberStyles.Float, CultureInfo.InvariantCulture);

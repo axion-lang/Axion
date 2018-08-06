@@ -9,95 +9,87 @@ namespace Axion.Processing {
     [JsonObject]
     public class ProcessingException : Exception {
         [JsonProperty] internal new SourceCode Source;
-        [JsonProperty] internal     int        ColumnPosition;
-        [JsonProperty] internal     int        LinePosition;
         [JsonProperty] internal new string     Message;
         [JsonProperty] internal     string     Time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
-        [JsonProperty] internal     Token      TokenPrev2;
-        [JsonProperty] internal     Token      TokenPrev1;
+        [JsonProperty] internal     int        ColumnPosition;
+        [JsonProperty] internal     int        LinePosition;
         [JsonProperty] internal     Token      Token;
-        [JsonProperty] internal     Token      TokenNext1;
-        [JsonProperty] internal     Token      TokenNext2;
 
         internal ProcessingException(ErrorType type, SourceCode source, Token errorToken) {
             Source  = source;
             Message = type.ToString("G"); // TODO add representations for <ErrorType>
             Token   = errorToken;
             // line positions need offset
-            LinePosition   = Token.StartLnPos + 1;
-            ColumnPosition = Token.StartClPos + 1;
+            LinePosition   = Token.StartLinePos + 1;
+            ColumnPosition = Token.StartColumnPos + 1;
         }
 
         internal ProcessingException(ErrorType type, SourceCode source, LinkedListNode<Token> tokenNode) {
-            Source     = source;
-            Message    = type.ToString("G"); // TODO add representations for <ErrorType>
-            Token      = tokenNode.Value;
-            TokenPrev1 = tokenNode.Previous?.Value;
-            TokenPrev2 = tokenNode.Previous?.Previous?.Value;
-            TokenNext1 = tokenNode.Next?.Value;
-            TokenNext2 = tokenNode.Next?.Next?.Value;
+            Source  = source;
+            Message = type.ToString("G"); // TODO add representations for <ErrorType>
+            Token   = tokenNode.Value;
             // line positions need offset
-            LinePosition   = Token.StartLnPos + 1;
-            ColumnPosition = Token.StartClPos + 1;
+            LinePosition   = Token.StartLinePos + 1;
+            ColumnPosition = Token.StartColumnPos + 1;
         }
 
         /// <summary>
         ///     Renders visual representation of occurred error.
         /// </summary>
         internal void Render() {
-            /* -----Error template-----
-             *
-             * Error: Invalid operator.
-             *
-             * 8| variable ~~ "string"
-             *             ^^
-             *
-             *
-             *
-             *
-             * Error: MismatchingParenthesis.
-             *
-             * 1| func("string",
-             * -------^
-             *         'c',
-             *         123
-             *
-             */
+            //--------Error templates--------
+            //
+            // Error: Invalid operator.
+            //
+            // 8| variable ~~ "string"
+            //             ^^
+            // ...
+            //
+            // Error: MismatchingParenthesis.
+            //
+            // 1| func("string",
+            // -------^
+            //         'c',
+            //         123
+            // ...
+            //
             // Write message
             Log.Write("Error: ", ConsoleColor.Red);
             Console.WriteLine(Message + ".");
 
-            var linesCount = Token.EndLnPos - Token.StartLnPos;
-            if (Token.EndLnPos + 1 < Source.Lines.Length) {
+            int linesCount = 0;
+            for (int i = Token.StartLinePos; i < Source.Lines.Length && i < 4; i++) {
                 linesCount++;
             }
-            var pointer = ""; // upside arrows (^), should be red-colored
 
-            List<string> lines = Source.Lines.Skip(Token.StartLnPos).Take(linesCount).ToList();
-            foreach (string line in lines) {
-                // <number>| <code>
-                int pointerPosition =
-                    LinePosition.ToString().Length + 2 + ColumnPosition;
-                // render space before pointer
-                for (var i = 0; i < pointerPosition; i++) {
-                    pointer += " ";
-                }
-                // render pointer arrows
-                for (var i = 0; i < Token.Value.Length; i++) {
-                    pointer += "^";
-                }
-                Console.WriteLine($"{LinePosition}| {line.Trim()}");
-                // Write pointer
-                Log.WriteLine(pointer, ConsoleColor.Red);
-                pointer = "";
+            List<string> lines = Source.Lines.Skip(Token.StartLinePos).Take(linesCount).ToList();
+            // limit rest of code sign by 5 lines
+            if (Token.StartLinePos + 5 < Source.Lines.Length) {
+                lines.Add("...");
             }
+            //
+            // FIRST LINE
+            //
+            // <line number>| <code line>
+            int pointerTailLength = LinePosition.ToString().Length + 1 + ColumnPosition;
+            // upside arrows (^), should be red-colored
+            var pointer =
+                // assemble tail of pointer
+                new string('-', pointerTailLength) +
+                // assemble pointer arrows
+                new string('^', Token.Value.Length);
 
-            // Traceback
-            Log.Info("Saving full traceback to file ...");
-            Source.SaveDebugInfoToFile();
-            //Console.WriteLine(JsonConvert.SerializeObject(this, Compiler.JsonSerializerSettings));
-            Console.Write("Press any key to close app.");
-            Console.WriteLine();
+            // render line
+            Console.WriteLine($"{LinePosition}| {lines[0].TrimEnd(Spec.EndLine, Spec.EndStream)}");
+            // render error pointer
+            Log.WriteLine(pointer, ConsoleColor.Red);
+            //
+            // NEXT LINES
+            //
+            for (var lineIndex = Token.StartLinePos + 1; lineIndex < lines.Count; lineIndex++) {
+                // render next line
+                Console.WriteLine($"{lineIndex + 1}| {lines[lineIndex].TrimEnd(Spec.EndLine, Spec.EndStream)}");
+            }
         }
     }
 }

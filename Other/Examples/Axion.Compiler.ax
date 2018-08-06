@@ -3,11 +3,12 @@
 # was originally created in C#.
 
 # import modules
-use:
+use {
    System: Collections.Generic, IO, Linq;
    Axion.Processing;
    Fclp;
    Newtonsoft.Json;
+}
 
 # declare a module
 module Axion:
@@ -167,7 +168,7 @@ module Axion:
       
          ## Displays a table with documentation about launch arguments.
          void DisplayHelpScreen()
-            Console.Write(f"""
+            Console.Write(rf"""
 ┌─────────────────────────────┬───────────────────────────────────────────────────────────────┐
 │        Argument name        │                                                               │
 ├───────┬─────────────────────┤                       Usage description                       │

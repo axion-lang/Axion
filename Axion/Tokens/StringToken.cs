@@ -19,14 +19,14 @@ namespace Axion.Tokens {
             //             1 quote  on 2+ lines, (1 * 1).
             int multiplier = linesCount == 1 ? 2 : 1;
             if (multiline) { // """ ```
-                EndClPos += 3 * multiplier;
+                EndColumnPos += 3 * multiplier;
             }
             else {
-                EndClPos += 1 * multiplier; // " " | ` `
+                EndColumnPos += 1 * multiplier; // " " | ` `
             }
             // if 1 line: add 1 for each prefix letter
             if (multiplier == 2) {
-                EndClPos += Utilities.GetSetBitCount((long) options);
+                EndColumnPos += Utilities.GetSetBitCount((long) options);
             }
         }
     }

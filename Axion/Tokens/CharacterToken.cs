@@ -5,7 +5,7 @@
     public class CharacterToken : Token {
         public CharacterToken((int line, int column) location, string value)
             : base(TokenType.CharLiteral, location, value) {
-            EndClPos += 2; // ' & '
+            EndColumnPos += 2; // quotes
         }
     }
 }

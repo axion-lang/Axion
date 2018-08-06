@@ -7,10 +7,10 @@
         public OperationDefinition(OperatorToken @operator, Token leftOperand, Token rightOperand) :
             base(
                 TokenType.Identifier,
-                (leftOperand?.StartLnPos
-              ?? @operator.StartLnPos,
-                 leftOperand?.StartClPos
-              ?? @operator.StartClPos),
+                (leftOperand?.StartLinePos
+              ?? @operator.StartLinePos,
+                 leftOperand?.StartColumnPos
+              ?? @operator.StartColumnPos),
                 @operator.Value
             ) {
             OperatorToken = @operator;

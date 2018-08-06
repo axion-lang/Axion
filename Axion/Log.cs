@@ -7,6 +7,17 @@ namespace Axion {
     ///     wrapped around <see cref="Console" /> class.
     /// </summary>
     internal static class Log {
+        internal const string HelpHint = "Type '-?' or '--help' to get documentation about launch arguments.";
+
+        internal static void PrintCaption() {
+            Console.ForegroundColor = ConsoleColor.White;
+            const string header = "Axion programming language compiler toolset";
+            Console.Title = header;                                                      // print title
+            WriteLine(header + " v. ", Compiler.Version,       ConsoleColor.DarkYellow); // print version
+            WriteLine("Working in ",   Compiler.WorkDirectory, ConsoleColor.DarkYellow); // print directory
+            Console.WriteLine(HelpHint + Environment.NewLine);
+        }
+
         internal static void Error(string message) {
             ConsoleColor prevFont = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
@@ -29,25 +40,58 @@ namespace Axion {
             Console.ForegroundColor = prevFont;
         }
 
-        internal static string ReadLine(string prompt, ConsoleColor color = ConsoleColor.Yellow) {
+        internal static string ReadLine(string prompt, ConsoleColor inputColor = ConsoleColor.White) {
             Console.Write(prompt);
             ConsoleColor prevColor = Console.ForegroundColor;
-            Console.ForegroundColor = color;
+            Console.ForegroundColor = inputColor;
             string line = Console.ReadLine();
             Console.ForegroundColor = prevColor;
             return line;
+        }
+
+        internal static string Read(string prompt, ConsoleColor inputColor = ConsoleColor.White) {
+            Console.Write(prompt);
+            ConsoleColor prevColor = Console.ForegroundColor;
+            Console.ForegroundColor = inputColor;
+            string         value = "";
+            ConsoleKeyInfo key   = Console.ReadKey(true);
+            while (key.Key != ConsoleKey.Enter) {
+                if (key.Key == ConsoleKey.Backspace) {
+                    if (value.Length > 0) {
+                        value = value.Remove(value.Length - 1);
+                        Console.Write("\b \b");
+                    }
+                }
+                else {
+                    value += key.KeyChar;
+                    Console.Write(key.KeyChar);
+                }
+                key = Console.ReadKey(true);
+            }
+            Console.ForegroundColor = prevColor;
+            return value;
         }
 
         /// <summary>
         ///     Clears specified <paramref name="length" /> of current line.
         /// </summary>
         internal static void ClearLine(int length) {
-            Console.Write("\r");
+            Console.CursorLeft = 0;
             var spaces = "";
             for (var _ = 0; _ < length; _++) {
                 spaces += " ";
             }
             Console.Write(spaces);
+        }
+
+        /// <summary>
+        ///     Clears current line.
+        /// </summary>
+        internal static void ClearLine() {
+            int top = Console.CursorTop;
+            Console.CursorLeft = 0;
+            Console.Write(new string(' ', Console.BufferWidth));
+            Console.SetCursorPosition(0, top);
         }
 
         #region Write() function

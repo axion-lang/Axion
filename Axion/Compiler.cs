@@ -17,12 +17,14 @@ namespace Axion {
         internal static readonly string WorkDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
         /// <summary>
-        ///     Returns path to directory where compiler executable is located.
+        ///     Returns path to directory where sources debugging output is located.
         /// </summary>
         internal static readonly string DebugDirectory = WorkDirectory + "output\\";
 
-        private const string typeHelp = "Type '-?' or '--help' to get documentation about launch arguments.";
-        private const string version  = "0.2.9.7-alpha [unstable]";
+        /// <summary>
+        ///     Compiler version.
+        /// </summary>
+        internal const string Version = "0.2.9.7-alpha [unstable]";
 
         /// <summary>
         ///     Compiler files to process.
@@ -33,17 +35,10 @@ namespace Axion {
             code.Process(mode);
         }
 
-        /// <summary>
-        ///     Main compiler method that enters into infinite working loop
-        ///     (input -> response).
-        /// </summary>
-        /// <param name="arguments">Command line arguments compiler was launched with.</param>
         public static void Init(string[] arguments) {
-            Log.WriteLine("Axion programming language compiler v. ", version,       ConsoleColor.Yellow);
-            Log.WriteLine("Working in ",                             WorkDirectory, ConsoleColor.Yellow);
-            Console.WriteLine(typeHelp + Environment.NewLine);
+            Log.PrintCaption();
 
-            if (!Directory.Exists(DebugDirectory)) {
+            if (Directory.Exists(DebugDirectory)) {
                 Directory.CreateDirectory(DebugDirectory);
             }
 
@@ -55,7 +50,7 @@ namespace Axion {
                     // if launch arguments not modified
                     // TODO Synchronize launch arguments count with UnmatchedOptions
                     if (result.UnMatchedOptions.Count() == 8) {
-                        Log.Error("Invalid argument.\n" + typeHelp);
+                        Log.Error("Invalid argument.\n" + Log.HelpHint);
                     }
                     else if (result.HasErrors) {
                         Log.Error(result.ErrorText);
@@ -65,7 +60,12 @@ namespace Axion {
                     }
                 }
                 // wait for next command
-                string command = Log.ReadLine(">>> ");
+                string command = Log.Read(">>> ");
+                while (command.Length == 0) {
+                    Log.ClearLine();
+                    command = Log.Read(">>> ");
+                }
+                Console.WriteLine();
                 arguments = GetUserArguments(command).ToArray();
             }
             // It is infinite loop, breaks only by 'exit' command.
@@ -77,7 +77,7 @@ namespace Axion {
                 Environment.Exit(0);
             }
             if (args.Version) {
-                Console.WriteLine(version);
+                Console.WriteLine(Version);
                 return;
             }
             if (args.Help) {
@@ -89,40 +89,46 @@ namespace Axion {
             // Interactive mode: jump into interpreter processing loop
             if (args.Interactive) {
                 Log.Info(
-                    "Interactive interpreter mode.\n" +
+                    "Interactive mode.\n" +
                     "Now your input will be processed by Axion interpreter.\n" +
-                    "Type 'exit' to close interpreter environment;\n" +
+                    "Type 'exit' or 'quit' to quit interactive mode;\n" +
                     "Type 'cls' to clear screen."
                 );
                 while (true) {
-                    string input      = Log.ReadLine(">>> ");
-                    string lowerInput = input.Trim().ToLower();
+                    string input        = Log.Read("i>> ", ConsoleColor.Yellow);
+                    string alignedInput = input.Trim().ToUpper();
                     // skip empty commands
-                    if (lowerInput == "") {
+                    if (alignedInput == "") {
+                        Log.ClearLine();
                         continue;
                     }
                     // exit from interpreter to main loop
-                    if (lowerInput == "exit") {
+                    if (alignedInput == "EXIT" ||
+                        alignedInput == "QUIT") {
+                        Console.WriteLine();
                         Log.Info("Interactive interpreter closed.");
                         return;
                     }
-                    if (lowerInput == "cls") {
+                    if (alignedInput == "CLS") {
                         Console.Clear();
+                        Log.PrintCaption();
                         continue;
                     }
-                    var script = "";
-                    while (!string.IsNullOrEmpty(input)) {
-                        script += input + "\n";
-                        input  =  Log.ReadLine("... ");
-                    }
                     // TODO parse "help(module)" argument
-                    //if (lowerInput == "help" || lowerInput == "h" || lowerInput == "?") {
+                    //if (alignedInput == "HELP" || alignedInput == "H" || alignedInput == "?") {
                     //    // give help about some module/function.
-                    //    // should have control about all standard library documentation.
+                    //    // should have control of all standard library documentation.
                     //}
-
+                    var codeLines = new List<string>();
+                    while (input.Length > 0) {
+                        codeLines.Add(input);
+                        Console.WriteLine();
+                        input = Log.Read("... ", ConsoleColor.Yellow);
+                    }
+                    // overwrite trailing '...'
+                    Log.ClearLine();
                     // interpret as Axion source and output result
-                    new SourceCode(script).Process(SourceProcessingMode.Interpret);
+                    new SourceCode(codeLines).Process(SourceProcessingMode.Interpret);
                 }
             }
 
@@ -143,7 +149,7 @@ namespace Axion {
                 source = new SourceCode(args.Script);
             }
             else {
-                Log.Error("Neither script nor path to script file not specified.\n" + typeHelp);
+                Log.Error("Neither script nor path to script file not specified.\n" + Log.HelpHint);
                 return;
             }
 
@@ -154,7 +160,6 @@ namespace Axion {
         /// <summary>
         ///     Initializes command line parser with allowed arguments.
         /// </summary>
-        /// <returns>Ready parser instance.</returns>
         private static FluentCommandLineParser<LaunchArguments> InitCLIParser() {
             var cliParser = new FluentCommandLineParser<LaunchArguments> { IsCaseSensitive = false };
             cliParser.Setup(arg => arg.Files)
@@ -200,7 +205,7 @@ namespace Axion {
 │       │ {nameof(SourceProcessingMode.ConvertCSharp)}       │     Convert source to 'C#' language.                          │  │
 │       │ {nameof(SourceProcessingMode.ConvertJavaScript)}   │     Convert source to 'JavaScript' language.                  │  │
 │       │ {nameof(SourceProcessingMode.ConvertPython)}       │     Convert source to 'Python' language.                      ├──┘
-│       │ {nameof(SourceProcessingMode.Lex)}                 │     Create tokens (lexemes) list from.                        │
+│       │ {nameof(SourceProcessingMode.Lex)}                 │     Create tokens (lexemes) list from source.                 │
 │       │ {nameof(SourceProcessingMode.Parsing)}             │     Create tokens list and Abstract Syntax Tree from source.  │
 ├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤
 │  -d   │ --{nameof(LaunchArguments.Debug)}             │ Save debug information to '<compilerDir>\output' directory.   │

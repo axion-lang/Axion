@@ -46,7 +46,7 @@ namespace Axion {
         public bool Help { get; set; } = false;
 
         /// <summary>
-        ///     Flag to display <see cref="Compiler.version" />.
+        ///     Flag to display <see cref="Compiler.Version" />.
         /// </summary>
         public bool Version { get; set; } = false;
 
