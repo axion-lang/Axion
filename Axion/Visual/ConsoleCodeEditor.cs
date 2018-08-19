@@ -28,7 +28,7 @@ namespace Axion.Visual {
         private int startCursorY;
 
         private const    int    leftBoundSize = 8;
-        private readonly string tabulation    = new string(' ', Compiler.Options.TabSize);
+        private readonly string tabulation    = new string(' ', 4);
 
         internal ConsoleCodeEditor(string firstCodeLine) {
             lines.Add(firstCodeLine); // [0]

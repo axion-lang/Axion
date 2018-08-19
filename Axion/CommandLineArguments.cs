@@ -117,7 +117,7 @@ namespace Axion {
                             processingMode = SourceProcessingMode.Compile;
                         }
                         // process source
-                        source.Process(processingMode);
+                        source.Process(processingMode, SourceProcessingOptions.CheckIndentationConsistency);
                     }
                     return 0;
                 }

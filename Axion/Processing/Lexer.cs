@@ -204,7 +204,7 @@ namespace Axion.Processing {
                             // check for consistency
                             if (indentChar != C && !inconsistentIndentation) {
                                 // warn user about inconsistency
-                                if (Compiler.Options.CheckIndentationConsistency) {
+                                if (src.Options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
                                     ConsoleView.Log.Warn(ErrorType.WarnInconsistentIndentation, pos);
                                 }
                                 inconsistentIndentation = true;

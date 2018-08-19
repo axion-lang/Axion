@@ -14,11 +14,6 @@ namespace Axion.Processing {
     /// </summary>
     public sealed class SourceCode {
         /// <summary>
-        ///     File extension of <see cref="debugFilePath" />.
-        /// </summary>
-        private const string debugExtension = ".debugInfo.json";
-
-        /// <summary>
         ///     Tokens list generated from source.
         /// </summary>
         public readonly LinkedList<Token> Tokens = new LinkedList<Token>();
@@ -38,6 +33,8 @@ namespace Axion.Processing {
         /// </summary>
         public readonly string[] Lines;
 
+        public SourceProcessingOptions Options = SourceProcessingOptions.None;
+
         /// <summary>
         ///     Path to file with source code.
         /// </summary>
@@ -47,6 +44,11 @@ namespace Axion.Processing {
         ///     Path to file with processing debug output.
         /// </summary>
         private readonly string debugFilePath;
+
+        /// <summary>
+        ///     File extension of <see cref="debugFilePath" />.
+        /// </summary>
+        private const string debugExtension = ".debugInfo.json";
 
         /// <summary>
         ///     Creates new <see cref="SourceCode" /> instance
@@ -118,9 +120,10 @@ namespace Axion.Processing {
 
         /// <summary>
         ///     Performs <see cref="SourceCode" /> processing
-        ///     due to <see cref="processingMode" />.
+        ///     due to <see cref="mode" /> and <see cref="options"/>.
         /// </summary>
-        internal void Process(SourceProcessingMode processingMode) {
+        internal void Process(SourceProcessingMode mode, SourceProcessingOptions options = SourceProcessingOptions.None) {
+            Options = options;
             ConsoleView.Log.Info($"## Compiling '{sourceFileName}' ...");
             if (Lines.Length == 0) {
                 ConsoleView.Log.Error("# Source is empty. Lexical analysis aborted.");
@@ -130,18 +133,18 @@ namespace Axion.Processing {
             {
                 CorrectFormat();
                 new Lexer(this).Process();
-                if (processingMode == SourceProcessingMode.Lex) {
+                if (mode == SourceProcessingMode.Lex) {
                     goto COMPILATION_END;
                 }
             }
             ConsoleView.Log.Info("# Abstract Syntax Tree generation...");
             {
                 // new Parser(this).Process();
-                if (processingMode == SourceProcessingMode.Parsing) {
+                if (mode == SourceProcessingMode.Parsing) {
                     goto COMPILATION_END;
                 }
             }
-            switch (processingMode) {
+            switch (mode) {
                 case SourceProcessingMode.Interpret: {
                     ConsoleView.Log.Error("Interpretation support is in progress!");
                     break;
@@ -151,7 +154,7 @@ namespace Axion.Processing {
                     break;
                 }
                 default: {
-                    ConsoleView.Log.Error($"'{processingMode:G}' mode not implemented yet.");
+                    ConsoleView.Log.Error($"'{mode:G}' mode not implemented yet.");
                     break;
                 }
             }

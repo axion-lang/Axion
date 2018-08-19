@@ -23,16 +23,19 @@ namespace Axion.Tokens {
         }
     }
 
+    /// <summary>
+    ///     USE '&amp;' AND '&amp;=' OPERATORS TO DEFINE AND APPEND 'Bit#' FLAGS!
+    /// </summary>
     [Flags]
     public enum NumberOptions {
         None = 0,
 
-        Floating   = 0x0_100,
-        Unsigned   = 0x0_010,
-        Bit8       = 0x0_001, // bit count
-        Bit16      = 0x0_002,
-        Bit32      = 0x0_003,
-        Bit64      = 0x0_004,
-        BitNoLimit = 0x0_005,
+        Floating   = 0b1000000,
+        Unsigned   = 0b0100000,
+        Bit8       = 0b0010000, // bit count
+        Bit16      = 0b0001000,
+        Bit32      = 0b0000100,
+        Bit64      = 0b0000010,
+        BitNoLimit = 0b0000001,
     }
 }

@@ -27,7 +27,7 @@ namespace Axion {
         /// <summary>
         ///     Compiler version.
         /// </summary>
-        internal const string Version = "0.2.9.92-alpha [unstable]";
+        internal const string Version = "0.2.9.93-alpha [unstable]";
 
         /// <summary>
         ///     Main settings of JSON debug information formatting.
@@ -77,16 +77,6 @@ namespace Axion {
             }
             // It is infinite loop, breaks only by 'exit' command.
             // ReSharper disable once FunctionNeverReturns
-        }
-
-        public static class Options {
-            /// <summary>
-            ///     Determines if compiler should check that script use consistent indentation.
-            ///     (e. g. only spaces or only tabs).
-            /// </summary>
-            public static bool CheckIndentationConsistency = true;
-
-            public static int TabSize = 4;
         }
 
         #region Get user input and split it into arguments
