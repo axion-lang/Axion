@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.2.9.8</Version>
+    <Version>0.2.9.92</Version>
     <Authors>Nikitin Ilya</Authors>
     <Company>Fluctus Technologies</Company>
     <Description>Axion programming language toolset.
@@ -15,7 +15,7 @@ Built on .NET Standard.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentCommandLineParser-netstandard" Version="1.4.3.13" />
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.5" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 

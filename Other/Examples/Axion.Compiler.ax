@@ -13,7 +13,7 @@ use {
 # declare a module
 module Axion:
    # declare a class
-   public static class Compiler <- ICompiler:
+   public static class Compiler < ICompiler:
       # declare an access modifier space
       internal:
          ## Returns path to directory where

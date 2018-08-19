@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Axion.Tokens;
 using Axion.Tokens.Ast;
+using Axion.Visual;
 using Newtonsoft.Json;
 
 namespace Axion.Processing {
@@ -107,10 +108,10 @@ namespace Axion.Processing {
             string debugInfo =
                 "{" + Environment.NewLine +
                 "\"tokens\": " +
-                JsonConvert.SerializeObject(Tokens, Compiler.Options.JsonSerializer) +
+                JsonConvert.SerializeObject(Tokens, Compiler.JsonSerializer) +
                 "," + Environment.NewLine +
                 "\"syntaxTree\": " +
-                JsonConvert.SerializeObject(SyntaxTree, Compiler.Options.JsonSerializer) +
+                JsonConvert.SerializeObject(SyntaxTree, Compiler.JsonSerializer) +
                 Environment.NewLine + "}";
             File.WriteAllText(debugFilePath, debugInfo);
         }
@@ -120,12 +121,12 @@ namespace Axion.Processing {
         ///     due to <see cref="processingMode" />.
         /// </summary>
         internal void Process(SourceProcessingMode processingMode) {
-            Log.Info($"## Compiling '{sourceFileName}' ...");
+            ConsoleView.Log.Info($"## Compiling '{sourceFileName}' ...");
             if (Lines.Length == 0) {
-                Log.Error("# Source is empty. Lexical analysis aborted.");
+                ConsoleView.Log.Error("# Source is empty. Lexical analysis aborted.");
                 goto COMPILATION_END;
             }
-            Log.Info("# Tokens list generation...");
+            ConsoleView.Log.Info("# Tokens list generation...");
             {
                 CorrectFormat();
                 new Lexer(this).Process();
@@ -133,7 +134,7 @@ namespace Axion.Processing {
                     goto COMPILATION_END;
                 }
             }
-            Log.Info("# Abstract Syntax Tree generation...");
+            ConsoleView.Log.Info("# Abstract Syntax Tree generation...");
             {
                 // new Parser(this).Process();
                 if (processingMode == SourceProcessingMode.Parsing) {
@@ -142,37 +143,34 @@ namespace Axion.Processing {
             }
             switch (processingMode) {
                 case SourceProcessingMode.Interpret: {
-                    Log.Error("Interpretation support is in progress!");
+                    ConsoleView.Log.Error("Interpretation support is in progress!");
                     break;
                 }
                 case SourceProcessingMode.ConvertC: {
-                    Log.Error("Transpiling to 'C' is not implemented yet.");
+                    ConsoleView.Log.Error("Transpiling to 'C' is not implemented yet.");
                     break;
                 }
                 default: {
-                    Log.Error($"'{processingMode:G}' mode not implemented yet.");
+                    ConsoleView.Log.Error($"'{processingMode:G}' mode not implemented yet.");
                     break;
                 }
             }
 
             COMPILATION_END:
 
-            bool hasErrors = Errors.Count > 0;
-            if (hasErrors) {
+            if (Compiler.Debug) {
+                ConsoleView.Log.Info($"# Saving debugging information to '{debugFilePath}' ...");
+                SaveDebugInfoToFile();
+            }
+
+            if (Errors.Count > 0) {
                 for (int i = 0; i < Errors.Count; i++) {
                     Errors[i].Render();
                 }
-            }
-
-            if (Compiler.Options.Debug) {
-                Log.Info($"# Saving debugging information to '{debugFilePath}' ...");
-                SaveDebugInfoToFile();
-            }
-            if (hasErrors) {
-                Log.WriteLine("# Compilation aborted due to errors above.", ConsoleColor.Red);
+                ConsoleView.Log.Info("# Compilation aborted due to errors above.");
             }
             else {
-                Log.Info("# Compilation completed.");
+                ConsoleView.Log.Info("# Compilation completed.");
             }
         }
 

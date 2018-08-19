@@ -2,7 +2,7 @@
     /// <summary>
     ///     Contains all error IDs that can happen while processing <see cref="SourceCode" />.
     /// </summary>
-    internal enum ErrorType {
+    public enum ErrorType {
         /// <summary>
         ///     No error is occurred.
         /// </summary>

@@ -1,6 +1,7 @@
 ﻿namespace Axion.Visual {
-    internal class ConsoleSyntaxHighlighter : ISyntaxHighlighter {
-        public void Highlight() {
+    internal class ConsoleSyntaxHighlighter {
+        public void Highlight(string inputCode) {
+            ConsoleView.Output.Write(inputCode);
         }
     }
 }

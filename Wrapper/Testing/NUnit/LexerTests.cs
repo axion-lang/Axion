@@ -51,7 +51,7 @@ namespace Wrapper.Testing.NUnit {
 
         [Test]
         public static void NestedMultilineCommentInvalid() {
-            Compiler.Options.Debug = true;
+            Compiler.Debug = true;
             string[] files = Directory.GetFiles(InPath, $"{nameof(NestedMultilineCommentInvalid)}*{axionExtension}");
 
             // check for error
@@ -60,13 +60,13 @@ namespace Wrapper.Testing.NUnit {
                     new FileInfo($"{InPath}{nameof(NestedMultilineCommentInvalid)}_{i}{axionExtension}"),
                     $"{OutPath}{nameof(NestedMultilineCommentInvalid)}_{i}{testExtension}"
                 );
-                Assert.Throws<ProcessingException>(() => Compiler.Process(source, SourceProcessingMode.Lex));
+                Assert.Throws<ProcessingException>(() => Compiler.UnitTest(source, SourceProcessingMode.Lex));
             }
         }
 
         [Test]
         public static void NestedMultilineCommentValid() {
-            Compiler.Options.Debug = true;
+            Compiler.Debug = true;
             string[] files = Directory.GetFiles(InPath, $"{nameof(NestedMultilineCommentValid)}*{axionExtension}");
 
             // validate
@@ -75,24 +75,24 @@ namespace Wrapper.Testing.NUnit {
                     new FileInfo($"{InPath}{nameof(NestedMultilineCommentValid)}_{i}{axionExtension}"),
                     $"{OutPath}{nameof(NestedMultilineCommentValid)}_{i}{testExtension}"
                 );
-                Assert.DoesNotThrow(() => Compiler.Process(source, SourceProcessingMode.Lex));
+                Assert.DoesNotThrow(() => Compiler.UnitTest(source, SourceProcessingMode.Lex));
             }
         }
 
         [Test]
         public static void StringsValidation() {
-            Compiler.Options.Debug = true;
+            Compiler.Debug = true;
             var source = new SourceCode(
                 new FileInfo(InPath + nameof(StringsValidation) + axionExtension),
                 OutPath + nameof(StringsValidation) + testExtension
             );
 
-            Assert.DoesNotThrow(() => Compiler.Process(source, SourceProcessingMode.Lex));
+            Assert.DoesNotThrow(() => Compiler.UnitTest(source, SourceProcessingMode.Lex));
         }
 
         [Test]
         public static void UseBlockValid() {
-            Compiler.Options.Debug = true;
+            Compiler.Debug = true;
             var source = new SourceCode(
                 @"use {
    collections.enumerable,
@@ -102,7 +102,7 @@ namespace Wrapper.Testing.NUnit {
                 OutPath + nameof(UseBlockValid) + testExtension
             );
 
-            Assert.DoesNotThrow(() => Compiler.Process(source, SourceProcessingMode.Lex));
+            Assert.DoesNotThrow(() => Compiler.UnitTest(source, SourceProcessingMode.Lex));
 
             var expected = new LinkedList<Token>();
 
@@ -141,20 +141,20 @@ namespace Wrapper.Testing.NUnit {
 
             #endregion
 
-            string t1 = JsonConvert.SerializeObject(source.Tokens, Compiler.Options.JsonSerializer);
-            string t2 = JsonConvert.SerializeObject(expected,      Compiler.Options.JsonSerializer);
+            string t1 = JsonConvert.SerializeObject(source.Tokens, Compiler.JsonSerializer);
+            string t2 = JsonConvert.SerializeObject(expected,      Compiler.JsonSerializer);
             Assert.AreEqual(t1, t2);
         }
 
         [Test]
         public static void VariousStuffValid() {
-            Compiler.Options.Debug = true;
+            Compiler.Debug = true;
             var source = new SourceCode(
                 new FileInfo(InPath + nameof(VariousStuffValid) + axionExtension),
                 OutPath + nameof(VariousStuffValid) + testExtension
             );
 
-            Assert.DoesNotThrow(() => Compiler.Process(source, SourceProcessingMode.Lex));
+            Assert.DoesNotThrow(() => Compiler.UnitTest(source, SourceProcessingMode.Lex));
         }
 
         //[Test]

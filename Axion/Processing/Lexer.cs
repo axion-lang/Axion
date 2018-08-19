@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using Axion.Tokens;
+using Axion.Visual;
 
 namespace Axion.Processing {
     /// <summary>
@@ -204,7 +205,7 @@ namespace Axion.Processing {
                             if (indentChar != C && !inconsistentIndentation) {
                                 // warn user about inconsistency
                                 if (Compiler.Options.CheckIndentationConsistency) {
-                                    Log.Warn(ErrorType.WarnInconsistentIndentation, pos);
+                                    ConsoleView.Log.Warn(ErrorType.WarnInconsistentIndentation, pos);
                                 }
                                 inconsistentIndentation = true;
                             }

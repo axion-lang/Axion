@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Axion.Tokens;
+using Axion.Visual;
 using Newtonsoft.Json;
 
 namespace Axion.Processing {
@@ -54,8 +55,7 @@ namespace Axion.Processing {
             // ...
             //
             // Write message
-            Log.Write("Error: ", ConsoleColor.Red);
-            Console.WriteLine(Message + ".");
+            ConsoleView.Log.Error(Message);
 
             int linesCount = 0;
             for (int i = Token.StartLinePos; i < Source.Lines.Length && i < 4; i++) {
@@ -80,15 +80,15 @@ namespace Axion.Processing {
                 new string('^', Token.Value.Length);
 
             // render line
-            Console.WriteLine($"{LinePosition}| {lines[0].TrimEnd(Spec.EndLine, Spec.EndStream)}");
+            ConsoleView.Output.WriteLine($"{LinePosition}| {lines[0].TrimEnd(Spec.EndLine, Spec.EndStream)}");
             // render error pointer
-            Log.WriteLine(pointer, ConsoleColor.Red);
+            ConsoleView.Output.WriteLine((pointer, ConsoleColor.Red));
             //
             // NEXT LINES
             //
             for (var lineIndex = Token.StartLinePos + 1; lineIndex < lines.Count; lineIndex++) {
                 // render next line
-                Console.WriteLine($"{lineIndex + 1}| {lines[lineIndex].TrimEnd(Spec.EndLine, Spec.EndStream)}");
+                ConsoleView.Output.WriteLine($"{lineIndex + 1}| {lines[lineIndex].TrimEnd(Spec.EndLine, Spec.EndStream)}");
             }
         }
     }
