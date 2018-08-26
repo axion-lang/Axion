@@ -23,14 +23,19 @@ namespace Axion.Core.Processing {
         public readonly Ast SyntaxTree;
 
         /// <summary>
-        ///     Contains all errors that happened while processing <see cref="SourceCode" />.
+        ///     Contains all errors that raised while processing <see cref="SourceCode" />.
         /// </summary>
-        public List<SourceProcessingException> Errors;
+        public List<SyntaxError> Errors;
+
+        /// <summary>
+        ///     Contains all warnings that found while processing <see cref="SourceCode" />.
+        /// </summary>
+        public List<SyntaxError> Warnings;
 
         /// <summary>
         ///     Lines of source code picked from string or file.
         /// </summary>
-        public readonly string[] Lines;
+        public readonly string Code;
 
         public SourceProcessingOptions Options = SourceProcessingOptions.None;
 
@@ -86,10 +91,7 @@ namespace Axion.Core.Processing {
 
             // initialize content
             SyntaxTree = new Ast(this);
-            Lines = File.ReadAllText(file.FullName).Split(
-                Spec.Newlines,
-                StringSplitOptions.None
-            );
+            Code       = File.ReadAllText(file.FullName);
         }
 
         /// <summary>
@@ -121,7 +123,7 @@ namespace Axion.Core.Processing {
 
             // initialize content
             SyntaxTree = new Ast(this);
-            Lines      = sourceLines;
+            Code       = string.Join(Spec.EndLine.ToString(), sourceLines);
         }
 
         /// <summary>
@@ -130,22 +132,21 @@ namespace Axion.Core.Processing {
         /// </summary>
         public void Process(SourceProcessingMode mode, SourceProcessingOptions options = SourceProcessingOptions.None) {
             Options = options;
-            ConsoleLog.Info($"# Compiling '{sourceFileName}'");
-            if (Lines.Length == 0) {
+            ConsoleLog.Info($"-- Compiling '{sourceFileName}'");
+            if (Code.Length == 0) {
                 ConsoleLog.Error("Source is empty. Compilation aborted.");
                 goto COMPILATION_END;
             }
             // [1] Tokenizing
-            ConsoleLog.Info("[*] Tokens list generation");
+            ConsoleLog.Info("|> Tokens list generation");
             {
-                CorrectFormat(Lines);
-                new Lexer(Lines, out Tokens, out Errors, Options).Process();
+                new Lexer(Code, out Tokens, out Errors, out Warnings, Options).Process();
                 if (mode == SourceProcessingMode.Lex) {
                     goto COMPILATION_END;
                 }
             }
             // [2] Parsing
-            ConsoleLog.Info("[*] Abstract Syntax Tree generation");
+            ConsoleLog.Info("}> Abstract Syntax Tree generation");
             {
                 // new Parser(this).Process();
                 if (mode == SourceProcessingMode.Parsing) {
@@ -171,29 +172,27 @@ namespace Axion.Core.Processing {
             COMPILATION_END:
 
             if (Options.HasFlag(SourceProcessingOptions.SyntaxAnalysisDebugOutput)) {
-                ConsoleLog.Info($"[*] Saving debugging information to '{debugFilePath}'");
+                ConsoleLog.Info($"|> Saving debugging information to '{debugFilePath}'");
                 SaveDebugInfoToFile(debugFilePath, Tokens, SyntaxTree);
             }
 
-            if (Errors.Count > 0) {
-                for (var i = 0; i < Errors.Count; i++) {
-                    Errors[i].Render();
+            bool hasErrors = Errors.Count > 0;
+            if (hasErrors) {
+                foreach (SyntaxError error in Errors) {
+                    error.Render();
                 }
-                ConsoleLog.Info("# Compilation aborted due to errors above.");
+            }
+            if (Warnings.Count > 0) {
+                foreach (SyntaxError warning in Warnings) {
+                    warning.Render();
+                }
+            }
+            
+            if (hasErrors) {
+                ConsoleLog.Info("-- Compilation aborted due to errors above.");
             }
             else {
-                ConsoleLog.Info("# Compilation completed.");
-            }
-        }
-
-        /// <summary>
-        ///     Appends newline statements on each line and
-        ///     adds <see cref="Spec.EndStream" /> mark at last line end.
-        /// </summary>
-        private static void CorrectFormat(string[] lines) {
-            // append newline statements to all lines except last
-            for (var i = 0; i < lines.Length - 1; i++) {
-                lines[i] += Spec.EndLine;
+                ConsoleLog.Info("-- Compilation completed.");
             }
         }
 

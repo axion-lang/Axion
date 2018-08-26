@@ -6,11 +6,12 @@ using Axion.Core.Tokens;
 
 namespace Axion.Core.Visual {
     internal class ConsoleSyntaxHighlighter {
-        public void Highlight(string inputCodeLine, out List<SourceProcessingException> errors) {
+        public void Highlight(string inputCodeLine, out List<SyntaxError> errors, out List<SyntaxError> warnings) {
             var lexer = new Lexer(
-                new[] { inputCodeLine },
+                inputCodeLine,
                 out LinkedList<Token> tokens,
                 out errors,
+                out warnings,
                 SourceProcessingOptions.PreserveWhitespaces
             );
             lexer.Process();

@@ -6,6 +6,7 @@ v2 = """"""
 n++
 ++n
 n2 = n++ + ++n
+n3 = ++n + n++
 # comment
 if val in collection:
     ++n

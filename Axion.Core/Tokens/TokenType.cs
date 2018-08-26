@@ -117,6 +117,6 @@ namespace Axion.Core.Tokens {
         Newline,
         Indent,
         Outdent,
-        EndOfFile
+        EndOfStream
     }
 }

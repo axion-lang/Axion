@@ -4,7 +4,7 @@
     /// </summary>
     public class EndOfStreamToken : Token {
         public EndOfStreamToken((int line, int column) location)
-            : base(TokenType.EndOfFile, location, Spec.EndStream.ToString()) {
+            : base(TokenType.EndOfStream, location, Spec.EndStream.ToString()) {
         }
     }
 }

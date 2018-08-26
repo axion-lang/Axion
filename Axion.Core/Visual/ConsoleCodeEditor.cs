@@ -455,16 +455,19 @@ namespace Axion.Core.Visual {
                     ClearLine();
                     if (!singleLineMode && syntaxHighlighting) {
                         EraseError();
-                        PrintLineNumber();
+                        PrintLineNumber(cursorY + 1);
                         if (line.Trim().Length == 0) {
                             // if line empty just print whitespace
                             ConsoleUI.Write(line);
                         }
                         else {
                             // invoke highlighter
-                            highlighter.Highlight(line, out List<SourceProcessingException> errors);
+                            highlighter.Highlight(line, out List<SyntaxError> errors, out List<SyntaxError> warnings);
                             if (errors.Count != 0) {
                                 PrintError(errors[0]);
+                            }
+                            else if (warnings.Count != 0) {
+                                PrintError(warnings[0]);
                             }
                         }
                     }
@@ -475,36 +478,36 @@ namespace Axion.Core.Visual {
             );
         }
 
+        internal const int LineNumberWidth = 7;
+
         /// <summary>
         ///     In multiline mode, prints line
         ///     number on left side of editor.
         ///     That number not included in code.
         /// </summary>
-        private void PrintLineNumber() {
-            if (!singleLineMode) {
-                var view = "|";
+        internal static void PrintLineNumber(int lineNumber) {
+            var view = "|";
 
-                // left align line number
-                // |   X |
-                if (cursorY < 9) {
-                    view += "   ";
-                }
-                // |  XX |
-                else if (cursorY < 99) {
-                    view += "  ";
-                }
-                // | XXX |
-                else if (cursorY < 300) {
-                    view += " ";
-                }
-                // file too large to display.
-                else {
-                    throw new FileTooLargeException();
-                }
-                // append line number and right aligner
-                view += cursorY + 1 + " | ";
-                ConsoleUI.Write(view);
+            // left align line number
+            // |   X |
+            if (lineNumber < 10) {
+                view += "   ";
             }
+            // |  XX |
+            else if (lineNumber < 100) {
+                view += "  ";
+            }
+            // | XXX |
+            else if (lineNumber < 301) {
+                view += " ";
+            }
+            // file too large to display.
+            else {
+                throw new FileTooLargeException();
+            }
+            // append line number and right aligner
+            view += lineNumber + " | ";
+            ConsoleUI.Write(view);
         }
 
         /// <summary>

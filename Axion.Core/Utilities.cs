@@ -6,15 +6,43 @@ using System.Linq;
 namespace Axion.Core {
     internal static class Utilities {
         private static readonly DateTimeFormatInfo dateTimeFormat = new CultureInfo("en-US").DateTimeFormat;
+        private const string timedFileNameFormat = "yyyy-MMM-dd_HH-mm-ss";
 
         /// <summary>
         ///     Creates a file name from current date and time
-        ///     in format: 'yyyy-MMM-dd_HH:mm:ss'.
+        ///     in format: 'yyyy-MMM-dd_HH-mm-ss'.
         /// </summary>
         /// <param name="dt"></param>
         /// <returns>file name without extension.</returns>
         internal static string ToFileName(this DateTime dt) {
-            return dt.ToString("yyyy-MMM-dd_HH:mm:ss", dateTimeFormat);
+            return dt.ToString(timedFileNameFormat, dateTimeFormat);
+        }
+
+        /// <summary>
+        ///     Returns
+        /// </summary>
+        internal static string[] GetLines(this string text, int fromIndex, int count) {
+            //int newlineIndex = text.IndexOf("\n", StringComparison.InvariantCulture);
+            //if (newlineIndex == -1) {
+            //    return new[] { text };
+            //}
+            //var lines = new List<string>();
+            //if (fromIndex == 0) {
+            //    lines.Add(text.Substring(0, newlineIndex + 1));
+            //}
+            //int i = 0;
+            //int prevNewlineIndex = newlineIndex;
+            //while (newlineIndex != -1 && lines.Count < count) {
+            //    text = text.Substring(prevNewlineIndex, newlineIndex + 1);
+            //    newlineIndex = text.IndexOf("\n", StringComparison.InvariantCulture);
+            //    if (i >= fromIndex) {
+            //        lines.Add(text.Substring(0, newlineIndex + 1));
+            //    }
+            //    prevNewlineIndex = newlineIndex;
+            //    i++;
+            //}
+            string[] lines = text.Split(Spec.Newlines, StringSplitOptions.None);
+            return lines.Skip(fromIndex).Take(count).ToArray();
         }
 
         /// <summary>

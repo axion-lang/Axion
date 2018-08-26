@@ -139,7 +139,7 @@ namespace Axion.Testing.NUnit {
             expected.AddLast(new Token(TokenType.Newline,    (3, 34), Spec.EndLine.ToString()));
             // line 5
             expected.AddLast(new OperatorToken("}", (4, 0)));
-            expected.AddLast(new Token(TokenType.EndOfFile, (4, 1), Spec.EndStream.ToString()));
+            expected.AddLast(new Token(TokenType.EndOfStream, (4, 1), Spec.EndStream.ToString()));
 
             #endregion
 
