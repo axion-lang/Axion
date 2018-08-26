@@ -92,69 +92,184 @@ namespace Axion.Core {
             { "false", TokenType.KeywordFalse }
         };
 
-        public static readonly Dictionary<string, OperatorProperties> Operators = new Dictionary<string, OperatorProperties> {
-            //{ "**",  new OperatorProperties("**",  InputSide.Both,    false,     38) },
+        public static readonly Dictionary<string, OperatorProperties> Operators =
+            new Dictionary<string, OperatorProperties> {
+                //{ "**",  new OperatorProperties("**",  InputSide.Both,    false,     38) },
 
-            //{ "->",  new OperatorProperties("->",  InputSide.Both,    false,     0) },
-            //{ "<-",  new OperatorProperties("<-",  InputSide.Both,    false,     0) },
+                //{ "->",  new OperatorProperties("->",  InputSide.Both,    false,     0) },
+                //{ "<-",  new OperatorProperties("<-",  InputSide.Both,    false,     0) },
 
-            { "(", new OperatorProperties(TokenType.OpLeftParenthesis,  InputSide.Both, Associativity.LeftToRight, false, 60) },
-            { ")", new OperatorProperties(TokenType.OpRightParenthesis, InputSide.Both, Associativity.LeftToRight, false, 60) },
-            { "[", new OperatorProperties(TokenType.OpLeftBracket,      InputSide.Both, Associativity.LeftToRight, false, 59) },
-            { "]", new OperatorProperties(TokenType.OpRightBracket,     InputSide.Both, Associativity.LeftToRight, false, 59) },
-            { ".", new OperatorProperties(TokenType.OpDot,              InputSide.Both, Associativity.LeftToRight, false, 55) },
+                {
+                    "(",
+                    new OperatorProperties(
+                        TokenType.OpLeftParenthesis, InputSide.Both, Associativity.LeftToRight, false, 60
+                    )
+                }, {
+                    ")",
+                    new OperatorProperties(
+                        TokenType.OpRightParenthesis, InputSide.Both, Associativity.LeftToRight, false, 60
+                    )
+                }, {
+                    "[",
+                    new OperatorProperties(
+                        TokenType.OpLeftBracket, InputSide.Both, Associativity.LeftToRight, false, 59
+                    )
+                }, {
+                    "]",
+                    new OperatorProperties(
+                        TokenType.OpRightBracket, InputSide.Both, Associativity.LeftToRight, false, 59
+                    )
+                },
+                { ".", new OperatorProperties(TokenType.OpDot, InputSide.Both, Associativity.LeftToRight, false, 55) }, {
+                    "++",
+                    new OperatorProperties(
+                        TokenType.OpIncrement, InputSide.SomeOne, Associativity.RightToLeft, false, 50
+                    )
+                }, {
+                    "--",
+                    new OperatorProperties(
+                        TokenType.OpDecrement, InputSide.SomeOne, Associativity.RightToLeft, false, 50
+                    )
+                },
+                { "!", new OperatorProperties(TokenType.OpNot, InputSide.Right, Associativity.RightToLeft, false, 50) }, {
+                    "~",
+                    new OperatorProperties(
+                        TokenType.OpBitwiseNot, InputSide.Right, Associativity.RightToLeft, false, 50
+                    )
+                }, {
+                    "*",
+                    new OperatorProperties(TokenType.OpMultiply, InputSide.Both, Associativity.LeftToRight, false, 45)
+                }, {
+                    "/",
+                    new OperatorProperties(TokenType.OpTrueDivide, InputSide.Both, Associativity.LeftToRight, false, 45)
+                }, {
+                    "%",
+                    new OperatorProperties(TokenType.OpRemainder, InputSide.Both, Associativity.LeftToRight, false, 45)
+                },
 
-            { "++", new OperatorProperties(TokenType.OpIncrement, InputSide.SomeOne, Associativity.RightToLeft, false, 50) },
-            { "--", new OperatorProperties(TokenType.OpDecrement, InputSide.SomeOne, Associativity.RightToLeft, false, 50) },
-            { "!", new OperatorProperties(TokenType.OpNot,        InputSide.Right,   Associativity.RightToLeft, false, 50) },
-            { "~", new OperatorProperties(TokenType.OpBitwiseNot, InputSide.Right,   Associativity.RightToLeft, false, 50) },
+                { "+", new OperatorProperties(TokenType.OpAdd, InputSide.Both, Associativity.LeftToRight, false, 40) }, {
+                    "-",
+                    new OperatorProperties(TokenType.OpSubtract, InputSide.Both, Associativity.LeftToRight, false, 40)
+                }, {
+                    "<<",
+                    new OperatorProperties(TokenType.OpLeftShift, InputSide.Both, Associativity.LeftToRight, false, 35)
+                }, {
+                    ">>",
+                    new OperatorProperties(TokenType.OpRightShift, InputSide.Both, Associativity.LeftToRight, false, 35)
+                },
 
-            { "*", new OperatorProperties(TokenType.OpMultiply,   InputSide.Both, Associativity.LeftToRight, false, 45) },
-            { "/", new OperatorProperties(TokenType.OpTrueDivide, InputSide.Both, Associativity.LeftToRight, false, 45) },
-            { "%", new OperatorProperties(TokenType.OpRemainder,  InputSide.Both, Associativity.LeftToRight, false, 45) },
+                { "in", new OperatorProperties(TokenType.OpIn, InputSide.Both, Associativity.LeftToRight, false, 30) }, {
+                    "<",
+                    new OperatorProperties(TokenType.OpLessThan, InputSide.Both, Associativity.LeftToRight, false, 30)
+                }, {
+                    "<=",
+                    new OperatorProperties(
+                        TokenType.OpLessThanOrEqual, InputSide.Both, Associativity.LeftToRight, false, 30
+                    )
+                }, {
+                    ">",
+                    new OperatorProperties(
+                        TokenType.OpGreaterThan, InputSide.Both, Associativity.LeftToRight, false, 30
+                    )
+                }, {
+                    ">=",
+                    new OperatorProperties(
+                        TokenType.OpGreaterThanOrEqual, InputSide.Both, Associativity.LeftToRight, false, 30
+                    )
+                }, {
+                    "==",
+                    new OperatorProperties(TokenType.OpEquals, InputSide.Both, Associativity.LeftToRight, false, 25)
+                }, {
+                    "!=",
+                    new OperatorProperties(TokenType.OpNotEquals, InputSide.Both, Associativity.LeftToRight, false, 25)
+                }, {
+                    "&",
+                    new OperatorProperties(TokenType.OpBitwiseAnd, InputSide.Both, Associativity.LeftToRight, false, 17)
+                }, {
+                    "^",
+                    new OperatorProperties(
+                        TokenType.OpExclusiveOr, InputSide.Both, Associativity.LeftToRight, false, 16
+                    )
+                }, {
+                    "|",
+                    new OperatorProperties(TokenType.OpBitwiseOr, InputSide.Both, Associativity.LeftToRight, false, 15)
+                },
 
-            { "+", new OperatorProperties(TokenType.OpAdd,      InputSide.Both, Associativity.LeftToRight, false, 40) },
-            { "-", new OperatorProperties(TokenType.OpSubtract, InputSide.Both, Associativity.LeftToRight, false, 40) },
+                { "&&", new OperatorProperties(TokenType.OpAnd, InputSide.Both, Associativity.LeftToRight, false, 11) },
+                { "||", new OperatorProperties(TokenType.OpOr,  InputSide.Both, Associativity.LeftToRight, false, 10) }, {
+                    "=",
+                    new OperatorProperties(
+                        TokenType.OpAssign, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                }, {
+                    "+=",
+                    new OperatorProperties(
+                        TokenType.OpAddEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                }, {
+                    "-=",
+                    new OperatorProperties(
+                        TokenType.OpSubtractEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                }, {
+                    "*=",
+                    new OperatorProperties(
+                        TokenType.OpMultiplyEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                }, {
+                    "/=",
+                    new OperatorProperties(
+                        TokenType.OpTrueDivideEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                }, {
+                    "%=",
+                    new OperatorProperties(
+                        TokenType.OpRemainderEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                }, {
+                    "<<=",
+                    new OperatorProperties(
+                        TokenType.OpLeftShiftEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                }, {
+                    ">>=",
+                    new OperatorProperties(
+                        TokenType.OpRightShiftEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                }, {
+                    "&=",
+                    new OperatorProperties(
+                        TokenType.OpBitwiseAndEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                }, {
+                    "|=",
+                    new OperatorProperties(
+                        TokenType.OpBitwiseOrEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                }, {
+                    "^=",
+                    new OperatorProperties(
+                        TokenType.OpExclusiveOrEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                }, {
+                    "=>",
+                    new OperatorProperties(
+                        TokenType.OpRightArrow, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence
+                    )
+                },
 
-            { "<<", new OperatorProperties(TokenType.OpLeftShift,  InputSide.Both, Associativity.LeftToRight, false, 35) },
-            { ">>", new OperatorProperties(TokenType.OpRightShift, InputSide.Both, Associativity.LeftToRight, false, 35) },
-
-            { "in", new OperatorProperties(TokenType.OpIn,                 InputSide.Both, Associativity.LeftToRight, false, 30) },
-            { "<", new OperatorProperties(TokenType.OpLessThan,            InputSide.Both, Associativity.LeftToRight, false, 30) },
-            { "<=", new OperatorProperties(TokenType.OpLessThanOrEqual,    InputSide.Both, Associativity.LeftToRight, false, 30) },
-            { ">", new OperatorProperties(TokenType.OpGreaterThan,         InputSide.Both, Associativity.LeftToRight, false, 30) },
-            { ">=", new OperatorProperties(TokenType.OpGreaterThanOrEqual, InputSide.Both, Associativity.LeftToRight, false, 30) },
-
-            { "==", new OperatorProperties(TokenType.OpEquals,    InputSide.Both, Associativity.LeftToRight, false, 25) },
-            { "!=", new OperatorProperties(TokenType.OpNotEquals, InputSide.Both, Associativity.LeftToRight, false, 25) },
-
-            { "&", new OperatorProperties(TokenType.OpBitwiseAnd,  InputSide.Both, Associativity.LeftToRight, false, 17) },
-            { "^", new OperatorProperties(TokenType.OpExclusiveOr, InputSide.Both, Associativity.LeftToRight, false, 16) },
-            { "|", new OperatorProperties(TokenType.OpBitwiseOr,   InputSide.Both, Associativity.LeftToRight, false, 15) },
-
-            { "&&", new OperatorProperties(TokenType.OpAnd, InputSide.Both, Associativity.LeftToRight, false, 11) },
-            { "||", new OperatorProperties(TokenType.OpOr,  InputSide.Both, Associativity.LeftToRight, false, 10) },
-
-            { "=", new OperatorProperties(TokenType.OpAssign,            InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-            { "+=", new OperatorProperties(TokenType.OpAddEqual,         InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-            { "-=", new OperatorProperties(TokenType.OpSubtractEqual,    InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-            { "*=", new OperatorProperties(TokenType.OpMultiplyEqual,    InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-            { "/=", new OperatorProperties(TokenType.OpTrueDivideEqual,  InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-            { "%=", new OperatorProperties(TokenType.OpRemainderEqual,   InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-            { "<<=", new OperatorProperties(TokenType.OpLeftShiftEqual,  InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-            { ">>=", new OperatorProperties(TokenType.OpRightShiftEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-            { "&=", new OperatorProperties(TokenType.OpBitwiseAndEqual,  InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-            { "|=", new OperatorProperties(TokenType.OpBitwiseOrEqual,   InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-            { "^=", new OperatorProperties(TokenType.OpExclusiveOrEqual, InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-            { "=>", new OperatorProperties(TokenType.OpRightArrow,       InputSide.Both, Associativity.RightToLeft, false, AssignPrecedence) },
-
-            { ",", new OperatorProperties(TokenType.OpComma,     InputSide.Both, Associativity.LeftToRight, false, 3) },
-            { ";", new OperatorProperties(TokenType.OpSemicolon, InputSide.Both, Associativity.LeftToRight, false, 2) },
-            { ":", new OperatorProperties(TokenType.OpColon,     InputSide.Both, Associativity.LeftToRight, false, 1) },
-
-            { "{", new OperatorProperties(TokenType.OpLeftBrace,  InputSide.Both, Associativity.LeftToRight, false, 0) },
-            { "}", new OperatorProperties(TokenType.OpRightBrace, InputSide.Both, Associativity.LeftToRight, false, 0) }
-        };
+                { ",", new OperatorProperties(TokenType.OpComma, InputSide.Both, Associativity.LeftToRight, false, 3) }, {
+                    ";",
+                    new OperatorProperties(TokenType.OpSemicolon, InputSide.Both, Associativity.LeftToRight, false, 2)
+                },
+                { ":", new OperatorProperties(TokenType.OpColon, InputSide.Both, Associativity.LeftToRight, false, 1) }, {
+                    "{",
+                    new OperatorProperties(TokenType.OpLeftBrace, InputSide.Both, Associativity.LeftToRight, false, 0)
+                }, {
+                    "}",
+                    new OperatorProperties(TokenType.OpRightBrace, InputSide.Both, Associativity.LeftToRight, false, 0)
+                }
+            };
 
         public static readonly string[] OperatorsValues = Operators.Keys.OrderByDescending(val => val.Length).ToArray();
 

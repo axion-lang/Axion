@@ -1,90 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
-using Axion.Core.Processing;
 
-namespace Axion.Core.Visual.ConsoleImpl {
+namespace Axion.Core.Visual {
     /// <summary>
     ///     Implementation of Axion toolset UI using <see cref="Console" /> class.
     /// </summary>
     internal static class ConsoleUI {
         public static void Initialize() {
-            Console.InputEncoding   = Console.OutputEncoding = Encoding.Unicode;
+            Console.InputEncoding   = Console.OutputEncoding = Encoding.UTF8;
             Console.ForegroundColor = ConsoleColor.White;
             const string header = "Axion programming language compiler toolset";
-            Console.Title = header;                                                                              // print title
-            WriteLine((header + " v. ", ConsoleColor.White), (Compiler.Version, ConsoleColor.DarkYellow));       // print version
-            WriteLine(("Working in ", ConsoleColor.White),   (Compiler.WorkDirectory, ConsoleColor.DarkYellow)); // print directory
-            WriteLine(Compiler.HelpHint + Environment.NewLine);
+            Console.Title = header; // print title
+            WriteLine(
+                (header + " v. ", ConsoleColor.White), (Compiler.Version, ConsoleColor.DarkYellow)
+            ); // print version
+            WriteLine(
+                ("Working in ", ConsoleColor.White), (Compiler.WorkDirectory, ConsoleColor.DarkYellow)
+            ); // print directory
+            WriteLine(Compiler.HelpHint + "\n");
         }
 
-        public static void InteractiveSession() {
-            ConsoleLog.Info(
-                "Interactive mode.\n" +
-                "Now your input will be processed by Axion interpreter.\n" +
-                "Type 'exit' or 'quit' to quit interactive mode;\n" +
-                "Type 'cls' to clear screen."
-            );
-            while (true) {
-                // code editor header
-                string input        = Read("i>> ", ConsoleColor.Yellow);
-                string alignedInput = input.Trim().ToUpper();
-                // skip empty commands
-                if (alignedInput == "") {
-                    ClearLine();
-                    continue;
-                }
-                // exit from interpreter to main loop
-                if (alignedInput == "EXIT" ||
-                    alignedInput == "QUIT") {
-                    WriteLine();
-                    ConsoleLog.Info("Interactive interpreter closed.");
-                    return;
-                }
-                if (alignedInput == "CLS") {
-                    Console.Clear();
-                    Initialize();
-                    continue;
-                }
-                // TODO parse "help(module)" argument
-                //if (alignedInput == "HELP" || alignedInput == "H" || alignedInput == "?") {
-                //    // give help about some module/function.
-                //    // should have control of all standard library documentation.
-                //}
-
-                IEnumerable<string> codeLines = ConsoleCodeEditor.BeginSession(input);
-                // interpret as Axion source and output result
-                new SourceCode(codeLines).Process(SourceProcessingMode.Interpret);
-            }
-        }
-
-        public static string Read(string prompt, ConsoleColor inputColor = ConsoleColor.White) {
+        public static string Read(string prompt, ConsoleColor withColor = ConsoleColor.White) {
             Console.Write(prompt);
-            ConsoleColor prevColor = Console.ForegroundColor;
-            Console.ForegroundColor = inputColor;
-            var            value = "";
-            ConsoleKeyInfo key   = Console.ReadKey(true);
-            while (key.Key != ConsoleKey.Enter) {
-                if (key.Key == ConsoleKey.Backspace) {
-                    if (value.Length > 0) {
-                        value = value.Remove(value.Length - 1);
-                        Console.Write("\b \b");
-                    }
+            var result = "";
+            DoWithFontColor(
+                withColor, () => {
+                    var editor = new ConsoleCodeEditor(true, false, prompt);
+                    result = editor.BeginSession()[0];
                 }
-                else {
-                    value += key.KeyChar;
-                    Console.Write(key.KeyChar);
-                }
-                key = Console.ReadKey(true);
-            }
-            Console.ForegroundColor = prevColor;
-            return value;
-        }
-
-        public static string ReadLine(string prompt, ConsoleColor inputColor = ConsoleColor.White) {
-            string line = Read(prompt, inputColor);
-            WriteLine();
-            return line;
+            );
+            return result;
         }
 
         /// <summary>
@@ -95,18 +40,6 @@ namespace Axion.Core.Visual.ConsoleImpl {
             Console.CursorLeft = 0;
             Console.Write(new string(' ', Console.BufferWidth));
             Console.SetCursorPosition(0, top);
-        }
-
-        /// <summary>
-        ///     Clears specified <paramref name="length" /> of current line.
-        /// </summary>
-        public static void ClearLine(int length) {
-            Console.CursorLeft = 0;
-            var spaces = "";
-            for (var _ = 0; _ < length; _++) {
-                spaces += " ";
-            }
-            Console.Write(spaces);
         }
 
         #region Basic write functions
@@ -125,10 +58,8 @@ namespace Axion.Core.Visual.ConsoleImpl {
         /// </summary>
         public static void Write(params (object text, ConsoleColor color)[] messages) {
             for (var i = 0; i < messages.Length; i++) {
-                ConsoleColor prevColor = Console.ForegroundColor;
-                Console.ForegroundColor = messages[i].color;
-                Console.Write(messages[i].text.ToString());
-                Console.ForegroundColor = prevColor;
+                // ReSharper disable once AccessToModifiedClosure
+                DoWithFontColor(messages[i].color, () => { Console.Write(messages[i].text.ToString()); });
             }
         }
 
@@ -157,18 +88,12 @@ namespace Axion.Core.Visual.ConsoleImpl {
         /// </summary>
         public static void WriteLine(params (object text, ConsoleColor color)[] messages) {
             for (var i = 0; i < messages.Length; i++) {
-                ConsoleColor prevColor;
                 if (i == messages.Length - 1) {
-                    prevColor               = Console.ForegroundColor;
-                    Console.ForegroundColor = messages[i].color;
-                    Console.WriteLine(messages[i].text.ToString());
-                    Console.ForegroundColor = prevColor;
+                    DoWithFontColor(messages[i].color, () => { Console.WriteLine(messages[i].text.ToString()); });
                     return;
                 }
-                prevColor               = Console.ForegroundColor;
-                Console.ForegroundColor = messages[i].color;
-                Console.Write(messages[i].text.ToString());
-                Console.ForegroundColor = prevColor;
+                // ReSharper disable once AccessToModifiedClosure
+                DoWithFontColor(messages[i].color, () => { Console.Write(messages[i].text.ToString()); });
             }
         }
 
@@ -186,13 +111,60 @@ namespace Axion.Core.Visual.ConsoleImpl {
         /// </summary>
         public static void WriteLines(params (object text, ConsoleColor color)[] lines) {
             for (var i = 0; i < lines.Length; i++) {
-                ConsoleColor prevColor = Console.ForegroundColor;
-                Console.ForegroundColor = lines[i].color;
-                Console.WriteLine(lines[i].text.ToString());
-                Console.ForegroundColor = prevColor;
+                // ReSharper disable once AccessToModifiedClosure
+                DoWithFontColor(lines[i].color, () => { Console.WriteLine(lines[i].text.ToString()); });
             }
         }
 
         #endregion
+
+        /// <summary>
+        ///     Performs action in <see cref="Console" />, then returns
+        ///     back to previous cursor position in <see cref="Console" />.
+        /// </summary>
+        internal static void DoAfterCursor(Action action) {
+            // save position
+            int sX = Console.CursorLeft;
+            int sY = Console.CursorTop;
+            // do action
+            action();
+            // reset cursor
+            Console.SetCursorPosition(sX, sY);
+        }
+
+        /// <summary>
+        ///     Moves to specified <see cref="Console" /> position,
+        ///     performs action, then returns back to previous
+        ///     cursor position in <see cref="Console" />.
+        /// </summary>
+        /// <param name="x">X</param>
+        /// <param name="y">Y</param>
+        /// <param name="action">action to perform at position (<paramref name="x" />, <paramref name="y" />).</param>
+        internal static void DoWithPosition(int x, int y, Action action) {
+            // save position
+            int sX = Console.CursorLeft;
+            int sY = Console.CursorTop;
+            // move cursor
+            Console.SetCursorPosition(x, y);
+            // do action
+            action();
+            // reset cursor
+            Console.SetCursorPosition(sX, sY);
+        }
+
+        /// <summary>
+        ///     Sets <see cref="Console.ForegroundColor" /> to &lt;<see cref="color" />&gt;,
+        ///     performs action, then returns back to previously used color.
+        /// </summary>
+        internal static void DoWithFontColor(ConsoleColor color, Action action) {
+            // save color
+            ConsoleColor prevColor = Console.ForegroundColor;
+            // set new color
+            Console.ForegroundColor = color;
+            // do action
+            action();
+            // reset color
+            Console.ForegroundColor = prevColor;
+        }
     }
 }

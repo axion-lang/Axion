@@ -10,7 +10,9 @@ namespace Axion.Core.Tokens {
             : base(TokenType.Unknown, location, value.ToString()) {
             if (!(value is long) &&
                 !(value is BigInteger)) {
-                throw new Exception($"Internal exception: {nameof(NumberToken)} constructor got invalid {nameof(value)}: {value}");
+                throw new Exception(
+                    $"Internal exception: {nameof(NumberToken)} constructor got invalid {nameof(value)}: {value}"
+                );
             }
             string str = value.ToString().ToUpper();
             if (str.Contains(".")) {

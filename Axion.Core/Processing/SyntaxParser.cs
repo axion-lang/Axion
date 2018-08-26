@@ -3,7 +3,7 @@
 //using Axion.Tokens.Ast;
 
 //namespace Axion.Processing {
-//    internal class Parser {
+//    internal class SyntaxParser {
 //        private readonly SourceCode        src;
 //        private readonly LinkedList<Token> tokens;
 //        private readonly Ast               ast;

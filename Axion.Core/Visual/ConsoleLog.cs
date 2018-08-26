@@ -1,6 +1,5 @@
 ﻿using System;
 using Axion.Core.Processing;
-using Axion.Core.Visual.ConsoleImpl;
 
 namespace Axion.Core.Visual {
     public static class ConsoleLog {

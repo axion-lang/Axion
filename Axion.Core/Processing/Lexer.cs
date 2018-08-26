@@ -10,13 +10,13 @@ namespace Axion.Core.Processing {
     /// <summary>
     ///     Static tool for splitting Axion code into tokens <see cref="LinkedList{T}" />.
     /// </summary>
-    internal class Lexer {
+    internal class Lexer { // TODO Lexer correct newlines; numbers parsing; string formattings & prefixes.
         /// <summary>
         ///     Reference to outgoing <see cref="LinkedList{T}" /> of tokens.
         /// </summary>
         private readonly LinkedList<Token> tokens = new LinkedList<Token>();
 
-        private readonly List<ProcessingException> errors = new List<ProcessingException>();
+        private readonly List<SourceProcessingException> errors = new List<SourceProcessingException>();
 
         private readonly SourceProcessingOptions options;
 
@@ -86,15 +86,15 @@ namespace Axion.Core.Processing {
         #endregion
 
         /// <summary>
-        ///     Contains unmatched unpaired parenthesis, brackets and braces.
+        ///     Contains unpaired parenthesis, brackets and braces.
         /// </summary>
         private readonly List<LinkedListNode<Token>> mismatchingPairs = new List<LinkedListNode<Token>>();
 
-        internal Lexer(
-            string[]                      codeLines,
-            out LinkedList<Token>         outTokens,
-            out List<ProcessingException> outErrors,
-            SourceProcessingOptions       processingOptions = SourceProcessingOptions.None
+        public Lexer(
+            string[]                            codeLines,
+            out LinkedList<Token>               outTokens,
+            out List<SourceProcessingException> outErrors,
+            SourceProcessingOptions             processingOptions = SourceProcessingOptions.None
         ) {
             lines     = codeLines;
             outTokens = tokens;
@@ -103,7 +103,7 @@ namespace Axion.Core.Processing {
         }
 
         /// <summary>
-        ///     Divides &lt;<see cref="SourceCode.Lines" />&gt; into &lt;<see cref="SourceCode.Tokens" />&gt; list of tokens.
+        ///     Divides code <see cref="lines" /> into list of tokens.
         /// </summary>
         internal void Process() {
             while (pos.line < lines.Length && pos.column < line.Length) {
@@ -129,7 +129,7 @@ namespace Axion.Core.Processing {
                 }
                 if (occurredErrorType != ErrorType.None) {
                     errors.Add(
-                        new ProcessingException(
+                        new SourceProcessingException(
                             occurredErrorType,
                             lines,
                             tokens.Last
@@ -166,10 +166,12 @@ namespace Axion.Core.Processing {
                         break;
                     }
                     default: {
-                        throw new Exception($"Internal error: {nameof(mismatchingPairs)} grabbed invalid {nameof(TokenType)}: {mismatch.Value.Type}.");
+                        throw new Exception(
+                            $"Internal error: {nameof(mismatchingPairs)} grabbed invalid {nameof(TokenType)}: {mismatch.Value.Type}."
+                        );
                     }
                 }
-                errors.Add(new ProcessingException(errorType, lines, mismatch));
+                errors.Add(new SourceProcessingException(errorType, lines, mismatch));
             }
         }
 
@@ -544,7 +546,7 @@ namespace Axion.Core.Processing {
                                 tokenValue
                             );
                             errors.Add(
-                                new ProcessingException(
+                                new SourceProcessingException(
                                     ErrorType.InvalidIntegerLiteral,
                                     lines,
                                     errorToken
@@ -615,7 +617,7 @@ namespace Axion.Core.Processing {
                         if (first) {
                             var errorToken = new Token(TokenType.Invalid, tokenPos, tokenValue);
                             errors.Add(
-                                new ProcessingException(
+                                new SourceProcessingException(
                                     ErrorType.InvalidBinaryLiteral,
                                     lines,
                                     errorToken
@@ -649,14 +651,16 @@ namespace Axion.Core.Processing {
                     }
                     case 'l':
                     case 'L': {
-                        BigInteger value = LiteralParser.ParseBigInteger(tokenValue.Substring(2, tokenValue.Length - 2), 8);
+                        BigInteger value = LiteralParser.ParseBigInteger(
+                            tokenValue.Substring(2, tokenValue.Length - 2), 8
+                        );
                         return new Token(TokenType.Unknown, tokenPos, value.ToString());
                     }
                     default: {
                         if (first) {
                             var errorToken = new Token(TokenType.Invalid, tokenPos, tokenValue);
                             errors.Add(
-                                new ProcessingException(
+                                new SourceProcessingException(
                                     ErrorType.InvalidOctalLiteral,
                                     lines,
                                     errorToken
@@ -693,7 +697,7 @@ namespace Axion.Core.Processing {
                     if (first) {
                         var errorToken = new Token(TokenType.Invalid, tokenPos, tokenValue);
                         errors.Add(
-                            new ProcessingException(
+                            new SourceProcessingException(
                                 ErrorType.InvalidHexadecimalLiteral,
                                 lines,
                                 errorToken
@@ -825,7 +829,9 @@ namespace Axion.Core.Processing {
         /// </summary>
         private void Move(int position = 1) {
             if (position <= 0) {
-                throw new Exception($"Internal error: function {nameof(Move)} was called with {nameof(position)} argument <= 0.");
+                throw new Exception(
+                    "Internal error: function " + nameof(Move) + " was called with " + nameof(position) + " <= 0."
+                );
             }
 
             for (var i = 0; i < position; i++) {

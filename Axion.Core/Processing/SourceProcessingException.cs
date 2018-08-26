@@ -4,12 +4,11 @@ using System.Globalization;
 using System.Linq;
 using Axion.Core.Tokens;
 using Axion.Core.Visual;
-using Axion.Core.Visual.ConsoleImpl;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing {
     [JsonObject]
-    public class ProcessingException : Exception {
+    public class SourceProcessingException : Exception {
         [JsonProperty] internal     string[] CodeLines;
         [JsonProperty] internal new string   Message;
         [JsonProperty] internal     string   Time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
@@ -17,7 +16,8 @@ namespace Axion.Core.Processing {
         [JsonProperty] internal     int      LinePosition;
         [JsonProperty] internal     Token    Token;
 
-        internal ProcessingException(ErrorType type, string[] codeLines, Token errorToken) {
+        internal SourceProcessingException(ErrorType type, string[] codeLines, Token errorToken)
+            : base(type.ToString("G")) {
             CodeLines = codeLines;
             Message   = type.ToString("G"); // TODO add representations for <ErrorType>
             Token     = errorToken;
@@ -26,7 +26,8 @@ namespace Axion.Core.Processing {
             ColumnPosition = Token.StartColumnPos + 1;
         }
 
-        internal ProcessingException(ErrorType type, string[] codeLines, LinkedListNode<Token> tokenNode) {
+        internal SourceProcessingException(ErrorType type, string[] codeLines, LinkedListNode<Token> tokenNode)
+            : base(type.ToString("G")) {
             CodeLines = codeLines;
             Message   = type.ToString("G"); // TODO add representations for <ErrorType>
             Token     = tokenNode.Value;

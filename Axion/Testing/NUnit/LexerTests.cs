@@ -31,8 +31,7 @@ namespace Axion.Testing.NUnit {
 
         private const string __inPath = "C:\\Users\\Fluctus\\Documents\\Code\\CSharp\\Axion\\Axion\\Testing\\_in\\";
 
-        private const string testExtension  = ".unittest.ax";
-        private const string axionExtension = ".ax";
+        private const string testExtension = ".unittest" + Compiler.SourceFileExtension;
 
         /// <summary>
         ///     a quick way to clear unit tests debug output.
@@ -41,8 +40,8 @@ namespace Axion.Testing.NUnit {
         public static void _ClearDebugDirectory() {
             Assert.DoesNotThrow(
                 () => {
-                    var di = new DirectoryInfo(__outPath);
-                    foreach (FileInfo file in di.EnumerateFiles()) {
+                    var dir = new DirectoryInfo(__outPath);
+                    foreach (FileInfo file in dir.EnumerateFiles()) {
                         file.Delete();
                     }
                 }
@@ -51,40 +50,46 @@ namespace Axion.Testing.NUnit {
 
         [Test]
         public static void NestedMultilineCommentInvalid() {
-            string[] files = Directory.GetFiles(InPath, $"{nameof(NestedMultilineCommentInvalid)}*{axionExtension}");
+            string[] files = Directory.GetFiles(
+                InPath, $"{nameof(NestedMultilineCommentInvalid)}*{Compiler.SourceFileExtension}"
+            );
 
             // check for error
             for (var i = 1; i < files.Length + 1; i++) {
                 var source = new SourceCode(
-                    new FileInfo($"{InPath}{nameof(NestedMultilineCommentInvalid)}_{i}{axionExtension}"),
+                    new FileInfo($"{InPath}{nameof(NestedMultilineCommentInvalid)}_{i}{Compiler.SourceFileExtension}"),
                     $"{OutPath}{nameof(NestedMultilineCommentInvalid)}_{i}{testExtension}"
                 );
-                Assert.Throws<ProcessingException>(() => Compiler.UnitTest(source, SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput));
+                source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+                Assert.IsTrue(source.Errors.Count == 1);
             }
         }
 
         [Test]
         public static void NestedMultilineCommentValid() {
-            string[] files = Directory.GetFiles(InPath, $"{nameof(NestedMultilineCommentValid)}*{axionExtension}");
+            string[] files = Directory.GetFiles(
+                InPath, $"{nameof(NestedMultilineCommentValid)}*{Compiler.SourceFileExtension}"
+            );
 
             // validate
             for (var i = 1; i < files.Length + 1; i++) {
                 var source = new SourceCode(
-                    new FileInfo($"{InPath}{nameof(NestedMultilineCommentValid)}_{i}{axionExtension}"),
+                    new FileInfo($"{InPath}{nameof(NestedMultilineCommentValid)}_{i}{Compiler.SourceFileExtension}"),
                     $"{OutPath}{nameof(NestedMultilineCommentValid)}_{i}{testExtension}"
                 );
-                Assert.DoesNotThrow(() => Compiler.UnitTest(source, SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput));
+                source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+                Assert.IsTrue(source.Errors.Count == 0);
             }
         }
 
         [Test]
         public static void StringsValidation() {
             var source = new SourceCode(
-                new FileInfo(InPath + nameof(StringsValidation) + axionExtension),
+                new FileInfo(InPath + nameof(StringsValidation) + Compiler.SourceFileExtension),
                 OutPath + nameof(StringsValidation) + testExtension
             );
-
-            Assert.DoesNotThrow(() => Compiler.UnitTest(source, SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput));
+            source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+            Assert.IsTrue(source.Errors.Count == 0);
         }
 
         [Test]
@@ -98,7 +103,8 @@ namespace Axion.Testing.NUnit {
                 OutPath + nameof(UseBlockValid) + testExtension
             );
 
-            Assert.DoesNotThrow(() => Compiler.UnitTest(source, SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput));
+            source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+            Assert.IsTrue(source.Errors.Count == 0);
 
             var expected = new LinkedList<Token>();
 
@@ -145,11 +151,12 @@ namespace Axion.Testing.NUnit {
         [Test]
         public static void VariousStuffValid() {
             var source = new SourceCode(
-                new FileInfo(InPath + nameof(VariousStuffValid) + axionExtension),
+                new FileInfo(InPath + nameof(VariousStuffValid) + Compiler.SourceFileExtension),
                 OutPath + nameof(VariousStuffValid) + testExtension
             );
 
-            Assert.DoesNotThrow(() => Compiler.UnitTest(source, SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput));
+            source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+            Assert.IsTrue(source.Errors.Count == 0);
         }
 
         //[Test]

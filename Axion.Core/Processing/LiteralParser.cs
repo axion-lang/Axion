@@ -61,7 +61,9 @@ namespace Axion.Core.Processing {
                         if (!isRaw) {
                             if (TryParseInt(text, i, len, max, out val)) {
                                 if (val < 0 || val > 0x10ffff) {
-                                    throw new Exception($@"Can't decode bytes in position {i}: illegal Unicode character");
+                                    throw new Exception(
+                                        $@"Can't decode bytes in position {i}: illegal Unicode character"
+                                    );
                                 }
                                 if (val < 0x010000) {
                                     buf.Append((char) val);
@@ -139,7 +141,9 @@ namespace Axion.Core.Processing {
                                         }
                                     }
                                     if (!namecomplete || namebuf.Length == 0) {
-                                        throw new Exception($@"Can't decode bytes in position {i}: malformed \N character escape");
+                                        throw new Exception(
+                                            $@"Can't decode bytes in position {i}: malformed \N character escape"
+                                        );
                                     }
                                     try {
                                         var    uval = "";
@@ -150,11 +154,15 @@ namespace Axion.Core.Processing {
                                         buf.Append(uval);
                                     }
                                     catch (KeyNotFoundException) {
-                                        throw new Exception($@"Can't decode bytes in position {i}: unknown Unicode character name");
+                                        throw new Exception(
+                                            $@"Can't decode bytes in position {i}: unknown Unicode character name"
+                                        );
                                     }
                                 }
                                 else {
-                                    throw new Exception($@"Can't decode bytes in position {i}: malformed \N character escape");
+                                    throw new Exception(
+                                        $@"Can't decode bytes in position {i}: malformed \N character escape"
+                                    );
                                 }
                             }
                                 continue;
@@ -214,10 +222,10 @@ namespace Axion.Core.Processing {
             return new string(text, start, length);
         }
 
-        public static object ParseInteger(string text, int b) {
-            Debug.Assert(b != 0);
-            if (!ParseInt(text, b, out int iret)) {
-                BigInteger ret = ParseBigInteger(text, b);
+        public static object ParseInteger(string text, int radix) {
+            Debug.Assert(radix != 0);
+            if (!ParseInt(text, radix, out int iret)) {
+                BigInteger ret = ParseBigInteger(text, radix);
                 if (!int.TryParse(ret.ToString(), out iret)) {
                     return ret;
                 }
@@ -225,38 +233,38 @@ namespace Axion.Core.Processing {
             return iret;
         }
 
-        public static object ParseIntegerSign(string text, int b, int start = 0) {
-            int end = text.Length, saveb = b, savestart = start;
+        public static object ParseIntegerSign(string text, int radix, int start = 0) {
+            int end = text.Length, saveb = radix, savestart = start;
             if (start < 0 || start > end) {
                 throw new ArgumentOutOfRangeException(nameof(start));
             }
             short sign = 1;
-            if (b < 0 || b == 1 || b > 36) {
+            if (radix < 0 || radix == 1 || radix > 36) {
                 throw new Exception("base must be >= 2 and <= 36");
             }
-            ParseIntegerStart(text, ref b, ref start, end, ref sign);
+            ParseIntegerStart(text, ref radix, ref start, end, ref sign);
             var ret = 0;
             try {
                 int saveStart = start;
                 for (;;) {
                     if (start >= end) {
                         if (saveStart == start) {
-                            throw new Exception($"invalid literal for int() with base {b}: '{text}'");
+                            throw new Exception($"invalid literal for int() with base {radix}: '{text}'");
                         }
                         break;
                     }
                     if (!HexValue(text[start], out int digit)) {
                         break;
                     }
-                    if (!(digit < b)) {
+                    if (!(digit < radix)) {
                         if (text[start] == 'l' || text[start] == 'L') {
                             break;
                         }
-                        throw new Exception($"invalid literal for int() with base {b}: '{text}'");
+                        throw new Exception($"invalid literal for int() with base {radix}: '{text}'");
                     }
                     checked {
                         // include sign here so that System.Int32.MinValue won't overflow
-                        ret = ret * b + sign * digit;
+                        ret = ret * radix + sign * digit;
                     }
                     start++;
                 }
@@ -268,8 +276,8 @@ namespace Axion.Core.Processing {
             return ret;
         }
 
-        public static BigInteger ParseBigInteger(string text, int b) {
-            Debug.Assert(b != 0);
+        public static BigInteger ParseBigInteger(string text, int radix) {
+            Debug.Assert(radix != 0);
             BigInteger ret = BigInteger.Zero;
             BigInteger m   = BigInteger.One;
             int        i   = text.Length - 1;
@@ -277,7 +285,7 @@ namespace Axion.Core.Processing {
                 i -= 1;
             }
             var groupMax = 7;
-            if (b <= 10) {
+            if (radix <= 10) {
                 groupMax = 9; // 2 147 483 647
             }
             while (i >= 0) {
@@ -285,8 +293,8 @@ namespace Axion.Core.Processing {
                 var  smallMultiplier = 1;
                 uint uval            = 0;
                 for (var j = 0; j < groupMax && i >= 0; j++) {
-                    uval            =  (uint) (CharValue(text[i--], b) * smallMultiplier + uval);
-                    smallMultiplier *= b;
+                    uval            =  (uint) (CharValue(text[i--], radix) * smallMultiplier + uval);
+                    smallMultiplier *= radix;
                 }
 
                 // this is more generous than needed
@@ -298,35 +306,35 @@ namespace Axion.Core.Processing {
             return ret;
         }
 
-        public static BigInteger ParseBigIntegerSign(string text, int b, int start = 0) {
+        public static BigInteger ParseBigIntegerSign(string text, int radix, int start = 0) {
             int end = text.Length;
             if (start < 0 || start > end) {
                 throw new ArgumentOutOfRangeException(nameof(start));
             }
             short sign = 1;
-            if (b < 0 || b == 1 || b > 36) {
+            if (radix < 0 || radix == 1 || radix > 36) {
                 throw new Exception("base must be >= 2 and <= 36");
             }
-            ParseIntegerStart(text, ref b, ref start, end, ref sign);
+            ParseIntegerStart(text, ref radix, ref start, end, ref sign);
             BigInteger ret       = BigInteger.Zero;
             int        saveStart = start;
             for (;;) {
                 if (start >= end) {
                     if (start == saveStart) {
-                        throw new Exception($"invalid literal for int() with base {b}: {text}");
+                        throw new Exception($"invalid literal for int() with base {radix}: {text}");
                     }
                     break;
                 }
                 if (!HexValue(text[start], out int digit)) {
                     break;
                 }
-                if (!(digit < b)) {
+                if (!(digit < radix)) {
                     if (text[start] == 'l' || text[start] == 'L') {
                         break;
                     }
-                    throw new Exception($"invalid literal for int() with base {b}: {text}");
+                    throw new Exception($"invalid literal for int() with base {radix}: {text}");
                 }
-                ret = ret * b + digit;
+                ret = ret * radix + digit;
                 start++;
             }
             if (start < end && (text[start] == 'l' || text[start] == 'L')) {
@@ -606,20 +614,20 @@ namespace Axion.Core.Processing {
             return val;
         }
 
-        private static bool ParseInt(string text, int b, out int ret) {
+        private static bool ParseInt(string text, int radix, out int ret) {
             ret = 0;
             long m = 1;
             for (int i = text.Length - 1; i >= 0; i--) {
                 // avoid the exception here.  Not only is throwing it expensive,
                 // but loading the resources for it is also expensive 
-                long lret = ret + m * CharValue(text[i], b);
+                long lret = ret + m * CharValue(text[i], radix);
                 if (int.MinValue <= lret && lret <= int.MaxValue) {
                     ret = (int) lret;
                 }
                 else {
                     return false;
                 }
-                m *= b;
+                m *= radix;
                 if (int.MinValue > m || m > int.MaxValue) {
                     return false;
                 }
@@ -627,14 +635,14 @@ namespace Axion.Core.Processing {
             return true;
         }
 
-        private static bool TryParseInt(char[] text, int start, int length, int b, out int value) {
+        private static bool TryParseInt(char[] text, int start, int length, int radix, out int value) {
             value = 0;
             if (start + length > text.Length) {
                 return false;
             }
             for (int i = start, end = start + length; i < end; i++) {
-                if (HexValue(text[i], out int onechar) && onechar < b) {
-                    value = value * b + onechar;
+                if (HexValue(text[i], out int onechar) && onechar < radix) {
+                    value = value * radix + onechar;
                 }
                 else {
                     return false;
@@ -643,7 +651,7 @@ namespace Axion.Core.Processing {
             return true;
         }
 
-        private static void ParseIntegerStart(string text, ref int b, ref int start, int end, ref short sign) {
+        private static void ParseIntegerStart(string text, ref int radix, ref int start, int end, ref short sign) {
             //  Skip whitespace
             while (start < end && char.IsWhiteSpace(text, start)) {
                 start++;
@@ -665,7 +673,7 @@ namespace Axion.Core.Processing {
             }
 
             //  Determine base
-            if (b == 0) {
+            if (radix == 0) {
                 if (start < end && text[start] == '0') {
                     // Hex, oct, or bin
                     if (++start < end) {
@@ -673,28 +681,28 @@ namespace Axion.Core.Processing {
                             case 'x':
                             case 'X':
                                 start++;
-                                b = 16;
+                                radix = 16;
                                 break;
                             case 'o':
                             case 'O':
-                                b = 8;
+                                radix = 8;
                                 start++;
                                 break;
                             case 'b':
                             case 'B':
                                 start++;
-                                b = 2;
+                                radix = 2;
                                 break;
                         }
                     }
-                    if (b == 0) {
+                    if (radix == 0) {
                         // Keep the leading zero
                         start--;
-                        b = 8;
+                        radix = 8;
                     }
                 }
                 else {
-                    b = 10;
+                    radix = 10;
                 }
             }
         }

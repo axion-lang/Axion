@@ -1,43 +1,43 @@
 str1 = "regular literal"
-str2 = `regular literal`
+str2 = 'regular literal'
 
 str1f = f"{str1} formatted literal {str2}"
-str2f = f`{str1} formatted literal {str2}`
+str2f = f'{str1} formatted literal {str2}'
 
 str1m = """multiline literal"""
-str2m = ```multiline literal```
+str2m = '''multiline literal'''
 
 str1fm = f"""{str1} formatted multiline literal {str2}"""
-str2fm = f```{str1} formatted multiline literal {str2}```
+str2fm = f'''{str1} formatted multiline literal {str2}'''
 
 str1fm_ = f"""
 {str1} formatted multiline literal {str2}
 """
 
-str2fm_ = f```
+str2fm_ = f'''
 {str1} formatted multiline literal {str2}
-```
+'''
 
 str1e = ""
-str2e = ``
+str2e = ''
 
 str1fe = f""
-str2fe = f``
+str2fe = f''
 
 str1me = """"""
-str2me = ``````
+str2me = ''''''
 
 str1me_ = """
 """
 
-str2me_ = ```
-```
+str2me_ = '''
+'''
 
 str1fme = f""""""
-str2fme = f``````
+str2fme = f''''''
 
 str1fme_ = f"""
 """
 
-str2fme_ = f```
-```
+str2fme_ = f'''
+'''

@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing;
 using Axion.Core.Tokens;
-using Axion.Core.Visual.ConsoleImpl;
 
 namespace Axion.Core.Visual {
     internal class ConsoleSyntaxHighlighter {
-        public void Highlight(string inputCodeLine, out List<ProcessingException> errors) {
+        public void Highlight(string inputCodeLine, out List<SourceProcessingException> errors) {
             var lexer = new Lexer(
                 new[] { inputCodeLine },
                 out LinkedList<Token> tokens,
