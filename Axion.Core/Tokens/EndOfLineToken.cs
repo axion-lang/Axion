@@ -3,8 +3,8 @@
     ///     Represents an &lt;end of line&gt; ( \n or \r\n ) <see cref="Token" />.
     /// </summary>
     public class EndOfLineToken : Token {
-        public EndOfLineToken((int line, int column) location)
-            : base(TokenType.Newline, location, Spec.EndLine.ToString()) {
+        public EndOfLineToken((int, int) startPosition)
+            : base(TokenType.Newline, startPosition, Spec.EndOfLine.ToString()) {
         }
     }
 }

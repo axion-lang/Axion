@@ -3,8 +3,8 @@
     ///     Represents an identifier <see cref="Token" />.
     /// </summary>
     public class IdentifierToken : Token {
-        public IdentifierToken((int line, int column) location, string value)
-            : base(TokenType.Identifier, location, value) {
+        public IdentifierToken((int, int) startPosition, string value)
+            : base(TokenType.Identifier, startPosition, value) {
         }
     }
 }

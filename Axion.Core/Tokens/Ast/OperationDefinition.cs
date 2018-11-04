@@ -7,10 +7,8 @@
         public OperationDefinition(OperatorToken @operator, Token leftOperand, Token rightOperand) :
             base(
                 TokenType.Identifier,
-                (leftOperand?.StartLinePos
-              ?? @operator.StartLinePos,
-                 leftOperand?.StartColumnPos
-              ?? @operator.StartColumnPos),
+                (leftOperand?.StartLine ?? @operator.StartLine,
+                 leftOperand?.StartColumn ?? @operator.StartColumn),
                 @operator.Value
             ) {
             OperatorToken = @operator;

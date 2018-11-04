@@ -3,42 +3,93 @@
 <h2 align="center">Welcome to Axion programming language toolset</h2>
 <h3 align="center">:\:\:\:\:\:\:\:\:\: Under construction :/:/:/:/:/:/:/:/:/:</h3>
 
-<h3 align="center">Objectives</h3>
+### Repository consists of 3 parts:
+
+- **Language core (lexer, parser, compiler, etc.) with flexible API to access language tools**
+- **A .NET Core wrapper around language core (mainly to provide unit-testing and simple launching)**
+- **Import of [ConsoleExtensions](https://github.com/F1uctus/ConsoleExtensions) project (to use the console code editor with syntax highlighting) (still unstable)**
+
+### Objectives:
+
+**Designed to union languages (inter-transpiling to many other popular programming languages),
+and to implement common design patterns quickly and simply.**
 
 - **General-purposed**
 - **High-performance**
-- **Static typed**
+- **Invisibly-static typed**
 - **Safe**
 - **Simple**
 - **Readable**
 
-<h3 align="center">Paradigms</h3>
+### Paradigms:
 
 - **Object-oriented**
 - **Reactive**
 - **Functional (extension)**
 
-<h3 align="center">Progress</h3>
+### Progress:
 
-- **Console interactive interpreter**
+- **Console interactive interpreter / code editor**
 - **Lexer (Tokenizer)**
 - **Parser is still under construction.**
 	*(Not working by last release time)*
-- **Transpiling to C or C++ is planned**
+- **Transpiling to C/C++ or Rust is planned**
+- **In future - easily transpile Axion to another language**
 	
-<h3 align="center">Syntax examples</h3>
+### Basic syntax examples:
 
-- ***Basic operations***
+- ***Numbers***
+	```crystal
+	n = 0          # Int32
+	n = 10         # Int32
+	n = 5.3252     # Float 64
+	n = 4.3_f32    # Float 32
+	n = 321_u8     # UInt 8
+	32 + 7j        # Complex numbers (incomplete)
+	# etc.
+	```
+
+- ***Operations***
 	```python
-	1 + 2, variable += "string", otherVar = 90.0, etc.
+	number-value = 1 + 2 * 3 # = 7
+	string-variable += "string"
+	float-value = 90.0
+	# etc.
+	```
+- ***Function calls***
+	```clojure
+	call(arg1, arg2, arg3)
+	function-call(nested-call(arg1, arg2), 12345)
 	```
 - ***Branching***
+	```
+	if condition
+		do-something()
+	elif condition
+		do-something-else()
+	else call()
+	```
+- ***String and character literals***
 	```python
-	if condition: 
-		doSomething()
-	elif condition: 
-		doSomethingElse()
-	else: call()
+	# simple
+	string-literal = "value"
+	string-literal = 'value'
+	# multiline
+	string-literal = """
+	value
+	"""
+	string-literal = '''
+	value
+	'''
+	# formatted
+	string-literal = f"interpolated {value}"
+	string-literal = f'interpolated {value}'
+	# formatted
+	string-literal = "escaped: \a\b\f\r\n\0"
+	string-literal = 'escaped: \a\b\f\r\n\0'
+	# raw
+	string-literal = r"raw symbols: \a\b\f\r\n\0"
+	string-literal = r'raw symbols: \a\b\f\r\n\0'
 	```
 - ***Collections indexers***
 	```python
@@ -68,13 +119,8 @@
 	collection = { int, str }
 	collection = { 1: "Text1", 2: "Hello, world!", 55: "Other string" }
 	```
-- ***Function calls***
-	```js
-	call(arg1, arg2, arg3)
-	functionCall(nestedCall(arg1, arg2), 12345)
-	```
 
-<h3 align="center">Licensed code usage</h3>
+### Licensed code usage:
 
 - **This project uses some code from [IronPython 2 compiler](https://github.com/IronLanguages/ironpython2)
    that is licensed under Apache License 2.0**

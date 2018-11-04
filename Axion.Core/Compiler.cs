@@ -12,9 +12,6 @@ namespace Axion.Core {
     ///     Main class to work with Axion source code.
     /// </summary>
     public static class Compiler {
-        internal const string HelpHint =
-            "Type '-h', or '--help' to get documentation about launch arguments.";
-
         public const string SourceFileExtension = ".ax";
         public const string OutputFileExtension = ".ax";
 
@@ -25,10 +22,8 @@ namespace Axion.Core {
             Formatting = Formatting.Indented
         };
 
-        /// <summary>
-        ///     <see cref="Assembly" /> of <see cref="Core" /> namespace.
-        /// </summary>
-        private static readonly Assembly assembly = Assembly.GetExecutingAssembly();
+        internal const string HelpHint =
+            "Type '-h', or '--help' to get documentation about launch arguments.";
 
         /// <summary>
         ///     Path to directory where compiler executable is located.
@@ -44,6 +39,11 @@ namespace Axion.Core {
         ///     Path to directory where debugging output is located.
         /// </summary>
         internal static readonly string DebugDirectory = OutputDirectory + "debug\\";
+
+        /// <summary>
+        ///     <see cref="Assembly" /> of <see cref="Core" /> namespace.
+        /// </summary>
+        private static readonly Assembly assembly = Assembly.GetExecutingAssembly();
 
         /// <summary>
         ///     Compiler version.
@@ -76,23 +76,23 @@ namespace Axion.Core {
                     cliParser
                         .ParseArguments<CommandLineOptions>(arguments)
                         .MapResult(
-                            args => {
-                                if (args.Exit) {
+                            options => {
+                                if (options.Exit) {
                                     Environment.Exit(0);
                                 }
-                                if (args.Version) {
+                                if (options.Version) {
                                     ConsoleUI.WriteLine(Version);
                                     return 0;
                                 }
-                                if (args.Help) {
+                                if (options.Help) {
                                     ConsoleUI.WriteLine(CommandLineOptions.HelpText);
                                     return 0;
                                 }
-                                // Set debug option
-                                bool debugMode = args.Debug;
-                                if (args.Interactive) {
+                                // set debug option
+                                bool debugMode = options.Debug;
+                                if (options.Interactive) {
                                     // Interactive mode: jump into interpreter processing loop
-                                    ConsoleLog.Info(
+                                    ConsoleUI.LogInfo(
                                         "Interactive mode.\n" +
                                         "Now your input will be processed by Axion interpreter.\n" +
                                         "Type 'exit' or 'quit' to quit interactive mode;\n" +
@@ -112,7 +112,7 @@ namespace Axion.Core {
                                             alignedInput == "QUIT") {
                                             // exit from interpreter to main loop
                                             ConsoleUI.WriteLine();
-                                            ConsoleLog.Info("Interactive interpreter closed.");
+                                            ConsoleUI.LogInfo("Interactive interpreter closed.");
                                             return 0;
                                         }
                                         if (alignedInput == "CLS") {
@@ -130,36 +130,36 @@ namespace Axion.Core {
                                         // initialize editor
                                         var      editor    = new ConsoleCodeEditor(false, true, "", input);
                                         string[] codeLines = editor.BeginSession();
-                                        // interpret as Axion source and output result
+                                        // interpret as source code and output result
                                         new SourceCode(codeLines).Process(SourceProcessingMode.Interpret);
                                     }
                                 }
                                 // process source
                                 SourceCode source;
                                 // get source code
-                                if (args.Files.Any()) {
-                                    int filesCount = args.Files.Count();
+                                if (options.Files.Any()) {
+                                    int filesCount = options.Files.Count();
                                     if (filesCount > 1) {
-                                        ConsoleLog.Error("Compiler doesn't support multiple files processing yet.");
+                                        ConsoleUI.LogError("Compiler doesn't support multiple files processing yet.");
                                         return 0;
                                     }
                                     InputFiles = new FileInfo[filesCount];
                                     for (var i = 0; i < filesCount; i++) {
-                                        InputFiles[i] = new FileInfo(args.Files.ElementAt(i));
+                                        InputFiles[i] = new FileInfo(options.Files.ElementAt(i));
                                     }
                                     source = new SourceCode(InputFiles[0]);
                                 }
-                                else if (!string.IsNullOrWhiteSpace(args.Code)) {
-                                    source = new SourceCode(Utilities.TrimMatchingQuotes(args.Code, '"'));
+                                else if (!string.IsNullOrWhiteSpace(options.Code)) {
+                                    source = new SourceCode(Utilities.TrimMatchingChars(options.Code, '"'));
                                 }
                                 else {
-                                    ConsoleLog.Error(
+                                    ConsoleUI.LogError(
                                         "Neither code nor path to source file not specified.\n" +
                                         HelpHint
                                     );
                                     return 0;
                                 }
-                                if (!Enum.TryParse(args.Mode, true, out SourceProcessingMode processingMode)) {
+                                if (!Enum.TryParse(options.Mode, true, out SourceProcessingMode processingMode)) {
                                     processingMode = SourceProcessingMode.Compile;
                                 }
                                 var processingOptions = SourceProcessingOptions.CheckIndentationConsistency;
@@ -172,7 +172,7 @@ namespace Axion.Core {
                             },
                             errors => {
                                 foreach (Error error in errors) {
-                                    ConsoleLog.Error(error.ToString());
+                                    ConsoleUI.LogError(error.ToString());
                                 }
                                 return 0;
                             }

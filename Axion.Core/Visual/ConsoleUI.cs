@@ -10,20 +10,15 @@ namespace Axion.Core.Visual {
             Console.InputEncoding   = Console.OutputEncoding = Encoding.UTF8;
             Console.ForegroundColor = ConsoleColor.White;
             const string header = "Axion programming language compiler toolset";
-            Console.Title = header; // print title
-            WriteLine(
-                (header + " v. ", ConsoleColor.White), (Compiler.Version, ConsoleColor.DarkYellow)
-            ); // print version
-            WriteLine(
-                ("Working in ", ConsoleColor.White), (Compiler.WorkDirectory, ConsoleColor.DarkYellow)
-            ); // print directory
+            Console.Title = header;                                                                              // set title
+            WriteLine((header + " v. ", ConsoleColor.White), (Compiler.Version, ConsoleColor.DarkYellow));       // print version
+            WriteLine(("Working in ", ConsoleColor.White),   (Compiler.WorkDirectory, ConsoleColor.DarkYellow)); // print directory
             WriteLine(Compiler.HelpHint + "\n");
         }
 
         public static string Read(string prompt, ConsoleColor withColor = ConsoleColor.White) {
-            Console.Write(prompt);
             var result = "";
-            DoWithFontColor(
+            WithFontColor(
                 withColor, () => {
                     var editor = new ConsoleCodeEditor(true, false, prompt);
                     result = editor.BeginSession()[0];
@@ -35,19 +30,30 @@ namespace Axion.Core.Visual {
         /// <summary>
         ///     Clears current line.
         /// </summary>
-        public static void ClearLine() {
-            int top = Console.CursorTop;
-            Console.CursorLeft = 0;
-            Console.Write(new string(' ', Console.BufferWidth));
-            Console.SetCursorPosition(0, top);
+        public static void ClearLine(int fromX = 0) {
+            Console.CursorLeft = fromX;
+            Console.Write(new string(' ', Console.BufferWidth - fromX - 1));
+            Console.CursorLeft = fromX;
         }
+
+        #region Simple logging functions
+
+        public static void LogInfo(string message) {
+            WriteLine((message, ConsoleColor.DarkCyan));
+        }
+
+        public static void LogError(string message) {
+            WriteLine(($"Error: {message}", ConsoleColor.Red));
+        }
+
+        #endregion
 
         #region Basic write functions
 
         /// <summary>
         ///     Writes messages to the standard output stream.
         /// </summary>
-        public static void Write(params object[] messages) {
+        public static void Write(params string[] messages) {
             for (var i = 0; i < messages.Length; i++) {
                 Console.Write(messages[i]);
             }
@@ -56,10 +62,10 @@ namespace Axion.Core.Visual {
         /// <summary>
         ///     Writes colored messages to the standard output stream.
         /// </summary>
-        public static void Write(params (object text, ConsoleColor color)[] messages) {
+        public static void Write(params (string text, ConsoleColor color)[] messages) {
             for (var i = 0; i < messages.Length; i++) {
                 // ReSharper disable once AccessToModifiedClosure
-                DoWithFontColor(messages[i].color, () => { Console.Write(messages[i].text.ToString()); });
+                WithFontColor(messages[i].color, () => { Console.Write(messages[i].text); });
             }
         }
 
@@ -73,7 +79,7 @@ namespace Axion.Core.Visual {
         /// <summary>
         ///     Writes messages followed by last line terminator to the standard output stream.
         /// </summary>
-        public static void WriteLine(params object[] messages) {
+        public static void WriteLine(params string[] messages) {
             for (var i = 0; i < messages.Length; i++) {
                 if (i == messages.Length - 1) {
                     Console.WriteLine(messages[i]);
@@ -86,21 +92,21 @@ namespace Axion.Core.Visual {
         /// <summary>
         ///     Writes colored messages followed by last line terminator to the standard output stream.
         /// </summary>
-        public static void WriteLine(params (object text, ConsoleColor color)[] messages) {
+        public static void WriteLine(params (string text, ConsoleColor color)[] messages) {
             for (var i = 0; i < messages.Length; i++) {
                 if (i == messages.Length - 1) {
-                    DoWithFontColor(messages[i].color, () => { Console.WriteLine(messages[i].text.ToString()); });
+                    WithFontColor(messages[i].color, () => { Console.WriteLine(messages[i].text); });
                     return;
                 }
                 // ReSharper disable once AccessToModifiedClosure
-                DoWithFontColor(messages[i].color, () => { Console.Write(messages[i].text.ToString()); });
+                WithFontColor(messages[i].color, () => { Console.Write(messages[i].text); });
             }
         }
 
         /// <summary>
         ///     Writes messages with line terminators to the standard output stream.
         /// </summary>
-        public static void WriteLines(params object[] lines) {
+        public static void WriteLines(params string[] lines) {
             for (var i = 0; i < lines.Length; i++) {
                 Console.WriteLine(lines[i]);
             }
@@ -109,20 +115,22 @@ namespace Axion.Core.Visual {
         /// <summary>
         ///     Writes colored messages with line terminators to the standard output stream.
         /// </summary>
-        public static void WriteLines(params (object text, ConsoleColor color)[] lines) {
+        public static void WriteLines(params (string text, ConsoleColor color)[] lines) {
             for (var i = 0; i < lines.Length; i++) {
                 // ReSharper disable once AccessToModifiedClosure
-                DoWithFontColor(lines[i].color, () => { Console.WriteLine(lines[i].text.ToString()); });
+                WithFontColor(lines[i].color, () => { Console.WriteLine(lines[i].text); });
             }
         }
 
         #endregion
 
+        #region Helpers
+
         /// <summary>
         ///     Performs action in <see cref="Console" />, then returns
         ///     back to previous cursor position in <see cref="Console" />.
         /// </summary>
-        internal static void DoAfterCursor(Action action) {
+        internal static void WithCurrentPosition(Action action) {
             // save position
             int sX = Console.CursorLeft;
             int sY = Console.CursorTop;
@@ -137,10 +145,7 @@ namespace Axion.Core.Visual {
         ///     performs action, then returns back to previous
         ///     cursor position in <see cref="Console" />.
         /// </summary>
-        /// <param name="x">X</param>
-        /// <param name="y">Y</param>
-        /// <param name="action">action to perform at position (<paramref name="x" />, <paramref name="y" />).</param>
-        internal static void DoWithPosition(int x, int y, Action action) {
+        internal static void WithPosition(int x, int y, Action action) {
             // save position
             int sX = Console.CursorLeft;
             int sY = Console.CursorTop;
@@ -156,7 +161,7 @@ namespace Axion.Core.Visual {
         ///     Sets <see cref="Console.ForegroundColor" /> to &lt;<see cref="color" />&gt;,
         ///     performs action, then returns back to previously used color.
         /// </summary>
-        internal static void DoWithFontColor(ConsoleColor color, Action action) {
+        internal static void WithFontColor(ConsoleColor color, Action action) {
             // save color
             ConsoleColor prevColor = Console.ForegroundColor;
             // set new color
@@ -166,5 +171,7 @@ namespace Axion.Core.Visual {
             // reset color
             Console.ForegroundColor = prevColor;
         }
+
+        #endregion
     }
 }

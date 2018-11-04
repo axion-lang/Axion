@@ -11,13 +11,13 @@ namespace Axion.Core.Tokens {
     public class OperatorToken : Token {
         internal readonly OperatorProperties Properties;
 
-        public OperatorToken(OperatorProperties properties, (int, int) position)
-            : base(properties.Type, position) {
+        public OperatorToken((int, int) startPosition, OperatorProperties properties)
+            : base(properties.Type, startPosition) {
             Properties = properties;
         }
 
-        public OperatorToken(string value, (int, int) position)
-            : base(TokenType.Unknown, position, value) {
+        public OperatorToken((int, int) startPosition, string value)
+            : base(TokenType.Unknown, startPosition, value) {
             Spec.Operators.TryGetValue(value, out Properties);
             Type = Properties.Type;
         }
@@ -29,11 +29,15 @@ namespace Axion.Core.Tokens {
 
     [JsonObject]
     public struct OperatorProperties {
-        [JsonProperty] internal readonly InputSide     InputSide;
+        [JsonProperty] internal readonly InputSide InputSide;
+
         [JsonProperty] internal readonly Associativity Associativity;
-        [JsonProperty] internal readonly bool          Overloadable;
-        [JsonProperty] internal readonly int           Precedence;
-        [JsonProperty] internal readonly TokenType     Type;
+
+        [JsonProperty] internal readonly bool Overloadable;
+
+        [JsonProperty] internal readonly int Precedence;
+
+        [JsonProperty] internal readonly TokenType Type;
 
         internal OperatorProperties(
             TokenType     type,
@@ -96,11 +100,11 @@ namespace Axion.Core.Tokens {
         }
 
         public bool Equals(OperatorProperties other) {
-            return InputSide == other.InputSide
-                && Associativity == other.Associativity
-                && Overloadable == other.Overloadable
-                && Precedence == other.Precedence
-                && Type == other.Type;
+            return InputSide == other.InputSide &&
+                   Associativity == other.Associativity &&
+                   Overloadable == other.Overloadable &&
+                   Precedence == other.Precedence &&
+                   Type == other.Type;
         }
 
         public override int GetHashCode() {

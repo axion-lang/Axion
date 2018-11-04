@@ -10,26 +10,14 @@ namespace Axion.Core {
         /// <summary>
         ///     End of file mark.
         /// </summary>
-        public const char EndStream = '\0';
+        public const char EndOfStream = '\0';
 
         /// <summary>
         ///     End of line mark.
         /// </summary>
-        public const char EndLine = '\n';
+        public const char EndOfLine = '\n';
 
-        internal const char   CharLiteralQuote             = '`';
-        internal const string CommentOnelineStart          = "#";
-        internal const string CommentMultilineStart        = "/*";
-        internal const string CommentMultilineStartPattern = "/\\*";
-        internal const string CommentMultilineEnd          = "*/";
-        internal const string CommentMultilineEndPattern   = "*\\*";
-
-        internal const int AssignPrecedence = 5;
-
-        public static readonly   string[] Newlines         = { "\r\n", "\n" };
-        internal static readonly char[]   StringQuotes     = { '"', '\'' };
-        internal static readonly char[]   StringPrefixes   = { 'f', 'r' };
-        internal static readonly char[]   ValidEscapeChars = { 'a', 'b', 'f', 'n', 'r', 't', 'v', '0', '\\', '\'' };
+        public static readonly string[] Newlines = { "\r\n", "\n" };
 
         public static readonly Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType> {
             // testing
@@ -61,12 +49,11 @@ namespace Axion.Core {
             { "throw", TokenType.KeywordThrow },
             { "catch", TokenType.KeywordCatch },
             { "anyway", TokenType.KeywordAnyway },
-            // modifiers
-            // access
+            // access modifiers
             { "public", TokenType.KeywordPublic },
             { "inner", TokenType.KeywordInner },
             { "private", TokenType.KeywordPrivate },
-            // property
+            // property modifiers
             { "readonly", TokenType.KeywordReadonly },
             { "react", TokenType.KeywordReact },
             { "static", TokenType.KeywordStatic },
@@ -90,6 +77,44 @@ namespace Axion.Core {
             { "self", TokenType.KeywordSelf },
             { "true", TokenType.KeywordTrue },
             { "false", TokenType.KeywordFalse }
+        };
+
+        internal static readonly char[] StringQuotes = { '"', '\'' };
+
+        internal static readonly char[] RestrictedIdentifierEndings = { '-' };
+
+        internal static readonly Dictionary<char, string> EscapeSequences = new Dictionary<char, string> {
+            { '0', "\u0000" },
+            { 'a', "\u0007" },
+            { 'b', "\u0008" },
+            { 'f', "\u000c" },
+            { 'n', "\u000a" },
+            { 'r', "\u000d" },
+            { 't', "\u0009" },
+            { 'v', "\u000b" },
+            { '\\', "\\" },
+            { '\'', "\'" },
+            { '\"', "\"" }
+        };
+
+        internal static readonly Dictionary<char, StringLiteralOptions> StringPrefixes = new Dictionary<char, StringLiteralOptions> {
+            { 'f', StringLiteralOptions.Format },
+            { 'r', StringLiteralOptions.Raw }
+        };
+
+        internal static readonly char[] NumberPostfixes = {
+            'l', 'L',
+            'i', 'I',
+            'u', 'U',
+            'f', 'F'
+        };
+
+        internal static readonly int[] NumberIntBitRates = {
+            8, 16, 32, 64, 128, 256
+        };
+
+        internal static readonly int[] NumberFloatBitRates = {
+            32, 64, 128
         };
 
         public static readonly Dictionary<string, OperatorProperties> Operators = new Dictionary<string, OperatorProperties> {
@@ -158,7 +183,16 @@ namespace Axion.Core {
 
         public static readonly string[] OperatorsValues = Operators.Keys.OrderByDescending(val => val.Length).ToArray();
 
-        public static readonly HashSet<char> OperatorChars = new HashSet<char>(OperatorsValues.Select(val => val[0]));
+        public static readonly char[] OperatorChars = OperatorsValues.Select(val => val[0]).ToArray();
+
+        internal const char   CharLiteralQuote             = '`';
+        internal const string CommentOneLineStart          = "#";
+        internal const string CommentMultilineStart        = "/*";
+        internal const string CommentMultilineStartPattern = @"/\*";
+        internal const string CommentMultilineEnd          = "*/";
+        internal const string CommentMultilineEndPattern   = @"\*/";
+
+        internal const int AssignPrecedence = 5;
 
         internal static readonly OperatorProperties InvalidOperatorProperties = new OperatorProperties(
             TokenType.Invalid,
@@ -167,12 +201,28 @@ namespace Axion.Core {
             false, -1
         );
 
+        internal static bool IsValidNumberPart(char c) {
+            return c.IsValidHexadecimalDigit() || c == '_' || NumberPostfixes.Contains(c);
+        }
+
+        internal static bool IsValidOctalDigit(this char c) {
+            return c == '0' || c == '1' || c == '2' || c == '3'
+                || c == '4' || c == '5' || c == '6' || c == '7';
+        }
+
+        internal static bool IsValidHexadecimalDigit(this char c) {
+            return c == '0' || c == '1' || c == '2' || c == '3' || c == '4'
+                || c == '5' || c == '6' || c == '7' || c == '8' || c == '9'
+                || c == 'a' || c == 'b' || c == 'c' || c == 'd' || c == 'e' || c == 'f'
+                || c == 'A' || c == 'B' || c == 'C' || c == 'D' || c == 'E' || c == 'F';
+        }
+
         internal static bool IsValidIdStart(char start) {
             return char.IsLetter(start) || start == '_';
         }
 
         internal static bool IsValidIdChar(char c) {
-            return char.IsLetterOrDigit(c) || c == '_';
+            return char.IsLetterOrDigit(c) || c == '_' || c == '-';
         }
     }
 }

@@ -1,25 +1,45 @@
 ﻿//using System.Collections.Generic;
-//using Axion.Tokens;
-//using Axion.Tokens.Ast;
+//using Axion.Core.Tokens;
+//using Axion.Core.Tokens.Ast;
 
-//namespace Axion.Processing {
+//namespace Axion.Core.Processing {
 //    internal class SyntaxParser {
-//        private readonly SourceCode        src;
+//        /// <summary>
+//        ///     Reference to processing <see cref="LinkedList{T}" /> of tokens.
+//        /// </summary>
 //        private readonly LinkedList<Token> tokens;
-//        private readonly Ast               ast;
+
+//        /// <summary>
+//        ///     Contains all errors that raised during syntax analysis.
+//        /// </summary>
+//        private readonly List<SyntaxError> errors = new List<SyntaxError>();
+
+//        /// <summary>
+//        ///     Contains all warnings that found during syntax analysis.
+//        /// </summary>
+//        private readonly List<SyntaxError> warnings = new List<SyntaxError>();
+
+//        /// <summary>
+//        ///     Outgoing Abstract Syntax Tree.
+//        /// </summary>
+//        private readonly Ast ast;
 
 //        private LinkedListNode<Token> tokenNode;
+
 //        private LinkedListNode<Token> nextTokenNode => tokenNode.Next;
-//        private Token                 nextToken     => nextTokenNode.Value;
+
+//        private Token                 nextToken     => tokenNode.Next?.Value;
 
 //        //private readonly Stack<ImportDefinition>   imports   = new Stack<ImportDefinition>();
 //        //private readonly Stack<ClassDefinition>    classes   = new Stack<ClassDefinition>();
 //        //private readonly Stack<FunctionDefinition> functions = new Stack<FunctionDefinition>();
 
-//        internal Parser(SourceCode source) {
-//            src    = source;
-//            tokens = src.Tokens;
-//            ast    = source.SyntaxTree;
+//        internal SyntaxParser(
+//            LinkedList<Token> tokens,
+//            out Ast           ast
+//        ) {
+//            this.tokens = tokens;
+//            ast         = this.ast;
 //        }
 
 //        internal void Process() {
@@ -30,7 +50,7 @@
 //            var statements = new List<Statement>();
 
 //            while (true) {
-//                if (MaybeEat(TokenType.EndOfFile)) break;
+//                if (MaybeEat(TokenType.EndOfStream)) break;
 
 //                if (MaybeEat(TokenType.Newline)) continue;
 
@@ -100,9 +120,11 @@
 //            return new IfStatement(branches, elseBranch);
 //        }
 
-//        // expression: conditional_expression | lambda_form
-//        // conditional_expression: or_test ['if' or_test 'else' expression]
-//        // lambda_form: "lambda" [parameter_list] : expression
+//        /// <summary>
+//        /// expression: conditional_expression | lambda_form
+//        ///     conditional_expression: or_test ['if' or_test 'else' expression]
+//        ///     lambda_form: "lambda" [parameter_list] : expression
+//        /// </summary>
 //        private Expressio ParseExpression() {
 //            if (MaybeEat(TokenKind.KeywordLambda)) {
 //                return FinishLambdef();
@@ -118,15 +140,19 @@
 //            return ret;
 //        }
 
-//        //suite: simple_stmt NEWLINE | Newline INDENT stmt+ DEDENT
+//        /// <summary>
+//        /// suite:
+//        ///     simple_stmt NEWLINE | Newline INDENT stmt+ DEDENT
+//        /// </summary>
+//        /// <returns></returns>
 //        private Statement ParseSuite() {
 //            if (!EatNoEof(TokenType.Colon)) {
 //                // improve error handling...
 //                return ErrorStmt();
 //            }
 
-//            Token           cur = nextToken;
-//            List<Statement> l   = new List<Statement>();
+//            Token cur = nextToken;
+//            var   l   = new List<Statement>();
 
 //            // we only read a real Newline here because we need to adjust error reporting
 //            // for the interpreter.
@@ -151,12 +177,10 @@
 
 //                while (true) {
 //                    Statement s = ParseStmt();
-
 //                    l.Add(s);
-
 //                    if (MaybeEat(TokenType.Dedent)) break;
 
-//                    if (PeekToken().Kind == TokenType.EndOfFile) {
+//                    if (PeekToken(TokenType.EndOfStream)) {
 //                        ReportSyntaxError("unexpected end of file");
 //                        break; // error handling
 //                    }
@@ -190,7 +214,7 @@
 //        }
 
 //        private bool PeekToken(Token expected) {
-//            return nextToken == expected;
+//            return Equals(nextToken, expected);
 //        }
 
 //        private bool MaybeEat(TokenType type) {

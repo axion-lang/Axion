@@ -9,18 +9,6 @@
         None,
 
         /// <summary>
-        ///     Indicates the multiline comment
-        ///     that went through end of input.
-        /// </summary>
-        UnclosedMultilineComment,
-
-        /// <summary>
-        ///     Indicates the string with
-        ///     missing ending quote.
-        /// </summary>
-        UnclosedString,
-
-        /// <summary>
         ///     Indicates a '(' symbol in
         ///     code without matching ')'.
         /// </summary>
@@ -38,12 +26,53 @@
         /// </summary>
         MismatchedBrace,
 
+        /// <summary>
+        ///     Indicates a multiline comment
+        ///     that went through end of input.
+        /// </summary>
+        UnclosedMultilineComment,
+
+        /// <summary>
+        ///     Indicates a string with
+        ///     missing ending quote.
+        /// </summary>
+        UnclosedString,
+
+        /// <summary>
+        ///     Indicates the character literal with
+        ///     missing ending quote.
+        /// </summary>
+        UnclosedCharacterLiteral,
+
+        /// <summary>
+        ///     Indicates a character literal that
+        ///     exceeds maximal allowed character literal length.
+        /// </summary>
+        CharacterLiteralTooLong,
+
+        /// <summary>
+        ///     Indicates that character literal
+        ///     length is 0, that is prohibited.
+        /// </summary>
+        EmptyCharacterLiteral,
+
         // Invalid number literals
         InvalidIntegerLiteral,
         InvalidFloatLiteral,
+        InvalidValueAfterExponent,
+        InvalidPostfixInNumberLiteral,
+        ExpectedABitRateAfterNumberPostfix,
+        InvalidIntegerNumberBitRate,
+        RepeatedDotInNumberLiteral,
+        RepeatedLongPostfixInNumberLiteral,
+        ShouldHaveNoValueAfterNumberLongPostfix,
         InvalidBinaryLiteral,
         InvalidOctalLiteral,
         InvalidHexadecimalLiteral,
+
+        ExpectedDigitAfterNumberBaseSpecifier,
+        ExpectedDigitAfterNumberExponent,
+        ExpectedEndOfNumberAfterLongPostfix,
 
         /// <summary>
         ///     Indicates an operator that isn't
@@ -62,27 +91,7 @@
         ///     literal uses invalid symbol to escape by '\'.
         /// </summary>
         InvalidEscapeSequence,
-
-        /// <summary>
-        ///     Indicates a character literal that
-        ///     exceeds maximal allowed character literal length.
-        /// </summary>
-        CharacterLiteralTooLong,
-
-        /// <summary>
-        ///     Indicates that character literal
-        ///     length is 0, that is prohibited.
-        /// </summary>
-        EmptyCharacterLiteral,
-
-        // ************************** \\
-        // ******** WARNINGS ******** \\
-        // ************************** \\
-
-        /// <summary>
-        ///     Indicates that input script uses
-        ///     mixed indentation (spaces mixed with tabs).
-        /// </summary>
-        WarnInconsistentIndentation
+        RepeatedImaginarySignInNumberLiteral,
+        InvalidFloatNumberBitRate
     }
 }

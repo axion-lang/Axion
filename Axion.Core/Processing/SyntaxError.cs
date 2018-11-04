@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Axion.Core.Tokens;
 using Axion.Core.Visual;
 using Newtonsoft.Json;
@@ -9,87 +8,123 @@ using Newtonsoft.Json;
 namespace Axion.Core.Processing {
     [JsonObject]
     public class SyntaxError : Exception {
-        [JsonProperty] internal     string Code;
+        [JsonProperty] internal string Code;
+
+        [JsonProperty] internal SourceCode File;
+
         [JsonProperty] internal new string Message;
-        [JsonProperty] internal     string Time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
-        [JsonProperty] internal     int    ColumnPosition;
-        [JsonProperty] internal     int    LinePosition;
-        [JsonProperty] internal     Token  Token;
+
+        [JsonProperty] internal string Time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+
+        [JsonProperty] internal ErrorType Type;
+
+        [JsonProperty] internal Token Token;
 
         internal SyntaxError(ErrorType type, string code, Token errorToken)
             : base(type.ToString("G")) {
+            Type    = type;
             Code    = code;
-            Message = type.ToString("G"); // TODO add representations for <ErrorType>
+            Message = type.ToString("G"); // TODO add strings for <ErrorType>
             Token   = errorToken;
             // line positions need offset
-            LinePosition   = Token.StartLinePos + 1;
-            ColumnPosition = Token.StartColumnPos + 1;
+        }
+
+        internal SyntaxError(ErrorType type, SourceCode file, Token errorToken)
+            : base(type.ToString("G")) {
+            Type    = type;
+            File    = file;
+            Code    = file.Code;
+            Message = type.ToString("G"); // TODO add strings for <ErrorType>
+            Token   = errorToken;
+            // line positions need offset
+        }
+
+        internal SyntaxError(WarningType type, string code, Token errorToken)
+            : base(type.ToString("G")) {
+            Code    = code;
+            Message = type.ToString("G"); // TODO add strings for <ErrorType>
+            Token   = errorToken;
+            // line positions need offset
+        }
+
+        internal SyntaxError(WarningType type, SourceCode file, Token errorToken)
+            : base(type.ToString("G")) {
+            File    = file;
+            Code    = file.Code;
+            Message = type.ToString("G"); // TODO add strings for <ErrorType>
+            Token   = errorToken;
+            // line positions need offset
         }
 
         /// <summary>
-        ///     Renders visual representation of occurred error.
+        ///     Creates visual representation of occurred error.
         /// </summary>
-        internal void Render() {
+        internal void Draw() {
             //--------Error templates--------
             //
             // Error: Invalid operator.
             //
             // |   8 | variable ~~ "string"
-            //             ^^
+            // -----------------^^
             // ...
             //
             // Error: MismatchingParenthesis.
             //
             // |   1 | func("string",
-            // -------------^
+            //             ^
             // |   2 |      'c',
             // |   3 |      123
             // ...
             //
             // Write message
-            ConsoleLog.Error(Message);
-            ConsoleUI.WriteLine(
-                ("At line " + (Token.StartLinePos + 1) + ", column " + (Token.StartColumnPos + 1) + ".",
-                 ConsoleColor.Red)
-            );
+            ConsoleUI.LogError(Message);
+            if (File != null) {
+                ConsoleUI.WriteLine("In file '" + File.SourceFilePath + "'.");
+            }
+            ConsoleUI.WriteLine(("At line " + (Token.StartLine + 1) + ", column " + (Token.StartColumn + 1) + ".", ConsoleColor.Red));
 
             string[] codeLines = Code.Split(Spec.Newlines, StringSplitOptions.None);
 
-            var linesCount = 0;
-            for (int i = Token.StartLinePos; i < codeLines.Length && i < 4; i++) {
-                linesCount++;
+            var lines = new List<string>();
+            // limit rest of code by 5 lines
+            for (int i = Token.StartLine; i < codeLines.Length && lines.Count < 4; i++) {
+                lines.Add(codeLines[i]);
             }
-
-            List<string> lines = codeLines.Skip(Token.StartLinePos).Take(linesCount).ToList();
-            // limit rest of code sign by 5 lines
-            if (Token.StartLinePos + 5 < codeLines.Length) {
+            if (lines.Count > codeLines.Length - Token.StartLine) {
                 lines.Add("...");
             }
+
             // first line
             // <line number>| <code line>
-            int pointerTailLength = ConsoleCodeEditor.LineNumberWidth + ColumnPosition;
+            int pointerTailLength = ConsoleCodeEditor.LineNumberWidth + Token.StartColumn + 1;
+            int errorTokenLength  = Token.EndColumn - Token.StartColumn;
+            if (errorTokenLength > 1) {
+                errorTokenLength++;
+            }
             // upside arrows (^), should be red-colored
             string pointer =
-                // assemble tail of pointer
-                new string('-', pointerTailLength) +
-                // assemble pointer arrows
+                // tail of pointer
+                new string(' ', pointerTailLength) +
+                // pointer arrows
                 new string(
-                    '^',
+                    '^', // TODO compute token value length: include tab lengths
                     Math.Min(
-                        Token.Value.Length, ConsoleCodeEditor.LineNumberWidth + lines[0].Length - pointerTailLength
-                    )
+                        errorTokenLength, ConsoleCodeEditor.LineNumberWidth + lines[0].Length - pointerTailLength
+                    ) // BUG: pointerTailLength: fails sometimes
                 );
 
-            // render line
-            ConsoleCodeEditor.PrintLineNumber(LinePosition);
-            ConsoleUI.WriteLine(lines[0].TrimEnd(Spec.EndLine, Spec.EndStream));
-            // render error pointer
+            // Drawing --------------------------------------------------------------------------
+
+            // line with error
+            ConsoleCodeEditor.PrintLineNumber(Token.StartLine + 1);
+            ConsoleUI.WriteLine(lines[0].TrimEnd(Spec.EndOfLine, Spec.EndOfStream));
+            // error pointer
             ConsoleUI.WriteLine((pointer, ConsoleColor.Red));
 
-            // render some next lines
-            for (int lineIndex = Token.StartLinePos + 1; lineIndex < lines.Count; lineIndex++) {
+            // next lines
+            for (int lineIndex = Token.StartLine + 1; lineIndex < lines.Count; lineIndex++) {
                 ConsoleCodeEditor.PrintLineNumber(lineIndex + 1);
-                ConsoleUI.WriteLine(lines[lineIndex].TrimEnd(Spec.EndLine, Spec.EndStream));
+                ConsoleUI.WriteLine(lines[lineIndex].TrimEnd(Spec.EndOfLine, Spec.EndOfStream));
             }
         }
     }

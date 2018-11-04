@@ -3,16 +3,23 @@
     ///     Represents a &lt;Multiline comment&gt; <see cref="Token" />.
     /// </summary>
     public class MultilineCommentToken : Token {
-        public MultilineCommentToken((int line, int column) location, string value)
-            : base(TokenType.CommentLiteral, location, value) {
+        internal readonly bool IsUnclosed;
+
+        public MultilineCommentToken((int, int) startPosition, string value, bool isUnclosed = false)
+            : base(TokenType.CommentLiteral, startPosition, value) {
+            IsUnclosed = isUnclosed;
             // append length not included in value
-            EndColumnPos += Spec.CommentMultilineStart.Length;
+            EndColumn += Spec.CommentMultilineStart.Length;
         }
 
         public override string ToAxionCode() {
-            return Spec.CommentMultilineStart +
-                   Value +
-                   Spec.CommentMultilineEnd;
+            return IsUnclosed
+                       ? Spec.CommentMultilineStart +
+                         Value
+                       // closed
+                       : Spec.CommentMultilineStart +
+                         Value +
+                         Spec.CommentMultilineEnd;
         }
     }
 }

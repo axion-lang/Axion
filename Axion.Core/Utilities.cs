@@ -5,8 +5,27 @@ using System.Linq;
 
 namespace Axion.Core {
     internal static class Utilities {
-        private static readonly DateTimeFormatInfo dateTimeFormat = new CultureInfo("en-US").DateTimeFormat;
-        private const string timedFileNameFormat = "yyyy-MMM-dd_HH-mm-ss";
+        private static readonly DateTimeFormatInfo dateTimeFormat      = new CultureInfo("en-US").DateTimeFormat;
+        private const           string             timedFileNameFormat = "yyyy-MMM-dd_HH-mm-ss";
+
+        /// <summary>
+        ///     Returns count of bits set to 1 on specified <see cref="number" />.
+        /// </summary>
+        public static int GetSetBitCount(long number) {
+            var count = 0;
+
+            // Loop the value while there are still bits
+            while (number != 0) {
+                // Remove the end bit
+                number = number & (number - 1);
+
+                // Increment the count
+                count++;
+            }
+
+            // Return the count
+            return count;
+        }
 
         /// <summary>
         ///     Creates a file name from current date and time
@@ -45,25 +64,6 @@ namespace Axion.Core {
             return lines.Skip(fromIndex).Take(count).ToArray();
         }
 
-        /// <summary>
-        ///     Returns count of bits set to 1 on specified <see cref="number" />.
-        /// </summary>
-        public static int GetSetBitCount(long number) {
-            var count = 0;
-
-            // Loop the value while there are still bits
-            while (number != 0) {
-                // Remove the end bit
-                number = number & (number - 1);
-
-                // Increment the count
-                count++;
-            }
-
-            // Return the count
-            return count;
-        }
-
         #region Get user input and split it into launch arguments
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Axion.Core {
                            return !inQuotes && char.IsWhiteSpace(c);
                        }
                    )
-                   .Select(arg => TrimMatchingQuotes(arg.Trim(), '\"'))
+                   .Select(arg => TrimMatchingChars(arg.Trim(), '\"'))
                    .Where(arg => !string.IsNullOrEmpty(arg));
         }
 
@@ -96,10 +96,8 @@ namespace Axion.Core {
             yield return str.Substring(nextPiece);
         }
 
-        public static string TrimMatchingQuotes(string input, char quote) {
-            if (input.Length >= 2
-             && input[0] == quote
-             && input[input.Length - 1] == quote) {
+        public static string TrimMatchingChars(string input, char c) {
+            if (input.Length >= 2 && input[0] == c && input[input.Length - 1] == c) {
                 return input.Substring(1, input.Length - 2);
             }
             return input;

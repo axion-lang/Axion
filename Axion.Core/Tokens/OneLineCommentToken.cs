@@ -3,14 +3,14 @@
     ///     Represents a &lt;single-line comment&gt; <see cref="Token" />.
     /// </summary>
     public class OneLineCommentToken : Token {
-        public OneLineCommentToken((int line, int column) location, string value)
-            : base(TokenType.CommentLiteral, location, value) {
+        public OneLineCommentToken((int, int) startPosition, string value)
+            : base(TokenType.CommentLiteral, startPosition, value) {
             // append length not included in value
-            EndLinePos += Spec.CommentOnelineStart.Length;
+            EndColumn += Spec.CommentOneLineStart.Length;
         }
 
         public override string ToAxionCode() {
-            return Spec.CommentOnelineStart + Value;
+            return Spec.CommentOneLineStart + Value;
         }
     }
 }

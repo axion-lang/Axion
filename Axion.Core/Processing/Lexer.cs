@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
@@ -9,47 +10,32 @@ namespace Axion.Core.Processing {
     /// <summary>
     ///     Static tool for splitting Axion code into tokens <see cref="LinkedList{T}" />.
     /// </summary>
-    internal class Lexer { // TODO Lexer correct newlines; numbers parsing; string formatting & prefixes.
+    internal class Lexer {
         /// <summary>
         ///     Reference to outgoing <see cref="LinkedList{T}" /> of tokens.
         /// </summary>
-        private readonly LinkedList<Token> tokens = new LinkedList<Token>();
+        private readonly LinkedList<Token> tokens;
 
         /// <summary>
-        ///     Contains all errors that raised during lexical analysis.
+        ///     All errors that found during lexical analysis.
         /// </summary>
-        private readonly List<SyntaxError> errors   = new List<SyntaxError>();
+        private readonly List<SyntaxError> errors;
 
         /// <summary>
-        ///     Contains all warnings that found during lexical analysis.
+        ///     All warnings that found during lexical analysis.
         /// </summary>
-        private readonly List<SyntaxError> warnings = new List<SyntaxError>();
-
-        private readonly SourceProcessingOptions options;
+        private readonly List<SyntaxError> warnings;
 
         /// <summary>
-        ///     Reference to current processing code divided by lines.
+        ///     Lexical analysis options enum.
         /// </summary>
-        private readonly string code;
+        private SourceProcessingOptions options;
 
-        #region Input source properties
+        private readonly string[] terminatorValues;
 
-        /// <summary>
-        ///     Current line and column index in code. 0-based.
-        /// </summary>
-        private (int line, int column) pos = (0, 0);
+        private CharStream stream;
 
-        /// <summary>
-        ///     Index of current evaluating character in code.
-        /// </summary>
-        private int cIndex;
-
-        /// <summary>
-        ///     Current evaluating character in code.
-        /// </summary>
-        private char c => code[cIndex];
-
-        #endregion
+        private char c => stream.c;
 
         #region Current token properties
 
@@ -61,7 +47,7 @@ namespace Axion.Core.Processing {
         /// <summary>
         ///     Start position of current reading <see cref="Token" />.
         /// </summary>
-        private (int line, int column) tokenPos = (0, 0);
+        private (int line, int column) tokenStartPosition = (0, 0);
 
         #endregion
 
@@ -91,59 +77,57 @@ namespace Axion.Core.Processing {
         private readonly List<Token> mismatchingPairs = new List<Token>();
 
         public Lexer(
-            string                  code,
-            out LinkedList<Token>   tokens,
-            out List<SyntaxError>   errors,
-            out List<SyntaxError>   warnings,
-            SourceProcessingOptions processingOptions = SourceProcessingOptions.None
+            string                  codeToProcess,
+            LinkedList<Token>       outTokens,
+            List<SyntaxError>       outErrors,
+            List<SyntaxError>       outWarnings,
+            SourceProcessingOptions processingOptions     = SourceProcessingOptions.None,
+            string[]                processingTerminators = null
         ) {
-            this.code = code.Replace("\r", "") + Spec.EndStream;
-            tokens    = this.tokens;
-            errors    = this.errors;
-            warnings  = this.warnings;
-            options   = processingOptions;
+            if (!codeToProcess.EndsWith(Spec.EndOfStream.ToString())) {
+                codeToProcess += Spec.EndOfStream;
+            }
+            stream           = new CharStream(codeToProcess);
+            tokens           = outTokens ?? new LinkedList<Token>();
+            errors           = outErrors ?? new List<SyntaxError>();
+            warnings         = outWarnings ?? new List<SyntaxError>();
+            options          = processingOptions;
+            terminatorValues = processingTerminators;
+        }
+
+        private Lexer(
+            CharStream              fromStream,
+            LinkedList<Token>       outTokens,
+            List<SyntaxError>       outErrors,
+            List<SyntaxError>       outWarnings,
+            SourceProcessingOptions processingOptions,
+            string[]                processingTerminators
+        ) {
+            stream           = new CharStream(fromStream);
+            tokens           = outTokens ?? new LinkedList<Token>();
+            errors           = outErrors ?? new List<SyntaxError>();
+            warnings         = outWarnings ?? new List<SyntaxError>();
+            options          = processingOptions;
+            terminatorValues = processingTerminators;
         }
 
         /// <summary>
         ///     Divides code into list of tokens.
         /// </summary>
         internal void Process() {
-            Token token = ReadToken(out ErrorType occurredErrorType);
+            Token token = NextToken();
             while (true) {
                 if (token != null) {
                     tokens.AddLast(token);
-                    if (token.Type == TokenType.EndOfStream) {
+                    // check for processing terminator
+                    if (token.Type == TokenType.EndOfStream
+                     || terminatorValues != null
+                     && terminatorValues.Contains(token.Value)) {
                         break;
                     }
-                    if (token is OperatorToken op) {
-                        // got open brace
-                        if (op.Properties.IsOpenBrace) {
-                            mismatchingPairs.Add(tokens.Last.Value);
-                        }
-                        else if (op.Properties.IsCloseBrace) {
-                            // got mismatching close brace
-                            if (mismatchingPairs.Count == 0) {
-                                mismatchingPairs.Add(tokens.Last.Value);
-                            }
-                            // got matching close brace
-                            else if (op.Properties.MatchingBrace == mismatchingPairs.Last().Type) {
-                                mismatchingPairs.RemoveAt(mismatchingPairs.Count - 1);
-                            }
-                        }
-                    }
                 }
-                if (occurredErrorType != ErrorType.None) {
-                    errors.Add(
-                        new SyntaxError(
-                            occurredErrorType,
-                            code,
-                            tokens.Last.Value
-                        )
-                    );
-                }
-                token = ReadToken(out occurredErrorType);
+                token = NextToken();
             }
-
             foreach (Token mismatch in mismatchingPairs) {
                 ErrorType errorType;
                 switch (mismatch.Type) {
@@ -163,48 +147,48 @@ namespace Axion.Core.Processing {
                         break;
                     }
                     default: {
-                        throw new Exception(
-                            $"Internal error: {nameof(mismatchingPairs)} grabbed invalid {nameof(TokenType)}: {mismatch.Type}."
-                        );
+                        throw new Exception($"Internal error: {nameof(mismatchingPairs)} grabbed invalid {nameof(TokenType)}: {mismatch.Type}.");
                     }
                 }
-                errors.Add(new SyntaxError(errorType, code, mismatch));
+                ReportError(errorType, mismatch);
             }
         }
 
-        private Token ReadToken(out ErrorType occurredErrorType) {
+        private Token NextToken() {
             // reset token properties
-            tokenPos          = pos;
-            tokenValue        = "";
-            occurredErrorType = ErrorType.None;
-
+            tokenStartPosition = stream.Position;
+            tokenValue         = "";
+#if DEBUG
+            if (tokens.Count != 0 && tokens.Last.Value.Type != TokenType.Whitespace) {
+                Debug.Assert(tokenStartPosition == (tokens.Last.Value.EndLine, tokens.Last.Value.EndColumn));
+            }
+#endif
             // newline
             if (c == '\r') {
-                MoveNext();
+                stream.Move();
                 return null;
             }
-            if (c == Spec.EndLine) {
-                pos.line++;
-                pos.column = 0;
-                cIndex++;
+
+            if (c == Spec.EndOfLine) {
+                stream.Move();
                 // don't add newline as first token
                 // and don't create multiple newline tokens.
-                if (tokens.Count == 0 || tokens.Last.Value.Type == TokenType.Newline) {
+                if ((tokens.Count == 0 || tokens.Last.Value.Type == TokenType.Newline)
+                 && !options.HasFlag(SourceProcessingOptions.PreserveWhitespaces)) {
                     return null;
                 }
-                return new EndOfLineToken(tokenPos);
+                return new EndOfLineToken(tokenStartPosition);
             }
 
-            if (c == Spec.EndStream) {
-                return new EndOfStreamToken(tokenPos);
+            // source end mark
+            if (c == Spec.EndOfStream) {
+                return new EndOfStreamToken(tokenStartPosition);
             }
 
             // whitespaces & indentation
             if (c == ' ' || c == '\t') {
                 // check if we're at line beginning
-                if (tokens.Count != 0
-                    && mismatchingPairs.Count == 0
-                    && tokens.Last.Value.Type == TokenType.Newline) {
+                if (tokens.Count != 0 && mismatchingPairs.Count == 0 && tokens.Last.Value.Type == TokenType.Newline) {
                     // set indent character if it is unknown
                     if (indentChar == '\0') {
                         indentChar = c;
@@ -216,7 +200,7 @@ namespace Axion.Core.Processing {
                         tokenValue += c;
 
                         // check for consistency
-                        if (indentChar != c && !inconsistentIndentation) {
+                        if (!inconsistentIndentation && indentChar != c) {
                             inconsistentIndentation = true;
                         }
 
@@ -224,146 +208,223 @@ namespace Axion.Core.Processing {
                             indentLength++;
                         }
                         else if (c == '\t') {
-                            // tab size computation borrowed from python compiler
+                            // tab size computation borrowed from Python compiler
                             indentLength += 8 - indentLength % 8;
                         }
-                        MoveNext();
+                        stream.Move();
                     }
 
-                    // return if line is empty / commented
+                    // return if line is blank / commented
                     {
-                        string restOfLine = GetRestOfLine();
-                        if (// rest of line is blank
+                        string restOfLine = stream.GetRestOfLine();
+                        if ( // rest of line is blank
                             string.IsNullOrWhiteSpace(restOfLine)
                             // rest is one-line comment
-                            || restOfLine.StartsWith(Spec.CommentOnelineStart)
+                         || restOfLine.StartsWith(Spec.CommentOneLineStart)
                             // or rest is multiline comment
-                            || restOfLine.StartsWith(Spec.CommentMultilineStart)
+                         || restOfLine.StartsWith(Spec.CommentMultilineStart)
                             // and comment goes through end of line
-                            && Regex.Matches(restOfLine, Spec.CommentMultilineStartPattern).Count >
-                            Regex.Matches(restOfLine, Spec.CommentMultilineEndPattern).Count) {
-                            return null;
+                         && Regex.Matches(restOfLine, Spec.CommentMultilineStartPattern).Count
+                          > Regex.Matches(restOfLine, Spec.CommentMultilineEndPattern).Count) {
+                            return new Token(TokenType.Whitespace, tokenStartPosition, tokenValue);
                         }
                     }
 
-                    Token indentationToken = null;
+                    Token indentationToken;
                     if (indentLength > indentLevel) {
                         // indent increased
-                        indentLevel      = indentLength;
-                        indentationToken = new IndentToken(tokenPos, tokenValue);
+                        indentationToken = new IndentToken(tokenStartPosition, tokenValue);
                     }
                     else if (indentLength < indentLevel) {
                         // indent decreased
-                        indentLevel      = indentLength;
-                        indentationToken = new OutdentToken(tokenPos, tokenValue);
+                        indentationToken = new OutdentToken(tokenStartPosition, tokenValue);
                     }
+                    else {
+                        // whitespace
+                        indentationToken = new Token(TokenType.Whitespace, tokenStartPosition, tokenValue);
+                    }
+                    indentLevel = indentLength;
+
                     // warn user about inconsistency
-                    if (indentationToken != null
-                        && inconsistentIndentation
-                        && options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
-                        warnings.Add(
-                            new SyntaxError(
-                                ErrorType.WarnInconsistentIndentation,
-                                code,
-                                indentationToken
-                            )
+                    if (inconsistentIndentation && options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
+                        ReportWarning(
+                            WarningType.InconsistentIndentation,
+                            indentationToken
                         );
+                        // ignore future warnings
+                        options &= ~SourceProcessingOptions.CheckIndentationConsistency;
                     }
-                    // return if indent level not changed
                     return indentationToken;
                 }
+                // whitespace
                 if (options.HasFlag(SourceProcessingOptions.PreserveWhitespaces)) {
                     char whitespace = c;
-                    MoveNext();
-                    if (tokens.Count > 0 &&
-                        tokens.Last.Value.Type == TokenType.Whitespace) {
+                    stream.Move();
+                    if (tokens.Count > 0
+                     && tokens.Last.Value.Type == TokenType.Whitespace) {
                         tokens.Last.Value.Value += whitespace;
                         return null;
                     }
-                    return new Token(TokenType.Whitespace, pos, whitespace.ToString());
+                    return new Token(TokenType.Whitespace, tokenStartPosition, whitespace.ToString());
                 }
                 // usefulness whitespace
-                MoveNext();
+                stream.Move();
                 return null;
             }
 
             // one-line comment
-            if (c.ToString() == Spec.CommentOnelineStart) {
-                MoveNext();
+            if (c.ToString() == Spec.CommentOneLineStart) {
+                stream.Move();
 
                 // skip all until end of line or end of file
-                while (!AtEndOfLine() && c != Spec.EndStream) {
+                while (!stream.AtEndOfLine() && c != Spec.EndOfStream) {
                     tokenValue += c;
-                    MoveNext();
+                    stream.Move();
                 }
-                return new OneLineCommentToken(tokenPos, tokenValue);
+                return new OneLineCommentToken(tokenStartPosition, tokenValue);
             }
 
             // multiline comment
-            if (c.ToString() + Peek() == Spec.CommentMultilineStart) {
-                MoveNext(2);
+            if (c.ToString() + stream.Peek() == Spec.CommentMultilineStart) {
+                stream.Move(2);
                 var commentLevel = 1;
                 while (commentLevel > 0) {
-                    string nextPiece = c.ToString() + Peek();
+                    string nextPiece = c.ToString() + stream.Peek();
                     // found comment end
                     if (nextPiece == Spec.CommentMultilineEnd) {
                         // don't add last comment '*/'
                         if (commentLevel != 1) {
                             tokenValue += Spec.CommentMultilineEnd;
                         }
-                        MoveNext(2);
+                        stream.Move(2);
                         // decrease comment level
                         commentLevel--;
                     }
                     // found nested multiline comment start
                     else if (nextPiece == Spec.CommentMultilineStart) {
                         tokenValue += Spec.CommentMultilineStart;
-                        MoveNext(2);
+                        stream.Move(2);
                         // increase comment level
                         commentLevel++;
                     }
                     // went through end of file
-                    else if (c == Spec.EndStream) {
-                        occurredErrorType = ErrorType.UnclosedMultilineComment;
-                        return new MultilineCommentToken(tokenPos, tokenValue);
+                    else if (c == Spec.EndOfStream) {
+                        var token = new MultilineCommentToken(tokenStartPosition, tokenValue, true);
+                        ReportError(ErrorType.UnclosedMultilineComment, token);
+                        return token;
                     }
                     // found any other character
                     else {
                         tokenValue += c;
-                        MoveNext();
+                        stream.Move();
                     }
                 }
-                return new MultilineCommentToken(tokenPos, tokenValue);
+                return new MultilineCommentToken(tokenStartPosition, tokenValue);
             }
 
             // character literal
             if (c == Spec.CharLiteralQuote) {
-                MoveNext();
+                stream.Move();
                 // got escape-sequence
                 if (c == '\\') {
                     tokenValue += '\\';
-                    MoveNext();
+                    stream.Move();
                     // got invalid sequence
-                    if (!Spec.ValidEscapeChars.Contains(c)) {
-                        tokenValue        += c;
-                        occurredErrorType =  ErrorType.InvalidEscapeSequence;
-                        return new CharacterToken(tokenPos, tokenValue);
+                    if (!Spec.EscapeSequences.Keys.Contains(c)) {
+                        tokenValue += c;
+                        var token = new CharacterToken(tokenStartPosition, tokenValue);
+                        ReportError(ErrorType.InvalidEscapeSequence, token);
+                        return token;
                     }
                 }
                 else if (c == Spec.CharLiteralQuote) {
-                    tokenValue += c;
-                    MoveNext();
-                    occurredErrorType = ErrorType.EmptyCharacterLiteral;
-                    return new CharacterToken(tokenPos, tokenValue);
+                    stream.Move();
+                    var token = new CharacterToken(tokenStartPosition, "");
+                    ReportError(ErrorType.EmptyCharacterLiteral, token);
+                    return token;
                 }
                 tokenValue += c;
-                MoveNext();
+                stream.Move();
                 if (c != Spec.CharLiteralQuote) {
-                    occurredErrorType = ErrorType.CharacterLiteralTooLong;
-                    return new CharacterToken(tokenPos, "");
+                    tokenValue += c;
+                    stream.Move();
+                    var errorType = ErrorType.CharacterLiteralTooLong;
+                    while (c != Spec.CharLiteralQuote) {
+                        if (stream.AtEndOfLine() || c == Spec.EndOfStream) {
+                            errorType = ErrorType.UnclosedCharacterLiteral;
+                            break;
+                        }
+                        tokenValue += c;
+                        stream.Move();
+                    }
+                    var token = new CharacterToken(tokenStartPosition, tokenValue, true);
+                    ReportError(errorType, token);
+                    return token;
                 }
-                MoveNext();
-                return new CharacterToken(tokenPos, tokenValue);
+                stream.Move();
+                return new CharacterToken(tokenStartPosition, tokenValue);
+            }
+
+            // string
+            if (Spec.StringQuotes.Contains(c)) {
+                var stringOptions = StringLiteralOptions.None;
+                {
+                    var tempPosition = tokenStartPosition;
+                    int tempCharIdx  = stream.CharIdx;
+                    // read string prefixes
+                    while (tempPosition.column > 0
+                        && Spec.StringPrefixes.TryGetValue(stream.Source[--tempCharIdx], out StringLiteralOptions newOption)) {
+                        tempPosition.column--;
+                        // check for duplicated prefixes
+                        if (stringOptions.HasFlag(newOption)) {
+                            ReportWarning(
+                                WarningType.DuplicatedStringPrefix,
+                                new Token(TokenType.Identifier, tempPosition, c.ToString())
+                            );
+                            continue;
+                        }
+                        stringOptions |= newOption;
+                    }
+                }
+
+                // if has prefixes
+                if (stringOptions != StringLiteralOptions.None) {
+                    // remove last token - it is prefix meant as identifier.
+                    tokenStartPosition.column -= tokens.Last.Value.Value.Length;
+                    tokens.RemoveLast();
+                }
+
+                string delimiter = c.ToString();
+                char   quote     = c;
+                stream.Move();
+                // add next 2 quotes for multiline strings
+                if (c == quote) {
+                    delimiter += c;
+                    stream.Move();
+                    if (c != quote) {
+                        // got empty one-quoted string
+                        var emptyString = new StringToken(
+                            tokenStartPosition,
+                            "",
+                            quote,
+                            stringOptions
+                        );
+                        if (stringOptions != StringLiteralOptions.None) {
+                            ReportWarning(
+                                WarningType.RedundantPrefixesForEmptyString,
+                                emptyString
+                            );
+                        }
+                        return emptyString;
+                    }
+                    delimiter += c;
+                    stream.Move();
+                }
+                if (delimiter.Length == 3) {
+                    stringOptions |= StringLiteralOptions.Multiline;
+                }
+
+                return ReadString(delimiter, stringOptions);
             }
 
             // number
@@ -371,505 +432,651 @@ namespace Axion.Core.Processing {
                 return ReadNumber();
             }
 
-            // string
-            if (Spec.StringQuotes.Contains(c) ||
-                Spec.StringPrefixes.Contains(c) &&
-                Spec.StringQuotes.Contains(Peek())) {
-                // TODO add string prefixes processing support
-                var stringOptions = StringLiteralOptions.None;
-                if (c == 'f') {
-                    stringOptions |= StringLiteralOptions.Format;
-                    MoveNext();
-                }
-                if (c == 'r') {
-                    stringOptions |= StringLiteralOptions.Raw;
-                    MoveNext();
-                }
-                string delimiter = c.ToString();
-                char   quote     = c;
-                MoveNext();
-                // add next 2 quotes for multiline strings
-                if (c == quote) {
-                    delimiter += c;
-                    MoveNext();
-                    if (c != quote) {
-                        // got empty one-quoted string
-                        return new StringToken(
-                            tokenPos,
-                            "",
-                            quote,
-                            stringOptions,
-                            false
-                        );
-                    }
-                    delimiter += c;
-                    MoveNext();
-                }
-
-                while (true) {
-                    string piece = c.ToString();
-                    // TODO add string escape sequences
-                    // if got non-escaped quote
-                    if (c == quote && (tokenValue.Length == 0 || tokenValue[tokenValue.Length - 1] != '\\')) {
-                        MoveNext();
-                        piece += c;
-                        // "
-                        if (delimiter.Length == 1) {
-                            return new StringToken(
-                                tokenPos,
-                                tokenValue,
-                                quote,
-                                stringOptions,
-                                false
-                            );
-                        }
-                        // """
-                        if (c == quote && Peek() == quote) {
-                            MoveNext(2);
-                            return new StringToken(
-                                tokenPos,
-                                tokenValue,
-                                quote,
-                                stringOptions,
-                                true
-                            );
-                        }
-                        MoveNext();
-                        piece += c;
-                    }
-
-                    // if not matched, check for end of line/file
-                    if (AtEndOfLine() && delimiter.Length == 1 ||
-                        c == Spec.EndStream) {
-                        occurredErrorType = ErrorType.UnclosedString;
-                        return new StringToken(
-                            tokenPos,
-                            tokenValue,
-                            quote,
-                            stringOptions,
-                            delimiter.Length == 3
-                        );
-                    }
-                    tokenValue += piece;
-                    MoveNext();
-                }
-            }
-
-            // identifier
+            // identifier/keyword
             if (Spec.IsValidIdStart(c)) {
                 tokenValue += c;
-                MoveNext();
+                stream.Move();
                 while (Spec.IsValidIdChar(c)) {
                     tokenValue += c;
-                    MoveNext();
+                    stream.Move();
+                }
+                // remove trailing restricted endings
+                int rawIdLength = tokenValue.Length;
+                tokenValue = tokenValue.TrimEnd(Spec.RestrictedIdentifierEndings);
+                int explicitIdPartLength = rawIdLength - tokenValue.Length;
+                if (explicitIdPartLength != 0) {
+                    stream.Move(-explicitIdPartLength);
                 }
 
                 if (!Spec.Keywords.TryGetValue(tokenValue, out TokenType tokenType)) {
-                    return new IdentifierToken(tokenPos, tokenValue);
+                    return new IdentifierToken(tokenStartPosition, tokenValue);
                 }
-                return new KeywordToken(tokenPos, tokenType, tokenValue);
+                return new KeywordToken(tokenStartPosition, tokenValue, tokenType);
             }
 
             // operator
             if (Spec.OperatorChars.Contains(c)) {
                 int    longestLength = Spec.OperatorsValues[0].Length;
-                string next          = c + Peek((uint) longestLength - 1u);
+                string next          = c + stream.Peek((uint) longestLength - 1u);
                 for (int length = longestLength; length > 0; length--) {
                     string piece = next.Substring(0, length);
                     if (Spec.OperatorsValues.Contains(piece)) {
-                        MoveNext(length);
-                        return new OperatorToken(piece, tokenPos);
+                        stream.Move(length);
+                        var operatorToken = new OperatorToken(tokenStartPosition, piece);
+                        // got open brace
+                        if (operatorToken.Properties.IsOpenBrace) {
+                            mismatchingPairs.Add(operatorToken);
+                        }
+                        else if (operatorToken.Properties.IsCloseBrace) {
+                            // got mismatching close brace
+                            if (mismatchingPairs.Count == 0) {
+                                mismatchingPairs.Add(operatorToken);
+                            }
+                            // got matching close brace
+                            else if (mismatchingPairs.Last().Type == operatorToken.Properties.MatchingBrace) {
+                                mismatchingPairs.RemoveAt(mismatchingPairs.Count - 1);
+                            }
+                        }
+                        return operatorToken;
                     }
                 }
-                occurredErrorType = ErrorType.InvalidOperator;
-                return new OperatorToken(Spec.InvalidOperatorProperties, tokenPos);
+                var invalidOperatorToken = new OperatorToken(tokenStartPosition, Spec.InvalidOperatorProperties);
+                ReportError(ErrorType.InvalidOperator, invalidOperatorToken);
+                return invalidOperatorToken;
             }
 
             // invalid
-            occurredErrorType = ErrorType.InvalidSymbol;
-            MoveNext();
-            return new Token(TokenType.Unknown, pos, c.ToString());
+            tokenValue += c;
+            stream.Move();
+            var unknownToken = new Token(TokenType.Unknown, tokenStartPosition, tokenValue);
+            ReportError(ErrorType.InvalidSymbol, unknownToken);
+            return unknownToken;
         }
+
+        #region Parsing Number literals
 
         private Token ReadNumber() {
-            var isPrefix0 = false;
             if (c == '0') {
-                tokenValue += c;
-                MoveNext();
-                // second char
+                tokenValue += "0";
+                stream.Move();
+
+                int           radix;
+                NumberOptions numberOptions;
+                numberOptions.Bits      = 32;
+                numberOptions.Floating  = false;
+                numberOptions.Imaginary = false;
+                numberOptions.Unsigned  = false;
+                numberOptions.Unlimited = false;
+                bool      atFirstChar;
+                ErrorType errorType;
+
+                // second char (determines radix)
                 if (c == 'b' || c == 'B') {
                     tokenValue += c;
-                    return ReadBinaryNumber();
+                    stream.Move();
+                    radix = 2;
+                    ReadBinaryNumber(ref numberOptions, out atFirstChar, out errorType);
                 }
-                if (c == 'o' || c == 'O') {
+                else if (c == 'o' || c == 'O') {
                     tokenValue += c;
-                    return ReadOctalNumber();
+                    stream.Move();
+                    radix = 8;
+                    ReadOctalNumber(ref numberOptions, out atFirstChar, out errorType);
                 }
-                if (c == 'x' || c == 'X') {
+                else if (c == 'x' || c == 'X') {
                     tokenValue += c;
-                    return ReadHexNumber();
+                    stream.Move();
+                    radix = 16;
+                    ReadHexNumber(ref numberOptions, out atFirstChar, out errorType);
                 }
-                isPrefix0 = true;
-                // skip leading zeros
-                while (c == '0') {
-                    tokenValue += '0';
-                    MoveNext();
+                else {
+                    // skip leading zeros
+                    while (c == '0') {
+                        tokenValue += "0";
+                        stream.Move();
+                    }
+                    return ReadDecimalNumber(true);
                 }
+                if (atFirstChar) {
+                    errorType = ErrorType.ExpectedDigitAfterNumberBaseSpecifier;
+                }
+                if (errorType != ErrorType.None) {
+                    var invalidNumber = new NumberToken(tokenStartPosition, tokenValue, numberOptions);
+                    ReportError(
+                        errorType,
+                        invalidNumber
+                    );
+                    return invalidNumber;
+                }
+                if (numberOptions.Unlimited) {
+                    BigInteger value = LiteralParser.ParseBigInteger(tokenValue.Substring(2, tokenValue.Length - 3), radix);
+                }
+                else {
+                    object value = LiteralParser.ParseInteger(tokenValue.Substring(2), radix);
+                }
+                return new NumberToken(tokenStartPosition, tokenValue, numberOptions);
             }
-            var isFirstChar = true;
-            while (true) {
-                switch (c) {
-                    case '.': {
-                        return ReadFraction();
-                    }
-                    case 'e':
-                    case 'E': {
-                        Token exp = ReadExponent();
-                        if (exp != null) {
-                            return exp;
-                        }
-                        return new Token(
-                            TokenType.Unknown,
-                            tokenPos,
-                            ParseInteger(tokenValue, 10).ToString()
-                        );
-                    }
-                    case 'j':
-                    case 'J': {
-                        return new Token(
-                            TokenType.Unknown,
-                            tokenPos,
-                            LiteralParser.ParseImaginary(tokenValue).ToString()
-                        );
-                    }
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9': {
-                        tokenValue += c;
-                        break;
-                    }
-                    default: {
-                        if (isPrefix0 && !isFirstChar) {
-                            var errorToken = new Token(
-                                TokenType.Unknown,
-                                tokenPos,
-                                tokenValue
-                            );
-                            errors.Add(
-                                new SyntaxError(
-                                    ErrorType.InvalidIntegerLiteral,
-                                    code,
-                                    errorToken
-                                )
-                            );
-                            return errorToken;
-                        }
-                        return new Token(
-                            TokenType.Unknown,
-                            tokenPos,
-                            ParseInteger(tokenValue, 10).ToString()
-                        );
-                    }
-                }
-                MoveNext();
-                isFirstChar = false;
-            }
+            return ReadDecimalNumber(false);
         }
 
-        private Token ReadBinaryNumber() {
-            var        bits       = 0;
-            var        longValue  = 0L;
-            var        numOptions = NumberOptions.Bit8;
-            BigInteger bigInt     = BigInteger.Zero;
-            var        first      = true;
-            while (true) {
-                MoveNext();
+        private Token ReadDecimalNumber(bool startsWithZero) {
+            // c is something except 0 here
+            NumberOptions numberOptions;
+            numberOptions.Bits      = 32;
+            numberOptions.Floating  = false;
+            numberOptions.Imaginary = false;
+            numberOptions.Unlimited = false;
+            numberOptions.Unsigned  = false;
+            var atFirstChar = true;
+            var errorType   = ErrorType.None;
+            // TODO: maybe use dynamic as value of number?
+            while (Spec.IsValidNumberPart(c)) {
+                if (numberOptions.Unlimited) {
+                    errorType = ErrorType.ExpectedEndOfNumberAfterLongPostfix;
+                }
+                if (!char.IsDigit(c) && c != '_') {
+                    if (c == '.') { // BUG: no error after dot
+                        if (char.IsDigit(stream.Peek())) {
+                            // if found second dot
+                            if (numberOptions.Floating) {
+                                tokenValue += c;
+                                stream.Move();
+                                var invalidNumber = new NumberToken(tokenStartPosition, tokenValue, numberOptions);
+                                ReportError(ErrorType.RepeatedDotInNumberLiteral, invalidNumber);
+                                return invalidNumber;
+                            }
+                            numberOptions.Floating = true;
+                            numberOptions.Bits = 64;
+                        }
+                        // non-digit after dot: '.' is operator on some number
+                        // leave dot to next token.
+                        else {
+                            break;
+                        }
+                    }
+                    else if (c == 'j' || c == 'J') {
+                        if (numberOptions.Imaginary) {
+                            errorType = ErrorType.RepeatedImaginarySignInNumberLiteral;
+                        }
+                        numberOptions.Imaginary = true;
+                    }
+                    else if (c == 'e' || c == 'E') {
+                        ReadExponent(numberOptions, ref errorType);
+                        continue;
+                    }
+                    else if (Spec.NumberPostfixes.Contains(c)) {
+                        ReadNumberPostfix(
+                            ref numberOptions,
+                            false,
+                            ref errorType
+                        );
+                        continue;
+                    }
+                    else {
+                        // invalid
+                        if (startsWithZero && !atFirstChar) {
+                            tokenValue += c;
+                            var errorToken = new Token(
+                                TokenType.Unknown,
+                                tokenStartPosition,
+                                tokenValue
+                            );
+                            ReportError(ErrorType.InvalidIntegerLiteral, errorToken);
+                            return errorToken;
+                        }
+                        break;
+                    }
+                }
                 tokenValue += c;
+                stream.Move();
+                atFirstChar = false;
+            }
+            var number = new NumberToken(tokenStartPosition, tokenValue, numberOptions);
+            if (errorType != ErrorType.None) {
+                ReportError(errorType, number);
+            }
+            return number;
+        }
+
+        private void ReadBinaryNumber(
+            ref NumberOptions numberOptions,
+            out bool          atFirstChar,
+            out ErrorType     errorType
+        ) {
+            var        bitsCount = 0;
+            var        longValue = 0L;
+            BigInteger bigInt    = BigInteger.Zero;
+            atFirstChar = true;
+            errorType   = ErrorType.None;
+            while (Spec.IsValidNumberPart(c)) {
+                if (numberOptions.Unlimited) {
+                    errorType = ErrorType.ExpectedEndOfNumberAfterLongPostfix;
+                }
                 switch (c) {
-                    case '0': {
+                    case '0':
                         if (longValue != 0L) {
                             // ignore leading 0's...
                             goto case '1';
                         }
                         break;
-                    }
-                    case '1': {
-                        bits++;
-                        if (bits == 8) {
-                            numOptions |= NumberOptions.Bit16;
+                    case '1':
+                        bitsCount++;
+                        if (bitsCount > 8) {
+                            numberOptions.Bits = 16;
                         }
-                        else if (bits == 16) {
-                            numOptions |= NumberOptions.Bit32;
+                        else if (bitsCount > 16) {
+                            numberOptions.Bits = 32;
                         }
-                        else if (bits == 32) {
-                            numOptions |= NumberOptions.Bit64;
+                        else if (bitsCount > 32) {
+                            numberOptions.Bits = 64;
                         }
-                        else if (bits == 64) {
-                            numOptions |= NumberOptions.BitNoLimit;
-                            bigInt     =  longValue;
+                        else if (bitsCount > 64) {
+                            numberOptions.Bits = 128;
+                            bigInt             = longValue;
                         }
                         // TODO debug
                         var or = (byte) (c - '0');
-                        if (bits >= 64) {
+                        if (bitsCount >= 64) {
                             bigInt = (bigInt << 1) | or;
                         }
                         else {
                             longValue = (longValue << 1) | or;
                         }
                         break;
-                    }
-                    case 'l':
-                    case 'L': {
-                        BigInteger value = numOptions.HasFlag(NumberOptions.BitNoLimit) ? bigInt : longValue;
-                        return new NumberToken(tokenPos, value, numOptions);
-                    }
-                    default: {
-                        if (first) {
-                            var errorToken = new Token(TokenType.Invalid, tokenPos, tokenValue);
-                            errors.Add(
-                                new SyntaxError(
-                                    ErrorType.InvalidBinaryLiteral,
-                                    code,
-                                    errorToken
-                                )
-                            );
-                            return errorToken;
-                        }
-                        object value = numOptions.HasFlag(NumberOptions.BitNoLimit) ? bigInt : (object) longValue;
-                        return new NumberToken(tokenPos, value, numOptions);
-                    }
-                }
-                first = false;
-            }
-        }
-
-        private Token ReadOctalNumber() {
-            var first = true;
-            while (true) {
-                MoveNext();
-                tokenValue += c;
-                switch (c) {
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7': {
+                    case '_': {
                         break;
                     }
-                    case 'l':
-                    case 'L': {
-                        BigInteger value = LiteralParser.ParseBigInteger(
-                            tokenValue.Substring(2, tokenValue.Length - 2), 8
-                        );
-                        return new Token(TokenType.Unknown, tokenPos, value.ToString());
-                    }
                     default: {
-                        if (first) {
-                            var errorToken = new Token(TokenType.Invalid, tokenPos, tokenValue);
-                            errors.Add(
-                                new SyntaxError(
-                                    ErrorType.InvalidOctalLiteral,
-                                    code,
-                                    errorToken
-                                )
+                        if (Spec.NumberPostfixes.Contains(c)) {
+                            ReadNumberPostfix(
+                                ref numberOptions,
+                                false,
+                                ref errorType
                             );
-                            return errorToken;
+                            continue;
                         }
-                        object value = ParseInteger(tokenValue.Substring(2), 8);
-                        return new Token(TokenType.Unknown, tokenPos, value.ToString());
+                        // invalid
+                        errorType = ErrorType.InvalidBinaryLiteral;
+                        break;
                     }
                 }
-                first = false;
-            }
-        }
-
-        private Token ReadHexNumber() {
-            var first = true;
-            while (true) {
-                MoveNext();
                 tokenValue += c;
-                if (char.IsDigit(c)
-                 || c == 'a' || c == 'b' || c == 'c' || c == 'd' || c == 'e' || c == 'f'
-                 || c == 'A' || c == 'B' || c == 'C' || c == 'D' || c == 'E' || c == 'F') {
-                }
-                else if (c == 'l' || c == 'L') {
-                    BigInteger value = LiteralParser
-                        .ParseBigInteger(
-                            tokenValue
-                                .Substring(2, tokenValue.Length - 3), 16
-                        );
-                    return new Token(TokenType.Unknown, tokenPos, value.ToString());
-                }
-                else {
-                    if (first) {
-                        var errorToken = new Token(TokenType.Invalid, tokenPos, tokenValue);
-                        errors.Add(
-                            new SyntaxError(
-                                ErrorType.InvalidHexadecimalLiteral,
-                                code,
-                                errorToken
-                            )
-                        );
-                        return errorToken;
-                    }
-                    object value = ParseInteger(tokenValue.Substring(2), 16);
-                    return new Token(TokenType.Unknown, tokenPos, value.ToString());
-                }
-                first = false;
+                stream.Move();
+                atFirstChar = false;
             }
         }
 
-        private Token ReadFraction() {
-            while (true) {
-                MoveNext();
+        private void ReadOctalNumber(
+            ref NumberOptions numberOptions,
+            out bool          atFirstChar,
+            out ErrorType     errorType
+        ) {
+            numberOptions.Bits      = 32;
+            numberOptions.Unsigned  = false;
+            numberOptions.Unlimited = false;
+            atFirstChar             = true;
+            errorType               = ErrorType.None;
+            while (Spec.IsValidNumberPart(c)) {
+                if (numberOptions.Unlimited) {
+                    errorType = ErrorType.ExpectedEndOfNumberAfterLongPostfix;
+                }
+                if (!c.IsValidOctalDigit()) {
+                    if (c == '_') {
+                        tokenValue += c;
+                        stream.Move();
+                    }
+                    else if (Spec.NumberPostfixes.Contains(c)) {
+                        ReadNumberPostfix(
+                            ref numberOptions,
+                            atFirstChar,
+                            ref errorType
+                        );
+                        continue;
+                    }
+                    else {
+                        // invalid
+                        errorType = ErrorType.InvalidOctalLiteral;
+                    }
+                }
                 tokenValue += c;
-                if (char.IsDigit(c)) {
-                }
-                else if (c == 'e' || c == 'E') {
-                    Token exp = ReadExponent();
-                    if (exp != null) {
-                        return exp;
-                    }
-                    object value = ParseFloat(tokenValue);
-                    return new Token(TokenType.Unknown, tokenPos, value.ToString());
-                }
-                else if (c == 'j' || c == 'J') {
-                    Complex value = LiteralParser.ParseImaginary(tokenValue);
-                    return new Token(TokenType.Unknown, tokenPos, value.ToString());
-                }
-                else {
-                    object value = ParseFloat(tokenValue);
-                    return new Token(TokenType.Unknown, tokenPos, value.ToString());
-                }
+                stream.Move();
+                atFirstChar = false;
             }
         }
 
-        private Token ReadExponent() {
-            (int line, int column) startPos = pos;
-            MoveNext();
+        private void ReadHexNumber(
+            ref NumberOptions numberOptions,
+            out bool          atFirstChar,
+            out ErrorType     errorType
+        ) {
+            numberOptions.Bits      = 32;
+            numberOptions.Unsigned  = false;
+            numberOptions.Unlimited = false;
+            atFirstChar             = true;
+            errorType               = ErrorType.None;
+            while (Spec.IsValidNumberPart(c)) {
+                if (numberOptions.Unlimited) {
+                    errorType = ErrorType.ExpectedEndOfNumberAfterLongPostfix;
+                }
+                if (!c.IsValidHexadecimalDigit()) {
+                    if (c == '_') {
+                        tokenValue += c;
+                        stream.Move();
+                    }
+                    else if (Spec.NumberPostfixes.Contains(c)) {
+                        ReadNumberPostfix(
+                            ref numberOptions,
+                            atFirstChar,
+                            ref errorType
+                        );
+                        continue;
+                    }
+                    else {
+                        // invalid
+                        errorType = ErrorType.InvalidHexadecimalLiteral;
+                    }
+                }
+                tokenValue += c;
+                stream.Move();
+                atFirstChar = false;
+            }
+        }
+
+        private void ReadExponent(
+            NumberOptions numberOptions,
+            ref ErrorType errorType
+        ) {
+            // c == 'e'
+            var hasExponentValue = false;
             tokenValue += c;
+            stream.Move();
             if (c == '-' || c == '+') {
-                MoveNext();
+                tokenValue += c;
+                stream.Move();
             }
-            object value;
-            while (true) {
+            //object value;
+            while (Spec.IsValidNumberPart(c)) {
                 if (char.IsDigit(c)) {
-                    tokenValue += c;
-                    MoveNext();
+                    hasExponentValue = true;
                 }
                 else if (c == 'j' || c == 'J') {
-                    value = LiteralParser.ParseImaginary(tokenValue);
-                    break;
+                    if (numberOptions.Imaginary) {
+                        errorType = ErrorType.RepeatedImaginarySignInNumberLiteral;
+                    }
+                    numberOptions.Imaginary = true;
+                }
+                else if (Spec.NumberPostfixes.Contains(c)) {
+                    ReadNumberPostfix(
+                        ref numberOptions,
+                        false,
+                        ref errorType
+                    );
+                    continue;
                 }
                 else {
-                    if (startPos.column == pos.column) {
-                        return null;
-                    }
-                    value = ParseFloat(tokenValue);
+                    // invalid
+                    errorType = ErrorType.InvalidValueAfterExponent;
                     break;
                 }
+                tokenValue += c;
+                stream.Move();
             }
-            return new Token(TokenType.Unknown, tokenPos, value.ToString());
-        }
-
-        private object ParseInteger(string s, int radix) {
-            try {
-                return LiteralParser.ParseInteger(s, radix);
-            }
-            catch (ArgumentException ex) {
-                throw;
-
-                //new ProcessingException(
-                //    ex, ErrorType.InvalidIntegerLiteral,
-                //    Line, new Token(TokenType.Invalid, tokenPos, s)
-                //);
+            if (!hasExponentValue) {
+                errorType = ErrorType.ExpectedDigitAfterNumberExponent;
             }
         }
 
-        private object ParseFloat(string s) {
-            try {
-                return LiteralParser.ParseFloat(s);
+        private void ReadNumberPostfix(
+            ref NumberOptions numberOptions,
+            bool              atFirstChar,
+            ref ErrorType     errorType
+        ) {
+            var bitRateStr = "";
+            if (atFirstChar) {
+                errorType = ErrorType.ExpectedDigitAfterNumberBaseSpecifier;
             }
-            catch (Exception ex) {
-                throw;
-
-                //    new ProcessingException(
-                //    ex, ErrorType.InvalidFloatLiteral,
-                //    Line, new Token(TokenType.Invalid, tokenPos, s)
-                //);
+            else if (numberOptions.Unlimited) {
+                errorType = ErrorType.ShouldHaveNoValueAfterNumberLongPostfix;
             }
-        }
-
-        #region Source stream control functions
-
-        private bool AtEndOfLine() {
-            return c == '\r' || c == Spec.EndLine;
-        }
-
-        private string GetRestOfLine() {
-            int indexOfNewline = code.Substring(cIndex).IndexOf(Spec.EndLine);
-            if (indexOfNewline == -1) {
-                return "";
+            // read postfix
+            if (c == 'i' || c == 'I') {
+                numberOptions.Unsigned = false;
             }
-            return code.Substring(cIndex, indexOfNewline);
-        }
-
-        private char Peek() {
-            if (cIndex + 1 < code.Length) {
-                return code[cIndex + 1];
+            else if (c == 'u' || c == 'U') {
+                numberOptions.Unsigned = true;
             }
-            return Spec.EndStream;
-        }
-
-        private string Peek(uint length) {
-            // save values
-            (int, int) savedPos         = pos;
-            int        savedCIndex      = cIndex;
-            int        savedIndentLevel = indentLevel;
-
-            var value = "";
-            for (var i = 0; i < length; i++) {
-                MoveNext();
-                value += c;
+            else if (c == 'f' || c == 'F') {
+                numberOptions.Floating = true;
             }
-            // restore values
-            pos         = savedPos;
-            cIndex      = savedCIndex;
-            indentLevel = savedIndentLevel;
-            return value;
-        }
-
-        /// <summary>
-        ///     Moves <see cref="pos" /> values by
-        ///     &lt;<paramref name="position" />&gt;.
-        /// </summary>
-        private void MoveNext(int position = 1) {
-            if (position <= 0) {
-                throw new Exception(
-                    "Internal error: function " + nameof(MoveNext) + " was called with " + nameof(position) + " <= 0."
-                );
+            else if (c == 'l' || c == 'L') {
+                numberOptions.Unlimited = true;
+                return;
+            }
+            else {
+                errorType = ErrorType.InvalidPostfixInNumberLiteral;
+                return;
             }
 
-            for (var i = 0; i < position; i++) {
-                // check for stream end
-                if (c == Spec.EndStream) {
-                    return;
+            // postfix is 'i' or 'u' here
+            tokenValue += c;
+            stream.Move();
+            if (char.IsDigit(c)) {
+                while (char.IsDigit(c)) {
+                    tokenValue += c;
+                    bitRateStr += c;
+                    stream.Move();
                 }
-                pos.column++;
-                cIndex++;
+                if (!int.TryParse(bitRateStr, out numberOptions.Bits)
+                 || !Spec.NumberFloatBitRates.Contains(numberOptions.Bits)) {
+                    errorType = ErrorType.InvalidIntegerNumberBitRate;
+                    numberOptions.Bits = 32;
+                }
+                if (numberOptions.Floating
+                 && !Spec.NumberFloatBitRates.Contains(numberOptions.Bits)) {
+                    errorType          = ErrorType.InvalidFloatNumberBitRate;
+                    numberOptions.Bits = 64;
+                }
+            }
+            else {
+                // expected digit after num 'i#' postfix
+                errorType = ErrorType.ExpectedABitRateAfterNumberPostfix;
             }
         }
 
         #endregion
+
+        private Token ReadString(string delimiter, StringLiteralOptions stringOptions) {
+            char quote = delimiter[0];
+
+            bool isRaw                = stringOptions.HasFlag(StringLiteralOptions.Raw);
+            bool isFmt                = stringOptions.HasFlag(StringLiteralOptions.Format);
+            bool normalizeLineEndings = stringOptions.HasFlag(StringLiteralOptions.NormalizeLineEndings);
+
+            var interpolations = new List<Interpolation>();
+            int startIndex     = stream.CharIdx;
+
+            while (true) {
+                if (c == '\\') {
+                    stream.Move();
+                    // just '\' and char
+                    if (isRaw) {
+                        tokenValue += "\\" + c;
+                        continue;
+                    }
+                    // escape sequence
+                    if (Spec.EscapeSequences.TryGetValue(c, out string value)) {
+                        tokenValue += value;
+                        continue;
+                    }
+                    switch (c) {
+                        // unicode symbol
+                        case 'u':
+                        case 'U': {
+                            int unicodeSymLen = c == 'u' ? 4 : 8;
+                            if (LiteralParser.TryParseInt(stream.Source, stream.CharIdx, unicodeSymLen, 16, out int val)) {
+                                if (val < 0 || val > 0x10ffff) {
+                                    throw new Exception(
+                                        $"Can't decode bytes at line {stream.Position.line}, column {stream.Position.column}: illegal Unicode character"
+                                    );
+                                }
+                                if (val < 0x010000) {
+                                    tokenValue += (char) val;
+                                }
+                                else {
+                                    tokenValue += char.ConvertFromUtf32(val);
+                                }
+                                stream.Move(unicodeSymLen);
+                            }
+                            else {
+                                throw new Exception(
+                                    $"Can't decode bytes at line {stream.Position.line}, column {stream.Position.column}: truncated \\uXXXX escape"
+                                );
+                            }
+                            continue;
+                        }
+                        // newlines
+                        case '\r': {
+                            if (c == '\n') {
+                                stream.Move();
+                            }
+                            continue;
+                        }
+                        case '\n': {
+                            continue;
+                        }
+                        // hexadecimal char
+                        case 'x': {
+                            if (!LiteralParser.TryParseInt(stream.Source, stream.CharIdx, 2, 16, out int val)) {
+                                goto default;
+                            }
+                            tokenValue += (char) val;
+                            stream.Move(2);
+                            continue;
+                        }
+                        case '0':
+                        case '1':
+                        case '2':
+                        case '3':
+                        case '4':
+                        case '5':
+                        case '6':
+                        case '7': {
+                            int val = c - '0';
+                            if (LiteralParser.HexValue(c, out int oneChar) && oneChar < 8) {
+                                val = val * 8 + oneChar;
+                                stream.Move();
+                                if (LiteralParser.HexValue(c, out oneChar) && oneChar < 8) {
+                                    val = val * 8 + oneChar;
+                                    stream.Move();
+                                }
+                            }
+                            tokenValue += (char) val;
+                            continue;
+                        }
+                        default: {
+                            tokenValue += "\\" + c;
+                            continue;
+                        }
+                    }
+                }
+
+                // found end of line
+                if (c == '\r' && normalizeLineEndings) {
+                    // normalize line endings
+                    if (c == '\n') {
+                        stream.Move();
+                    }
+                    tokenValue += '\n';
+                }
+
+                // check for end of line/file
+                if (stream.AtEndOfLine() && delimiter.Length == 1
+                 || c == Spec.EndOfStream) {
+                    var token = new StringToken(
+                        tokenStartPosition,
+                        tokenValue,
+                        quote,
+                        stringOptions,
+                        true
+                    );
+                    ReportError(ErrorType.UnclosedString, token);
+                    return token;
+                }
+
+                // got non-escaped quote
+                if (c == quote && (tokenValue.Length == 0 || tokenValue[tokenValue.Length - 1] != '\\')) {
+                    stream.Move();
+                    // ending "
+                    if (delimiter.Length == 1) {
+                        break;
+                    }
+                    // ending """
+                    if (c == quote && stream.Peek() == quote) {
+                        stream.Move(2);
+                        break;
+                    }
+                    // just piece of string
+                    stream.Move();
+                }
+
+                // found string format sign
+                if (c == '{' && isFmt) {
+                    ReadStringInterpolation(interpolations, startIndex);
+                    continue;
+                }
+                // else
+                tokenValue += c;
+                stream.Move();
+            }
+            if (isFmt) {
+                var interpolatedStringToken = new InterpolatedStringToken(tokenStartPosition, tokenValue, quote, stringOptions, interpolations);
+                if (interpolations.Count == 0) {
+                    ReportWarning(
+                        WarningType.RedundantStringFormatPrefix,
+                        interpolatedStringToken
+                    );
+                }
+                return interpolatedStringToken;
+            }
+            return new StringToken(tokenStartPosition, tokenValue, quote, stringOptions);
+        }
+
+        private void ReadStringInterpolation(ICollection<Interpolation> interpolations, int stringStartIndex) {
+            var newInterpolation = new Interpolation(stream.CharIdx - stringStartIndex);
+            interpolations.Add(newInterpolation);
+            // process interpolation
+            {
+                var lexer = new Lexer(
+                    stream,
+                    newInterpolation.Tokens,
+                    errors,
+                    warnings,
+                    options,
+                    new[] { "}" }
+                );
+                lexer.stream.Move(); // skip {
+                lexer.mismatchingPairs.Add(new Token(TokenType.OpLeftBrace, stream.Position, "{"));
+                lexer.Process();
+                // remove usefulness closing curly
+                newInterpolation.Tokens.RemoveLast();
+                // restore character position
+                stream = new CharStream(lexer.stream);
+            }
+            // append interpolated piece to main string token
+            newInterpolation.EndIndex =  stream.CharIdx - stringStartIndex;
+            tokenValue                += stream.Source.Substring(stream.CharIdx - newInterpolation.Length, newInterpolation.Length);
+        }
+
+        private void ReportError(ErrorType occurredErrorType, Token token) {
+            Debug.Assert(occurredErrorType != ErrorType.None);
+
+            errors.Add(new SyntaxError(occurredErrorType, stream.Source, token));
+        }
+
+        private void ReportWarning(WarningType occurredWarningType, Token token) {
+            Debug.Assert(occurredWarningType != WarningType.None);
+
+            warnings.Add(new SyntaxError(occurredWarningType, stream.Source, token));
+        }
     }
 }

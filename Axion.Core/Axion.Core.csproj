@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.2.9.95</Version>
+    <Version>0.2.9.98</Version>
     <Authors>Nikitin Ilya</Authors>
     <Company>Fluctus Technologies</Company>
     <Description>Core of Axion programming language toolset.
@@ -12,11 +12,17 @@ Built on .NET Standard.</Description>
     <PackageId>Axion.Core</PackageId>
     <AssemblyName>Axion.Core</AssemblyName>
     <RootNamespace>Axion.Core</RootNamespace>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Processing\Lexer.cs~RF51606f8.TMP" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="TextCopy" Version="1.5.0" />
   </ItemGroup>
 
 </Project>
