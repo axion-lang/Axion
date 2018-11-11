@@ -11,8 +11,10 @@
 
 ### Objectives:
 
-**Designed to union languages (inter-transpiling to many other popular programming languages),
-and to implement common design patterns quickly and simply.**
+Designed to: <br/>
+**Union languages (provide inter-transpiling to other popular languages).** <br/>
+**Implement common design patterns quickly and simply.** <br/>
+**Be as close to human, as possible.**
 
 - **General-purposed**
 - **High-performance**
