@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Axion.Core.Tokens;
 using Axion.Core.Tokens.Ast;
-using Axion.Core.Visual;
+using ConsoleExtensions;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing {
@@ -13,9 +13,9 @@ namespace Axion.Core.Processing {
     /// </summary>
     public sealed class SourceCode {
         /// <summary>
-        ///     File extension of <see cref="debugFilePath" />.
+        ///     File extension of <see cref="DebugFilePath" />.
         /// </summary>
-        private const string debugExtension = ".debugInfo.json";
+        private const string debugExtension = ".dbg.json";
 
         /// <summary>
         ///     Tokens list generated from source.
@@ -30,26 +30,26 @@ namespace Axion.Core.Processing {
         /// <summary>
         ///     Contains all errors that raised while processing <see cref="SourceCode" />.
         /// </summary>
-        public readonly List<SyntaxError> Errors = new List<SyntaxError>();
+        public readonly List<Exception> Errors = new List<Exception>();
 
         /// <summary>
         ///     Contains all warnings that found while processing <see cref="SourceCode" />.
         /// </summary>
-        public readonly List<SyntaxError> Warnings = new List<SyntaxError>();
+        public readonly List<Exception> Warnings = new List<Exception>();
 
         /// <summary>
         ///     Lines of source code picked from string or file.
         /// </summary>
         public readonly string Code;
 
-        public SourceProcessingOptions Options;
+        public SourceProcessingOptions Options { get; private set; }
 
         /// <summary>
         ///     Path to file where generated result is located.
         ///     If not specified in constructor, then this is assigned to
         ///     <see cref="Compiler.OutputDirectory" />\ + "latest" + <see cref="Compiler.OutputFileExtension" />
         /// </summary>
-        internal readonly string OutputFilePath;
+        internal string OutputFilePath { get; private set; }
 
         /// <summary>
         ///     Path to file where source code is located.
@@ -57,42 +57,18 @@ namespace Axion.Core.Processing {
         ///     <see cref="SourceCode(string[], string)" /> is used,
         ///     then file name assigned to date and time of instance creation.
         /// </summary>
-        internal readonly string SourceFilePath;
+        internal string SourceFilePath { get; private set; }
 
         /// <summary>
         ///     Name of file where source code is located.
         ///     Created automatically from <see cref="SourceFilePath" />.
         /// </summary>
-        private readonly string sourceFileName;
+        internal string SourceFileName { get; private set; }
 
         /// <summary>
         ///     Path to file where processing debug output is located.
         /// </summary>
-        private readonly string debugFilePath;
-
-        /// <summary>
-        ///     Creates new <see cref="SourceCode" /> instance
-        ///     using specified &lt;<paramref name="file" />&gt; info.
-        /// </summary>
-        public SourceCode(FileInfo file, string outFilePath = null) {
-            if (!file.Exists) {
-                throw new FileNotFoundException("Source file doesn't exists", file.FullName);
-            }
-            if (file.Extension != Compiler.SourceFileExtension) {
-                throw new ArgumentException("Source file must have '" + Compiler.SourceFileExtension + "' extension.");
-            }
-            // initialize file paths
-            SourceFilePath = file.Name;
-            sourceFileName = Path.GetFileName(SourceFilePath);
-            OutputFilePath = BuildOutputPath(outFilePath);
-            debugFilePath = Compiler.DebugDirectory +
-                            Path.GetFileNameWithoutExtension(OutputFilePath) +
-                            debugExtension;
-
-            // initialize content
-            SyntaxTree = new Ast(this);
-            Code       = File.ReadAllText(file.FullName);
-        }
+        internal string DebugFilePath { get; private set; }
 
         /// <summary>
         ///     Creates new <see cref="SourceCode" /> instance
@@ -101,7 +77,7 @@ namespace Axion.Core.Processing {
         public SourceCode(string code, string outFilePath = null) :
             this(
                 code.Split(
-                    Spec.Newlines,
+                    Spec.EndOfLines,
                     StringSplitOptions.None
                 ), outFilePath
             ) {
@@ -109,50 +85,122 @@ namespace Axion.Core.Processing {
 
         /// <summary>
         ///     Creates new <see cref="SourceCode" /> instance
+        ///     using specified &lt;<paramref name="file" />&gt; info.
+        /// </summary>
+        public SourceCode(FileInfo file, string outFilePath = null) {
+            // check source file
+            if (!file.Exists) {
+                throw new FileNotFoundException("Source file doesn't exists", file.FullName);
+            }
+            if (file.Extension != Compiler.SourceFileExtension) {
+                throw new ArgumentException(
+                    "Source file must have '" + Compiler.SourceFileExtension + "' extension.",
+                    nameof(file)
+                );
+            }
+
+            // initialize file paths
+            InitializeFilePaths(file.FullName, outFilePath);
+
+            // set content
+            SyntaxTree = new Ast(this);
+            Code       = File.ReadAllText(file.FullName);
+        }
+
+        /// <summary>
+        ///     Creates new <see cref="SourceCode" /> instance
         ///     using specified &lt;<paramref name="sourceLines" />&gt;.
+        ///     Use only for interpreter and tests,
+        ///     output is redirected to the compiler dir.
         /// </summary>
         public SourceCode(string[] sourceLines, string outFilePath = null) {
-            // initialize file paths
-            SourceFilePath = Compiler.OutputDirectory + DateTime.Now.ToFileName() + Compiler.SourceFileExtension;
-            sourceFileName = Path.GetFileName(SourceFilePath);
-            OutputFilePath = BuildOutputPath(outFilePath);
-            debugFilePath = Compiler.DebugDirectory +
-                            Path.GetFileNameWithoutExtension(OutputFilePath) +
-                            debugExtension;
+            InitializeFilePaths(
+                Compiler.OutputDirectory + DateTime.Now.ToFileName() + Compiler.SourceFileExtension,
+                outFilePath
+            );
 
-            // initialize content
+            // set content
             SyntaxTree = new Ast(this);
-            Code       = string.Join(Spec.EndOfLine.ToString(), sourceLines);
+            Code       = string.Join("\n", sourceLines);
+        }
+
+        private void InitializeFilePaths(
+            string sourceFilePath,
+            string outFilePath = null
+        ) {
+            SourceFilePath = sourceFilePath;
+            SourceFileName = Path.GetFileNameWithoutExtension(SourceFilePath);
+            BuildOutputPath(outFilePath);
+
+            string debugDir = new FileInfo(OutputFilePath).Directory.FullName +
+                              "\\debug\\";
+            if (!Directory.Exists(debugDir)) {
+                Directory.CreateDirectory(debugDir);
+            }
+            DebugFilePath = debugDir + SourceFileName + debugExtension;
+        }
+
+        private void BuildOutputPath(string outFilePath) {
+            if (string.IsNullOrWhiteSpace(outFilePath)) {
+                outFilePath = SourceFileName;
+            }
+            if (!Path.HasExtension(outFilePath)) {
+                outFilePath += Compiler.OutputFileExtension;
+            }
+            if (!Path.IsPathRooted(outFilePath)) {
+                outFilePath = Compiler.OutputDirectory + outFilePath;
+            }
+            var outFile = new FileInfo(outFilePath);
+            if (!outFile.Directory.Exists) {
+                outFile.Directory.Create();
+            }
+            OutputFilePath = outFilePath;
         }
 
         /// <summary>
         ///     Performs <see cref="SourceCode" /> processing
         ///     due to <see cref="mode" /> and <see cref="options" />.
         /// </summary>
-        public void Process(SourceProcessingMode mode, SourceProcessingOptions options = SourceProcessingOptions.None) {
+        public void Process(
+            SourceProcessingMode    mode,
+            SourceProcessingOptions options = SourceProcessingOptions.None
+        ) {
             Options = options;
-            ConsoleUI.LogInfo($"--- Compiling '{sourceFileName}'");
+            ConsoleUI.LogInfo($"--- Compiling '{SourceFileName}'");
             if (Code.Length == 0) {
                 ConsoleUI.LogError("Source is empty. Compilation aborted.");
-                goto COMPILATION_END;
+                FinishCompilation();
+                return;
             }
             // [1] Tokenizing
-            ConsoleUI.LogInfo("-- Tokens list generation");
-            {
-                new Lexer(Code, Tokens, Errors, Warnings, Options).Process();
-                if (mode == SourceProcessingMode.Lex) {
-                    goto COMPILATION_END;
-                }
+            Tokenizing();
+            if (mode == SourceProcessingMode.Lex) {
+                FinishCompilation();
+                return;
             }
             // [2] Parsing
-            ConsoleUI.LogInfo("-- Abstract Syntax Tree generation");
-            {
-                // new Parser(this).Process();
-                if (mode == SourceProcessingMode.Parsing) {
-                    goto COMPILATION_END;
-                }
+            Parsing();
+            if (mode == SourceProcessingMode.Parsing) {
+                FinishCompilation();
+                return;
             }
             // [3] Code generation
+            GenerateCode(mode);
+            FinishCompilation();
+        }
+
+        private void Tokenizing() {
+            ConsoleUI.LogInfo("-- Tokens list generation");
+            new Lexer(Code, Tokens, Errors, Warnings, Options).Process();
+        }
+
+        private void Parsing() {
+            ConsoleUI.LogInfo("-- Abstract Syntax Tree generation");
+        }
+
+        private void GenerateCode(
+            SourceProcessingMode mode
+        ) {
             switch (mode) {
                 case SourceProcessingMode.Interpret: {
                     ConsoleUI.LogError("Interpretation support is in progress!");
@@ -167,22 +215,24 @@ namespace Axion.Core.Processing {
                     break;
                 }
             }
+        }
 
-            COMPILATION_END:
-
+        private void FinishCompilation() {
             if (Options.HasFlag(SourceProcessingOptions.SyntaxAnalysisDebugOutput)) {
-                ConsoleUI.LogInfo($"-- Saving debugging information to '{debugFilePath}'");
-                SaveDebugInfoToFile(debugFilePath, Tokens, SyntaxTree);
+                ConsoleUI.LogInfo($"-- Saving debugging information to '{DebugFilePath}'");
+                SaveDebugInfoToFile();
             }
 
             bool hasErrors = Errors.Count > 0;
             if (hasErrors) {
-                foreach (SyntaxError error in Errors) {
+                foreach (Exception exception in Errors) {
+                    var error = (SyntaxException) exception;
                     error.Draw();
                 }
             }
             if (Warnings.Count > 0) {
-                foreach (SyntaxError warning in Warnings) {
+                foreach (Exception exception in Warnings) {
+                    var warning = (SyntaxException) exception;
                     warning.Draw();
                 }
             }
@@ -195,36 +245,16 @@ namespace Axion.Core.Processing {
             }
         }
 
-        private string BuildOutputPath(string outFilePath) {
-            if (string.IsNullOrWhiteSpace(outFilePath)) {
-                outFilePath = Path.GetFileNameWithoutExtension(SourceFilePath) + Compiler.OutputFileExtension;
-            }
-            if (!Path.HasExtension(outFilePath)) {
-                outFilePath += Compiler.OutputFileExtension;
-            }
-            if (!Path.IsPathRooted(outFilePath)) {
-                outFilePath = Compiler.OutputDirectory + outFilePath;
-            }
-            return outFilePath;
-        }
-
         /// <summary>
         ///     Saves <see cref="SourceCode" /> debug information
         ///     in JSON format.
         /// </summary>
-        private static void SaveDebugInfoToFile(string debugPath, LinkedList<Token> tokens, Ast syntaxTree) {
+        private void SaveDebugInfoToFile() {
             string debugInfo =
-                "{" +
-                Environment.NewLine +
-                "\"tokens\": " +
-                JsonConvert.SerializeObject(tokens, Compiler.JsonSerializer) +
-                "," +
-                Environment.NewLine +
-                "\"syntaxTree\": " +
-                JsonConvert.SerializeObject(syntaxTree, Compiler.JsonSerializer) +
-                Environment.NewLine +
-                "}";
-            File.WriteAllText(debugPath, debugInfo);
+                $@"{{
+""tokens"": {JsonConvert.SerializeObject(Tokens, Compiler.JsonSerializer)}
+}}";
+            File.WriteAllText(DebugFilePath, debugInfo);
         }
     }
 }

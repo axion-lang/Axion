@@ -18,15 +18,9 @@ namespace Axion.Core.Processing {
         CheckIndentationConsistency = 1 << 0,
 
         /// <summary>
-        ///     Preserve whitespace tokens in <see cref="Lexer" /> output.
-        ///     Used by code editors to correctly format code.
-        /// </summary>
-        PreserveWhitespaces = 1 << 1,
-
-        /// <summary>
         ///     Compiler should save debugging information
         ///     to files when performing code syntax analysis.
         /// </summary>
-        SyntaxAnalysisDebugOutput = 1 << 2
+        SyntaxAnalysisDebugOutput = 1 << 1
     }
 }

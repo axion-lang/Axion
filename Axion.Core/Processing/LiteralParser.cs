@@ -192,7 +192,7 @@ namespace Axion.Core.Processing {
             var ret = 0;
             try {
                 int saveStart = start;
-                for (;;) {
+                while (true) {
                     if (start >= end) {
                         if (saveStart == start) {
                             throw new Exception($"invalid literal for int() with base {radix}: '{text}'");
@@ -202,7 +202,7 @@ namespace Axion.Core.Processing {
                     if (!HexValue(text[start], out int digit)) {
                         break;
                     }
-                    if (!(digit < radix)) {
+                    if (digit >= radix) {
                         if (text[start] == 'l' || text[start] == 'L') {
                             break;
                         }
@@ -234,7 +234,7 @@ namespace Axion.Core.Processing {
             ParseIntegerStart(text, ref radix, ref start, end, ref sign);
             BigInteger ret       = BigInteger.Zero;
             int        saveStart = start;
-            for (;;) {
+            while (true) {
                 if (start >= end) {
                     if (start == saveStart) {
                         throw new Exception($"invalid literal for int() with base {radix}: {text}");
@@ -244,7 +244,7 @@ namespace Axion.Core.Processing {
                 if (!HexValue(text[start], out int digit)) {
                     break;
                 }
-                if (!(digit < radix)) {
+                if (digit >= radix) {
                     if (text[start] == 'l' || text[start] == 'L') {
                         break;
                     }
@@ -290,7 +290,7 @@ namespace Axion.Core.Processing {
                     if (signPos < 0) {
                         return new Complex(0.0, len == 1 ? 1 : ParseFloatNoCatch(text.Substring(0, len - 1)));
                     }
-                    real = text.Substring(0,       signPos);
+                    real      = text.Substring(0,       signPos);
                     imaginary = text.Substring(signPos, len - signPos - 1);
                     if (imaginary.Length == 1) {
                         imaginary += "1"; // convert +/- to +1/-1
@@ -309,7 +309,7 @@ namespace Axion.Core.Processing {
                     if (splitText.Length != 2) {
                         throw ExnMalformed();
                     }
-                    real = splitText[1];
+                    real      = splitText[1];
                     imaginary = splitText[0];
 
                     // a sign must follow the 'j'

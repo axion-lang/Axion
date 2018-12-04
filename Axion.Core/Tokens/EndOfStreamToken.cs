@@ -4,7 +4,7 @@
     /// </summary>
     public class EndOfStreamToken : Token {
         public EndOfStreamToken((int, int) startPosition)
-            : base(TokenType.EndOfStream, startPosition, Spec.EndOfStream.ToString()) {
+            : base(TokenType.EndOfStream, startPosition) {
         }
     }
 }

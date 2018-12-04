@@ -1,10 +1,15 @@
-﻿namespace Axion.Core.Tokens {
+﻿using System.Linq;
+
+namespace Axion.Core.Tokens {
     /// <summary>
     ///     Represents a &lt;language keyword&gt; <see cref="Token" />.
     /// </summary>
-    internal class KeywordToken : Token {
-        public KeywordToken((int, int) startPosition, string value, TokenType type)
-            : base(type, startPosition, value) {
+    public class KeywordToken : Token {
+        private readonly KeywordType KeywordType;
+
+        public KeywordToken(KeywordType keywordType, (int, int) startPosition, string whitespaces = "")
+            : base(TokenType.Keyword, startPosition, Spec.Keywords.First(x => x.Value == keywordType).Key, whitespaces) {
+            KeywordType = keywordType;
         }
     }
 }

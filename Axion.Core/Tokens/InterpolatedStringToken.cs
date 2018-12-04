@@ -2,15 +2,27 @@
 
 namespace Axion.Core.Tokens {
     public sealed class InterpolatedStringToken : StringToken {
-        internal readonly Interpolation[] Interpolations;
+        internal readonly List<Interpolation> Interpolations;
 
         public InterpolatedStringToken(
             (int, int)           startPosition,
-            string               value, char usedQuote,
-            StringLiteralOptions literalOptions,
-            List<Interpolation>  interpolations
-        ) : base(startPosition, value, usedQuote, literalOptions) {
-            Interpolations = interpolations.ToArray();
+            StringLiteralOptions options,
+            char                 usedQuote,
+            List<Interpolation>  interpolations,
+            string               value,
+            string               unescapedValue,
+            bool                 isUnclosed     = false,
+            string               trailingQuotes = ""
+        ) : base(
+            startPosition,
+            options,
+            usedQuote,
+            value,
+            unescapedValue,
+            isUnclosed,
+            trailingQuotes
+        ) {
+            Interpolations = interpolations;
         }
     }
 

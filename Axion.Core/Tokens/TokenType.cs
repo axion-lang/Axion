@@ -3,23 +3,11 @@ using Newtonsoft.Json.Converters;
 
 namespace Axion.Core.Tokens {
     /// <summary>
-    ///     Represents a &lt;<see cref="Token.Type" />&gt;.
+    ///     Represents a &lt;Type&gt; of <see cref="Token" />.
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum TokenType {
-        Unknown,
-        Invalid,
-        Whitespace,
-
-        Operator,
-        Identifier,
-
-        CommentLiteral,
-        CharLiteral,
-        StringLiteral,
-        IntegerLiteral,
-        RealLiteral,
-        FloatLiteral,
+        #region GENERATION_operators
 
         OpLeftParenthesis    = 40,
         OpRightParenthesis   = 41,
@@ -67,53 +55,23 @@ namespace Axion.Core.Tokens {
         OpColon              = 83,
         OpSemicolon          = 84,
 
-        FirstKeyword    = KeywordAnd,
-        LastKeyword     = KeywordFalse,
-        KeywordAnd      = 90,
-        KeywordAnyway   = 91,
-        KeywordAs       = 92,
-        KeywordAssert   = 93,
-        KeywordAsync    = 94,
-        KeywordAwait    = 95,
-        KeywordBreak    = 96,
-        KeywordCase     = 97,
-        KeywordCatch    = 98,
-        KeywordClass    = 99,
-        KeywordConst    = 100,
-        KeywordContinue = 101,
-        KeywordDefault  = 102,
-        KeywordDo       = 103,
-        KeywordElif     = 104,
-        KeywordElse     = 105,
-        KeywordEnum     = 106,
-        KeywordExtends  = 107,
-        KeywordFalse    = 108,
-        KeywordFor      = 109,
-        KeywordIf       = 110,
-        KeywordIn       = 111,
-        KeywordInner    = 112,
-        KeywordIs       = 113,
-        KeywordMatch    = 114,
-        KeywordModule   = 115,
-        KeywordNew      = 116,
-        KeywordNull     = 117,
-        KeywordOr       = 118,
-        KeywordPrivate  = 119,
-        KeywordPublic   = 120,
-        KeywordReact    = 121,
-        KeywordReadonly = 122,
-        KeywordReturn   = 123,
-        KeywordSelf     = 124,
-        KeywordStatic   = 125,
-        KeywordStruct   = 126,
-        KeywordThrow    = 127,
-        KeywordTrue     = 128,
-        KeywordTry      = 129,
-        KeywordUse      = 130,
-        KeywordVar      = 131,
-        KeywordWhile    = 132,
-        KeywordYield    = 133,
+        #endregion GENERATION_operators
 
+        Unknown,
+        Invalid,
+
+        Operator,
+        Identifier,
+        Keyword,
+
+        CommentLiteral,
+        CharLiteral,
+        StringLiteral,
+        IntegerLiteral,
+        RealLiteral,
+        FloatLiteral,
+
+        Whitespace,
         Newline,
         Indent,
         Outdent,

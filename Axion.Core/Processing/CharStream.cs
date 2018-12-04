@@ -1,7 +1,8 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Axion.Core.Processing {
-    internal class CharStream {
+    public class CharStream {
         /// <summary>
         ///     Stream source.
         /// </summary>
@@ -15,7 +16,7 @@ namespace Axion.Core.Processing {
         /// <summary>
         ///     Current processing character in source.
         /// </summary>
-        internal char c => Source[CharIdx];
+        internal char C => Source[CharIdx];
 
         /// <summary>
         ///     Index of current processing line.
@@ -34,21 +35,33 @@ namespace Axion.Core.Processing {
 
         /// <summary>
         ///     Length of previous processed line.
-        ///     Used to return <see cref="columnIdx"/>
+        ///     Used to return <see cref="columnIdx" />
         ///     to previous value when moving backward.
         /// </summary>
         private int prevLineLength;
+
+        /// <summary>
+        ///     Initializes a new stream with specified lines of source code.
+        /// </summary>
+        /// <param name="sourceLines"></param>
+        public CharStream(IEnumerable<string> sourceLines)
+            : this(string.Join("\n", sourceLines)) {
+        }
 
         /// <summary>
         ///     Initializes a new stream with specified source.
         /// </summary>
         /// <param name="source"></param>
         public CharStream(string source) {
+            // add null-terminator to mark end of stream.
+            if (!source.EndsWith(Spec.EndOfStream.ToString())) {
+                source += Spec.EndOfStream;
+            }
             Source = source;
         }
 
         /// <summary>
-        ///     Copies <see cref="stream"/>
+        ///     Copies <see cref="stream" />
         ///     to current stream.
         /// </summary>
         /// <param name="stream"></param>
@@ -63,9 +76,9 @@ namespace Axion.Core.Processing {
         ///     Checks that current character
         ///     is a newline character.
         /// </summary>
-        /// <returns></returns>
         internal bool AtEndOfLine() {
-            return c == '\r' || c == Spec.EndOfLine;
+            return Source[CharIdx] == '\r'
+                || Source[CharIdx] == '\n';
         }
 
         /// <summary>
@@ -73,10 +86,9 @@ namespace Axion.Core.Processing {
         ///     starting from current char
         ///     to nearest newline character.
         /// </summary>
-        /// <returns></returns>
         internal string GetRestOfLine() {
             string fromCurrentIndex = Source.Substring(CharIdx);
-            int    indexOfNewline   = fromCurrentIndex.IndexOf(Spec.EndOfLine);
+            int    indexOfNewline   = fromCurrentIndex.IndexOf('\n');
             if (indexOfNewline == -1) {
                 return fromCurrentIndex;
             }
@@ -87,7 +99,6 @@ namespace Axion.Core.Processing {
         ///     Returns character next to current character,
         ///     without moving to it.
         /// </summary>
-        /// <returns></returns>
         internal char Peek() {
             if (CharIdx + 1 < Source.Length) {
                 return Source[CharIdx + 1];
@@ -96,41 +107,29 @@ namespace Axion.Core.Processing {
         }
 
         /// <summary>
-        ///     Returns string of specified <see cref="length"/>
+        ///     Returns string of specified <see cref="length" />
         ///     starting from character next to current.
         /// </summary>
         /// <param name="length"></param>
-        /// <returns></returns>
-        internal string Peek(uint length) {
-            // save values
-            var savedPosition = Position;
-            int savedCharIdx  = CharIdx;
-
-            var value = "";
-            for (var i = 0; i < length; i++) {
-                Move();
-                value += c;
+        internal string Peek(int length) {
+            if (CharIdx + 1 + length < Source.Length) {
+                return Source.Substring(CharIdx + 1, length);
             }
-
-            // restore values
-            lineIdx   = savedPosition.line;
-            columnIdx = savedPosition.column;
-            CharIdx   = savedCharIdx;
-            return value;
+            return Source.Substring(CharIdx + 1, Source.Length - CharIdx - 1);
         }
 
         /// <summary>
         ///     Gets next (or previous) character from stream,
-        ///     depending on <see cref="byLength"/> value.
+        ///     depending on <see cref="byLength" /> value.
         /// </summary>
         internal void Move(int byLength = 1) {
             Debug.Assert(byLength != 0);
             if (byLength > 0) {
-                for (var _ = 0; _ < byLength && c != Spec.EndOfStream; _++) {
-                    if (c == Spec.EndOfLine) {
+                for (var _ = 0; _ < byLength && Source[CharIdx] != Spec.EndOfStream; _++) {
+                    if (Source[CharIdx] == '\n') {
                         lineIdx++;
                         prevLineLength = columnIdx;
-                        columnIdx = 0;
+                        columnIdx      = 0;
                     }
                     else {
                         columnIdx++;
@@ -139,9 +138,9 @@ namespace Axion.Core.Processing {
                 }
             }
             else {
-                for (var _ = byLength; _ < 0; _++) {
+                for (int _ = byLength; _ < 0; _++) {
                     CharIdx--;
-                    if (c == Spec.EndOfLine) {
+                    if (Source[CharIdx] == '\n') {
                         lineIdx--;
                         columnIdx = prevLineLength;
                     }

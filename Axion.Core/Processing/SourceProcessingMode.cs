@@ -16,7 +16,6 @@
 
         /// <summary>
         ///     Interactive processing of source and outputting result.
-        ///     SHOULD NOT BE MIXED WITH OTHER PROCESS MODES!
         /// </summary>
         Interpret = 0b000000111,
 
@@ -24,37 +23,31 @@
 
         /// <summary>
         ///     Compile Axion source into machine code.
-        ///     SHOULD NOT BE MIXED WITH OTHER PROCESS MODES!
         /// </summary>
         Compile = 0b000001011,
 
         /// <summary>
         ///     Transpile Axion source into the C programming language source.
-        ///     SHOULD NOT BE MIXED WITH OTHER PROCESS MODES!
         /// </summary>
         ConvertC = 0b000010011,
 
         /// <summary>
         ///     Transpile Axion source into the C++ programming language source.
-        ///     SHOULD NOT BE MIXED WITH OTHER PROCESS MODES!
         /// </summary>
         ConvertCpp = 0b000100011,
 
         /// <summary>
         ///     Transpile Axion source into the C# programming language source.
-        ///     SHOULD NOT BE MIXED WITH OTHER PROCESS MODES!
         /// </summary>
         ConvertCSharp = 0b001000011,
 
         /// <summary>
         ///     Transpile Axion source into the JavaScript programming language source.
-        ///     SHOULD NOT BE MIXED WITH OTHER PROCESS MODES!
         /// </summary>
         ConvertJavaScript = 0b010000011,
 
         /// <summary>
         ///     Transpile Axion source into the Python programming language source.
-        ///     SHOULD NOT BE MIXED WITH OTHER PROCESS MODES!
         /// </summary>
         ConvertPython = 0b100000011
 

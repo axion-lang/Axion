@@ -1,0 +1,60 @@
+# Класс пультов имеет ссылку на устройство, которым управляет.
+# Методы этого класса делегируют работу методам связанного
+# устройства.
+class Remote:
+    protected Device device
+
+    initialize(Device self.device): pass
+
+    togglePower():
+        if device.isEnabled():
+            device.disable()
+        else:
+            device.enable()
+
+    volumeDown():
+        device.setVolume(device.getVolume() - 10)
+
+    volumeUp():
+        device.setVolume(device.getVolume() + 10)
+
+    channelDown():
+        device.setChannel(device.getChannel() - 1)
+
+    channelUp():
+        device.setChannel(device.getChannel() + 1)
+
+
+# Вы можете расширять класс пультов, не трогая код устройств.
+class AdvancedRemote <- Remote:
+    mute():
+        device.setVolume(0)
+
+
+# Все устройства имеют общий интерфейс. Поэтому с ними может
+# работать любой пульт.
+interface Device:
+    bool Enabled
+    enable()
+    disable()
+    getVolume()
+    setVolume(percent)
+    getChannel()
+    setChannel(channel)
+
+
+# Но каждое устройство имеет особую реализацию.
+class Tv <- Device:
+    # ...
+
+class Radio <- Device:
+    # ...
+
+
+# Где-то в клиентском коде.
+tv = new Tv()
+remote = new Remote(tv)
+remote.power()
+
+radio = new Radio()
+remote = new AdvancedRemote(radio)

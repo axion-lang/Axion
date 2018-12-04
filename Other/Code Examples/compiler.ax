@@ -1,0 +1,196 @@
+use (
+    System (IO, Linq, Reflection, Text),
+    Axion.Core (Processing, Visual),
+    CommandLine,
+    ConsoleExtensions,
+    Newtonsoft.Json
+)
+
+module Axion.Core:
+
+## Main class to work with Axion source code.
+public static class Compiler:
+    const:
+        SourceFileExtension = ".ax"
+        OutputFileExtension = ".ax"
+        HelpHint = "Type '-h', or '--help' to get documentation about launch arguments."
+
+    ## Main settings of JSON debug information formatting.
+    readonly JsonSerializerSettings JsonSerializer = new() {
+        Formatting = Formatting.Indented
+    }
+
+
+    Init(string[] arguments):
+        if not Directory.Exists(OutputDirectory):
+            Directory.CreateDirectory(OutputDirectory)
+
+        PrintGreeting()
+
+        # main processing loop
+        # It is infinite loop, breaks only by 'exit' command.
+        # ReSharper disable once FunctionNeverReturns
+        while true:
+            if arguments.Length > 0:
+                cliParser
+                    .ParseArguments(CommandLineArguments)(arguments)
+                    .MapResult(
+                        options => {
+                            if options.Exit:
+                                Environment.Exit(0)
+
+                            if options.Version:
+                                ConsoleUI.WriteLine(Version)
+                                return 0
+                            
+                            if options.Help:
+                                ConsoleUI.WriteLine(CommandLineArguments.HelpText)
+                                return 0
+                            
+                            if options.Interactive:
+                                EnterInteractiveMode()
+                                return 0
+                            
+                            ProcessSources(options)
+                            return 0
+                        },
+                        errors => {
+                            foreach (Error error in errors):
+                                ConsoleUI.LogError(error.ToString())
+                            
+                            return 0
+                        }
+                    )
+            # wait for next command
+            string command = ConsoleUI.Read(">>> ")
+            while command.Length == 0:
+                ConsoleUI.ClearLine()
+                command = ConsoleUI.Read(">>> ")
+            
+            ConsoleUI.WriteLine()
+            arguments = Utilities.SplitLaunchArguments(command).ToArray()
+
+    inner:
+        readonly:
+            ## Path to directory where compiler executable is located.
+            string WorkDirectory = AppDomain.CurrentDomain.BaseDirectory
+
+            ## Path to directory where generated output is located.
+            string OutputDirectory = WorkDirectory + "output\\"
+
+            ## Path to directory where debugging output is located.
+            string DebugDirectory = OutputDirectory + "debug\\"
+
+            # Compiler version.
+            string Version = assembly.GetName().Version.ToString()
+
+        # Compiler files to process.
+        FileInfo[] InputFiles { get; private set; }
+
+    private:
+        readonly:
+            ## [Assembly] of [Core] namespace.
+            Assembly assembly = Assembly.GetExecutingAssembly()
+
+            Parser cliParser = new (
+                settings => {
+                    settings.EnableDashDash = true
+                    settings.CaseSensitive  = false
+                    settings.HelpWriter     = null
+                }
+            )
+
+
+        PrintGreeting():
+            Console.InputEncoding   = Console.OutputEncoding = Encoding.UTF8
+            Console.ForegroundColor = ConsoleColor.White
+            const string header = "Axion programming language compiler toolset"
+            Console.Title = header                                                                               # set title
+            ConsoleUI.WriteLine((header + " v. ", ConsoleColor.White), (Version, ConsoleColor.DarkYellow))       # print version
+            ConsoleUI.WriteLine(("Working in ", ConsoleColor.White),   (WorkDirectory, ConsoleColor.DarkYellow)) # print directory
+            ConsoleUI.WriteLine(HelpHint + "\n")
+
+
+        EnterInteractiveMode():
+            ConsoleUI.LogInfo(
+                "Interactive mode.\n" +
+                "Now your input will be processed by Axion interpreter.\n" +
+                "Type 'exit' or 'quit' to quit interactive mode\n" +
+                "Type 'cls' to clear screen."
+            )
+            while true:
+                # code editor header
+                string input        = ConsoleUI.Read("i>> ")
+                string alignedInput = input.Trim().ToUpper()
+
+                if alignedInput.Length == 0:
+                    # skip empty commands
+                    ConsoleUI.ClearLine()
+                    continue
+                
+                if alignedInput == "EXIT"
+                || alignedInput == "QUIT":
+                    # exit from interpreter to main loop
+                    ConsoleUI.WriteLine()
+                    ConsoleUI.LogInfo("Interactive interpreter closed.")
+                    return
+                
+                if alignedInput == "CLS":
+                    # clear screen
+                    Console.Clear()
+                    PrintGreeting()
+                    continue
+                
+                # TODO parse "help(module)" argument
+                #if alignedInput.StartsWith("HELP"):
+                #    # give help about some module/function.
+                #    # should have access to all documentation in standard library.
+                #}
+
+                # initialize editor
+                editor = new ConsoleCodeEditor(
+                    false,
+                    true,
+                    firstCodeLine: input,
+                    highlighter: new ConsoleAxionSyntaxHighlighter()
+                )
+                string[] codeLines = editor.RunSession()
+                # interpret as source code and output result
+                new SourceCode(codeLines).Process(SourceProcessingMode.Interpret)
+
+
+        ProcessSources(CommandLineArguments options):
+            SourceCode source
+            # get source code
+            if options.Files.Any():
+                int filesCount = options.Files.Count()
+                if filesCount > 1:
+                    ConsoleUI.LogError("Compiler doesn't support multiple files processing yet.")
+                    return
+                
+                InputFiles = new FileInfo[filesCount]
+                for i = 0; i < filesCount; i++:
+                    InputFiles[i] = new FileInfo(options.Files.ElementAt(i))
+                
+                source = new SourceCode(InputFiles[0])
+            
+            elif not string.IsNullOrWhiteSpace(options.Code):
+                source = new SourceCode(Utilities.TrimMatchingChars(options.Code, '"'))
+            
+            else:
+                ConsoleUI.LogError(
+                    "Neither code nor path to source file not specified.\n" +
+                    HelpHint
+                )
+                return
+            
+            if not Enum.TryParse(options.Mode, true, out SourceProcessingMode processingMode):
+                processingMode = SourceProcessingMode.Compile
+            
+            processingOptions = SourceProcessingOptions.CheckIndentationConsistency
+            
+            if options.Debug:
+                processingOptions |= SourceProcessingOptions.SyntaxAnalysisDebugOutput
+            
+            # process source
+            source.Process(processingMode, processingOptions)

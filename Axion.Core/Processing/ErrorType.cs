@@ -38,6 +38,10 @@
         /// </summary>
         UnclosedString,
 
+        InvalidPrefixInStringLiteral,
+
+        UnescapedQuoteInStringLiteral,
+
         /// <summary>
         ///     Indicates the character literal with
         ///     missing ending quote.
@@ -66,13 +70,19 @@
         RepeatedDotInNumberLiteral,
         RepeatedLongPostfixInNumberLiteral,
         ShouldHaveNoValueAfterNumberLongPostfix,
+        ShouldHaveNoValueAfterNumberImaginaryPostfix,
         InvalidBinaryLiteral,
         InvalidOctalLiteral,
         InvalidHexadecimalLiteral,
 
+        ExpectedEndOfNumberAfterExponent,
         ExpectedDigitAfterNumberBaseSpecifier,
         ExpectedDigitAfterNumberExponent,
-        ExpectedEndOfNumberAfterLongPostfix,
+        ExpectedEndOfNumberAfterPostfix,
+
+        RepeatedPostfixInNumberLiteral,
+        RepeatedImaginarySignInNumberLiteral,
+        InvalidFloatNumberBitRate,
 
         /// <summary>
         ///     Indicates an operator that isn't
@@ -91,7 +101,7 @@
         ///     literal uses invalid symbol to escape by '\'.
         /// </summary>
         InvalidEscapeSequence,
-        RepeatedImaginarySignInNumberLiteral,
-        InvalidFloatNumberBitRate
+        IllegalUnicodeCharacter,
+        Truncated_uXXXX_Escape
     }
 }

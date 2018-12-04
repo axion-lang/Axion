@@ -1,14 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Tokens {
     [JsonObject]
+    [DebuggerDisplay("{debuggerDisplay,nq}")]
     public class Token {
-        [JsonProperty(Order = 1)] internal TokenType Type;
+        [JsonProperty(Order = 1)]
+        public TokenType Type { get; protected internal set; }
 
-        [JsonProperty(Order = 2)] public string Value;
+        [JsonProperty(Order = 2)]
+        public string Value { get; protected internal set; }
+
+        /// <summary>
+        ///     Whitespaces after that token.
+        ///     Used in code rendering.
+        /// </summary>
+        [JsonProperty(Order = 3)]
+        public string Whitespaces { get; protected internal set; }
 
         /// <summary>
         ///     Line position of <see cref="Token" /> start in the input stream.
@@ -34,12 +45,17 @@ namespace Axion.Core.Tokens {
         [JsonProperty(Order = 1004)]
         public int EndColumn { get; protected internal set; }
 
-        public Token(TokenType type, (int line, int column) startPosition, string value = "") {
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string debuggerDisplay =>
+            $"{Type} :: {Value.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t")} :: ({StartLine},{StartColumn}; {EndLine},{EndColumn})";
+
+        public Token(TokenType type, (int line, int column) startPosition, string value = "", string whitespaces = "") {
             Type        = type;
             Value       = value;
+            Whitespaces = whitespaces;
             StartLine   = startPosition.line;
             StartColumn = startPosition.column;
-            string[] valueLines = value.Split(Spec.Newlines, StringSplitOptions.None);
+            string[] valueLines = value.Split(Spec.EndOfLines, StringSplitOptions.None);
             // compute end line & end column
             if (valueLines.Length == 1) {
                 EndLine   = StartLine;
@@ -49,14 +65,25 @@ namespace Axion.Core.Tokens {
                 EndLine   = StartLine + valueLines.Length - 1;
                 EndColumn = valueLines[valueLines.Length - 1].Length;
             }
+            EndColumn += Whitespaces.Length;
         }
 
+        public void AppendWhitespace(string space) {
+            Whitespaces += space;
+            EndColumn   += space.Length;
+        }
+
+        /// <summary>
+        ///     Returns string representation of
+        ///     this token in Axion language format.
+        /// </summary>
+        /// <returns></returns>
         public virtual string ToAxionCode() {
-            return Value;
+            return Value + Whitespaces;
         }
 
         public override string ToString() {
-            return $"{Type}   ::   {Value}   ::   ({StartLine},{StartColumn}; {EndLine},{EndColumn})";
+            return $"{Type} :: {Value} :: ({StartLine},{StartColumn}; {EndLine},{EndColumn})";
         }
 
         public override bool Equals(object obj) {

@@ -7,6 +7,14 @@ str2f = f'{str1} formatted literal {str2}'
 str1m = """multiline literal"""
 str2m = '''multiline literal'''
 
+str1m_ = """
+multiline literal
+"""
+
+str2m_ = '''
+multiline literal
+'''
+
 str1fm = f"""{str1} formatted multiline literal {str2}"""
 str2fm = f'''{str1} formatted multiline literal {str2}'''
 

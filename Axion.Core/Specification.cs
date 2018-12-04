@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Axion.Core.Tokens;
 
 namespace Axion.Core {
@@ -8,81 +10,98 @@ namespace Axion.Core {
     /// </summary>
     public static class Spec {
         /// <summary>
-        ///     End of file mark.
+        ///     End of source stream mark.
         /// </summary>
         public const char EndOfStream = '\0';
 
-        /// <summary>
-        ///     End of line mark.
-        /// </summary>
-        public const char EndOfLine = '\n';
-
-        public static readonly string[] Newlines = { "\r\n", "\n" };
-
-        public static readonly Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType> {
-            // testing
-            { "assert", TokenType.KeywordAssert },
-            // bool operators
-            { "and", TokenType.KeywordAnd },
-            { "or", TokenType.KeywordOr },
-            { "in", TokenType.KeywordIn },
-            { "is", TokenType.KeywordIs },
-            { "as", TokenType.KeywordAs },
-            // asynchronous
-            { "async", TokenType.KeywordAsync },
-            { "await", TokenType.KeywordAwait },
-            // branching
-            { "if", TokenType.KeywordIf },
-            { "elif", TokenType.KeywordElif },
-            { "else", TokenType.KeywordElse },
-            { "match", TokenType.KeywordMatch },
-            { "case", TokenType.KeywordCase },
-            { "default", TokenType.KeywordDefault },
-            // loops
-            { "for", TokenType.KeywordFor },
-            { "do", TokenType.KeywordDo },
-            { "while", TokenType.KeywordWhile },
-            { "break", TokenType.KeywordBreak },
-            { "continue", TokenType.KeywordContinue },
-            // exceptions
-            { "try", TokenType.KeywordTry },
-            { "throw", TokenType.KeywordThrow },
-            { "catch", TokenType.KeywordCatch },
-            { "anyway", TokenType.KeywordAnyway },
-            // access modifiers
-            { "public", TokenType.KeywordPublic },
-            { "inner", TokenType.KeywordInner },
-            { "private", TokenType.KeywordPrivate },
-            // property modifiers
-            { "readonly", TokenType.KeywordReadonly },
-            { "react", TokenType.KeywordReact },
-            { "static", TokenType.KeywordStatic },
-            { "const", TokenType.KeywordConst },
-            // modules
-            { "use", TokenType.KeywordUse },
-            { "module", TokenType.KeywordModule },
-            // structures
-            { "class", TokenType.KeywordClass },
-            { "extends", TokenType.KeywordExtends },
-            { "struct", TokenType.KeywordStruct },
-            { "enum", TokenType.KeywordEnum },
-            // variables
-            { "var", TokenType.KeywordVar },
-            { "new", TokenType.KeywordNew },
-            // returns
-            { "yield", TokenType.KeywordYield },
-            { "return", TokenType.KeywordReturn },
-            // values
-            { "null", TokenType.KeywordNull },
-            { "self", TokenType.KeywordSelf },
-            { "true", TokenType.KeywordTrue },
-            { "false", TokenType.KeywordFalse }
-        };
-
-        internal static readonly char[] StringQuotes = { '"', '\'' };
+        internal const char   CharLiteralQuote         = '`';
+        internal const string SingleCommentStart       = "#";
+        internal const string MultiCommentStart        = "/*";
+        internal const string MultiCommentStartPattern = @"/\*";
+        internal const string MultiCommentEnd          = "*/";
+        internal const string MultiCommentEndPattern   = @"\*/";
 
         internal static readonly char[] RestrictedIdentifierEndings = { '-' };
 
+        /// <summary>
+        ///     Contains all valid newline sequences.
+        /// </summary>
+        public static readonly string[] EndOfLines = { "\r\n", "\n" };
+
+        /// <summary>
+        ///     Contains all keywords in language.
+        /// </summary>
+        public static readonly Dictionary<string, KeywordType> Keywords = new Dictionary<string, KeywordType> {
+            // testing
+            { "assert", KeywordType.Assert },
+            // bool operators
+            { "and", KeywordType.And },
+            { "or", KeywordType.Or },
+            { "in", KeywordType.In },
+            { "is", KeywordType.Is },
+            { "as", KeywordType.As },
+            // asynchronous
+            { "async", KeywordType.Async },
+            { "await", KeywordType.Await },
+            // branching
+            { "if", KeywordType.If },
+            { "elif", KeywordType.Elif },
+            { "else", KeywordType.Else },
+            { "match", KeywordType.Match },
+            { "case", KeywordType.Case },
+            { "default", KeywordType.Default },
+            // loops
+            { "for", KeywordType.For },
+            { "do", KeywordType.Do },
+            { "while", KeywordType.While },
+            { "break", KeywordType.Break },
+            { "continue", KeywordType.Continue },
+            // exceptions
+            { "try", KeywordType.Try },
+            { "raise", KeywordType.Raise },
+            { "catch", KeywordType.Catch },
+            { "anyway", KeywordType.Anyway },
+            // access modifiers
+            { "public", KeywordType.Public },
+            { "inner", KeywordType.Inner },
+            { "private", KeywordType.Private },
+            // property modifiers
+            { "readonly", KeywordType.Readonly },
+            { "react", KeywordType.React },
+            { "singleton", KeywordType.Singleton },
+            { "static", KeywordType.Static },
+            { "const", KeywordType.Const },
+            // modules
+            { "use", KeywordType.Use },
+            { "module", KeywordType.Module },
+            // structures
+            { "class", KeywordType.Class },
+            { "extends", KeywordType.Extends },
+            { "struct", KeywordType.Struct },
+            { "enum", KeywordType.Enum },
+            // variables
+            { "var", KeywordType.Var },
+            { "new", KeywordType.New },
+            // returns
+            { "yield", KeywordType.Yield },
+            { "return", KeywordType.Return },
+            // values
+            { "null", KeywordType.Null },
+            { "self", KeywordType.Self },
+            { "true", KeywordType.True },
+            { "false", KeywordType.False }
+        };
+
+        #region Language string and character literals
+
+        /// <summary>
+        ///     Contains all valid quotes for string literals.
+        /// </summary>
+        internal static readonly char[] StringQuotes = { '"', '\'' };
+
+        /// <summary>
+        ///     Contains all valid escape sequences in string and character literals.
+        /// </summary>
         internal static readonly Dictionary<char, string> EscapeSequences = new Dictionary<char, string> {
             { '0', "\u0000" },
             { 'a', "\u0007" },
@@ -97,25 +116,39 @@ namespace Axion.Core {
             { '\"', "\"" }
         };
 
-        internal static readonly Dictionary<char, StringLiteralOptions> StringPrefixes = new Dictionary<char, StringLiteralOptions> {
-            { 'f', StringLiteralOptions.Format },
-            { 'r', StringLiteralOptions.Raw }
+        #endregion
+
+        #region Language number literals
+
+        internal static readonly string[] NumberTypes = {
+            nameof(Int64),
+            nameof(Double),
+            nameof(BigInteger),
+            nameof(Complex)
         };
 
         internal static readonly char[] NumberPostfixes = {
-            'l', 'L',
-            'i', 'I',
-            'u', 'U',
-            'f', 'F'
+            'f', 'F', // float
+            'l', 'L', // long
+            'i', 'I', // int (followed by bit rate)
+            'u', 'U', // unsigned
+            'j', 'J'  // complex
         };
 
-        internal static readonly int[] NumberIntBitRates = {
-            8, 16, 32, 64, 128, 256
+        internal const int MinNumberBitRate = 8;
+        internal const int MaxNumberBitRate = 64;
+
+        internal static readonly int[] IntegerBitRates = {
+            MinNumberBitRate, 16, 32, MaxNumberBitRate
         };
 
-        internal static readonly int[] NumberFloatBitRates = {
+        internal static readonly int[] FloatBitRates = {
             32, 64, 128
         };
+
+        #endregion
+
+        #region Language operators
 
         public static readonly Dictionary<string, OperatorProperties> Operators = new Dictionary<string, OperatorProperties> {
             //{ "**",  new OperatorProperties("**",  InputSide.Both,    false,     38) },
@@ -185,13 +218,6 @@ namespace Axion.Core {
 
         public static readonly char[] OperatorChars = OperatorsValues.Select(val => val[0]).ToArray();
 
-        internal const char   CharLiteralQuote             = '`';
-        internal const string CommentOneLineStart          = "#";
-        internal const string CommentMultilineStart        = "/*";
-        internal const string CommentMultilineStartPattern = @"/\*";
-        internal const string CommentMultilineEnd          = "*/";
-        internal const string CommentMultilineEndPattern   = @"\*/";
-
         internal const int AssignPrecedence = 5;
 
         internal static readonly OperatorProperties InvalidOperatorProperties = new OperatorProperties(
@@ -201,9 +227,9 @@ namespace Axion.Core {
             false, -1
         );
 
-        internal static bool IsValidNumberPart(char c) {
-            return c.IsValidHexadecimalDigit() || c == '_' || NumberPostfixes.Contains(c);
-        }
+        #endregion
+
+        #region Extensions for character checking
 
         internal static bool IsValidOctalDigit(this char c) {
             return c == '0' || c == '1' || c == '2' || c == '3'
@@ -217,6 +243,18 @@ namespace Axion.Core {
                 || c == 'A' || c == 'B' || c == 'C' || c == 'D' || c == 'E' || c == 'F';
         }
 
+        internal static bool IsSpaceOrTab(char c) {
+            return c == ' ' || c == '\t';
+        }
+
+        internal static bool IsLetterOrNumberPart(char c) {
+            return char.IsLetterOrDigit(c) || c == '_' || c == '.';
+        }
+
+        internal static bool IsValidNumberPart(char c) {
+            return c.IsValidHexadecimalDigit() || c == '_' || c == '.' || NumberPostfixes.Contains(c);
+        }
+
         internal static bool IsValidIdStart(char start) {
             return char.IsLetter(start) || start == '_';
         }
@@ -224,5 +262,7 @@ namespace Axion.Core {
         internal static bool IsValidIdChar(char c) {
             return char.IsLetterOrDigit(c) || c == '_' || c == '-';
         }
+
+        #endregion
     }
 }

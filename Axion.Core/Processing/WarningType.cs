@@ -2,7 +2,7 @@
     /// <summary>
     ///     Contains all warning IDs that can happen while processing <see cref="SourceCode" />.
     /// </summary>
-    internal enum WarningType {
+    public enum WarningType {
         /// <summary>
         ///     No warning is occurred.
         /// </summary>

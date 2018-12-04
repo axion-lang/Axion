@@ -337,6 +337,11 @@ ASALocalRun/
 # Individual
 ###############################################
 
+/.sonarqube
+
 # unit test results
-/[Ww]rapper/[Tt]esting/_out
+/Axion.Testing/Files/out
 *.ax.debugInfo.json
+
+
+Other/CodeGraphs/

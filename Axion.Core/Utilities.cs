@@ -6,7 +6,7 @@ using System.Linq;
 namespace Axion.Core {
     internal static class Utilities {
         private static readonly DateTimeFormatInfo dateTimeFormat      = new CultureInfo("en-US").DateTimeFormat;
-        private const           string             timedFileNameFormat = "yyyy-MMM-dd_HH-mm-ss";
+        private const           string             timedFileNameFormat = "yyyy-MMM-dd__HH-mm-ss";
 
         /// <summary>
         ///     Returns count of bits set to 1 on specified <see cref="number" />.
@@ -17,7 +17,7 @@ namespace Axion.Core {
             // Loop the value while there are still bits
             while (number != 0) {
                 // Remove the end bit
-                number = number & (number - 1);
+                number &= number - 1;
 
                 // Increment the count
                 count++;
@@ -60,7 +60,7 @@ namespace Axion.Core {
             //    prevNewlineIndex = newlineIndex;
             //    i++;
             //}
-            string[] lines = text.Split(Spec.Newlines, StringSplitOptions.None);
+            string[] lines = text.Split(Spec.EndOfLines, StringSplitOptions.None);
             return lines.Skip(fromIndex).Take(count).ToArray();
         }
 

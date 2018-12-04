@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using Axion.Core.Processing;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -16,14 +16,14 @@ namespace Axion.Core.Tokens {
             Properties = properties;
         }
 
-        public OperatorToken((int, int) startPosition, string value)
-            : base(TokenType.Unknown, startPosition, value) {
+        public OperatorToken((int, int) startPosition, string value, string whitespaces = "")
+            : base(TokenType.Unknown, startPosition, value, whitespaces) {
             Spec.Operators.TryGetValue(value, out Properties);
             Type = Properties.Type;
         }
 
         public override string ToAxionCode() {
-            return Spec.Operators.First(kvp => kvp.Value.Equals(Properties)).Key;
+            return Spec.Operators.First(kvp => kvp.Value.Equals(Properties)).Key + Whitespaces;
         }
     }
 
@@ -53,42 +53,27 @@ namespace Axion.Core.Tokens {
             Precedence    = precedence;
         }
 
-        internal ErrorType PossibleErrorType {
-            get {
-                switch (Type) {
-                    case TokenType.OpLeftParenthesis:
-                    case TokenType.OpRightParenthesis: return ErrorType.MismatchedParenthesis;
-                    case TokenType.OpLeftBracket:
-                    case TokenType.OpRightBracket: return ErrorType.MismatchedBracket;
-                    case TokenType.OpLeftBrace:
-                    case TokenType.OpRightBrace: return ErrorType.MismatchedBrace;
-                    default: return ErrorType.InvalidOperator;
-                }
-            }
-        }
+        internal bool IsOpenBrace => Type == TokenType.OpLeftParenthesis
+                                  || Type == TokenType.OpLeftBracket
+                                  || Type == TokenType.OpLeftBrace;
 
-        internal bool IsOpenBrace => Type == TokenType.OpLeftParenthesis ||
-                                     Type == TokenType.OpLeftBracket ||
-                                     Type == TokenType.OpLeftBrace;
+        internal bool IsCloseBrace => Type == TokenType.OpRightParenthesis
+                                   || Type == TokenType.OpRightBracket
+                                   || Type == TokenType.OpRightBrace;
 
-        internal bool IsCloseBrace => Type == TokenType.OpRightParenthesis ||
-                                      Type == TokenType.OpRightBracket ||
-                                      Type == TokenType.OpRightBrace;
-
-        internal TokenType MatchingBrace {
-            get {
-                switch (Type) {
-                    // open : close
-                    case TokenType.OpLeftParenthesis: return TokenType.OpRightParenthesis;
-                    case TokenType.OpLeftBracket:     return TokenType.OpRightBracket;
-                    case TokenType.OpLeftBrace:       return TokenType.OpRightBrace;
-                    // close : open
-                    case TokenType.OpRightParenthesis: return TokenType.OpLeftParenthesis;
-                    case TokenType.OpRightBracket:     return TokenType.OpLeftBracket;
-                    case TokenType.OpRightBrace:       return TokenType.OpLeftBrace;
-                    // should never be
-                    default: throw new Exception();
-                }
+        [Pure]
+        internal TokenType GetMatchingBrace() {
+            switch (Type) {
+                // open : close
+                case TokenType.OpLeftParenthesis: return TokenType.OpRightParenthesis;
+                case TokenType.OpLeftBracket:     return TokenType.OpRightBracket;
+                case TokenType.OpLeftBrace:       return TokenType.OpRightBrace;
+                // close : open
+                case TokenType.OpRightParenthesis: return TokenType.OpLeftParenthesis;
+                case TokenType.OpRightBracket:     return TokenType.OpLeftBracket;
+                case TokenType.OpRightBrace:       return TokenType.OpLeftBrace;
+                // should never be
+                default: throw new NotSupportedException("Cannot return matching brace for non-brace operator.");
             }
         }
 
@@ -100,11 +85,11 @@ namespace Axion.Core.Tokens {
         }
 
         public bool Equals(OperatorProperties other) {
-            return InputSide == other.InputSide &&
-                   Associativity == other.Associativity &&
-                   Overloadable == other.Overloadable &&
-                   Precedence == other.Precedence &&
-                   Type == other.Type;
+            return InputSide == other.InputSide
+                && Associativity == other.Associativity
+                && Overloadable == other.Overloadable
+                && Precedence == other.Precedence
+                && Type == other.Type;
         }
 
         public override int GetHashCode() {

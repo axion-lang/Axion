@@ -1,0 +1,73 @@
+# Паттерн Фабричный метод применим тогда, когда в программе
+# есть иерархия классов продуктов.
+interface Button:
+    render()
+    on-click(Action f)
+
+class WindowsButton <- Button:
+    render():
+        # Отрисовать кнопку в стиле Windows.
+    on-click(Action f):
+        # Навесить на кнопку обработчик событий Windows.
+
+class HTMLButton <- Button:
+    render():
+        # Вернуть HTML-код кнопки.
+    on-click(Action f):
+        # Навесить на кнопку обработчик события браузера.
+
+
+# Базовый класс фабрики. Заметьте, что "фабрика" — это всего
+# лишь дополнительная роль для класса. Скорее всего, он уже
+# имеет какую-то бизнес-логику, в которой требуется создание
+# разнообразных продуктов.
+class Dialog:
+    render():
+        # Чтобы использовать фабричный метод, вы должны
+        # убедиться в том, что эта бизнес-логика не зависит от
+        # конкретных классов продуктов. Button — это общий
+        # интерфейс кнопок, поэтому все хорошо.
+        Button ok-button = create-button()
+        ok-button.on-click(close-dialog)
+        ok-button.render()
+
+    # Мы выносим весь код создания продуктов в особый метод,
+    # который назвают "фабричным".
+    abstract Button create-button()
+
+
+# Конкретные фабрики переопределяют фабричный метод и
+# возвращают из него собственные продукты.
+class WindowsDialog <- Dialog:
+    create-button():
+        return new WindowsButton()
+
+class WebDialog <- Dialog:
+    create-button():
+        return new HTMLButton()
+
+
+class ClientApplication:
+    dialog: Dialog
+
+    # Приложение создаёт определённую фабрику в зависимости от
+    # конфигурации или окружения.
+    initialize():
+        config = read-application-config-file()
+
+        if config.OS == OS.Windows:
+            dialog = new WindowsDialog()
+        elif config.OS == OS.Web:
+            dialog = new WebDialog()
+        else:
+            throw new Exception("Error! Unknown operating system.")
+
+    # Если весь остальной клиентский код работает с фабриками и
+    # продуктами только через общий интерфейс, то для него
+    # будет не важно, какая фабрика была создана изначально.
+    start():
+        dialog.initialize()
+        dialog.render()
+
+main():
+    ClientApplication.start()
