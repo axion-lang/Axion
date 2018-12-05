@@ -1,4 +1,4 @@
-<img align="center" src="Other/Axion_Mini.png" />
+<img align="center" src="Other/Graphics/Axion_Mini.png" />
 
 <h2 align="center">Welcome to Axion programming language toolset</h2>
 <h3 align="center">:\:\:\:\:\:\:\:\:\: Under construction :/:/:/:/:/:/:/:/:/:</h3>
@@ -37,6 +37,15 @@ Designed to: <br/>
 	*(Not working by last release time)*
 - **Transpiling to C/C++ or Rust is planned**
 - **In future - easily transpile Axion to another language**
+
+### Launching:
+
+Now compiler doesn't do anything useful for user
+(it just creates lists of language tokens),
+but if you want to see basic syntax and etc.
+you can launch compiler with `dotnet run Axion.dll`
+in bin folder and type `-h` in console to get support
+about arguments for compiler CLI interface.
 	
 ### Basic syntax examples:
 
@@ -47,7 +56,7 @@ Designed to: <br/>
 	n = 5.3252     # Float 64
 	n = 4.3_f32    # Float 32
 	n = 321_u8     # UInt 8
-	32 + 7j        # Complex numbers (incomplete)
+	32 + 7j        # Complex numbers
 	# etc.
 	```
 
