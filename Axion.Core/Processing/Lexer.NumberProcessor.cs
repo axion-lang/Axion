@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Axion.Core.Tokens;
@@ -5,66 +6,76 @@ using Axion.Core.Tokens;
 namespace Axion.Core.Processing {
     public partial class Lexer {
         private NumberToken ReadNumber() {
-            var errorType     = ErrorType.None;
-            var numberOptions = new NumberOptions();
+            var           errors   = new List<ErrorType>();
+            var           warnings = new List<WarningType>();
+            NumberOptions numberOptions;
             if (c == '0') {
                 tokenValue.Append("0");
                 Stream.Move();
 
                 bool isOnBaseLetter;
-                // second char (determines radix)
+                // on second char (base letter, determines radix)
                 if (c == 'b' || c == 'B') {
                     tokenValue.Append(c);
                     Stream.Move();
-                    numberOptions.Radix = 2;
-                    ReadBinaryNumber(numberOptions, out isOnBaseLetter, ref errorType);
+                    numberOptions = ReadBinaryNumber(out isOnBaseLetter, errors, warnings);
                 }
                 else if (c == 'o' || c == 'O') {
                     tokenValue.Append(c);
                     Stream.Move();
-                    numberOptions.Radix = 8;
-                    ReadOctalNumber(numberOptions, out isOnBaseLetter, ref errorType);
+                    numberOptions = ReadOctalNumber(out isOnBaseLetter, errors, warnings);
                 }
                 else if (c == 'x' || c == 'X') {
                     tokenValue.Append(c);
                     Stream.Move();
-                    numberOptions.Radix = 16;
-                    ReadHexNumber(numberOptions, out isOnBaseLetter, ref errorType);
+                    numberOptions = ReadHexNumber(out isOnBaseLetter, errors, warnings);
                 }
                 else {
+                    // regular num with 0's at beginning
                     isOnBaseLetter = false;
                     // skip leading zeros
                     while (c == '0') {
                         tokenValue.Append("0");
                         Stream.Move();
                     }
-                    ReadDecimalNumber(numberOptions, ref errorType);
+                    numberOptions = ReadDecimalNumber(errors, warnings);
                 }
 
+                // '0x', '0b', '0o'
                 if (isOnBaseLetter) {
-                    errorType = ErrorType.ExpectedDigitAfterNumberBaseSpecifier;
+                    errors.Add(ErrorType.ExpectedDigitAfterNumberBaseSpecifier);
                 }
             }
             else {
-                ReadDecimalNumber(numberOptions, ref errorType);
+                // c in (1..9)
+                numberOptions = ReadDecimalNumber(errors, warnings);
             }
 
-            if (errorType == ErrorType.None) {
-                return new NumberToken(tokenStartPosition, tokenValue, numberOptions);
+            var number = new NumberToken(tokenStartPosition, tokenValue, numberOptions);
+            if (warnings.Count > 0) {
+                foreach (WarningType warning in warnings) {
+                    ReportWarning(
+                        warning,
+                        number
+                    );
+                }
             }
-
-            var invalidNumber = new NumberToken(tokenStartPosition, tokenValue, numberOptions);
-            ReportError(
-                errorType,
-                invalidNumber
-            );
-            return invalidNumber;
+            if (errors.Count > 0) {
+                foreach (ErrorType error in errors) {
+                    ReportError(
+                        error,
+                        number
+                    );
+                }
+            }
+            return number;
         }
 
-        private void ReadDecimalNumber(
-            NumberOptions numberOptions,
-            ref ErrorType errorType
+        private NumberOptions ReadDecimalNumber(
+            List<ErrorType>   errors,
+            List<WarningType> warnings
         ) {
+            var numberOptions = new NumberOptions { Radix = 10 };
             // c is digit or dot except 0 here
             var isOnBaseLetter = true;
             while (Spec.IsLetterOrNumberPart(c)) {
@@ -76,7 +87,7 @@ namespace Axion.Core.Processing {
                             if (numberOptions.Floating) {
                                 tokenValue.Append(c);
                                 Stream.Move();
-                                errorType = ErrorType.RepeatedDotInNumberLiteral;
+                                errors.Add(ErrorType.RepeatedDotInNumberLiteral);
                             }
                             numberOptions.Floating = true;
                         }
@@ -87,36 +98,39 @@ namespace Axion.Core.Processing {
                         }
                     }
                     else if (c == 'e' || c == 'E') {
-                        ReadExponent(numberOptions, ref errorType);
+                        ReadExponent(numberOptions, errors, warnings);
                         continue;
                     }
                     else if (Spec.NumberPostfixes.Contains(c)) {
                         ReadNumberPostfix(
                             numberOptions,
                             isOnBaseLetter,
-                            ref errorType
+                            errors,
+                            warnings
                         );
-                        break;
+                        return numberOptions;
                     }
                     else {
                         // invalid
-                        errorType = ErrorType.InvalidIntegerLiteral;
+                        errors.Add(ErrorType.InvalidIntegerLiteral);
                     }
                 }
                 tokenValue.Append(c);
                 Stream.Move();
                 isOnBaseLetter = false;
             }
+            return numberOptions;
         }
 
-        private void ReadBinaryNumber(
-            NumberOptions numberOptions,
-            out bool      isOnBaseLetter,
-            ref ErrorType errorType
+        private NumberOptions ReadBinaryNumber(
+            out bool          isOnBaseLetter,
+            List<ErrorType>   errors,
+            List<WarningType> warnings
         ) {
-            var        bitsCount = 0;
-            var        longValue = 0L;
-            BigInteger bigInt    = BigInteger.Zero;
+            var        numberOptions = new NumberOptions { Radix = 2 };
+            var        bitsCount     = 0;
+            var        longValue     = 0L;
+            BigInteger bigInt        = BigInteger.Zero;
             isOnBaseLetter = true;
             while (Spec.IsLetterOrNumberPart(c)) {
                 switch (c) {
@@ -160,12 +174,13 @@ namespace Axion.Core.Processing {
                             ReadNumberPostfix(
                                 numberOptions,
                                 false,
-                                ref errorType
+                                errors,
+                                warnings
                             );
-                            return;
+                            return numberOptions;
                         }
                         // invalid
-                        errorType = ErrorType.InvalidBinaryLiteral;
+                        errors.Add(ErrorType.InvalidBinaryLiteral);
                         break;
                     }
                 }
@@ -173,13 +188,15 @@ namespace Axion.Core.Processing {
                 Stream.Move();
                 isOnBaseLetter = false;
             }
+            return numberOptions;
         }
 
-        private void ReadOctalNumber(
-            NumberOptions numberOptions,
-            out bool      isOnBaseLetter,
-            ref ErrorType errorType
+        private NumberOptions ReadOctalNumber(
+            out bool          isOnBaseLetter,
+            List<ErrorType>   errors,
+            List<WarningType> warnings
         ) {
+            var numberOptions = new NumberOptions { Radix = 8 };
             isOnBaseLetter = true;
 
             while (Spec.IsLetterOrNumberPart(c)) {
@@ -188,24 +205,27 @@ namespace Axion.Core.Processing {
                         ReadNumberPostfix(
                             numberOptions,
                             isOnBaseLetter,
-                            ref errorType
+                            errors,
+                            warnings
                         );
-                        return;
+                        return numberOptions;
                     }
                     // invalid
-                    errorType = ErrorType.InvalidOctalLiteral;
+                    errors.Add(ErrorType.InvalidOctalLiteral);
                 }
                 tokenValue.Append(c);
                 Stream.Move();
                 isOnBaseLetter = false;
             }
+            return numberOptions;
         }
 
-        private void ReadHexNumber(
-            NumberOptions numberOptions,
-            out bool      isOnBaseLetter,
-            ref ErrorType errorType
+        private NumberOptions ReadHexNumber(
+            out bool          isOnBaseLetter,
+            List<ErrorType>   errors,
+            List<WarningType> warnings
         ) {
+            var numberOptions = new NumberOptions { Radix = 16 };
             isOnBaseLetter = true;
 
             while (Spec.IsLetterOrNumberPart(c)) {
@@ -214,23 +234,29 @@ namespace Axion.Core.Processing {
                         ReadNumberPostfix(
                             numberOptions,
                             isOnBaseLetter,
-                            ref errorType
+                            errors,
+                            warnings
                         );
-                        return;
+                        return numberOptions;
                     }
                     // invalid
-                    errorType = ErrorType.InvalidHexadecimalLiteral;
+                    errors.Add(ErrorType.InvalidHexadecimalLiteral);
                 }
                 tokenValue.Append(c);
                 Stream.Move();
                 isOnBaseLetter = false;
             }
+            return numberOptions;
         }
 
         private void ReadExponent(
-            NumberOptions numberOptions,
-            ref ErrorType errorType
+            NumberOptions     numberOptions,
+            List<ErrorType>   errors,
+            List<WarningType> warnings
         ) {
+            if (int.TryParse(tokenValue.ToString().Replace("_", ""), out int num) && num == 0) {
+                warnings.Add(WarningType.RedundantExponentForZeroNumber);
+            }
             numberOptions.HasExponent = true;
             // c == 'e'
             var hasValue   = false;
@@ -258,7 +284,7 @@ namespace Axion.Core.Processing {
                 }
                 else if (c != '_') {
                     // invalid
-                    errorType = ErrorType.InvalidValueAfterExponent;
+                    errors.Add(ErrorType.InvalidValueAfterExponent);
                     break;
                 }
                 tokenValue.Append(c);
@@ -266,7 +292,7 @@ namespace Axion.Core.Processing {
             }
 
             if (!hasValue) {
-                errorType = ErrorType.ExpectedDigitAfterNumberExponent;
+                errors.Add(ErrorType.ExpectedDigitAfterNumberExponent);
             }
             else {
                 numberOptions.Exponent = int.Parse(eValue);
@@ -276,19 +302,24 @@ namespace Axion.Core.Processing {
                 ReadNumberPostfix(
                     numberOptions,
                     false,
-                    ref errorType
+                    errors,
+                    warnings
                 );
             }
         }
 
         private void ReadNumberPostfix(
-            NumberOptions numberOptions,
-            bool          isOnBaseLetter,
-            ref ErrorType errorType
+            NumberOptions     numberOptions,
+            bool              isOnBaseLetter,
+            List<ErrorType>   errors,
+            List<WarningType> warnings
         ) {
             // letter here
             if (isOnBaseLetter) {
-                errorType = ErrorType.ExpectedDigitAfterNumberBaseSpecifier;
+                errors.Add(ErrorType.ExpectedDigitAfterNumberBaseSpecifier);
+            }
+            else if (int.TryParse(tokenValue.ToString().Replace("_", ""), out int num) && num == 0) {
+                warnings.Add(WarningType.RedundantSpecifiersForZeroNumber);
             }
 
             // add postfix letters
@@ -329,7 +360,7 @@ namespace Axion.Core.Processing {
                         break;
                     }
                     default: {
-                        errorType = ErrorType.InvalidPostfixInNumberLiteral;
+                        errors.Add(ErrorType.InvalidPostfixInNumberLiteral);
                         return;
                     }
                 }
@@ -338,7 +369,7 @@ namespace Axion.Core.Processing {
             }
 
             if (Spec.IsLetterOrNumberPart(c) && expectingEndOfNumber) {
-                errorType = ErrorType.ExpectedEndOfNumberAfterPostfix;
+                errors.Add(ErrorType.ExpectedEndOfNumberAfterPostfix);
             }
             else if (char.IsDigit(c)) {
                 // Reading number bit rate
@@ -354,20 +385,20 @@ namespace Axion.Core.Processing {
                 // check for invalid bit rates
                 if (numberOptions.Floating &&
                     !Spec.FloatBitRates.Contains(numberOptions.Bits)) {
-                    errorType = ErrorType.InvalidFloatNumberBitRate;
+                    errors.Add(ErrorType.InvalidFloatNumberBitRate);
                 }
                 if (!Spec.IntegerBitRates.Contains(numberOptions.Bits)) {
-                    errorType = ErrorType.InvalidIntegerNumberBitRate;
+                    errors.Add(ErrorType.InvalidIntegerNumberBitRate);
                 }
 
                 if (char.IsLetter(c) || c == '_') {
                     // number can't be followed by these characters
-                    errorType = ErrorType.ExpectedEndOfNumberAfterPostfix;
+                    errors.Add(ErrorType.ExpectedEndOfNumberAfterPostfix);
                 }
             }
             else if (bitRateRequired) {
                 // expected digit after num 'i#' postfix
-                errorType = ErrorType.ExpectedABitRateAfterNumberPostfix;
+                errors.Add(ErrorType.ExpectedABitRateAfterNumberPostfix);
             }
         }
     }

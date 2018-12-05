@@ -30,6 +30,8 @@
         ///     Indicates that string is empty,
         ///     and has prefixes, whose are useless
         /// </summary>
-        RedundantPrefixesForEmptyString
+        RedundantPrefixesForEmptyString,
+        RedundantSpecifiersForZeroNumber,
+        RedundantExponentForZeroNumber
     }
 }

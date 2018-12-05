@@ -12,12 +12,12 @@
 //        /// <summary>
 //        ///     Contains all errors that raised during syntax analysis.
 //        /// </summary>
-//        private readonly List<SyntaxException> errors = new List<SyntaxException>();
+//        private List<SyntaxException> errors { get; }
 //
 //        /// <summary>
 //        ///     Contains all warnings that found during syntax analysis.
 //        /// </summary>
-//        private readonly List<SyntaxException> warnings = new List<SyntaxException>();
+//        private List<SyntaxException> warnings { get; }
 //
 //        /// <summary>
 //        ///     Outgoing Abstract Syntax Tree.
