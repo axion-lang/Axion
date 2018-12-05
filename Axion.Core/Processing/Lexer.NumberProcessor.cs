@@ -18,17 +18,17 @@ namespace Axion.Core.Processing {
                 if (c == 'b' || c == 'B') {
                     tokenValue.Append(c);
                     Stream.Move();
-                    numberOptions = ReadBinaryNumber(out isOnBaseLetter, errors, warnings);
+                    numberOptions = ReadBinaryNumber(out isOnBaseLetter, errors);
                 }
                 else if (c == 'o' || c == 'O') {
                     tokenValue.Append(c);
                     Stream.Move();
-                    numberOptions = ReadOctalNumber(out isOnBaseLetter, errors, warnings);
+                    numberOptions = ReadOctalNumber(out isOnBaseLetter, errors);
                 }
                 else if (c == 'x' || c == 'X') {
                     tokenValue.Append(c);
                     Stream.Move();
-                    numberOptions = ReadHexNumber(out isOnBaseLetter, errors, warnings);
+                    numberOptions = ReadHexNumber(out isOnBaseLetter, errors);
                 }
                 else {
                     // regular num with 0's at beginning
@@ -105,8 +105,7 @@ namespace Axion.Core.Processing {
                         ReadNumberPostfix(
                             numberOptions,
                             isOnBaseLetter,
-                            errors,
-                            warnings
+                            errors
                         );
                         return numberOptions;
                     }
@@ -124,8 +123,7 @@ namespace Axion.Core.Processing {
 
         private NumberOptions ReadBinaryNumber(
             out bool          isOnBaseLetter,
-            List<ErrorType>   errors,
-            List<WarningType> warnings
+            List<ErrorType>   errors
         ) {
             var        numberOptions = new NumberOptions { Radix = 2 };
             var        bitsCount     = 0;
@@ -174,8 +172,7 @@ namespace Axion.Core.Processing {
                             ReadNumberPostfix(
                                 numberOptions,
                                 false,
-                                errors,
-                                warnings
+                                errors
                             );
                             return numberOptions;
                         }
@@ -193,8 +190,7 @@ namespace Axion.Core.Processing {
 
         private NumberOptions ReadOctalNumber(
             out bool          isOnBaseLetter,
-            List<ErrorType>   errors,
-            List<WarningType> warnings
+            List<ErrorType>   errors
         ) {
             var numberOptions = new NumberOptions { Radix = 8 };
             isOnBaseLetter = true;
@@ -205,8 +201,7 @@ namespace Axion.Core.Processing {
                         ReadNumberPostfix(
                             numberOptions,
                             isOnBaseLetter,
-                            errors,
-                            warnings
+                            errors
                         );
                         return numberOptions;
                     }
@@ -222,8 +217,7 @@ namespace Axion.Core.Processing {
 
         private NumberOptions ReadHexNumber(
             out bool          isOnBaseLetter,
-            List<ErrorType>   errors,
-            List<WarningType> warnings
+            List<ErrorType>   errors
         ) {
             var numberOptions = new NumberOptions { Radix = 16 };
             isOnBaseLetter = true;
@@ -234,8 +228,7 @@ namespace Axion.Core.Processing {
                         ReadNumberPostfix(
                             numberOptions,
                             isOnBaseLetter,
-                            errors,
-                            warnings
+                            errors
                         );
                         return numberOptions;
                     }
@@ -254,9 +247,13 @@ namespace Axion.Core.Processing {
             List<ErrorType>   errors,
             List<WarningType> warnings
         ) {
-            if (int.TryParse(tokenValue.ToString().Replace("_", ""), out int num) && num == 0) {
+            // check for '0'
+            string num = tokenValue.ToString().Replace("_", "").Trim('0');
+            if (tokenValue.Length > 0
+             && (num == "" || num == ".")) {
                 warnings.Add(WarningType.RedundantExponentForZeroNumber);
             }
+            
             numberOptions.HasExponent = true;
             // c == 'e'
             var hasValue   = false;
@@ -302,8 +299,7 @@ namespace Axion.Core.Processing {
                 ReadNumberPostfix(
                     numberOptions,
                     false,
-                    errors,
-                    warnings
+                    errors
                 );
             }
         }
@@ -311,15 +307,11 @@ namespace Axion.Core.Processing {
         private void ReadNumberPostfix(
             NumberOptions     numberOptions,
             bool              isOnBaseLetter,
-            List<ErrorType>   errors,
-            List<WarningType> warnings
+            List<ErrorType>   errors
         ) {
-            // letter here
+            // c is letter here
             if (isOnBaseLetter) {
                 errors.Add(ErrorType.ExpectedDigitAfterNumberBaseSpecifier);
-            }
-            else if (int.TryParse(tokenValue.ToString().Replace("_", ""), out int num) && num == 0) {
-                warnings.Add(WarningType.RedundantSpecifiersForZeroNumber);
             }
 
             // add postfix letters
