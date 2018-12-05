@@ -221,7 +221,7 @@ namespace Axion.Core.Processing {
             }
 
             // multiline comment
-            if (c.ToString() + Stream.Peek() == Spec.MultiCommentStart) {
+            if (c.ToString() + Stream.Peek == Spec.MultiCommentStart) {
                 return ReadMultilineComment();
             }
 
@@ -427,7 +427,7 @@ namespace Axion.Core.Processing {
                 );
             }
             while (_unclosedMultilineComments.Count > 0) {
-                string nextPiece = c.ToString() + Stream.Peek();
+                string nextPiece = c.ToString() + Stream.Peek;
                 // found comment end
                 if (nextPiece == Spec.MultiCommentEnd) {
                     // don't add last comment '*/'
@@ -585,7 +585,7 @@ namespace Axion.Core.Processing {
         /// </returns>
         private OperatorToken ReadOperator() {
             int    longestLength = Spec.OperatorsValues[0].Length;
-            string nextCodePiece = c + Stream.Peek(longestLength - 1);
+            string nextCodePiece = c + Stream.PeekPiece(longestLength - 1);
 
             for (int length = nextCodePiece.Length; length > 0; length--) {
                 string piece = nextCodePiece.Substring(0, length);

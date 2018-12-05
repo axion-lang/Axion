@@ -99,19 +99,14 @@ namespace Axion.Core.Processing {
         ///     Returns character next to current character,
         ///     without moving to it.
         /// </summary>
-        internal char Peek() {
-            if (CharIdx + 1 < Source.Length) {
-                return Source[CharIdx + 1];
-            }
-            return Spec.EndOfStream;
-        }
+        internal char Peek => CharIdx + 1 < Source.Length ? Source[CharIdx + 1] : Spec.EndOfStream;
 
         /// <summary>
         ///     Returns string of specified <see cref="length" />
         ///     starting from character next to current.
         /// </summary>
         /// <param name="length"></param>
-        internal string Peek(int length) {
+        internal string PeekPiece(int length) {
             if (CharIdx + 1 + length < Source.Length) {
                 return Source.Substring(CharIdx + 1, length);
             }

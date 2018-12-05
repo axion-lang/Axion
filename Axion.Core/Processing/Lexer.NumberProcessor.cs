@@ -81,21 +81,19 @@ namespace Axion.Core.Processing {
             while (Spec.IsLetterOrNumberPart(c)) {
                 if (!char.IsDigit(c) && c != '_') {
                     if (c == '.') {
-                        // BUG: no error after dot
-                        if (char.IsDigit(Stream.Peek())) {
-                            // if found second dot
-                            if (numberOptions.Floating) {
-                                tokenValue.Append(c);
-                                Stream.Move();
-                                errors.Add(ErrorType.RepeatedDotInNumberLiteral);
-                            }
-                            numberOptions.Floating = true;
-                        }
-                        // non-digit after dot: '.' is operator on some number
-                        // leave dot to next token.
-                        else {
+                        if (!char.IsDigit(Stream.Peek) || Stream.Peek == '.') {
+                            // found .. in number (probably range operator)
+                            // or found non-digit after dot: '.' is operator on some number.
+                            // leaving '.' or '..' to next token.
                             break;
                         }
+                        // if found second dot in number
+                        if (numberOptions.Floating) {
+                            tokenValue.Append(c);
+                            Stream.Move();
+                            errors.Add(ErrorType.RepeatedDotInNumberLiteral);
+                        }
+                        numberOptions.Floating = true;
                     }
                     else if (c == 'e' || c == 'E') {
                         ReadExponent(numberOptions, errors, warnings);

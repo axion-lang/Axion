@@ -69,6 +69,7 @@ namespace Axion.Core.Visual {
                   || token.EndLine == renderPosition.Y
                   && token.EndColumn <= renderPosition.X
                   || token.Type == TokenType.EndOfStream);
+                // BUG: if code has error before that token, and it's fixed with next char, it'll be highlighted improperly (e. g. type '0..10')
 
                 #region Complex values
 
