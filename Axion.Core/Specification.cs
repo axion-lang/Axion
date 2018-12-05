@@ -31,65 +31,65 @@ namespace Axion.Core {
         /// <summary>
         ///     Contains all keywords in language.
         /// </summary>
-        public static readonly Dictionary<string, KeywordType> Keywords = new Dictionary<string, KeywordType> {
+        public static readonly Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType> {
             // testing
-            { "assert", KeywordType.Assert },
+            { "assert", TokenType.KeywordAssert },
             // bool operators
-            { "and", KeywordType.And },
-            { "or", KeywordType.Or },
-            { "in", KeywordType.In },
-            { "is", KeywordType.Is },
-            { "as", KeywordType.As },
+            { "and", TokenType.KeywordAnd },
+            { "or", TokenType.KeywordOr },
+            { "in", TokenType.KeywordIn },
+            { "is", TokenType.KeywordIs },
+            { "as", TokenType.KeywordAs },
             // asynchronous
-            { "async", KeywordType.Async },
-            { "await", KeywordType.Await },
+            { "async", TokenType.KeywordAsync },
+            { "await", TokenType.KeywordAwait },
             // branching
-            { "if", KeywordType.If },
-            { "elif", KeywordType.Elif },
-            { "else", KeywordType.Else },
-            { "match", KeywordType.Match },
-            { "case", KeywordType.Case },
-            { "default", KeywordType.Default },
+            { "if", TokenType.KeywordIf },
+            { "elif", TokenType.KeywordElif },
+            { "else", TokenType.KeywordElse },
+            { "match", TokenType.KeywordMatch },
+            { "case", TokenType.KeywordCase },
+            { "default", TokenType.KeywordDefault },
             // loops
-            { "for", KeywordType.For },
-            { "do", KeywordType.Do },
-            { "while", KeywordType.While },
-            { "break", KeywordType.Break },
-            { "continue", KeywordType.Continue },
+            { "for", TokenType.KeywordFor },
+            { "do", TokenType.KeywordDo },
+            { "while", TokenType.KeywordWhile },
+            { "break", TokenType.KeywordBreak },
+            { "continue", TokenType.KeywordContinue },
             // exceptions
-            { "try", KeywordType.Try },
-            { "raise", KeywordType.Raise },
-            { "catch", KeywordType.Catch },
-            { "anyway", KeywordType.Anyway },
+            { "try", TokenType.KeywordTry },
+            { "raise", TokenType.KeywordRaise },
+            { "catch", TokenType.KeywordCatch },
+            { "anyway", TokenType.KeywordAnyway },
             // access modifiers
-            { "public", KeywordType.Public },
-            { "inner", KeywordType.Inner },
-            { "private", KeywordType.Private },
+            { "public", TokenType.KeywordPublic },
+            { "inner", TokenType.KeywordInner },
+            { "private", TokenType.KeywordPrivate },
             // property modifiers
-            { "readonly", KeywordType.Readonly },
-            { "react", KeywordType.React },
-            { "singleton", KeywordType.Singleton },
-            { "static", KeywordType.Static },
-            { "const", KeywordType.Const },
+            { "readonly", TokenType.KeywordReadonly },
+            { "react", TokenType.KeywordReact },
+            { "singleton", TokenType.KeywordSingleton },
+            { "static", TokenType.KeywordStatic },
+            { "const", TokenType.KeywordConst },
             // modules
-            { "use", KeywordType.Use },
-            { "module", KeywordType.Module },
+            { "use", TokenType.KeywordUse },
+            { "module", TokenType.KeywordModule },
             // structures
-            { "class", KeywordType.Class },
-            { "extends", KeywordType.Extends },
-            { "struct", KeywordType.Struct },
-            { "enum", KeywordType.Enum },
+            { "class", TokenType.KeywordClass },
+            { "extends", TokenType.KeywordExtends },
+            { "struct", TokenType.KeywordStruct },
+            { "enum", TokenType.KeywordEnum },
             // variables
-            { "var", KeywordType.Var },
-            { "new", KeywordType.New },
+            { "var", TokenType.KeywordVar },
+            { "new", TokenType.KeywordNew },
             // returns
-            { "yield", KeywordType.Yield },
-            { "return", KeywordType.Return },
+            { "yield", TokenType.KeywordYield },
+            { "return", TokenType.KeywordReturn },
             // values
-            { "null", KeywordType.Null },
-            { "self", KeywordType.Self },
-            { "true", KeywordType.True },
-            { "false", KeywordType.False }
+            { "null", TokenType.KeywordNull },
+            { "self", TokenType.KeywordSelf },
+            { "true", TokenType.KeywordTrue },
+            { "false", TokenType.KeywordFalse }
         };
 
         #region Language string and character literals

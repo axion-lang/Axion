@@ -569,7 +569,7 @@ namespace Axion.Core.Processing {
                 Stream.Move(-explicitIdPartLength);
             }
 
-            if (Spec.Keywords.TryGetValue(tokenValue.ToString(), out KeywordType kwType)) {
+            if (Spec.Keywords.TryGetValue(tokenValue.ToString(), out TokenType kwType)) {
                 return new KeywordToken(kwType, tokenStartPosition);
             }
             return new IdentifierToken(tokenStartPosition, tokenValue.ToString());

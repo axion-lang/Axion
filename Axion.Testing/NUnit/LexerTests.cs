@@ -27,7 +27,7 @@ namespace Axion.Testing.NUnit {
             #region Expected tokens list
 
             // line 1
-            expectedTokens.AddLast(new KeywordToken(KeywordType.Use, (0, 0), " "));
+            expectedTokens.AddLast(new KeywordToken(TokenType.KeywordUse, (0, 0), " "));
             expectedTokens.AddLast(new OperatorToken((0, 4), "{"));
             expectedTokens.AddLast(new EndOfLineToken((0, 5), whitespaces: "   "));
             // line 2
