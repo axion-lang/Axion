@@ -3,7 +3,7 @@
     ///     Represents a &lt;number&gt; <see cref="Token" />.
     /// </summary>
     public class NumberToken : Token {
-        internal readonly NumberOptions Options;
+        internal NumberOptions Options { get; }
 
         public NumberToken((int, int) startPosition, object value, NumberOptions options)
             : base(TokenType.IntegerLiteral, startPosition, value.ToString()) {
@@ -12,18 +12,20 @@
     }
 
     public class NumberOptions {
-        internal string ValueType;
+        internal string ValueType { get; set; }
+        internal object Value     { get; set; }
 
-        internal int Bits;
+        internal string Number { get; set; }
 
-        internal int  Radix;
-        internal bool Floating;
-        internal bool Imaginary;
-        internal bool Unsigned;
-        internal bool Unlimited;
+        internal int  Bits      { get; set; }
+        internal int  Radix     { get; set; }
+        internal bool Floating  { get; set; }
+        internal bool Imaginary { get; set; }
+        internal bool Unsigned  { get; set; }
+        internal bool Unlimited { get; set; }
 
-        internal bool HasExponent;
-        internal int  Exponent;
+        internal bool HasExponent { get; set; }
+        internal int  Exponent    { get; set; }
 
         public NumberOptions(
             int  radix     = 10,
@@ -40,5 +42,16 @@
             Unsigned  = unsigned;
             Unlimited = unlimited;
         }
+    }
+
+    public enum NumberType {
+        Byte,
+        Int16,
+        Int32,
+        Int64,
+        IntBig,
+        Float32,
+        Float64,
+        Complex
     }
 }

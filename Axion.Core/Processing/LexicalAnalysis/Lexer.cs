@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Axion.Core.Processing.Errors;
 using Axion.Core.Tokens;
 
 namespace Axion.Core.Processing {
@@ -167,7 +168,11 @@ namespace Axion.Core.Processing {
                         );
                     }
                 }
-                ReportError(errorType, mismatch);
+                ReportError(
+                    errorType,
+                    (mismatch.StartLine, mismatch.StartColumn),
+                    (mismatch.EndLine, mismatch.EndColumn)
+                );
             }
 
             #endregion
@@ -253,9 +258,8 @@ namespace Axion.Core.Processing {
             // invalid
             tokenValue.Append(c);
             Stream.Move();
-            var unknownToken = new Token(TokenType.Unknown, tokenStartPosition, tokenValue.ToString());
-            ReportError(ErrorType.InvalidSymbol, unknownToken);
-            return unknownToken;
+            ReportError(ErrorType.InvalidSymbol, tokenStartPosition, Stream.Position);
+            return new Token(TokenType.Unknown, tokenStartPosition, tokenValue.ToString());
         }
 
         #region Reading tokens
@@ -397,7 +401,8 @@ namespace Axion.Core.Processing {
             if (inconsistentIndentation && Options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
                 ReportWarning(
                     WarningType.InconsistentIndentation,
-                    indentationToken
+                    tokenStartPosition,
+                    Stream.Position
                 );
                 // ignore future warnings
                 Options &= ~SourceProcessingOptions.CheckIndentationConsistency;
@@ -453,13 +458,12 @@ namespace Axion.Core.Processing {
                 }
                 // went through end of file
                 else if (c == Spec.EndOfStream) {
-                    var token = new MultilineCommentToken(
+                    ReportError(ErrorType.UnclosedMultilineComment, tokenStartPosition, Stream.Position);
+                    return new MultilineCommentToken(
                         tokenStartPosition,
                         tokenValue.ToString(),
                         true
                     );
-                    ReportError(ErrorType.UnclosedMultilineComment, token);
-                    return token;
                 }
                 // found any other character
                 else {
@@ -482,32 +486,21 @@ namespace Axion.Core.Processing {
         ///     or just unclosed char literal.
         /// </returns>
         private CharacterToken ReadCharLiteral() {
-            string unescapedValue = null;
+            var unescapedValue = "";
             // we're on char quote
             Stream.Move();
             switch (c) {
                 case '\\': {
-                    // escape-sequence
+                    // escape sequence
                     Stream.Move();
-                    if (Spec.EscapeSequences.TryGetValue(c, out string sequence)) {
-                        tokenValue.Append(sequence);
-                        unescapedValue += "\\" + c;
-                        Stream.Move();
-                    }
-                    else {
-                        // invalid escape sequence
-                        var invalidlyEscapedCharToken = new CharacterToken(tokenStartPosition, "\\" + c);
-                        ReportError(ErrorType.InvalidEscapeSequence, invalidlyEscapedCharToken);
-                        Stream.Move();
-                        return invalidlyEscapedCharToken;
-                    }
+                    (string value, string raw) value = ReadEscapeSequence();
+                    tokenValue.Append(value.value);
+                    unescapedValue += value.raw;
                     break;
                 }
                 case Spec.CharLiteralQuote: {
-                    Stream.Move();
-                    var emptyCharToken = new CharacterToken(tokenStartPosition, "");
-                    ReportError(ErrorType.EmptyCharacterLiteral, emptyCharToken);
-                    return emptyCharToken;
+                    ReportError(ErrorType.EmptyCharacterLiteral, tokenStartPosition, Stream.Position);
+                    break;
                 }
                 default: {
                     // any character
@@ -517,31 +510,29 @@ namespace Axion.Core.Processing {
                 }
             }
 
-            if (c == Spec.CharLiteralQuote) {
-                // OK, valid literal
-                Stream.Move();
-                return new CharacterToken(tokenStartPosition, tokenValue.ToString(), unescapedValue);
-            }
+            CharacterToken result;
 
-            var errorType = ErrorType.CharacterLiteralTooLong;
-
-            tokenValue.Append(c);
-            unescapedValue += c;
-            Stream.Move();
-            while (c != Spec.CharLiteralQuote) {
-                if (Stream.AtEndOfLine() || c == Spec.EndOfStream) {
-                    errorType = ErrorType.UnclosedCharacterLiteral;
-                    break;
+            if (c != Spec.CharLiteralQuote) {
+                ReportError(ErrorType.CharacterLiteralTooLong, tokenStartPosition, Stream.Position);
+                while (c != Spec.CharLiteralQuote) {
+                    if (Stream.AtEndOfLine() || c == Spec.EndOfStream) {
+                        ReportError(ErrorType.UnclosedCharacterLiteral, tokenStartPosition, Stream.Position);
+                        break;
+                    }
+                    tokenValue.Append(c);
+                    unescapedValue += c;
+                    Stream.Move();
                 }
-                tokenValue.Append(c);
-                unescapedValue += c;
+
+                // can be or too long, or unclosed.
+                result = new CharacterToken(tokenStartPosition, tokenValue.ToString(), unescapedValue, true);
+            }
+            else {
+                // OK, valid literal
+                result = new CharacterToken(tokenStartPosition, tokenValue.ToString(), unescapedValue);
                 Stream.Move();
             }
-
-            // can be or too long, or unclosed.
-            var invalidCharToken = new CharacterToken(tokenStartPosition, tokenValue.ToString(), unescapedValue, true);
-            ReportError(errorType, invalidCharToken);
-            return invalidCharToken;
+            return result;
         }
 
         /// <summary>
@@ -610,11 +601,109 @@ namespace Axion.Core.Processing {
                 return operatorToken;
             }
             // operator not found in specification
-            var invalidOperatorToken = new OperatorToken(tokenStartPosition, Spec.InvalidOperatorProperties);
-            ReportError(ErrorType.InvalidOperator, invalidOperatorToken);
-            return invalidOperatorToken;
+            ReportError(ErrorType.InvalidOperator, tokenStartPosition, Stream.Position);
+            return new OperatorToken(
+                tokenStartPosition,
+                Spec.InvalidOperatorProperties
+            );
         }
 
         #endregion
+
+        private (string value, string raw) ReadEscapeSequence() {
+            // position is after \
+            (string value, string raw) result        = ("", "");
+            (int line, int column)     startPosition = Stream.Position;
+            startPosition.column--;
+            // single-character sequence (\n, \t, etc.)
+            if (Spec.EscapeSequences.TryGetValue(c, out string sequence)) {
+                result.value = sequence;
+                result.raw   = "\\" + c;
+                Stream.Move();
+                return result;
+            }
+            switch (c) {
+                // unicode character
+                // 16 bits \uxxxx
+                case 'u':
+                // 32 bits \U00xxxxxx
+                case 'U': {
+                    char u             = c;
+                    int  unicodeSymLen = u == 'u' ? 4 : 8;
+                    Stream.Move();
+                    var number = "";
+                    var error  = false;
+                    while (number.Length < unicodeSymLen) {
+                        if (c.IsValidHexadecimalDigit()) {
+                            number += c;
+                            Stream.Move();
+                        }
+                        else if (number.Length < unicodeSymLen) {
+                            ReportError(ErrorType.Truncated_uXXXX_Escape, startPosition, Stream.Position);
+                            error = true;
+                            break;
+                        }
+                    }
+                    result.raw += "\\" + u + number;
+
+                    if (!error &&
+                        LiteralParser.TryParseInt(number, 16, out int val)) {
+                        if (val < 0 || val > 0x10ffff) {
+                            ReportError(ErrorType.IllegalUnicodeCharacter, startPosition, Stream.Position);
+                        }
+                        else if (val < 0x010000) {
+                            result.value += ((char) val).ToString();
+                        }
+                        else {
+                            result.value += char.ConvertFromUtf32(val);
+                        }
+                    }
+                    else {
+                        result.value += result.raw;
+                    }
+                    return result;
+                }
+                // TODO: Add \N{name} escape sequences
+                // TODO: Add warnings for meaningless escapes, what can be shortened (e. g. \x00)
+                // hexadecimal character \xn[n][n][n]
+                case 'x': {
+                    Stream.Move();
+                    var number = "";
+                    var error  = false;
+                    while (c.IsValidHexadecimalDigit() && number.Length < 4) {
+                        number += c;
+                        Stream.Move();
+                    }
+                    if (number.Length == 0) {
+                        error = true;
+                        ReportError(ErrorType.InvalidXEscapeFormat, startPosition, Stream.Position);
+                    }
+
+                    result.raw = "\\x" + number;
+                    if (!error &&
+                        LiteralParser.TryParseInt(number, 16, out int val)) {
+                        result.value += ((char) val).ToString();
+                    }
+                    else {
+                        result.value += result.raw;
+                    }
+                    return result;
+                }
+                // truncated escape & unclosed literal
+                case Spec.EndOfStream: {
+                    result.value += '\\';
+                    result.raw   += '\\';
+                    ReportError(ErrorType.TruncatedEscapeSequence, startPosition, Stream.Position);
+                    return result;
+                }
+                // not a valid escape seq.
+                default: {
+                    ReportError(ErrorType.InvalidEscapeSequence, startPosition, Stream.Position);
+                    result.value += "\\" + c;
+                    result.raw   += "\\" + c;
+                    return result;
+                }
+            }
+        }
     }
 }

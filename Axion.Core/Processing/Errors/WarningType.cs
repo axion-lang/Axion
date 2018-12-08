@@ -1,4 +1,4 @@
-﻿namespace Axion.Core.Processing {
+﻿namespace Axion.Core.Processing.Errors {
     /// <summary>
     ///     Contains all warning IDs that can happen while processing <see cref="SourceCode" />.
     /// </summary>
@@ -31,7 +31,11 @@
         ///     and has prefixes, whose are useless
         /// </summary>
         RedundantPrefixesForEmptyString,
-        RedundantSpecifiersForZeroNumber,
+
+        /// <summary>
+        ///     Indicates that 0 number is followed
+        ///     by exponent, that's meaningless.
+        /// </summary>
         RedundantExponentForZeroNumber
     }
 }

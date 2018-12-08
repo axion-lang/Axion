@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Axion.Core.Processing;
+using Axion.Core.Processing.LexicalAnalysis;
 using Axion.Core.Tokens;
 using ConsoleExtensions;
 
@@ -162,7 +163,7 @@ namespace Axion.Core.Visual {
             values.Add(
                 new ColoredValue(
                     new string(
-                        token.Quote,
+                        token.Options.Quote,
                         quotesCount
                     ),
                     ConsoleColor.DarkYellow
@@ -189,7 +190,7 @@ namespace Axion.Core.Visual {
 
             // closing quotes
             if (!token.IsUnclosed) {
-                values.Add(new ColoredValue(new string(token.Quote, quotesCount), ConsoleColor.DarkYellow));
+                values.Add(new ColoredValue(new string(token.Options.Quote, quotesCount), ConsoleColor.DarkYellow));
             }
         }
 

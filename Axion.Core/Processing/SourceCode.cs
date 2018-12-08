@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Axion.Core.Processing.Errors;
+using Axion.Core.Processing.LexicalAnalysis;
 using Axion.Core.Tokens;
 using Axion.Core.Tokens.Ast;
 using ConsoleExtensions;
@@ -227,13 +229,13 @@ namespace Axion.Core.Processing {
             if (hasErrors) {
                 foreach (Exception exception in Errors) {
                     var error = (SyntaxException) exception;
-                    error.Draw();
+                    error.Print();
                 }
             }
             if (Warnings.Count > 0) {
                 foreach (Exception exception in Warnings) {
                     var warning = (SyntaxException) exception;
-                    warning.Draw();
+                    warning.Print();
                 }
             }
 

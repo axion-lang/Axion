@@ -7,20 +7,16 @@ namespace Axion.Core.Tokens {
         public InterpolatedStringToken(
             (int, int)           startPosition,
             StringLiteralOptions options,
-            char                 usedQuote,
             List<Interpolation>  interpolations,
             string               value,
             string               unescapedValue,
-            bool                 isUnclosed     = false,
-            string               trailingQuotes = ""
+            bool                 isUnclosed = false
         ) : base(
             startPosition,
             options,
-            usedQuote,
             value,
             unescapedValue,
-            isUnclosed,
-            trailingQuotes
+            isUnclosed
         ) {
             Interpolations = interpolations;
         }

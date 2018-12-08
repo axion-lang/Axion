@@ -1,66 +1,34 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace Axion.Core.Tokens {
     /// <summary>
     ///     Represents a &lt;string literal&gt; <see cref="Token" />.
     /// </summary>
     public class StringToken : Token, IClosingToken {
-        internal readonly char                 Quote;
-        internal readonly StringLiteralOptions Options;
-        private           string               trailingQuotes;
+        [JsonProperty]
+        public string RawValue { get; }
 
-        private string _unescapedValue;
+        [JsonProperty]
+        public bool IsUnclosed { get; }
 
-        internal string UnescapedValue {
-            get => _unescapedValue;
-            set {
-                _unescapedValue = value;
-                RecomputeEndPosition();
-            }
-        }
-
-        private bool _isUnclosed;
-
-        public bool IsUnclosed {
-            get => _isUnclosed;
-            set {
-                _isUnclosed = value;
-                RecomputeEndPosition();
-            }
-        }
+        [JsonProperty]
+        internal StringLiteralOptions Options { get; }
 
         public StringToken(
             (int, int)           startPosition,
             StringLiteralOptions options,
-            char                 usedQuote,
             string               value,
-            string               unescapedValue = null,
-            bool                 isUnclosed     = false,
-            string               trailingQuotes = ""
+            string               rawValue   = null,
+            bool                 isUnclosed = false
         ) : base(TokenType.StringLiteral, startPosition, value) {
-            if (unescapedValue == null) {
-                unescapedValue = value;
+            if (rawValue == null) {
+                rawValue = value;
             }
-            Options             = options;
-            Quote               = usedQuote;
-            _unescapedValue     = unescapedValue;
-            _isUnclosed         = isUnclosed;
-            this.trailingQuotes = trailingQuotes;
+            Options    = options;
+            RawValue   = rawValue;
+            IsUnclosed = isUnclosed;
 
-            RecomputeEndPosition();
-        }
-
-        internal void AddTrailingQuotes(string quotes) {
-            if (quotes.Length > 0) {
-                if (!IsUnclosed) {
-                    throw new InvalidOperationException("Cannot append trailing quote to finished string.");
-                }
-                trailingQuotes += quotes;
-                RecomputeEndPosition();
-            }
-        }
-
-        private void RecomputeEndPosition() {
             EndColumn = StartColumn;
             EndLine   = StartLine;
             // addition of quotes length:
@@ -69,7 +37,7 @@ namespace Axion.Core.Tokens {
             //             3 quotes on 2+ lines, (3 * 1);
             // One-line:   2 quotes on 1  line,  (1 * 2);
             //             1 quote  on 2+ lines, (1 * 1).
-            string[] lines       = Value.Split(Spec.EndOfLines, StringSplitOptions.None);
+            string[] lines       = RawValue.Split(Spec.EndOfLines, StringSplitOptions.None);
             int      quotesCount = Options.QuotesCount;
             if (lines.Length == 1) {
                 EndColumn += lines[lines.Length - 1].Length;
@@ -106,18 +74,22 @@ namespace Axion.Core.Tokens {
                 result += "r";
             }
             int quotesCount = Options.QuotesCount;
-            result += new string(Quote, quotesCount) + Value;
+            result += new string(Options.Quote, quotesCount) + RawValue;
             if (!IsUnclosed) {
-                result += new string(Quote, quotesCount);
+                result += new string(Options.Quote, quotesCount);
             }
             else {
-                result += trailingQuotes;
+                result += Options.TrailingQuotes;
             }
             return result + Whitespaces;
         }
     }
 
     public class StringLiteralOptions {
+        internal char Quote { get; set; }
+
+        internal string TrailingQuotes { get; set; }
+
         internal bool IsMultiline;
 
         internal readonly bool IsLineEndsNormalized;
@@ -127,11 +99,13 @@ namespace Axion.Core.Tokens {
         internal bool IsRaw { get; private set; }
 
         public StringLiteralOptions(
+            char quote                = '"',
             bool isMultiline          = false,
             bool isLineEndsNormalized = false,
             bool isFormatted          = false,
             bool isRaw                = false
         ) {
+            Quote                = quote;
             IsMultiline          = isMultiline;
             IsLineEndsNormalized = isLineEndsNormalized;
             IsFormatted          = isFormatted;

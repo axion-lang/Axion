@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.2.9.98</Version>
+    <Version>0.3.0.2</Version>
     <Authors>Nikitin Ilya</Authors>
     <Company>Fluctus Technologies</Company>
     <Description>Core of Axion programming language toolset.
@@ -13,8 +13,8 @@ Built on .NET Standard.</Description>
     <AssemblyName>Axion.Core</AssemblyName>
     <RootNamespace>Axion.Core</RootNamespace>
     <LangVersion>latest</LangVersion>
-    <AssemblyVersion>0.3.0.1</AssemblyVersion>
-    <FileVersion>0.3.0.1</FileVersion>
+    <AssemblyVersion>0.3.0.2</AssemblyVersion>
+    <FileVersion>0.3.0.2</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -24,9 +24,6 @@ Built on .NET Standard.</Description>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.3.0" />

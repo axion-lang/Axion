@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Axion.Core.Processing.Errors;
 using Axion.Core.Tokens;
 
-namespace Axion.Core.Processing {
+namespace Axion.Core.Processing.LexicalAnalysis {
     public abstract class AbstractLexer {
         /// <summary>
         ///     Reference to outgoing <see cref="LinkedList{T}" /> of tokens.
@@ -66,22 +67,24 @@ namespace Axion.Core.Processing {
 
         public abstract void Process();
 
-        protected void ReportError(ErrorType occurredErrorType, Token token) {
-            if (token == null) {
-                throw new ArgumentNullException(nameof(token));
-            }
-            Debug.Assert(occurredErrorType != ErrorType.None);
+        protected void ReportError(
+            ErrorType  type,
+            (int, int) startPos,
+            (int, int) endPos
+        ) {
+            Debug.Assert(type != ErrorType.None);
 
-            Errors.Add(new SyntaxException(occurredErrorType, Stream.Source, token));
+            Errors.Add(new SyntaxException(new Error(type, startPos, endPos), Stream.Source));
         }
 
-        protected void ReportWarning(WarningType occurredWarningType, Token token) {
-            if (token == null) {
-                throw new ArgumentNullException(nameof(token));
-            }
-            Debug.Assert(occurredWarningType != WarningType.None);
+        protected void ReportWarning(
+            WarningType type,
+            (int, int)  startPos,
+            (int, int)  endPos
+        ) {
+            Debug.Assert(type != WarningType.None);
 
-            Warnings.Add(new SyntaxException(occurredWarningType, Stream.Source, token));
+            Warnings.Add(new SyntaxException(new Warning(type, startPos, endPos), Stream.Source));
         }
     }
 }
