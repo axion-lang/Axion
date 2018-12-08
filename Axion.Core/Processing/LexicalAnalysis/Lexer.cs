@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Tokens;
 
-namespace Axion.Core.Processing {
+namespace Axion.Core.Processing.LexicalAnalysis {
     /// <summary>
     ///     Static tool for splitting Axion code into tokens <see cref="LinkedList{T}" />.
     /// </summary>
