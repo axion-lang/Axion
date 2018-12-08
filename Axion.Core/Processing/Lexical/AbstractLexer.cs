@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Tokens;
+using Axion.Core.Processing.Lexical.Tokens;
 
-namespace Axion.Core.Processing.LexicalAnalysis {
+namespace Axion.Core.Processing.Lexical {
     public abstract class AbstractLexer {
         /// <summary>
         ///     Reference to outgoing <see cref="LinkedList{T}" /> of tokens.
         /// </summary>
-        protected LinkedList<Token> Tokens { get; }
+        protected List<Token> Tokens { get; }
 
         /// <summary>
         ///     All errors that found during lexical analysis.
@@ -33,13 +33,13 @@ namespace Axion.Core.Processing.LexicalAnalysis {
 
         protected AbstractLexer(
             string                  codeToProcess,
-            LinkedList<Token>       outTokens,
+            List<Token>             outTokens,
             List<Exception>         outErrors,
             List<Exception>         outWarnings,
             SourceProcessingOptions processingOptions = SourceProcessingOptions.None
         ) {
             Stream   = new CharStream(codeToProcess);
-            Tokens   = outTokens ?? new LinkedList<Token>();
+            Tokens   = outTokens ?? new List<Token>();
             Errors   = outErrors ?? new List<Exception>();
             Warnings = outWarnings ?? new List<Exception>();
             Options  = processingOptions;
@@ -47,13 +47,13 @@ namespace Axion.Core.Processing.LexicalAnalysis {
 
         protected AbstractLexer(
             CharStream              fromStream,
-            LinkedList<Token>       outTokens,
+            List<Token>             outTokens,
             List<Exception>         outErrors,
             List<Exception>         outWarnings,
             SourceProcessingOptions processingOptions = SourceProcessingOptions.None
         ) {
             Stream   = new CharStream(fromStream);
-            Tokens   = outTokens ?? new LinkedList<Token>();
+            Tokens   = outTokens ?? new List<Token>();
             Errors   = outErrors ?? new List<Exception>();
             Warnings = outWarnings ?? new List<Exception>();
             Options  = processingOptions;

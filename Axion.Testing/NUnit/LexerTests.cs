@@ -2,7 +2,7 @@
 using System.Linq;
 using Axion.Core;
 using Axion.Core.Processing;
-using Axion.Core.Tokens;
+using Axion.Core.Processing.Lexical.Tokens;
 using Newtonsoft.Json;
 using NUnit.Framework;
 

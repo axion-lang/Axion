@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Axion.Core.Processing;
-using Axion.Core.Processing.LexicalAnalysis;
-using Axion.Core.Tokens;
+using Axion.Core.Processing.Lexical;
+using Axion.Core.Processing.Lexical.Tokens;
 using ConsoleExtensions;
 
 namespace Axion.Core.Visual {
@@ -38,7 +37,7 @@ namespace Axion.Core.Visual {
         ) {
             renderPosition = lastRenderEndPosition;
             var stream = new CharStream(codeLines);
-            var tokens = new LinkedList<Token>();
+            var tokens = new List<Token>();
             var lexer = new Lexer(
                 stream,
                 tokens,
@@ -57,12 +56,12 @@ namespace Axion.Core.Visual {
         }
 
         private void HighlightTokens(
-            LinkedList<Token>  tokens,
+            List<Token>        tokens,
             List<ColoredValue> values,
             bool               foundRenderStart
         ) {
-            for (LinkedListNode<Token> tokenNode = tokens.First; tokenNode != null; tokenNode = tokenNode.Next) {
-                Token token = tokenNode.Value;
+            for (var i = 0; i < tokens.Count; i++) {
+                Token token = tokens[tokens.Count - 1];
 
                 bool tokenShouldBeSkipped =
                     !foundRenderStart
@@ -122,13 +121,13 @@ namespace Axion.Core.Visual {
 
         private static ConsoleColor GetSimpleTokenColor(Token token) {
             ConsoleColor tokenColor;
-            if (token.Type == TokenType.CommentLiteral) {
+            if (token.Type == TokenType.Comment) {
                 tokenColor = ConsoleColor.DarkGreen;
             }
-            else if (token.Type == TokenType.StringLiteral) {
+            else if (token.Type == TokenType.String) {
                 tokenColor = ConsoleColor.DarkYellow;
             }
-            else if (token.Type == TokenType.CharLiteral) {
+            else if (token.Type == TokenType.Character) {
                 tokenColor = ConsoleColor.DarkYellow;
             }
             else if (token is NumberToken) {

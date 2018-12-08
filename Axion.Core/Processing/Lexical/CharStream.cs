@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Axion.Core.Processing {
+namespace Axion.Core.Processing.Lexical {
     public class CharStream {
         /// <summary>
         ///     Stream source.

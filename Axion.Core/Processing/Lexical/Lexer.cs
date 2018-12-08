@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Tokens;
+using Axion.Core.Processing.LexicalAnalysis.Tokens;
 
 namespace Axion.Core.Processing.LexicalAnalysis {
     /// <summary>

@@ -1,14 +1,11 @@
-﻿//using System.Collections.Generic;
-//using Axion.Core.Tokens;
-//using Axion.Core.Tokens.Ast;
+﻿//using System;
+//using System.Collections.Generic;
+//using Axion.Core.Processing.Errors;
+//using Axion.Core.Processing.Lexical.Tokens;
+//using Axion.Core.Processing.Syntax.Tree;
 //
-//namespace Axion.Core.Processing {
+//namespace Axion.Core.Processing.Syntax {
 //    internal class SyntaxParser {
-//        /// <summary>
-//        ///     Reference to processing <see cref="LinkedList{T}" /> of tokens.
-//        /// </summary>
-//        private readonly LinkedList<Token> tokens;
-//
 //        /// <summary>
 //        ///     Contains all errors that raised during syntax analysis.
 //        /// </summary>
@@ -19,40 +16,33 @@
 //        /// </summary>
 //        private List<SyntaxException> warnings { get; }
 //
+//        private TokenStream stream { get; }
+//
 //        /// <summary>
 //        ///     Outgoing Abstract Syntax Tree.
 //        /// </summary>
 //        private readonly Ast ast;
 //
-//        private LinkedListNode<Token> tokenNode;
-//
-//        private LinkedListNode<Token> nextTokenNode => tokenNode.Next;
-//
-//        private Token nextToken => tokenNode.Next?.Value;
-//
-//        //private readonly Stack<ImportDefinition>   imports   = new Stack<ImportDefinition>();
-//        //private readonly Stack<ClassDefinition>    classes   = new Stack<ClassDefinition>();
-//        //private readonly Stack<FunctionDefinition> functions = new Stack<FunctionDefinition>();
-//
 //        internal SyntaxParser(
-//            LinkedList<Token> tokens,
-//            out Ast           ast
+//            TokenStream           stream,
+//            Ast                   outAst,
+//            List<SyntaxException> outErrors,
+//            List<SyntaxException> outWarnings
 //        ) {
-//            this.tokens = tokens;
-//            ast         = this.ast;
+//            this.stream = stream;
+//            ast         = outAst ?? throw new ArgumentNullException(nameof(outAst));
+//            errors      = outErrors ?? new List<SyntaxException>();
+//            warnings    = outWarnings ?? new List<SyntaxException>();
 //        }
 //
 //        internal void Process() {
-//            if (tokens.Count == 0) {
+//            if (stream.Tokens.Count == 0) {
 //                return;
 //            }
-//            tokenNode = tokens.First;
 //            var statements = new List<Statement>();
 //
-//            while (true) {
-//                if (MaybeEat(TokenType.EndOfStream)) break;
-//
-//                if (MaybeEat(TokenType.Newline)) continue;
+//            while (!stream.MaybeEat(TokenType.EndOfStream)) {
+//                if (stream.MaybeEat(TokenType.Newline)) continue;
 //
 //                Statement statement = ParseStmt();
 //                statements.Add(statement);
@@ -68,7 +58,7 @@
 //        ///         classdef | decorated | async_stmt
 //        /// </summary>
 //        private Statement ParseStmt() {
-//            switch (tokenNode.Value.Type) {
+//            switch (stream.Token.Type) {
 //                // if
 //                case TokenType.KeywordIf:
 //                    return ParseIfStmt();
@@ -103,17 +93,17 @@
 //        ///         ['else' ':' suite]
 //        /// </summary>
 //        private IfStatement ParseIfStmt() {
-//            Eat(TokenType.KeywordIf);
+//            stream.Eat(TokenType.KeywordIf);
 //            var branches = new List<IfStatementBranch>();
 //
 //            do {
 //                Expressio condition  = ParseExpression();
 //                Statement branchBody = ParseSuite();
 //                branches.Add(new IfStatementBranch(condition, branchBody));
-//            } while (MaybeEat(TokenType.KeywordElif));
+//            } while (stream.MaybeEat(TokenType.KeywordElif));
 //
 //            Statement elseBranch = null;
-//            if (MaybeEat(TokenType.KeywordElse)) {
+//            if (stream.MaybeEat(TokenType.KeywordElse)) {
 //                elseBranch = ParseSuite();
 //            }
 //
@@ -126,12 +116,12 @@
 //        ///     lambda_form: "lambda" [parameter_list] : expression
 //        /// </summary>
 //        private Expressio ParseExpression() {
-//            if (MaybeEat(TokenKind.KeywordLambda)) {
+//            if (stream.MaybeEat(TokenType.KeywordLambda)) {
 //                return FinishLambdef();
 //            }
 //
 //            Expressio ret = ParseOrTest();
-//            if (MaybeEat(TokenKind.KeywordIf)) {
+//            if (stream.MaybeEat(TokenType.KeywordIf)) {
 //                var start = ret.StartIndex;
 //                ret = ParseConditionalTest(ret);
 //                ret.SetLoc(_globalParent, start, GetEnd());
@@ -146,26 +136,26 @@
 //        /// </summary>
 //        /// <returns></returns>
 //        private Statement ParseSuite() {
-//            if (!EatNoEof(TokenType.Colon)) {
+//            if (!stream.EatNoEof(TokenType.OpColon)) {
 //                // improve error handling...
 //                return ErrorStmt();
 //            }
 //
-//            Token cur = nextToken;
+//            Token cur = stream.Peek;
 //            var   l   = new List<Statement>();
 //
 //            // we only read a real Newline here because we need to adjust error reporting
 //            // for the interpreter.
-//            if (MaybeEat(TokenType.Newline)) {
+//            if (stream.MaybeEat(TokenType.Newline)) {
 //                CheckSuiteEofError(cur);
 //
 //                cur = nextToken;
 //
-//                if (!MaybeEat(TokenType.Indent)) {
+//                if (!stream.MaybeEat(TokenType.Indent)) {
 //                    // no indent?  report the indentation error.
 //                    if (cur.Type == TokenType.Outdent) {
 //                        ReportSyntaxError(
-//                            nextToken.Span.Start, nextToken.Span.End, Resources.ExpectedIndentation,
+//                            stream.Peek.Span.Start, nextToken.Span.End, Resources.ExpectedIndentation,
 //                            ErrorCodes.IndentationError | ErrorCodes.IncompleteStatement
 //                        );
 //                    }
@@ -178,9 +168,9 @@
 //                while (true) {
 //                    Statement s = ParseStmt();
 //                    l.Add(s);
-//                    if (MaybeEat(TokenType.Dedent)) break;
+//                    if (stream.MaybeEat(TokenType.Outdent)) break;
 //
-//                    if (PeekToken(TokenType.EndOfStream)) {
+//                    if (stream.PeekIs(TokenType.EndOfStream)) {
 //                        ReportSyntaxError("unexpected end of file");
 //                        break; // error handling
 //                    }
@@ -204,44 +194,7 @@
 //
 //        #region Tokens stream control
 //
-//        private Token Move() {
-//            tokenNode = nextTokenNode;
-//            return tokenNode.Value;
-//        }
 //
-//        private bool PeekToken(TokenType type) {
-//            return nextToken.Type == type;
-//        }
-//
-//        private bool PeekToken(Token expected) {
-//            return Equals(nextToken, expected);
-//        }
-//
-//        private bool MaybeEat(TokenType type) {
-//            if (nextToken.Type == type) {
-//                Move();
-//                return true;
-//            }
-//            return false;
-//        }
-//
-//        private bool Eat(TokenType type) {
-//            if (nextToken.Type == type) {
-//                Move();
-//                return true;
-//            }
-//            ReportSyntaxError(nextToken);
-//            return false;
-//        }
-//
-//        private bool EatNonEof(TokenType type) {
-//            if (nextToken.Type == type) {
-//                Move();
-//                return true;
-//            }
-//            ReportSyntaxError(nextToken, ErrorCodes.SyntaxError, false);
-//            return false;
-//        }
 //
 //        #endregion
 //    }

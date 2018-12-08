@@ -9,7 +9,7 @@ using System.Numerics;
 using System.Text;
 using Axion.Core.Processing.Errors;
 
-namespace Axion.Core.Processing.LexicalAnalysis {
+namespace Axion.Core.Processing.Lexical {
     internal static class LiteralParser {
         internal static object ParseInteger(string input, int radix) {
             Debug.Assert(radix != 0);

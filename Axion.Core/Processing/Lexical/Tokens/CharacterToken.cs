@@ -1,4 +1,4 @@
-﻿namespace Axion.Core.Tokens {
+﻿namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents a character literal <see cref="Token" />.
     /// </summary>
@@ -8,7 +8,7 @@
         public bool IsUnclosed { get; }
 
         public CharacterToken((int, int) startPosition, string value, string rawValue = null, bool isUnclosed = false)
-            : base(TokenType.CharLiteral, startPosition, value) {
+            : base(TokenType.Character, startPosition, value) {
             if (rawValue == null) {
                 rawValue = value;
             }

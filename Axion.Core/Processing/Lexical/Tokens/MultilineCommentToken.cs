@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Axion.Core.Tokens {
+namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents a &lt;Multiline comment&gt; <see cref="Token" />.
     /// </summary>
@@ -8,7 +8,7 @@ namespace Axion.Core.Tokens {
         public bool IsUnclosed { get; }
 
         public MultilineCommentToken((int, int) startPosition, string value, bool isUnclosed = false)
-            : base(TokenType.CommentLiteral, startPosition, value) {
+            : base(TokenType.Comment, startPosition, value) {
             IsUnclosed = isUnclosed;
 
             int linesCount        = value.Split(Spec.EndOfLines, StringSplitOptions.None).Length;

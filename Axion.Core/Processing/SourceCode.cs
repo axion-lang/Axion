@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.LexicalAnalysis;
-using Axion.Core.Tokens;
-using Axion.Core.Tokens.Ast;
+using Axion.Core.Processing.Lexical;
+using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntax.Tree;
 using ConsoleExtensions;
 using Newtonsoft.Json;
 
@@ -22,7 +22,7 @@ namespace Axion.Core.Processing {
         /// <summary>
         ///     Tokens list generated from source.
         /// </summary>
-        public readonly LinkedList<Token> Tokens = new LinkedList<Token>();
+        public readonly List<Token> Tokens = new List<Token>();
 
         /// <summary>
         ///     Abstract Syntax Tree generated from <see cref="Tokens" />.

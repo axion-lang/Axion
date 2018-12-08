@@ -4,7 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Axion.Core.Tokens {
+namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents a &lt;operator&gt; <see cref="Token" />.
     /// </summary>
@@ -17,7 +17,7 @@ namespace Axion.Core.Tokens {
         }
 
         public OperatorToken((int, int) startPosition, string value, string whitespaces = "")
-            : base(TokenType.Unknown, startPosition, value, whitespaces) {
+            : base(TokenType.Invalid, startPosition, value, whitespaces) {
             Spec.Operators.TryGetValue(value, out Properties);
             Type = Properties.Type;
         }

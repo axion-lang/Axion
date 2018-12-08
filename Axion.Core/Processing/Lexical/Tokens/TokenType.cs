@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Axion.Core.Tokens {
+namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents a &lt;Type&gt; of <see cref="Token" />.
     /// </summary>
@@ -107,19 +107,13 @@ namespace Axion.Core.Tokens {
 
         #endregion
 
-        Unknown,
         Invalid,
 
-        Operator,
         Identifier,
-        Keyword,
-
-        CommentLiteral,
-        CharLiteral,
-        StringLiteral,
-        IntegerLiteral,
-        RealLiteral,
-        FloatLiteral,
+        Comment,
+        Character,
+        String,
+        Number,
 
         Whitespace,
         Newline,

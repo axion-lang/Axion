@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Axion.Core.Tokens {
+namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents a &lt;string literal&gt; <see cref="Token" />.
     /// </summary>
@@ -21,16 +21,15 @@ namespace Axion.Core.Tokens {
             string               value,
             string               rawValue   = null,
             bool                 isUnclosed = false
-        ) : base(TokenType.StringLiteral, startPosition, value) {
+        ) : base(TokenType.String, startPosition, value) {
             if (rawValue == null) {
                 rawValue = value;
             }
             Options    = options;
             RawValue   = rawValue;
             IsUnclosed = isUnclosed;
-
-            EndColumn = StartColumn;
             EndLine   = StartLine;
+            
             // addition of quotes length:
             // compute count of quotes on token end line:
             // Multiline:  6 quotes on 1  line,  (3 * 2);
@@ -38,8 +37,8 @@ namespace Axion.Core.Tokens {
             // One-line:   2 quotes on 1  line,  (1 * 2);
             //             1 quote  on 2+ lines, (1 * 1).
             string[] lines       = RawValue.Split(Spec.EndOfLines, StringSplitOptions.None);
-            int      quotesCount = Options.QuotesCount;
             if (lines.Length == 1) {
+                EndColumn = StartColumn;
                 EndColumn += lines[lines.Length - 1].Length;
                 // if 1 line: add 1 for each prefix letter
                 if (Options.IsRaw) {
@@ -50,18 +49,18 @@ namespace Axion.Core.Tokens {
                 }
 
                 if (IsUnclosed) {
-                    EndColumn += quotesCount;
+                    EndColumn += Options.QuotesCount;
                 }
                 else {
-                    EndColumn += quotesCount * 2;
+                    EndColumn += Options.QuotesCount * 2;
                 }
             }
-            else if (!IsUnclosed) {
-                EndColumn += quotesCount;
-            }
-            if (lines.Length > 1) {
-                EndColumn =  lines[lines.Length - 1].Length;
-                EndLine   += lines.Length;
+            else if (lines.Length > 1) {
+                EndColumn = lines[lines.Length - 1].Length;
+                if (!IsUnclosed) {
+                    EndColumn += Options.QuotesCount;
+                }
+                EndLine += lines.Length - 1;
             }
         }
 

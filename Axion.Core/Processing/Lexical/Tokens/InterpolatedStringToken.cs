@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Axion.Core.Tokens {
+namespace Axion.Core.Processing.Lexical.Tokens {
     public sealed class InterpolatedStringToken : StringToken {
         internal readonly List<Interpolation> Interpolations;
 
@@ -23,9 +23,9 @@ namespace Axion.Core.Tokens {
     }
 
     public sealed class Interpolation {
-        internal readonly LinkedList<Token> Tokens = new LinkedList<Token>();
-        internal readonly int               StartIndex;
-        internal          int               EndIndex;
+        internal readonly List<Token> Tokens = new List<Token>();
+        internal readonly int         StartIndex;
+        internal          int         EndIndex;
 
         internal int Length => EndIndex - StartIndex;
 

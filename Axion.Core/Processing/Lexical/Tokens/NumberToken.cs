@@ -1,4 +1,4 @@
-﻿namespace Axion.Core.Tokens {
+﻿namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents a &lt;number&gt; <see cref="Token" />.
     /// </summary>
@@ -6,7 +6,7 @@
         internal NumberOptions Options { get; }
 
         public NumberToken((int, int) startPosition, object value, NumberOptions options)
-            : base(TokenType.IntegerLiteral, startPosition, value.ToString()) {
+            : base(TokenType.Number, startPosition, value.ToString()) {
             Options = options;
         }
     }

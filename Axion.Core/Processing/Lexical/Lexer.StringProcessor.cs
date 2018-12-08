@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Tokens;
+using Axion.Core.Processing.Lexical.Tokens;
 
-namespace Axion.Core.Processing.LexicalAnalysis {
+namespace Axion.Core.Processing.Lexical {
     public partial class Lexer {
         private Token ReadString(bool continueUnclosedString) {
             bool isStringEmpty = ReadStringPrefixes(
@@ -100,7 +100,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
 
                 // found string format sign
                 if (c == '{' && strOptions.IsFormatted) {
-                    ReadStringInterpolation(interpolations, startIndex);
+                    ReadStringInterpolation(interpolations, startIndex, rawValue);
                     continue;
                 }
                 // else
@@ -172,7 +172,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
                         // digit right before quote - error!
                         else if (char.IsLetterOrDigit(pfc)) {
                             ReportError(ErrorType.InvalidPrefixInStringLiteral, tempPosition, Stream.Position);
-                            Tokens.AddLast(
+                            Tokens.Add(
                                 new Token(
                                     TokenType.Identifier,
                                     tempPosition,
@@ -187,8 +187,8 @@ namespace Axion.Core.Processing.LexicalAnalysis {
                 bool stringHasPrefixes = strOptions.HasPrefixes;
                 if (stringHasPrefixes) {
                     // remove last token - it is string prefix meant as identifier.
-                    tokenStartPosition.column -= Tokens.Last.Value.Value.Length;
-                    Tokens.RemoveLast();
+                    tokenStartPosition.column -= Tokens[Tokens.Count - 1].Value.Length;
+                    Tokens.RemoveAt(Tokens.Count - 1);
                 }
 
                 delimiter        = c.ToString();
@@ -211,7 +211,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
                         if (stringHasPrefixes) {
                             ReportWarning(WarningType.RedundantPrefixesForEmptyString, tokenStartPosition, Stream.Position);
                         }
-                        Tokens.AddLast(emptyString);
+                        Tokens.Add(emptyString);
                         return true;
                     }
                 }
@@ -222,7 +222,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
             return false;
         }
 
-        private void ReadStringInterpolation(ICollection<Interpolation> interpolations, int stringStartIndex) {
+        private void ReadStringInterpolation(ICollection<Interpolation> interpolations, int stringStartIndex, StringBuilder rawValue) {
             var newInterpolation = new Interpolation(Stream.CharIdx - stringStartIndex);
             interpolations.Add(newInterpolation);
             // process interpolation
@@ -239,13 +239,15 @@ namespace Axion.Core.Processing.LexicalAnalysis {
                 lexer._mismatchingPairs.Add(new Token(TokenType.OpLeftBrace, Stream.Position, "{"));
                 lexer.Process();
                 // remove usefulness closing curly
-                newInterpolation.Tokens.RemoveLast();
+                newInterpolation.Tokens.RemoveAt(newInterpolation.Tokens.Count - 1);
                 // restore character position
-                Stream = new CharStream(lexer.Stream);
+                Stream = lexer.Stream;
             }
             // append interpolated piece to main string token
             newInterpolation.EndIndex = Stream.CharIdx - stringStartIndex;
-            tokenValue.Append(Stream.Source.Substring(Stream.CharIdx - newInterpolation.Length, newInterpolation.Length));
+            string value = Stream.Source.Substring(Stream.CharIdx - newInterpolation.Length, newInterpolation.Length);
+            rawValue.Append(value);
+            tokenValue.Append(value);
         }
     }
 }

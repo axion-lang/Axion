@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Numerics;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Tokens;
+using Axion.Core.Processing.Lexical.Tokens;
 
-namespace Axion.Core.Processing.LexicalAnalysis {
+namespace Axion.Core.Processing.Lexical {
     public partial class Lexer {
         private NumberToken ReadNumber() {
             NumberOptions numberOptions;

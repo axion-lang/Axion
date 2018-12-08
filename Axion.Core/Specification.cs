@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Axion.Core.Tokens;
+using Axion.Core.Processing.Lexical.Tokens;
 
 namespace Axion.Core {
     /// <summary>

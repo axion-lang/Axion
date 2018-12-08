@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace Axion.Core.Tokens {
+namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents a &lt;language keyword&gt; <see cref="Token" />.
     /// </summary>

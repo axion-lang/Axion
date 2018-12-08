@@ -1,4 +1,4 @@
-﻿namespace Axion.Core.Tokens {
+﻿namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents an &lt;indentation increase&gt; <see cref="Token" />.
     /// </summary>

@@ -1,4 +1,4 @@
-﻿namespace Axion.Core.Tokens {
+﻿namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents an &lt;end of line&gt; ( \n or \r\n ) <see cref="Token" />.
     /// </summary>

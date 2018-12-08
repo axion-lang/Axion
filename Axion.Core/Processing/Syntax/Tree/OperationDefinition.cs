@@ -1,4 +1,6 @@
-﻿namespace Axion.Core.Tokens.Ast {
+﻿using Axion.Core.Processing.Lexical.Tokens;
+
+namespace Axion.Core.Processing.Syntax.Tree {
     public class OperationDefinition : Token {
         public readonly Token         LeftOperand;
         public readonly OperatorToken OperatorToken;
