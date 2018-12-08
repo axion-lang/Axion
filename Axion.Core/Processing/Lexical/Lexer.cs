@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.LexicalAnalysis.Tokens;
+using Axion.Core.Processing.Lexical.Tokens;
 
-namespace Axion.Core.Processing.LexicalAnalysis {
+namespace Axion.Core.Processing.Lexical {
     /// <summary>
     ///     Static tool for splitting Axion code into tokens <see cref="LinkedList{T}" />.
     /// </summary>
@@ -84,7 +85,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
 
         public Lexer(
             string                  codeToProcess,
-            LinkedList<Token>       outTokens,
+            List<Token>             outTokens,
             List<Exception>         outErrors,
             List<Exception>         outWarnings,
             SourceProcessingOptions processingOptions = SourceProcessingOptions.None
@@ -94,7 +95,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
 
         public Lexer(
             CharStream              fromStream,
-            LinkedList<Token>       outTokens,
+            List<Token>             outTokens,
             List<Exception>         outErrors,
             List<Exception>         outWarnings,
             SourceProcessingOptions processingOptions = SourceProcessingOptions.None
@@ -130,7 +131,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
             }
             while (true) {
                 if (token != null) {
-                    Tokens.AddLast(token);
+                    Tokens.Add(token);
                     // check for processing terminator
                     if (token.Type == TokenType.EndOfStream
                      || _processingTerminators.Contains(token.Value)) {
@@ -185,11 +186,11 @@ namespace Axion.Core.Processing.LexicalAnalysis {
             // reset token properties
             tokenStartPosition = Stream.Position;
             tokenValue.Clear();
-//#if DEBUG
-//            if (Tokens.Count != 0 && Tokens.Last.Value.Type != TokenType.Outdent) {
-//                Debug.Assert(tokenStartPosition == (Tokens.Last.Value.EndLine, Tokens.Last.Value.EndColumn));
-//            }
-//#endif
+#if DEBUG
+            if (Tokens.Count != 0 && Tokens[Tokens.Count - 1].Type != TokenType.Outdent) {
+                Debug.Assert(tokenStartPosition == (Tokens[Tokens.Count - 1].EndLine, Tokens[Tokens.Count - 1].EndColumn));
+            }
+#endif
             // source end mark
             if (c == Spec.EndOfStream) {
                 return new EndOfStreamToken(tokenStartPosition);
@@ -214,7 +215,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
             if (Spec.IsSpaceOrTab(c)) {
                 if (Tokens.Count != 0
                  && _mismatchingPairs.Count == 0
-                 && Tokens.Last.Value.Type == TokenType.Newline) {
+                 && Tokens[Tokens.Count - 1].Type == TokenType.Newline) {
                     return ReadIndentation();
                 }
                 return ReadWhitespace();
@@ -259,7 +260,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
             tokenValue.Append(c);
             Stream.Move();
             ReportError(ErrorType.InvalidSymbol, tokenStartPosition, Stream.Position);
-            return new Token(TokenType.Unknown, tokenStartPosition, tokenValue.ToString());
+            return new Token(TokenType.Invalid, tokenStartPosition, tokenValue.ToString());
         }
 
         #region Reading tokens
@@ -278,12 +279,12 @@ namespace Axion.Core.Processing.LexicalAnalysis {
             // if last newline doesn't starts
             // with whitespace - reset indentation to 0
             // add newline at first
-            Tokens.AddLast(endOfLineToken);
+            Tokens.Add(endOfLineToken);
             tokenStartPosition = Stream.Position;
             // then add outdents
             lastIndentLength = 0;
             while (indentLevel > 0) {
-                Tokens.AddLast(new OutdentToken(tokenStartPosition));
+                Tokens.Add(new OutdentToken(tokenStartPosition));
                 indentLevel--;
             }
             return null;
@@ -296,7 +297,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
                 Stream.Move();
             }
             if (Tokens.Count > 0) {
-                Tokens.Last.Value.AppendWhitespace(whitespace);
+                Tokens[Tokens.Count - 1].AppendWhitespace(whitespace);
                 return null;
             }
             // if it is 1st token,
@@ -360,7 +361,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
                  && Regex.Matches(restOfLine, Spec.MultiCommentStartPattern).Count
                   > Regex.Matches(restOfLine, Spec.MultiCommentEndPattern).Count) {
                     // append it to last token
-                    Tokens.Last.Value.AppendWhitespace(tokenValue.ToString());
+                    Tokens[Tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
                     return null;
                 }
             }
@@ -375,13 +376,13 @@ namespace Axion.Core.Processing.LexicalAnalysis {
                 // whitespace
                 if (Tokens.Count > 0) {
                     // append it to last token
-                    Tokens.Last.Value.AppendWhitespace(tokenValue.ToString());
+                    Tokens[Tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
                 }
 
                 int temp = newIndentLength;
                 while (temp < lastIndentLength) {
                     // indent decreased
-                    Tokens.AddLast(new OutdentToken(tokenStartPosition));
+                    Tokens.Add(new OutdentToken(tokenStartPosition));
                     indentLevel--;
                     temp += oneIndentSize;
                 }
@@ -391,7 +392,7 @@ namespace Axion.Core.Processing.LexicalAnalysis {
                 // whitespace
                 if (Tokens.Count > 0) {
                     // append it to last token
-                    Tokens.Last.Value.AppendWhitespace(tokenValue.ToString());
+                    Tokens[Tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
                 }
                 return null;
             }
