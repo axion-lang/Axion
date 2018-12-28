@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Axion.Core.Processing.Lexical;
+using Axion.Core.Processing.Lexical.Lexer;
 using Axion.Core.Processing.Lexical.Tokens;
 using ConsoleExtensions;
 
@@ -23,17 +24,13 @@ namespace Axion.Core.Visual {
         /// <param name="lastRenderEndPosition">
         ///     Last position of cursor, where code was correctly rendered.
         /// </param>
-        /// <param name="errors">
-        ///     Errors, occurred during code analysis.
-        /// </param>
-        /// <param name="warnings">
-        ///     Warnings, occurred during code analysis.
+        /// <param name="blames">
+        ///     Errors and warnings occurred during code analysis.
         /// </param>
         public List<ColoredValue> Highlight(
             IEnumerable<string> codeLines,
             out Point           lastRenderEndPosition,
-            List<Exception>     errors,
-            List<Exception>     warnings
+            List<Exception>     blames
         ) {
             renderPosition = lastRenderEndPosition;
             var stream = new CharStream(codeLines);
@@ -41,8 +38,7 @@ namespace Axion.Core.Visual {
             var lexer = new Lexer(
                 stream,
                 tokens,
-                errors,
-                warnings
+                blames
             );
             lexer.Process();
 
@@ -61,13 +57,13 @@ namespace Axion.Core.Visual {
             bool               foundRenderStart
         ) {
             for (var i = 0; i < tokens.Count; i++) {
-                Token token = tokens[tokens.Count - 1];
+                Token token = tokens[i];
 
                 bool tokenShouldBeSkipped =
                     !foundRenderStart
-                 && (token.EndLine < renderPosition.Y
-                  || token.EndLine == renderPosition.Y
-                  && token.EndColumn <= renderPosition.X
+                 && (token.Span.End.Line < renderPosition.Y
+                  || token.Span.End.Line == renderPosition.Y
+                  && token.Span.End.Column <= renderPosition.X
                   || token.Type == TokenType.EndOfStream);
                 // BUG: if code has error before that token, and it's fixed with next char, it'll be highlighted improperly (e. g. type '0..10')
 
@@ -79,7 +75,7 @@ namespace Axion.Core.Visual {
                 if (!foundRenderStart) {
                     // When we found token, closest to last render position
                     // we should re-render this token to prevent invalid highlighting.
-                    renderPosition   = new Point(token.StartColumn, token.StartLine);
+                    renderPosition   = new Point(token.Span.Start.Column, token.Span.Start.Line);
                     foundRenderStart = true;
                 }
 
@@ -122,7 +118,7 @@ namespace Axion.Core.Visual {
         private static ConsoleColor GetSimpleTokenColor(Token token) {
             ConsoleColor tokenColor;
             if (token.Type == TokenType.Comment) {
-                tokenColor = ConsoleColor.DarkGreen;
+                tokenColor = ConsoleColor.DarkGray;
             }
             else if (token.Type == TokenType.String) {
                 tokenColor = ConsoleColor.DarkYellow;
@@ -130,7 +126,7 @@ namespace Axion.Core.Visual {
             else if (token.Type == TokenType.Character) {
                 tokenColor = ConsoleColor.DarkYellow;
             }
-            else if (token is NumberToken) {
+            else if (token.Type == TokenType.Number) {
                 tokenColor = ConsoleColor.Yellow;
             }
             else if (token is OperatorToken) {

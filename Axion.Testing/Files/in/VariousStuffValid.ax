@@ -26,7 +26,7 @@ if val in collection and val in collection:
 	      i++:
 		print(collection[i])
 	++n
-else if condition and condition:
+elif condition and condition:
 	c_else_if()
 	n++
 else:

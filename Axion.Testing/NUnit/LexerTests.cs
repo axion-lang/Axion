@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Axion.Core;
 using Axion.Core.Processing;
 using Axion.Core.Processing.Lexical.Tokens;
@@ -11,56 +12,59 @@ namespace Axion.Testing.NUnit {
         [Test]
         public void UseBlockValid() {
             var source = new SourceCode(
-                "use {\n" +
-                "   collections.enumerable,\n" +
-                "   dotnet.namespace,\n" +
-                "   some.multi.nested.namespace.end\n" +
-                "}",
+                "use (\n" +
+                "   System (IO, Linq),\n" +
+                "   Axion (Core, Testing),\n" +
+                "   Some.Long.Namespace\n" +
+                ")",
                 outPath + nameof(UseBlockValid) + testExtension
             );
 
             source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
-            Assert.IsTrue(source.Errors.Count == 0);
+            Assert.AreEqual(0, source.Blames.Count);
 
-            var expectedTokens = new LinkedList<Token>();
+            var expected = new List<Token> {
+                // line 1
+                new KeywordToken(TokenType.KeywordUse, (0, 0), " "),
+                new SymbolToken((0, 4), "("),
+                new EndOfLineToken((0, 5), whitespaces: "   "),
+                // line 2
+                new IdentifierToken((1, 3), "System", " "),
+                new SymbolToken((1, 10), "("),
+                new IdentifierToken((1, 11), "IO"),
+                new SymbolToken((1, 13), ",", " "),
+                new IdentifierToken((1, 15), "Linq"),
+                new SymbolToken((1, 19), ")"),
+                new SymbolToken((1, 20), ","),
+                new EndOfLineToken((1, 21), whitespaces: "   "),
+                // line 3
+                new IdentifierToken((2, 3), "Axion", " "),
+                new SymbolToken((2, 9), "("),
+                new IdentifierToken((2, 10), "Core"),
+                new SymbolToken((2, 14), ",", " "),
+                new IdentifierToken((2, 16), "Testing"),
+                new SymbolToken((2, 23), ")"),
+                new SymbolToken((2, 24), ","),
+                new EndOfLineToken((2, 25), whitespaces: "   "),
+                // line 4
+                new IdentifierToken((3, 3), "Some"),
+                new SymbolToken((3, 7), "."),
+                new IdentifierToken((3, 8), "Long"),
+                new SymbolToken((3, 12), "."),
+                new IdentifierToken((3, 13), "Namespace"),
+                new EndOfLineToken((3, 22)),
+                // line 5
+                new SymbolToken((4, 0), ")"),
+                new EndOfLineToken((4, 1)),
+                new EndOfStreamToken((5, 0))
+            };
 
-            #region Expected tokens list
+            for (var i = 0; i < source.Tokens.Count; i++) {
+                Assert.IsTrue(expected[i].TEquals(source.Tokens[i]));
+            }
 
-            // line 1
-            expectedTokens.AddLast(new KeywordToken(TokenType.KeywordUse, (0, 0), " "));
-            expectedTokens.AddLast(new OperatorToken((0, 4), "{"));
-            expectedTokens.AddLast(new EndOfLineToken((0, 5), whitespaces: "   "));
-            // line 2
-            expectedTokens.AddLast(new Token(TokenType.Identifier, (1, 3), "collections"));
-            expectedTokens.AddLast(new OperatorToken((1, 14), "."));
-            expectedTokens.AddLast(new Token(TokenType.Identifier, (1, 15), "enumerable"));
-            expectedTokens.AddLast(new OperatorToken((1, 25), ","));
-            expectedTokens.AddLast(new EndOfLineToken((1, 26), whitespaces: "   "));
-            // line 3
-            expectedTokens.AddLast(new Token(TokenType.Identifier, (2, 3), "dotnet"));
-            expectedTokens.AddLast(new OperatorToken((2, 9), "."));
-            expectedTokens.AddLast(new Token(TokenType.Identifier, (2, 10), "namespace"));
-            expectedTokens.AddLast(new OperatorToken((2, 19), ","));
-            expectedTokens.AddLast(new EndOfLineToken((2, 20), whitespaces: "   "));
-            // line 4
-            expectedTokens.AddLast(new Token(TokenType.Identifier, (3, 3), "some"));
-            expectedTokens.AddLast(new OperatorToken((3, 7), "."));
-            expectedTokens.AddLast(new Token(TokenType.Identifier, (3, 8), "multi"));
-            expectedTokens.AddLast(new OperatorToken((3, 13), "."));
-            expectedTokens.AddLast(new Token(TokenType.Identifier, (3, 14), "nested"));
-            expectedTokens.AddLast(new OperatorToken((3, 20), "."));
-            expectedTokens.AddLast(new Token(TokenType.Identifier, (3, 21), "namespace"));
-            expectedTokens.AddLast(new OperatorToken((3, 30), "."));
-            expectedTokens.AddLast(new Token(TokenType.Identifier, (3, 31), "end"));
-            expectedTokens.AddLast(new EndOfLineToken((3, 34)));
-            // line 5
-            expectedTokens.AddLast(new OperatorToken((4, 0), "}"));
-            expectedTokens.AddLast(new EndOfStreamToken((4, 1)));
-
-            #endregion
-
-            string t1 = JsonConvert.SerializeObject(source.Tokens,  Compiler.JsonSerializer);
-            string t2 = JsonConvert.SerializeObject(expectedTokens, Compiler.JsonSerializer);
+            string t1 = JsonConvert.SerializeObject(source.Tokens, Compiler.JsonSerializer);
+            string t2 = JsonConvert.SerializeObject(expected,      Compiler.JsonSerializer);
             Assert.AreEqual(t1, t2);
         }
 
@@ -93,14 +97,13 @@ namespace Axion.Testing.NUnit {
               | SourceProcessingOptions.CheckIndentationConsistency
             );
 
-            Assert.IsTrue(source1.Errors.Count == 0);
-            Assert.IsTrue(source1.Warnings.Count == 0);
+            Assert.AreEqual(0, source1.Blames.Count);
 
-            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex1).Equals(new IndentToken((2, 0), "\t")));
-            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex2).Equals(new IndentToken((5, 0), "\t\t")));
-            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex3).Equals(new IndentToken((6, 0), "\t\t\t")));
-            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex4).Equals(new OutdentToken((7, 0))));
-            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex5).Equals(new OutdentToken((8, 0))));
+            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex1).TEquals(new IndentToken((2, 0), "\t")));
+            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex2).TEquals(new IndentToken((5, 0), "\t\t")));
+            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex3).TEquals(new IndentToken((6, 0), "\t\t\t")));
+            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex4).TEquals(new OutdentToken((7, 0))));
+            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex5).TEquals(new OutdentToken((8, 0))));
 
             // with spaces
             var source2 = new SourceCode(
@@ -123,14 +126,13 @@ namespace Axion.Testing.NUnit {
               | SourceProcessingOptions.CheckIndentationConsistency
             );
 
-            Assert.IsTrue(source2.Errors.Count == 0);
-            Assert.IsTrue(source2.Warnings.Count == 0);
+            Assert.AreEqual(0, source2.Blames.Count);
 
-            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex1).Equals(new IndentToken((2, 0), new string(' ', 4))));
-            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex2).Equals(new IndentToken((5, 0), new string(' ', 8))));
-            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex3).Equals(new IndentToken((6, 0), new string(' ', 12))));
-            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex4).Equals(new OutdentToken((7, 0))));
-            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex5).Equals(new OutdentToken((8, 0))));
+            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex1).TEquals(new IndentToken((2, 0), new string(' ', 4))));
+            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex2).TEquals(new IndentToken((5, 0), new string(' ', 8))));
+            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex3).TEquals(new IndentToken((6, 0), new string(' ', 12))));
+            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex4).TEquals(new OutdentToken((7, 0))));
+            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex5).TEquals(new OutdentToken((8, 0))));
 
             // mixed
             var source3 = new SourceCode(
@@ -154,14 +156,13 @@ namespace Axion.Testing.NUnit {
               | SourceProcessingOptions.CheckIndentationConsistency
             );
 
-            Assert.IsTrue(source3.Errors.Count == 0);
-            Assert.IsTrue(source3.Warnings.Count == 1);
+            Assert.AreEqual(1, source3.Blames.Count);
 
-            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex1).Equals(new IndentToken((2, 0), "\t")));
-            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex2).Equals(new IndentToken((5, 0), new string(' ', 12))));
-            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex3).Equals(new IndentToken((6, 0), new string(' ', 12) + "\t")));
-            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex4).Equals(new OutdentToken((7, 0))));
-            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex5).Equals(new OutdentToken((8, 0))));
+            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex1).TEquals(new IndentToken((2, 0), "\t")));
+            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex2).TEquals(new IndentToken((5, 0), new string(' ', 12))));
+            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex3).TEquals(new IndentToken((6, 0), new string(' ', 12) + "\t")));
+            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex4).TEquals(new OutdentToken((7, 0))));
+            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex5).TEquals(new OutdentToken((8, 0))));
 
             string TokenString(Token tk) {
                 return "(" + tk.Value.Replace("\t", "    ") + ")";
@@ -176,24 +177,42 @@ namespace Axion.Testing.NUnit {
             string[] numbers = {
                 "123456", "654321",
                 "123.456", "654.321",
-                "0x16829641",
+                "0x1689ABCDEF",
                 "0b10110001",
-                "0o72517242"
-                //"3 + 4j",
-                //"12e"
+                "0o72517242",
+                "4j",
+                "12e5"
             };
             var pos = (0, 9);
             // TODO complete numbers parsing test
             Token[] tokens = {
-                new NumberToken(pos, "123456",     new NumberOptions(32)),
-                new NumberToken(pos, "654321",     new NumberOptions(32)),
-                new NumberToken(pos, "123.456",    new NumberOptions(32)),
-                new NumberToken(pos, "654.321",    new NumberOptions(32)),
-                new NumberToken(pos, "0x16829641", new NumberOptions(32)),
-                new NumberToken(pos, "0b10110001", new NumberOptions(32)),
-                new NumberToken(pos, "0o72517242", new NumberOptions(32))
-                //new NumberToken(pos, "3 + 4j", new NumberOptions(32)),
-                //new NumberToken(pos, 12, new NumberOptions()),
+                new NumberToken(
+                    pos, "123456", new NumberOptions { Number = new StringBuilder("123456") }
+                ),
+                new NumberToken(
+                    pos, "654321", new NumberOptions { Number = new StringBuilder("654321") }
+                ),
+                new NumberToken(
+                    pos, "123.456", new NumberOptions(10, 32, true) { Number = new StringBuilder("123.456") }
+                ),
+                new NumberToken(
+                    pos, "654.321", new NumberOptions(10, 32, true) { Number = new StringBuilder("654.321") }
+                ),
+                new NumberToken(
+                    pos, "0x1689ABCDEF", new NumberOptions(16) { Number = new StringBuilder("1689ABCDEF") }
+                ),
+                new NumberToken(
+                    pos, "0b10110001", new NumberOptions(2) { Number = new StringBuilder("10110001") }
+                ),
+                new NumberToken(
+                    pos, "0o72517242", new NumberOptions(8) { Number = new StringBuilder("72517242") }
+                ),
+                new NumberToken(
+                    pos, "4j", new NumberOptions(10, 32, false, true) { Number = new StringBuilder("4") }
+                ),
+                new NumberToken(
+                    pos, "12e5", new NumberOptions(10, 32, false, false, false, false, true, 5) { Number = new StringBuilder("12") }
+                )
             };
             foreach (Token token in tokens) {
                 token.AppendWhitespace(" ");
@@ -213,25 +232,33 @@ namespace Axion.Testing.NUnit {
                     )
                 );
 
-                var expected = new LinkedList<Token>();
+                var expected = new List<Token> {
+                    new IdentifierToken((0, 0), "number", " "),
+                    new SymbolToken((0, 7), "=", " "),
+                    tokens[i],
+                    new OperatorToken((0, tokens[i].Span.End.Column), "+", " "),
+                    new NumberToken((0, tokens[i].Span.End.Column + 2), "0b10010010", new NumberOptions(32)),
+                    new EndOfLineToken((0, tokens[i].Span.End.Column + 12)),
+                    new EndOfStreamToken((1, 0))
+                };
 
-                #region Expected tokens list
-
-                // line 1
-                expected.AddLast(new Token(TokenType.Identifier, (0, 0), "number", " "));
-                expected.AddLast(new OperatorToken((0, 7), "=", " "));
-                expected.AddLast(tokens[i]);
-                int numLen = tokens[i].EndColumn;
-                expected.AddLast(new OperatorToken((0, numLen), "+", " "));
-                expected.AddLast(new NumberToken((0, numLen + 2), "0b10010010", new NumberOptions(32)));
-                expected.AddLast(new EndOfStreamToken((0, numLen + 12)));
-
-                string t1 = JsonConvert.SerializeObject(source.Tokens, Compiler.JsonSerializer);
-                string t2 = JsonConvert.SerializeObject(expected,      Compiler.JsonSerializer);
-                Assert.AreEqual(t1, t2);
-
-                #endregion
+                for (var k = 0; k < source.Tokens.Count; k++) {
+                    if (k == 2 &&
+                        source.Tokens[k] is NumberToken num
+                     && expected[k] is NumberToken num2) {
+                        Assert.IsTrue(num.Options.TestEquality(num2.Options));
+                    }
+                    Assert.IsTrue(expected[k].TEquals(source.Tokens[k]));
+                }
             }
+        }
+    }
+
+    internal static class TUtils {
+        internal static bool TEquals(this Token a, Token b) {
+            return a.Type == b.Type
+                && string.Equals(a.Value,       b.Value)
+                && string.Equals(a.Whitespaces, b.Whitespaces);
         }
     }
 }

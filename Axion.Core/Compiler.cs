@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Axion.Core.Processing;
+using Axion.Core.Specification;
 using Axion.Core.Visual;
 using CommandLine;
 using ConsoleExtensions;
@@ -14,18 +15,13 @@ namespace Axion.Core {
     ///     Main class to work with Axion source code.
     /// </summary>
     public static class Compiler {
-        public const string SourceFileExtension = ".ax";
-        public const string OutputFileExtension = ".ax";
-
         /// <summary>
         ///     Main settings of JSON debug information formatting.
         /// </summary>
         public static readonly JsonSerializerSettings JsonSerializer = new JsonSerializerSettings {
-            Formatting = Formatting.Indented
+            Formatting       = Formatting.Indented,
+            TypeNameHandling = TypeNameHandling.All
         };
-
-        internal const string HelpHint =
-            "Type '-h', or '--help' to get documentation about launch arguments.";
 
         /// <summary>
         ///     Path to directory where compiler executable is located.
@@ -60,22 +56,26 @@ namespace Axion.Core {
             }
         );
 
-        private static void PrintGreeting() {
+        private const string helpHint =
+            "Type '-h', or '--help' to get documentation about launch arguments.";
+
+        private static void PrintIntro() {
             Console.InputEncoding   = Console.OutputEncoding = Encoding.UTF8;
             Console.ForegroundColor = ConsoleColor.White;
             const string header = "Axion programming language compiler toolset";
             Console.Title = header;                                                                               // set title
             ConsoleUI.WriteLine((header + " v. ", ConsoleColor.White), (Version, ConsoleColor.DarkYellow));       // print version
             ConsoleUI.WriteLine(("Working in ", ConsoleColor.White),   (WorkDirectory, ConsoleColor.DarkYellow)); // print directory
-            ConsoleUI.WriteLine(HelpHint + "\n");
+            ConsoleUI.WriteLine(helpHint + "\n");
         }
 
         public static void Init(string[] arguments) {
             if (!Directory.Exists(OutputDirectory)) {
                 Directory.CreateDirectory(OutputDirectory);
             }
+            Spec.AssertNoErrorsInDefinitions();
 
-            PrintGreeting();
+            PrintIntro();
 
             // main processing loop
             while (true) {
@@ -150,7 +150,7 @@ namespace Axion.Core {
                 if (alignedInput == "CLS") {
                     // clear screen
                     Console.Clear();
-                    PrintGreeting();
+                    PrintIntro();
                     continue;
                 }
                 // TODO parse "help(module)" argument
@@ -183,7 +183,7 @@ namespace Axion.Core {
                 }
                 InputFiles = new FileInfo[filesCount];
                 for (var i = 0; i < filesCount; i++) {
-                    InputFiles[i] = new FileInfo(options.Files.ElementAt(i));
+                    InputFiles[i] = new FileInfo(Utilities.TrimMatchingChars(options.Files.ElementAt(i), '"'));
                 }
                 source = new SourceCode(InputFiles[0]);
             }
@@ -193,7 +193,7 @@ namespace Axion.Core {
             else {
                 ConsoleUI.LogError(
                     "Neither code nor path to source file not specified.\n" +
-                    HelpHint
+                    helpHint
                 );
                 return;
             }

@@ -6,11 +6,11 @@ using CommandLine;
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace Axion.Core {
-  /// <summary>
-  ///     Stores information about last
-  ///     user arguments in command line.
-  /// </summary>
-  internal class CommandLineArguments {
+    /// <summary>
+    ///     Stores information about last
+    ///     user arguments in command line.
+    /// </summary>
+    internal class CommandLineArguments {
         internal const string HelpText =
             "┌─────────────────────────────┬───────────────────────────────────────────────────────────────┐\r\n" +
             "│        Argument name        │                                                               │\r\n" +
@@ -39,10 +39,10 @@ namespace Axion.Core {
           + "   │     Convert source to 'JavaScript' language.                  │  │\r\n" +
             "│       │ " + nameof(SourceProcessingMode.ConvertPython)
           + "       │     Convert source to 'Python' language.                      ├──┘\r\n" +
-            "│       │ " + nameof(SourceProcessingMode.Lex)
-          + "                 │     Create tokens (lexemes) list from source.                 │\r\n" +
-            "│       │ " + nameof(SourceProcessingMode.Parsing)
-          + "             │     Create tokens list and Abstract Syntax Tree from source.  │\r\n" +
+            "│       │ " + nameof(SourceProcessingMode.Lex) + "                 │     Create tokens (lexemes) list from source.                 │\r\n"
+           +
+            "│       │ " + nameof(SourceProcessingMode.Parsing) + "             │     Create tokens list and Abstract Syntax Tree from source.  │\r\n"
+           +
             "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤\r\n" +
             "│  -d   │ --" + nameof(Debug) + "             │ Save debug information to '<compilerDir>\\output' directory.  │\r\n" +
             "│  -h   │ --" + nameof(Help) + "              │ Display this help screen.                                     │\r\n" +

@@ -1,6 +1,5 @@
-﻿using System;
-using System.Diagnostics.Contracts;
-using System.Linq;
+﻿using System.Linq;
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -11,12 +10,12 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     public class OperatorToken : Token {
         internal readonly OperatorProperties Properties;
 
-        public OperatorToken((int, int) startPosition, OperatorProperties properties)
+        public OperatorToken(Position startPosition, OperatorProperties properties)
             : base(properties.Type, startPosition) {
             Properties = properties;
         }
 
-        public OperatorToken((int, int) startPosition, string value, string whitespaces = "")
+        public OperatorToken(Position startPosition, string value, string whitespaces = "")
             : base(TokenType.Invalid, startPosition, value, whitespaces) {
             Spec.Operators.TryGetValue(value, out Properties);
             Type = Properties.Type;
@@ -29,15 +28,11 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
     [JsonObject]
     public struct OperatorProperties {
-        [JsonProperty] internal readonly InputSide InputSide;
-
+        [JsonProperty] internal readonly InputSide     InputSide;
         [JsonProperty] internal readonly Associativity Associativity;
-
-        [JsonProperty] internal readonly bool Overloadable;
-
-        [JsonProperty] internal readonly int Precedence;
-
-        [JsonProperty] internal readonly TokenType Type;
+        [JsonProperty] internal readonly bool          Overloadable;
+        [JsonProperty] internal readonly int           Precedence;
+        [JsonProperty] internal readonly TokenType     Type;
 
         internal OperatorProperties(
             TokenType     type,
@@ -51,30 +46,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Associativity = associativity;
             Overloadable  = overloadable;
             Precedence    = precedence;
-        }
-
-        internal bool IsOpenBrace => Type == TokenType.OpLeftParenthesis
-                                  || Type == TokenType.OpLeftBracket
-                                  || Type == TokenType.OpLeftBrace;
-
-        internal bool IsCloseBrace => Type == TokenType.OpRightParenthesis
-                                   || Type == TokenType.OpRightBracket
-                                   || Type == TokenType.OpRightBrace;
-
-        [Pure]
-        internal TokenType GetMatchingBrace() {
-            switch (Type) {
-                // open : close
-                case TokenType.OpLeftParenthesis: return TokenType.OpRightParenthesis;
-                case TokenType.OpLeftBracket:     return TokenType.OpRightBracket;
-                case TokenType.OpLeftBrace:       return TokenType.OpRightBrace;
-                // close : open
-                case TokenType.OpRightParenthesis: return TokenType.OpLeftParenthesis;
-                case TokenType.OpRightBracket:     return TokenType.OpLeftBracket;
-                case TokenType.OpRightBrace:       return TokenType.OpLeftBrace;
-                // should never be
-                default: throw new NotSupportedException("Cannot return matching brace for non-brace operator.");
-            }
         }
 
         public override bool Equals(object obj) {

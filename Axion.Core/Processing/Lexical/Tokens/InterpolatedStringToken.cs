@@ -5,7 +5,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         internal readonly List<Interpolation> Interpolations;
 
         public InterpolatedStringToken(
-            (int, int)           startPosition,
+            Position             startPosition,
             StringLiteralOptions options,
             List<Interpolation>  interpolations,
             string               value,

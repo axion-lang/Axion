@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Axion.Core;
 using Axion.Core.Processing;
+using Axion.Core.Specification;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit {
@@ -80,7 +80,7 @@ namespace Axion.Testing.NUnit {
 
         private void ScanSources(DirectoryInfo dir) {
             foreach (FileInfo file in dir.EnumerateFiles()) {
-                if (file.Extension == ".ax") {
+                if (file.Extension == Spec.SourceFileExtension) {
                     sourceFiles.Add(file);
                 }
             }
@@ -91,7 +91,7 @@ namespace Axion.Testing.NUnit {
 
         private SourceCode MakeSourceFromFile(string fileName) {
             return new SourceCode(
-                new FileInfo(inPath + fileName + Compiler.SourceFileExtension),
+                new FileInfo(inPath + fileName + Spec.SourceFileExtension),
                 outPath + fileName + testExtension
             );
         }
@@ -100,14 +100,14 @@ namespace Axion.Testing.NUnit {
         public void NestedMultilineCommentInvalid() {
             string[] files = Directory.GetFiles(
                 inPath,
-                $"{nameof(NestedMultilineCommentInvalid)}*{Compiler.SourceFileExtension}"
+                $"{nameof(NestedMultilineCommentInvalid)}*{Spec.SourceFileExtension}"
             );
 
             // check for error
             for (var i = 1; i < files.Length + 1; i++) {
                 SourceCode source = MakeSourceFromFile(nameof(NestedMultilineCommentInvalid) + "_" + i);
                 source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
-                Assert.That(source.Errors.Count == 1);
+                Assert.AreEqual(1, source.Blames.Count);
             }
         }
 
@@ -115,14 +115,14 @@ namespace Axion.Testing.NUnit {
         public void NestedMultilineCommentValid() {
             string[] files = Directory.GetFiles(
                 inPath,
-                $"{nameof(NestedMultilineCommentValid)}*{Compiler.SourceFileExtension}"
+                $"{nameof(NestedMultilineCommentValid)}*{Spec.SourceFileExtension}"
             );
 
             // validate
             for (var i = 1; i < files.Length + 1; i++) {
                 SourceCode source = MakeSourceFromFile(nameof(NestedMultilineCommentValid) + "_" + i);
                 source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
-                Assert.That(source.Errors.Count == 0);
+                Assert.AreEqual(0, source.Blames.Count);
             }
         }
 
@@ -130,14 +130,14 @@ namespace Axion.Testing.NUnit {
         public void StringsValidation() {
             SourceCode source = MakeSourceFromFile(nameof(StringsValidation));
             source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
-            Assert.That(source.Errors.Count == 0);
+            Assert.AreEqual(6, source.Blames.Count);
         }
 
         [Test]
         public void VariousStuffValid() {
             SourceCode source = MakeSourceFromFile(nameof(VariousStuffValid));
             source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
-            Assert.That(source.Errors.Count == 0);
+            Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
@@ -149,7 +149,7 @@ namespace Axion.Testing.NUnit {
                     outPath + nameof(DesignPatternsValidation) + i + testExtension
                 );
                 source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
-                Assert.That(source.Errors.Count == 0, file.Name + ": Errors count > 0");
+                Assert.That(source.Blames.Count == 0, file.Name + ": Errors count > 0");
                 Assert.That(source.Tokens.Count > 0,  file.Name + ": Tokens count == 0");
             }
         }

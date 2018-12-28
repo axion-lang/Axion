@@ -3,7 +3,7 @@
     ///     Represents a &lt;indentation decrease&gt; <see cref="Token" />.
     /// </summary>
     public class OutdentToken : Token {
-        public OutdentToken((int, int) startPosition)
+        public OutdentToken(Position startPosition)
             : base(TokenType.Outdent, startPosition) {
         }
     }

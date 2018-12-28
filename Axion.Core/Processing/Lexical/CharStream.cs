@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical {
     public class CharStream {
@@ -31,7 +32,7 @@ namespace Axion.Core.Processing.Lexical {
         /// <summary>
         ///     Line and column position of current processing character in source.
         /// </summary>
-        internal (int line, int column) Position => (lineIdx, columnIdx);
+        internal Position Position => (lineIdx, columnIdx);
 
         /// <summary>
         ///     Length of previous processed line.
@@ -68,8 +69,8 @@ namespace Axion.Core.Processing.Lexical {
         internal CharStream(CharStream stream) {
             Source    = stream.Source;
             CharIdx   = stream.CharIdx;
-            lineIdx   = stream.Position.line;
-            columnIdx = stream.Position.column;
+            lineIdx   = stream.Position.Line;
+            columnIdx = stream.Position.Column;
         }
 
         /// <summary>

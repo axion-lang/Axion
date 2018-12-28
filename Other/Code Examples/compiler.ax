@@ -145,8 +145,7 @@ public static class Compiler:
                 #if alignedInput.StartsWith("HELP"):
                 #    # give help about some module/function.
                 #    # should have access to all documentation in standard library.
-                #}
-
+                
                 # initialize editor
                 editor = new ConsoleCodeEditor(
                     false,

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Lexical;
+using Axion.Core.Processing.Lexical.Lexer;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntax.Parser;
 using Axion.Core.Processing.Syntax.Tree;
+using Axion.Core.Specification;
 using ConsoleExtensions;
 using Newtonsoft.Json;
 
@@ -13,50 +15,48 @@ namespace Axion.Core.Processing {
     ///     Container of Axion source code;
     ///     performs different kinds of code processing.
     /// </summary>
+    [JsonObject]
     public sealed class SourceCode {
+        /// <summary>
+        ///     Lines of source code picked from string or file.
+        /// </summary>
+        [JsonProperty] public readonly string Code;
+
+        /// <summary>
+        ///     Tokens list generated from source.
+        /// </summary>
+        [JsonProperty] public readonly List<Token> Tokens = new List<Token>();
+
+        /// <summary>
+        ///     Abstract Syntax Tree generated from <see cref="Tokens" />.
+        /// </summary>
+        [JsonProperty] public readonly Ast SyntaxTree;
+
+        /// <summary>
+        ///     Contains all errors, warnings and messages that raised while processing <see cref="SourceCode" />.
+        /// </summary>
+        [JsonProperty] public readonly List<Exception> Blames = new List<Exception>();
+
+        [JsonProperty]
+        public SourceProcessingOptions Options { get; private set; }
+
+        #region File paths
+
         /// <summary>
         ///     File extension of <see cref="DebugFilePath" />.
         /// </summary>
         private const string debugExtension = ".dbg.json";
 
         /// <summary>
-        ///     Tokens list generated from source.
-        /// </summary>
-        public readonly List<Token> Tokens = new List<Token>();
-
-        /// <summary>
-        ///     Abstract Syntax Tree generated from <see cref="Tokens" />.
-        /// </summary>
-        public readonly Ast SyntaxTree;
-
-        /// <summary>
-        ///     Contains all errors that raised while processing <see cref="SourceCode" />.
-        /// </summary>
-        public readonly List<Exception> Errors = new List<Exception>();
-
-        /// <summary>
-        ///     Contains all warnings that found while processing <see cref="SourceCode" />.
-        /// </summary>
-        public readonly List<Exception> Warnings = new List<Exception>();
-
-        /// <summary>
-        ///     Lines of source code picked from string or file.
-        /// </summary>
-        public readonly string Code;
-
-        public SourceProcessingOptions Options { get; private set; }
-
-        /// <summary>
         ///     Path to file where generated result is located.
-        ///     If not specified in constructor, then this is assigned to
-        ///     <see cref="Compiler.OutputDirectory" />\ + "latest" + <see cref="Compiler.OutputFileExtension" />
+        ///     When not specified in constructor,
+        ///     then file name assigned to date and time of instance creation.
         /// </summary>
         internal string OutputFilePath { get; private set; }
 
         /// <summary>
         ///     Path to file where source code is located.
-        ///     When <see cref="SourceCode(string, string)" /> or
-        ///     <see cref="SourceCode(string[], string)" /> is used,
+        ///     When not specified in constructor,
         ///     then file name assigned to date and time of instance creation.
         /// </summary>
         internal string SourceFilePath { get; private set; }
@@ -71,6 +71,8 @@ namespace Axion.Core.Processing {
         ///     Path to file where processing debug output is located.
         /// </summary>
         internal string DebugFilePath { get; private set; }
+
+        #endregion
 
         /// <summary>
         ///     Creates new <see cref="SourceCode" /> instance
@@ -94,9 +96,9 @@ namespace Axion.Core.Processing {
             if (!file.Exists) {
                 throw new FileNotFoundException("Source file doesn't exists", file.FullName);
             }
-            if (file.Extension != Compiler.SourceFileExtension) {
+            if (file.Extension != Spec.SourceFileExtension) {
                 throw new ArgumentException(
-                    "Source file must have '" + Compiler.SourceFileExtension + "' extension.",
+                    "Source file must have '" + Spec.SourceFileExtension + "' extension.",
                     nameof(file)
                 );
             }
@@ -107,6 +109,9 @@ namespace Axion.Core.Processing {
             // set content
             SyntaxTree = new Ast(this);
             Code       = File.ReadAllText(file.FullName);
+            if (!Code.EndsWith("\n")) {
+                Code += "\n";
+            }
         }
 
         /// <summary>
@@ -117,13 +122,13 @@ namespace Axion.Core.Processing {
         /// </summary>
         public SourceCode(string[] sourceLines, string outFilePath = null) {
             InitializeFilePaths(
-                Compiler.OutputDirectory + DateTime.Now.ToFileName() + Compiler.SourceFileExtension,
+                Compiler.OutputDirectory + DateTime.Now.ToFileName() + Spec.SourceFileExtension,
                 outFilePath
             );
 
             // set content
             SyntaxTree = new Ast(this);
-            Code       = string.Join("\n", sourceLines);
+            Code       = string.Join("\n", sourceLines) + "\n";
         }
 
         private void InitializeFilePaths(
@@ -147,7 +152,7 @@ namespace Axion.Core.Processing {
                 outFilePath = SourceFileName;
             }
             if (!Path.HasExtension(outFilePath)) {
-                outFilePath += Compiler.OutputFileExtension;
+                outFilePath += Spec.OutputFileExtension;
             }
             if (!Path.IsPathRooted(outFilePath)) {
                 outFilePath = Compiler.OutputDirectory + outFilePath;
@@ -168,7 +173,7 @@ namespace Axion.Core.Processing {
             SourceProcessingOptions options = SourceProcessingOptions.None
         ) {
             Options = options;
-            ConsoleUI.LogInfo($"--- Compiling '{SourceFileName}'");
+            ConsoleUI.LogInfo($"- Compiling '{SourceFileName}'");
             if (Code.Length == 0) {
                 ConsoleUI.LogError("Source is empty. Compilation aborted.");
                 FinishCompilation();
@@ -192,17 +197,16 @@ namespace Axion.Core.Processing {
         }
 
         private void Tokenizing() {
-            ConsoleUI.LogInfo("-- Tokens list generation");
-            new Lexer(Code, Tokens, Errors, Warnings, Options).Process();
+            ConsoleUI.LogInfo("--- Tokens list generation");
+            new Lexer(Code, Tokens, Blames, Options).Process();
         }
 
         private void Parsing() {
-            ConsoleUI.LogInfo("-- Abstract Syntax Tree generation");
+            ConsoleUI.LogInfo("--- Abstract Syntax Tree generation");
+            new SyntaxParser(Code, Tokens, SyntaxTree, Blames).Process(false);
         }
 
-        private void GenerateCode(
-            SourceProcessingMode mode
-        ) {
+        private void GenerateCode(SourceProcessingMode mode) {
             switch (mode) {
                 case SourceProcessingMode.Interpret: {
                     ConsoleUI.LogError("Interpretation support is in progress!");
@@ -221,42 +225,32 @@ namespace Axion.Core.Processing {
 
         private void FinishCompilation() {
             if (Options.HasFlag(SourceProcessingOptions.SyntaxAnalysisDebugOutput)) {
-                ConsoleUI.LogInfo($"-- Saving debugging information to '{DebugFilePath}'");
+                ConsoleUI.LogInfo($"--- Saving debugging information to '{DebugFilePath}'");
                 SaveDebugInfoToFile();
             }
 
-            bool hasErrors = Errors.Count > 0;
-            if (hasErrors) {
-                foreach (Exception exception in Errors) {
-                    var error = (SyntaxException) exception;
-                    error.Print();
-                }
-            }
-            if (Warnings.Count > 0) {
-                foreach (Exception exception in Warnings) {
-                    var warning = (SyntaxException) exception;
-                    warning.Print();
+            bool hasBlames = Blames.Count > 0;
+            if (hasBlames) {
+                foreach (Exception blame in Blames) {
+                    var exception = (LanguageException) blame;
+                    exception.Print();
                 }
             }
 
-            if (hasErrors) {
-                ConsoleUI.LogInfo("--- Compilation aborted due to errors above.");
+            if (hasBlames) {
+                ConsoleUI.LogInfo("- Compilation aborted due to errors above.");
             }
             else {
-                ConsoleUI.LogInfo("--- Compilation completed.");
+                ConsoleUI.LogInfo("- Compilation completed.");
             }
         }
 
         /// <summary>
-        ///     Saves <see cref="SourceCode" /> debug information
+        ///     Saves processed source debug information
         ///     in JSON format.
         /// </summary>
         private void SaveDebugInfoToFile() {
-            string debugInfo =
-                $@"{{
-""tokens"": {JsonConvert.SerializeObject(Tokens, Compiler.JsonSerializer)}
-}}";
-            File.WriteAllText(DebugFilePath, debugInfo);
+            File.WriteAllText(DebugFilePath, JsonConvert.SerializeObject(this, Compiler.JsonSerializer));
         }
     }
 }

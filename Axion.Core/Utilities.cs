@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Specification;
 
 namespace Axion.Core {
     internal static class Utilities {
         private static readonly DateTimeFormatInfo dateTimeFormat      = new CultureInfo("en-US").DateTimeFormat;
         private const           string             timedFileNameFormat = "yyyy-MMM-dd__HH-mm-ss";
 
-        /// <summary>
-        ///     Returns count of bits set to 1 on specified <see cref="number" />.
-        /// </summary>
         public static int GetSetBitCount(long number) {
             var count = 0;
 
@@ -37,31 +36,20 @@ namespace Axion.Core {
             return dt.ToString(timedFileNameFormat, dateTimeFormat);
         }
 
-        /// <summary>
-        ///     Returns
-        /// </summary>
-        internal static string[] GetLines(this string text, int fromIndex, int count) {
-            //int newlineIndex = text.IndexOf("\n", StringComparison.InvariantCulture);
-            //if (newlineIndex == -1) {
-            //    return new[] { text };
-            //}
-            //var lines = new List<string>();
-            //if (fromIndex == 0) {
-            //    lines.Add(text.Substring(0, newlineIndex + 1));
-            //}
-            //int i = 0;
-            //int prevNewlineIndex = newlineIndex;
-            //while (newlineIndex != -1 && lines.Count < count) {
-            //    text = text.Substring(prevNewlineIndex, newlineIndex + 1);
-            //    newlineIndex = text.IndexOf("\n", StringComparison.InvariantCulture);
-            //    if (i >= fromIndex) {
-            //        lines.Add(text.Substring(0, newlineIndex + 1));
-            //    }
-            //    prevNewlineIndex = newlineIndex;
-            //    i++;
-            //}
-            string[] lines = text.Split(Spec.EndOfLines, StringSplitOptions.None);
-            return lines.Skip(fromIndex).Take(count).ToArray();
+        internal static string GetValue(this TokenType type) {
+            string value = Spec.Keywords.FirstOrDefault(kvp => kvp.Value == type).Key;
+            if (value != null) {
+                return value;
+            }
+            value = Spec.Operators.FirstOrDefault(kvp => kvp.Value.Type == type).Key;
+            if (value != null) {
+                return value;
+            }
+            value = Spec.Symbols.FirstOrDefault(kvp => kvp.Value == type).Key;
+            if (value != null) {
+                return value;
+            }
+            return type.ToString("G");
         }
 
         #region Get user input and split it into launch arguments

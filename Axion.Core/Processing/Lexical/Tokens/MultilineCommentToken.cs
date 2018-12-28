@@ -1,4 +1,6 @@
 ﻿using System;
+using Axion.Core.Processing.Lexical.Tokens.Interfaces;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
@@ -7,23 +9,25 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     public class MultilineCommentToken : Token, IClosingToken {
         public bool IsUnclosed { get; }
 
-        public MultilineCommentToken((int, int) startPosition, string value, bool isUnclosed = false)
+        public MultilineCommentToken(Position startPosition, string value, bool isUnclosed = false)
             : base(TokenType.Comment, startPosition, value) {
             IsUnclosed = isUnclosed;
 
             int linesCount        = value.Split(Spec.EndOfLines, StringSplitOptions.None).Length;
             int commentMarkLength = Spec.MultiCommentStart.Length;
+            int endCol            = Span.End.Column;
             if (linesCount == 1) {
                 if (isUnclosed) {
-                    EndColumn += commentMarkLength;
+                    endCol += commentMarkLength;
                 }
                 else {
-                    EndColumn += commentMarkLength * 2;
+                    endCol += commentMarkLength * 2;
                 }
             }
             else if (!isUnclosed) {
-                EndColumn += commentMarkLength;
+                endCol += commentMarkLength;
             }
+            Span = new Span(Span.Start, (Span.End.Line, endCol));
         }
 
         public override string ToAxionCode() {

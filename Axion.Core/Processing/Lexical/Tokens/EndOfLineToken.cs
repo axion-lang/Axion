@@ -3,8 +3,9 @@
     ///     Represents an &lt;end of line&gt; ( \n or \r\n ) <see cref="Token" />.
     /// </summary>
     public class EndOfLineToken : Token {
-        public EndOfLineToken((int, int) startPosition, string tokenValue = "\n", string whitespaces = "")
-            : base(TokenType.Newline, startPosition, tokenValue, whitespaces) {
+        public EndOfLineToken(Position startPosition, string tokenValue = "\n", string whitespaces = "")
+            : base(TokenType.Newline, startPosition, tokenValue) {
+            AppendValue(whitespaces);
         }
     }
 }

@@ -1,11 +1,13 @@
 ﻿using System;
+using Axion.Core.Processing.Lexical.Tokens.Interfaces;
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents a &lt;string literal&gt; <see cref="Token" />.
     /// </summary>
-    public class StringToken : Token, IClosingToken {
+    public class StringToken : Token, IClosingToken, ILiteralToken {
         [JsonProperty]
         public string RawValue { get; }
 
@@ -16,7 +18,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         internal StringLiteralOptions Options { get; }
 
         public StringToken(
-            (int, int)           startPosition,
+            Position             startPosition,
             StringLiteralOptions options,
             string               value,
             string               rawValue   = null,
@@ -28,40 +30,42 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Options    = options;
             RawValue   = rawValue;
             IsUnclosed = isUnclosed;
-            EndLine   = StartLine;
-            
+            int endLine = Span.Start.Line;
+            int endCol  = Span.End.Column;
+
             // addition of quotes length:
             // compute count of quotes on token end line:
             // Multiline:  6 quotes on 1  line,  (3 * 2);
             //             3 quotes on 2+ lines, (3 * 1);
             // One-line:   2 quotes on 1  line,  (1 * 2);
             //             1 quote  on 2+ lines, (1 * 1).
-            string[] lines       = RawValue.Split(Spec.EndOfLines, StringSplitOptions.None);
+            string[] lines = RawValue.Split(Spec.EndOfLines, StringSplitOptions.None);
             if (lines.Length == 1) {
-                EndColumn = StartColumn;
-                EndColumn += lines[lines.Length - 1].Length;
+                endCol =  Span.Start.Column;
+                endCol += lines[lines.Length - 1].Length;
                 // if 1 line: add 1 for each prefix letter
                 if (Options.IsRaw) {
-                    EndColumn++;
+                    endCol++;
                 }
                 if (Options.IsFormatted) {
-                    EndColumn++;
+                    endCol++;
                 }
 
                 if (IsUnclosed) {
-                    EndColumn += Options.QuotesCount;
+                    endCol += Options.QuotesCount;
                 }
                 else {
-                    EndColumn += Options.QuotesCount * 2;
+                    endCol += Options.QuotesCount * 2;
                 }
             }
             else if (lines.Length > 1) {
-                EndColumn = lines[lines.Length - 1].Length;
+                endCol = lines[lines.Length - 1].Length;
                 if (!IsUnclosed) {
-                    EndColumn += Options.QuotesCount;
+                    endCol += Options.QuotesCount;
                 }
-                EndLine += lines.Length - 1;
+                endLine += lines.Length - 1;
             }
+            Span = new Span(Span.Start, (endLine, endCol));
         }
 
         public override string ToAxionCode() {
