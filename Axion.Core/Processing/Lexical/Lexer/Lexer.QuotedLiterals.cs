@@ -54,7 +54,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     AddPiece("\n");
                 }
 
-                // check for end of line/file
+                // check for end of line/stream
                 if (c == Spec.EndOfStream
                  || Stream.AtEndOfLine() && delimiter.Length == 1) {
                     result = new StringToken(
@@ -337,10 +337,10 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 // unicode character
                 // 16 bits \uxxxx
                 case 'u':
-                // 32 bits \U00xxxxxx
+                // 32 bits \U(XX)xxxxxx
                 case 'U': {
                     char u             = c;
-                    int  unicodeSymLen = u == 'u' ? 4 : 8;
+                    int  unicodeSymLen = u == 'u' ? 4 : Spec.Unicode32BitHexLength;
                     Stream.Move();
                     var number = "";
                     var error  = false;

@@ -2,17 +2,11 @@ using System.Collections.Generic;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 
 namespace Axion.Core.Processing.Syntax.Tree.Comprehensions {
-    public abstract class Comprehension : Expression {
-        public abstract IList<ComprehensionIterator> Iterators { get; }
-        public abstract string                       NodeName  { get; }
+    public interface IComprehension {
+        IList<ComprehensionIterator> Iterators { get; }
     }
 
-    public sealed class ListComprehension : Comprehension {
-        public ListComprehension(Expression item, IList<ComprehensionIterator> iterators) {
-            Item      = item;
-            Iterators = iterators;
-        }
-
+    public sealed class ListComprehension : Expression, IComprehension {
         public ListComprehension(Expression item, IList<ComprehensionIterator> iterators, Position start, Position end) {
             Item      = item;
             Iterators = iterators;
@@ -21,17 +15,10 @@ namespace Axion.Core.Processing.Syntax.Tree.Comprehensions {
 
         public Expression Item { get; }
 
-        public override IList<ComprehensionIterator> Iterators { get; }
-
-        public override string NodeName => "list comprehension";
+        public IList<ComprehensionIterator> Iterators { get; }
     }
 
-    public sealed class SetComprehension : Comprehension {
-        public SetComprehension(Expression item, IList<ComprehensionIterator> iterators) {
-            Item      = item;
-            Iterators = iterators;
-        }
-
+    public sealed class SetComprehension : Expression, IComprehension {
         public SetComprehension(Expression item, IList<ComprehensionIterator> iterators, Position start, Position end) {
             Item      = item;
             Iterators = iterators;
@@ -40,18 +27,10 @@ namespace Axion.Core.Processing.Syntax.Tree.Comprehensions {
 
         public Expression Item { get; }
 
-        public override IList<ComprehensionIterator> Iterators { get; }
-
-        public override string NodeName => "set comprehension";
+        public IList<ComprehensionIterator> Iterators { get; }
     }
 
-    public sealed class MapComprehension : Comprehension {
-        public MapComprehension(Expression key, Expression value, ComprehensionIterator[] iterators) {
-            Key       = key;
-            Value     = value;
-            Iterators = iterators;
-        }
-
+    public sealed class MapComprehension : Expression, IComprehension {
         public MapComprehension(Expression key, Expression value, ComprehensionIterator[] iterators, Position start, Position end) {
             Key       = key;
             Value     = value;
@@ -63,8 +42,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Comprehensions {
 
         public Expression Value { get; }
 
-        public override IList<ComprehensionIterator> Iterators { get; }
-
-        public override string NodeName => "map comprehension";
+        public IList<ComprehensionIterator> Iterators { get; }
     }
 }

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
@@ -15,38 +14,51 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     stmt:
         ///         simple_stmt | compound_stmt
         ///     compound_stmt:
-        ///         if_stmt  | while_stmt | for_stmt  |
-        ///         try_stmt | with_stmt  | class_def |
-        ///         func_def | use_stmt   | mod_stmt
+        ///         if_stmt   | while_stmt | for_stmt |
+        ///         try_stmt  | with_stmt  | use_stmt |
+        ///         decorated | class_def  | enum_def |
+        ///         func_def
         /// </c>
         /// </summary>
-        private Statement ParseStmt(TokenType terminator = None) {
+        private Statement ParseStmt(TokenType terminator = None, bool onlyDecorated = false) {
+            if (!onlyDecorated) {
+                switch (stream.Peek.Type) {
+                    case KeywordIf: {
+                        return ParseIfStmt();
+                    }
+                    case KeywordWhile: {
+                        return ParseWhileStmt();
+                    }
+                    case KeywordFor: {
+                        return ParseForStmt();
+                    }
+                    case KeywordTry: {
+                        return ParseTryStatement();
+                    }
+                    case KeywordWith: {
+                        return ParseWithStmt();
+                    }
+                    //case KeywordUse: {
+                    //    return ParseImportStmt();
+                    //}
+                    case At: {
+                        return ParseDecorated();
+                    }
+                }
+            }
             switch (stream.Peek.Type) {
-                case KeywordIf: {
-                    return ParseIfStmt();
-                }
-                case KeywordWhile: {
-                    return ParseWhileStmt();
-                }
-                case KeywordFor: {
-                    return ParseForStmt();
-                }
-                case KeywordTry: {
-                    return ParseTryStatement();
-                }
-                case KeywordWith: {
-                    return ParseWithStmt();
-                }
                 case KeywordClass: {
-                    return ParseClass();
+                    return ParseClassDef();
                 }
-                // TODO: func def
-                //case KeywordUse: {
-                //    return ParseImportStmt();
-                //}
+                case KeywordEnum: {
+                    return ParseEnumDef();
+                }
+                case KeywordFn: {
+                    return ParseFunctionDef();
+                }
                 default: {
-                    if (Spec.Modifiers.Contains(stream.Peek.Type)) {
-                        return ParseModifiersStmt();
+                    if (onlyDecorated) {
+                        ReportError("Invalid decorated statement", stream.Peek);
                     }
                     return ParseSimpleStmt(terminator);
                 }
@@ -60,7 +72,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     if_stmt:
         ///         'if' if_stmt_branch
         ///         ('elif' if_stmt_branch)*
-        ///         ['else' suite]
+        ///         ['else' body]
         /// </c>
         /// </summary>
         private IfStatement ParseIfStmt() {
@@ -77,7 +89,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             // else
             Statement elseBranch = null;
             if (stream.MaybeEat(KeywordElse)) {
-                elseBranch = ParseSuite();
+                elseBranch = ParseBody();
             }
 
             return new IfStatement(branches, elseBranch);
@@ -86,14 +98,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <summary>
         /// <c>
         ///     if_stmt_branch:
-        ///         test suite
+        ///         test body
         /// </c>
         /// </summary>
         private IfStatementBranch ParseIfStmtBranch() {
             Token      start = stream.Token;
             Expression expr  = ParseTestExpr();
-            Statement  suite = ParseSuite();
-            return new IfStatementBranch(expr, suite, start);
+            Statement  body  = ParseBody();
+            return new IfStatementBranch(expr, body, start);
         }
 
         #endregion
@@ -103,17 +115,17 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <summary>
         /// <c>
         ///     while_stmt:
-        ///         'while' test suite ['else' suite]
+        ///         'while' test body ['else' body]
         /// </c>
         /// </summary>
         private WhileStatement ParseWhileStmt() {
             Token start = StartNewStmt(KeywordWhile);
 
             Expression condition   = ParseTestExpr();
-            Statement  body        = ParseLoopSuite();
+            Statement  body        = ParseLoopBody();
             Statement  noBreakBody = null;
             if (stream.MaybeEat(KeywordElse)) {
-                noBreakBody = ParseSuite();
+                noBreakBody = ParseBody();
             }
             return new WhileStatement(condition, body, noBreakBody, start);
         }
@@ -127,7 +139,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     for_stmt:
         ///         'for' (exprlist 'in' testlist |
         ///                expr_stmt, expr_stmt, expr_stmt)
-        ///         suite ['else' suite]
+        ///         body ['else' body]
         /// </c>
         /// </summary>
         private ForStatement ParseForStmt() {
@@ -147,12 +159,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
             Expression lhs = MakeTupleOrExpr(l, trailingComma);
             stream.Eat(KeywordIn);
             Expression list  = ParseTestListAsExpr();
-            Statement  body  = ParseLoopSuite();
-            Statement  else_ = null;
+            Statement  body  = ParseLoopBody();
+            Statement  @else = null;
             if (stream.MaybeEat(KeywordElse)) {
-                else_ = ParseSuite();
+                @else = ParseBody();
             }
-            return new ForStatement(lhs, list, body, else_, start);
+            return new ForStatement(lhs, list, body, @else, start);
         }
 
         #endregion
@@ -162,24 +174,24 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <summary>
         /// <c>
         ///     try_stmt:
-        ///         ('try' suite
-        ///         ((except_clause suite)+
-        ///         ['else' suite]
-        ///         ['finally' suite] |
-        ///         'finally' suite))
+        ///         ('try' body
+        ///         ((except_clause body)+
+        ///         ['else' body]
+        ///         ['finally' body] |
+        ///         'finally' body))
         /// </c>
         /// </summary>
         private Statement ParseTryStatement() {
             Token start = StartNewStmt(KeywordTry);
 
             // try
-            Statement body         = ParseSuite();
-            Statement finallySuite = null;
+            Statement body        = ParseBody();
+            Statement finallyBody = null;
 
             // anyway
             if (stream.MaybeEat(KeywordAnyway)) {
-                finallySuite = ParseFinallySuite();
-                return new TryStatement(body, null, null, finallySuite, start);
+                finallyBody = ParseFinallyBody();
+                return new TryStatement(body, null, null, finallyBody, start);
             }
             // catch
             var                 handlers       = new List<TryStatementHandler>();
@@ -191,24 +203,24 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 if (defaultHandler != null) {
                     Blame(BlameType.DefaultCatchMustBeLast, defaultHandler);
                 }
-                if (handler.Test == null) {
+                if (handler.ErrorType == null) {
                     defaultHandler = handler;
                 }
             } while (stream.PeekIs(KeywordCatch));
             // else
-            Statement elseSuite = null;
+            Statement elseBody = null;
             if (stream.MaybeEat(KeywordElse)) {
-                elseSuite = ParseSuite();
+                elseBody = ParseBody();
             }
             // anyway
             if (stream.MaybeEat(KeywordAnyway)) {
                 // If this function has an except block, then it can set the current exception.
-                finallySuite = ParseFinallySuite();
+                finallyBody = ParseFinallyBody();
             }
-            return new TryStatement(body, handlers, elseSuite, finallySuite, start);
+            return new TryStatement(body, handlers.ToArray(), elseBody, finallyBody, start);
         }
 
-        // catch_clause: 'catch' [expression ['as' identifier]]
+        // catch_clause: 'catch' [expr ['as' ID]]
         private TryStatementHandler ParseTryStmtHandler() {
             stream.Eat(KeywordCatch);
 
@@ -218,35 +230,35 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 ast.CurrentFunction.CanSetSysExcInfo = true;
             }
 
-            Position   start = tokenStart;
-            Expression test  = null, target = null;
-            if (!stream.PeekIs(Colon)) {
-                test = ParseTestExpr();
+            Position   start     = tokenStart;
+            Expression errorType = null, name = null;
+            if (!stream.PeekIs(Spec.BlockStarters)) {
+                errorType = ParseTestExpr();
                 if (stream.MaybeEat(KeywordAs)) {
-                    target = ReadName();
+                    name = ParseName();
                 }
             }
-            Statement body = ParseSuite();
-            return new TryStatementHandler(test, target, body, start);
+            Statement body = ParseBody();
+            return new TryStatementHandler(errorType, name, body, start);
         }
 
-        private Statement ParseFinallySuite() {
+        private Statement ParseFinallyBody() {
             if (ast.CurrentFunction != null) {
                 ast.CurrentFunction.ContainsTryFinally = true;
             }
-            Statement finallySuite;
+            Statement finallyBody;
             bool isInFinally     = inFinally,
                  isInFinallyLoop = inFinallyLoop;
             try {
                 inFinally     = true;
                 inFinallyLoop = false;
-                finallySuite  = ParseSuite();
+                finallyBody   = ParseBody();
             }
             finally {
                 inFinally     = isInFinally;
                 inFinallyLoop = isInFinallyLoop;
             }
-            return finallySuite;
+            return finallyBody;
         }
 
         #endregion
@@ -255,9 +267,9 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     with_stmt:
-        ///     'with' with_item (',' with_item)* ':' suite
+        ///         'with' with_item (',' with_item)* ':' body
         ///     with_item:
-        ///     test ['as' expr]
+        ///         test ['as' ID]
         /// </summary>
         private WithStatement ParseWithStmt() {
             Token start = StartNewStmt(KeywordWith);
@@ -272,7 +284,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 items.Add(ParseWithItem());
             }
 
-            Statement body = ParseSuite();
+            Statement body = ParseBody();
             if (items != null) {
                 for (int i = items.Count - 1; i >= 0; i--) {
                     body = new WithStatement(items[i], body, start);
@@ -285,79 +297,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private WithStatementItem ParseWithItem() {
             Position   start          = tokenStart;
             Expression contextManager = ParseTestExpr();
-            Expression variable       = null;
+            Expression name           = null;
             if (stream.MaybeEat(KeywordAs)) {
-                variable = ParseTestExpr();
+                name = ParseName();
             }
 
-            return new WithStatementItem(start, contextManager, variable);
-        }
-
-        #endregion
-
-        #region Class statement
-
-        /// <summary>
-        ///     class_def:
-        ///         'class' ID ['(' args_list ')'] ':' suite
-        /// </summary>
-        private ClassDefinition ParseClass() {
-            Token start = StartNewStmt(KeywordClass);
-
-            NameExpression name = ReadName();
-            if (name == null) {
-                // no name, assume there's no class.
-                return new ClassDefinition(null, new Expression[0], new Expression[0], ErrorStmt());
-            }
-
-            Expression metaClass = null;
-            var        bases     = new List<Expression>();
-            var        keywords  = new List<Expression>();
-            if (stream.MaybeEat(LeftParenthesis)) {
-                foreach (Arg arg in ParseArgumentsList()) {
-                    ArgumentKind argKind = arg.GetArgumentInfo();
-                    if (argKind == ArgumentKind.Simple) {
-                        bases.Add(arg.Value);
-                    }
-                    else if (argKind == ArgumentKind.Named) {
-                        keywords.Add(arg.Value);
-                        if (arg.Name.Name == "metaclass") {
-                            metaClass = arg.Value;
-                        }
-                    }
-                }
-            }
-            var ret = new ClassDefinition(name, bases.ToArray(), keywords.ToArray(), metaClass: metaClass);
-            ast.PushClass(ret);
-
-            // Parse class body
-            Statement body = ParseClassOrFuncBody();
-
-            ClassDefinition ret2 = ast.PopClass();
-            Debug.Assert(ret == ret2);
-
-            ret.Body = body;
-            ret.MarkPosition(start.Span.Start, tokenEnd);
-            return ret;
-        }
-
-        private Statement ParseClassOrFuncBody() {
-            Statement body;
-            bool isInLoop        = inLoop,
-                 isInFinally     = inFinally,
-                 isInFinallyLoop = inFinallyLoop;
-            try {
-                inLoop        = false;
-                inFinally     = false;
-                inFinallyLoop = false;
-                body          = ParseSuite();
-            }
-            finally {
-                inLoop        = isInLoop;
-                inFinally     = isInFinally;
-                inFinallyLoop = isInFinallyLoop;
-            }
-            return body;
+            return new WithStatementItem(start, contextManager, name);
         }
 
         #endregion
@@ -365,8 +310,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         #region Use statement
 
 //        /// <summary>
-//        ///     use_stmt: 'import' module ['as' name] (',' module ['as' name])*        
-//        ///     name: identifier
+//        ///     use_stmt: 'import' module ['as' ID] (',' module ['as' ID])*
 //        /// </summary>
 //        private ImportStatement ParseImportStmt() {
 //            stream.Eat(TokenType.KeywordImport);
@@ -423,8 +367,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
 //            return ret;
 //        }
 //
-//        // 'from' relative_module 'import' identifier ['as' name] (',' identifier ['as' name]) *
-//        // 'from' relative_module 'import' '(' identifier ['as' name] (',' identifier ['as' name])* [','] ')'        
+//        // 'from' relative_module 'import' name ['as' ID] (',' name ['as' ID]) *
+//        // 'from' relative_module 'import' '(' name ['as' ID] (',' name ['as' ID])* [','] ')'        
 //        // 'from' module 'import' "*"                                        
 //        private FromImportStatement ParseFromImportStmt() {
 //            stream.Eat(TokenType.KeywordFrom);
@@ -489,6 +433,52 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         #endregion
 
+        #region Decorators
+
+        /// <summary>
+        ///     decorators:
+        ///         ('@' decorator (',' decorator)* NEWLINE)+
+        /// </summary>
+        private List<Expression> ParseDecorators() {
+            var decorators = new List<Expression>();
+
+            while (stream.MaybeEat(At)) {
+                Expression decorator = ParseDecorator();
+                while (stream.PeekIs(Comma)) {
+                    stream.NextToken();
+                    if (stream.PeekIs(Newline)) {
+                        ReportError("Decorators list must be placed on one line.", decorator);
+                    }
+                    decorators.Add(decorator);
+                    decorator = ParseDecorator();
+                }
+
+                stream.EatNewline();
+                decorators.Add(decorator);
+            }
+
+            return decorators;
+        }
+
+        /// <summary>
+        ///     decorator:
+        ///         name ["(" [argument_list [","]] ")"]
+        /// </summary>
+        private Expression ParseDecorator() {
+            // on '@'
+            Position   start     = tokenStart;
+            Expression decorator = ParseName(true);
+            if (stream.PeekIs(LeftParenthesis)) {
+                stream.NextToken();
+                Arg[] args = FinishGeneratorOrArgList();
+                decorator = FinishCallExpr(decorator, args);
+            }
+            decorator.MarkPosition(start, tokenEnd);
+            return decorator;
+        }
+
+        #endregion
+
         /// <summary>
         /// <c>
         ///     simple_stmt:
@@ -510,18 +500,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
                             // force error here (No terminator)
                             stream.Eat(terminator);
                         }
-                        // else EOF implies a new line
+                        // else EOS implies a new line
                         break;
                     }
                     if (!stream.MaybeEat(Semicolon)) {
                         stream.EatNewline();
                     }
                 }
-                return new SuiteStatement(statements);
-            }
-            if (!stream.MaybeEat(EndOfStream) && !stream.EatNewline()) {
-                // error handling, make sure we're making forward progress
-                stream.NextToken();
+                return new BodyStatement(statements.ToArray());
             }
             return statement;
         }
@@ -569,6 +555,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 case KeywordYield: {
                     return ParseYieldStmt();
                 }
+                // var definition
+//                case Identifier: {
+//                    
+//                }
                 default: {
                     return ParseExpressionStmt();
                 }
@@ -614,7 +604,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
             }
 
-            return new DeleteStatement(expressions, start);
+            return new DeleteStatement(expressions.ToArray(), start);
         }
 
         /// <summary>
@@ -664,7 +654,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
 
             Expression expr = null;
-            if (!Spec.NeverTestTypes.Contains(stream.Peek.Type)) {
+            if (!stream.PeekIs(Spec.NeverTestTypes)) {
                 expr = ParseTestListAsExpr();
             }
 
@@ -681,7 +671,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             Token start = StartNewStmt(KeywordRaise);
 
             Expression expr = null, cause = null;
-            if (!Spec.NeverTestTypes.Contains(stream.Peek.Type)) {
+            if (!stream.PeekIs(Spec.NeverTestTypes)) {
                 expr = ParseTestExpr();
                 if (stream.MaybeEat(KeywordFrom)) {
                     cause = ParseTestExpr();
@@ -712,14 +702,33 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         #endregion
 
-        private Statement ParseLoopSuite() {
+        private Statement ParseTopLevelBody() {
+            Statement body;
+            bool isInLoop        = inLoop,
+                 isInFinally     = inFinally,
+                 isInFinallyLoop = inFinallyLoop;
+            try {
+                inLoop        = false;
+                inFinally     = false;
+                inFinallyLoop = false;
+                body          = ParseBody();
+            }
+            finally {
+                inLoop        = isInLoop;
+                inFinally     = isInFinally;
+                inFinallyLoop = isInFinallyLoop;
+            }
+            return body;
+        }
+
+        private Statement ParseLoopBody() {
             Statement body;
             bool wasInLoop        = inLoop,
                  wasInFinallyLoop = inFinallyLoop;
             try {
                 inLoop        = true;
                 inFinallyLoop = inFinally;
-                body          = ParseSuite();
+                body          = ParseBody();
             }
             finally {
                 inLoop        = wasInLoop;
@@ -730,63 +739,86 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         /// <c>
-        ///     suite:
+        ///     body:
         ///         (':' simple_stmt) |
         ///         ([':'] [NEWLINE] '{' [NEWLINE] stmt+ '}') |
         ///         (':' NEWLINE INDENT stmt+ OUTDENT)
         /// </c>
         /// </summary>
-        private Statement ParseSuite() {
-            var statements = new List<Statement>();
+        private Statement ParseBody(bool usesColon = true) {
+            var                                              statements = new List<Statement>();
+            (TokenType terminator, bool oneLine, bool error) body       = ParseBodyStart(usesColon);
 
-            // 1) colon
-            bool  hasColon = stream.MaybeEat(Colon);
-            Token colon    = stream.Token;
-
-            // single-line suite (not a NEWLINE, not a '{')
-            if (!stream.MaybeEatNewline() && !stream.PeekIs(LeftBrace)) {
-                if (!hasColon) {
-                    // must have a colon
-                    BlameInvalidSyntax(Colon, stream.Peek);
+            if (body.oneLine) {
+                statements.Add(ParseSimpleStmt());
+            }
+            else if (!body.error) {
+                while (true) {
+                    statements.Add(ParseStmt(body.terminator));
+                    if (stream.MaybeEat(body.terminator)) {
+                        break;
+                    }
+                    if (CheckUnexpectedEOS()) {
+                        break;
+                    }
                 }
-                return ParseSimpleStmt();
             }
 
-            // multiline suite
-            TokenType bodyTerminator;
-            // 2) '{'
-            if (stream.MaybeEat(LeftBrace)) {
-                bodyTerminator = RightBrace;
-                stream.MaybeEatNewline();
-            }
-            // 2) INDENT
-            else if (stream.MaybeEat(Indent)) {
-                bodyTerminator = Outdent;
+            return new BodyStatement(statements.ToArray());
+        }
+
+        /// <summary>
+        ///     Starts parsing the statement's body,
+        ///     returns terminator what can be used to parse body end.
+        /// </summary>
+        private (TokenType terminator, bool oneLine, bool error) ParseBodyStart(bool usesColon = true) {
+            // 1) colon
+            bool  hasColon  = stream.MaybeEat(Colon);
+            Token bodyStart = stream.Token;
+
+            // 1-2) newline
+            bool hasNewline;
+            if (hasColon) {
+                // ':' NL
+                hasNewline = stream.MaybeEatNewline();
             }
             else {
-                // no indent or brace? - report suite error.
-                Blame(BlameType.ExpectedBlockDeclaration, stream.Peek);
-                return ErrorStmt();
+                // NL
+                hasNewline = bodyStart.Type == Newline;
+            }
+
+            TokenType terminator;
+            // 1-3) '{'
+            if (stream.MaybeEat(LeftBrace)) {
+                terminator = RightBrace;
+            }
+            // 3) INDENT
+            else if (stream.MaybeEat(Indent)) {
+                terminator = Outdent;
+            }
+            else {
+                // no indent or brace? - report body error
+                if (hasNewline) {
+                    // newline but with invalid follower
+                    Blame(BlameType.ExpectedBlockDeclaration, stream.Peek);
+                    return (None, false, true);
+                }
+                // no newline
+                if (!hasColon && usesColon) {
+                    // must have a colon
+                    BlameInvalidSyntax(Colon, stream.Peek);
+                    return (None, true, true);
+                }
+                return (Newline, true, false);
             }
 
             // ':' followed by '{'
-            if (hasColon && bodyTerminator == RightBrace) {
-                Blame(BlameType.ColonIsNotNeededWithBraces, colon);
+            if (hasColon && terminator == RightBrace) {
+                Blame(BlameType.RedundantColonWithBraces, bodyStart);
             }
 
-            // statements
-            while (true) {
-                statements.Add(ParseStmt(bodyTerminator));
-                if (stream.MaybeEat(bodyTerminator)) {
-                    break;
-                }
-                if (stream.PeekIs(EndOfStream)) {
-                    Blame(BlameType.UnexpectedEndOfCode, stream.Token);
-                    break;
-                }
-            }
-
-            return new SuiteStatement(statements);
+            stream.MaybeEatNewline();
+            return (terminator, false, false);
         }
     }
 }

@@ -1,24 +1,44 @@
 using System;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
-using Axion.Core.Processing.Syntax.Tree.Statements.Interfaces;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
-    public class ForStatement : Statement, IAsyncStatement {
+    public class ForStatement : Statement {
         [JsonProperty]
         public Expression Left { get; }
 
-        [JsonProperty]
-        public Statement Body { get; set; }
+        private Expression list;
 
         [JsonProperty]
-        public Expression List { get; set; }
+        internal Expression List {
+            get => list;
+            set {
+                value.Parent = this;
+                list         = value;
+            }
+        }
+
+        private Statement body;
 
         [JsonProperty]
-        public Statement NoBreakBody { get; }
+        internal Statement Body {
+            get => body;
+            set {
+                value.Parent = this;
+                body         = value;
+            }
+        }
+
+        private Statement noBreakBody;
 
         [JsonProperty]
-        public bool IsAsync { get; set; }
+        internal Statement NoBreakBody {
+            get => noBreakBody;
+            set {
+                value.Parent = this;
+                noBreakBody  = value;
+            }
+        }
 
         public ForStatement(Expression left, Expression list, Statement body, Statement noBreakBody, SpannedRegion start) {
             Left        = left;

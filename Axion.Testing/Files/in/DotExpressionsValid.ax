@@ -1,0 +1,2 @@
+Console.print(value)
+Console.print2(int.tryParse(value).toString())

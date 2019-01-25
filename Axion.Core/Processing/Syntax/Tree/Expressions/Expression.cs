@@ -1,5 +1,5 @@
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
-    public abstract class Expression : SpannedRegion {
+    public abstract class Expression : TreeNode {
         protected Expression() {
         }
 

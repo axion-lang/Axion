@@ -2,14 +2,38 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class ConditionalExpression : Expression {
-        [JsonProperty]
-        internal Expression Condition { get; }
+        private Expression condition;
 
         [JsonProperty]
-        internal Expression TrueExpression { get; }
+        internal Expression Condition {
+            get => condition;
+            set {
+                value.Parent = this;
+                condition    = value;
+            }
+        }
+
+        private Expression trueExpression;
 
         [JsonProperty]
-        internal Expression FalseExpression { get; }
+        internal Expression TrueExpression {
+            get => trueExpression;
+            set {
+                value.Parent   = this;
+                trueExpression = value;
+            }
+        }
+
+        private Expression falseExpression;
+
+        [JsonProperty]
+        internal Expression FalseExpression {
+            get => falseExpression;
+            set {
+                value.Parent    = this;
+                falseExpression = value;
+            }
+        }
 
         public ConditionalExpression(Expression condition, Expression trueExpression, Expression falseExpression) {
             Condition       = condition;

@@ -77,9 +77,9 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///         'if' old_test [comprehension_iterator]
         /// </summary>
         private ComprehensionIf ParseComprehensionIf() {
-            Token      start      = StartNewStmt(TokenType.KeywordIf);
-            Expression expression = ParseTestExpr(true);
-            return new ComprehensionIf(start, expression);
+            Token      start     = StartNewStmt(TokenType.KeywordIf);
+            Expression condition = ParseTestExpr(true);
+            return new ComprehensionIf(start, condition);
         }
     }
 }

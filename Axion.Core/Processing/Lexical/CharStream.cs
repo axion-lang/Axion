@@ -93,7 +93,7 @@ namespace Axion.Core.Processing.Lexical {
             if (indexOfNewline == -1) {
                 return fromCurrentIndex;
             }
-            return Source.Substring(CharIdx, indexOfNewline);
+            return fromCurrentIndex.Substring(0, indexOfNewline + 1);
         }
 
         /// <summary>

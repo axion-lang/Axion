@@ -1,12 +1,23 @@
-using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class SetExpression : Expression {
-        internal Expression[] Expressions;
+        private Expression[] expressions;
 
-        internal SetExpression(List<Expression> expressions, Position start, Position end)
+        [JsonProperty]
+        internal Expression[] Expressions {
+            get => expressions;
+            set {
+                expressions = value;
+                foreach (Expression expr in expressions) {
+                    expr.Parent = this;
+                }
+            }
+        }
+
+        internal SetExpression(Expression[] expressions, Position start, Position end)
             : base(start, end) {
-            Expressions = expressions.ToArray();
+            Expressions = expressions;
         }
     }
 }

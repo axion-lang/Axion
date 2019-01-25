@@ -1,6 +1,6 @@
 ﻿namespace Axion.Core.Processing.Errors {
     /// <summary>
-    ///     Contains all error IDs that can happen while processing <see cref="SourceCode" />.
+    ///     Contains all error IDs that can happen while processing <see cref="SourceUnit" />.
     /// </summary>
     public enum BlameType {
         /// <summary>
@@ -164,7 +164,7 @@
         MisplacedReturn,
         MisplacedYield,
         InvalidExpressionToDelete,
-        DuplicatedArgumentInFunctionDefinition,
+        DuplicatedParameterNameInFunctionDefinition,
         ExpectedIndentation,
         UnexpectedIndentation,
         InvalidIndentation,
@@ -176,6 +176,8 @@
         CannotUseAccessModifierOutsideClass,
         AsyncModifierIsInapplicableToThatStatement,
         ExpectedBlockDeclaration,
+        ConstantValueExpected,
+        InvalidTypeNameExpression,
 
         #endregion
 
@@ -217,7 +219,8 @@
 
         RedundantEmptyUseStatement,
         DoubleNegationIsMeaningless,
-        ColonIsNotNeededWithBraces,
+        RedundantColonWithBraces,
+        RedundantEmptyEnumItemAssociatedValuesList,
 
         #endregion
 

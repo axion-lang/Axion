@@ -3,21 +3,37 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class MemberExpression : Expression {
-        [JsonProperty]
-        internal Expression Target { get; }
+        private Expression target;
 
         [JsonProperty]
-        internal NameExpression Name { get; }
+        internal Expression Target {
+            get => target;
+            set {
+                value.Parent = this;
+                target       = value;
+            }
+        }
 
-        public MemberExpression(Expression target, NameExpression name) {
+        private Expression name;
+
+        [JsonProperty]
+        internal Expression Name {
+            get => name;
+            set {
+                value.Parent = this;
+                name         = value;
+            }
+        }
+
+        public MemberExpression(Expression target, NameExpression identifier) {
             Target = target ?? throw new ArgumentNullException(nameof(target));
-            Name   = name ?? throw new ArgumentNullException(nameof(name));
+            Name   = identifier ?? throw new ArgumentNullException(nameof(identifier));
 
-            MarkPosition(target, name);
+            MarkPosition(target, identifier);
         }
 
         public override string ToString() {
-            return base.ToString() + ":" + Name;
+            return Target + "." + Name;
         }
     }
 }

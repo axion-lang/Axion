@@ -1,10 +1,29 @@
 using System;
+using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class OrExpression : Expression {
-        public Expression Left { get; }
+        private Expression left;
 
-        public Expression Right { get; }
+        [JsonProperty]
+        internal Expression Left {
+            get => left;
+            set {
+                value.Parent = this;
+                left         = value;
+            }
+        }
+
+        private Expression right;
+
+        [JsonProperty]
+        internal Expression Right {
+            get => right;
+            set {
+                value.Parent = this;
+                right        = value;
+            }
+        }
 
         public OrExpression(Expression left, Expression right) {
             Left  = left ?? throw new ArgumentNullException(nameof(left));

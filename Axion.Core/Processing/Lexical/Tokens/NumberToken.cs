@@ -12,6 +12,14 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             : base(TokenType.Number, startPosition, value.ToString()) {
             Options = options;
         }
+
+        public override string ToAxionCode() {
+            return Options.Number.ToString();
+        }
+
+        public override string ToString() {
+            return ToAxionCode();
+        }
     }
 
     public class NumberOptions {
@@ -48,29 +56,5 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             HasExponent = hasExponent;
             Exponent    = exponent;
         }
-
-        public bool TestEquality(NumberOptions other) {
-            // don't check value equality
-            return Number == other.Number
-                && Radix == other.Radix
-                && Bits == other.Bits
-                && Floating == other.Floating
-                && Imaginary == other.Imaginary
-                && Unsigned == other.Unsigned
-                && Unlimited == other.Unlimited
-                && HasExponent == other.HasExponent
-                && Exponent == other.Exponent;
-        }
-    }
-
-    public enum NumberType {
-        Byte,
-        Int16,
-        Int32,
-        Int64,
-        IntBig,
-        Float32,
-        Float64,
-        Complex
     }
 }

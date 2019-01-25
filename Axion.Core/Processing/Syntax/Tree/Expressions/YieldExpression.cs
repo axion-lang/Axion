@@ -1,13 +1,19 @@
+using Newtonsoft.Json;
+
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class YieldExpression : Expression {
-        internal Expression Expression  { get; }
-        internal bool       IsYieldFrom { get; }
+        private Expression expression;
 
-        internal YieldExpression(Expression expression, bool isYieldFrom = false) {
-            Expression  = expression;
-            IsYieldFrom = isYieldFrom;
-            MarkPosition(expression);
+        [JsonProperty]
+        internal Expression Expression {
+            get => expression;
+            set {
+                value.Parent = this;
+                expression   = value;
+            }
         }
+
+        internal bool IsYieldFrom { get; }
 
         internal YieldExpression(Expression expression, bool isYieldFrom, Position start, Position end)
             : base(start, end) {

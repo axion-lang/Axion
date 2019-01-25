@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Axion.Core.Processing.Lexical.Tokens;
+using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Specification {
     /// <summary>
@@ -13,6 +14,8 @@ namespace Axion.Core.Specification {
         ///     End of source stream mark.
         /// </summary>
         public const char EndOfStream = '\0';
+
+        public const int Unicode32BitHexLength = 6;
 
         internal const string SingleCommentStart       = "#";
         internal const string MultiCommentStart        = "#|";
@@ -32,105 +35,118 @@ namespace Axion.Core.Specification {
         /// </summary>
         public static readonly Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType> {
             // testing
-            { "assert", TokenType.KeywordAssert },
+            { "assert", KeywordAssert },
             // bool operators
-            { "not", TokenType.KeywordNot },
-            { "and", TokenType.KeywordAnd },
-            { "or", TokenType.KeywordOr },
-            { "in", TokenType.KeywordIn },
-            { "not in", TokenType.KeywordNotIn },
-            { "is", TokenType.KeywordIs },
-            { "is not", TokenType.KeywordIsNot },
-            { "as", TokenType.KeywordAs },
+            { "not", KeywordNot },
+            { "and", KeywordAnd },
+            { "or", KeywordOr },
+            { "in", KeywordIn },
+            { "not in", KeywordNotIn },
+            { "is", KeywordIs },
+            { "is not", KeywordIsNot },
+            { "as", KeywordAs },
             // branching
-            { "if", TokenType.KeywordIf },
-            { "elif", TokenType.KeywordElseIf },
-            { "else", TokenType.KeywordElse },
-            { "match", TokenType.KeywordMatch },
-            { "case", TokenType.KeywordCase },
-            { "default", TokenType.KeywordDefault },
+            { "if", KeywordIf },
+            { "elif", KeywordElseIf },
+            { "else", KeywordElse },
+            { "match", KeywordMatch },
+            { "case", KeywordCase },
+            { "default", KeywordDefault },
             // loops
-            { "for", TokenType.KeywordFor },
-            { "do", TokenType.KeywordDo },
-            { "while", TokenType.KeywordWhile },
-            { "break", TokenType.KeywordBreak },
-            { "nobreak", TokenType.KeywordNoBreak },
-            { "continue", TokenType.KeywordContinue },
+            { "for", KeywordFor },
+            { "do", KeywordDo },
+            { "while", KeywordWhile },
+            { "break", KeywordBreak },
+            { "nobreak", KeywordNoBreak },
+            { "continue", KeywordContinue },
             // exceptions
-            { "try", TokenType.KeywordTry },
-            { "raise", TokenType.KeywordRaise },
-            { "catch", TokenType.KeywordCatch },
-            { "anyway", TokenType.KeywordAnyway },
-            // access modifiers
-            { "public", TokenType.KeywordPublic },
-            { "inner", TokenType.KeywordInner },
-            { "private", TokenType.KeywordPrivate },
-            // property modifiers
-            { "readonly", TokenType.KeywordReadonly },
-            { "react", TokenType.KeywordReact },
-            { "singleton", TokenType.KeywordSingleton },
-            { "static", TokenType.KeywordStatic },
-            { "const", TokenType.KeywordConst },
+            { "try", KeywordTry },
+            { "raise", KeywordRaise },
+            { "catch", KeywordCatch },
+            { "anyway", KeywordAnyway },
+//            // access modifiers
+//            { "public", KeywordPublic },
+//            { "inner", KeywordInner },
+//            { "private", KeywordPrivate },
+//            // property modifiers
+//            { "readonly", KeywordReadonly },
+//            { "react", KeywordReact },
+//            { "singleton", KeywordSingleton },
+//            { "static", KeywordStatic },
+            { "const", KeywordConst },
             // asynchronous
-            { "async", TokenType.KeywordAsync },
-            { "await", TokenType.KeywordAwait },
+            { "async", KeywordAsync },
+            { "await", KeywordAwait },
             // modules
-            { "use", TokenType.KeywordUse },
-            { "namespace", TokenType.KeywordNamespace },
-            { "mixin", TokenType.KeywordMixin },
-            { "from", TokenType.KeywordFrom },
+            { "use", KeywordUse },
+            { "namespace", KeywordNamespace },
+            { "mixin", KeywordMixin },
+            { "from", KeywordFrom },
             // structures
-            { "class", TokenType.KeywordClass },
-            { "extends", TokenType.KeywordExtends },
-            { "struct", TokenType.KeywordStruct },
-            { "enum", TokenType.KeywordEnum },
-            { "lambda", TokenType.KeywordLambda },
+            { "class", KeywordClass },
+            { "extends", KeywordExtends },
+            { "struct", KeywordStruct },
+            { "enum", KeywordEnum },
+            { "fn", KeywordFn },
             // variables
-            { "var", TokenType.KeywordVar },
-            { "new", TokenType.KeywordNew },
-            { "delete", TokenType.KeywordDelete },
+            { "var", KeywordVar },
+            { "new", KeywordNew },
+            { "delete", KeywordDelete },
             // returns
-            { "yield", TokenType.KeywordYield },
-            { "return", TokenType.KeywordReturn },
-            { "pass", TokenType.KeywordPass },
+            { "yield", KeywordYield },
+            { "return", KeywordReturn },
+            { "pass", KeywordPass },
             // values
-            { "null", TokenType.KeywordNull },
-            { "self", TokenType.KeywordSelf },
-            { "true", TokenType.KeywordTrue },
-            { "false", TokenType.KeywordFalse },
-            { "with", TokenType.KeywordWith }
+            { "null", KeywordNull },
+            { "self", KeywordSelf },
+            { "true", KeywordTrue },
+            { "false", KeywordFalse },
+            { "with", KeywordWith }
+        };
+
+        internal static readonly TokenType[] TypeNameFollowers = {
+            OpBitwiseOr,
+            Dot,
+            LeftBracket,
+            Identifier
+        };
+
+        internal static readonly TokenType[] BlockStarters = {
+            Colon,
+            Newline,
+            LeftBrace
         };
 
         internal static readonly TokenType[] NeverTestTypes = {
-            TokenType.Assign,
-            TokenType.AddAssign,
-            TokenType.SubtractAssign,
-            TokenType.MultiplyAssign,
-            TokenType.TrueDivideAssign,
-            TokenType.RemainderAssign,
-            TokenType.BitAndAssign,
-            TokenType.BitOrAssign,
-            TokenType.BitExclusiveOrAssign,
-            TokenType.BitLeftShiftAssign,
-            TokenType.BitRightShiftAssign,
-            TokenType.PowerAssign,
-            TokenType.FloorDivideAssign,
+            Assign,
+            AddAssign,
+            SubtractAssign,
+            MultiplyAssign,
+            TrueDivideAssign,
+            RemainderAssign,
+            BitAndAssign,
+            BitOrAssign,
+            BitExclusiveOrAssign,
+            BitLeftShiftAssign,
+            BitRightShiftAssign,
+            PowerAssign,
+            FloorDivideAssign,
 
-            TokenType.Indent,
-            TokenType.Outdent,
-            TokenType.Newline,
+            Indent,
+            Outdent,
+            Newline,
             TokenType.EndOfStream,
-            TokenType.Semicolon,
+            Semicolon,
 
-            TokenType.RightBrace,
-            TokenType.RightBracket,
-            TokenType.RightParenthesis,
+            RightBrace,
+            RightBracket,
+            RightParenthesis,
 
-            TokenType.Comma,
+            Comma,
 
-            TokenType.KeywordFor,
-            TokenType.KeywordIn,
-            TokenType.KeywordIf
+            KeywordFor,
+            KeywordIn,
+            KeywordIf
         };
     }
 }

@@ -2,6 +2,8 @@ namespace Axion.Core.Processing {
     public abstract class SpannedRegion {
         public Span Span { get; protected set; }
 
+        // Region
+
         internal void MarkStart(SpannedRegion mark) {
             Span = new Span(mark.Span.Start, Span.End);
         }
@@ -17,6 +19,8 @@ namespace Axion.Core.Processing {
         internal void MarkPosition(SpannedRegion start, SpannedRegion end) {
             Span = new Span(start.Span.Start, end.Span.End);
         }
+
+        // Position
 
         internal void MarkStart(Position position) {
             Span = new Span(position, Span.End);

@@ -4,6 +4,7 @@ using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Axion.Core.Processing.Syntax.Tree.Statements;
+using Axion.Core.Processing.Syntax.Tree.Statements.Definitions;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntax.Parser {
@@ -22,6 +23,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (expr is ErrorExpression) {
                 stream.NextToken();
             }
+            // TODO: insert var_def somewhere here...
             if (stream.PeekIs(TokenType.Assign)) {
                 return FinishAssignments(expr);
             }
@@ -124,72 +126,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </c>
         /// </summary>
         private Expression ParseTestExpr(bool noInnerGeneratorOrComprehension = false) {
-            if (stream.PeekIs(TokenType.KeywordLambda)) {
-                return FinishLambda(noInnerGeneratorOrComprehension);
-            }
-
             Expression expr = ParseOrTest();
-            if (!noInnerGeneratorOrComprehension && stream.PeekIs(TokenType.KeywordIf)) {
+            if (!noInnerGeneratorOrComprehension
+             && stream.PeekIs(TokenType.KeywordIf)
+             && stream.Token.Type != TokenType.Newline) {
                 expr = ParseConditionalTest(expr);
             }
             return expr;
         }
-
-        #region Lambdas
-
-        /// <summary>
-        /// <c>
-        ///     lambda_def:
-        ///         'lambda' [var_args_list] ':' test
-        /// </c>
-        /// </summary>
-        private Expression FinishLambda(bool noGenOrComp) {
-            stream.Eat(TokenType.KeywordLambda);
-            FunctionDefinition func = ParseLambdaHelperStart(null);
-            Expression         expr = ParseTestExpr(noGenOrComp);
-            return ParseLambdaHelperEnd(func, expr);
-        }
-
-        /// <summary>
-        ///     Helpers for parsing lambda expressions.
-        ///     Usage:
-        /// <c>
-        ///     FunctionDefinition f = ParseLambdaHelperStart(string);
-        ///     Expression expr = ParseXYZ();
-        ///     return ParseLambdaHelperEnd(f, expr);
-        /// </c>
-        /// </summary>
-        private FunctionDefinition ParseLambdaHelperStart(string name) {
-            Position    start      = tokenStart;
-            Parameter[] parameters = ParseFunctionParameterList(TokenType.Colon, false);
-
-            // new Parameter[0] for error handling of incomplete lambda
-            var func = new FunctionDefinition(name, parameters, null, start);
-
-            // Push the lambda function on the stack so that it's available
-            // for any yield expressions to mark it as a generator.
-            ast.PushFunction(func);
-            return func;
-        }
-
-        private Expression ParseLambdaHelperEnd(FunctionDefinition func, Expression expr) {
-            Statement body;
-            if (func.IsGenerator) {
-                body = new ExpressionStatement(new YieldExpression(expr));
-            }
-            else {
-                body = new ReturnStatement(expr);
-            }
-
-            FunctionDefinition func2 = ast.PopFunction();
-            Debug.Assert(func == func2);
-
-            func.Body = body;
-
-            return new LambdaExpression(func);
-        }
-
-        #endregion
 
         #region Arithmetic precedence-based expressions
 
@@ -217,7 +161,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private Expression ParseOrTest() {
             Expression expr = ParseAndTest();
             while (stream.MaybeEat(TokenType.KeywordOr)) {
-                expr = new OrExpression(expr, ParseAndTest());
+                expr = new BinaryExpression(expr, (OperatorToken) stream.Token, ParseAndTest());
             }
             return expr;
         }
@@ -231,7 +175,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private Expression ParseAndTest() {
             Expression expr = ParseNotTest();
             while (stream.MaybeEat(TokenType.KeywordAnd)) {
-                expr = new AndExpression(expr, ParseAndTest());
+                expr = new BinaryExpression(expr, (OperatorToken) stream.Token, ParseAndTest());
             }
             return expr;
         }
@@ -247,8 +191,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 Token      op   = stream.Token;
                 Expression expr = ParseNotTest();
                 if (expr is UnaryExpression unary
-                 && unary.Op.Type == TokenType.KeywordNot) {
-                    Blame(BlameType.DoubleNegationIsMeaningless, op.Span.Start, unary.Op.Span.End);
+                 && unary.Operator.Type == TokenType.KeywordNot) {
+                    Blame(BlameType.DoubleNegationIsMeaningless, op.Span.Start, unary.Operator.Span.End);
                 }
                 return new UnaryExpression(op, expr);
             }

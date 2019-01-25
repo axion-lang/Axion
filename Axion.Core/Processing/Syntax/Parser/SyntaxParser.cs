@@ -39,8 +39,6 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Position tokenEnd => stream.Token.Span.End;
 
-        private bool allowIncomplete;
-
         private bool inLoop, inFinally, inFinallyLoop;
 
         #endregion
@@ -78,7 +76,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     statements[statements.Count - 1] = new ReturnStatement(exprStmt.Expression);
                 }
             }
-            ast.Root = new SuiteStatement(statements);
+            ast.Root = new BodyStatement(statements.ToArray());
         }
 
         private Token StartNewStmt(TokenType type) {
@@ -91,7 +89,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     primary:
         ///         atom | trailer
         ///     atom:
-        ///         ID | LITERAL
+        ///         ID
+        ///         | LITERAL
         ///         | parenthesis_expr
         ///         | list_display
         ///         | map_or_set_display
@@ -120,7 +119,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                         return new ConstantExpression(token);
                     }
                     ReportError("Expected an identifier, list, map or other primary expression.", token);
-                    return new ErrorExpression(token);
+                    return Error();
                 }
             }
         }
@@ -140,43 +139,35 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
             Expression result;
             if (stream.MaybeEat(TokenType.RightParenthesis)) {
-                result = new TupleExpression(false, new List<Expression>());
+                result = new TupleExpression(false, new Expression[0]);
             }
             // yield_expr
             else if (stream.MaybeEat(TokenType.KeywordYield)) {
                 result = ParseYield();
-                stream.Eat(TokenType.RightParenthesis);
             }
             else {
-                bool prevAllow = allowIncomplete;
-                allowIncomplete = true;
-                try {
-                    Expression expr = ParseTestExpr();
-                    // tuple
-                    if (stream.MaybeEat(TokenType.Comma)) {
-                        // '(' expression ',' ...
-                        List<Expression> list = ParseExpressionList(out bool trailingComma);
-                        list.Insert(0, expr);
-                        result = MakeTupleOrExpr(list, trailingComma);
-                    }
-                    // generator_expression
-                    else if (stream.PeekIs(TokenType.KeywordFor)) {
-                        // '(' expression 'for' ...
-                        result = ParseGeneratorExpr(expr);
-                    }
-                    // parenthesis_expr
-                    else {
-                        // '(' expression ')'
-                        result = expr is ParenthesisExpression
-                                     ? expr
-                                     : new ParenthesisExpression(expr);
-                    }
+                Expression expr = ParseTestExpr();
+                // tuple
+                if (stream.MaybeEat(TokenType.Comma)) {
+                    // '(' expression ',' ...
+                    List<Expression> list = ParseExpressionList(out bool trailingComma);
+                    list.Insert(0, expr);
+                    result = MakeTupleOrExpr(list, trailingComma);
                 }
-                finally {
-                    allowIncomplete = prevAllow;
+                // generator_expression
+                else if (stream.PeekIs(TokenType.KeywordFor)) {
+                    // '(' expression 'for' ...
+                    result = ParseGeneratorExpr(expr);
+                }
+                // parenthesis_expr
+                else {
+                    // '(' expression ')'
+                    result = expr is ParenthesisExpression
+                                 ? expr
+                                 : new ParenthesisExpression(expr);
                 }
             }
-
+            stream.Eat(TokenType.RightParenthesis);
             result.MarkPosition(start, tokenEnd);
             return result;
         }
@@ -193,25 +184,18 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
             var expressions = new List<Expression>();
             if (!stream.MaybeEat(TokenType.RightBracket)) {
-                bool prevAllow = allowIncomplete;
-                allowIncomplete = true;
-                try {
-                    expressions.Add(ParseTestExpr());
-                    if (stream.MaybeEat(TokenType.Comma)) {
-                        expressions.AddRange(ParseTestList());
-                    }
-                    else if (stream.PeekIs(TokenType.KeywordFor)) {
-                        ComprehensionIterator[] iterators = ParseComprehensionIterators();
-                        stream.Eat(TokenType.RightBracket);
-                        return new ListComprehension(expressions[0], iterators);
-                    }
+                expressions.Add(ParseTestExpr());
+                if (stream.MaybeEat(TokenType.Comma)) {
+                    expressions.AddRange(ParseTestList());
+                }
+                else if (stream.PeekIs(TokenType.KeywordFor)) {
+                    ComprehensionIterator[] iterators = ParseComprehensionIterators();
                     stream.Eat(TokenType.RightBracket);
+                    return new ListComprehension(expressions[0], iterators, start, tokenEnd);
                 }
-                finally {
-                    allowIncomplete = prevAllow;
-                }
+                stream.Eat(TokenType.RightBracket);
             }
-            return new ListExpression(new Span(start, tokenEnd), expressions);
+            return new ListExpression((start, tokenEnd), expressions);
         }
 
         /// <summary>
@@ -229,65 +213,58 @@ namespace Axion.Core.Processing.Syntax.Parser {
             List<SliceExpression> mapMembers = null;
             List<Expression>      setMembers = null;
 
-            bool prevAllow = allowIncomplete;
-            allowIncomplete = true;
-            try {
-                while (!stream.MaybeEat(TokenType.RightBrace)) {
-                    var        first     = false;
-                    Expression itemPart1 = ParseTestExpr();
+            while (!stream.MaybeEat(TokenType.RightBrace)) {
+                var        first     = false;
+                Expression itemPart1 = ParseTestExpr();
 
-                    // map item (expr : expr)
-                    if (stream.MaybeEat(TokenType.Colon)) {
-                        if (setMembers != null) {
-                            ReportError("Single expression expected", stream.Token);
-                        }
-                        else if (mapMembers == null) {
-                            mapMembers = new List<SliceExpression>();
-                            first      = true;
-                        }
-                        Expression itemPart2 = ParseTestExpr();
-                        // generator: { key: value for (key, value) in iterable }
-                        if (stream.PeekIs(TokenType.KeywordFor)) {
-                            if (!first) {
-                                ReportError("Generator can only be used as first map item", stream.Token);
-                            }
-                            return FinishMapComprehension(itemPart1, itemPart2, start);
-                        }
-                        mapMembers?.Add(new SliceExpression(itemPart1, itemPart2, null));
+                // map item (expr : expr)
+                if (stream.MaybeEat(TokenType.Colon)) {
+                    if (setMembers != null) {
+                        ReportError("Single expression expected", stream.Token);
                     }
-                    // set item (expr)
-                    else {
-                        if (mapMembers != null) {
-                            ReportError("'Key : Value' expression expected", stream.Token);
-                        }
-                        else if (setMembers == null) {
-                            setMembers = new List<Expression>();
-                            first      = true;
-                        }
-                        // generator: { x * 2 for x in { 1, 2, 3 } }
-                        if (stream.PeekIs(TokenType.KeywordFor)) {
-                            if (!first) {
-                                ReportError("Generator can only be used as first set item", stream.Token);
-                            }
-                            return FinishSetComprehension(itemPart1, start);
-                        }
-                        setMembers?.Add(itemPart1);
+                    else if (mapMembers == null) {
+                        mapMembers = new List<SliceExpression>();
+                        first      = true;
                     }
-
-                    if (!stream.MaybeEat(TokenType.Comma)) {
-                        stream.Eat(TokenType.RightBrace);
-                        break;
+                    Expression itemPart2 = ParseTestExpr();
+                    // generator: { key: value for (key, value) in iterable }
+                    if (stream.PeekIs(TokenType.KeywordFor)) {
+                        if (!first) {
+                            ReportError("Generator can only be used as single map item", stream.Token);
+                        }
+                        return FinishMapComprehension(itemPart1, itemPart2, start);
                     }
+                    mapMembers?.Add(new SliceExpression(itemPart1, itemPart2, null));
                 }
-            }
-            finally {
-                allowIncomplete = prevAllow;
+                // set item (expr)
+                else {
+                    if (mapMembers != null) {
+                        ReportError("'Key : Value' expression expected", stream.Token);
+                    }
+                    else if (setMembers == null) {
+                        setMembers = new List<Expression>();
+                        first      = true;
+                    }
+                    // generator: { x * 2 for x in { 1, 2, 3 } }
+                    if (stream.PeekIs(TokenType.KeywordFor)) {
+                        if (!first) {
+                            ReportError("Generator can only be used as single set item", stream.Token);
+                        }
+                        return FinishSetComprehension(itemPart1, start);
+                    }
+                    setMembers?.Add(itemPart1);
+                }
+
+                if (!stream.MaybeEat(TokenType.Comma)) {
+                    stream.Eat(TokenType.RightBrace);
+                    break;
+                }
             }
 
             if (mapMembers == null && setMembers != null) {
-                return new SetExpression(setMembers, start, tokenEnd);
+                return new SetExpression(setMembers.ToArray(), start, tokenEnd);
             }
-            return new MapExpression(mapMembers ?? new List<SliceExpression>(), start, tokenEnd);
+            return new MapExpression(mapMembers?.ToArray() ?? new SliceExpression[0], start, tokenEnd);
         }
 
         #endregion
@@ -297,55 +274,47 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     trailer:
         ///         call
         ///         | '[' subscription_list ']'
-        ///         | attribute_ref
+        ///         | member
         ///     call:
-        ///         '(' [argument_list | comprehension_iterator] ')'
-        ///     attribute_ref:
+        ///         '(' [args_list | comprehension_iterator] ')'
+        ///     member:
         ///         '.' ID
         /// </c>
         /// </summary>
         private Expression ParseTrailingExpr(Expression result, bool allowGeneratorExpression) {
-            bool prevAllow = allowIncomplete;
-            allowIncomplete = true;
-            try {
-                while (true) {
-                    if (stream.PeekIs(TokenType.LeftParenthesis)) {
-                        if (!allowGeneratorExpression) {
-                            return result;
-                        }
-
-                        stream.NextToken();
-                        Arg[] args = FinishGeneratorOrArgList();
-                        result = args != null
-                                     ? FinishCallExpr(result, args)
-                                     : new CallExpression(result, new Arg[0], tokenEnd);
-                    }
-                    else if (stream.PeekIs(TokenType.LeftBracket)) {
-                        result = new IndexExpression(result, ParseSubscriptList());
-                    }
-                    else if (stream.PeekIs(TokenType.Dot)) {
-                        stream.NextToken();
-                        result = new MemberExpression(result, ReadName());
-                    }
-                    else if (Spec.ConstantValueTypes.Contains(stream.Peek.Type)) {
-                        // abc.1, abc"", abc 1L, abc 0j
-                        ReportError(Spec.ERR_InvalidStatement, stream.Peek);
-                        return Error();
-                    }
-                    else {
+            while (true) {
+                if (stream.PeekIs(TokenType.LeftParenthesis)) {
+                    if (!allowGeneratorExpression) {
                         return result;
                     }
+
+                    stream.NextToken();
+                    Arg[] args = FinishGeneratorOrArgList();
+                    result = args != null
+                                 ? FinishCallExpr(result, args)
+                                 : new CallExpression(result, new Arg[0], tokenEnd);
                 }
-            }
-            finally {
-                allowIncomplete = prevAllow;
+                else if (stream.PeekIs(TokenType.LeftBracket)) {
+                    result = new IndexExpression(result, ParseSubscriptList());
+                }
+                else if (stream.MaybeEat(TokenType.Dot)) {
+                    result = new MemberExpression(result, ParseName());
+                }
+                else if (stream.PeekIs(Spec.ConstantValueTypes)) {
+                    // abc 1, abc "", abc 1L, abc 0j
+                    ReportError(Spec.ERR_InvalidStatement, stream.Peek);
+                    return Error();
+                }
+                else {
+                    return result;
+                }
             }
         }
 
         private CallExpression FinishCallExpr(Expression target, params Arg[] args) {
-//            var hasArgsTuple   = false;
+//            var hasArgsTuple  = false;
 //            var hasKeywordMap = false;
-//            var keywordCount   = 0;
+//            var keywordCount  = 0;
 //
 //            foreach (Arg arg in args) {
 //                if (arg.Name.Name == null) {
@@ -391,8 +360,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </c>
         /// </summary>
         private Expression ParseSubscriptList() {
-            Position start = StartNewStmt(TokenType.LeftBracket).Span.Start;
-            bool     trailingComma;
+            stream.Eat(TokenType.LeftBracket);
+            bool trailingComma;
 
             var expressions = new List<Expression>();
             while (true) {
@@ -459,12 +428,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     }
                 }
 
-                return new SliceExpression(startExpr, stop, step, start, tokenEnd);
+                return new SliceExpression(startExpr, stop, step);
             }
 
-            Expression ret = MakeTupleOrExpr(expressions, trailingComma, true);
-            ret.MarkPosition(start, tokenEnd);
-            return ret;
+            return MakeTupleOrExpr(expressions, trailingComma, true);
         }
 
         /// <summary>
@@ -489,299 +456,46 @@ namespace Axion.Core.Processing.Syntax.Parser {
             return new GeneratorExpression(expr, comprehensions.ToArray());
         }
 
-        #region Functions
-
-//        // decorators ::=
-//        // decorator+
-//        // decorator ::=
-//        // "@" dotted_name ["(" [argument_list [","]] ")"] NEWLINE
-//        private List<Expression> ParseDecorators() {
-//            var decorators = new List<Expression>();
-//
-//            while (stream.MaybeEat(TokenType.OpAt)) {
-//                Position   start     = tokenStart;
-//                Expression decorator = new NameExpression(ReadName());
-//                decorator.MarkPosition(start, tokenEnd);
-//                while (stream.MaybeEat(TokenType.OpDot)) {
-//                    Token name = ReadName();
-//                    decorator = new MemberExpression(decorator, name);
-//                    decorator.MarkPosition(tokenStart, tokenEnd);
-//                }
-//                decorator.MarkPosition(start, tokenEnd);
-//
-//                if (stream.MaybeEat(TokenType.OpLeftParenthesis)) {
-//                    Arg[] args = FinishArgumentList(null);
-//                    decorator = FinishCallExpr(decorator, args);
-//                }
-//                decorator.MarkPosition(start, tokenEnd);
-//                stream.EatNewline();
-//
-//                decorators.Add(decorator);
-//            }
-//
-//            return decorators;
-//        }
-//
-//        // 'def' NAME parameters ['->' test] ':' suite
-//
-//        // decorated: decorators(class | funcdef | async_funcdef)
-//        // this gets called with "@" look-ahead
-//        private Statement ParseDecorated() {
-//            List<Expression> decorators = ParseDecorators();
-//
-//            Statement res;
-//
-//            if (stream.Peek == Tokens.KeywordDefToken) {
-//                FunctionDefinition fnc = ParseFuncDef();
-//                fnc.Decorators = decorators.ToArray();
-//                res            = fnc;
-//            }
-//            else if (stream.PeekIs(TokenType.KeywordClass)) {
-//                ClassDefinition cls = ParseClassDef();
-//                cls.Decorators = decorators.ToArray();
-//                res            = cls;
-//            }
-//            else if (stream.PeekIs(TokenType.KeywordAsync)) {
-//                stream.NextToken();
-//                FunctionDefinition fnc = ParseFuncDef(true);
-//                fnc.Decorators = decorators.ToArray();
-//                res            = fnc;
-//            }
-//            else {
-//                res = new EmptyStatement(stream.Peek);
-//                ReportSyntaxError(stream.Peek);
-//            }
-//
-//            return res;
-//        }
-//
-//        // func_def: [decorators] 'def' NAME parameters ':' suite
-//        // parameters: '(' [typed_args_list] ')'
-//        // this gets called with "def" as the look-ahead
-//        private FunctionDefinition ParseFuncDef(bool isAsync = false) {
-//            stream.Eat(TokenType.KeywordDef);
-//            Position start = tokenStart;
-//            string   name  = ReadName().Value;
-//
-//            stream.Eat(TokenType.OpLeftParenthesis);
-//
-//            Position lEnd = tokenEnd;
-//
-//            Parameter[] parameters = ParseParameterList(TokenType.OpRightParenthesis, true);
-//            if (parameters == null) {
-//                // error in parameters
-//                return new FunctionDefinition(name, new Parameter[0], start/*, lEnd*/);
-//            }
-//
-//            Expression annotation = null;
-//            if (stream.MaybeEat(TokenType.ReturnAnnotation)) {
-//                annotation = ParseExpression();
-//            }
-//
-//            var ret = new FunctionDefinition(name, parameters, start);
-//            ast.PushFunction(ret);
-//
-//            Statement          body = ParseClassOrFuncBody();
-//            FunctionDefinition ret2 = ast.PopFunction();
-//            Debug.Assert(ret == ret2);
-//
-//            ret.Body             = body;
-//            ret.ReturnAnnotation = annotation;
-//            ret.MarkPosition(start, body.Span.End);
-//
-//            return ret;
-//        }
-
-        #endregion
-
-        #region Parameters
-
-        private void CheckUniqueParameter(HashSet<string> names, Token name) {
-            if (names.Contains(name.Value)) {
-                Blame(BlameType.DuplicatedArgumentInFunctionDefinition, name);
-            }
-            names.Add(name.Value);
-        }
-
-        /// <summary>
-        /// <c>
-        ///     parameter_list:
-        ///         (named_parameter ",")*
-        ///         ( "*" [parameter] ("," named_parameter)* ["," "**" parameter]
-        ///         | "**" parameter
-        ///         | named_parameter[","] )
-        /// </c>
-        /// </summary>
-        private Parameter[] ParseFunctionParameterList(TokenType terminator, bool allowAnnotations) {
-            var pl                      = new List<Parameter>();
-            var names                   = new HashSet<string>(StringComparer.Ordinal);
-            var needDefault             = false;
-            var readMultiply            = false;
-            var hasKeywordOnlyParameter = false;
-            // we want these to be the last two parameters
-            Parameter listParameter = null;
-            Parameter mapParameter  = null;
-            while (true) {
-                if (stream.MaybeEat(terminator)) {
-                    break;
-                }
-
-                if (stream.MaybeEat(TokenType.OpPower)) {
-                    mapParameter = ParseParameter(names, ParameterKind.Map, allowAnnotations);
-                    if (mapParameter == null) {
-                        // no parameter name, syntax error
-                        return new Parameter[0];
-                    }
-                    stream.Eat(terminator);
-                    break;
-                }
-
-                if (stream.MaybeEat(TokenType.OpMultiply)) {
-                    if (readMultiply) {
-                        ReportError("Invalid syntax (ALE-1, description_not_implemented)", stream.Peek);
-                        return new Parameter[0];
-                    }
-
-                    if (stream.PeekIs(TokenType.Comma)) {
-                        // "*"
-                    }
-                    else {
-                        listParameter = ParseParameter(names, ParameterKind.List, allowAnnotations);
-                        if (listParameter == null) {
-                            // no parameter name, syntax error
-                            return new Parameter[0];
-                        }
-                    }
-
-                    readMultiply = true;
-                }
-                else {
-                    // If a parameter has a default value, all following parameters up until the "*" must also have a default value
-                    Parameter parameter;
-                    if (readMultiply) {
-                        var dontCare = false;
-                        parameter               = ParseNamedParameter(names, ParameterKind.KeywordOnly, allowAnnotations, ref dontCare);
-                        hasKeywordOnlyParameter = true;
-                    }
-                    else {
-                        parameter = ParseNamedParameter(names, ParameterKind.Normal, allowAnnotations, ref needDefault);
-                    }
-                    if (parameter == null) {
-                        // no parameter, syntax error
-                        return new Parameter[0];
-                    }
-
-                    pl.Add(parameter);
-                }
-
-                if (!stream.MaybeEat(TokenType.Comma)) {
-                    stream.Eat(terminator);
-                    break;
-                }
-            }
-
-            if (readMultiply
-             && listParameter == null
-             && mapParameter != null
-             && !hasKeywordOnlyParameter) {
-                // TODO: this should not throw right away
-                ReportError("named arguments must follow bare *", stream.Token);
-            }
-
-            if (listParameter != null) {
-                pl.Add(listParameter);
-            }
-            if (mapParameter != null) {
-                pl.Add(mapParameter);
-            }
-
-            return pl.ToArray();
-        }
-
-        // named_parameter:
-        //     parameter ["=" expression]
-        private Parameter ParseNamedParameter(HashSet<string> names, ParameterKind parameterKind, bool allowAnnotations, ref bool needDefault) {
-            Parameter parameter = ParseParameter(names, parameterKind, allowAnnotations);
-            if (parameter != null) {
-                if (stream.MaybeEat(TokenType.Assign)) {
-                    needDefault            = true;
-                    parameter.DefaultValue = ParseTestExpr();
-                }
-                else if (needDefault) {
-                    Blame(BlameType.ExpectedDefaultParameterValue, stream.Token);
-                }
-            }
-            return parameter;
-        }
-
-        // parameter:
-        //     ID [":" expression]
-        private Parameter ParseParameter(HashSet<string> names, ParameterKind parameterKind, bool allowAnnotations) {
-            if (!stream.PeekIs(TokenType.Identifier)) {
-                BlameInvalidSyntax(TokenType.Identifier, stream.Peek);
-                return null;
-            }
-
-            Token t         = stream.NextToken();
-            var   parameter = new Parameter(t, parameterKind);
-            CompleteParameterName(parameter, t, names);
-
-            // expression
-            if (allowAnnotations && stream.MaybeEat(TokenType.Colon)) {
-                parameter.Annotation = ParseTestExpr();
-            }
-
-            return parameter;
-        }
-
-        private void CompleteParameterName(SpannedRegion node, Token name, HashSet<string> names) {
-            CheckUniqueParameter(names, name);
-            node.MarkPosition(tokenStart, tokenEnd);
-        }
-
-        #endregion
-
         #region Arguments list
 
         /// <summary>
         ///     arg_list:
-        ///     expression                     rest_of_arguments
-        ///     expression "="   expression    rest_of_arguments
-        ///     expression "for" gen_expr_rest
+        ///         (expression
+        ///          | expression '=' expression
+        ///          | expression 'for')*
         /// </summary>
         private Arg[] FinishGeneratorOrArgList() {
             if (stream.PeekIs(TokenType.RightParenthesis, TokenType.OpMultiply, TokenType.OpPower)) {
                 return ParseArgumentsList();
             }
-            Position   start = tokenStart;
-            Expression e     = ParseTestExpr();
-            if (e is ErrorExpression) {
+            Position   start          = tokenStart;
+            Expression argNameOrValue = ParseTestExpr();
+            if (argNameOrValue is ErrorExpression) {
                 return new Arg[0];
             }
-            Arg a;
+            var generator = false;
+            Arg arg;
             if (stream.MaybeEat(TokenType.Assign)) {
                 // Keyword argument
-                a = FinishKeywordArgument(e);
+                arg = FinishKeywordArgument(argNameOrValue);
             }
             else if (stream.PeekIs(TokenType.KeywordFor)) {
                 // Generator expression
-                a = new Arg(ParseGeneratorExpr(e));
-                stream.Eat(TokenType.RightParenthesis);
-                a.MarkPosition(start, tokenEnd);
-                return new[] { a }; // Generator expression is the argument
+                arg       = new Arg(ParseGeneratorExpr(argNameOrValue));
+                generator = true;
             }
             else {
-                a = new Arg(e);
+                arg = new Arg(argNameOrValue);
             }
 
             // Was this all?
-            if (stream.MaybeEat(TokenType.Comma)) {
-                return ParseArgumentsList(a);
+            if (!generator && stream.MaybeEat(TokenType.Comma)) {
+                return ParseArgumentsList(arg);
             }
 
             stream.Eat(TokenType.RightParenthesis);
-            a.MarkPosition(start, tokenEnd);
-            return new[] { a };
+            arg.MarkPosition(start, tokenEnd);
+            return new[] { arg };
         }
 
         private Arg FinishKeywordArgument(Expression expr) {
@@ -805,69 +519,61 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
-        ///     arg_list: (argument ',')* (argument [',']| '*' expression [',' '**' expression] | '**' expression)
-        ///     argument: [expression '='] expression
+        ///     arg_list:
+        ///         (argument ',')* (argument [',']| '*' expression [',' '**' expression] | '**' expression)
+        ///     argument:
+        ///         [expression '='] expression
         ///     # Really [keyword '='] expression
         /// </summary>
         private Arg[] ParseArgumentsList(Arg first = null) {
-            const TokenType terminator = TokenType.RightParenthesis;
-
             var arguments = new List<Arg>();
 
             if (first != null) {
                 arguments.Add(first);
             }
 
-            // parse remaining arguments
-            while (true) {
-                if (stream.MaybeEat(terminator)) {
-                    break;
-                }
+            while (!stream.MaybeEat(TokenType.RightParenthesis)) {
                 var name = new NameExpression(stream.Peek);
+                stream.NextToken();
                 Arg arg;
 
                 if (stream.MaybeEat(TokenType.OpMultiply)) {
-                    Expression t = ParseTestExpr();
-                    arg = new Arg(name, t);
+                    arg = new Arg(name, ParseTestExpr());
                 }
                 else {
-                    Expression e = ParseTestExpr();
                     if (stream.MaybeEat(TokenType.Assign)) {
-                        arg = FinishKeywordArgument(e);
+                        arg = FinishKeywordArgument(name);
                         CheckUniqueArgument(arguments, arg);
                     }
                     else {
-                        arg = new Arg(e);
+                        arg = new Arg(name);
                     }
                 }
                 arguments.Add(arg);
-                if (stream.MaybeEat(TokenType.Comma)) {
-                    continue;
+                if (!stream.MaybeEat(TokenType.Comma)) {
+                    stream.Eat(TokenType.RightParenthesis);
+                    break;
                 }
-                stream.Eat(terminator);
-                break;
             }
+
             return arguments.ToArray();
         }
 
         #endregion
 
-        private NameExpression ReadName() {
-            if (!stream.PeekIs(TokenType.Identifier)) {
-                BlameInvalidSyntax(TokenType.Identifier, stream.Peek);
-                return null;
-            }
-            stream.NextToken();
-            return new NameExpression(stream.Token);
+        private NameExpression ParseName(bool allowQualified = false) {
+            var nameParts = new List<Token>();
+            do {
+                stream.NextToken();
+                nameParts.Add(stream.Token);
+                if (stream.Token.Type != TokenType.Identifier) {
+                    BlameInvalidSyntax(TokenType.Identifier, stream.Peek);
+                }
+            } while (allowQualified && stream.MaybeEat(TokenType.Dot));
+            return new NameExpression(nameParts.ToArray());
         }
 
-        private NameExpression[] ReadNames() {
-            var l = new List<NameExpression> { ReadName() };
-            while (stream.MaybeEat(TokenType.Dot)) {
-                l.Add(ReadName());
-            }
-            return l.ToArray();
-        }
+        #region Errors reporting
 
         private ErrorExpression Error() {
             return new ErrorExpression(tokenStart, tokenEnd);
@@ -877,22 +583,32 @@ namespace Axion.Core.Processing.Syntax.Parser {
             return new ExpressionStatement(Error());
         }
 
-        #region Errors reporting
+        internal bool CheckUnexpectedEOS() {
+            if (stream.PeekIs(TokenType.EndOfStream)) {
+                Blame(BlameType.UnexpectedEndOfCode, stream.Token);
+                return true;
+            }
+            return false;
+        }
 
         internal void BlameInvalidSyntax(TokenType expectedType, SpannedRegion mark) {
             ReportError("Invalid syntax, '" + expectedType.GetValue() + "' expected.", mark);
         }
 
         internal void ReportError(string message, SpannedRegion mark) {
-            blames.Add(new LanguageException(new Blame(message, BlameSeverity.Error, mark), stream.Source));
+            blames.Add(new LanguageException(new Blame(message, BlameSeverity.Error, mark.Span), stream.Source));
         }
 
         internal void ReportWarning(string message, SpannedRegion mark) {
-            blames.Add(new LanguageException(new Blame(message, BlameSeverity.Warning, mark), stream.Source));
+            blames.Add(new LanguageException(new Blame(message, BlameSeverity.Warning, mark.Span), stream.Source));
         }
 
-        internal void Blame(BlameType type, SpannedRegion mark) {
-            Blame(type, mark.Span.Start, mark.Span.End);
+        internal void Blame(BlameType type, SpannedRegion region) {
+            Blame(type, region.Span.Start, region.Span.End);
+        }
+
+        internal void Blame(BlameType type, Span span) {
+            Blame(type, span.Start, span.End);
         }
 
         internal void Blame(BlameType type, Position start, Position end) {

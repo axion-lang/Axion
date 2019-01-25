@@ -1,0 +1,4 @@
+@private, static, inline, async
+@abstract
+class Person
+	pass

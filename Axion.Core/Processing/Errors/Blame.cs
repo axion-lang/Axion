@@ -32,21 +32,21 @@ namespace Axion.Core.Processing.Errors {
         public Blame(
             string        message,
             BlameSeverity severity,
-            SpannedRegion spannedRegion
+            Span          span
         ) {
             Message  = message;
             Severity = severity;
-            Span     = spannedRegion.Span;
+            Span     = span;
         }
 
         public Blame(
             BlameType     type,
             BlameSeverity severity,
-            SpannedRegion spannedRegion
+            Span          span
         ) {
             Message  = TypeToMessage(type);
             Severity = severity;
-            Span     = spannedRegion.Span;
+            Span     = span;
         }
 
         private string TypeToMessage(BlameType type) {

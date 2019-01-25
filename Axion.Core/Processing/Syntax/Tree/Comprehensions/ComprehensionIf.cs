@@ -1,15 +1,25 @@
 using System;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
+using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Comprehensions {
     public class ComprehensionIf : ComprehensionIterator {
-        public Expression Test { get; }
+        private Expression condition;
 
-        public ComprehensionIf(SpannedRegion start, Expression test) {
-            Test = test ?? throw new ArgumentNullException(nameof(test));
+        [JsonProperty]
+        internal Expression Condition {
+            get => condition;
+            set {
+                value.Parent = this;
+                condition    = value;
+            }
+        }
+
+        public ComprehensionIf(SpannedRegion start, Expression condition) {
+            Condition = condition ?? throw new ArgumentNullException(nameof(condition));
 
             MarkStart(start);
-            MarkEnd(Test);
+            MarkEnd(Condition);
         }
     }
 }

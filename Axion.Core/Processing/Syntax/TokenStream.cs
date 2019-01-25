@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Parser;
@@ -12,11 +13,11 @@ namespace Axion.Core.Processing.Syntax {
         /// </summary>
         internal readonly List<Token> Tokens;
 
-        internal Token Token => index > -1 && index < Tokens.Count ? Tokens[index] : Tokens[Tokens.Count - 1];
+        internal Token Token => Index > -1 && Index < Tokens.Count ? Tokens[Index] : Tokens[Tokens.Count - 1];
 
-        internal Token Peek => index + 1 < Tokens.Count ? Tokens[index + 1] : Tokens[Tokens.Count - 1];
+        internal Token Peek => Index + 1 < Tokens.Count ? Tokens[Index + 1] : Tokens[Tokens.Count - 1];
 
-        private int index = -1;
+        internal int Index { get; private set; } = -1;
 
         private readonly SyntaxParser parser;
 
@@ -89,11 +90,10 @@ namespace Axion.Core.Processing.Syntax {
                 Move();
             }
 
-            // here we do tricky thing:
             // if we got newline before wanted type, just skip it
-            // (except we want to get newline)
-            if (!wantedTypes.Contains(TokenType.Newline)
-             && Peek.Type == TokenType.Newline) {
+            // (except we WANT to get newline)
+            if (Peek.Type == TokenType.Newline
+             && !wantedTypes.Contains(TokenType.Newline)) {
                 Move();
             }
         }
@@ -104,7 +104,12 @@ namespace Axion.Core.Processing.Syntax {
         }
 
         private void Move(int pos = 1) {
-            index += pos;
+            Index += pos;
+        }
+
+        internal void MoveTo(int tokenIndex) {
+            Debug.Assert(tokenIndex >= 0 && tokenIndex < Tokens.Count);
+            Index = tokenIndex;
         }
     }
 }

@@ -1,0 +1,31 @@
+# py style
+while condition:
+    doIter()
+    
+while condition:
+    doIter()
+else:
+    doElse()
+
+while condition: doIter()
+
+# ax style
+while condition
+    doIter()
+
+while condition
+    doIter()
+else
+    doElse()
+
+# c style
+while condition {
+    doIter()
+}
+
+while condition {
+    doIter()
+}
+else {
+    doElse()
+}

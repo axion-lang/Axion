@@ -3,8 +3,16 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class BreakStatement : Statement {
+        private Expression loopName;
+
         [JsonProperty]
-        internal Expression LoopName { get; }
+        internal Expression LoopName {
+            get => loopName;
+            set {
+                value.Parent = this;
+                loopName     = value;
+            }
+        }
 
         internal BreakStatement(SpannedRegion kwBreak, Expression loopName = null) {
             LoopName = loopName;

@@ -74,17 +74,18 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             bool   nextIsIndent;
             string restOfLine = Stream.GetRestOfLine();
-            nextIsIndent = _mismatchingPairs.Count == 0 && !(
-                                                                // rest of line is blank
-                                                                string.IsNullOrWhiteSpace(restOfLine)
-                                                                // rest is one-line comment
-                                                             || restOfLine.StartsWith(Spec.SingleCommentStart)
-                                                                // or rest is multiline comment
-                                                             || restOfLine.StartsWith(Spec.MultiCommentStart)
-                                                                // and comment goes through end of line
-                                                             && Regex.Matches(restOfLine, Spec.MultiCommentStartPattern).Count
-                                                              > Regex.Matches(restOfLine, Spec.MultiCommentEndPattern).Count
-                                                            );
+            // BUG: Outdent dont adds, when we have empty string with spaces.
+            nextIsIndent =
+                _mismatchingPairs.Count == 0
+             && !(
+                     // rest is one-line comment
+                     restOfLine.StartsWith(Spec.SingleCommentStart)
+                     // or rest is multiline comment
+                  || restOfLine.StartsWith(Spec.MultiCommentStart)
+                     // and comment goes through end of line
+                  && Regex.Matches(restOfLine, Spec.MultiCommentStartPattern).Count
+                   > Regex.Matches(restOfLine, Spec.MultiCommentEndPattern).Count
+                 );
 
             // if it is 1st token,
             // set default indentation level.
@@ -96,6 +97,14 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             if (tokens[tokens.Count - 1].Type == TokenType.Newline) {
                 if (nextIsIndent) {
+                    // handle empty string with whitespaces, make newline
+                    if (restOfLine.Trim().Length == 0) {
+                        tokenValue.Append(restOfLine);
+                        Stream.Move(restOfLine.Length);
+                        tokens.Add(new EndOfLineToken(tokenStartPosition, tokenValue.ToString()));
+                        tokenValue.Clear();
+                        tokenStartPosition = Stream.Position;
+                    }
                     return ReadIndentation();
                 }
                 tokens[tokens.Count - 1].AppendValue(tokenValue.ToString());

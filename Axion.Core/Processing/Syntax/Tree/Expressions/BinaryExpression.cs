@@ -5,13 +5,29 @@ using Newtonsoft.Json;
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class BinaryExpression : Expression {
         [JsonProperty]
-        internal Expression Left { get; }
-
-        [JsonProperty]
         internal OperatorToken Operator { get; }
 
+        private Expression left;
+
         [JsonProperty]
-        internal Expression Right { get; }
+        internal Expression Left {
+            get => left;
+            set {
+                value.Parent = this;
+                left         = value;
+            }
+        }
+
+        private Expression right;
+
+        [JsonProperty]
+        internal Expression Right {
+            get => right;
+            set {
+                value.Parent = this;
+                right        = value;
+            }
+        }
 
         public BinaryExpression(Expression left, OperatorToken op, Expression right) {
             Left     = left ?? throw new ArgumentNullException(nameof(left));
@@ -26,7 +42,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
         }
 
         private string ToAxionCode() {
-            return Left + Operator.ToString() + Right;
+            return Left + " " + Operator.Value + " " + Right;
         }
     }
 }

@@ -1,0 +1,42 @@
+# expressions
+
+## assignment
+a = 1
+a += 2
+b -= 3
+c **= 4
+d *= 5
+e /= 6
+f //= 7
+g %= 8
+h ?= 9
+i <<= 10
+j >>= 11
+k &= k1
+l |= l2
+m ^= m2
+n.o
+
+p = q
+    |> Seq.map(x => x.Messages)
+    |> Seq.concat
+
+## annotated
+a : int = 1
+
+# statements
+
+# return type: Unit if do1 and do2 return Unit
+if condition
+	do1()
+else
+	do2()
+
+# inline if
+value = 10 if condition else 20
+
+
+
+
+# 'while' generator
+lst = (x + '\n' while (x = stream.readLine()) != None)

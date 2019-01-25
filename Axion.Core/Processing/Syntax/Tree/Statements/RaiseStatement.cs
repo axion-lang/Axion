@@ -3,8 +3,16 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class RaiseStatement : Statement {
+        private Expression exception;
+
         [JsonProperty]
-        public Expression Exception { get; }
+        internal Expression Exception {
+            get => exception;
+            set {
+                value.Parent = this;
+                exception    = value;
+            }
+        }
 
         [JsonProperty]
         public Expression Cause { get; }

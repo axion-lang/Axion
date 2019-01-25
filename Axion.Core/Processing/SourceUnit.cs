@@ -16,7 +16,7 @@ namespace Axion.Core.Processing {
     ///     performs different kinds of code processing.
     /// </summary>
     [JsonObject]
-    public sealed class SourceCode {
+    public sealed class SourceUnit {
         /// <summary>
         ///     Lines of source code picked from string or file.
         /// </summary>
@@ -33,7 +33,7 @@ namespace Axion.Core.Processing {
         [JsonProperty] public readonly Ast SyntaxTree;
 
         /// <summary>
-        ///     Contains all errors, warnings and messages that raised while processing <see cref="SourceCode" />.
+        ///     Contains all errors, warnings and messages that raised while processing <see cref="SourceUnit" />.
         /// </summary>
         [JsonProperty] public readonly List<Exception> Blames = new List<Exception>();
 
@@ -75,10 +75,10 @@ namespace Axion.Core.Processing {
         #endregion
 
         /// <summary>
-        ///     Creates new <see cref="SourceCode" /> instance
+        ///     Creates new <see cref="SourceUnit" /> instance
         ///     using specified &lt;<paramref name="code" />&gt;.
         /// </summary>
-        public SourceCode(string code, string outFilePath = null) :
+        public SourceUnit(string code, string outFilePath = null) :
             this(
                 code.Split(
                     Spec.EndOfLines,
@@ -88,10 +88,10 @@ namespace Axion.Core.Processing {
         }
 
         /// <summary>
-        ///     Creates new <see cref="SourceCode" /> instance
+        ///     Creates new <see cref="SourceUnit" /> instance
         ///     using specified &lt;<paramref name="file" />&gt; info.
         /// </summary>
-        public SourceCode(FileInfo file, string outFilePath = null) {
+        public SourceUnit(FileInfo file, string outFilePath = null) {
             // check source file
             if (!file.Exists) {
                 throw new FileNotFoundException("Source file doesn't exists", file.FullName);
@@ -115,12 +115,12 @@ namespace Axion.Core.Processing {
         }
 
         /// <summary>
-        ///     Creates new <see cref="SourceCode" /> instance
+        ///     Creates new <see cref="SourceUnit" /> instance
         ///     using specified &lt;<paramref name="sourceLines" />&gt;.
         ///     Use only for interpreter and tests,
         ///     output is redirected to the compiler dir.
         /// </summary>
-        public SourceCode(string[] sourceLines, string outFilePath = null) {
+        public SourceUnit(string[] sourceLines, string outFilePath = null) {
             InitializeFilePaths(
                 Compiler.OutputDirectory + DateTime.Now.ToFileName() + Spec.SourceFileExtension,
                 outFilePath
@@ -165,7 +165,7 @@ namespace Axion.Core.Processing {
         }
 
         /// <summary>
-        ///     Performs <see cref="SourceCode" /> processing
+        ///     Performs <see cref="SourceUnit" /> processing
         ///     due to <see cref="mode" /> and <see cref="options" />.
         /// </summary>
         public void Process(

@@ -2,11 +2,29 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class CallExpression : Expression {
-        [JsonProperty]
-        internal Expression Target { get; }
+        private Expression target;
 
         [JsonProperty]
-        internal Arg[] Args { get; }
+        internal Expression Target {
+            get => target;
+            set {
+                value.Parent = this;
+                target       = value;
+            }
+        }
+
+        private Arg[] args;
+
+        [JsonProperty]
+        internal Arg[] Args {
+            get => args;
+            set {
+                args = value;
+                foreach (Arg arg in args) {
+                    arg.Parent = this;
+                }
+            }
+        }
 
         public CallExpression(Expression target, Arg[] args, Position end) {
             Target = target;
@@ -14,28 +32,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
 
             MarkStart(target);
             MarkEnd(end);
-        }
-
-        public bool NeedsLocalsMap() {
-            if (!(Target is NameExpression nameExpr)) {
-                return false;
-            }
-            if (Args.Length == 0) {
-                switch (nameExpr.Name) {
-                    case "locals":
-                    case "vars":
-                    case "dir":
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-            if (Args.Length == 1 && (nameExpr.Name == "dir" || nameExpr.Name == "vars") && (Args[0].Name.Name == "*" || Args[0].Name.Name == "**")
-             || Args.Length == 2 && (nameExpr.Name == "dir" || nameExpr.Name == "vars") && Args[0].Name.Name == "*" && Args[1].Name.Name == "**") {
-                // could be splatting empty list or map resulting in 0-param call which needs context
-                return true;
-            }
-            return nameExpr.Name == "eval";
         }
 
         public override string ToString() {
@@ -54,24 +50,26 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
         Map
     }
 
-    public class Arg : SpannedRegion {
+    public class Arg : TreeNode {
         internal NameExpression Name  { get; }
         internal Expression     Value { get; }
 
         internal Arg(Expression value) {
             Value = value;
+
             MarkPosition(value);
         }
 
         internal Arg(NameExpression name, Expression value) {
-            Value = value;
             Name  = name;
+            Value = value;
+
             MarkStart(name);
             MarkEnd(value);
         }
 
         internal ArgumentKind GetArgumentInfo() {
-            if (Name.Name == null) {
+            if (Name == null) {
                 return ArgumentKind.Simple;
             }
             if (Name.Name == "*") {

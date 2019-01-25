@@ -33,6 +33,14 @@ namespace Axion.Core.Processing {
         public static bool operator !=(Span c1, Span c2) {
             return !c1.Equals(c2);
         }
+
+        public static implicit operator (Position, Position)(Span span) {
+            return (span.Start, span.End);
+        }
+
+        public static implicit operator Span((Position, Position) positions) {
+            return new Span(positions.Item1, positions.Item2);
+        }
     }
 
     public struct Position {

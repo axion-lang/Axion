@@ -8,6 +8,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum TokenType {
         None,
+        Invalid,
 
         #region GENERATION_operators
 
@@ -59,31 +60,35 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         KeywordEnum,
         KeywordExtends,
         KeywordFalse,
+        KeywordFn,
         KeywordFor,
         KeywordFrom,
         KeywordIf,
         KeywordNotIn,
         KeywordIn,
-        KeywordInner,
+
+//        KeywordInner,
         KeywordIs,
         KeywordIsNot,
-        KeywordLambda,
         KeywordMatch,
         KeywordMixin,
         KeywordNamespace,
         KeywordNew,
         KeywordNoBreak,
+        KeywordNot,
         KeywordNull,
         KeywordOr,
         KeywordPass,
-        KeywordPrivate,
-        KeywordPublic,
-        KeywordReact,
-        KeywordReadonly,
+
+//        KeywordPrivate,
+//        KeywordPublic,
+//        KeywordReact,
+//        KeywordReadonly,
         KeywordReturn,
         KeywordSelf,
-        KeywordSingleton,
-        KeywordStatic,
+
+//        KeywordSingleton,
+//        KeywordStatic,
         KeywordStruct,
         KeywordRaise,
         KeywordTrue,
@@ -96,16 +101,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         #endregion
 
-        LeftParenthesis,
-        RightParenthesis,
-        LeftBracket,
-        RightBracket,
-        LeftBrace,
-        RightBrace,
+        // symbols
 
-        Dot,
-        RightPipeline,
-        LeftPipeline,
         Assign,
         AddAssign,
         SubtractAssign,
@@ -122,12 +119,25 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         PowerAssign,
         FloorDivideAssign,
         NullCoalescingAssign,
-        RightArrow,
+
+        Dot,
+        RightPipeline,
+        LeftPipeline,
+        RightFatArrow,
+        At,
+
+        LeftParenthesis,
+        RightParenthesis,
+        LeftBracket,
+        RightBracket,
+        LeftBrace,
+        RightBrace,
+
         Comma,
         Colon,
         Semicolon,
 
-        Invalid,
+        // literals
 
         Identifier,
         Comment,
@@ -135,11 +145,12 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         String,
         Number,
 
+        // white
+
         Whitespace,
         Newline,
         Indent,
         Outdent,
-        EndOfStream,
-        KeywordNot
+        EndOfStream
     }
 }

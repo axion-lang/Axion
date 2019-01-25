@@ -1,19 +1,20 @@
 ﻿using System.Collections.Generic;
 using Axion.Core.Processing.Syntax.Tree.Statements;
+using Axion.Core.Processing.Syntax.Tree.Statements.Definitions;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree {
-    public class Ast : Statement {
-        private readonly SourceCode Source;
+    public class Ast : TreeNode {
+        private readonly SourceUnit Source;
 
         [JsonProperty]
-        internal SuiteStatement Root { get; set; }
+        internal BodyStatement Root { get; set; }
 
         //private readonly Stack<ImportDefinition>   imports = new Stack<ImportDefinition>();
         private readonly Stack<ClassDefinition>    classes   = new Stack<ClassDefinition>();
         private readonly Stack<FunctionDefinition> functions = new Stack<FunctionDefinition>();
 
-        internal Ast(SourceCode sourceCode) {
+        internal Ast(SourceUnit sourceCode) {
             Source = sourceCode;
         }
 

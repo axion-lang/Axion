@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
@@ -17,7 +16,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private List<Expression> ParseExpressionList(out bool trailingComma, bool old = false) {
             var list = new List<Expression>();
             trailingComma = false;
-            while (!Spec.NeverTestTypes.Contains(stream.Peek.Type)) {
+            while (!stream.PeekIs(Spec.NeverTestTypes)) {
                 list.Add(ParseTestExpr(old));
                 trailingComma = stream.MaybeEat(Comma);
                 if (!trailingComma) {
@@ -28,7 +27,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         private Expression ParseTestListAsExpr() {
-            if (Spec.NeverTestTypes.Contains(stream.Peek.Type)) {
+            if (stream.PeekIs(Spec.NeverTestTypes)) {
                 return ParseTestListAsExprError();
             }
             Expression expr = ParseTestExpr();
@@ -46,7 +45,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
                 return expr;
             }
-            if (!Spec.NeverTestTypes.Contains(stream.Peek.Type)) {
+            if (!stream.PeekIs(Spec.NeverTestTypes)) {
                 Expression expr = ParseTestExpr();
                 if (stream.MaybeEat(Comma)) {
                     return ParseTestListStarExpr(expr);
@@ -64,7 +63,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 if (stream.MaybeEat(OpMultiply)) {
                     list.Add(new StarredExpression(tokenStart, ParseTestExpr()));
                 }
-                else if (Spec.NeverTestTypes.Contains(stream.Peek.Type)) {
+                else if (stream.PeekIs(Spec.NeverTestTypes)) {
                     break;
                 }
                 else {
@@ -79,7 +78,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (stream.MaybeEat(Indent)) {
                 // the error is on the next token which has
                 // a useful location, unlike the indent - note we don't have an
-                // indent if we're at an EOF.
+                // indent if we're at an EOS.
                 stream.NextToken();
                 Blame(BlameType.UnexpectedIndentation, stream.Token);
             }
@@ -100,7 +99,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 expressions.Add(ParseExpr());
             } while (
                 stream.MaybeEat(Comma) &&
-                !Spec.NeverTestTypes.Contains(stream.Peek.Type)
+                !stream.PeekIs(Spec.NeverTestTypes)
             );
             return expressions;
         }
@@ -117,19 +116,19 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 trailingComma = stream.MaybeEat(Comma);
             } while (
                 trailingComma
-             && !Spec.NeverTestTypes.Contains(stream.Peek.Type)
+             && !stream.PeekIs(Spec.NeverTestTypes)
             );
             return list;
         }
 
         /// <summary>
         ///     target:
-        ///     identifier          |
-        ///     "(" target_list ")" |
-        ///     "[" target_list "]" |
-        ///     attribute_ref       |
-        ///     subscription        |
-        ///     slicing
+        ///         ID                  |
+        ///         "(" target_list ")" |
+        ///         "[" target_list "]" |
+        ///         attribute_ref       |
+        ///         subscription        |
+        ///         slicing
         /// </summary>
         private Expression ParseTargetExpr() {
             Token startToken = stream.Peek;
@@ -150,7 +149,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (expressions.Count == 1 && !trailingComma) {
                 return expressions[0];
             }
-            return new TupleExpression(expandable && !trailingComma, expressions);
+            return new TupleExpression(expandable && !trailingComma, expressions.ToArray());
         }
     }
 }

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.3.0.3</Version>
+    <Version>0.3.2.0</Version>
     <Authors>Nikitin Ilya</Authors>
     <Company>Fluctus Technologies</Company>
     <Description>Core of Axion programming language toolset.

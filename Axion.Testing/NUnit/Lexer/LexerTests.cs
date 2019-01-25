@@ -7,11 +7,11 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace Axion.Testing.NUnit {
+namespace Axion.Testing.NUnit.Lexer {
     public partial class LexerTests {
         [Test]
         public void UseBlockValid() {
-            var source = new SourceCode(
+            var source = new SourceUnit(
                 "use (\n" +
                 "   System (IO, Linq),\n" +
                 "   Axion (Core, Testing),\n" +
@@ -71,7 +71,7 @@ namespace Axion.Testing.NUnit {
         [Test]
         public void IndentationLengthComputedCorrectly() {
             // with tabs
-            var source1 = new SourceCode(
+            var source1 = new SourceUnit(
                 "i = 0\r\n" +
                 "while i < 10:\r\n" +
                 "\tconsole.print 'OK.'\r\n" +
@@ -106,7 +106,7 @@ namespace Axion.Testing.NUnit {
             Assert.IsTrue(source1.Tokens.ElementAt(indentIndex5).TEquals(new OutdentToken((8, 0))));
 
             // with spaces
-            var source2 = new SourceCode(
+            var source2 = new SourceUnit(
                 "i = 0\r\n" +
                 "while i < 10:\r\n" +
                 "    console.print 'OK.'\r\n" +
@@ -135,7 +135,7 @@ namespace Axion.Testing.NUnit {
             Assert.IsTrue(source2.Tokens.ElementAt(indentIndex5).TEquals(new OutdentToken((8, 0))));
 
             // mixed
-            var source3 = new SourceCode(
+            var source3 = new SourceUnit(
                 // use double indent at line 5 to distinct 8-space tab from spaces.
                 "i = 0\r\n" +                                 // 1
                 "while i < 10:\r\n" +                         // 2
@@ -221,7 +221,7 @@ namespace Axion.Testing.NUnit {
             Assert.AreEqual(numbers.Length, tokens.Length);
 
             for (var i = 0; i < numbers.Length; i++) {
-                var source = new SourceCode(
+                var source = new SourceUnit(
                     "number = " + numbers[i] + " + 0b10010010",
                     outPath + nameof(NumbersParsedCorrectly) + i + testExtension
                 );
@@ -248,7 +248,9 @@ namespace Axion.Testing.NUnit {
                      && expected[k] is NumberToken num2) {
                         Assert.IsTrue(num.Options.TestEquality(num2.Options));
                     }
-                    Assert.IsTrue(expected[k].TEquals(source.Tokens[k]));
+                    else {
+                        Assert.IsTrue(expected[k].TEquals(source.Tokens[k]));
+                    }
                 }
             }
         }
@@ -259,6 +261,19 @@ namespace Axion.Testing.NUnit {
             return a.Type == b.Type
                 && string.Equals(a.Value,       b.Value)
                 && string.Equals(a.Whitespaces, b.Whitespaces);
+        }
+
+        internal static bool TestEquality(this NumberOptions t, NumberOptions other) {
+            // don't check value equality
+            return t.Number.ToString() == other.Number.ToString()
+                && t.Radix == other.Radix
+                && t.Bits == other.Bits
+                && t.Floating == other.Floating
+                && t.Imaginary == other.Imaginary
+                && t.Unsigned == other.Unsigned
+                && t.Unlimited == other.Unlimited
+                && t.HasExponent == other.HasExponent
+                && t.Exponent == other.Exponent;
         }
     }
 }

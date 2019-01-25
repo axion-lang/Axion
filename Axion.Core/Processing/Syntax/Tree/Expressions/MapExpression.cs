@@ -1,15 +1,24 @@
-using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     [JsonObject]
     public class MapExpression : Expression {
-        [JsonProperty]
-        internal SliceExpression[] Expressions { get; }
+        private SliceExpression[] expressions;
 
-        internal MapExpression(List<SliceExpression> expressions, Position start, Position end)
+        [JsonProperty]
+        internal SliceExpression[] Expressions {
+            get => expressions;
+            set {
+                expressions = value;
+                foreach (SliceExpression expr in expressions) {
+                    expr.Parent = this;
+                }
+            }
+        }
+
+        internal MapExpression(SliceExpression[] expressions, Position start, Position end)
             : base(start, end) {
-            Expressions = expressions.ToArray();
+            Expressions = expressions;
         }
     }
 }

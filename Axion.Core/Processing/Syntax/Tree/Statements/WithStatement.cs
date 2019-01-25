@@ -3,11 +3,27 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class WithStatement : Statement {
-        [JsonProperty]
-        public WithStatementItem Item { get; }
+        private WithStatementItem item;
 
         [JsonProperty]
-        public Statement Body { get; }
+        internal WithStatementItem Item {
+            get => item;
+            set {
+                value.Parent = this;
+                item         = value;
+            }
+        }
+
+        private Statement body;
+
+        [JsonProperty]
+        internal Statement Body {
+            get => body;
+            set {
+                value.Parent = this;
+                body         = value;
+            }
+        }
 
         internal WithStatement(WithStatementItem item, Statement body, SpannedRegion start) {
             Item = item;
@@ -17,15 +33,33 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
         }
     }
 
-    public struct WithStatementItem {
-        public readonly Position   Start;
-        public readonly Expression ContextManager;
-        public readonly Expression Variable;
+    public class WithStatementItem : TreeNode {
+        private Expression contextManager;
 
-        public WithStatementItem(Position start, Expression contextManager, Expression variable) {
-            Start          = start;
+        [JsonProperty]
+        internal Expression ContextManager {
+            get => contextManager;
+            set {
+                value.Parent   = this;
+                contextManager = value;
+            }
+        }
+
+        private Expression name;
+
+        [JsonProperty]
+        internal Expression Name {
+            get => name;
+            set {
+                value.Parent = this;
+                name         = value;
+            }
+        }
+
+        public WithStatementItem(Position start, Expression contextManager, Expression name) {
             ContextManager = contextManager;
-            Variable       = variable;
+            Name           = name;
+            MarkStart(start);
         }
     }
 }

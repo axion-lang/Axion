@@ -7,7 +7,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         private SingleCommentToken ReadSingleComment() {
             Stream.Move();
 
-            // skip all until end of line or end of file
+            // skip all until end of line or end of stream
             while (!Stream.AtEndOfLine() && c != Spec.EndOfStream) {
                 tokenValue.Append(c);
                 Stream.Move();
@@ -59,7 +59,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         )
                     );
                 }
-                // went through end of file
+                // went through end of stream
                 else if (c == Spec.EndOfStream) {
                     Blame(BlameType.UnclosedMultilineComment, tokenStartPosition, Stream.Position);
                     return new MultilineCommentToken(

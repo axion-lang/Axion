@@ -168,12 +168,12 @@ namespace Axion.Core {
                 );
                 string[] codeLines = editor.RunSession();
                 // interpret as source code and output result
-                new SourceCode(codeLines).Process(SourceProcessingMode.Interpret);
+                new SourceUnit(codeLines).Process(SourceProcessingMode.Interpret);
             }
         }
 
         private static void ProcessSources(CommandLineArguments options) {
-            SourceCode source;
+            SourceUnit source;
             // get source code
             if (options.Files.Any()) {
                 int filesCount = options.Files.Count();
@@ -185,10 +185,10 @@ namespace Axion.Core {
                 for (var i = 0; i < filesCount; i++) {
                     InputFiles[i] = new FileInfo(Utilities.TrimMatchingChars(options.Files.ElementAt(i), '"'));
                 }
-                source = new SourceCode(InputFiles[0]);
+                source = new SourceUnit(InputFiles[0]);
             }
             else if (!string.IsNullOrWhiteSpace(options.Code)) {
-                source = new SourceCode(Utilities.TrimMatchingChars(options.Code, '"'));
+                source = new SourceUnit(Utilities.TrimMatchingChars(options.Code, '"'));
             }
             else {
                 ConsoleUI.LogError(

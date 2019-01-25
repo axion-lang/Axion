@@ -1,0 +1,11 @@
+fn (i32, List[i32]) DoSomething (i32 value1, i32 value2 = 3)
+    return value1 + value2
+
+fn i32 | List[i32] DoSomething (value1, i32 value2 = 3)
+    return value1 + value2
+
+fn i32 DoSomething(value1, value2 = 3)
+    return value1 + value2
+
+fn DoSomething(value1, value2 = 3)
+    return value1 + value2

@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Errors {
         internal new string Message { get; }
 
         [JsonProperty]
-        private SourceCode file { get; }
+        private SourceUnit src { get; }
 
         [JsonProperty]
         private string code { get; }
@@ -31,9 +31,9 @@ namespace Axion.Core.Processing.Errors {
             Message    = base.Message;
         }
 
-        internal LanguageException(Blame blame, SourceCode file)
-            : this(blame, file.Code) {
-            this.file = file;
+        internal LanguageException(Blame blame, SourceUnit source)
+            : this(blame, source.Code) {
+            src = source;
         }
 
         /// <summary>
@@ -64,8 +64,8 @@ namespace Axion.Core.Processing.Errors {
             // Write message
             ConsoleUI.WriteLine((Message, color));
             // Append file name if it's exists.
-            if (file != null) {
-                ConsoleUI.WriteLine("In file '" + file.SourceFilePath + "'.");
+            if (src != null) {
+                ConsoleUI.WriteLine("In file '" + src.SourceFilePath + "'.");
             }
             Console.WriteLine();
 
