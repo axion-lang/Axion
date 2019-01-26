@@ -25,7 +25,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             get => block;
             set {
                 value.Parent = this;
-                block         = value;
+                block        = value;
             }
         }
 
@@ -36,13 +36,13 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             get => noBreakBlock;
             set {
                 value.Parent = this;
-                noBreakBlock  = value;
+                noBreakBlock = value;
             }
         }
 
         public ForStatement(Expression left, Expression list, Statement block, Statement noBreakBlock, SpannedRegion start) {
-            Left        = left;
-            List        = list ?? throw new ArgumentNullException(nameof(list));
+            Left         = left;
+            List         = list ?? throw new ArgumentNullException(nameof(list));
             Block        = block;
             NoBreakBlock = noBreakBlock;
 

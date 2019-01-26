@@ -14,8 +14,10 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntax.Parser {
     public partial class SyntaxParser {
         /// <summary>
+        /// <c>
         ///     decorated:
         ///         decorators (class_def | enum_def | func_def)
+        /// </c>
         /// </summary>
         private Statement ParseDecorated() {
             List<Expression> decorators = ParseDecorators();
@@ -34,6 +36,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         #region Type name
 
         /// <summary>
+        /// <c>
         ///     type:
         ///         simple_type | generic_type
         ///       | union_type  | tuple_type
@@ -45,6 +48,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///         type ('|' type)+
         ///     tuple_type:
         ///         '(' [type (',' type)*] ')'
+        /// </c>
         /// </summary>
         private void ValidateTypeName(SpannedRegion span) {
             if (span is TupleExpression tuple) {
@@ -131,8 +135,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         #region Class
 
         /// <summary>
+        /// <c>
         ///     class_def:
         ///         'class' ID ['(' args_list ')'] block
+        /// </c>
         /// </summary>
         private ClassDefinition ParseClassDef() {
             Token start = StartNewStmt(KeywordClass);
@@ -143,10 +149,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 return new ClassDefinition(null, new Expression[0], new Expression[0], ErrorStmt());
             }
 
-            Expression metaClass = null;
-            var        bases     = new List<Expression>();
-            var        keywords  = new List<Expression>();
-            var        types     = ParseTypeArgs(true);
+            Expression                         metaClass = null;
+            var                                bases     = new List<Expression>();
+            var                                keywords  = new List<Expression>();
+            List<(NameExpression, Expression)> types     = ParseTypeArgs(true);
             foreach ((NameExpression name, Expression type) type in types) {
                 if (type.name == null) {
                     bases.Add(type.type);
@@ -178,10 +184,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
         #region Enum
 
         /// <summary>
+        /// <c>
         ///     enum_def:
         ///         'enum' ID ['(' args_list ')'] block_start enum_item* block_terminator
+        /// </c>
         /// </summary>
-        /// <returns></returns>
         private EnumDefinition ParseEnumDef() {
             Token start = StartNewStmt(KeywordEnum);
 
@@ -189,9 +196,9 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (name == null || !name.IsSimple) {
                 return new EnumDefinition(start.Span.StartPosition, tokenEnd, name);
             }
-            var bases = ParseTypeArgs(false).Select(it => it.Item2).ToArray();
-            var block = ParseBlockStart();
-            var items = new List<EnumItem>();
+            Expression[]                                     bases = ParseTypeArgs(false).Select(it => it.Item2).ToArray();
+            (TokenType terminator, bool oneLine, bool error) block = ParseBlockStart();
+            var                                              items = new List<EnumItem>();
             if (!stream.MaybeEat(KeywordPass) && !block.error) {
                 do {
                     items.Add(ParseEnumItem());
@@ -203,8 +210,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     enum_item:
         ///         ID ['(' type (',' type)* ')'] ['=' constant_expr]
+        /// </c>
         /// </summary>
         private EnumItem ParseEnumItem() {
             stream.MaybeEatNewline();
@@ -225,10 +234,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
         #region Function
 
         /// <summary>
+        /// <c>
         ///     func_def:
         ///         'fn' [type_name] ID parameters block
         ///     parameters:
         ///         '(' [parameters_list] ')'
+        /// </c>
         /// </summary>
         private FunctionDefinition ParseFunctionDef() {
             Position       start      = StartNewStmt(KeywordFn).Span.StartPosition;
@@ -350,8 +361,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     named_parameter:
         ///         parameter ["=" test]
+        /// </c>
         /// </summary>
         private Parameter ParseNamedParameter(HashSet<string> names, ParameterKind parameterKind, ref bool needDefault) {
             Parameter parameter = ParseParameter(names, parameterKind);
@@ -366,8 +379,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     parameter:
         ///         [type] ID [":" test]
+        /// </c>
         /// </summary>
         private Parameter ParseParameter(HashSet<string> names, ParameterKind parameterKind) {
             var parameter = new Parameter(ParseTypeName(), ParseName(), parameterKind);

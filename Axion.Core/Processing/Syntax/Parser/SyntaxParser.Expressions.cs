@@ -66,14 +66,15 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     yield_expr:
         ///         'yield' [yield_arg]
         ///     yield_arg:
         ///         'from' test | test_list
-        ///     <para />
         ///     Peek if the next token is a 'yield' and parse a yield expression.
         ///     Else return null.
         ///     Called w/ yield already stream.Eaten.
+        /// </c>
         /// </summary>
         private Expression ParseYield() {
             // Mark that this function is actually a generator.

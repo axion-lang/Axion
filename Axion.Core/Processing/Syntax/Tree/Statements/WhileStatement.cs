@@ -21,7 +21,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             get => block;
             set {
                 value.Parent = this;
-                block         = value;
+                block        = value;
             }
         }
 
@@ -39,7 +39,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
         }
 
         internal WhileStatement(Expression condition, Statement block, Statement noBreakBlock, SpannedRegion start) {
-            Condition   = condition;
+            Condition    = condition;
             Block        = block;
             NoBreakBlock = noBreakBlock;
 

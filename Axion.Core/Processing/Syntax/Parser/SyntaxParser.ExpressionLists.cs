@@ -89,8 +89,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     expr_list:
-        ///     (expr|star_expr) (',' (expr|star_expr))* [',']
+        ///         (expr|star_expr) (',' (expr|star_expr))* [',']
+        /// </c>
         /// </summary>
         private List<Expression> ParseExprList() {
             var expressions = new List<Expression>();
@@ -107,7 +109,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
             return ParseExpressionList(out bool _);
         }
 
-        // target_list: target ("," target)* [","] 
+        /// <summary>
+        /// <c>
+        ///     target_list:
+        ///         target ("," target)* [","] 
+        /// </c>
+        /// </summary>
         private List<Expression> ParseTargetListExpr(out bool trailingComma) {
             var list = new List<Expression>();
             do {
@@ -121,6 +128,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     target:
         ///         ID                  |
         ///         "(" target_list ")" |
@@ -128,6 +136,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///         attribute_ref       |
         ///         subscription        |
         ///         slicing
+        /// </c>
         /// </summary>
         private Expression ParseTargetExpr() {
             Token startToken = stream.Peek;

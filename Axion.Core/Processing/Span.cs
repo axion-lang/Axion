@@ -7,8 +7,6 @@ namespace Axion.Core.Processing {
             StartPosition = start;
             EndPosition   = end;
         }
-        
-        
 
         public override string ToString() {
             return "start (" + StartPosition + "), end (" + EndPosition + ")";

@@ -78,7 +78,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
         public FunctionDefinition(Expression name, Parameter[] parameters, Statement body, Expression returnType = null) {
             Name       = name;
             Parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
-            Block       = body;
+            Block      = body;
             ReturnType = returnType;
         }
     }

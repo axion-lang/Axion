@@ -79,7 +79,7 @@ namespace Axion.Core.Specification {
             { RedundantEmptyUseStatement, Warning },
             { DoubleNegationIsMeaningless, Warning },
             { RedundantColonWithBraces, Warning },
-            { RedundantEmptyListOfTypeArguments, Warning },
+            { RedundantEmptyListOfTypeArguments, Warning }
         };
     }
 }

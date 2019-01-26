@@ -435,10 +435,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     generator_expression:
         ///         '(' expression comp_for ')'
-        ///     <para />
-        ///     "for" has NOT been stream.Eaten before entering this method
+        /// </c>
+        /// "for" has NOT been stream.Eaten before entering this method
         /// </summary>
         private Expression ParseGeneratorExpr(Expression expr) {
             var comprehensions = new List<ComprehensionIterator> { ParseComprehensionFor() };
@@ -459,10 +460,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
         #region Arguments list
 
         /// <summary>
+        /// <c>
         ///     arg_list:
         ///         (expression
         ///          | expression '=' expression
         ///          | expression 'for')*
+        /// </c>
         /// </summary>
         private Arg[] FinishGeneratorOrArgList() {
             if (stream.PeekIs(TokenType.RightParenthesis, TokenType.OpMultiply, TokenType.OpPower)) {
@@ -519,11 +522,13 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     arg_list:
         ///         (argument ',')* (argument [',']| '*' expression [',' '**' expression] | '**' expression)
         ///     argument:
         ///         [expression '='] expression
-        ///     # Really [keyword '='] expression
+        /// </c>
+        /// Really [keyword '='] expression
         /// </summary>
         private Arg[] ParseArgumentsList(Arg first = null) {
             var arguments = new List<Arg>();

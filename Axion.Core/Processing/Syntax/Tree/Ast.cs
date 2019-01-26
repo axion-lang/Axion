@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Syntax.Tree {
         internal readonly SourceUnit Source;
 
         private BlockStatement root;
-        
+
         [JsonProperty]
         internal BlockStatement Root {
             get => root;

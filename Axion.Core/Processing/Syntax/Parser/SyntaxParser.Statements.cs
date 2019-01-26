@@ -175,7 +175,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <c>
         ///     try_stmt:
         ///         ('try' block
-        ///         ((except_clause block)+
+        ///         ((try_handler block)+
         ///         ['else' block]
         ///         ['finally' block] |
         ///         'finally' block))
@@ -220,7 +220,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
             return new TryStatement(block, handlers.ToArray(), elseBlock, finallyBlock, start);
         }
 
-        // catch_clause: 'catch' [expr ['as' ID]]
+        /// <summary>
+        /// <c>
+        ///     try_handler:
+        ///         'catch' [expr ['as' ID]]
+        /// </c>
+        /// </summary>
         private TryStatementHandler ParseTryStmtHandler() {
             stream.Eat(KeywordCatch);
 
@@ -266,10 +271,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         #region With statement
 
         /// <summary>
+        /// <c>
         ///     with_stmt:
         ///         'with' with_item (',' with_item)* ':' block
-        ///     with_item:
-        ///         test ['as' ID]
+        /// </c>
         /// </summary>
         private WithStatement ParseWithStmt() {
             Token start = StartNewStmt(KeywordWith);
@@ -294,6 +299,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
             return new WithStatement(withItem, block, start);
         }
 
+        /// <summary>
+        /// <c>
+        ///     with_item:
+        ///         test ['as' ID]
+        /// </c>
+        /// </summary>
         private WithStatementItem ParseWithItem() {
             Position   start          = tokenStart;
             Expression contextManager = ParseTestExpr();
@@ -436,8 +447,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         #region Decorators
 
         /// <summary>
+        /// <c>
         ///     decorators:
         ///         ('@' decorator (',' decorator)* NEWLINE)+
+        /// </c>
         /// </summary>
         private List<Expression> ParseDecorators() {
             var decorators = new List<Expression>();
@@ -460,9 +473,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
             return decorators;
         }
 
-        /// <summary>
+        /// <summary>'
+        /// <c>
         ///     decorator:
         ///         name ["(" [argument_list [","]] ")"]
+        /// </c>
         /// </summary>
         private Expression ParseDecorator() {
             // on '@'
@@ -513,12 +528,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     small_stmt:
         ///         assert_stmt | delete_stmt |
         ///         pass_stmt | flow_stmt | expr_stmt
         ///     flow_stmt:
         ///         break_stmt | continue_stmt |
         ///         return_stmt | raise_stmt | yield_stmt
+        /// </c>
         /// </summary>
         private Statement ParseSmallStmt() {
             switch (stream.Peek.Type) {
@@ -555,10 +572,6 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 case KeywordYield: {
                     return ParseYieldStmt();
                 }
-                // var definition
-//                case Identifier: {
-//                    
-//                }
                 default: {
                     return ParseExpressionStmt();
                 }

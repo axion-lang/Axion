@@ -6,7 +6,9 @@ using Axion.Core.Processing.Syntax.Tree.Expressions;
 namespace Axion.Core.Processing.Syntax.Parser {
     public partial class SyntaxParser {
         /// <summary>
+        /// <c>
         ///     comprehension_iterator '}'
+        /// </c>
         /// </summary>
         private SetComprehension FinishSetComprehension(Expression item, Position start) {
             ComprehensionIterator[] iterators = ParseComprehensionIterators();
@@ -16,7 +18,9 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     comprehension_iterator '}'
+        /// </c>
         /// </summary>
         private MapComprehension FinishMapComprehension(Expression key, Expression value, Position start) {
             ComprehensionIterator[] iterators = ParseComprehensionIterators();
@@ -26,8 +30,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     comprehension_iterator:
         ///         comprehension_for | comprehension_if
+        /// </c>
         /// </summary>
         private ComprehensionIterator[] ParseComprehensionIterators() {
             var              iterators = new List<ComprehensionIterator>();
@@ -50,8 +56,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     comprehension_for:
         ///         'for target_list 'in' or_test [comprehension_iterator]
+        /// </c>
         /// </summary>
         private ComprehensionFor ParseComprehensionFor() {
             Token start = StartNewStmt(TokenType.KeywordFor);
@@ -73,8 +81,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
+        /// <c>
         ///     comprehension_if:
         ///         'if' old_test [comprehension_iterator]
+        /// </c>
         /// </summary>
         private ComprehensionIf ParseComprehensionIf() {
             Token      start     = StartNewStmt(TokenType.KeywordIf);

@@ -10,7 +10,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             get => block;
             set {
                 value.Parent = this;
-                block         = value;
+                block        = value;
             }
         }
 
@@ -34,7 +34,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             get => elseBlock;
             set {
                 value.Parent = this;
-                elseBlock     = value;
+                elseBlock    = value;
             }
         }
 
@@ -45,7 +45,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             get => anywayBlock;
             set {
                 value.Parent = this;
-                anywayBlock   = value;
+                anywayBlock  = value;
             }
         }
 
@@ -57,7 +57,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             SpannedRegion         start
         ) {
             Block       = block;
-            Handlers   = handlers ?? new TryStatementHandler[0];
+            Handlers    = handlers ?? new TryStatementHandler[0];
             ElseBlock   = elseBlock;
             AnywayBlock = anywayBlock;
 
@@ -96,14 +96,14 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             get => block;
             set {
                 value.Parent = this;
-                block         = value;
+                block        = value;
             }
         }
 
         public TryStatementHandler(Expression errorType, Expression target, Statement block, Position start) {
             ErrorType = errorType;
             Name      = target;
-            Block      = block;
+            Block     = block;
 
             MarkStart(start);
             MarkEnd(Block);

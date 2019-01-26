@@ -43,13 +43,13 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             get => block;
             set {
                 value.Parent = this;
-                block         = value;
+                block        = value;
             }
         }
 
         internal IfStatementBranch(Expression condition, Statement block, SpannedRegion start) {
             Condition = condition;
-            Block      = block;
+            Block     = block;
 
             MarkPosition(start, block);
         }

@@ -21,12 +21,12 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             get => block;
             set {
                 value.Parent = this;
-                block         = value;
+                block        = value;
             }
         }
 
         internal WithStatement(WithStatementItem item, Statement block, SpannedRegion start) {
-            Item = item;
+            Item  = item;
             Block = block;
             MarkStart(start);
             MarkEnd(Block);
