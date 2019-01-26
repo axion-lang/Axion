@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
@@ -13,7 +14,8 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntax.Parser {
     public partial class SyntaxParser {
         /// <summary>
-        ///     decorated: decorators (class | func)
+        ///     decorated:
+        ///         decorators (class_def | enum_def | func_def)
         /// </summary>
         private Statement ParseDecorated() {
             List<Expression> decorators = ParseDecorators();
@@ -23,11 +25,13 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 def.Modifiers = decorators;
             }
             else {
-                ReportError("Decorator can be applied only to the top level definition.", stmt);
+                ReportError(Spec.ERR_InvalidDecoratorPosition, stmt);
             }
 
             return stmt;
         }
+
+        #region Type name
 
         /// <summary>
         ///     type:
@@ -42,29 +46,33 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     tuple_type:
         ///         '(' [type (',' type)*] ')'
         /// </summary>
-        private void ValidateTypeName(Expression expr) {
-            if (expr is TupleExpression tuple) {
+        private void ValidateTypeName(SpannedRegion span) {
+            if (span is TupleExpression tuple) {
                 // tuple of types
                 for (var i = 0; i < tuple.Expressions.Length; i++) {
                     ValidateTypeName(tuple.Expressions[i]);
                 }
             }
-            else if (expr is BinaryExpression bin
+            else if (span is BinaryExpression bin
                   && bin.Operator.Type == OpBitwiseOr) {
                 // union - type
                 ValidateTypeName(bin.Left);
                 ValidateTypeName(bin.Right);
             }
-            else if (expr is IndexExpression index) {
+            else if (span is IndexExpression index) {
                 // generic
                 ValidateTypeName(index.Target);
                 ValidateTypeName(index.Index);
             }
-            else if (expr is NameExpression) {
+            else if (span is MemberExpression member) {
+                ValidateTypeName(member.Name);
+                ValidateTypeName(member.Target);
+            }
+            else if (span is NameExpression) {
                 // type name
             }
             else {
-                Blame(BlameType.InvalidTypeNameExpression, expr);
+                Blame(BlameType.InvalidTypeNameExpression, span);
             }
         }
 
@@ -85,11 +93,46 @@ namespace Axion.Core.Processing.Syntax.Parser {
             return typeName;
         }
 
+        private List<(NameExpression, Expression)> ParseTypeArgs(bool allowNamed) {
+            var   typeArgs = new List<(NameExpression, Expression)>();
+            Token start    = stream.Peek;
+            // '(' type (',' type)* ')'
+            if (stream.MaybeEat(LeftParenthesis)) {
+                if (stream.MaybeEat(RightParenthesis)) {
+                    // redundant parens
+                    Blame(BlameType.RedundantEmptyListOfTypeArguments, (start.Span.EndPosition, tokenEnd));
+                }
+                else {
+                    do {
+                        NameExpression name     = null;
+                        int            startIdx = stream.Index;
+                        if (stream.MaybeEat(Identifier)) {
+                            Token id = stream.Token;
+                            if (stream.MaybeEat(Assign)) {
+                                if (!allowNamed) {
+                                    ReportError("Base of this type cannot be named.", id);
+                                }
+                                name = new NameExpression(id);
+                            }
+                            else {
+                                stream.MoveTo(startIdx);
+                            }
+                        }
+                        typeArgs.Add((name, ParseTypeName()));
+                    } while (stream.MaybeEat(Comma));
+                    stream.Eat(RightParenthesis);
+                }
+            }
+            return typeArgs;
+        }
+
+        #endregion
+
         #region Class
 
         /// <summary>
         ///     class_def:
-        ///         'class' ID ['(' args_list ')'] body
+        ///         'class' ID ['(' args_list ')'] block
         /// </summary>
         private ClassDefinition ParseClassDef() {
             Token start = StartNewStmt(KeywordClass);
@@ -103,31 +146,30 @@ namespace Axion.Core.Processing.Syntax.Parser {
             Expression metaClass = null;
             var        bases     = new List<Expression>();
             var        keywords  = new List<Expression>();
-            if (stream.MaybeEat(LeftParenthesis)) {
-                foreach (Arg arg in ParseArgumentsList()) {
-                    ArgumentKind argKind = arg.GetArgumentInfo();
-                    if (argKind == ArgumentKind.Simple) {
-                        bases.Add(arg.Value);
-                    }
-                    else if (argKind == ArgumentKind.Named) {
-                        keywords.Add(arg.Value);
-                        if (arg.Name.Name == "metaclass") {
-                            metaClass = arg.Value;
-                        }
+            var        types     = ParseTypeArgs(true);
+            foreach ((NameExpression name, Expression type) type in types) {
+                if (type.name == null) {
+                    bases.Add(type.type);
+                }
+                else {
+                    keywords.Add(type.type);
+                    if (type.name.Name == "metaclass") {
+                        metaClass = type.type;
                     }
                 }
             }
+
             var classDef = new ClassDefinition(name, bases.ToArray(), keywords.ToArray(), metaClass: metaClass);
             ast.PushClass(classDef);
 
-            // Parse class body
-            Statement body = ParseTopLevelBody();
+            // Parse class block
+            Statement block = ParseTopLevelBlock();
 
             ClassDefinition ret2 = ast.PopClass();
             Debug.Assert(classDef == ret2);
 
-            classDef.Body = body;
-            classDef.MarkPosition(start.Span.Start, tokenEnd);
+            classDef.Block = block;
+            classDef.MarkPosition(start.Span.StartPosition, tokenEnd);
             return classDef;
         }
 
@@ -137,7 +179,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     enum_def:
-        ///         'enum' ID ['(' args_list ')'] body_start enum_item* body_terminator
+        ///         'enum' ID ['(' args_list ')'] block_start enum_item* block_terminator
         /// </summary>
         /// <returns></returns>
         private EnumDefinition ParseEnumDef() {
@@ -145,65 +187,37 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
             NameExpression name = ParseName();
             if (name == null || !name.IsSimple) {
-                return new EnumDefinition(start.Span.Start, tokenEnd, name);
+                return new EnumDefinition(start.Span.StartPosition, tokenEnd, name);
             }
-
-            var bases = new List<Expression>();
-            if (stream.MaybeEat(LeftParenthesis)) {
-                foreach (Arg arg in ParseArgumentsList()) {
-                    ArgumentKind argKind = arg.GetArgumentInfo();
-                    if (argKind == ArgumentKind.Simple) {
-                        bases.Add(arg.Value);
-                    }
-                    else {
-                        ReportError("Bases of any inheritable type must be specified as simple names", arg);
-                    }
-                }
-            }
-
-            (TokenType terminator, bool oneLine, bool error) body = ParseBodyStart();
-
+            var bases = ParseTypeArgs(false).Select(it => it.Item2).ToArray();
+            var block = ParseBlockStart();
             var items = new List<EnumItem>();
-            if (!stream.MaybeEat(KeywordPass) && !body.error) {
+            if (!stream.MaybeEat(KeywordPass) && !block.error) {
                 do {
                     items.Add(ParseEnumItem());
-                } while (!stream.MaybeEat(body.terminator)
+                } while (!stream.MaybeEat(block.terminator)
                       && !CheckUnexpectedEOS()
                       && stream.MaybeEat(Comma));
             }
-            return new EnumDefinition(start.Span.Start, tokenEnd, name, bases.ToArray(), items.ToArray());
+            return new EnumDefinition(start.Span.StartPosition, tokenEnd, name, bases, items.ToArray());
         }
 
         /// <summary>
         ///     enum_item:
-        ///         ID ['(' type* ')'] ['=' constant_expr]
+        ///         ID ['(' type (',' type)* ')'] ['=' constant_expr]
         /// </summary>
         private EnumItem ParseEnumItem() {
             stream.MaybeEatNewline();
-            NameExpression name     = ParseName();
-            var            typeArgs = new List<NameExpression>();
-            // '(' type* ')'
-            if (stream.MaybeEat(LeftParenthesis)) {
-                if (stream.MaybeEat(RightParenthesis)) {
-                    // redundant parens
-                    Blame(BlameType.RedundantEmptyEnumItemAssociatedValuesList, (name.Span.End, tokenEnd));
-                }
-                else {
-                    do {
-                        typeArgs.Add(ParseName(true));
-                    } while (stream.MaybeEat(Comma));
-                    stream.Eat(RightParenthesis);
-                }
-            }
-
-            ConstantExpression value = null;
+            NameExpression                     name     = ParseName();
+            List<(NameExpression, Expression)> typeArgs = ParseTypeArgs(false);
+            ConstantExpression                 value    = null;
             if (stream.MaybeEat(Assign)) {
                 value = ParsePrimaryExpr() as ConstantExpression;
                 if (value == null) {
                     Blame(BlameType.ConstantValueExpected, stream.Token);
                 }
             }
-            return new EnumItem(name, typeArgs.ToArray(), value);
+            return new EnumItem(name, typeArgs.Select(it => it.Item2).ToArray(), value);
         }
 
         #endregion
@@ -212,12 +226,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     func_def:
-        ///         'fn' [type_name] ID parameters body
+        ///         'fn' [type_name] ID parameters block
         ///     parameters:
         ///         '(' [parameters_list] ')'
         /// </summary>
         private FunctionDefinition ParseFunctionDef() {
-            Position       start      = StartNewStmt(KeywordFn).Span.Start;
+            Position       start      = StartNewStmt(KeywordFn).Span.StartPosition;
             Expression     returnType = ParseTypeName();
             NameExpression funcName   = ParseName();
 
@@ -227,12 +241,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
             var ret = new FunctionDefinition(funcName, parameters, returnType);
 
             ast.PushFunction(ret);
-            Statement          body = ParseTopLevelBody();
-            FunctionDefinition ret2 = ast.PopFunction();
+            Statement          block = ParseTopLevelBlock();
+            FunctionDefinition ret2  = ast.PopFunction();
             Debug.Assert(ret == ret2);
 
-            ret.Body = body;
-            ret.MarkPosition(start, body.Span.End);
+            ret.Block = block;
+            ret.MarkPosition(start, block.Span.EndPosition);
             return ret;
         }
 

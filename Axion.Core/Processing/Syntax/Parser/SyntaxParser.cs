@@ -32,12 +32,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <summary>
         ///     Start position of current token in stream.
         /// </summary>
-        private Position tokenStart => stream.Token.Span.Start;
+        private Position tokenStart => stream.Token.Span.StartPosition;
 
         /// <summary>
         ///     End position of current token in stream.
         /// </summary>
-        private Position tokenEnd => stream.Token.Span.End;
+        private Position tokenEnd => stream.Token.Span.EndPosition;
 
         private bool inLoop, inFinally, inFinallyLoop;
 
@@ -76,7 +76,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     statements[statements.Count - 1] = new ReturnStatement(exprStmt.Expression);
                 }
             }
-            ast.Root = new BodyStatement(statements.ToArray());
+            ast.Root = new BlockStatement(statements.ToArray());
         }
 
         private Token StartNewStmt(TokenType type) {
@@ -118,7 +118,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                         // TODO add pre-concatenation of literals
                         return new ConstantExpression(token);
                     }
-                    ReportError("Expected an identifier, list, map or other primary expression.", token);
+                    ReportError(Spec.ERR_PrimaryExpected, token);
                     return Error();
                 }
             }
@@ -135,7 +135,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </c>
         /// </summary>
         private Expression ParsePrimaryInParenthesis() {
-            Position start = StartNewStmt(TokenType.LeftParenthesis).Span.Start;
+            Position start = StartNewStmt(TokenType.LeftParenthesis).Span.StartPosition;
 
             Expression result;
             if (stream.MaybeEat(TokenType.RightParenthesis)) {
@@ -180,7 +180,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </c>
         /// </summary>
         private Expression ParsePrimaryInBrackets() {
-            Position start = StartNewStmt(TokenType.LeftBracket).Span.Start;
+            Position start = StartNewStmt(TokenType.LeftBracket).Span.StartPosition;
 
             var expressions = new List<Expression>();
             if (!stream.MaybeEat(TokenType.RightBracket)) {
@@ -208,7 +208,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </c>
         /// </summary>
         private Expression ParseMapOrSetDisplay() {
-            Position start = StartNewStmt(TokenType.LeftBrace).Span.Start;
+            Position start = StartNewStmt(TokenType.LeftBrace).Span.StartPosition;
 
             List<SliceExpression> mapMembers = null;
             List<Expression>      setMembers = null;
@@ -533,7 +533,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
 
             while (!stream.MaybeEat(TokenType.RightParenthesis)) {
-                var name = new NameExpression(stream.Peek);
+                NameExpression name = ParseName();
                 stream.NextToken();
                 Arg arg;
 
@@ -564,11 +564,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private NameExpression ParseName(bool allowQualified = false) {
             var nameParts = new List<Token>();
             do {
-                stream.NextToken();
+                stream.Eat(TokenType.Identifier);
                 nameParts.Add(stream.Token);
-                if (stream.Token.Type != TokenType.Identifier) {
-                    BlameInvalidSyntax(TokenType.Identifier, stream.Peek);
-                }
             } while (allowQualified && stream.MaybeEat(TokenType.Dot));
             return new NameExpression(nameParts.ToArray());
         }
@@ -604,11 +601,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         internal void Blame(BlameType type, SpannedRegion region) {
-            Blame(type, region.Span.Start, region.Span.End);
+            Blame(type, region.Span.StartPosition, region.Span.EndPosition);
         }
 
         internal void Blame(BlameType type, Span span) {
-            Blame(type, span.Start, span.End);
+            Blame(type, span.StartPosition, span.EndPosition);
         }
 
         internal void Blame(BlameType type, Position start, Position end) {

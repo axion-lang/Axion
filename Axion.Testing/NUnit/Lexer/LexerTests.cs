@@ -236,9 +236,9 @@ namespace Axion.Testing.NUnit.Lexer {
                     new IdentifierToken((0, 0), "number", " "),
                     new SymbolToken((0, 7), "=", " "),
                     tokens[i],
-                    new OperatorToken((0, tokens[i].Span.End.Column), "+", " "),
-                    new NumberToken((0, tokens[i].Span.End.Column + 2), "0b10010010", new NumberOptions(32)),
-                    new EndOfLineToken((0, tokens[i].Span.End.Column + 12)),
+                    new OperatorToken((0, tokens[i].Span.EndPosition.Column), "+", " "),
+                    new NumberToken((0, tokens[i].Span.EndPosition.Column + 2), "0b10010010", new NumberOptions(32)),
+                    new EndOfLineToken((0, tokens[i].Span.EndPosition.Column + 12)),
                     new EndOfStreamToken((1, 0))
                 };
 

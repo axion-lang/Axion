@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
             int linesCount        = value.Split(Spec.EndOfLines, StringSplitOptions.None).Length;
             int commentMarkLength = Spec.MultiCommentStart.Length;
-            int endCol            = Span.End.Column;
+            int endCol            = Span.EndPosition.Column;
             if (linesCount == 1) {
                 if (isUnclosed) {
                     endCol += commentMarkLength;
@@ -27,7 +27,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             else if (!isUnclosed) {
                 endCol += commentMarkLength;
             }
-            Span = new Span(Span.Start, (Span.End.Line, endCol));
+            Span = new Span(Span.StartPosition, (Span.EndPosition.Line, endCol));
         }
 
         public override string ToAxionCode() {

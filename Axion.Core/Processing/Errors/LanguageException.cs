@@ -73,23 +73,23 @@ namespace Axion.Core.Processing.Errors {
 
             var lines = new List<string>();
             // limit rest of code by 5 lines
-            for (int i = blame.Span.Start.Line; i < codeLines.Length && lines.Count < 4; i++) {
+            for (int i = blame.Span.StartPosition.Line; i < codeLines.Length && lines.Count < 4; i++) {
                 lines.Add(codeLines[i].TrimEnd('\n', Spec.EndOfStream));
             }
-            if (lines.Count > codeLines.Length - blame.Span.Start.Line) {
+            if (lines.Count > codeLines.Length - blame.Span.StartPosition.Line) {
                 lines.Add("...");
             }
 
             // first line
             // <line number>| <code line>
-            int pointerTailLength = ConsoleCodeEditor.LineNumberWidth + blame.Span.Start.Column;
+            int pointerTailLength = ConsoleCodeEditor.LineNumberWidth + blame.Span.StartPosition.Column;
             int errorTokenLength;
-            if (blame.Span.End.Line > blame.Span.Start.Line) {
+            if (blame.Span.EndPosition.Line > blame.Span.StartPosition.Line) {
                 // token multiline
-                errorTokenLength = lines[0].Length - blame.Span.Start.Column;
+                errorTokenLength = lines[0].Length - blame.Span.StartPosition.Column;
             }
             else {
-                errorTokenLength = blame.Span.End.Column - blame.Span.Start.Column;
+                errorTokenLength = blame.Span.EndPosition.Column - blame.Span.StartPosition.Column;
             }
             // upside arrows (^), should be red-colored
             string pointer =
@@ -104,13 +104,13 @@ namespace Axion.Core.Processing.Errors {
             // Drawing --------------------------------------------------------------------------
 
             // line with error
-            ConsoleCodeEditor.PrintLineNumber(blame.Span.Start.Line + 1);
+            ConsoleCodeEditor.PrintLineNumber(blame.Span.StartPosition.Line + 1);
             ConsoleUI.WriteLine(lines[0]);
             // error pointer
             ConsoleUI.WriteLine((pointer, color));
 
             // next lines
-            for (int lineIndex = blame.Span.Start.Line + 1; lineIndex < lines.Count; lineIndex++) {
+            for (int lineIndex = blame.Span.StartPosition.Line + 1; lineIndex < lines.Count; lineIndex++) {
                 ConsoleCodeEditor.PrintLineNumber(lineIndex + 1);
                 ConsoleUI.WriteLine(lines[lineIndex]);
             }

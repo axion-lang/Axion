@@ -49,8 +49,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             string[] valueLines = value.Split(Spec.EndOfLines, StringSplitOptions.None);
 
             // compute end line & end column
-            int endLine = Span.End.Line;
-            int endCol  = Span.End.Column;
+            int endLine = Span.EndPosition.Line;
+            int endCol  = Span.EndPosition.Column;
             if (valueLines.Length == 1) {
                 endCol += value.Length;
             }
@@ -58,7 +58,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                 endLine += valueLines.Length - 1;
                 endCol  =  valueLines[valueLines.Length - 1].Length;
             }
-            Span = new Span(Span.Start, (endLine, endCol));
+            Span = new Span(Span.StartPosition, (endLine, endCol));
         }
 
         public void AppendWhitespace(string space) {

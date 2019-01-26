@@ -34,7 +34,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         last.Type == TokenType.KeywordIs) {
                         tokens[tokens.Count - 1] = new KeywordToken(
                             TokenType.KeywordIsNot,
-                            last.Span.Start,
+                            last.Span.StartPosition,
                             value: last.Value + last.Whitespaces + tokenValue
                         );
                         return null;
@@ -44,7 +44,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         last.Type == TokenType.KeywordNot) {
                         tokens[tokens.Count - 1] = new KeywordToken(
                             TokenType.KeywordNotIn,
-                            last.Span.Start,
+                            last.Span.StartPosition,
                             value: last.Value + last.Whitespaces + tokenValue
                         );
                         return null;

@@ -143,8 +143,8 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 }
                 Blame(
                     errorType,
-                    mismatch.Span.Start,
-                    mismatch.Span.End
+                    mismatch.Span.StartPosition,
+                    mismatch.Span.EndPosition
                 );
             }
 
@@ -167,7 +167,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 Token last = tokens[tokens.Count - 1];
                 Debug.Assert(
                     tokenStartPosition ==
-                    (last.Span.End.Line, last.Span.End.Column + last.Whitespaces.Length)
+                    (last.Span.EndPosition.Line, last.Span.EndPosition.Column + last.Whitespaces.Length)
                 );
             }
 #endif

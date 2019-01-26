@@ -3,14 +3,14 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class TryStatement : Statement {
-        private Statement body;
+        private Statement block;
 
         [JsonProperty]
-        internal Statement Body {
-            get => body;
+        internal Statement Block {
+            get => block;
             set {
                 value.Parent = this;
-                body         = value;
+                block         = value;
             }
         }
 
@@ -27,42 +27,42 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
-        private Statement elseBody;
+        private Statement elseBlock;
 
         [JsonProperty]
-        internal Statement ElseBody {
-            get => elseBody;
+        internal Statement ElseBlock {
+            get => elseBlock;
             set {
                 value.Parent = this;
-                elseBody     = value;
+                elseBlock     = value;
             }
         }
 
-        private Statement anywayBody;
+        private Statement anywayBlock;
 
         [JsonProperty]
-        internal Statement AnywayBody {
-            get => anywayBody;
+        internal Statement AnywayBlock {
+            get => anywayBlock;
             set {
                 value.Parent = this;
-                anywayBody   = value;
+                anywayBlock   = value;
             }
         }
 
         internal TryStatement(
-            Statement             body,
+            Statement             block,
             TryStatementHandler[] handlers,
             Statement             elseBlock,
             Statement             anywayBlock,
             SpannedRegion         start
         ) {
-            Body       = body;
+            Block       = block;
             Handlers   = handlers ?? new TryStatementHandler[0];
-            ElseBody   = elseBlock;
-            AnywayBody = anywayBlock;
+            ElseBlock   = elseBlock;
+            AnywayBlock = anywayBlock;
 
             MarkStart(start);
-            MarkEnd(AnywayBody ?? ElseBody ?? (Handlers.Length > 0 ? Handlers[Handlers.Length - 1] : (TreeNode) body));
+            MarkEnd(AnywayBlock ?? ElseBlock ?? (Handlers.Length > 0 ? Handlers[Handlers.Length - 1] : (TreeNode) block));
         }
     }
 
@@ -89,24 +89,24 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
-        private Statement body;
+        private Statement block;
 
         [JsonProperty]
-        internal Statement Body {
-            get => body;
+        internal Statement Block {
+            get => block;
             set {
                 value.Parent = this;
-                body         = value;
+                block         = value;
             }
         }
 
-        public TryStatementHandler(Expression errorType, Expression target, Statement body, Position start) {
+        public TryStatementHandler(Expression errorType, Expression target, Statement block, Position start) {
             ErrorType = errorType;
             Name      = target;
-            Body      = body;
+            Block      = block;
 
             MarkStart(start);
-            MarkEnd(Body);
+            MarkEnd(Block);
         }
     }
 }

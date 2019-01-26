@@ -5,11 +5,11 @@ namespace Axion.Core.Processing {
         // Region
 
         internal void MarkStart(SpannedRegion mark) {
-            Span = new Span(mark.Span.Start, Span.End);
+            Span = new Span(mark.Span.StartPosition, Span.EndPosition);
         }
 
         internal void MarkEnd(SpannedRegion mark) {
-            Span = new Span(Span.Start, mark.Span.End);
+            Span = new Span(Span.StartPosition, mark.Span.EndPosition);
         }
 
         internal void MarkPosition(SpannedRegion mark) {
@@ -17,17 +17,17 @@ namespace Axion.Core.Processing {
         }
 
         internal void MarkPosition(SpannedRegion start, SpannedRegion end) {
-            Span = new Span(start.Span.Start, end.Span.End);
+            Span = new Span(start.Span.StartPosition, end.Span.EndPosition);
         }
 
         // Position
 
         internal void MarkStart(Position position) {
-            Span = new Span(position, Span.End);
+            Span = new Span(position, Span.EndPosition);
         }
 
         internal void MarkEnd(Position position) {
-            Span = new Span(Span.Start, position);
+            Span = new Span(Span.StartPosition, position);
         }
 
         internal void MarkPosition(Position start, Position end) {

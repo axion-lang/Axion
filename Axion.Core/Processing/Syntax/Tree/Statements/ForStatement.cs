@@ -18,36 +18,36 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
-        private Statement body;
+        private Statement block;
 
         [JsonProperty]
-        internal Statement Body {
-            get => body;
+        internal Statement Block {
+            get => block;
             set {
                 value.Parent = this;
-                body         = value;
+                block         = value;
             }
         }
 
-        private Statement noBreakBody;
+        private Statement noBreakBlock;
 
         [JsonProperty]
-        internal Statement NoBreakBody {
-            get => noBreakBody;
+        internal Statement NoBreakBlock {
+            get => noBreakBlock;
             set {
                 value.Parent = this;
-                noBreakBody  = value;
+                noBreakBlock  = value;
             }
         }
 
-        public ForStatement(Expression left, Expression list, Statement body, Statement noBreakBody, SpannedRegion start) {
+        public ForStatement(Expression left, Expression list, Statement block, Statement noBreakBlock, SpannedRegion start) {
             Left        = left;
             List        = list ?? throw new ArgumentNullException(nameof(list));
-            Body        = body;
-            NoBreakBody = noBreakBody;
+            Block        = block;
+            NoBreakBlock = noBreakBlock;
 
             MarkStart(start);
-            MarkEnd(NoBreakBody ?? (SpannedRegion) Body ?? List);
+            MarkEnd(NoBreakBlock ?? (SpannedRegion) Block ?? List);
         }
     }
 }

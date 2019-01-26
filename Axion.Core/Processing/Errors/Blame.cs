@@ -70,7 +70,7 @@ namespace Axion.Core.Processing.Errors {
         public string AsMessage() {
             return Severity + ": " +
                    Message +
-                   $" (line {Span.Start.Line + 1}, column {Span.Start.Column + 1})";
+                   $" (line {Span.StartPosition.Line + 1}, column {Span.StartPosition.Column + 1})";
         }
     }
 }

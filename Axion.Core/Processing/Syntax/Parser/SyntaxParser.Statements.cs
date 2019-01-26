@@ -72,7 +72,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     if_stmt:
         ///         'if' if_stmt_branch
         ///         ('elif' if_stmt_branch)*
-        ///         ['else' body]
+        ///         ['else' block]
         /// </c>
         /// </summary>
         private IfStatement ParseIfStmt() {
@@ -89,7 +89,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             // else
             Statement elseBranch = null;
             if (stream.MaybeEat(KeywordElse)) {
-                elseBranch = ParseBody();
+                elseBranch = ParseBlock();
             }
 
             return new IfStatement(branches, elseBranch);
@@ -98,14 +98,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <summary>
         /// <c>
         ///     if_stmt_branch:
-        ///         test body
+        ///         test block
         /// </c>
         /// </summary>
         private IfStatementBranch ParseIfStmtBranch() {
             Token      start = stream.Token;
             Expression expr  = ParseTestExpr();
-            Statement  body  = ParseBody();
-            return new IfStatementBranch(expr, body, start);
+            Statement  block = ParseBlock();
+            return new IfStatementBranch(expr, block, start);
         }
 
         #endregion
@@ -115,19 +115,19 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <summary>
         /// <c>
         ///     while_stmt:
-        ///         'while' test body ['else' body]
+        ///         'while' test block ['else' block]
         /// </c>
         /// </summary>
         private WhileStatement ParseWhileStmt() {
             Token start = StartNewStmt(KeywordWhile);
 
-            Expression condition   = ParseTestExpr();
-            Statement  body        = ParseLoopBody();
-            Statement  noBreakBody = null;
+            Expression condition    = ParseTestExpr();
+            Statement  block        = ParseLoopBlock();
+            Statement  noBreakBlock = null;
             if (stream.MaybeEat(KeywordElse)) {
-                noBreakBody = ParseBody();
+                noBreakBlock = ParseBlock();
             }
-            return new WhileStatement(condition, body, noBreakBody, start);
+            return new WhileStatement(condition, block, noBreakBlock, start);
         }
 
         #endregion
@@ -139,7 +139,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     for_stmt:
         ///         'for' (exprlist 'in' testlist |
         ///                expr_stmt, expr_stmt, expr_stmt)
-        ///         body ['else' body]
+        ///         block ['else' block]
         /// </c>
         /// </summary>
         private ForStatement ParseForStmt() {
@@ -159,12 +159,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
             Expression lhs = MakeTupleOrExpr(l, trailingComma);
             stream.Eat(KeywordIn);
             Expression list  = ParseTestListAsExpr();
-            Statement  body  = ParseLoopBody();
+            Statement  block = ParseLoopBlock();
             Statement  @else = null;
             if (stream.MaybeEat(KeywordElse)) {
-                @else = ParseBody();
+                @else = ParseBlock();
             }
-            return new ForStatement(lhs, list, body, @else, start);
+            return new ForStatement(lhs, list, block, @else, start);
         }
 
         #endregion
@@ -174,24 +174,24 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <summary>
         /// <c>
         ///     try_stmt:
-        ///         ('try' body
-        ///         ((except_clause body)+
-        ///         ['else' body]
-        ///         ['finally' body] |
-        ///         'finally' body))
+        ///         ('try' block
+        ///         ((except_clause block)+
+        ///         ['else' block]
+        ///         ['finally' block] |
+        ///         'finally' block))
         /// </c>
         /// </summary>
         private Statement ParseTryStatement() {
             Token start = StartNewStmt(KeywordTry);
 
             // try
-            Statement body        = ParseBody();
-            Statement finallyBody = null;
+            Statement block        = ParseBlock();
+            Statement finallyBlock = null;
 
             // anyway
             if (stream.MaybeEat(KeywordAnyway)) {
-                finallyBody = ParseFinallyBody();
-                return new TryStatement(body, null, null, finallyBody, start);
+                finallyBlock = ParseFinallyBlock();
+                return new TryStatement(block, null, null, finallyBlock, start);
             }
             // catch
             var                 handlers       = new List<TryStatementHandler>();
@@ -208,16 +208,16 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
             } while (stream.PeekIs(KeywordCatch));
             // else
-            Statement elseBody = null;
+            Statement elseBlock = null;
             if (stream.MaybeEat(KeywordElse)) {
-                elseBody = ParseBody();
+                elseBlock = ParseBlock();
             }
             // anyway
             if (stream.MaybeEat(KeywordAnyway)) {
                 // If this function has an except block, then it can set the current exception.
-                finallyBody = ParseFinallyBody();
+                finallyBlock = ParseFinallyBlock();
             }
-            return new TryStatement(body, handlers.ToArray(), elseBody, finallyBody, start);
+            return new TryStatement(block, handlers.ToArray(), elseBlock, finallyBlock, start);
         }
 
         // catch_clause: 'catch' [expr ['as' ID]]
@@ -238,27 +238,27 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     name = ParseName();
                 }
             }
-            Statement body = ParseBody();
-            return new TryStatementHandler(errorType, name, body, start);
+            Statement block = ParseBlock();
+            return new TryStatementHandler(errorType, name, block, start);
         }
 
-        private Statement ParseFinallyBody() {
+        private Statement ParseFinallyBlock() {
             if (ast.CurrentFunction != null) {
                 ast.CurrentFunction.ContainsTryFinally = true;
             }
-            Statement finallyBody;
+            Statement finallyBlock;
             bool isInFinally     = inFinally,
                  isInFinallyLoop = inFinallyLoop;
             try {
                 inFinally     = true;
                 inFinallyLoop = false;
-                finallyBody   = ParseBody();
+                finallyBlock  = ParseBlock();
             }
             finally {
                 inFinally     = isInFinally;
                 inFinallyLoop = isInFinallyLoop;
             }
-            return finallyBody;
+            return finallyBlock;
         }
 
         #endregion
@@ -267,7 +267,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     with_stmt:
-        ///         'with' with_item (',' with_item)* ':' body
+        ///         'with' with_item (',' with_item)* ':' block
         ///     with_item:
         ///         test ['as' ID]
         /// </summary>
@@ -284,14 +284,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 items.Add(ParseWithItem());
             }
 
-            Statement body = ParseBody();
+            Statement block = ParseBlock();
             if (items != null) {
                 for (int i = items.Count - 1; i >= 0; i--) {
-                    body = new WithStatement(items[i], body, start);
+                    block = new WithStatement(items[i], block, start);
                 }
             }
 
-            return new WithStatement(withItem, body, start);
+            return new WithStatement(withItem, block, start);
         }
 
         private WithStatementItem ParseWithItem() {
@@ -507,7 +507,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                         stream.EatNewline();
                     }
                 }
-                return new BodyStatement(statements.ToArray());
+                return new BlockStatement(statements.ToArray());
             }
             return statement;
         }
@@ -702,8 +702,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         #endregion
 
-        private Statement ParseTopLevelBody() {
-            Statement body;
+        private Statement ParseTopLevelBlock() {
+            Statement block;
             bool isInLoop        = inLoop,
                  isInFinally     = inFinally,
                  isInFinallyLoop = inFinallyLoop;
@@ -711,51 +711,51 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 inLoop        = false;
                 inFinally     = false;
                 inFinallyLoop = false;
-                body          = ParseBody();
+                block         = ParseBlock();
             }
             finally {
                 inLoop        = isInLoop;
                 inFinally     = isInFinally;
                 inFinallyLoop = isInFinallyLoop;
             }
-            return body;
+            return block;
         }
 
-        private Statement ParseLoopBody() {
-            Statement body;
+        private Statement ParseLoopBlock() {
+            Statement block;
             bool wasInLoop        = inLoop,
                  wasInFinallyLoop = inFinallyLoop;
             try {
                 inLoop        = true;
                 inFinallyLoop = inFinally;
-                body          = ParseBody();
+                block         = ParseBlock();
             }
             finally {
                 inLoop        = wasInLoop;
                 inFinallyLoop = wasInFinallyLoop;
             }
-            return body;
+            return block;
         }
 
         /// <summary>
         /// <c>
-        ///     body:
+        ///     block:
         ///         (':' simple_stmt) |
         ///         ([':'] [NEWLINE] '{' [NEWLINE] stmt+ '}') |
         ///         (':' NEWLINE INDENT stmt+ OUTDENT)
         /// </c>
         /// </summary>
-        private Statement ParseBody(bool usesColon = true) {
+        private Statement ParseBlock(bool usesColon = true) {
             var                                              statements = new List<Statement>();
-            (TokenType terminator, bool oneLine, bool error) body       = ParseBodyStart(usesColon);
+            (TokenType terminator, bool oneLine, bool error) block      = ParseBlockStart(usesColon);
 
-            if (body.oneLine) {
+            if (block.oneLine) {
                 statements.Add(ParseSimpleStmt());
             }
-            else if (!body.error) {
+            else if (!block.error) {
                 while (true) {
-                    statements.Add(ParseStmt(body.terminator));
-                    if (stream.MaybeEat(body.terminator)) {
+                    statements.Add(ParseStmt(block.terminator));
+                    if (stream.MaybeEat(block.terminator)) {
                         break;
                     }
                     if (CheckUnexpectedEOS()) {
@@ -764,17 +764,17 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
             }
 
-            return new BodyStatement(statements.ToArray());
+            return new BlockStatement(statements.ToArray());
         }
 
         /// <summary>
-        ///     Starts parsing the statement's body,
-        ///     returns terminator what can be used to parse body end.
+        ///     Starts parsing the statement's block,
+        ///     returns terminator what can be used to parse block end.
         /// </summary>
-        private (TokenType terminator, bool oneLine, bool error) ParseBodyStart(bool usesColon = true) {
+        private (TokenType terminator, bool oneLine, bool error) ParseBlockStart(bool usesColon = true) {
             // 1) colon
-            bool  hasColon  = stream.MaybeEat(Colon);
-            Token bodyStart = stream.Token;
+            bool  hasColon   = stream.MaybeEat(Colon);
+            Token blockStart = stream.Token;
 
             // 1-2) newline
             bool hasNewline;
@@ -784,7 +784,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
             else {
                 // NL
-                hasNewline = bodyStart.Type == Newline;
+                hasNewline = blockStart.Type == Newline;
             }
 
             TokenType terminator;
@@ -797,7 +797,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 terminator = Outdent;
             }
             else {
-                // no indent or brace? - report body error
+                // no indent or brace? - report block error
                 if (hasNewline) {
                     // newline but with invalid follower
                     Blame(BlameType.ExpectedBlockDeclaration, stream.Peek);
@@ -814,7 +814,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
             // ':' followed by '{'
             if (hasColon && terminator == RightBrace) {
-                Blame(BlameType.RedundantColonWithBraces, bodyStart);
+                Blame(BlameType.RedundantColonWithBraces, blockStart);
             }
 
             stream.MaybeEatNewline();

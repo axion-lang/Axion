@@ -30,8 +30,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Options    = options;
             RawValue   = rawValue;
             IsUnclosed = isUnclosed;
-            int endLine = Span.Start.Line;
-            int endCol  = Span.End.Column;
+            int endLine = Span.StartPosition.Line;
+            int endCol  = Span.EndPosition.Column;
 
             // addition of quotes length:
             // compute count of quotes on token end line:
@@ -41,7 +41,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             //             1 quote  on 2+ lines, (1 * 1).
             string[] lines = RawValue.Split(Spec.EndOfLines, StringSplitOptions.None);
             if (lines.Length == 1) {
-                endCol =  Span.Start.Column;
+                endCol =  Span.StartPosition.Column;
                 endCol += lines[lines.Length - 1].Length;
                 // if 1 line: add 1 for each prefix letter
                 if (Options.IsRaw) {
@@ -65,7 +65,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                 }
                 endLine += lines.Length - 1;
             }
-            Span = new Span(Span.Start, (endLine, endCol));
+            Span = new Span(Span.StartPosition, (endLine, endCol));
         }
 
         public override string ToAxionCode() {

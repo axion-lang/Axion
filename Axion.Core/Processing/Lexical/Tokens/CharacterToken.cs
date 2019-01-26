@@ -21,11 +21,11 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
 
         private void RecomputeEndPosition() {
-            int endCol = Span.Start.Column + RawValue.Length;
+            int endCol = Span.StartPosition.Column + RawValue.Length;
             endCol += IsUnclosed
                           ? 1
                           : 2; // quotes length
-            Span = new Span(Span.Start, (Span.End.Line, endCol));
+            Span = new Span(Span.StartPosition, (Span.EndPosition.Line, endCol));
         }
 
         public override string ToAxionCode() {

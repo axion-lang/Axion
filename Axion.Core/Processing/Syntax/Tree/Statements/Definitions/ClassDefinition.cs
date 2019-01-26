@@ -48,29 +48,33 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
         internal Expression MetaClass {
             get => metaClass;
             set {
-                value.Parent = this;
-                metaClass    = value;
+                if (value != null) {
+                    value.Parent = this;
+                }
+                metaClass = value;
             }
         }
 
-        private Statement body;
+        private Statement block;
 
         [JsonProperty]
-        internal Statement Body {
-            get => body;
+        internal Statement Block {
+            get => block;
             set {
-                value.Parent = this;
-                body         = value;
+                if (value != null) {
+                    value.Parent = this;
+                }
+                block = value;
             }
         }
 
         public List<Expression> Modifiers { get; set; }
 
-        public ClassDefinition(NameExpression name, Expression[] bases, Expression[] keywords, Statement body = null, Expression metaClass = null) {
+        public ClassDefinition(NameExpression name, Expression[] bases, Expression[] keywords, Statement block = null, Expression metaClass = null) {
             Name      = name;
             Bases     = bases;
             Keywords  = keywords;
-            Body      = body;
+            Block     = block;
             MetaClass = metaClass;
         }
     }

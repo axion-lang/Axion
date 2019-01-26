@@ -21,7 +21,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             Expandable  = expandable;
             Expressions = expressions;
             if (expressions.Length > 0) {
-                MarkPosition(expressions[0].Span.Start, expressions[expressions.Length - 1].Span.End);
+                MarkPosition(expressions[0].Span.StartPosition, expressions[expressions.Length - 1].Span.EndPosition);
             }
         }
     }

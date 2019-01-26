@@ -57,15 +57,15 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
 
     public class EnumItem : TreeNode {
         public NameExpression     Name     { get; }
-        public NameExpression[]   TypeList { get; }
+        public Expression[]       TypeList { get; }
         public ConstantExpression Value    { get; }
 
-        public EnumItem(NameExpression name, NameExpression[] typeList, ConstantExpression value = null) {
+        public EnumItem(NameExpression name, Expression[] typeList, ConstantExpression value = null) {
             Name     = name;
             TypeList = typeList;
             Value    = value;
             MarkStart(Name);
-            MarkEnd((SpannedRegion) Value ?? (typeList.Length > 0 ? typeList[typeList.Length - 1] : Name));
+            MarkEnd(Value ?? (typeList.Length > 0 ? typeList[typeList.Length - 1] : Name));
         }
     }
 }

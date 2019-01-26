@@ -3,7 +3,7 @@ using Axion.Core.Processing.Syntax.Tree.Statements;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
-    public class AssignmentStatement : Statement {
+    public class AssignmentExpression : Expression {
         private Expression[] left;
 
         [JsonProperty]
@@ -28,7 +28,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
-        public AssignmentStatement(Expression[] left, Expression right) {
+        public AssignmentExpression(Expression[] left, Expression right) {
             Left  = left ?? throw new ArgumentNullException(nameof(left));
             Right = right ?? throw new ArgumentNullException(nameof(right));
         }

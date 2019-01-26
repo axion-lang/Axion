@@ -43,16 +43,16 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             }
         }
 
-        private Statement body;
+        private Statement block;
 
         [JsonProperty]
-        internal Statement Body {
-            get => body;
+        internal Statement Block {
+            get => block;
             set {
                 if (value != null) {
                     value.Parent = this;
                 }
-                body = value;
+                block = value;
             }
         }
 
@@ -78,7 +78,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
         public FunctionDefinition(Expression name, Parameter[] parameters, Statement body, Expression returnType = null) {
             Name       = name;
             Parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
-            Body       = body;
+            Block       = body;
             ReturnType = returnType;
         }
     }

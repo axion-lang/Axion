@@ -1,15 +1,17 @@
 namespace Axion.Core.Processing {
     public struct Span {
-        public readonly Position Start;
-        public readonly Position End;
+        public readonly Position StartPosition;
+        public readonly Position EndPosition;
 
         public Span(Position start, Position end) {
-            Start = start;
-            End   = end;
+            StartPosition = start;
+            EndPosition   = end;
         }
+        
+        
 
         public override string ToString() {
-            return "start (" + Start + "), end (" + End + ")";
+            return "start (" + StartPosition + "), end (" + EndPosition + ")";
         }
 
         public override bool Equals(object obj) {
@@ -17,12 +19,12 @@ namespace Axion.Core.Processing {
         }
 
         public bool Equals(Span other) {
-            return Start == other.Start && End == other.End;
+            return StartPosition == other.StartPosition && EndPosition == other.EndPosition;
         }
 
         public override int GetHashCode() {
             unchecked {
-                return (Start.GetHashCode() * 397) ^ End.GetHashCode();
+                return (StartPosition.GetHashCode() * 397) ^ EndPosition.GetHashCode();
             }
         }
 
@@ -35,7 +37,7 @@ namespace Axion.Core.Processing {
         }
 
         public static implicit operator (Position, Position)(Span span) {
-            return (span.Start, span.End);
+            return (span.StartPosition, span.EndPosition);
         }
 
         public static implicit operator Span((Position, Position) positions) {

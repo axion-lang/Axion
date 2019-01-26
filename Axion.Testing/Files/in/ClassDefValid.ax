@@ -1,0 +1,6 @@
+class Point(nmspc1.base1, m2.base2)
+	x = 0
+	y = 0
+
+	fn Point FromCoords(int x, int y)
+		return (x + y)

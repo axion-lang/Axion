@@ -1,8 +1,9 @@
 using System;
+using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
-    public class BodyStatement : Statement {
+    public class BlockStatement : Statement {
         private Statement[] statements;
 
         [JsonProperty]
@@ -16,14 +17,14 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
-        internal BodyStatement(Statement[] statements) {
+        internal BlockStatement(Statement[] statements) {
             if (statements.Length == 0) {
                 throw new ArgumentException("Value cannot be an empty collection.", nameof(statements));
             }
             Statements = statements;
 
             MarkStart(statements[0]);
-            MarkEnd(statements[statements.Length - 1].Span.End);
+            MarkEnd(statements[statements.Length - 1].Span.EndPosition);
         }
     }
 }

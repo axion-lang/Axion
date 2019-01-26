@@ -61,9 +61,9 @@ namespace Axion.Core.Visual {
 
                 bool tokenShouldBeSkipped =
                     !foundRenderStart
-                 && (token.Span.End.Line < renderPosition.Y
-                  || token.Span.End.Line == renderPosition.Y
-                  && token.Span.End.Column <= renderPosition.X
+                 && (token.Span.EndPosition.Line < renderPosition.Y
+                  || token.Span.EndPosition.Line == renderPosition.Y
+                  && token.Span.EndPosition.Column <= renderPosition.X
                   || token.Type == TokenType.EndOfStream);
                 // BUG: if code has error before that token, and it's fixed with next char, it'll be highlighted improperly (e. g. type '0..10')
 
@@ -75,7 +75,7 @@ namespace Axion.Core.Visual {
                 if (!foundRenderStart) {
                     // When we found token, closest to last render position
                     // we should re-render this token to prevent invalid highlighting.
-                    renderPosition   = new Point(token.Span.Start.Column, token.Span.Start.Line);
+                    renderPosition   = new Point(token.Span.StartPosition.Column, token.Span.StartPosition.Line);
                     foundRenderStart = true;
                 }
 

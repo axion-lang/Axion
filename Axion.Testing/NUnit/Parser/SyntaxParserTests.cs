@@ -40,6 +40,13 @@ namespace Axion.Testing.NUnit.Parser {
         }
 
         [Test]
+        public void ClassDefValid() {
+            SourceUnit source = MakeSourceFromFile(nameof(ClassDefValid));
+            source.Process(SourceProcessingMode.Parsing, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+            Assert.AreEqual(0, source.Blames.Count);
+        }
+
+        [Test]
         public void DotExpressionsValid() {
             SourceUnit source = MakeSourceFromFile(nameof(DotExpressionsValid));
             source.Process(SourceProcessingMode.Parsing, SourceProcessingOptions.SyntaxAnalysisDebugOutput);

@@ -14,37 +14,37 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
-        private Statement body;
+        private Statement block;
 
         [JsonProperty]
-        internal Statement Body {
-            get => body;
+        internal Statement Block {
+            get => block;
             set {
                 value.Parent = this;
-                body         = value;
+                block         = value;
             }
         }
 
-        private Statement noBreakBody;
+        private Statement noBreakBlock;
 
         [JsonProperty]
-        internal Statement NoBreakBody {
-            get => noBreakBody;
+        internal Statement NoBreakBlock {
+            get => noBreakBlock;
             set {
                 if (value != null) {
                     value.Parent = this;
                 }
-                noBreakBody = value;
+                noBreakBlock = value;
             }
         }
 
-        internal WhileStatement(Expression condition, Statement body, Statement noBreakBody, SpannedRegion start) {
+        internal WhileStatement(Expression condition, Statement block, Statement noBreakBlock, SpannedRegion start) {
             Condition   = condition;
-            Body        = body;
-            NoBreakBody = noBreakBody;
+            Block        = block;
+            NoBreakBlock = noBreakBlock;
 
             MarkStart(start);
-            MarkEnd(NoBreakBody ?? Body);
+            MarkEnd(NoBreakBlock ?? Block);
         }
     }
 }

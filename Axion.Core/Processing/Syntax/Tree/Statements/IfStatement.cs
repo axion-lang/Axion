@@ -11,13 +11,13 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
         [JsonProperty]
         public Statement Else { get; }
 
-        public IfStatement(List<IfStatementBranch> branches, Statement elseBody) {
+        public IfStatement(List<IfStatementBranch> branches, Statement elseBlock) {
             if (branches.Count == 0) {
                 throw new ArgumentException("Value cannot be an empty collection.", nameof(branches));
             }
 
             Branches = branches.ToArray();
-            Else     = elseBody;
+            Else     = elseBlock;
 
             MarkStart(branches[0]);
             MarkEnd(Else ?? Branches[Branches.Length - 1]);
@@ -36,22 +36,22 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
-        private Statement body;
+        private Statement block;
 
         [JsonProperty]
-        internal Statement Body {
-            get => body;
+        internal Statement Block {
+            get => block;
             set {
                 value.Parent = this;
-                body         = value;
+                block         = value;
             }
         }
 
-        internal IfStatementBranch(Expression condition, Statement body, SpannedRegion start) {
+        internal IfStatementBranch(Expression condition, Statement block, SpannedRegion start) {
             Condition = condition;
-            Body      = body;
+            Block      = block;
 
-            MarkPosition(start, body);
+            MarkPosition(start, block);
         }
     }
 }

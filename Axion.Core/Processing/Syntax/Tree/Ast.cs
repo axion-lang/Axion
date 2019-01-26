@@ -5,10 +5,20 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree {
     public class Ast : TreeNode {
-        private readonly SourceUnit Source;
+        internal readonly SourceUnit Source;
 
+        private BlockStatement root;
+        
         [JsonProperty]
-        internal BodyStatement Root { get; set; }
+        internal BlockStatement Root {
+            get => root;
+            set {
+                if (value != null) {
+                    value.Parent = this;
+                }
+                root = value;
+            }
+        }
 
         //private readonly Stack<ImportDefinition>   imports = new Stack<ImportDefinition>();
         private readonly Stack<ClassDefinition>    classes   = new Stack<ClassDefinition>();

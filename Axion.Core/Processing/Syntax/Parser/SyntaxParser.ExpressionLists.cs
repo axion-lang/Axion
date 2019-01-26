@@ -79,8 +79,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 // the error is on the next token which has
                 // a useful location, unlike the indent - note we don't have an
                 // indent if we're at an EOS.
-                stream.NextToken();
-                Blame(BlameType.UnexpectedIndentation, stream.Token);
+                Blame(BlameType.UnexpectedIndentation, stream.NextToken());
             }
             else {
                 BlameInvalidSyntax(Indent, stream.Peek);

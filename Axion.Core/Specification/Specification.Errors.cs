@@ -5,8 +5,14 @@ using static Axion.Core.Processing.Errors.BlameType;
 
 namespace Axion.Core.Specification {
     public static partial class Spec {
+        internal const string ERR_PrimaryExpected =
+            "Expected an identifier, list, map or other primary expression.";
+
         internal const string ERR_InvalidStatement =
             "Only assignment, call, increment, decrement, await expression, and new object expressions can be used as a statement";
+
+        internal const string ERR_InvalidDecoratorPosition =
+            "Decorator can be applied only to the top level definition.";
 
         public static readonly Dictionary<BlameType, BlameSeverity> Blames = new Dictionary<BlameType, BlameSeverity> {
             // Errors
@@ -73,7 +79,7 @@ namespace Axion.Core.Specification {
             { RedundantEmptyUseStatement, Warning },
             { DoubleNegationIsMeaningless, Warning },
             { RedundantColonWithBraces, Warning },
-            { RedundantEmptyEnumItemAssociatedValuesList, Warning }
+            { RedundantEmptyListOfTypeArguments, Warning },
         };
     }
 }

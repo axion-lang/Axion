@@ -14,22 +14,22 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
-        private Statement body;
+        private Statement block;
 
         [JsonProperty]
-        internal Statement Body {
-            get => body;
+        internal Statement Block {
+            get => block;
             set {
                 value.Parent = this;
-                body         = value;
+                block         = value;
             }
         }
 
-        internal WithStatement(WithStatementItem item, Statement body, SpannedRegion start) {
+        internal WithStatement(WithStatementItem item, Statement block, SpannedRegion start) {
             Item = item;
-            Body = body;
+            Block = block;
             MarkStart(start);
-            MarkEnd(Body);
+            MarkEnd(Block);
         }
     }
 

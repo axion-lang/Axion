@@ -25,7 +25,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
             // TODO: insert var_def somewhere here...
             if (stream.PeekIs(TokenType.Assign)) {
-                return FinishAssignments(expr);
+                expr = FinishAssignments(expr);
             }
             if (stream.MaybeEat(Spec.AugmentedAssignOperators)) {
                 var        op = (OperatorToken) stream.Token;
@@ -44,7 +44,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             return new ExpressionStatement(expr);
         }
 
-        private Statement FinishAssignments(Expression right) {
+        private Expression FinishAssignments(Expression right) {
             var left = new List<Expression>();
 
             while (stream.MaybeEat(TokenType.Assign)) {
@@ -62,7 +62,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
 
             Debug.Assert(left.Count > 0);
-            return new AssignmentStatement(left.ToArray(), right);
+            return new AssignmentExpression(left.ToArray(), right);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 Expression expr = ParseNotTest();
                 if (expr is UnaryExpression unary
                  && unary.Operator.Type == TokenType.KeywordNot) {
-                    Blame(BlameType.DoubleNegationIsMeaningless, op.Span.Start, unary.Operator.Span.End);
+                    Blame(BlameType.DoubleNegationIsMeaningless, op.Span.StartPosition, unary.Operator.Span.EndPosition);
                 }
                 return new UnaryExpression(op, expr);
             }

@@ -220,7 +220,7 @@
         RedundantEmptyUseStatement,
         DoubleNegationIsMeaningless,
         RedundantColonWithBraces,
-        RedundantEmptyEnumItemAssociatedValuesList,
+        RedundantEmptyListOfTypeArguments,
 
         #endregion
 
