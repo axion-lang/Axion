@@ -74,17 +74,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         }
 
         #endregion
-
-        protected sealed override void AddPresets(
-            List<MultilineCommentToken> unclosedMultilineComments = null,
-            List<StringToken>           unclosedStrings           = null,
-            string[]                    processingTerminators     = null
-        ) {
-            _unclosedStrings           = unclosedStrings ?? new List<StringToken>();
-            _unclosedMultilineComments = unclosedMultilineComments ?? new List<MultilineCommentToken>();
-            _processingTerminators     = processingTerminators ?? new string[0];
-        }
-
+        
         /// <summary>
         ///     Divides code into list of tokens.
         /// </summary>
@@ -105,8 +95,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 if (token != null) {
                     tokens.Add(token);
                     // check for processing terminator
-                    if (token.Type == TokenType.EndOfCode
-                     || _processingTerminators.Contains(token.Value)) {
+                    if (token.Type == TokenType.EndOfCode || _processingTerminators.Contains(token.Value)) {
                         break;
                     }
                 }
@@ -136,25 +125,35 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     }
                     default: {
                         throw new NotSupportedException(
-                            "Internal error: " + nameof(_mismatchingPairs) +
-                            " grabbed invalid " + nameof(TokenType) + ": " + mismatch.Type
+                            "Internal error: "
+                          + nameof(_mismatchingPairs)
+                          + " grabbed invalid "
+                          + nameof(TokenType)
+                          + ": "
+                          + mismatch.Type
                         );
                     }
                 }
-                Blame(
-                    errorType,
-                    mismatch.Span.StartPosition,
-                    mismatch.Span.EndPosition
-                );
+                Blame(errorType, mismatch.Span.StartPosition, mismatch.Span.EndPosition);
             }
 
             #endregion
         }
 
+        protected sealed override void AddPresets(
+            List<MultilineCommentToken> unclosedMultilineComments = null,
+            List<StringToken>           unclosedStrings           = null,
+            string[]                    processingTerminators     = null
+        ) {
+            _unclosedStrings           = unclosedStrings ?? new List<StringToken>();
+            _unclosedMultilineComments = unclosedMultilineComments ?? new List<MultilineCommentToken>();
+            _processingTerminators     = processingTerminators ?? new string[0];
+        }
+
         /// <summary>
         ///     Reads next token from character stream.
-        /// <para/>
-        ///     Every time that method invoked, <see cref="CharStream.C"/>
+        ///     <para />
+        ///     Every time that method invoked, <see cref="CharStream.C" />
         ///     property should be on first letter of current new reading token.
         /// </summary>
         private Token NextToken() {
@@ -166,8 +165,8 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             if (tokens.Count != 0 && tokens[tokens.Count - 1].Type != TokenType.Outdent) {
                 Token last = tokens[tokens.Count - 1];
                 Debug.Assert(
-                    tokenStartPosition ==
-                    (last.Span.EndPosition.Line, last.Span.EndPosition.Column + last.Whitespaces.Length)
+                    tokenStartPosition
+                 == (last.Span.EndPosition.Line, last.Span.EndPosition.Column + last.Whitespaces.Length)
                 );
             }
 #endif

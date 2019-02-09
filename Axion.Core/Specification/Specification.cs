@@ -17,14 +17,6 @@ namespace Axion.Core.Specification {
 
         public const int Unicode32BitHexLength = 6;
 
-        internal const string SingleCommentStart       = "#";
-        internal const string MultiCommentStart        = "#|";
-        internal const string MultiCommentStartPattern = @"#\|";
-        internal const string MultiCommentEnd          = "|#";
-        internal const string MultiCommentEndPattern   = @"\|#";
-
-        internal static readonly char[] RestrictedIdentifierEndings = { '-' };
-
         /// <summary>
         ///     Contains all valid newline sequences.
         /// </summary>
@@ -65,15 +57,7 @@ namespace Axion.Core.Specification {
             { "raise", KeywordRaise },
             { "catch", KeywordCatch },
             { "anyway", KeywordAnyway },
-//            // access modifiers
-//            { "public", KeywordPublic },
-//            { "inner", KeywordInner },
-//            { "private", KeywordPrivate },
-//            // property modifiers
-//            { "readonly", KeywordReadonly },
-//            { "react", KeywordReact },
-//            { "singleton", KeywordSingleton },
-//            { "static", KeywordStatic },
+            
             { "const", KeywordConst },
             // asynchronous
             { "async", KeywordAsync },
@@ -105,21 +89,18 @@ namespace Axion.Core.Specification {
             { "with", KeywordWith }
         };
 
-        internal static readonly TokenType[] TypeNameFollowers = {
-            OpBitwiseOr,
-            Dot,
-            LeftBracket,
-            Identifier,
-            RightBrace,
-            RightBracket,
-            RightParenthesis,
-        };
+        internal const string SingleCommentStart       = "#";
+        internal const string MultiCommentStart        = "#|";
+        internal const string MultiCommentStartPattern = @"#\|";
+        internal const string MultiCommentEnd          = "|#";
+        internal const string MultiCommentEndPattern   = @"\|#";
 
-        internal static readonly TokenType[] BlockStarters = {
-            Colon,
-            Indent,
-            LeftBrace
-        };
+        internal static readonly char[] RestrictedIdentifierEndings = { '-' };
+
+        /// <summary>
+        ///     Types of token, that can start a 'block'.
+        /// </summary>
+        internal static readonly TokenType[] BlockStarters = { Colon, Indent, LeftBrace };
 
         internal static readonly TokenType[] NeverTestTypes = {
             Assign,
@@ -135,19 +116,15 @@ namespace Axion.Core.Specification {
             BitRightShiftAssign,
             PowerAssign,
             FloorDivideAssign,
-
             Indent,
             Outdent,
             Newline,
             EndOfCode,
             Semicolon,
-
             RightBrace,
             RightBracket,
             RightParenthesis,
-
             Comma,
-
             KeywordFor,
             KeywordIn,
             KeywordIf

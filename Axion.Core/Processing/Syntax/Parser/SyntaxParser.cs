@@ -25,6 +25,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private readonly Ast ast;
 
+        private bool inLoop, inFinally, inFinallyLoop;
+
+        internal SyntaxParser(List<Token> tokens, Ast outAst, List<Exception> outBlames) {
+            stream = new TokenStream(this, tokens);
+            ast    = outAst ?? throw new ArgumentNullException(nameof(outAst));
+            blames = outBlames ?? new List<Exception>();
+        }
+
         /// <summary>
         ///     Start position of current token in stream.
         /// </summary>
@@ -34,18 +42,6 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     End position of current token in stream.
         /// </summary>
         private Position tokenEnd => stream.Token.Span.EndPosition;
-
-        private bool inLoop, inFinally, inFinallyLoop;
-
-        internal SyntaxParser(
-            List<Token>     tokens,
-            Ast             outAst,
-            List<Exception> outBlames
-        ) {
-            stream = new TokenStream(this, tokens);
-            ast    = outAst ?? throw new ArgumentNullException(nameof(outAst));
-            blames = outBlames ?? new List<Exception>();
-        }
 
         internal void Process(bool returnValue) {
             if (stream.Tokens.Count == 0) {
@@ -73,6 +69,17 @@ namespace Axion.Core.Processing.Syntax.Parser {
             ast.Root = new BlockStatement(statements.ToArray());
         }
 
+        internal void BlameInvalidSyntax(TokenType expectedType, SpannedRegion mark) {
+            ReportError(
+                "Invalid syntax, expected '"
+              + expectedType.GetValue()
+              + "', got '"
+              + stream.Peek.Type.GetValue()
+              + "'.",
+                mark
+            );
+        }
+
         private Token StartExprOrStmt(TokenType type) {
             stream.Eat(type);
             return stream.Token;
@@ -94,17 +101,6 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 return true;
             }
             return false;
-        }
-
-        internal void BlameInvalidSyntax(TokenType expectedType, SpannedRegion mark) {
-            ReportError(
-                "Invalid syntax, expected '"
-                        + expectedType.GetValue()
-                        + "', got '"
-                        + stream.Peek.Type.GetValue()
-                        + "'.",
-                mark
-            );
         }
 
         private void ReportError(string message, SpannedRegion mark) {
