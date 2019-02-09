@@ -7,6 +7,17 @@ namespace Axion.Testing.NUnit.Lexer {
     [TestFixture]
     public partial class LexerTests : Tests {
         [Test]
+        public void DesignPatternsValidation() {
+            for (var i = 0; i < sourceFiles.Count; i++) {
+                FileInfo file   = sourceFiles[i];
+                var      source = new SourceUnit(file, outPath + nameof(DesignPatternsValidation) + i + testExtension);
+                source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+                Assert.That(source.Blames.Count == 0, file.Name + ": Errors count > 0");
+                Assert.That(source.Tokens.Count > 0,  file.Name + ": Tokens count == 0");
+            }
+        }
+
+        [Test]
         public void NestedMultilineCommentInvalid() {
             string[] files = Directory.GetFiles(
                 inPath,
@@ -48,20 +59,6 @@ namespace Axion.Testing.NUnit.Lexer {
             SourceUnit source = MakeSourceFromFile(nameof(VariousStuffValid));
             source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
             Assert.AreEqual(0, source.Blames.Count);
-        }
-
-        [Test]
-        public void DesignPatternsValidation() {
-            for (var i = 0; i < sourceFiles.Count; i++) {
-                FileInfo file = sourceFiles[i];
-                var source = new SourceUnit(
-                    file,
-                    outPath + nameof(DesignPatternsValidation) + i + testExtension
-                );
-                source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
-                Assert.That(source.Blames.Count == 0, file.Name + ": Errors count > 0");
-                Assert.That(source.Tokens.Count > 0,  file.Name + ": Tokens count == 0");
-            }
         }
     }
 }

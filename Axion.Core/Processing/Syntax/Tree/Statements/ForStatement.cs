@@ -4,10 +4,30 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class ForStatement : Statement {
+        private Expression list;
+
+        private Statement block;
+
+        private Statement noBreakBlock;
+
+        public ForStatement(
+            Expression    left,
+            Expression    list,
+            Statement     block,
+            Statement     noBreakBlock,
+            SpannedRegion start
+        ) {
+            Left         = left;
+            List         = list ?? throw new ArgumentNullException(nameof(list));
+            Block        = block;
+            NoBreakBlock = noBreakBlock;
+
+            MarkStart(start);
+            MarkEnd(NoBreakBlock ?? (SpannedRegion) Block ?? List);
+        }
+
         [JsonProperty]
         public Expression Left { get; }
-
-        private Expression list;
 
         [JsonProperty]
         internal Expression List {
@@ -18,8 +38,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
-        private Statement block;
-
         [JsonProperty]
         internal Statement Block {
             get => block;
@@ -29,8 +47,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
-        private Statement noBreakBlock;
-
         [JsonProperty]
         internal Statement NoBreakBlock {
             get => noBreakBlock;
@@ -38,16 +54,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
                 value.Parent = this;
                 noBreakBlock = value;
             }
-        }
-
-        public ForStatement(Expression left, Expression list, Statement block, Statement noBreakBlock, SpannedRegion start) {
-            Left         = left;
-            List         = list ?? throw new ArgumentNullException(nameof(list));
-            Block        = block;
-            NoBreakBlock = noBreakBlock;
-
-            MarkStart(start);
-            MarkEnd(NoBreakBlock ?? (SpannedRegion) Block ?? List);
         }
     }
 }

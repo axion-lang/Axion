@@ -5,6 +5,11 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class ListExpression : Expression {
         private List<Expression> expressions;
 
+        internal ListExpression(Span region, List<Expression> expressions) {
+            Expressions = expressions;
+            Span        = region;
+        }
+
         [JsonProperty]
         internal List<Expression> Expressions {
             get => expressions;
@@ -14,11 +19,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                     expr.Parent = this;
                 }
             }
-        }
-
-        internal ListExpression(Span region, List<Expression> expressions) {
-            Expressions = expressions;
-            Span        = region;
         }
     }
 }

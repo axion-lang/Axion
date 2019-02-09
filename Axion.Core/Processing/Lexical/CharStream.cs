@@ -3,21 +3,18 @@ using System.Diagnostics;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical {
+    /// <summary>
+    ///     A stream of characters, created from strings.
+    ///     Used with [<see cref="Axion.Core.Processing.Lexical.Lexer"/>]
+    ///     to read symbols, with ability to peek, go backward,
+    ///     get rest of current line of source,
+    ///     and other useful functions. 
+    /// </summary>
     public class CharStream {
         /// <summary>
         ///     Stream source.
         /// </summary>
         internal readonly string Source;
-
-        /// <summary>
-        ///     Index of current processing character in source.
-        /// </summary>
-        internal int CharIdx { get; private set; }
-
-        /// <summary>
-        ///     Current processing character in source.
-        /// </summary>
-        internal char C => Source[CharIdx];
 
         /// <summary>
         ///     Index of current processing line.
@@ -30,13 +27,8 @@ namespace Axion.Core.Processing.Lexical {
         private int columnIdx;
 
         /// <summary>
-        ///     Line and column position of current processing character in source.
-        /// </summary>
-        internal Position Position => (lineIdx, columnIdx);
-
-        /// <summary>
         ///     Length of previous processed line.
-        ///     Used to return <see cref="columnIdx" />
+        ///     Used to return [<see cref="columnIdx" />]
         ///     to previous value when moving backward.
         /// </summary>
         private int prevLineLength;
@@ -44,15 +36,12 @@ namespace Axion.Core.Processing.Lexical {
         /// <summary>
         ///     Initializes a new stream with specified lines of source code.
         /// </summary>
-        /// <param name="sourceLines"></param>
-        public CharStream(IEnumerable<string> sourceLines)
-            : this(string.Join("\n", sourceLines)) {
+        public CharStream(IEnumerable<string> sourceLines) : this(string.Join("\n", sourceLines)) {
         }
 
         /// <summary>
         ///     Initializes a new stream with specified source.
         /// </summary>
-        /// <param name="source"></param>
         public CharStream(string source) {
             // add null-terminator to mark end of stream.
             if (!source.EndsWith(Spec.EndOfStream.ToString())) {
@@ -62,10 +51,9 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         /// <summary>
-        ///     Copies <see cref="stream" />
-        ///     to current stream.
+        ///     Copies whole [<paramref name="stream" />]
+        ///     to this stream instance.
         /// </summary>
-        /// <param name="stream"></param>
         internal CharStream(CharStream stream) {
             Source    = stream.Source;
             CharIdx   = stream.CharIdx;
@@ -74,12 +62,32 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         /// <summary>
+        ///     Index of current processing character in source.
+        /// </summary>
+        internal int CharIdx { get; private set; }
+
+        /// <summary>
+        ///     Current processing character in source.
+        /// </summary>
+        internal char C => Source[CharIdx];
+
+        /// <summary>
+        ///     Line and column position of current processing character in source.
+        /// </summary>
+        internal Position Position => (lineIdx, columnIdx);
+
+        /// <summary>
+        ///     Returns character next to current character,
+        ///     without moving to it.
+        /// </summary>
+        internal char Peek => CharIdx + 1 < Source.Length ? Source[CharIdx + 1] : Spec.EndOfStream;
+
+        /// <summary>
         ///     Checks that current character
         ///     is a newline character.
         /// </summary>
         internal bool AtEndOfLine() {
-            return Source[CharIdx] == '\r'
-                || Source[CharIdx] == '\n';
+            return Source[CharIdx] == '\r' || Source[CharIdx] == '\n';
         }
 
         /// <summary>
@@ -97,16 +105,9 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         /// <summary>
-        ///     Returns character next to current character,
-        ///     without moving to it.
-        /// </summary>
-        internal char Peek => CharIdx + 1 < Source.Length ? Source[CharIdx + 1] : Spec.EndOfStream;
-
-        /// <summary>
-        ///     Returns string of specified <see cref="length" />
+        ///     Returns string of specified [<see cref="length" />]
         ///     starting from character next to current.
         /// </summary>
-        /// <param name="length"></param>
         internal string PeekPiece(int length) {
             if (CharIdx + 1 + length < Source.Length) {
                 return Source.Substring(CharIdx + 1, length);
@@ -116,7 +117,7 @@ namespace Axion.Core.Processing.Lexical {
 
         /// <summary>
         ///     Gets next (or previous) character from stream,
-        ///     depending on <see cref="byLength" /> value.
+        ///     depending on [<see cref="byLength" />] value.
         /// </summary>
         internal void Move(int byLength = 1) {
             Debug.Assert(byLength != 0);

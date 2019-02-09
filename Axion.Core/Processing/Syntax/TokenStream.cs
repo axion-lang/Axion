@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -6,12 +7,19 @@ using Axion.Core.Processing.Syntax.Parser;
 
 namespace Axion.Core.Processing.Syntax {
     public class TokenStream {
-        internal readonly string Source;
-
         /// <summary>
         ///     Reference to processing <see cref="List{T}" /> of tokens.
         /// </summary>
         internal readonly List<Token> Tokens;
+
+        private readonly SyntaxParser parser;
+
+        private bool inOneLineMode;
+
+        public TokenStream(SyntaxParser parser, List<Token> tokens) {
+            this.parser = parser;
+            Tokens      = tokens;
+        }
 
         internal Token Token => Index > -1 && Index < Tokens.Count ? Tokens[Index] : Tokens[Tokens.Count - 1];
 
@@ -19,25 +27,63 @@ namespace Axion.Core.Processing.Syntax {
 
         internal int Index { get; private set; } = -1;
 
-        private readonly SyntaxParser parser;
-
-        public TokenStream(SyntaxParser parser, List<Token> tokens, string source) {
-            this.parser = parser;
-            Tokens      = tokens;
-            Source      = source;
-        }
-
         public bool PeekIs(TokenType expected) {
             return Peek.Type == expected;
         }
 
         public bool PeekIs(params TokenType[] expected) {
+            SkipTrivial(expected);
             for (var i = 0; i < expected.Length; i++) {
                 if (Peek.Type == expected[i]) {
                     return true;
                 }
             }
 
+            return false;
+        }
+
+        public bool EnsureNext(TokenType type) {
+            SkipTrivial(type);
+            if (Peek.Type != type) {
+                parser.BlameInvalidSyntax(type, Peek);
+                return false;
+            }
+            return true;
+        }
+
+        public void EnsureOneLine(Action action) {
+            inOneLineMode = true;
+            action();
+            inOneLineMode = false;
+        }
+
+        public void NextToken(int pos = 1) {
+            if (Index + pos >= 0 && Index + pos < Tokens.Count) {
+                Index += pos;
+            }
+        }
+
+        internal bool Eat(TokenType type) {
+            bool matches = EnsureNext(type);
+            if (matches) {
+                NextToken();
+            }
+            return matches;
+        }
+
+        /// <summary>
+        ///     Eats a new line token throwing if the next token isn't a new line.
+        /// </summary>
+        internal bool EatNewline() {
+            return Eat(TokenType.Newline);
+        }
+
+        internal bool MaybeEat(TokenType type) {
+            SkipTrivial(type);
+            if (Peek.Type == type) {
+                NextToken();
+                return true;
+            }
             return false;
         }
 
@@ -48,68 +94,39 @@ namespace Axion.Core.Processing.Syntax {
             return MaybeEat(TokenType.Newline);
         }
 
-        /// <summary>
-        ///     Eats a new line token throwing if the next token isn't a new line.
-        /// </summary>
-        internal bool EatNewline() {
-            return Eat(TokenType.Newline);
-        }
-
-        internal bool Eat(TokenType type) {
-            SkipTrivial(type);
-            if (Peek.Type != type) {
-                parser.BlameInvalidSyntax(type, Peek);
-                return false;
-            }
-            Move();
-            return true;
-        }
-
-        internal bool MaybeEat(TokenType type) {
-            SkipTrivial(type);
-            if (Peek.Type == type) {
-                Move();
-                return true;
-            }
-            return false;
-        }
-
         internal bool MaybeEat(params TokenType[] types) {
             SkipTrivial(types);
             for (var i = 0; i < types.Length; i++) {
                 if (Peek.Type == types[i]) {
-                    Move();
+                    NextToken();
                     return true;
                 }
             }
             return false;
         }
 
-        private void SkipTrivial(params TokenType[] wantedTypes) {
-            while (PeekIs(TokenType.Comment)) {
-                Move();
-            }
-
-            // if we got newline before wanted type, just skip it
-            // (except we WANT to get newline)
-            if (Peek.Type == TokenType.Newline
-             && !wantedTypes.Contains(TokenType.Newline)) {
-                Move();
-            }
-        }
-
-        public Token NextToken() {
-            Move();
-            return Token;
-        }
-
-        private void Move(int pos = 1) {
-            Index += pos;
-        }
-
         internal void MoveTo(int tokenIndex) {
             Debug.Assert(tokenIndex >= 0 && tokenIndex < Tokens.Count);
             Index = tokenIndex;
+        }
+
+        private void SkipTrivial(params TokenType[] wantedTypes) {
+            while (true) {
+                if (PeekIs(TokenType.Comment)) {
+                    NextToken();
+                }
+                // if we got newline before wanted type, just skip it
+                // (except we WANT to get newline)
+                else if (Peek.Type == TokenType.Newline && !wantedTypes.Contains(TokenType.Newline)) {
+                    if (inOneLineMode) {
+                        throw new NotSupportedException("Syntax error: got newline in one-line expression.");
+                    }
+                    NextToken();
+                }
+                else {
+                    break;
+                }
+            }
         }
     }
 }

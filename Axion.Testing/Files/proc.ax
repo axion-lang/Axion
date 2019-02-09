@@ -1,0 +1,67 @@
+## Reads next token from character stream.
+## Every time that method invoked, `CharStream.C`
+## property should be on first letter of current new reading token.
+@private
+fn NextToken() => Token
+    # reset token properties
+    tokenStartPosition = Stream.Position
+    tokenValue.Clear()
+
+    %if DEBUG
+
+    if tokens.Count != 0 and tokens[tokens.Count - 1].Type != TokenType.Outdent
+        last: Token = tokens[tokens.Count - 1]
+        Debug.Assert (
+            tokenStartPosition ==
+            (last.Span.EndPosition.Line, last.Span.EndPosition.Column + last.Whitespaces.Length)
+        )
+
+    %endif
+
+    if c == Spec.EndOfStream
+        return new EndOfStreamToken (tokenStartPosition)
+
+    if c == '\r'
+        Stream.Move()
+        if c == '\n'
+            tokenValue.Append ('\r')
+        else
+            # skip carriage returns
+            return nil
+
+    # this branch should forever be
+    # right after \r check.
+    if c == '\n'
+        return ReadNewline()
+
+    if Spec.IsSpaceOrTab (c)
+        # whitespaces & indentation
+        return ReadWhite()
+
+    if c.ToString() == Spec.SingleCommentStart
+        # one-line comment
+        if c.ToString() + Stream.Peek == Spec.MultiCommentStart
+            # multiline comment
+            return ReadMultilineComment()
+        return ReadSingleComment()
+
+    if c == Spec.CharLiteralQuote
+        return ReadCharLiteral()
+
+    if Spec.StringQuotes.Contains (c)
+        return ReadString (false)
+
+    if char.IsDigit (c)
+        return ReadNumber()
+
+    if Spec.IsValidIdStart (c)
+        return ReadWord()
+
+    if Spec.SymbolicChars.Contains (c)
+        return ReadSymbolic()
+
+    # invalid
+    tokenValue.Append (c)
+    Stream.Move()
+    Blame (BlameType.InvalidSymbol, tokenStartPosition, Stream.Position)
+    return new Token (TokenType.Invalid, tokenStartPosition, tokenValue.ToString())

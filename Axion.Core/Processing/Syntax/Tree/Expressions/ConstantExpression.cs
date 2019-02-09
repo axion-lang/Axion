@@ -3,18 +3,17 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class ConstantExpression : Expression {
-        [JsonProperty]
-        internal Token Value { get; }
-
         internal ConstantExpression(Token value) {
             Value = value;
             MarkPosition(value);
         }
 
-        internal ConstantExpression(Token value, Position start, Position end)
-            : base(start, end) {
+        internal ConstantExpression(Token value, Position start, Position end) : base(start, end) {
             Value = value;
         }
+
+        [JsonProperty]
+        internal Token Value { get; }
 
         public override string ToString() {
             return ToAxionCode();

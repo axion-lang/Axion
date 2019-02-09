@@ -1,11 +1,31 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
+using Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames;
 using Axion.Core.Processing.Syntax.Tree.Statements.Interfaces;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
     public class EnumDefinition : Statement, IDecorated {
         private Expression name;
+
+        private TypeName[] bases;
+
+        private EnumItem[] items;
+
+        public EnumDefinition(
+            Position       start,
+            Position       end,
+            NameExpression name,
+            TypeName[]     bases = null,
+            EnumItem[]     items = null
+        ) {
+            Name  = name;
+            Bases = bases ?? new TypeName[0];
+            Items = items ?? new EnumItem[0];
+            MarkPosition(start, end);
+        }
+
+        public bool IsEmpty => Items.Length == 0;
 
         [JsonProperty]
         internal Expression Name {
@@ -16,20 +36,16 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             }
         }
 
-        private Expression[] bases;
-
         [JsonProperty]
-        internal Expression[] Bases {
+        internal TypeName[] Bases {
             get => bases;
             set {
                 bases = value;
-                foreach (Expression expr in bases) {
+                foreach (TypeName expr in bases) {
                     expr.Parent = this;
                 }
             }
         }
-
-        private EnumItem[] items;
 
         [JsonProperty]
         internal EnumItem[] Items {
@@ -42,30 +58,21 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             }
         }
 
-        public bool IsEmpty => Items.Length == 0;
-
         [JsonProperty]
         public List<Expression> Modifiers { get; set; }
-
-        public EnumDefinition(Position start, Position end, NameExpression name, Expression[] bases = null, EnumItem[] items = null) {
-            Name  = name;
-            Bases = bases ?? new Expression[0];
-            Items = items ?? new EnumItem[0];
-            MarkPosition(start, end);
-        }
     }
 
     public class EnumItem : TreeNode {
-        public NameExpression     Name     { get; }
-        public Expression[]       TypeList { get; }
-        public ConstantExpression Value    { get; }
-
-        public EnumItem(NameExpression name, Expression[] typeList, ConstantExpression value = null) {
+        public EnumItem(NameExpression name, TypeName[] typeList, ConstantExpression value = null) {
             Name     = name;
             TypeList = typeList;
             Value    = value;
             MarkStart(Name);
-            MarkEnd(Value ?? (typeList.Length > 0 ? typeList[typeList.Length - 1] : Name));
+            MarkEnd(Value ?? (typeList.Length > 0 ? (SpannedRegion) typeList[typeList.Length - 1] : Name));
         }
+
+        public NameExpression     Name     { get; }
+        public TypeName[]         TypeList { get; }
+        public ConstantExpression Value    { get; }
     }
 }

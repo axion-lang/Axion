@@ -46,6 +46,7 @@ namespace Axion.Core.Specification {
             { "is not", KeywordIsNot },
             { "as", KeywordAs },
             // branching
+            { "unless", KeywordUnless },
             { "if", KeywordIf },
             { "elif", KeywordElseIf },
             { "else", KeywordElse },
@@ -97,7 +98,7 @@ namespace Axion.Core.Specification {
             { "return", KeywordReturn },
             { "pass", KeywordPass },
             // values
-            { "null", KeywordNull },
+            { "nil", KeywordNil },
             { "self", KeywordSelf },
             { "true", KeywordTrue },
             { "false", KeywordFalse },
@@ -108,12 +109,15 @@ namespace Axion.Core.Specification {
             OpBitwiseOr,
             Dot,
             LeftBracket,
-            Identifier
+            Identifier,
+            RightBrace,
+            RightBracket,
+            RightParenthesis,
         };
 
         internal static readonly TokenType[] BlockStarters = {
             Colon,
-            Newline,
+            Indent,
             LeftBrace
         };
 
@@ -135,7 +139,7 @@ namespace Axion.Core.Specification {
             Indent,
             Outdent,
             Newline,
-            TokenType.EndOfStream,
+            EndOfCode,
             Semicolon,
 
             RightBrace,

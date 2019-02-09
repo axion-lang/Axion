@@ -5,15 +5,10 @@ using static Axion.Core.Processing.Errors.BlameType;
 
 namespace Axion.Core.Specification {
     public static partial class Spec {
-        internal const string ERR_PrimaryExpected =
-            "Expected an identifier, list, map or other primary expression.";
-
-        internal const string ERR_InvalidStatement =
-            "Only assignment, call, increment, decrement, await expression, and new object expressions can be used as a statement";
-
-        internal const string ERR_InvalidDecoratorPosition =
-            "Decorator can be applied only to the top level definition.";
-
+        /// <summary>
+        ///     Map, declaring severity
+        ///     for all specified code blames.
+        /// </summary>
         public static readonly Dictionary<BlameType, BlameSeverity> Blames = new Dictionary<BlameType, BlameSeverity> {
             // Errors
             { InvalidOperator, Error },
@@ -48,7 +43,6 @@ namespace Axion.Core.Specification {
             { InvalidComplexNumberLiteral, Error },
             { ComplexLiteralTooLarge, Error },
             { AsyncModifierIsInapplicableToThatStatement, Error },
-
             { BreakIsOutsideLoop, Error },
             { ContinueIsOutsideLoop, Error },
             { ContinueNotSupportedInsideFinally, Error },
@@ -75,11 +69,18 @@ namespace Axion.Core.Specification {
             { RedundantStringFormatPrefix, Warning },
             { RedundantPrefixesForEmptyString, Warning },
             { RedundantExponentForZeroNumber, Warning },
-
             { RedundantEmptyUseStatement, Warning },
             { DoubleNegationIsMeaningless, Warning },
             { RedundantColonWithBraces, Warning },
             { RedundantEmptyListOfTypeArguments, Warning }
         };
+
+        internal const string ERR_PrimaryExpected = "Expected an identifier, list, map or other primary expression.";
+
+        internal const string ERR_InvalidStatement =
+            "Only assignment, call, increment, decrement, await expression, and new object expressions can be used as a statement";
+
+        internal const string ERR_InvalidDecoratorPosition =
+            "Decorator can be applied only to the top level definition.";
     }
 }

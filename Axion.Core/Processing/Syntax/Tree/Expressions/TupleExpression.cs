@@ -6,6 +6,14 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
 
         private Expression[] expressions;
 
+        internal TupleExpression(bool expandable, Expression[] expressions) {
+            Expandable  = expandable;
+            Expressions = expressions;
+            if (expressions.Length > 0) {
+                MarkPosition(expressions[0].Span.StartPosition, expressions[expressions.Length - 1].Span.EndPosition);
+            }
+        }
+
         [JsonProperty]
         internal Expression[] Expressions {
             get => expressions;
@@ -14,14 +22,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 foreach (Expression expr in expressions) {
                     expr.Parent = this;
                 }
-            }
-        }
-
-        internal TupleExpression(bool expandable, Expression[] expressions) {
-            Expandable  = expandable;
-            Expressions = expressions;
-            if (expressions.Length > 0) {
-                MarkPosition(expressions[0].Span.StartPosition, expressions[expressions.Length - 1].Span.EndPosition);
             }
         }
     }

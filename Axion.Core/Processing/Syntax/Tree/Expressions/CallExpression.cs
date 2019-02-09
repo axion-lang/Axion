@@ -4,6 +4,16 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class CallExpression : Expression {
         private Expression target;
 
+        private Arg[] args;
+
+        public CallExpression(Expression target, Arg[] args, Position end) {
+            Target = target;
+            Args   = args ?? new Arg[0];
+
+            MarkStart(target);
+            MarkEnd(end);
+        }
+
         [JsonProperty]
         internal Expression Target {
             get => target;
@@ -12,8 +22,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 target       = value;
             }
         }
-
-        private Arg[] args;
 
         [JsonProperty]
         internal Arg[] Args {
@@ -24,14 +32,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                     arg.Parent = this;
                 }
             }
-        }
-
-        public CallExpression(Expression target, Arg[] args, Position end) {
-            Target = target;
-            Args   = args ?? new Arg[0];
-
-            MarkStart(target);
-            MarkEnd(end);
         }
 
         public override string ToString() {
@@ -51,9 +51,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     }
 
     public class Arg : TreeNode {
-        internal NameExpression Name  { get; }
-        internal Expression     Value { get; }
-
         internal Arg(Expression value) {
             Value = value;
 
@@ -68,6 +65,13 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             MarkEnd(value);
         }
 
+        internal NameExpression Name  { get; }
+        internal Expression     Value { get; }
+
+        public override string ToString() {
+            return ToAxionCode();
+        }
+
         internal ArgumentKind GetArgumentInfo() {
             if (Name == null) {
                 return ArgumentKind.Simple;
@@ -79,10 +83,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 return ArgumentKind.Map;
             }
             return ArgumentKind.Named;
-        }
-
-        public override string ToString() {
-            return ToAxionCode();
         }
 
         private string ToAxionCode() {

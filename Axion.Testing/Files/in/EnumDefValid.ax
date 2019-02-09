@@ -1,7 +1,7 @@
 enum Enum1
 	item1,
 	item2 = 2,
-	item3(int),
+	item3(list<int>),
 	item4(int, int) = 4,
 	item5(complex.name1, complex.name2),
 	item6 = 6,

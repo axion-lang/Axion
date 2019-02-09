@@ -4,6 +4,19 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class SliceExpression : Expression {
         private Expression start;
 
+        private Expression stop;
+
+        private Expression step;
+
+        public SliceExpression(Expression start, Expression stop, Expression step) {
+            Start = start;
+            Stop  = stop;
+            Step  = step;
+
+            MarkStart(start ?? stop ?? step);
+            MarkEnd(step ?? stop ?? start);
+        }
+
         [JsonProperty]
         internal Expression Start {
             get => start;
@@ -12,8 +25,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 start        = value;
             }
         }
-
-        private Expression stop;
 
         [JsonProperty]
         internal Expression Stop {
@@ -24,8 +35,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
-        private Expression step;
-
         [JsonProperty]
         internal Expression Step {
             get => step;
@@ -33,15 +42,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 step.Parent = this;
                 step        = value;
             }
-        }
-
-        public SliceExpression(Expression start, Expression stop, Expression step) {
-            Start = start;
-            Stop  = stop;
-            Step  = step;
-
-            MarkStart(start ?? stop ?? step);
-            MarkEnd(step ?? stop ?? start);
         }
     }
 }

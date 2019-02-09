@@ -9,8 +9,16 @@ namespace Axion.Core.Processing.Syntax.Tree {
 
         private BlockStatement root;
 
+        //private readonly Stack<ImportDefinition>   imports = new Stack<ImportDefinition>();
+        private readonly Stack<ClassDefinition>    classes   = new Stack<ClassDefinition>();
+        private readonly Stack<FunctionDefinition> functions = new Stack<FunctionDefinition>();
+
+        internal Ast(SourceUnit sourceCode) {
+            Source = sourceCode;
+        }
+
         [JsonProperty]
-        internal BlockStatement Root {
+        public BlockStatement Root {
             get => root;
             set {
                 if (value != null) {
@@ -20,18 +28,19 @@ namespace Axion.Core.Processing.Syntax.Tree {
             }
         }
 
-        //private readonly Stack<ImportDefinition>   imports = new Stack<ImportDefinition>();
-        private readonly Stack<ClassDefinition>    classes   = new Stack<ClassDefinition>();
-        private readonly Stack<FunctionDefinition> functions = new Stack<FunctionDefinition>();
-
-        internal Ast(SourceUnit sourceCode) {
-            Source = sourceCode;
-        }
-
         internal ClassDefinition CurrentClass {
             get {
                 if (classes != null && classes.Count > 0) {
                     return classes.Peek();
+                }
+                return null;
+            }
+        }
+
+        internal FunctionDefinition CurrentFunction {
+            get {
+                if (functions != null && functions.Count > 0) {
+                    return functions.Peek();
                 }
                 return null;
             }
@@ -46,15 +55,6 @@ namespace Axion.Core.Processing.Syntax.Tree {
 
         internal void PushClass(ClassDefinition clazz) {
             classes.Push(clazz);
-        }
-
-        internal FunctionDefinition CurrentFunction {
-            get {
-                if (functions != null && functions.Count > 0) {
-                    return functions.Peek();
-                }
-                return null;
-            }
         }
 
         internal FunctionDefinition PopFunction() {

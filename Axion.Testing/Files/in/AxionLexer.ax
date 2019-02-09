@@ -1,0 +1,183 @@
+use (
+    System (Collections.Generic, Diagnostics, Linq, Text),
+    Axion.Core (
+        Processing (Errors, Lexical.Tokens),
+        Specification
+    )
+)
+
+module Axion.Core.Processing.Lexical.Lexer
+    ## Static tool for splitting Axion
+    ## code into list of tokens.
+    #@public, partial
+    class Lexer (AbstractLexer)
+        #@private:
+            #$region Current source properties
+
+            c: char => Stream.C
+
+            ## Contains values, from which lexer should stop working.
+            _processingTerminators: string[]
+
+            ## Contains all unclosed multiline comments found.
+            _unclosedMultilineComments: List<MultilineCommentToken> { get, set }
+
+            ## Contains all unclosed strings found in source code.
+            _unclosedStrings: List<StringToken> { get, set }
+
+            ## Contains unpaired parenthesis, brackets and braces.
+            _mismatchingPairs { get } = new List<Token>()
+
+            #$endregion
+
+            #$region Current token properties
+
+            ## Value of current reading `Token`.
+            #@readonly tokenValue = new StringBuilder()
+
+            ## Start position of current reading `Token`.
+            tokenStartPosition: Position = (0, 0)
+
+            #$endregion
+
+        #@protected, sealed, override
+        fn AddPresets (
+            self.unclosedMultilineComments = new(),
+            self.unclosedStrings           = new(),
+            self.processingTerminators     = new[0]
+        ) pass
+
+        #@public:
+            #$region Constructors
+
+            fn init (
+                codeToProcess: string,
+                outTokens:     List<Token>,
+                outBlames:     List<Exception>,
+                processingOptions = SourceProcessingOptions.None
+            )
+                base (codeToProcess, outTokens, outBlames, processingOptions)
+                AddPresets()
+
+            fn init (
+                fromStream: CharStream,
+                outTokens:  List<Token>,
+                outBlames:  List<Exception>,
+                processingOptions = SourceProcessingOptions.None
+            )
+                base (fromStream, outTokens, outBlames, processingOptions)
+                AddPresets()
+
+            #$endregion
+
+            ## Divides code into list of tokens.
+            #@override
+            fn Process()
+                token = nil
+                # at first, check if we're after unclosed string
+                if _unclosedStrings.Count > 0
+                    token = ReadString (true)
+                # then, check if we're after unclosed multiline comment
+                if _unclosedMultilineComments.Count > 0
+                    token = ReadMultilineComment()
+                if token == nil
+                    token = NextToken()
+                while true
+                    if token != nil
+                        tokens.Add (token)
+                        # check for processing terminator
+                        if token.Type == TokenType.EndOfStream
+                        or _processingTerminators.Contains (token.Value)
+                            break
+                    token = NextToken()
+
+                #$region Process mismatches
+
+                for i = 0; i < _mismatchingPairs.Count; i++
+                    mismatch:  Token = _mismatchingPairs[i]
+                    errorType: BlameType
+                    switch mismatch.Type
+                        case TokenType.LeftParenthesis, TokenType.RightParenthesis: errorType = BlameType.MismatchedParenthesis
+                        case TokenType.LeftBracket, TokenType.RightBracket:         errorType = BlameType.MismatchedBracket
+                        case TokenType.LeftBrace, TokenType.RightBrace:             errorType = BlameType.MismatchedBrace
+                        default:
+                            throw new NotSupportedException (
+                                "Internal error: " + nameof (_mismatchingPairs) +
+                                " grabbed invalid " + nameof (TokenType) + ": " + mismatch.Type
+                            )
+                    Blame (
+                        errorType,
+                        mismatch.Span.StartPosition,
+                        mismatch.Span.EndPosition
+                    )
+
+                #$endregion
+
+
+        ## Reads next token from character stream.
+        ## Every time that method invoked, `CharStream.C`
+        ## property should be on first letter of current new reading token.
+        #@private
+        fn NextToken() => Token
+            # reset token properties
+            tokenStartPosition = Stream.Position
+            tokenValue.Clear()
+
+            #$if DEBUG
+
+            if tokens.Count != 0 and tokens[tokens.Count - 1].Type != TokenType.Outdent
+                last: Token = tokens[tokens.Count - 1]
+                Debug.Assert (
+                    tokenStartPosition ==
+                    (last.Span.EndPosition.Line, last.Span.EndPosition.Column + last.Whitespaces.Length)
+                )
+
+            #$endif
+
+            if c == Spec.EndOfStream
+                return new EndOfStreamToken (tokenStartPosition)
+
+            if c == '\r'
+                Stream.Move()
+                if c == '\n'
+                    tokenValue.Append ('\r')
+                else
+                    # skip carriage returns
+                    return nil
+
+            # this branch should forever be
+            # right after \r check.
+            if c == '\n'
+                return ReadNewline()
+
+            if Spec.IsSpaceOrTab (c)
+                # whitespaces & indentation
+                return ReadWhite()
+
+            if c.ToString() == Spec.SingleCommentStart
+                # one-line comment
+                if c.ToString() + Stream.Peek == Spec.MultiCommentStart
+                    # multiline comment
+                    return ReadMultilineComment()
+                return ReadSingleComment()
+
+            if c == Spec.CharLiteralQuote
+                return ReadCharLiteral()
+
+            if Spec.StringQuotes.Contains (c)
+                return ReadString (false)
+
+            if char.IsDigit (c)
+                return ReadNumber()
+
+            if Spec.IsValidIdStart (c)
+                return ReadWord()
+
+            if Spec.SymbolicChars.Contains (c)
+                return ReadSymbolic()
+
+            # invalid
+            tokenValue.Append (c)
+            Stream.Move()
+            Blame (BlameType.InvalidSymbol, tokenStartPosition, Stream.Position)
+            return new Token (TokenType.Invalid, tokenStartPosition, tokenValue.ToString())

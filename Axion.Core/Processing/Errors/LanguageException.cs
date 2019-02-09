@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using Axion.Core.Specification;
 using ConsoleExtensions;
@@ -9,30 +10,31 @@ namespace Axion.Core.Processing.Errors {
     [JsonObject]
     [Serializable]
     public class LanguageException : Exception {
-        [JsonProperty]
-        internal new string Message { get; }
+        private readonly SourceUnit src;
 
         [JsonProperty]
-        private SourceUnit src { get; }
+        private readonly string code;
 
         [JsonProperty]
-        private string code { get; }
+        private readonly string time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
 
         [JsonProperty]
-        private string time { get; } = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+        private readonly Blame blame;
 
         [JsonProperty]
-        private Blame blame { get; }
+        public override string Message { get; }
+        
+        public override string StackTrace { get; }
 
-        internal LanguageException(Blame blame, string code)
-            : base(blame.AsMessage()) {
+        // TODO: deal with sourceless constructor
+        internal LanguageException(Blame blame, string code) {
             this.blame = blame;
             this.code  = code;
-            Message    = base.Message;
+            Message    = blame.AsMessage();
+            StackTrace = new StackTrace(2).ToString();
         }
 
-        internal LanguageException(Blame blame, SourceUnit source)
-            : this(blame, source.Code) {
+        internal LanguageException(Blame blame, SourceUnit source) : this(blame, source.Code) {
             src = source;
         }
 
@@ -57,9 +59,7 @@ namespace Axion.Core.Processing.Errors {
             // ...
             //
 
-            ConsoleColor color = blame.Severity == BlameSeverity.Error
-                                     ? ConsoleColor.Red
-                                     : ConsoleColor.DarkYellow;
+            ConsoleColor color = blame.Severity == BlameSeverity.Error ? ConsoleColor.Red : ConsoleColor.DarkYellow;
 
             // Write message
             ConsoleUI.WriteLine((Message, color));
@@ -94,14 +94,15 @@ namespace Axion.Core.Processing.Errors {
             // upside arrows (^), should be red-colored
             string pointer =
                 // tail of pointer
-                new string(' ', pointerTailLength) +
+                new string(' ', pointerTailLength)
+               +
                 // pointer arrows
                 new string(
                     '^', // TODO compute token value length: include tab lengths
                     errorTokenLength
                 );
 
-            // Drawing --------------------------------------------------------------------------
+            // Drawing ==========
 
             // line with error
             ConsoleCodeEditor.PrintLineNumber(blame.Span.StartPosition.Line + 1);

@@ -4,10 +4,20 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class BinaryExpression : Expression {
+        private Expression left;
+
+        private Expression right;
+
+        public BinaryExpression(Expression left, OperatorToken op, Expression right) {
+            Left     = left ?? throw new ArgumentNullException(nameof(left));
+            Operator = op ?? throw new ArgumentNullException(nameof(op));
+            Right    = right ?? throw new ArgumentNullException(nameof(right));
+
+            MarkPosition(left, right);
+        }
+
         [JsonProperty]
         internal OperatorToken Operator { get; }
-
-        private Expression left;
 
         [JsonProperty]
         internal Expression Left {
@@ -18,8 +28,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
-        private Expression right;
-
         [JsonProperty]
         internal Expression Right {
             get => right;
@@ -27,14 +35,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 value.Parent = this;
                 right        = value;
             }
-        }
-
-        public BinaryExpression(Expression left, OperatorToken op, Expression right) {
-            Left     = left ?? throw new ArgumentNullException(nameof(left));
-            Operator = op ?? throw new ArgumentNullException(nameof(op));
-            Right    = right ?? throw new ArgumentNullException(nameof(right));
-
-            MarkPosition(left, right);
         }
 
         public override string ToString() {

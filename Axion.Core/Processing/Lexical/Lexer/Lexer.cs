@@ -105,7 +105,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 if (token != null) {
                     tokens.Add(token);
                     // check for processing terminator
-                    if (token.Type == TokenType.EndOfStream
+                    if (token.Type == TokenType.EndOfCode
                      || _processingTerminators.Contains(token.Value)) {
                         break;
                     }
@@ -173,7 +173,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 #endif
 
             if (c == Spec.EndOfStream) {
-                return new EndOfStreamToken(tokenStartPosition);
+                return new EndOfCodeToken(tokenStartPosition);
             }
 
             if (c == '\r') {
@@ -203,7 +203,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     // multiline comment
                     return ReadMultilineComment();
                 }
-                return ReadSingleComment();
+                return ReadSingleLineComment();
             }
 
             if (c == Spec.CharLiteralQuote) {

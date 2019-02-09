@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Parser {
     [TestFixture]
-    public class SyntaxParserTests : Tests {
+    public partial class SyntaxParserTests : Tests {
         [Test]
         public void IfStmtValid() {
             SourceUnit source = MakeSourceFromFile(nameof(IfStmtValid));

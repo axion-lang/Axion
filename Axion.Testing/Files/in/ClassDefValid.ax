@@ -1,6 +1,11 @@
-class Point(nmspc1.base1, m2.base2)
-	x = 0
-	y = 0
+# class Point (@private x: num, @private y: num) :: mod1.base1, m2.base2 { }
 
-	fn Point FromCoords(int x, int y)
-		return (x + y)
+class Point(mod1.base1, m2.base2)
+	#@private {
+	#	[static, react] x: num
+	#	y: num
+	#}
+
+	#@static
+	fn FromCoords (x: num, y: num) => Point
+		return Point (x, y)

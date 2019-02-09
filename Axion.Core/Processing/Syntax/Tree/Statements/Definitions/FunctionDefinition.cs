@@ -1,12 +1,36 @@
 using System;
 using System.Collections.Generic;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
+using Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames;
 using Axion.Core.Processing.Syntax.Tree.Statements.Interfaces;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
     public class FunctionDefinition : Statement, IDecorated {
         private Expression name;
+
+        private TypeName returnType;
+
+        private Parameter[] parameters;
+
+        private Statement block;
+
+        public FunctionDefinition(Expression name, Parameter[] parameters, TypeName returnType = null) : this(
+            name,
+            parameters,
+            null,
+            returnType
+        ) {
+        }
+
+        public FunctionDefinition(Expression name, Parameter[] parameters, Statement body, TypeName returnType = null) {
+            Name       = name;
+            Parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
+            Block      = body;
+            ReturnType = returnType;
+        }
+
+        public bool IsGenerator { get; set; }
 
         [JsonProperty]
         internal Expression Name {
@@ -17,10 +41,8 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             }
         }
 
-        private Expression returnType;
-
         [JsonProperty]
-        internal Expression ReturnType {
+        internal TypeName ReturnType {
             get => returnType;
             set {
                 if (value != null) {
@@ -29,8 +51,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
                 returnType = value;
             }
         }
-
-        private Parameter[] parameters;
 
         [JsonProperty]
         internal Parameter[] Parameters {
@@ -43,8 +63,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             }
         }
 
-        private Statement block;
-
         [JsonProperty]
         internal Statement Block {
             get => block;
@@ -55,10 +73,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
                 block = value;
             }
         }
-
-        public List<Expression> Modifiers { get; set; }
-
-        public bool IsGenerator { get; set; }
 
         // true if this function can set sys.exc_info(). Only functions with an except block can set that.
 
@@ -71,16 +85,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
         [JsonProperty]
         internal bool ContainsTryFinally { get; set; }
 
-        public FunctionDefinition(Expression name, Parameter[] parameters, Expression returnType = null)
-            : this(name, parameters, null, returnType) {
-        }
-
-        public FunctionDefinition(Expression name, Parameter[] parameters, Statement body, Expression returnType = null) {
-            Name       = name;
-            Parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
-            Block      = body;
-            ReturnType = returnType;
-        }
+        public List<Expression> Modifiers { get; set; }
     }
 
     public enum ParameterKind {
@@ -93,6 +98,20 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
     public class Parameter : Expression {
         private NameExpression name;
 
+        private TypeName typeName;
+
+        private Expression defaultValue;
+
+        private readonly ParameterKind Kind;
+
+        public Parameter(NameExpression name, TypeName typeName, ParameterKind kind = ParameterKind.Normal) {
+            Name     = name;
+            TypeName = typeName;
+            Kind     = kind;
+
+            MarkPosition(name);
+        }
+
         [JsonProperty]
         internal NameExpression Name {
             get => name;
@@ -102,10 +121,8 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             }
         }
 
-        private Expression typeName;
-
         [JsonProperty]
-        internal Expression TypeName {
+        internal TypeName TypeName {
             get => typeName;
             set {
                 if (value != null) {
@@ -115,8 +132,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             }
         }
 
-        private Expression defaultValue;
-
         [JsonProperty]
         internal Expression DefaultValue {
             get => defaultValue;
@@ -124,16 +139,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
                 value.Parent = this;
                 defaultValue = value;
             }
-        }
-
-        private readonly ParameterKind Kind;
-
-        public Parameter(Expression typeName, NameExpression name, ParameterKind kind = ParameterKind.Normal) {
-            TypeName = typeName;
-            Name     = name;
-            Kind     = kind;
-
-            MarkPosition(name);
         }
 
         public override string ToString() {

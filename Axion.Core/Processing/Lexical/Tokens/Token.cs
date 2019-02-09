@@ -5,25 +5,8 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     [JsonObject]
-    [DebuggerDisplay("{debuggerDisplay,nq}")]
+    [DebuggerDisplay("{" + nameof(debuggerDisplay) + ",nq}")]
     public class Token : SpannedRegion {
-        [JsonProperty(Order = 1)]
-        public TokenType Type { get; protected internal set; }
-
-        [JsonProperty(Order = 2)]
-        public string Value { get; protected set; }
-
-        /// <summary>
-        ///     Whitespaces after that token.
-        ///     Used in code rendering.
-        /// </summary>
-        [JsonProperty(Order = 3)]
-        public string Whitespaces { get; protected internal set; }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string debuggerDisplay =>
-            $"{Type} :: {Value.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t")} :: ({Span})";
-
         public Token(TokenType type, Position startPosition, string value = "", string whitespaces = "") {
             Type        = type;
             Value       = value;
@@ -43,6 +26,23 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             }
             Span = new Span(startPosition, (endLine, endCol));
         }
+
+        [JsonProperty(Order = 1)]
+        public TokenType Type { get; protected internal set; }
+
+        [JsonProperty(Order = 2)]
+        public string Value { get; protected set; }
+
+        /// <summary>
+        ///     Whitespaces after that token.
+        ///     Used in code rendering.
+        /// </summary>
+        [JsonProperty(Order = 3)]
+        public string Whitespaces { get; protected internal set; }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string debuggerDisplay =>
+            $"{Type} :: {Value.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t")} :: ({Span})";
 
         public void AppendValue(string value) {
             Value += value;

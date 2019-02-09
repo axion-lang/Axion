@@ -61,7 +61,8 @@ namespace Axion.Core {
         internal static IEnumerable<string> SplitLaunchArguments(string input) {
             var inQuotes = false;
             return Split(
-                       input, c => {
+                       input,
+                       c => {
                            if (c == '\"') {
                                inQuotes = !inQuotes;
                            }

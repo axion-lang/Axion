@@ -4,6 +4,11 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class ParenthesisExpression : Expression {
         private Expression expression;
 
+        internal ParenthesisExpression(Expression expression) {
+            Expression = expression;
+            MarkPosition(expression);
+        }
+
         [JsonProperty]
         internal Expression Expression {
             get => expression;
@@ -15,9 +20,12 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
 
         internal override string CannotDeleteReason => Expression.CannotDeleteReason;
 
-        internal ParenthesisExpression(Expression expression) {
-            Expression = expression;
-            MarkPosition(expression);
+        public override string ToString() {
+            return ToAxionCode();
+        }
+
+        private string ToAxionCode() {
+            return "(" + Expression + ")";
         }
     }
 }

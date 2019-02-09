@@ -7,10 +7,17 @@ using Axion.Core.Processing.Lexical.Tokens;
 
 namespace Axion.Core.Specification {
     public partial class Spec {
+        /// <summary>
+        ///     First barrier, preventing silly
+        ///     errors in specification.
+        ///     Checks, that all keywords, operators and blames
+        ///     are declared in specification.
+        /// </summary>
         [Conditional("DEBUG")]
         internal static void AssertNoErrorsInDefinitions() {
             // check keywords completeness
-            IEnumerable<string> definedKws = Enum.GetNames(typeof(TokenType)).Where(name => name.ToLower().StartsWith("keyword"));
+            IEnumerable<string> definedKws =
+                Enum.GetNames(typeof(TokenType)).Where(name => name.ToLower().StartsWith("keyword"));
             foreach (string kw in definedKws) {
                 Enum.TryParse(kw, out TokenType type);
                 if (!Keywords.ContainsValue(type)) {
@@ -19,7 +26,8 @@ namespace Axion.Core.Specification {
             }
 
             // check operators completeness
-            IEnumerable<string> definedOps = Enum.GetNames(typeof(TokenType)).Where(name => name.ToLower().StartsWith("op"));
+            IEnumerable<string> definedOps =
+                Enum.GetNames(typeof(TokenType)).Where(name => name.ToLower().StartsWith("op"));
             foreach (string op in definedOps) {
                 Enum.TryParse(op, out TokenType type);
                 if (Operators.Values.All(props => props.Type != type)) {
@@ -28,7 +36,8 @@ namespace Axion.Core.Specification {
             }
 
             // check blames completeness
-            IEnumerable<string> definedBls = Enum.GetNames(typeof(BlameType)).Where(name => name != nameof(BlameType.None));
+            IEnumerable<string> definedBls =
+                Enum.GetNames(typeof(BlameType)).Where(name => name != nameof(BlameType.None));
             foreach (string bl in definedBls) {
                 Enum.TryParse(bl, out BlameType type);
                 if (!Blames.ContainsKey(type)) {
@@ -40,15 +49,32 @@ namespace Axion.Core.Specification {
         #region Extensions for character checking
 
         internal static bool IsValidOctalDigit(this char c) {
-            return c == '0' || c == '1' || c == '2' || c == '3'
-                || c == '4' || c == '5' || c == '6' || c == '7';
+            return c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7';
         }
 
         internal static bool IsValidHexadecimalDigit(this char c) {
-            return c == '0' || c == '1' || c == '2' || c == '3' || c == '4'
-                || c == '5' || c == '6' || c == '7' || c == '8' || c == '9'
-                || c == 'a' || c == 'b' || c == 'c' || c == 'd' || c == 'e' || c == 'f'
-                || c == 'A' || c == 'B' || c == 'C' || c == 'D' || c == 'E' || c == 'F';
+            return c == '0'
+                || c == '1'
+                || c == '2'
+                || c == '3'
+                || c == '4'
+                || c == '5'
+                || c == '6'
+                || c == '7'
+                || c == '8'
+                || c == '9'
+                || c == 'a'
+                || c == 'b'
+                || c == 'c'
+                || c == 'd'
+                || c == 'e'
+                || c == 'f'
+                || c == 'A'
+                || c == 'B'
+                || c == 'C'
+                || c == 'D'
+                || c == 'E'
+                || c == 'F';
         }
 
         internal static bool IsSpaceOrTab(char c) {

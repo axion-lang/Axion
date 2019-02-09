@@ -36,14 +36,14 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         private bool inconsistentIndentation;
 
         #endregion
-
+        
         private EndOfLineToken ReadNewline() {
             // skip all newline characters
             while (c == '\n' || c == '\r') {
                 tokenValue.Append(c);
                 Stream.Move();
             }
-            if (tokens[tokens.Count - 1].Type == TokenType.Newline) {
+            if (tokens.Count > 0 && tokens[tokens.Count - 1].Type == TokenType.Newline) {
                 tokens[tokens.Count - 1].AppendValue(tokenValue.ToString());
                 return null;
             }
@@ -75,17 +75,15 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             bool   nextIsIndent;
             string restOfLine = Stream.GetRestOfLine();
             // BUG: Outdent dont adds, when we have empty string with spaces.
-            nextIsIndent =
-                _mismatchingPairs.Count == 0
-             && !(
-                     // rest is one-line comment
-                     restOfLine.StartsWith(Spec.SingleCommentStart)
-                     // or rest is multiline comment
-                  || restOfLine.StartsWith(Spec.MultiCommentStart)
-                     // and comment goes through end of line
-                  && Regex.Matches(restOfLine, Spec.MultiCommentStartPattern).Count
-                   > Regex.Matches(restOfLine, Spec.MultiCommentEndPattern).Count
-                 );
+            nextIsIndent = _mismatchingPairs.Count == 0
+                        && !(
+                                // rest is one-line comment
+                                restOfLine.StartsWith(Spec.SingleCommentStart)
+                                // or rest is multiline comment
+                             || restOfLine.StartsWith(Spec.MultiCommentStart)
+                                // and comment goes through end of line
+                             && Regex.Matches(restOfLine, Spec.MultiCommentStartPattern).Count
+                              > Regex.Matches(restOfLine, Spec.MultiCommentEndPattern).Count);
 
             // if it is 1st token,
             // set default indentation level.
@@ -177,11 +175,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             // warn user about inconsistency
             if (inconsistentIndentation && options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
-                Blame(
-                    BlameType.InconsistentIndentation,
-                    tokenStartPosition,
-                    Stream.Position
-                );
+                Blame(BlameType.InconsistentIndentation, tokenStartPosition, Stream.Position);
                 // ignore future warnings
                 options &= ~SourceProcessingOptions.CheckIndentationConsistency;
             }

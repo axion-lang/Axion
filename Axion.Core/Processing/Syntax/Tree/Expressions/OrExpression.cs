@@ -5,6 +5,15 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class OrExpression : Expression {
         private Expression left;
 
+        private Expression right;
+
+        public OrExpression(Expression left, Expression right) {
+            Left  = left ?? throw new ArgumentNullException(nameof(left));
+            Right = right ?? throw new ArgumentNullException(nameof(right));
+
+            MarkPosition(left, right);
+        }
+
         [JsonProperty]
         internal Expression Left {
             get => left;
@@ -14,8 +23,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
-        private Expression right;
-
         [JsonProperty]
         internal Expression Right {
             get => right;
@@ -23,13 +30,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 value.Parent = this;
                 right        = value;
             }
-        }
-
-        public OrExpression(Expression left, Expression right) {
-            Left  = left ?? throw new ArgumentNullException(nameof(left));
-            Right = right ?? throw new ArgumentNullException(nameof(right));
-
-            MarkPosition(left, right);
         }
     }
 }

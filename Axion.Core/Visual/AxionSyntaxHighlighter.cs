@@ -7,13 +7,16 @@ using Axion.Core.Processing.Lexical.Tokens;
 using ConsoleExtensions;
 
 namespace Axion.Core.Visual {
+    /// <summary>
+    ///     Implementation of Axion language
+    ///     syntax highlighter for console.
+    /// </summary>
     internal class AxionSyntaxHighlighter : ISyntaxHighlighter {
-        public ConsoleCodeEditor Editor { get; set; }
-
-        private Point renderPosition;
+        private Point             renderPosition;
+        public  ConsoleCodeEditor Editor { get; set; }
 
         /// <summary>
-        ///     Creates a pairs (text, color) from given source,
+        ///     Creates a pairs of (text, color) from given source,
         ///     After that, moves cursor to last render position
         ///     and cleans all code after cursor.
         ///     Next you just need to write given values to the editor.
@@ -35,11 +38,7 @@ namespace Axion.Core.Visual {
             renderPosition = lastRenderEndPosition;
             var stream = new CharStream(codeLines);
             var tokens = new List<Token>();
-            var lexer = new Lexer(
-                stream,
-                tokens,
-                blames
-            );
+            var lexer  = new Lexer(stream, tokens, blames);
             lexer.Process();
 
             var values = new List<ColoredValue>();
@@ -51,20 +50,15 @@ namespace Axion.Core.Visual {
             return values;
         }
 
-        private void HighlightTokens(
-            List<Token>        tokens,
-            List<ColoredValue> values,
-            bool               foundRenderStart
-        ) {
+        private void HighlightTokens(List<Token> tokens, List<ColoredValue> values, bool foundRenderStart) {
             for (var i = 0; i < tokens.Count; i++) {
                 Token token = tokens[i];
 
-                bool tokenShouldBeSkipped =
-                    !foundRenderStart
-                 && (token.Span.EndPosition.Line < renderPosition.Y
-                  || token.Span.EndPosition.Line == renderPosition.Y
-                  && token.Span.EndPosition.Column <= renderPosition.X
-                  || token.Type == TokenType.EndOfStream);
+                bool tokenShouldBeSkipped = !foundRenderStart
+                                         && (token.Span.EndPosition.Line < renderPosition.Y
+                                          || token.Span.EndPosition.Line == renderPosition.Y
+                                          && token.Span.EndPosition.Column <= renderPosition.X
+                                          || token.Type == TokenType.EndOfCode);
                 // BUG: if code has error before that token, and it's fixed with next char, it'll be highlighted improperly (e. g. type '0..10')
 
                 #region Complex values
@@ -79,6 +73,9 @@ namespace Axion.Core.Visual {
                     foundRenderStart = true;
                 }
 
+                if (token.Type == TokenType.EndOfCode) {
+                    break;
+                }
                 if (token.Type == TokenType.Whitespace) {
                     values.Add(new ColoredValue(new string(' ', token.Whitespaces.Length), ConsoleColor.DarkGray));
                     continue;
@@ -102,8 +99,8 @@ namespace Axion.Core.Visual {
                     }
                     continue;
                 }
-                if (token is InterpolatedStringToken interpolatedStringToken) {
-                    HighlightInterpolatedString(interpolatedStringToken, values);
+                if (token is StringToken strToken && strToken.Interpolations.Count > 0) {
+                    HighlightInterpolatedString(strToken, values);
                     continue;
                 }
 
@@ -129,7 +126,7 @@ namespace Axion.Core.Visual {
             else if (token.Type == TokenType.Number) {
                 tokenColor = ConsoleColor.Yellow;
             }
-            else if (token is OperatorToken) {
+            else if (token is OperatorToken || token is SymbolToken) {
                 tokenColor = ConsoleColor.Red;
             }
             else if (token is KeywordToken) {
@@ -141,29 +138,13 @@ namespace Axion.Core.Visual {
             return tokenColor;
         }
 
-        private void HighlightInterpolatedString(
-            InterpolatedStringToken token,
-            List<ColoredValue>      values
-        ) {
+        private void HighlightInterpolatedString(StringToken token, List<ColoredValue> values) {
             // prefixes
-            values.Add(
-                new ColoredValue(
-                    token.Options.GetPrefixes(),
-                    ConsoleColor.Cyan
-                )
-            );
+            values.Add(new ColoredValue(token.Options.GetPrefixes(), ConsoleColor.Cyan));
 
             int quotesCount = token.Options.QuotesCount;
             // opening quotes
-            values.Add(
-                new ColoredValue(
-                    new string(
-                        token.Options.Quote,
-                        quotesCount
-                    ),
-                    ConsoleColor.DarkYellow
-                )
-            );
+            values.Add(new ColoredValue(new string(token.Options.Quote, quotesCount), ConsoleColor.DarkYellow));
 
             // interpolations
             var interpolationI = 0;

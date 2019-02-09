@@ -1,4 +1,8 @@
 namespace Axion.Core.Processing {
+    /// <summary>
+    ///     Abstract 'extension-class'
+    ///     for tokens, expressions and statements.
+    /// </summary>
     public abstract class SpannedRegion {
         public Span Span { get; protected set; }
 

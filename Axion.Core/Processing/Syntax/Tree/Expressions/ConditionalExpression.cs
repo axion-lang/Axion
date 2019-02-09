@@ -4,6 +4,18 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class ConditionalExpression : Expression {
         private Expression condition;
 
+        private Expression trueExpression;
+
+        private Expression falseExpression;
+
+        public ConditionalExpression(Expression condition, Expression trueExpression, Expression falseExpression) {
+            Condition       = condition;
+            TrueExpression  = trueExpression;
+            FalseExpression = falseExpression;
+
+            MarkPosition(condition, falseExpression ?? trueExpression);
+        }
+
         [JsonProperty]
         internal Expression Condition {
             get => condition;
@@ -12,8 +24,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 condition    = value;
             }
         }
-
-        private Expression trueExpression;
 
         [JsonProperty]
         internal Expression TrueExpression {
@@ -24,23 +34,15 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
-        private Expression falseExpression;
-
         [JsonProperty]
         internal Expression FalseExpression {
             get => falseExpression;
             set {
-                value.Parent    = this;
+                if (value != null) {
+                    value.Parent = this;
+                }
                 falseExpression = value;
             }
-        }
-
-        public ConditionalExpression(Expression condition, Expression trueExpression, Expression falseExpression) {
-            Condition       = condition;
-            TrueExpression  = trueExpression;
-            FalseExpression = falseExpression;
-
-            MarkPosition(condition, falseExpression ?? trueExpression);
         }
 
         public override string ToString() {

@@ -1,10 +1,9 @@
 ﻿namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
-    ///     Represents a &lt;indentation decrease&gt; <see cref="Token" />.
+    ///     Represents an 'indentation decreasing' mark.
     /// </summary>
     public class OutdentToken : Token {
-        public OutdentToken(Position startPosition)
-            : base(TokenType.Outdent, startPosition) {
+        public OutdentToken(Position startPosition) : base(TokenType.Outdent, startPosition) {
         }
     }
 }

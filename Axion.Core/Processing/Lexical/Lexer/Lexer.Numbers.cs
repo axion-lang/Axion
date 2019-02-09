@@ -53,15 +53,17 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             return new NumberToken(tokenStartPosition, tokenValue, numberOptions);
         }
 
+        #region Dec, Bin, Oct, Hex
+
         private NumberOptions ReadDecimalNumber(bool startsWithZero) {
             var numberOptions = new NumberOptions { Radix = 10 };
             if (startsWithZero) {
-                numberOptions.Number.Append("0");
+                tokenValue.Append("0");
             }
             // c is digit or dot except 0 here
             while (Spec.IsLetterOrNumberPart(c)) {
                 if (char.IsDigit(c)) {
-                    numberOptions.Number.Append(c);
+                    tokenValue.Append(c);
                 }
                 else if (c != '_') {
                     if (c == '.') {
@@ -78,7 +80,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                             Blame(BlameType.RepeatedDotInNumberLiteral, dotPosition, Stream.Position);
                         }
                         else {
-                            numberOptions.Number.Append(c);
+                            tokenValue.Append(c);
                         }
                         numberOptions.Floating = true;
                     }
@@ -87,10 +89,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         continue;
                     }
                     else if (Spec.NumberPostfixes.Contains(c)) {
-                        ReadNumberPostfix(
-                            numberOptions,
-                            false
-                        );
+                        ReadNumberPostfix(numberOptions, false);
                         return numberOptions;
                     }
                     else {
@@ -104,9 +103,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             return numberOptions;
         }
 
-        private NumberOptions ReadBinaryNumber(
-            out bool isOnBaseLetter
-        ) {
+        private NumberOptions ReadBinaryNumber(out bool isOnBaseLetter) {
             var        numberOptions = new NumberOptions { Radix = 2 };
             var        bitsCount     = 0;
             var        longValue     = 0L;
@@ -122,7 +119,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         break;
                     }
                     case '1': {
-                        numberOptions.Number.Append(c);
+                        tokenValue.Append(c);
                         bitsCount++;
                         if (bitsCount > 8) {
                             numberOptions.Bits = 16;
@@ -152,10 +149,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     }
                     default: {
                         if (Spec.NumberPostfixes.Contains(c)) {
-                            ReadNumberPostfix(
-                                numberOptions,
-                                false
-                            );
+                            ReadNumberPostfix(numberOptions, false);
                             return numberOptions;
                         }
                         // invalid
@@ -170,22 +164,17 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             return numberOptions;
         }
 
-        private NumberOptions ReadOctalNumber(
-            out bool isOnBaseLetter
-        ) {
+        private NumberOptions ReadOctalNumber(out bool isOnBaseLetter) {
             var numberOptions = new NumberOptions { Radix = 8 };
             isOnBaseLetter = true;
 
             while (Spec.IsLetterOrNumberPart(c)) {
                 if (c.IsValidOctalDigit()) {
-                    numberOptions.Number.Append(c);
+                    tokenValue.Append(c);
                 }
                 else if (c != '_') {
                     if (Spec.NumberPostfixes.Contains(c)) {
-                        ReadNumberPostfix(
-                            numberOptions,
-                            isOnBaseLetter
-                        );
+                        ReadNumberPostfix(numberOptions, isOnBaseLetter);
                         break;
                     }
                     // invalid
@@ -198,22 +187,17 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             return numberOptions;
         }
 
-        private NumberOptions ReadHexNumber(
-            out bool isOnBaseLetter
-        ) {
+        private NumberOptions ReadHexNumber(out bool isOnBaseLetter) {
             var numberOptions = new NumberOptions { Radix = 16 };
             isOnBaseLetter = true;
 
             while (Spec.IsLetterOrNumberPart(c)) {
                 if (c.IsValidHexadecimalDigit()) {
-                    numberOptions.Number.Append(c);
+                    tokenValue.Append(c);
                 }
                 else if (c != '_') {
                     if (Spec.NumberPostfixes.Contains(c)) {
-                        ReadNumberPostfix(
-                            numberOptions,
-                            isOnBaseLetter
-                        );
+                        ReadNumberPostfix(numberOptions, isOnBaseLetter);
                         break;
                     }
                     // invalid
@@ -226,15 +210,16 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             return numberOptions;
         }
 
-        private void ReadExponent(
-            in NumberOptions numberOptions
-        ) {
+        #endregion
+
+        #region Number endings parsing
+
+        private void ReadExponent(in NumberOptions numberOptions) {
             Position ePosition = Stream.Position;
             // c == 'e'
             // check for '0'
-            string num = tokenValue.ToString().Replace("_", "").Trim('0');
-            bool zero = tokenValue.Length > 0
-                     && (num == "" || num == ".");
+            string num  = tokenValue.ToString().Replace("_", "").Trim('0');
+            bool   zero = tokenValue.Length > 0 && (num == "" || num == ".");
 
             numberOptions.HasExponent = true;
             var hasValue   = false;
@@ -281,17 +266,11 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             }
 
             if (hasPostfix) {
-                ReadNumberPostfix(
-                    numberOptions,
-                    false
-                );
+                ReadNumberPostfix(numberOptions, false);
             }
         }
 
-        private void ReadNumberPostfix(
-            in NumberOptions numberOptions,
-            bool             isOnBaseLetter
-        ) {
+        private void ReadNumberPostfix(in NumberOptions numberOptions, bool isOnBaseLetter) {
             Position postfixPosition = Stream.Position;
             // c is letter here
             if (isOnBaseLetter) {
@@ -336,7 +315,11 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             }
         }
 
-        private void ReadNumberPostfixLetters(in NumberOptions numberOptions, out bool expectingEndOfNumber, out bool bitRateRequired) {
+        private void ReadNumberPostfixLetters(
+            in  NumberOptions numberOptions,
+            out bool          expectingEndOfNumber,
+            out bool          bitRateRequired
+        ) {
             expectingEndOfNumber = true;
             bitRateRequired      = false;
             switch (c) {
@@ -358,7 +341,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 case 'l':
                 case 'L': {
                     numberOptions.Unlimited = true;
-                    if (BigInteger.TryParse(numberOptions.Number.ToString(), out BigInteger result)) {
+                    if (BigInteger.TryParse(tokenValue.ToString(), out BigInteger result)) {
                         numberOptions.Value = result;
                     }
                     else {
@@ -376,7 +359,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 case 'j':
                 case 'J': {
                     numberOptions.Imaginary = true;
-                    if (double.TryParse(numberOptions.Number.ToString(), out double imag)) {
+                    if (double.TryParse(tokenValue.ToString(), out double imag)) {
                         numberOptions.Value = new Complex(0.0, imag);
                     }
                     else {
@@ -392,5 +375,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             tokenValue.Append(c);
             Stream.Move();
         }
+
+        #endregion
     }
 }

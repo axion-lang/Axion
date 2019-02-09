@@ -7,7 +7,12 @@ namespace Axion.Core.Processing.Syntax.Tree.Comprehensions {
     }
 
     public sealed class ListComprehension : Expression, IComprehension {
-        public ListComprehension(Expression item, IList<ComprehensionIterator> iterators, Position start, Position end) {
+        public ListComprehension(
+            Expression                   item,
+            IList<ComprehensionIterator> iterators,
+            Position                     start,
+            Position                     end
+        ) {
             Item      = item;
             Iterators = iterators;
             MarkPosition(start, end);
@@ -31,7 +36,13 @@ namespace Axion.Core.Processing.Syntax.Tree.Comprehensions {
     }
 
     public sealed class MapComprehension : Expression, IComprehension {
-        public MapComprehension(Expression key, Expression value, ComprehensionIterator[] iterators, Position start, Position end) {
+        public MapComprehension(
+            Expression              key,
+            Expression              value,
+            ComprehensionIterator[] iterators,
+            Position                start,
+            Position                end
+        ) {
             Key       = key;
             Value     = value;
             Iterators = iterators;

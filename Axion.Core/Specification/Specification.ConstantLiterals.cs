@@ -1,21 +1,27 @@
-using System;
 using System.Collections.Generic;
-using System.Numerics;
 using Axion.Core.Processing.Lexical.Tokens;
 
 namespace Axion.Core.Specification {
     public partial class Spec {
+        /// <summary>
+        ///     Type of tokens, that are treated as
+        ///     compile-time constant values.
+        /// </summary>
         internal static readonly TokenType[] ConstantValueTypes = {
             TokenType.String,
             TokenType.Character,
             TokenType.Number,
             TokenType.KeywordTrue,
             TokenType.KeywordFalse,
-            TokenType.KeywordNull
+            TokenType.KeywordNil
         };
 
         #region Language string and character literals
 
+        /// <summary>
+        ///     Quote used in language to specify
+        ///     start/end of 'character' literal.
+        /// </summary>
         internal const char CharLiteralQuote = '`';
 
         /// <summary>
@@ -45,31 +51,25 @@ namespace Axion.Core.Specification {
 
         #region Language number literals
 
-        internal static readonly string[] NumberTypes = {
-            nameof(Int64),
-            nameof(Double),
-            nameof(BigInteger),
-            nameof(Complex)
-        };
-
         internal static readonly char[] NumberPostfixes = {
-            'f', 'F', // float
-            'l', 'L', // long
-            'i', 'I', // int (followed by bit rate)
-            'u', 'U', // unsigned
-            'j', 'J'  // complex
+            'f',
+            'F', // float
+            'l',
+            'L', // long
+            'i',
+            'I', // int (followed by bit rate)
+            'u',
+            'U', // unsigned
+            'j',
+            'J' // complex
         };
 
         internal const int MinNumberBitRate = 8;
         internal const int MaxNumberBitRate = 64;
 
-        internal static readonly int[] IntegerBitRates = {
-            MinNumberBitRate, 16, 32, MaxNumberBitRate
-        };
+        internal static readonly int[] IntegerBitRates = { MinNumberBitRate, 16, 32, MaxNumberBitRate };
 
-        internal static readonly int[] FloatBitRates = {
-            32, 64, 128
-        };
+        internal static readonly int[] FloatBitRates = { 32, 64, 128 };
 
         #endregion
     }

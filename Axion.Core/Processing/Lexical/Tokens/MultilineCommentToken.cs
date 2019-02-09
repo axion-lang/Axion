@@ -1,16 +1,16 @@
 ﻿using System;
-using Axion.Core.Processing.Lexical.Tokens.Interfaces;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
-    ///     Represents a &lt;Multiline comment&gt; <see cref="Token" />.
+    ///     Represents a 'comment' literal placed on multiple lines.
     /// </summary>
-    public class MultilineCommentToken : Token, IClosingToken {
-        public bool IsUnclosed { get; }
-
-        public MultilineCommentToken(Position startPosition, string value, bool isUnclosed = false)
-            : base(TokenType.Comment, startPosition, value) {
+    public class MultilineCommentToken : Token {
+        public MultilineCommentToken(Position startPosition, string value, bool isUnclosed = false) : base(
+            TokenType.Comment,
+            startPosition,
+            value
+        ) {
             IsUnclosed = isUnclosed;
 
             int linesCount        = value.Split(Spec.EndOfLines, StringSplitOptions.None).Length;
@@ -30,14 +30,13 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Span = new Span(Span.StartPosition, (Span.EndPosition.Line, endCol));
         }
 
+        public bool IsUnclosed { get; }
+
         public override string ToAxionCode() {
             return IsUnclosed
-                       ? Spec.MultiCommentStart +
-                         Value
+                       ? Spec.MultiCommentStart + Value
                        // closed
-                       : Spec.MultiCommentStart +
-                         Value +
-                         Spec.MultiCommentEnd + Whitespaces;
+                       : Spec.MultiCommentStart + Value + Spec.MultiCommentEnd + Whitespaces;
         }
     }
 }

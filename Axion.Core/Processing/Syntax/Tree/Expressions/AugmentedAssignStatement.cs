@@ -1,14 +1,21 @@
 using System;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Processing.Syntax.Tree.Statements;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
-    public class AugmentedAssignStatement : Statement {
-        [JsonProperty]
-        internal OperatorToken Operator { get; }
-
+    public class AugmentedAssignExpression : Expression {
         private Expression left;
+
+        private Expression right;
+
+        public AugmentedAssignExpression(Expression left, SymbolToken op, Expression right) {
+            Left     = left ?? throw new ArgumentNullException(nameof(left));
+            Operator = op ?? throw new ArgumentNullException(nameof(op));
+            Right    = right ?? throw new ArgumentNullException(nameof(right));
+        }
+
+        [JsonProperty]
+        internal SymbolToken Operator { get; }
 
         [JsonProperty]
         internal Expression Left {
@@ -19,8 +26,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
-        private Expression right;
-
         [JsonProperty]
         internal Expression Right {
             get => right;
@@ -30,10 +35,12 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
-        public AugmentedAssignStatement(Expression left, OperatorToken op, Expression right) {
-            Left     = left ?? throw new ArgumentNullException(nameof(left));
-            Operator = op ?? throw new ArgumentNullException(nameof(op));
-            Right    = right ?? throw new ArgumentNullException(nameof(right));
+        public override string ToString() {
+            return ToAxionCode();
+        }
+
+        private string ToAxionCode() {
+            return Left + " " + Operator.Value + " " + Right;
         }
     }
 }

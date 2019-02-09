@@ -5,6 +5,19 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class WhileStatement : Statement {
         private Expression condition;
 
+        private Statement block;
+
+        private Statement noBreakBlock;
+
+        internal WhileStatement(Expression condition, Statement block, Statement noBreakBlock, SpannedRegion start) {
+            Condition    = condition;
+            Block        = block;
+            NoBreakBlock = noBreakBlock;
+
+            MarkStart(start);
+            MarkEnd(NoBreakBlock ?? Block);
+        }
+
         [JsonProperty]
         internal Expression Condition {
             get => condition;
@@ -13,8 +26,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
                 condition    = value;
             }
         }
-
-        private Statement block;
 
         [JsonProperty]
         internal Statement Block {
@@ -25,8 +36,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
-        private Statement noBreakBlock;
-
         [JsonProperty]
         internal Statement NoBreakBlock {
             get => noBreakBlock;
@@ -36,15 +45,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
                 }
                 noBreakBlock = value;
             }
-        }
-
-        internal WhileStatement(Expression condition, Statement block, Statement noBreakBlock, SpannedRegion start) {
-            Condition    = condition;
-            Block        = block;
-            NoBreakBlock = noBreakBlock;
-
-            MarkStart(start);
-            MarkEnd(NoBreakBlock ?? Block);
         }
     }
 }

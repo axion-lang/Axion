@@ -1,35 +1,28 @@
 ﻿using System;
-using Axion.Core.Processing.Lexical.Tokens.Interfaces;
+using System.Collections.Generic;
 using Axion.Core.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
-    ///     Represents a &lt;string literal&gt; <see cref="Token" />.
+    ///     Represents a 'string' literal.
     /// </summary>
-    public class StringToken : Token, IClosingToken, ILiteralToken {
-        [JsonProperty]
-        public string RawValue { get; }
-
-        [JsonProperty]
-        public bool IsUnclosed { get; }
-
-        [JsonProperty]
-        internal StringLiteralOptions Options { get; }
-
+    public class StringToken : Token {
         public StringToken(
             Position             startPosition,
             StringLiteralOptions options,
             string               value,
-            string               rawValue   = null,
-            bool                 isUnclosed = false
+            string               rawValue       = null,
+            List<Interpolation>  interpolations = null,
+            bool                 isUnclosed     = false
         ) : base(TokenType.String, startPosition, value) {
             if (rawValue == null) {
                 rawValue = value;
             }
-            Options    = options;
-            RawValue   = rawValue;
-            IsUnclosed = isUnclosed;
+            Options        = options;
+            Interpolations = interpolations ?? new List<Interpolation>();
+            RawValue       = rawValue;
+            IsUnclosed     = isUnclosed;
             int endLine = Span.StartPosition.Line;
             int endCol  = Span.EndPosition.Column;
 
@@ -68,6 +61,18 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Span = new Span(Span.StartPosition, (endLine, endCol));
         }
 
+        [JsonProperty]
+        public string RawValue { get; }
+
+        [JsonProperty]
+        public bool IsUnclosed { get; }
+
+        [JsonProperty]
+        internal StringLiteralOptions Options { get; }
+
+        [JsonProperty]
+        internal List<Interpolation> Interpolations { get; }
+
         public override string ToAxionCode() {
             var result = "";
             if (Options.IsFormatted) {
@@ -88,18 +93,22 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
     }
 
+    public sealed class Interpolation {
+        internal readonly List<Token> Tokens = new List<Token>();
+        internal readonly int         StartIndex;
+        internal          int         EndIndex;
+
+        public Interpolation(int startIndex) {
+            StartIndex = startIndex;
+        }
+
+        internal int Length => EndIndex - StartIndex;
+    }
+
     public class StringLiteralOptions {
-        internal char Quote { get; set; }
-
-        internal string TrailingQuotes { get; set; }
-
         internal bool IsMultiline;
 
         internal readonly bool IsLineEndsNormalized;
-
-        internal bool IsFormatted { get; private set; }
-
-        internal bool IsRaw { get; private set; }
 
         public StringLiteralOptions(
             char quote                = '"',
@@ -117,9 +126,15 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         public bool HasPrefixes => IsFormatted || IsRaw;
 
-        public int QuotesCount => IsMultiline
-                                      ? 3
-                                      : 1;
+        public int QuotesCount => IsMultiline ? 3 : 1;
+
+        internal char Quote { get; set; }
+
+        internal string TrailingQuotes { get; set; }
+
+        internal bool IsFormatted { get; private set; }
+
+        internal bool IsRaw { get; private set; }
 
         public void AppendPrefix(char c, out bool valid, out bool duplicated) {
             duplicated = false;

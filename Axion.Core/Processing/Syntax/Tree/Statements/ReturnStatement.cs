@@ -5,15 +5,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class ReturnStatement : Statement {
         private Expression expression;
 
-        [JsonProperty]
-        internal Expression Expression {
-            get => expression;
-            set {
-                value.Parent = this;
-                expression   = value;
-            }
-        }
-
         internal ReturnStatement(Expression expression) {
             Expression = expression;
             MarkPosition(expression);
@@ -24,6 +15,15 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
 
             MarkStart(start);
             MarkEnd(expression ?? start);
+        }
+
+        [JsonProperty]
+        internal Expression Expression {
+            get => expression;
+            set {
+                value.Parent = this;
+                expression   = value;
+            }
         }
     }
 }

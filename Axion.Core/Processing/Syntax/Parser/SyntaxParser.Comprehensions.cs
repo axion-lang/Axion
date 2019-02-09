@@ -6,9 +6,9 @@ using Axion.Core.Processing.Syntax.Tree.Expressions;
 namespace Axion.Core.Processing.Syntax.Parser {
     public partial class SyntaxParser {
         /// <summary>
-        /// <c>
-        ///     comprehension_iterator '}'
-        /// </c>
+        ///     <c>
+        ///         comprehension_iterator '}'
+        ///     </c>
         /// </summary>
         private SetComprehension FinishSetComprehension(Expression item, Position start) {
             ComprehensionIterator[] iterators = ParseComprehensionIterators();
@@ -18,9 +18,9 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
-        /// <c>
-        ///     comprehension_iterator '}'
-        /// </c>
+        ///     <c>
+        ///         comprehension_iterator '}'
+        ///     </c>
         /// </summary>
         private MapComprehension FinishMapComprehension(Expression key, Expression value, Position start) {
             ComprehensionIterator[] iterators = ParseComprehensionIterators();
@@ -30,10 +30,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
-        /// <c>
-        ///     comprehension_iterator:
+        ///     <c>
+        ///         comprehension_iterator:
         ///         comprehension_for | comprehension_if
-        /// </c>
+        ///     </c>
         /// </summary>
         private ComprehensionIterator[] ParseComprehensionIterators() {
             var              iterators = new List<ComprehensionIterator>();
@@ -56,15 +56,15 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         /// <summary>
-        /// <c>
-        ///     comprehension_for:
+        ///     <c>
+        ///         comprehension_for:
         ///         'for target_list 'in' or_test [comprehension_iterator]
-        /// </c>
+        ///     </c>
         /// </summary>
         private ComprehensionFor ParseComprehensionFor() {
-            Token start = StartNewStmt(TokenType.KeywordFor);
+            Token start = StartExprOrStmt(TokenType.KeywordFor);
 
-            List<Expression> target = ParseTargetListExpr(out bool trailingComma);
+            List<Expression> target = ParseTargetList(out bool trailingComma);
             Expression       test   = MakeTupleOrExpr(target, trailingComma);
 
             // expr list is something like:
@@ -76,19 +76,19 @@ namespace Axion.Core.Processing.Syntax.Parser {
             // so we can do tupleExpr.EmitSet() or loneExpr.EmitSet()
 
             stream.Eat(TokenType.KeywordIn);
-            Expression list = ParseOrTest();
+            Expression list = ParseOrExpr();
             return new ComprehensionFor(start, test, list);
         }
 
         /// <summary>
-        /// <c>
-        ///     comprehension_if:
+        ///     <c>
+        ///         comprehension_if:
         ///         'if' old_test [comprehension_iterator]
-        /// </c>
+        ///     </c>
         /// </summary>
         private ComprehensionIf ParseComprehensionIf() {
-            Token      start     = StartNewStmt(TokenType.KeywordIf);
-            Expression condition = ParseTestExpr(true);
+            Token      start     = StartExprOrStmt(TokenType.KeywordIf);
+            Expression condition = ParseTestExpr();
             return new ComprehensionIf(start, condition);
         }
     }

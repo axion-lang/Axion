@@ -5,6 +5,10 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class MapExpression : Expression {
         private SliceExpression[] expressions;
 
+        internal MapExpression(SliceExpression[] expressions, Position start, Position end) : base(start, end) {
+            Expressions = expressions;
+        }
+
         [JsonProperty]
         internal SliceExpression[] Expressions {
             get => expressions;
@@ -14,11 +18,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                     expr.Parent = this;
                 }
             }
-        }
-
-        internal MapExpression(SliceExpression[] expressions, Position start, Position end)
-            : base(start, end) {
-            Expressions = expressions;
         }
     }
 }

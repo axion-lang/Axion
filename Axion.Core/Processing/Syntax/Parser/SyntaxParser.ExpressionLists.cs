@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Axion.Core.Specification;
@@ -8,153 +7,93 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntax.Parser {
     public partial class SyntaxParser {
         /// <summary>
-        /// <c>
-        ///     expression_list:
-        ///         expression (',' expression)* [',']
-        /// </c>
+        ///     <c>
+        ///         expr_list:
+        ///         expr (',' expr)* [',']
+        ///     </c>
         /// </summary>
-        private List<Expression> ParseExpressionList(out bool trailingComma, bool old = false) {
+        private List<Expression> ParseExpressionList(out bool trailingComma) {
             var list = new List<Expression>();
             trailingComma = false;
-            while (!stream.PeekIs(Spec.NeverTestTypes)) {
-                list.Add(ParseTestExpr(old));
+            do {
+                list.Add(ParseTestExpr());
                 trailingComma = stream.MaybeEat(Comma);
-                if (!trailingComma) {
-                    break;
-                }
-            }
+            } while (trailingComma && !stream.PeekIs(Spec.NeverTestTypes));
             return list;
         }
 
-        private Expression ParseTestListAsExpr() {
+        /// <summary>
+        ///     <c>
+        ///         test_list:
+        ///         '(' ')'
+        ///         | ['('] expr_list [')']
+        ///     </c>
+        /// </summary>
+        private Expression ParseTestList(bool allowEmpty = false) {
+            bool       parens = stream.MaybeEat(LeftParenthesis);
+            Expression expr   = null;
             if (stream.PeekIs(Spec.NeverTestTypes)) {
-                return ParseTestListAsExprError();
+                if (!allowEmpty) {
+                    ReportError("Invalid expression.", stream.Peek);
+                    expr = Error();
+                }
             }
-            Expression expr = ParseTestExpr();
-            if (stream.MaybeEat(Comma)) {
-                return MakeTupleOrExpr(ParseExpressionList(out bool trailingComma), trailingComma);
+            else {
+                expr = ParseTestExpr();
+                if (stream.MaybeEat(Comma)) {
+                    List<Expression> list = ParseExpressionList(out bool trailingComma);
+                    list.Insert(0, expr);
+                    expr = MakeTupleOrExpr(list, trailingComma);
+                }
+            }
+            if (parens) {
+                stream.Eat(RightParenthesis);
             }
             return expr;
         }
 
-        private Expression ParseTestListStarExpr() {
-            if (stream.MaybeEat(OpMultiply)) {
-                var expr = new StarredExpression(tokenStart, ParseTestExpr());
-                if (stream.MaybeEat(Comma)) {
-                    return ParseTestListStarExpr(expr);
-                }
-                return expr;
-            }
-            if (!stream.PeekIs(Spec.NeverTestTypes)) {
-                Expression expr = ParseTestExpr();
-                if (stream.MaybeEat(Comma)) {
-                    return ParseTestListStarExpr(expr);
-                }
-                return expr;
-            }
-            return ParseTestListAsExprError();
-        }
+        /// <summary>
+        ///     <c>
+        ///         target:
+        ///         ID
+        ///         | '(' target_list ')'
+        ///         | '[' target_list ']'
+        ///         | primary [trailer]
+        ///         target_list:
+        ///         target ("," target)* [","]
+        ///     </c>
+        /// </summary>
+        private List<Expression> ParseTargetList(out bool trailingComma) {
+            var list = new List<Expression>();
 
-        private Expression ParseTestListStarExpr(Expression expr) {
-            var list = new List<Expression> { expr };
-
-            var trailingComma = true;
             do {
-                if (stream.MaybeEat(OpMultiply)) {
-                    list.Add(new StarredExpression(tokenStart, ParseTestExpr()));
-                }
-                else if (stream.PeekIs(Spec.NeverTestTypes)) {
-                    break;
+                if (stream.MaybeEat(LeftParenthesis, LeftBracket)) {
+                    var brace = (SymbolToken) stream.Token;
+
+                    // parenthesis_form | generator_expr
+                    list.Add(MakeTupleOrExpr(ParseTargetList(out trailingComma), trailingComma));
+                    stream.Eat(brace.GetMatchingBrace());
                 }
                 else {
-                    list.Add(ParseTestExpr());
+                    list.Add(ParseTrailingExpr(ParsePrimaryExpr(), false));
                 }
+
                 trailingComma = stream.MaybeEat(Comma);
-            } while (trailingComma);
-            return MakeTupleOrExpr(list, trailingComma);
-        }
+            } while (trailingComma && !stream.PeekIs(Spec.NeverTestTypes));
 
-        private Expression ParseTestListAsExprError() {
-            if (stream.MaybeEat(Indent)) {
-                // the error is on the next token which has
-                // a useful location, unlike the indent - note we don't have an
-                // indent if we're at an EOS.
-                Blame(BlameType.UnexpectedIndentation, stream.NextToken());
-            }
-            else {
-                BlameInvalidSyntax(Indent, stream.Peek);
-            }
-
-            return Error();
-        }
-
-        /// <summary>
-        /// <c>
-        ///     expr_list:
-        ///         (expr|star_expr) (',' (expr|star_expr))* [',']
-        /// </c>
-        /// </summary>
-        private List<Expression> ParseExprList() {
-            var expressions = new List<Expression>();
-            do {
-                expressions.Add(ParseExpr());
-            } while (
-                stream.MaybeEat(Comma) &&
-                !stream.PeekIs(Spec.NeverTestTypes)
-            );
-            return expressions;
-        }
-
-        private List<Expression> ParseTestList() {
-            return ParseExpressionList(out bool _);
-        }
-
-        /// <summary>
-        /// <c>
-        ///     target_list:
-        ///         target ("," target)* [","] 
-        /// </c>
-        /// </summary>
-        private List<Expression> ParseTargetListExpr(out bool trailingComma) {
-            var list = new List<Expression>();
-            do {
-                list.Add(ParseTargetExpr());
-                trailingComma = stream.MaybeEat(Comma);
-            } while (
-                trailingComma
-             && !stream.PeekIs(Spec.NeverTestTypes)
-            );
             return list;
         }
 
         /// <summary>
-        /// <c>
-        ///     target:
-        ///         ID                  |
-        ///         "(" target_list ")" |
-        ///         "[" target_list "]" |
-        ///         attribute_ref       |
-        ///         subscription        |
-        ///         slicing
-        /// </c>
+        ///     If <paramref name="trailingComma" />, creates a tuple,
+        ///     otherwise, returns first expr from list.
         /// </summary>
-        private Expression ParseTargetExpr() {
-            Token startToken = stream.Peek;
-            if (stream.MaybeEat(LeftParenthesis, LeftBracket)) {
-                // parenthesis_form | generator_expression
-                Expression result = MakeTupleOrExpr(ParseTargetListExpr(out bool trailingComma), trailingComma);
-                stream.Eat(((SymbolToken) startToken).GetMatchingBrace());
-                return result;
-            }
-            return ParseTrailingExpr(ParsePrimaryExpr(), false);
-        }
-
-        /// <summary>
-        ///     If <param name="trailingComma" />, creates a tuple,
-        ///     otherwise, returns first expression from list.
-        /// </summary>
-        private static Expression MakeTupleOrExpr(List<Expression> expressions, bool trailingComma, bool expandable = false) {
-            if (expressions.Count == 1 && !trailingComma) {
+        private static Expression MakeTupleOrExpr(
+            List<Expression> expressions,
+            bool             trailingComma,
+            bool             expandable = false
+        ) {
+            if (!trailingComma && expressions.Count == 1) {
                 return expressions[0];
             }
             return new TupleExpression(expandable && !trailingComma, expressions.ToArray());

@@ -1,42 +1,28 @@
-﻿using System.Text;
-using Axion.Core.Processing.Lexical.Tokens.Interfaces;
-
-namespace Axion.Core.Processing.Lexical.Tokens {
+﻿namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
-    ///     Represents a &lt;number&gt; <see cref="Token" />.
+    ///     Represents a 'number' literal.
     /// </summary>
-    public class NumberToken : Token, ILiteralToken {
+    public class NumberToken : Token {
+        public NumberToken(Position startPosition, object value, NumberOptions options = null) : base(
+            TokenType.Number,
+            startPosition,
+            value.ToString()
+        ) {
+            Options = options ?? new NumberOptions();
+        }
+
         public NumberOptions Options { get; }
-
-        public NumberToken(Position startPosition, object value, NumberOptions options)
-            : base(TokenType.Number, startPosition, value.ToString()) {
-            Options = options;
-        }
-
-        public override string ToAxionCode() {
-            return Options.Number.ToString();
-        }
 
         public override string ToString() {
             return ToAxionCode();
         }
     }
 
+    /// <summary>
+    ///     Contains information about number properties
+    ///     (base, reserved bits count, is it floating, etc.)
+    /// </summary>
     public class NumberOptions {
-        internal object Value { get; set; }
-
-        public StringBuilder Number { get; set; } = new StringBuilder();
-
-        public int  Bits      { get; set; }
-        public int  Radix     { get; set; }
-        public bool Floating  { get; set; }
-        public bool Imaginary { get; set; }
-        public bool Unsigned  { get; set; }
-        public bool Unlimited { get; set; }
-
-        public bool HasExponent { get; set; }
-        public int  Exponent    { get; set; }
-
         public NumberOptions(
             int  radix       = 10,
             int  bits        = 32,
@@ -56,5 +42,16 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             HasExponent = hasExponent;
             Exponent    = exponent;
         }
+
+        public int  Bits      { get; set; }
+        public int  Radix     { get; set; }
+        public bool Floating  { get; set; }
+        public bool Imaginary { get; set; }
+        public bool Unsigned  { get; set; }
+        public bool Unlimited { get; set; }
+
+        public   bool   HasExponent { get; set; }
+        public   int    Exponent    { get; set; }
+        internal object Value       { get; set; }
     }
 }

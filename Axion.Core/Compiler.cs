@@ -19,8 +19,9 @@ namespace Axion.Core {
         ///     Main settings of JSON debug information formatting.
         /// </summary>
         public static readonly JsonSerializerSettings JsonSerializer = new JsonSerializerSettings {
-            Formatting       = Formatting.Indented,
-            TypeNameHandling = TypeNameHandling.All
+            Formatting           = Formatting.Indented,
+            TypeNameHandling     = TypeNameHandling.Auto,
+            DefaultValueHandling = DefaultValueHandling.Ignore
         };
 
         /// <summary>
@@ -43,11 +44,6 @@ namespace Axion.Core {
         /// </summary>
         internal static readonly string Version = assembly.GetName().Version.ToString();
 
-        /// <summary>
-        ///     Compiler files to process.
-        /// </summary>
-        internal static FileInfo[] InputFiles { get; private set; }
-
         private static readonly Parser cliParser = new Parser(
             settings => {
                 settings.EnableDashDash = true;
@@ -56,18 +52,12 @@ namespace Axion.Core {
             }
         );
 
-        private const string helpHint =
-            "Type '-h', or '--help' to get documentation about launch arguments.";
+        private const string helpHint = "Type '-h', or '--help' to get documentation about launch arguments.";
 
-        private static void PrintIntro() {
-            Console.InputEncoding   = Console.OutputEncoding = Encoding.UTF8;
-            Console.ForegroundColor = ConsoleColor.White;
-            const string header = "Axion programming language compiler toolset";
-            Console.Title = header;                                                                               // set title
-            ConsoleUI.WriteLine((header + " v. ", ConsoleColor.White), (Version, ConsoleColor.DarkYellow));       // print version
-            ConsoleUI.WriteLine(("Working in ", ConsoleColor.White),   (WorkDirectory, ConsoleColor.DarkYellow)); // print directory
-            ConsoleUI.WriteLine(helpHint + "\n");
-        }
+        /// <summary>
+        ///     Compiler files to process.
+        /// </summary>
+        internal static FileInfo[] InputFiles { get; private set; }
 
         public static void Init(string[] arguments) {
             if (!Directory.Exists(OutputDirectory)) {
@@ -80,37 +70,37 @@ namespace Axion.Core {
             // main processing loop
             while (true) {
                 if (arguments.Length > 0) {
-                    cliParser
-                        .ParseArguments<CommandLineArguments>(arguments)
-                        .MapResult(
-                            options => {
-                                if (options.Exit) {
-                                    Environment.Exit(0);
-                                }
-                                if (options.Version) {
-                                    ConsoleUI.WriteLine(Version);
-                                    return 0;
-                                }
-                                if (options.Help) {
-                                    ConsoleUI.WriteLine(CommandLineArguments.HelpText);
-                                    return 0;
-                                }
-                                if (options.Interactive) {
-                                    EnterInteractiveMode();
-                                    return 0;
-                                }
-                                ProcessSources(options);
-                                return 0;
-                            },
-                            errors => {
-                                foreach (Error error in errors) {
-                                    ConsoleUI.LogError(error.ToString());
-                                }
-                                return 0;
-                            }
-                        );
+                    cliParser.ParseArguments<CommandLineArguments>(arguments)
+                             .MapResult(
+                                 options => {
+                                     if (options.Exit) {
+                                         Environment.Exit(0);
+                                     }
+                                     if (options.Version) {
+                                         ConsoleUI.WriteLine(Version);
+                                         return 0;
+                                     }
+                                     if (options.Help) {
+                                         ConsoleUI.WriteLine(CommandLineArguments.HelpText);
+                                         return 0;
+                                     }
+                                     if (options.Interactive) {
+                                         EnterInteractiveMode();
+                                         return 0;
+                                     }
+                                     ProcessSources(options);
+                                     return 0;
+                                 },
+                                 errors => {
+                                     foreach (Error error in errors) {
+                                         ConsoleUI.LogError(error.ToString());
+                                     }
+                                     return 0;
+                                 }
+                             );
                 }
                 // wait for next command
+                // TODO: add console commands history (up-down)
                 string command = ConsoleUI.Read(">>> ");
                 while (command.Length == 0) {
                     ConsoleUI.ClearLine();
@@ -123,12 +113,28 @@ namespace Axion.Core {
             // ReSharper disable once FunctionNeverReturns
         }
 
+        private static void PrintIntro() {
+            Console.InputEncoding   = Console.OutputEncoding = Encoding.UTF8;
+            Console.ForegroundColor = ConsoleColor.White;
+            const string header = "Axion programming language compiler toolset";
+            Console.Title = header; // set title
+            ConsoleUI.WriteLine(
+                (header + " v. ", ConsoleColor.White),
+                (Version, ConsoleColor.DarkYellow)
+            ); // print version
+            ConsoleUI.WriteLine(
+                ("Working in ", ConsoleColor.White),
+                (WorkDirectory, ConsoleColor.DarkYellow)
+            ); // print directory
+            ConsoleUI.WriteLine(helpHint + "\n");
+        }
+
         private static void EnterInteractiveMode() {
             ConsoleUI.LogInfo(
-                "Interactive mode.\n" +
-                "Now your input will be processed by Axion interpreter.\n" +
-                "Type 'exit' or 'quit' to quit interactive mode;\n" +
-                "Type 'cls' to clear screen."
+                "Interactive mode.\n"
+              + "Now your input will be processed by Axion interpreter.\n"
+              + "Type 'exit' or 'quit' to quit interactive mode;\n"
+              + "Type 'cls' to clear screen."
             );
             while (true) {
                 // code editor header
@@ -140,8 +146,7 @@ namespace Axion.Core {
                     ConsoleUI.ClearLine();
                     continue;
                 }
-                if (alignedInput == "EXIT"
-                 || alignedInput == "QUIT") {
+                if (alignedInput == "EXIT" || alignedInput == "QUIT") {
                     // exit from interpreter to main loop
                     ConsoleUI.WriteLine();
                     ConsoleUI.LogInfo("Interactive interpreter closed.");
@@ -191,10 +196,7 @@ namespace Axion.Core {
                 source = new SourceUnit(Utilities.TrimMatchingChars(options.Code, '"'));
             }
             else {
-                ConsoleUI.LogError(
-                    "Neither code nor path to source file not specified.\n" +
-                    helpHint
-                );
+                ConsoleUI.LogError("Neither code nor path to source file not specified.\n" + helpHint);
                 return;
             }
             if (!Enum.TryParse(options.Mode, true, out SourceProcessingMode processingMode)) {
@@ -203,6 +205,9 @@ namespace Axion.Core {
             var processingOptions = SourceProcessingOptions.CheckIndentationConsistency;
             if (options.Debug) {
                 processingOptions |= SourceProcessingOptions.SyntaxAnalysisDebugOutput;
+            }
+            if (options.AstJson) {
+                processingOptions |= SourceProcessingOptions.ShowAstJson;
             }
             // process source
             source.Process(processingMode, processingOptions);

@@ -4,9 +4,16 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class UnaryExpression : Expression {
-        public Token Operator { get; }
-
         private Expression expression;
+
+        public UnaryExpression(Token op, Expression expression) {
+            Operator   = op ?? throw new ArgumentNullException(nameof(op));
+            Expression = expression;
+
+            MarkPosition(op, expression);
+        }
+
+        public Token Operator { get; }
 
         [JsonProperty]
         internal Expression Expression {
@@ -15,13 +22,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 value.Parent = this;
                 expression   = value;
             }
-        }
-
-        public UnaryExpression(Token op, Expression expression) {
-            Operator   = op ?? throw new ArgumentNullException(nameof(op));
-            Expression = expression;
-
-            MarkPosition(op, expression);
         }
     }
 }

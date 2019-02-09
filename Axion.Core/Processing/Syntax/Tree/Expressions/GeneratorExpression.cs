@@ -5,6 +5,13 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class GeneratorExpression : Expression {
         private Expression iterable;
 
+        private ComprehensionIterator[] comprehensions;
+
+        public GeneratorExpression(Expression iterable, ComprehensionIterator[] comprehensions) {
+            Iterable       = iterable;
+            Comprehensions = comprehensions;
+        }
+
         [JsonProperty]
         internal Expression Iterable {
             get => iterable;
@@ -13,8 +20,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 iterable     = value;
             }
         }
-
-        private ComprehensionIterator[] comprehensions;
 
         [JsonProperty]
         internal ComprehensionIterator[] Comprehensions {
@@ -25,11 +30,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                     compr.Parent = this;
                 }
             }
-        }
-
-        public GeneratorExpression(Expression iterable, ComprehensionIterator[] comprehensions) {
-            Iterable       = iterable;
-            Comprehensions = comprehensions;
         }
     }
 }

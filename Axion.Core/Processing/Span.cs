@@ -1,4 +1,8 @@
 namespace Axion.Core.Processing {
+    /// <summary>
+    ///     Represents a (start, end) span
+    ///     of some piece of source.
+    /// </summary>
     public struct Span {
         public readonly Position StartPosition;
         public readonly Position EndPosition;
@@ -43,8 +47,19 @@ namespace Axion.Core.Processing {
         }
     }
 
+    /// <summary>
+    ///     Represents (line, column) position
+    ///     in source code.
+    /// </summary>
     public struct Position {
+        /// <summary>
+        ///     0-based.
+        /// </summary>
         public readonly int Line;
+        
+        /// <summary>
+        ///     0-based.
+        /// </summary>
         public readonly int Column;
 
         internal Position(int line, int column) {

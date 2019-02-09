@@ -8,14 +8,10 @@ using NUnit.Framework;
 namespace Axion.Testing.NUnit {
     [TestFixture]
     public class Tests {
-        #region Define file paths
-
         private static readonly DirectoryInfo axionTestingDir =
-            new DirectoryInfo(Environment.CurrentDirectory)
-                .Parent.Parent.Parent;
+            new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent;
 
-        private readonly string __samplesPath =
-            axionTestingDir.Parent.FullName + "\\Other\\Code Examples\\";
+        private readonly string __samplesPath = axionTestingDir.Parent.FullName + "\\Other\\Code Examples\\";
 
         protected string samplesPath {
             get {
@@ -26,8 +22,7 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        protected readonly string __outPath =
-            axionTestingDir.FullName + "\\Files\\out\\";
+        protected readonly string __outPath = axionTestingDir.FullName + "\\Files\\out\\";
 
         protected string outPath {
             get {
@@ -38,8 +33,7 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        private readonly string __inPath =
-            axionTestingDir.FullName + "\\Files\\in\\";
+        private readonly string __inPath = axionTestingDir.FullName + "\\Files\\in\\";
 
         protected string inPath {
             get {
@@ -53,8 +47,6 @@ namespace Axion.Testing.NUnit {
         protected const string testExtension = ".unit";
 
         protected readonly List<FileInfo> sourceFiles = new List<FileInfo>();
-
-        #endregion
 
         /// <summary>
         ///     A quick way to clear unit tests debug output.
@@ -94,6 +86,10 @@ namespace Axion.Testing.NUnit {
                 new FileInfo(inPath + fileName + Spec.SourceFileExtension),
                 outPath + fileName + testExtension
             );
+        }
+
+        internal SourceUnit MakeSourceFromCode(string fileName, string code) {
+            return new SourceUnit(code, outPath + fileName + testExtension);
         }
     }
 }

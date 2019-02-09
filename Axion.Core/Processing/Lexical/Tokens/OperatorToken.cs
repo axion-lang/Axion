@@ -5,18 +5,24 @@ using Newtonsoft.Json.Converters;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
-    ///     Represents a &lt;operator&gt; <see cref="Token" />.
+    ///     Represents an 'operator' literal.
     /// </summary>
     public class OperatorToken : Token {
         internal readonly OperatorProperties Properties;
 
-        public OperatorToken(Position startPosition, OperatorProperties properties)
-            : base(properties.Type, startPosition) {
+        public OperatorToken(Position startPosition, OperatorProperties properties) : base(
+            properties.Type,
+            startPosition
+        ) {
             Properties = properties;
         }
 
-        public OperatorToken(Position startPosition, string value, string whitespaces = "")
-            : base(TokenType.Invalid, startPosition, value, whitespaces) {
+        public OperatorToken(Position startPosition, string value, string whitespaces = "") : base(
+            TokenType.Invalid,
+            startPosition,
+            value,
+            whitespaces
+        ) {
             Spec.Operators.TryGetValue(value, out Properties);
             Type = Properties.Type;
         }
@@ -28,11 +34,20 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
     [JsonObject]
     public struct OperatorProperties {
-        [JsonProperty] internal readonly InputSide     InputSide;
-        [JsonProperty] internal readonly Associativity Associativity;
-        [JsonProperty] internal readonly bool          Overloadable;
-        [JsonProperty] internal readonly int           Precedence;
-        [JsonProperty] internal readonly TokenType     Type;
+        [JsonProperty]
+        internal readonly InputSide InputSide;
+
+        [JsonProperty]
+        internal readonly Associativity Associativity;
+
+        [JsonProperty]
+        internal readonly bool Overloadable;
+
+        [JsonProperty]
+        internal readonly int Precedence;
+
+        [JsonProperty]
+        internal readonly TokenType Type;
 
         internal OperatorProperties(
             TokenType     type,
@@ -77,8 +92,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
     [JsonConverter(typeof(StringEnumConverter))]
     internal enum InputSide {
-        None,
-        Left,
         Right,
         Both,
         SomeOne
@@ -87,7 +100,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     [JsonConverter(typeof(StringEnumConverter))]
     internal enum Associativity {
         RightToLeft,
-        LeftToRight,
-        None
+        LeftToRight
     }
 }

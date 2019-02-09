@@ -5,6 +5,13 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class StarredExpression : Expression {
         private Expression value;
 
+        public StarredExpression(Position start, Expression value) {
+            Value = value ?? throw new ArgumentNullException(nameof(value));
+
+            MarkStart(start);
+            MarkEnd(value);
+        }
+
         [JsonProperty]
         internal Expression Value {
             get => value;
@@ -12,13 +19,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 value.Parent = this;
                 this.value   = value;
             }
-        }
-
-        public StarredExpression(Position start, Expression value) {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-
-            MarkStart(start);
-            MarkEnd(value);
         }
     }
 }

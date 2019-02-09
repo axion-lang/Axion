@@ -1,14 +1,37 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
+using Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames;
 using Axion.Core.Processing.Syntax.Tree.Statements.Interfaces;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
     public class ClassDefinition : Statement, IDecorated {
-        private Expression name;
+        private NameExpression name;
+
+        private TypeName[] bases;
+
+        private Expression[] keywords;
+
+        private Expression metaClass;
+
+        private Statement block;
+
+        public ClassDefinition(
+            NameExpression name,
+            TypeName[]     bases,
+            Expression[]   keywords,
+            Statement      block     = null,
+            Expression     metaClass = null
+        ) {
+            Name      = name;
+            Bases     = bases;
+            Keywords  = keywords;
+            Block     = block;
+            MetaClass = metaClass;
+        }
 
         [JsonProperty]
-        internal Expression Name {
+        internal NameExpression Name {
             get => name;
             set {
                 value.Parent = this;
@@ -16,20 +39,16 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             }
         }
 
-        private Expression[] bases;
-
         [JsonProperty]
-        internal Expression[] Bases {
+        internal TypeName[] Bases {
             get => bases;
             set {
                 bases = value;
-                foreach (Expression expr in bases) {
+                foreach (TypeName expr in bases) {
                     expr.Parent = this;
                 }
             }
         }
-
-        private Expression[] keywords;
 
         [JsonProperty]
         internal Expression[] Keywords {
@@ -42,8 +61,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             }
         }
 
-        private Expression metaClass;
-
         [JsonProperty]
         internal Expression MetaClass {
             get => metaClass;
@@ -54,8 +71,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
                 metaClass = value;
             }
         }
-
-        private Statement block;
 
         [JsonProperty]
         internal Statement Block {
@@ -69,13 +84,5 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
         }
 
         public List<Expression> Modifiers { get; set; }
-
-        public ClassDefinition(NameExpression name, Expression[] bases, Expression[] keywords, Statement block = null, Expression metaClass = null) {
-            Name      = name;
-            Bases     = bases;
-            Keywords  = keywords;
-            Block     = block;
-            MetaClass = metaClass;
-        }
     }
 }

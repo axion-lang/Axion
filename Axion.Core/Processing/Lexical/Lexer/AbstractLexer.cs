@@ -51,19 +51,15 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             options = processingOptions;
         }
 
+        public abstract void Process();
+
         protected abstract void AddPresets(
             List<MultilineCommentToken> unclosedMultilineComments = null,
             List<StringToken>           unclosedStrings           = null,
             string[]                    processingTerminators     = null
         );
 
-        public abstract void Process();
-
-        protected void Blame(
-            BlameType type,
-            Position  startPos,
-            Position  endPos
-        ) {
+        protected void Blame(BlameType type, Position startPos, Position endPos) {
             Debug.Assert(type != BlameType.None);
 
             BlameSeverity severity = Spec.Blames[type];

@@ -5,8 +5,21 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class BlockStatement : Statement {
         private Statement[] statements;
 
+        internal BlockStatement(Statement[] statements) {
+            if (statements.Length == 0) {
+                throw new ArgumentException("Value cannot be an empty collection.", nameof(statements));
+            }
+            Statements = statements;
+            MarkPosition(statements[0], statements[statements.Length - 1]);
+        }
+
+        internal BlockStatement(Statement[] statements, Position start, Position end) {
+            Statements = statements;
+            MarkPosition(start, end);
+        }
+
         [JsonProperty]
-        internal Statement[] Statements {
+        public Statement[] Statements {
             get => statements;
             set {
                 statements = value;
@@ -14,16 +27,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
                     expr.Parent = this;
                 }
             }
-        }
-
-        internal BlockStatement(Statement[] statements) {
-            if (statements.Length == 0) {
-                throw new ArgumentException("Value cannot be an empty collection.", nameof(statements));
-            }
-            Statements = statements;
-
-            MarkStart(statements[0]);
-            MarkEnd(statements[statements.Length - 1].Span.EndPosition);
         }
     }
 }

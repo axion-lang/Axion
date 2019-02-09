@@ -3,7 +3,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
-    ///     Represents a &lt;Type&gt; of <see cref="Token" />.
+    ///     Contains all types of tokens, available in language specification.
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum TokenType {
@@ -31,8 +31,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         OpBitwiseAnd,
         OpExclusiveOr,
         OpBitwiseOr,
-        OpAnd,
-        OpOr,
         OpFloorDivide,
         OpPower,
 
@@ -76,7 +74,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         KeywordNew,
         KeywordNoBreak,
         KeywordNot,
-        KeywordNull,
+        KeywordNil,
         KeywordOr,
         KeywordPass,
 
@@ -93,6 +91,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         KeywordRaise,
         KeywordTrue,
         KeywordTry,
+        KeywordUnless,
         KeywordUse,
         KeywordVar,
         KeywordWhile,
@@ -125,6 +124,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         LeftPipeline,
         RightFatArrow,
         At,
+        Question,
+        DoubleColon,
 
         LeftParenthesis,
         RightParenthesis,
@@ -151,6 +152,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         Newline,
         Indent,
         Outdent,
-        EndOfStream
+        EndOfCode
     }
 }

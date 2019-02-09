@@ -5,6 +5,16 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class IndexExpression : Expression {
         private Expression target;
 
+        private Expression index;
+
+        public IndexExpression(Expression target, Expression index) {
+            Target = target ?? throw new ArgumentNullException(nameof(target));
+            Index  = index ?? throw new ArgumentNullException(nameof(index));
+
+            MarkStart(target);
+            MarkEnd(index);
+        }
+
         [JsonProperty]
         internal Expression Target {
             get => target;
@@ -14,8 +24,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
-        private Expression index;
-
         [JsonProperty]
         internal Expression Index {
             get => index;
@@ -23,14 +31,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 value.Parent = this;
                 index        = value;
             }
-        }
-
-        public IndexExpression(Expression target, Expression index) {
-            Target = target ?? throw new ArgumentNullException(nameof(target));
-            Index  = index ?? throw new ArgumentNullException(nameof(index));
-
-            MarkStart(target);
-            MarkEnd(index);
         }
 
         public override string ToString() {

@@ -4,7 +4,7 @@ using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Lexer {
     public partial class Lexer {
-        private SingleCommentToken ReadSingleComment() {
+        private SingleCommentToken ReadSingleLineComment() {
             Stream.Move();
 
             // skip all until end of line or end of stream
@@ -26,13 +26,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             if (_unclosedMultilineComments.Count == 0) {
                 // we're on '/*'
                 Stream.Move(Spec.MultiCommentStart.Length);
-                _unclosedMultilineComments.Add(
-                    new MultilineCommentToken(
-                        tokenStartPosition,
-                        "",
-                        true
-                    )
-                );
+                _unclosedMultilineComments.Add(new MultilineCommentToken(tokenStartPosition, "", true));
             }
             while (_unclosedMultilineComments.Count > 0) {
                 string nextPiece = c.ToString() + Stream.Peek;
@@ -52,21 +46,13 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     Stream.Move(2);
                     // increase comment level
                     _unclosedMultilineComments.Add(
-                        new MultilineCommentToken(
-                            tokenStartPosition,
-                            tokenValue.ToString(),
-                            true
-                        )
+                        new MultilineCommentToken(tokenStartPosition, tokenValue.ToString(), true)
                     );
                 }
                 // went through end of stream
                 else if (c == Spec.EndOfStream) {
                     Blame(BlameType.UnclosedMultilineComment, tokenStartPosition, Stream.Position);
-                    return new MultilineCommentToken(
-                        tokenStartPosition,
-                        tokenValue.ToString(),
-                        true
-                    );
+                    return new MultilineCommentToken(tokenStartPosition, tokenValue.ToString(), true);
                 }
                 // found any other character
                 else {

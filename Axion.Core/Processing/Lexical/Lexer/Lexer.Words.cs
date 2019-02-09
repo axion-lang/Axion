@@ -30,8 +30,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 if (tokens.Count > 0) {
                     Token last = tokens[tokens.Count - 1];
                     // is not
-                    if (kwType == TokenType.KeywordNot &&
-                        last.Type == TokenType.KeywordIs) {
+                    if (last.Type == TokenType.KeywordIs && kwType == TokenType.KeywordNot) {
                         tokens[tokens.Count - 1] = new KeywordToken(
                             TokenType.KeywordIsNot,
                             last.Span.StartPosition,
@@ -40,8 +39,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         return null;
                     }
                     // not in
-                    if (kwType == TokenType.KeywordIn &&
-                        last.Type == TokenType.KeywordNot) {
+                    if (last.Type == TokenType.KeywordNot && kwType == TokenType.KeywordIn) {
                         tokens[tokens.Count - 1] = new KeywordToken(
                             TokenType.KeywordNotIn,
                             last.Span.StartPosition,
