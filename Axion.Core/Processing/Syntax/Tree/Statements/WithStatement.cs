@@ -33,7 +33,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
         }
     }
 
-    public class WithStatementItem : TreeNode {
+    public class WithStatementItem : SyntaxTreeNode {
         private Expression contextManager;
 
         private Expression name;

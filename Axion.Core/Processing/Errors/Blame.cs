@@ -30,8 +30,7 @@ namespace Axion.Core.Processing.Errors {
             result.Append(char.ToUpper(enumMemberName[0]));
 
             enumMemberName = enumMemberName.Remove(0, 1);
-            for (var i = 0; i < enumMemberName.Length; i++) {
-                char c = enumMemberName[i];
+            foreach (char c in enumMemberName) {
                 if (char.IsUpper(c)) {
                     result.Append(" ").Append(char.ToLower(c));
                 }

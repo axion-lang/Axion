@@ -1,8 +1,9 @@
 using System.Linq;
 using Axion.Core.Processing;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
+using Axion.Core.Processing.Syntax.Tree.Expressions.Binary;
 using Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames;
-using Axion.Core.Processing.Syntax.Tree.Statements;
+using Axion.Core.Processing.Syntax.Tree.Statements.Small;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Parser {
@@ -24,7 +25,10 @@ type8: (Type1<Int>[], (Array[] | AnotherType)[])
 type9: List< Map<T1, T2> > | (Type1<Int, Type2[]>[], (Array[] | AnotherType)[])
 "
             );
-            unit.Process(SourceProcessingMode.Parsing, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+            unit.Process(
+                SourceProcessingMode.Parsing,
+                SourceProcessingOptions.SyntaxAnalysisDebugOutput
+            );
             TypeName[] stmts = unit.SyntaxTree.Root.Statements.Cast<ExpressionStatement>()
                                    .Select(s => ((VarDefinitionExpression) s.Expression).Type)
                                    .ToArray();
@@ -32,15 +36,19 @@ type9: List< Map<T1, T2> > | (Type1<Int, Type2[]>[], (Array[] | AnotherType)[])
             Assert.DoesNotThrow(
                 () => {
                     var type0 = (SimpleTypeName) stmts[0];
-                    Assert.That(!type0.Name.IsSimple);
+                    Assert.That(!(type0.Name is NameExpression));
 
                     var type1   = (UnionTypeName) stmts[1];
                     var union1L = (SimpleTypeName) type1.Left;
-                    Assert.That(union1L.Name.IsSimple);
+                    Assert.That(union1L.Name is NameExpression);
                     var union1R = (TupleTypeName) type1.Right;
                     Assert.That(union1R.Types.Length == 0);
 
                     var type2 = (GenericTypeName) stmts[2];
+                    var genT2 = (SimpleTypeName) type2.Target;
+                    Assert.That(genT2.Name is NameExpression);
+                    var genG2 = (SimpleTypeName) type2.Generics[0];
+                    Assert.That(genG2.Name is NameExpression);
                 }
             );
         }

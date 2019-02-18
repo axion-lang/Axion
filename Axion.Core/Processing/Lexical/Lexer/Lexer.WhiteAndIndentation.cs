@@ -36,7 +36,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         private bool inconsistentIndentation;
 
         #endregion
-        
+
         private EndOfLineToken ReadNewline() {
             // skip all newline characters
             while (c == '\n' || c == '\r') {
@@ -90,7 +90,12 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             // TODO use another approach with indentation (leadingWhitespaces property)
             if (tokens.Count == 0) {
                 lastIndentLength = tokenValue.Length;
-                return new Token(TokenType.Whitespace, tokenStartPosition, "", tokenValue.ToString());
+                return new Token(
+                    TokenType.Whitespace,
+                    tokenStartPosition,
+                    "",
+                    tokenValue.ToString()
+                );
             }
 
             if (tokens[tokens.Count - 1].Type == TokenType.Newline) {
@@ -174,7 +179,8 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             lastIndentLength = newIndentLength;
 
             // warn user about inconsistency
-            if (inconsistentIndentation && options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
+            if (inconsistentIndentation
+             && options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
                 Blame(BlameType.InconsistentIndentation, tokenStartPosition, Stream.Position);
                 // ignore future warnings
                 options &= ~SourceProcessingOptions.CheckIndentationConsistency;

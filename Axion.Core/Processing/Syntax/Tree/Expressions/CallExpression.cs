@@ -1,18 +1,9 @@
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class CallExpression : Expression {
         private Expression target;
-
-        private Arg[] args;
-
-        public CallExpression(Expression target, Arg[] args, Position end) {
-            Target = target;
-            Args   = args ?? new Arg[0];
-
-            MarkStart(target);
-            MarkEnd(end);
-        }
 
         [JsonProperty]
         internal Expression Target {
@@ -23,6 +14,8 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
+        private Arg[] args;
+
         [JsonProperty]
         internal Arg[] Args {
             get => args;
@@ -32,6 +25,16 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                     arg.Parent = this;
                 }
             }
+        }
+
+        internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
+
+        public CallExpression(Expression target, Arg[] args, Position end) {
+            Target = target;
+            Args   = args ?? new Arg[0];
+
+            MarkStart(target);
+            MarkEnd(end);
         }
 
         public override string ToString() {
@@ -50,7 +53,10 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
         Map
     }
 
-    public class Arg : TreeNode {
+    public class Arg : SyntaxTreeNode {
+        internal NameExpression Name  { get; }
+        internal Expression     Value { get; }
+
         internal Arg(Expression value) {
             Value = value;
 
@@ -65,9 +71,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             MarkEnd(value);
         }
 
-        internal NameExpression Name  { get; }
-        internal Expression     Value { get; }
-
         public override string ToString() {
             return ToAxionCode();
         }
@@ -76,10 +79,10 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             if (Name == null) {
                 return ArgumentKind.Simple;
             }
-            if (Name.Name == "*") {
+            if (Name.Name.Value == "*") {
                 return ArgumentKind.List;
             }
-            if (Name.Name == "**") {
+            if (Name.Name.Value == "**") {
                 return ArgumentKind.Map;
             }
             return ArgumentKind.Named;

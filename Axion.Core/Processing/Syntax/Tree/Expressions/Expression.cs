@@ -1,5 +1,5 @@
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
-    public abstract class Expression : TreeNode {
+    public abstract class Expression : SyntaxTreeNode {
         protected Expression() {
         }
 
@@ -10,7 +10,5 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
         internal virtual string CannotDeleteReason => null;
 
         internal virtual string CannotAssignReason => null;
-
-        internal virtual string CannotAugAssignReason => null;
     }
 }

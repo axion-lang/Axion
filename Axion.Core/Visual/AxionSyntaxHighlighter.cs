@@ -50,10 +50,12 @@ namespace Axion.Core.Visual {
             return values;
         }
 
-        private void HighlightTokens(List<Token> tokens, List<ColoredValue> values, bool foundRenderStart) {
-            for (var i = 0; i < tokens.Count; i++) {
-                Token token = tokens[i];
-
+        private void HighlightTokens(
+            List<Token>        tokens,
+            List<ColoredValue> values,
+            bool               foundRenderStart
+        ) {
+            foreach (Token token in tokens) {
                 bool tokenShouldBeSkipped = !foundRenderStart
                                          && (token.Span.EndPosition.Line < renderPosition.Y
                                           || token.Span.EndPosition.Line == renderPosition.Y
@@ -69,7 +71,10 @@ namespace Axion.Core.Visual {
                 if (!foundRenderStart) {
                     // When we found token, closest to last render position
                     // we should re-render this token to prevent invalid highlighting.
-                    renderPosition   = new Point(token.Span.StartPosition.Column, token.Span.StartPosition.Line);
+                    renderPosition = new Point(
+                        token.Span.StartPosition.Column,
+                        token.Span.StartPosition.Line
+                    );
                     foundRenderStart = true;
                 }
 
@@ -77,7 +82,12 @@ namespace Axion.Core.Visual {
                     break;
                 }
                 if (token.Type == TokenType.Whitespace) {
-                    values.Add(new ColoredValue(new string(' ', token.Whitespaces.Length), ConsoleColor.DarkGray));
+                    values.Add(
+                        new ColoredValue(
+                            new string(' ', token.Whitespaces.Length),
+                            ConsoleColor.DarkGray
+                        )
+                    );
                     continue;
                 }
                 if (token.Type == TokenType.Newline) {
@@ -144,7 +154,12 @@ namespace Axion.Core.Visual {
 
             int quotesCount = token.Options.QuotesCount;
             // opening quotes
-            values.Add(new ColoredValue(new string(token.Options.Quote, quotesCount), ConsoleColor.DarkYellow));
+            values.Add(
+                new ColoredValue(
+                    new string(token.Options.Quote, quotesCount),
+                    ConsoleColor.DarkYellow
+                )
+            );
 
             // interpolations
             var interpolationI = 0;
@@ -166,7 +181,12 @@ namespace Axion.Core.Visual {
 
             // closing quotes
             if (!token.IsUnclosed) {
-                values.Add(new ColoredValue(new string(token.Options.Quote, quotesCount), ConsoleColor.DarkYellow));
+                values.Add(
+                    new ColoredValue(
+                        new string(token.Options.Quote, quotesCount),
+                        ConsoleColor.DarkYellow
+                    )
+                );
             }
         }
 

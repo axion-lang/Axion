@@ -1,16 +1,10 @@
 using System;
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class StarredExpression : Expression {
         private Expression value;
-
-        public StarredExpression(Position start, Expression value) {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-
-            MarkStart(start);
-            MarkEnd(value);
-        }
 
         [JsonProperty]
         internal Expression Value {
@@ -19,6 +13,15 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 value.Parent = this;
                 this.value   = value;
             }
+        }
+
+        internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
+
+        public StarredExpression(Position start, Expression value) {
+            Value = value ?? throw new ArgumentNullException(nameof(value));
+
+            MarkStart(start);
+            MarkEnd(value);
         }
     }
 }

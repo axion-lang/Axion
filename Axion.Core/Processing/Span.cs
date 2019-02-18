@@ -56,7 +56,7 @@ namespace Axion.Core.Processing {
         ///     0-based.
         /// </summary>
         public readonly int Line;
-        
+
         /// <summary>
         ///     0-based.
         /// </summary>

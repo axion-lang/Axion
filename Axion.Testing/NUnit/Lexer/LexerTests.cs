@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Axion.Core;
 using Axion.Core.Processing;
 using Axion.Core.Processing.Lexical.Tokens;
@@ -33,14 +34,21 @@ namespace Axion.Testing.NUnit.Lexer {
 
             source1.Process(
                 SourceProcessingMode.Lex,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput | SourceProcessingOptions.CheckIndentationConsistency
+                SourceProcessingOptions.SyntaxAnalysisDebugOutput
+              | SourceProcessingOptions.CheckIndentationConsistency
             );
 
             Assert.AreEqual(0, source1.Blames.Count);
 
-            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex1).TEquals(new IndentToken((2, 0), "\t")));
-            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex2).TEquals(new IndentToken((5, 0), "\t\t")));
-            Assert.IsTrue(source1.Tokens.ElementAt(indentIndex3).TEquals(new IndentToken((6, 0), "\t\t\t")));
+            Assert.IsTrue(
+                source1.Tokens.ElementAt(indentIndex1).TEquals(new IndentToken((2, 0), "\t"))
+            );
+            Assert.IsTrue(
+                source1.Tokens.ElementAt(indentIndex2).TEquals(new IndentToken((5, 0), "\t\t"))
+            );
+            Assert.IsTrue(
+                source1.Tokens.ElementAt(indentIndex3).TEquals(new IndentToken((6, 0), "\t\t\t"))
+            );
             Assert.IsTrue(source1.Tokens.ElementAt(indentIndex4).TEquals(new OutdentToken((7, 0))));
             Assert.IsTrue(source1.Tokens.ElementAt(indentIndex5).TEquals(new OutdentToken((8, 0))));
 
@@ -61,14 +69,24 @@ namespace Axion.Testing.NUnit.Lexer {
 
             source2.Process(
                 SourceProcessingMode.Lex,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput | SourceProcessingOptions.CheckIndentationConsistency
+                SourceProcessingOptions.SyntaxAnalysisDebugOutput
+              | SourceProcessingOptions.CheckIndentationConsistency
             );
 
             Assert.AreEqual(0, source2.Blames.Count);
 
-            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex1).TEquals(new IndentToken((2, 0), new string(' ', 4))));
-            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex2).TEquals(new IndentToken((5, 0), new string(' ', 8))));
-            Assert.IsTrue(source2.Tokens.ElementAt(indentIndex3).TEquals(new IndentToken((6, 0), new string(' ', 12))));
+            Assert.IsTrue(
+                source2.Tokens.ElementAt(indentIndex1)
+                       .TEquals(new IndentToken((2, 0), new string(' ', 4)))
+            );
+            Assert.IsTrue(
+                source2.Tokens.ElementAt(indentIndex2)
+                       .TEquals(new IndentToken((5, 0), new string(' ', 8)))
+            );
+            Assert.IsTrue(
+                source2.Tokens.ElementAt(indentIndex3)
+                       .TEquals(new IndentToken((6, 0), new string(' ', 12)))
+            );
             Assert.IsTrue(source2.Tokens.ElementAt(indentIndex4).TEquals(new OutdentToken((7, 0))));
             Assert.IsTrue(source2.Tokens.ElementAt(indentIndex5).TEquals(new OutdentToken((8, 0))));
 
@@ -99,15 +117,22 @@ namespace Axion.Testing.NUnit.Lexer {
 
             source3.Process(
                 SourceProcessingMode.Lex,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput | SourceProcessingOptions.CheckIndentationConsistency
+                SourceProcessingOptions.SyntaxAnalysisDebugOutput
+              | SourceProcessingOptions.CheckIndentationConsistency
             );
 
             Assert.AreEqual(1, source3.Blames.Count);
 
-            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex1).TEquals(new IndentToken((2, 0), "\t")));
-            Assert.IsTrue(source3.Tokens.ElementAt(indentIndex2).TEquals(new IndentToken((5, 0), new string(' ', 12))));
             Assert.IsTrue(
-                source3.Tokens.ElementAt(indentIndex3).TEquals(new IndentToken((6, 0), new string(' ', 12) + "\t"))
+                source3.Tokens.ElementAt(indentIndex1).TEquals(new IndentToken((2, 0), "\t"))
+            );
+            Assert.IsTrue(
+                source3.Tokens.ElementAt(indentIndex2)
+                       .TEquals(new IndentToken((5, 0), new string(' ', 12)))
+            );
+            Assert.IsTrue(
+                source3.Tokens.ElementAt(indentIndex3)
+                       .TEquals(new IndentToken((6, 0), new string(' ', 12) + "\t"))
             );
             Assert.IsTrue(source3.Tokens.ElementAt(indentIndex4).TEquals(new OutdentToken((7, 0))));
             Assert.IsTrue(source3.Tokens.ElementAt(indentIndex5).TEquals(new OutdentToken((8, 0))));
@@ -126,22 +151,62 @@ namespace Axion.Testing.NUnit.Lexer {
         [Test]
         public void NumbersParsedCorrectly() {
             string[] numbers = {
-                "123456", "654321", "123.456", "654.321", "0x1689ABCDEF", "0b10110001", "0o72517242", "4j", "12e5"
+                "123456",
+                "654321",
+                "123.456",
+                "654.321",
+                "0x1689ABCDEF",
+                "0b10110001",
+                "0o72517242",
+                "4j",
+                "12e5"
             };
             var pos = (0, 9);
             // TODO complete numbers parsing test
             Token[] tokens = {
-                new NumberToken(pos, numbers[0]),
-                new NumberToken(pos, numbers[1]),
-                new NumberToken(pos, numbers[2]),
-                new NumberToken(pos, numbers[3]),
-                new NumberToken(pos, numbers[4]),
-                new NumberToken(pos, numbers[5]),
-                new NumberToken(pos, numbers[6]),
-                new NumberToken(pos, numbers[7], new NumberOptions(10, 32, false, true)),
                 new NumberToken(
                     pos,
-                    numbers[8],
+                    "123456",
+                    new NumberOptions { Number = new StringBuilder("123456") }
+                ),
+                new NumberToken(
+                    pos,
+                    "654321",
+                    new NumberOptions { Number = new StringBuilder("654321") }
+                ),
+                new NumberToken(
+                    pos,
+                    "123.456",
+                    new NumberOptions(10, 32, true) { Number = new StringBuilder("123.456") }
+                ),
+                new NumberToken(
+                    pos,
+                    "654.321",
+                    new NumberOptions(10, 32, true) { Number = new StringBuilder("654.321") }
+                ),
+                new NumberToken(
+                    pos,
+                    "0x1689ABCDEF",
+                    new NumberOptions(16) { Number = new StringBuilder("1689ABCDEF") }
+                ),
+                new NumberToken(
+                    pos,
+                    "0b10110001",
+                    new NumberOptions(2) { Number = new StringBuilder("10110001") }
+                ),
+                new NumberToken(
+                    pos,
+                    "0o72517242",
+                    new NumberOptions(8) { Number = new StringBuilder("72517242") }
+                ),
+                new NumberToken(
+                    pos,
+                    "4j",
+                    new NumberOptions(10, 32, false, true) { Number = new StringBuilder("4") }
+                ),
+                new NumberToken(
+                    pos,
+                    "12e5",
                     new NumberOptions(
                         10,
                         32,
@@ -151,7 +216,7 @@ namespace Axion.Testing.NUnit.Lexer {
                         false,
                         true,
                         5
-                    )
+                    ) { Number = new StringBuilder("12") }
                 )
             };
             foreach (Token token in tokens) {
@@ -166,7 +231,10 @@ namespace Axion.Testing.NUnit.Lexer {
                     outPath + nameof(NumbersParsedCorrectly) + i + testExtension
                 );
                 Assert.DoesNotThrow(
-                    () => source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput)
+                    () => source.Process(
+                        SourceProcessingMode.Lex,
+                        SourceProcessingOptions.SyntaxAnalysisDebugOutput
+                    )
                 );
 
                 var expected = new List<Token> {
@@ -174,13 +242,19 @@ namespace Axion.Testing.NUnit.Lexer {
                     new SymbolToken((0, 7), "=", " "),
                     tokens[i],
                     new OperatorToken((0, tokens[i].Span.EndPosition.Column), "+", " "),
-                    new NumberToken((0, tokens[i].Span.EndPosition.Column + 2), "0b10010010", new NumberOptions(32)),
+                    new NumberToken(
+                        (0, tokens[i].Span.EndPosition.Column + 2),
+                        "0b10010010",
+                        new NumberOptions(32)
+                    ),
                     new EndOfLineToken((0, tokens[i].Span.EndPosition.Column + 12)),
                     new EndOfCodeToken((1, 0))
                 };
 
                 for (var k = 0; k < source.Tokens.Count; k++) {
-                    if (k == 2 && source.Tokens[k] is NumberToken num && expected[k] is NumberToken num2) {
+                    if (k == 2
+                     && source.Tokens[k] is NumberToken num
+                     && expected[k] is NumberToken num2) {
                         Assert.IsTrue(num.Options.TestEquality(num2.Options));
                     }
                     else {
@@ -201,7 +275,10 @@ namespace Axion.Testing.NUnit.Lexer {
                 outPath + nameof(UseBlockValid) + testExtension
             );
 
-            source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+            source.Process(
+                SourceProcessingMode.Lex,
+                SourceProcessingOptions.SyntaxAnalysisDebugOutput
+            );
             Assert.AreEqual(0, source.Blames.Count);
 
             var expected = new List<Token> {
@@ -252,7 +329,9 @@ namespace Axion.Testing.NUnit.Lexer {
 
     internal static class TUtils {
         internal static bool TEquals(this Token a, Token b) {
-            return a.Type == b.Type && string.Equals(a.Value, b.Value) && string.Equals(a.Whitespaces, b.Whitespaces);
+            return a.Type == b.Type
+                && string.Equals(a.Value,       b.Value)
+                && string.Equals(a.Whitespaces, b.Whitespaces);
         }
 
         internal static bool TestEquality(this NumberOptions t, NumberOptions other) {

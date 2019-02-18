@@ -6,11 +6,11 @@ using CommandLine;
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace Axion.Core {
-  /// <summary>
-  ///     Stores information about last
-  ///     user arguments in command line.
-  /// </summary>
-  internal class CommandLineArguments {
+    /// <summary>
+    ///     Stores information about last
+    ///     user arguments in command line.
+    /// </summary>
+    internal class CommandLineArguments {
         internal const string HelpText =
             "┌─────────────────────────────┬───────────────────────────────────────────────────────────────┐\r\n"
           + "│        Argument name        │                                                               │\r\n"

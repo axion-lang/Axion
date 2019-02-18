@@ -1,40 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.CodeDom;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class IfStatement : Statement {
-        public IfStatement(List<IfStatementBranch> branches, Statement elseBlock) {
-            if (branches.Count == 0) {
-                throw new ArgumentException("Value cannot be an empty collection.", nameof(branches));
-            }
-
-            Branches = branches.ToArray();
-            Else     = elseBlock;
-
-            MarkStart(branches[0]);
-            MarkEnd(Else ?? Branches[Branches.Length - 1]);
-        }
-
-        [JsonProperty]
-        public IfStatementBranch[] Branches { get; }
-
-        [JsonProperty]
-        public Statement Else { get; }
-    }
-
-    public class IfStatementBranch : Statement {
         private Expression condition;
-
-        private Statement block;
-
-        internal IfStatementBranch(Expression condition, Statement block, SpannedRegion start) {
-            Condition = condition;
-            Block     = block;
-
-            MarkPosition(start, block);
-        }
 
         [JsonProperty]
         internal Expression Condition {
@@ -45,13 +16,47 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
+        private BlockStatement thenBlock;
+
         [JsonProperty]
-        internal Statement Block {
-            get => block;
+        internal BlockStatement ThenBlock {
+            get => thenBlock;
             set {
                 value.Parent = this;
-                block        = value;
+                thenBlock    = value;
             }
+        }
+
+        private BlockStatement elseBlock;
+
+        [JsonProperty]
+        public BlockStatement ElseBlock {
+            get => elseBlock;
+            set {
+                if (value != null) {
+                    value.Parent = this;
+                }
+                elseBlock = value;
+            }
+        }
+
+        public IfStatement(
+            Expression     condition,
+            BlockStatement thenBlock,
+            BlockStatement elseBlock
+        ) {
+            Condition = condition ?? throw new ArgumentNullException(nameof(condition));
+            ThenBlock = thenBlock ?? throw new ArgumentNullException(nameof(thenBlock));
+            ElseBlock = elseBlock;
+            MarkPosition(ThenBlock, ElseBlock ?? ThenBlock);
+        }
+
+        internal override CodeObject ToCSharp() {
+            return new CodeConditionStatement(
+                (CodeExpression) Condition.ToCSharp(),
+                (CodeStatement[]) ThenBlock.ToCSharpArray(),
+                (CodeStatement[]) ElseBlock.ToCSharpArray()
+            );
         }
     }
 }

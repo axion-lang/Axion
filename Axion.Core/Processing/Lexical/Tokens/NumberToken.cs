@@ -1,13 +1,13 @@
-﻿namespace Axion.Core.Processing.Lexical.Tokens {
+﻿using System.Text;
+using Newtonsoft.Json;
+
+namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents a 'number' literal.
     /// </summary>
     public class NumberToken : Token {
-        public NumberToken(Position startPosition, object value, NumberOptions options = null) : base(
-            TokenType.Number,
-            startPosition,
-            value.ToString()
-        ) {
+        public NumberToken(Position startPosition, object value, NumberOptions options = null) :
+            base(TokenType.Number, startPosition, value.ToString()) {
             Options = options ?? new NumberOptions();
         }
 
@@ -42,6 +42,9 @@
             HasExponent = hasExponent;
             Exponent    = exponent;
         }
+
+        [JsonIgnore]
+        public StringBuilder Number { get; set; } = new StringBuilder();
 
         public int  Bits      { get; set; }
         public int  Radix     { get; set; }

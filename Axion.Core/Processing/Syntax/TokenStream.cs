@@ -21,9 +21,11 @@ namespace Axion.Core.Processing.Syntax {
             Tokens      = tokens;
         }
 
-        internal Token Token => Index > -1 && Index < Tokens.Count ? Tokens[Index] : Tokens[Tokens.Count - 1];
+        internal Token Token =>
+            Index > -1 && Index < Tokens.Count ? Tokens[Index] : Tokens[Tokens.Count - 1];
 
-        internal Token Peek => Index + 1 < Tokens.Count ? Tokens[Index + 1] : Tokens[Tokens.Count - 1];
+        internal Token Peek =>
+            Index + 1 < Tokens.Count ? Tokens[Index + 1] : Tokens[Tokens.Count - 1];
 
         internal int Index { get; private set; } = -1;
 
@@ -117,9 +119,12 @@ namespace Axion.Core.Processing.Syntax {
                 }
                 // if we got newline before wanted type, just skip it
                 // (except we WANT to get newline)
-                else if (Peek.Type == TokenType.Newline && !wantedTypes.Contains(TokenType.Newline)) {
+                else if (Peek.Type == TokenType.Newline
+                      && !wantedTypes.Contains(TokenType.Newline)) {
                     if (inOneLineMode) {
-                        throw new NotSupportedException("Syntax error: got newline in one-line expression.");
+                        throw new NotSupportedException(
+                            "Syntax error: got newline in one-line expression."
+                        );
                     }
                     NextToken();
                 }

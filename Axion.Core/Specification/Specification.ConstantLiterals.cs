@@ -32,20 +32,21 @@ namespace Axion.Core.Specification {
         /// <summary>
         ///     Contains all valid escape sequences in string and character literals.
         /// </summary>
-        internal static readonly Dictionary<char, string> EscapeSequences = new Dictionary<char, string> {
-            { '0', "\u0000" },
-            { 'a', "\u0007" },
-            { 'b', "\u0008" },
-            { 'f', "\u000c" },
-            { 'n', "\u000a" },
-            { 'r', "\u000d" },
-            { 't', "\u0009" },
-            { 'v', "\u000b" },
-            { '\\', "\\" },
-            { '\'', "\'" },
-            { '\"', "\"" },
-            { '`', "\\`" }
-        };
+        internal static readonly Dictionary<char, string> EscapeSequences =
+            new Dictionary<char, string> {
+                { '0', "\u0000" },
+                { 'a', "\u0007" },
+                { 'b', "\u0008" },
+                { 'f', "\u000c" },
+                { 'n', "\u000a" },
+                { 'r', "\u000d" },
+                { 't', "\u0009" },
+                { 'v', "\u000b" },
+                { '\\', "\\" },
+                { '\'', "\'" },
+                { '\"', "\"" },
+                { '`', "\\`" }
+            };
 
         #endregion
 
@@ -67,7 +68,9 @@ namespace Axion.Core.Specification {
         internal const int MinNumberBitRate = 8;
         internal const int MaxNumberBitRate = 64;
 
-        internal static readonly int[] IntegerBitRates = { MinNumberBitRate, 16, 32, MaxNumberBitRate };
+        internal static readonly int[] IntegerBitRates = {
+            MinNumberBitRate, 16, 32, MaxNumberBitRate
+        };
 
         internal static readonly int[] FloatBitRates = { 32, 64, 128 };
 

@@ -178,6 +178,7 @@
         ExpectedBlockDeclaration,
         ConstantValueExpected,
         InvalidTypeNameExpression,
+        DecoratorCanOnlyBeANameWithOptionalArguments,
 
         #endregion
 

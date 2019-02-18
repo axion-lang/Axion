@@ -7,7 +7,12 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     [JsonObject]
     [DebuggerDisplay("{" + nameof(debuggerDisplay) + ",nq}")]
     public class Token : SpannedRegion {
-        public Token(TokenType type, Position startPosition, string value = "", string whitespaces = "") {
+        public Token(
+            TokenType type,
+            Position  startPosition,
+            string    value       = "",
+            string    whitespaces = ""
+        ) {
             Type        = type;
             Value       = value;
             Whitespaces = whitespaces;

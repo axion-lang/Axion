@@ -5,10 +5,10 @@ using Axion.Core.Specification;
 namespace Axion.Core.Processing.Lexical {
     /// <summary>
     ///     A stream of characters, created from strings.
-    ///     Used with [<see cref="Axion.Core.Processing.Lexical.Lexer"/>]
+    ///     Used with [<see cref="Axion.Core.Processing.Lexical.Lexer" />]
     ///     to read symbols, with ability to peek, go backward,
     ///     get rest of current line of source,
-    ///     and other useful functions. 
+    ///     and other useful functions.
     /// </summary>
     public class CharStream {
         /// <summary>

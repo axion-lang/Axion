@@ -25,69 +25,69 @@ namespace Axion.Core.Specification {
         /// <summary>
         ///     Contains all language keywords.
         /// </summary>
-        public static readonly Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType> {
-            // testing
-            { "assert", KeywordAssert },
-            // bool operators
-            { "not", KeywordNot },
-            { "and", KeywordAnd },
-            { "or", KeywordOr },
-            { "in", KeywordIn },
-            { "not in", KeywordNotIn },
-            { "is", KeywordIs },
-            { "is not", KeywordIsNot },
-            { "as", KeywordAs },
-            // branching
-            { "unless", KeywordUnless },
-            { "if", KeywordIf },
-            { "elif", KeywordElseIf },
-            { "else", KeywordElse },
-            { "match", KeywordMatch },
-            { "case", KeywordCase },
-            { "default", KeywordDefault },
-            // loops
-            { "for", KeywordFor },
-            { "do", KeywordDo },
-            { "while", KeywordWhile },
-            { "break", KeywordBreak },
-            { "nobreak", KeywordNoBreak },
-            { "continue", KeywordContinue },
-            // exceptions
-            { "try", KeywordTry },
-            { "raise", KeywordRaise },
-            { "catch", KeywordCatch },
-            { "anyway", KeywordAnyway },
-            
-            { "const", KeywordConst },
-            // asynchronous
-            { "async", KeywordAsync },
-            { "await", KeywordAwait },
-            // modules
-            { "use", KeywordUse },
-            { "namespace", KeywordNamespace },
-            { "mixin", KeywordMixin },
-            { "from", KeywordFrom },
-            // structures
-            { "class", KeywordClass },
-            { "extends", KeywordExtends },
-            { "struct", KeywordStruct },
-            { "enum", KeywordEnum },
-            { "fn", KeywordFn },
-            // variables
-            { "var", KeywordVar },
-            { "new", KeywordNew },
-            { "delete", KeywordDelete },
-            // returns
-            { "yield", KeywordYield },
-            { "return", KeywordReturn },
-            { "pass", KeywordPass },
-            // values
-            { "nil", KeywordNil },
-            { "self", KeywordSelf },
-            { "true", KeywordTrue },
-            { "false", KeywordFalse },
-            { "with", KeywordWith }
-        };
+        public static readonly Dictionary<string, TokenType> Keywords =
+            new Dictionary<string, TokenType> {
+                // testing
+                { "assert", KeywordAssert },
+                // bool operators
+                { "not", KeywordNot },
+                { "and", KeywordAnd },
+                { "or", KeywordOr },
+                { "in", KeywordIn },
+                { "not in", KeywordNotIn },
+                { "is", KeywordIs },
+                { "is not", KeywordIsNot },
+                { "as", KeywordAs },
+                // branching
+                { "unless", KeywordUnless },
+                { "if", KeywordIf },
+                { "elif", KeywordElseIf },
+                { "else", KeywordElse },
+                { "match", KeywordMatch },
+                { "case", KeywordCase },
+                { "default", KeywordDefault },
+                // loops
+                { "for", KeywordFor },
+                { "do", KeywordDo },
+                { "while", KeywordWhile },
+                { "break", KeywordBreak },
+                { "nobreak", KeywordNoBreak },
+                { "continue", KeywordContinue },
+                // exceptions
+                { "try", KeywordTry },
+                { "raise", KeywordRaise },
+                { "catch", KeywordCatch },
+                { "anyway", KeywordAnyway },
+                { "const", KeywordConst },
+                // asynchronous
+                { "async", KeywordAsync },
+                { "await", KeywordAwait },
+                // modules
+                { "use", KeywordUse },
+                { "module", KeywordModule },
+                { "mixin", KeywordMixin },
+                { "from", KeywordFrom },
+                // structures
+                { "class", KeywordClass },
+                { "extends", KeywordExtends },
+                { "struct", KeywordStruct },
+                { "enum", KeywordEnum },
+                { "fn", KeywordFn },
+                // variables
+                { "var", KeywordVar },
+                { "new", KeywordNew },
+                { "delete", KeywordDelete },
+                // returns
+                { "yield", KeywordYield },
+                { "return", KeywordReturn },
+                { "pass", KeywordPass },
+                // values
+                { "nil", KeywordNil },
+                { "self", KeywordSelf },
+                { "true", KeywordTrue },
+                { "false", KeywordFalse },
+                { "with", KeywordWith }
+            };
 
         internal const string SingleCommentStart       = "#";
         internal const string MultiCommentStart        = "#|";

@@ -11,7 +11,8 @@ namespace Axion.Testing.NUnit {
         private static readonly DirectoryInfo axionTestingDir =
             new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent;
 
-        private readonly string __samplesPath = axionTestingDir.Parent.FullName + "\\Other\\Code Examples\\";
+        private readonly string __samplesPath =
+            axionTestingDir.Parent.FullName + "\\Other\\Code Examples\\";
 
         protected string samplesPath {
             get {

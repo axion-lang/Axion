@@ -16,10 +16,14 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
 
         internal bool IsOpenBrace =>
-            Type == TokenType.LeftParenthesis || Type == TokenType.LeftBracket || Type == TokenType.LeftBrace;
+            Type == TokenType.LeftParenthesis
+         || Type == TokenType.LeftBracket
+         || Type == TokenType.LeftBrace;
 
         internal bool IsCloseBrace =>
-            Type == TokenType.RightParenthesis || Type == TokenType.RightBracket || Type == TokenType.RightBrace;
+            Type == TokenType.RightParenthesis
+         || Type == TokenType.RightBracket
+         || Type == TokenType.RightBrace;
 
         [Pure]
         internal TokenType GetMatchingBrace() {
@@ -40,7 +44,9 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                     return TokenType.LeftBrace;
                 // should never be
                 default:
-                    throw new NotSupportedException("Cannot return matching brace for non-brace operator.");
+                    throw new NotSupportedException(
+                        "Cannot return matching brace for non-brace operator."
+                    );
             }
         }
     }

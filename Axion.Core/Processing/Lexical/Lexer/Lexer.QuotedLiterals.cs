@@ -47,7 +47,11 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 Blame(BlameType.CharacterLiteralTooLong, tokenStartPosition, Stream.Position);
                 while (c != Spec.CharLiteralQuote) {
                     if (Stream.AtEndOfLine() || c == Spec.EndOfStream) {
-                        Blame(BlameType.UnclosedCharacterLiteral, tokenStartPosition, Stream.Position);
+                        Blame(
+                            BlameType.UnclosedCharacterLiteral,
+                            tokenStartPosition,
+                            Stream.Position
+                        );
                         break;
                     }
                     tokenValue.Append(c);
@@ -56,11 +60,20 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 }
 
                 // can be or too long, or unclosed.
-                result = new CharacterToken(tokenStartPosition, tokenValue.ToString(), unescapedValue, true);
+                result = new CharacterToken(
+                    tokenStartPosition,
+                    tokenValue.ToString(),
+                    unescapedValue,
+                    true
+                );
             }
             else {
                 // OK, valid literal
-                result = new CharacterToken(tokenStartPosition, tokenValue.ToString(), unescapedValue);
+                result = new CharacterToken(
+                    tokenStartPosition,
+                    tokenValue.ToString(),
+                    unescapedValue
+                );
                 Stream.Move();
             }
             return result;
@@ -170,7 +183,11 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             }
             if (strOptions.IsFormatted) {
                 if (interpolations.Count == 0) {
-                    Blame(BlameType.RedundantStringFormatPrefix, tokenStartPosition, Stream.Position);
+                    Blame(
+                        BlameType.RedundantStringFormatPrefix,
+                        tokenStartPosition,
+                        Stream.Position
+                    );
                 }
             }
             return new StringToken(
@@ -208,13 +225,21 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         strOptions.AppendPrefix(pfc, out validPrefix, out bool duplicatedPrefix);
                         if (validPrefix) {
                             if (duplicatedPrefix) {
-                                Blame(BlameType.DuplicatedStringPrefix, tempPosition, Stream.Position);
+                                Blame(
+                                    BlameType.DuplicatedStringPrefix,
+                                    tempPosition,
+                                    Stream.Position
+                                );
                             }
                         }
                         // got invalid prefix letter or
                         // digit right before quote - error!
                         else if (char.IsLetterOrDigit(pfc)) {
-                            Blame(BlameType.InvalidPrefixInStringLiteral, tempPosition, Stream.Position);
+                            Blame(
+                                BlameType.InvalidPrefixInStringLiteral,
+                                tempPosition,
+                                Stream.Position
+                            );
                             tokens.Add(new Token(TokenType.Identifier, tempPosition, c.ToString()));
                             break;
                         }
@@ -245,7 +270,11 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         // only 2 quotes - an empty string.
                         Token emptyString = new StringToken(tokenStartPosition, strOptions, "");
                         if (stringHasPrefixes) {
-                            Blame(BlameType.RedundantPrefixesForEmptyString, tokenStartPosition, Stream.Position);
+                            Blame(
+                                BlameType.RedundantPrefixesForEmptyString,
+                                tokenStartPosition,
+                                Stream.Position
+                            );
                         }
                         tokens.Add(emptyString);
                         return true;
@@ -279,7 +308,10 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             }
             // append interpolated piece to main string token
             newInterpolation.EndIndex = Stream.CharIdx - stringStartIndex;
-            string value = Stream.Source.Substring(Stream.CharIdx - newInterpolation.Length, newInterpolation.Length);
+            string value = Stream.Source.Substring(
+                Stream.CharIdx - newInterpolation.Length,
+                newInterpolation.Length
+            );
             rawValue.Append(value);
             tokenValue.Append(value);
         }
@@ -317,7 +349,11 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                             Stream.Move();
                         }
                         else if (number.Length < unicodeSymLen) {
-                            Blame(BlameType.TruncatedEscapeSequence, startPosition, Stream.Position);
+                            Blame(
+                                BlameType.TruncatedEscapeSequence,
+                                startPosition,
+                                Stream.Position
+                            );
                             error = true;
                             break;
                         }
@@ -326,7 +362,11 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
                     if (!error && TryParseInt(number, 16, out int val)) {
                         if (val < 0 || val > 0x10ffff) {
-                            Blame(BlameType.IllegalUnicodeCharacter, startPosition, Stream.Position);
+                            Blame(
+                                BlameType.IllegalUnicodeCharacter,
+                                startPosition,
+                                Stream.Position
+                            );
                         }
                         else if (val < 0x010000) {
                             result.value += ((char) val).ToString();
@@ -384,8 +424,8 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
         private static bool TryParseInt(string input, int radix, out int value) {
             value = 0;
-            for (var i = 0; i < input.Length; i++) {
-                if (HexValue(input[i], out int oneChar) && oneChar < radix) {
+            foreach (char с in input) {
+                if (HexValue(с, out int oneChar) && oneChar < radix) {
                     value = value * radix + oneChar;
                 }
                 else {

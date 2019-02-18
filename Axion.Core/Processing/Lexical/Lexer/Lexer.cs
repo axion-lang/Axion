@@ -74,7 +74,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         }
 
         #endregion
-        
+
         /// <summary>
         ///     Divides code into list of tokens.
         /// </summary>
@@ -95,7 +95,8 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 if (token != null) {
                     tokens.Add(token);
                     // check for processing terminator
-                    if (token.Type == TokenType.EndOfCode || _processingTerminators.Contains(token.Value)) {
+                    if (token.Type == TokenType.EndOfCode
+                     || _processingTerminators.Contains(token.Value)) {
                         break;
                     }
                 }
@@ -104,8 +105,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             #region Process mismatches
 
-            for (var i = 0; i < _mismatchingPairs.Count; i++) {
-                Token     mismatch = _mismatchingPairs[i];
+            foreach (Token mismatch in _mismatchingPairs) {
                 BlameType errorType;
                 switch (mismatch.Type) {
                     case TokenType.LeftParenthesis:
@@ -145,9 +145,10 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             List<StringToken>           unclosedStrings           = null,
             string[]                    processingTerminators     = null
         ) {
-            _unclosedStrings           = unclosedStrings ?? new List<StringToken>();
-            _unclosedMultilineComments = unclosedMultilineComments ?? new List<MultilineCommentToken>();
-            _processingTerminators     = processingTerminators ?? new string[0];
+            _unclosedStrings = unclosedStrings ?? new List<StringToken>();
+            _unclosedMultilineComments =
+                unclosedMultilineComments ?? new List<MultilineCommentToken>();
+            _processingTerminators = processingTerminators ?? new string[0];
         }
 
         /// <summary>
@@ -166,7 +167,8 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 Token last = tokens[tokens.Count - 1];
                 Debug.Assert(
                     tokenStartPosition
-                 == (last.Span.EndPosition.Line, last.Span.EndPosition.Column + last.Whitespaces.Length)
+                 == (last.Span.EndPosition.Line,
+                     last.Span.EndPosition.Column + last.Whitespaces.Length)
                 );
             }
 #endif

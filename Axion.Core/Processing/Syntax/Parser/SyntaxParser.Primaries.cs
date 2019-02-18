@@ -1,22 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Processing.Syntax.Tree.Comprehensions;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
+using Axion.Core.Processing.Syntax.Tree.Expressions.Comprehensions;
+using Axion.Core.Processing.Syntax.Tree.Expressions.Multiple;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntax.Parser {
     public partial class SyntaxParser {
         /// <summary>
         ///     <c>
-        ///         primary:
-        ///         atom | trailer
-        ///         atom:
-        ///         ID
-        ///         | LITERAL
-        ///         | parenthesis_expr
-        ///         | list_display
-        ///         | map_or_set_display
+        ///         primary ::=
+        ///             atom | trailer
+        ///         atom ::=
+        ///             ID
+        ///             | LITERAL
+        ///             | parenthesis_expr
+        ///             | list_display
+        ///             | map_or_set_display
         ///     </c>
         /// </summary>
         private Expression ParsePrimaryExpr() {
@@ -51,7 +52,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     <c>
         ///         parenthesis_expr
         ///         | yield_expr
-        ///         | (expr (',' expr)* [','] ) # tuple
+        ///         | {expr (',' expr} [','] )
         ///         | generator_expr
         ///     </c>
         /// </summary>
@@ -93,8 +94,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     <c>
-        ///         generator_expr:
-        ///         '(' expr comp_for ')'
+        ///         generator_expr ::=
+        ///             '(' expr comp_for ')'
         ///     </c>
         ///     "for" has NOT been stream.Eaten before entering this method
         /// </summary>
@@ -117,8 +118,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <summary>
         ///     <c>
         ///         list_display | subscription
-        ///         list_display:
-        ///         '[' expr ( comprehension_iterator | (',' expr)* [','] ) ']'
+        ///         list_display ::=
+        ///             '[' expr ( comprehension_iterator | {',' expr} [','] ) ']'
         ///     </c>
         /// </summary>
         private Expression ParsePrimaryInBrackets() {
@@ -137,16 +138,21 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
                 stream.Eat(TokenType.RightBracket);
             }
-            return new ListExpression((start, tokenEnd), expressions);
+            return new ListExpression((start, tokenEnd), expressions.ToArray());
         }
 
         /// <summary>
         ///     <c>
-        ///         map_or_set_display:
-        ///         '{' [map_or_set_initializer] '}'
-        ///         map_or_set_initializer:
-        ///         ( (test ':' test (comprehension_for | (',' test ':' test)* [',']))
-        ///         | (test (comprehension_for | (',' test)* [','])) )
+        ///         map_or_set_display ::=
+        ///             '{' [map_or_set_initializer] '}'
+        ///         map_or_set_initializer ::=
+        ///         (
+        ///             (test ':' test
+        ///                 (comprehension_for
+        ///                 | {',' test ':' test} [','])
+        ///             )
+        ///             | (test (comprehension_for | {',' test} [',']))
+        ///         )
         ///     </c>
         /// </summary>
         private Expression ParseMapOrSetDisplay() {
@@ -172,7 +178,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     // map generator: { key: value for (key, value) in iterable }
                     if (stream.PeekIs(TokenType.KeywordFor)) {
                         if (!first) {
-                            ReportError("Generator can only be used as single map item", stream.Token);
+                            ReportError(
+                                "Generator can only be used as single map item",
+                                stream.Token
+                            );
                         }
                         return FinishMapComprehension(itemPart1, itemPart2, start);
                     }
@@ -190,7 +199,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     // set generator: { x * 2 for x in { 1, 2, 3 } }
                     if (stream.PeekIs(TokenType.KeywordFor)) {
                         if (!first) {
-                            ReportError("Generator can only be used as single set item", stream.Token);
+                            ReportError(
+                                "Generator can only be used as single set item",
+                                stream.Token
+                            );
                         }
                         return FinishSetComprehension(itemPart1, start);
                     }
@@ -206,7 +218,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (mapMembers == null && setMembers != null) {
                 return new SetExpression(setMembers.ToArray(), start, tokenEnd);
             }
-            return new MapExpression(mapMembers?.ToArray() ?? new SliceExpression[0], start, tokenEnd);
+            return new MapExpression(
+                mapMembers?.ToArray() ?? new SliceExpression[0],
+                start,
+                tokenEnd
+            );
         }
     }
 }

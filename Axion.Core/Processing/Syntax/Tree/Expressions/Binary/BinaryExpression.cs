@@ -2,11 +2,10 @@ using System;
 using Axion.Core.Processing.Lexical.Tokens;
 using Newtonsoft.Json;
 
-namespace Axion.Core.Processing.Syntax.Tree.Expressions {
-    public class BinaryExpression : Expression {
-        private Expression left;
-
-        private Expression right;
+namespace Axion.Core.Processing.Syntax.Tree.Expressions.Binary {
+    public class BinaryExpression : LeftRightExpression {
+        [JsonProperty]
+        internal OperatorToken Operator { get; }
 
         public BinaryExpression(Expression left, OperatorToken op, Expression right) {
             Left     = left ?? throw new ArgumentNullException(nameof(left));
@@ -14,27 +13,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             Right    = right ?? throw new ArgumentNullException(nameof(right));
 
             MarkPosition(left, right);
-        }
-
-        [JsonProperty]
-        internal OperatorToken Operator { get; }
-
-        [JsonProperty]
-        internal Expression Left {
-            get => left;
-            set {
-                value.Parent = this;
-                left         = value;
-            }
-        }
-
-        [JsonProperty]
-        internal Expression Right {
-            get => right;
-            set {
-                value.Parent = this;
-                right        = value;
-            }
         }
 
         public override string ToString() {

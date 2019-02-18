@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Errors {
 
         [JsonProperty]
         public override string Message { get; }
-        
+
         public override string StackTrace { get; }
 
         // TODO: deal with sourceless constructor
@@ -59,7 +59,9 @@ namespace Axion.Core.Processing.Errors {
             // ...
             //
 
-            ConsoleColor color = blame.Severity == BlameSeverity.Error ? ConsoleColor.Red : ConsoleColor.DarkYellow;
+            ConsoleColor color = blame.Severity == BlameSeverity.Error
+                                     ? ConsoleColor.Red
+                                     : ConsoleColor.DarkYellow;
 
             // Write message
             ConsoleUI.WriteLine((Message, color));
@@ -73,7 +75,9 @@ namespace Axion.Core.Processing.Errors {
 
             var lines = new List<string>();
             // limit rest of code by 5 lines
-            for (int i = blame.Span.StartPosition.Line; i < codeLines.Length && lines.Count < 4; i++) {
+            for (int i = blame.Span.StartPosition.Line;
+                 i < codeLines.Length && lines.Count < 4;
+                 i++) {
                 lines.Add(codeLines[i].TrimEnd('\n', Spec.EndOfStream));
             }
             if (lines.Count > codeLines.Length - blame.Span.StartPosition.Line) {
@@ -82,7 +86,8 @@ namespace Axion.Core.Processing.Errors {
 
             // first line
             // <line number>| <code line>
-            int pointerTailLength = ConsoleCodeEditor.LineNumberWidth + blame.Span.StartPosition.Column;
+            int pointerTailLength =
+                ConsoleCodeEditor.LineNumberWidth + blame.Span.StartPosition.Column;
             int errorTokenLength;
             if (blame.Span.EndPosition.Line > blame.Span.StartPosition.Line) {
                 // token multiline
@@ -111,7 +116,9 @@ namespace Axion.Core.Processing.Errors {
             ConsoleUI.WriteLine((pointer, color));
 
             // next lines
-            for (int lineIndex = blame.Span.StartPosition.Line + 1; lineIndex < lines.Count; lineIndex++) {
+            for (int lineIndex = blame.Span.StartPosition.Line + 1;
+                 lineIndex < lines.Count;
+                 lineIndex++) {
                 ConsoleCodeEditor.PrintLineNumber(lineIndex + 1);
                 ConsoleUI.WriteLine(lines[lineIndex]);
             }

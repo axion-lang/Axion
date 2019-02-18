@@ -7,8 +7,10 @@ using Axion.Core.Specification;
 
 namespace Axion.Core {
     internal static class Utilities {
-        private static readonly DateTimeFormatInfo dateTimeFormat      = new CultureInfo("en-US").DateTimeFormat;
-        private const           string             timedFileNameFormat = "yyyy-MMM-dd__HH-mm-ss";
+        private static readonly DateTimeFormatInfo dateTimeFormat =
+            new CultureInfo("en-US").DateTimeFormat;
+
+        private const string timedFileNameFormat = "yyyy-MMM-dd__HH-mm-ss";
 
         public static int GetSetBitCount(long number) {
             var count = 0;

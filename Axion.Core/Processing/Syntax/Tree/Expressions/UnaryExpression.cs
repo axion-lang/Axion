@@ -1,19 +1,13 @@
 using System;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class UnaryExpression : Expression {
-        private Expression expression;
-
-        public UnaryExpression(Token op, Expression expression) {
-            Operator   = op ?? throw new ArgumentNullException(nameof(op));
-            Expression = expression;
-
-            MarkPosition(op, expression);
-        }
-
         public Token Operator { get; }
+
+        private Expression expression;
 
         [JsonProperty]
         internal Expression Expression {
@@ -22,6 +16,15 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 value.Parent = this;
                 expression   = value;
             }
+        }
+
+        internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
+
+        public UnaryExpression(Token op, Expression expression) {
+            Operator   = op ?? throw new ArgumentNullException(nameof(op));
+            Expression = expression;
+
+            MarkPosition(op, expression);
         }
     }
 }

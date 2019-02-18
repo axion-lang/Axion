@@ -6,16 +6,34 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class ForStatement : Statement {
         private Expression list;
 
-        private Statement block;
+        private BlockStatement block;
 
-        private Statement noBreakBlock;
+        [JsonProperty]
+        internal BlockStatement Block {
+            get => block;
+            set {
+                value.Parent = this;
+                block        = value;
+            }
+        }
+
+        private BlockStatement noBreakBlock;
+
+        [JsonProperty]
+        internal BlockStatement NoBreakBlock {
+            get => noBreakBlock;
+            set {
+                value.Parent = this;
+                noBreakBlock = value;
+            }
+        }
 
         public ForStatement(
-            Expression    left,
-            Expression    list,
-            Statement     block,
-            Statement     noBreakBlock,
-            SpannedRegion start
+            Expression     left,
+            Expression     list,
+            BlockStatement block,
+            BlockStatement noBreakBlock,
+            SpannedRegion  start
         ) {
             Left         = left;
             List         = list ?? throw new ArgumentNullException(nameof(list));
@@ -35,24 +53,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             set {
                 value.Parent = this;
                 list         = value;
-            }
-        }
-
-        [JsonProperty]
-        internal Statement Block {
-            get => block;
-            set {
-                value.Parent = this;
-                block        = value;
-            }
-        }
-
-        [JsonProperty]
-        internal Statement NoBreakBlock {
-            get => noBreakBlock;
-            set {
-                value.Parent = this;
-                noBreakBlock = value;
             }
         }
     }

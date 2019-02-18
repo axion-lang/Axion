@@ -1,8 +1,8 @@
 namespace Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames {
     public class SimpleTypeName : TypeName {
-        public readonly NameExpression Name;
+        public readonly Expression Name;
 
-        public SimpleTypeName(NameExpression name) {
+        public SimpleTypeName(Expression name) {
             Name = name;
         }
     }

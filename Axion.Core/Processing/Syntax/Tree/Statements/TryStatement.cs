@@ -3,40 +3,18 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class TryStatement : Statement {
-        private Statement block;
-
-        private TryStatementHandler[] handlers;
-
-        private Statement elseBlock;
-
-        private Statement anywayBlock;
-
-        internal TryStatement(
-            Statement             block,
-            TryStatementHandler[] handlers,
-            Statement             elseBlock,
-            Statement             anywayBlock,
-            SpannedRegion         start
-        ) {
-            Block       = block;
-            Handlers    = handlers ?? new TryStatementHandler[0];
-            ElseBlock   = elseBlock;
-            AnywayBlock = anywayBlock;
-
-            MarkStart(start);
-            MarkEnd(
-                AnywayBlock ?? ElseBlock ?? (Handlers.Length > 0 ? Handlers[Handlers.Length - 1] : (TreeNode) block)
-            );
-        }
+        private BlockStatement block;
 
         [JsonProperty]
-        internal Statement Block {
+        internal BlockStatement Block {
             get => block;
             set {
                 value.Parent = this;
                 block        = value;
             }
         }
+
+        private TryStatementHandler[] handlers;
 
         [JsonProperty]
         internal TryStatementHandler[] Handlers {
@@ -49,8 +27,10 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
+        private BlockStatement elseBlock;
+
         [JsonProperty]
-        internal Statement ElseBlock {
+        internal BlockStatement ElseBlock {
             get => elseBlock;
             set {
                 value.Parent = this;
@@ -58,31 +38,40 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
+        private BlockStatement anywayBlock;
+
         [JsonProperty]
-        internal Statement AnywayBlock {
+        internal BlockStatement AnywayBlock {
             get => anywayBlock;
             set {
                 value.Parent = this;
                 anywayBlock  = value;
             }
         }
-    }
 
-    public class TryStatementHandler : TreeNode {
-        private Expression errorType;
-
-        private Expression name;
-
-        private Statement block;
-
-        public TryStatementHandler(Expression errorType, Expression target, Statement block, Position start) {
-            ErrorType = errorType;
-            Name      = target;
-            Block     = block;
+        internal TryStatement(
+            BlockStatement        block,
+            TryStatementHandler[] handlers,
+            BlockStatement        elseBlock,
+            BlockStatement        anywayBlock,
+            SpannedRegion         start
+        ) {
+            Block       = block;
+            Handlers    = handlers ?? new TryStatementHandler[0];
+            ElseBlock   = elseBlock;
+            AnywayBlock = anywayBlock;
 
             MarkStart(start);
-            MarkEnd(Block);
+            MarkEnd(
+                AnywayBlock
+             ?? ElseBlock
+             ?? (Handlers.Length > 0 ? Handlers[Handlers.Length - 1] : (SyntaxTreeNode) block)
+            );
         }
+    }
+
+    public class TryStatementHandler : SyntaxTreeNode {
+        private Expression errorType;
 
         [JsonProperty]
         internal Expression ErrorType {
@@ -93,6 +82,8 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
+        private Expression name;
+
         [JsonProperty]
         internal Expression Name {
             get => name;
@@ -102,13 +93,29 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
+        private BlockStatement block;
+
         [JsonProperty]
-        internal Statement Block {
+        internal BlockStatement Block {
             get => block;
             set {
                 value.Parent = this;
                 block        = value;
             }
+        }
+
+        public TryStatementHandler(
+            Expression     errorType,
+            Expression     target,
+            BlockStatement block,
+            Position       start
+        ) {
+            ErrorType = errorType;
+            Name      = target;
+            Block     = block;
+
+            MarkStart(start);
+            MarkEnd(Block);
         }
     }
 }

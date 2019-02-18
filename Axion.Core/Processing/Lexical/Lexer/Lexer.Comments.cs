@@ -26,7 +26,9 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             if (_unclosedMultilineComments.Count == 0) {
                 // we're on '/*'
                 Stream.Move(Spec.MultiCommentStart.Length);
-                _unclosedMultilineComments.Add(new MultilineCommentToken(tokenStartPosition, "", true));
+                _unclosedMultilineComments.Add(
+                    new MultilineCommentToken(tokenStartPosition, "", true)
+                );
             }
             while (_unclosedMultilineComments.Count > 0) {
                 string nextPiece = c.ToString() + Stream.Peek;
@@ -52,7 +54,11 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 // went through end of stream
                 else if (c == Spec.EndOfStream) {
                     Blame(BlameType.UnclosedMultilineComment, tokenStartPosition, Stream.Position);
-                    return new MultilineCommentToken(tokenStartPosition, tokenValue.ToString(), true);
+                    return new MultilineCommentToken(
+                        tokenStartPosition,
+                        tokenValue.ToString(),
+                        true
+                    );
                 }
                 // found any other character
                 else {

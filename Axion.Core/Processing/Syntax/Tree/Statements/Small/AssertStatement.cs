@@ -1,13 +1,17 @@
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Newtonsoft.Json;
 
-namespace Axion.Core.Processing.Syntax.Tree.Statements {
+namespace Axion.Core.Processing.Syntax.Tree.Statements.Small {
     public class AssertStatement : Statement {
         private Expression condition;
 
         private Expression falseExpression;
 
-        internal AssertStatement(Expression condition, Expression falseExpression, SpannedRegion start) {
+        internal AssertStatement(
+            Expression    condition,
+            Expression    falseExpression,
+            SpannedRegion start
+        ) {
             Condition       = condition;
             FalseExpression = falseExpression;
 

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
+using Axion.Core.Processing.Syntax.Tree.Expressions.Multiple;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -8,8 +9,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
     public partial class SyntaxParser {
         /// <summary>
         ///     <c>
-        ///         expr_list:
-        ///         expr (',' expr)* [',']
+        ///         expr_list ::=
+        ///             expr {',' expr} [',']
         ///     </c>
         /// </summary>
         private List<Expression> ParseExpressionList(out bool trailingComma) {
@@ -24,9 +25,9 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     <c>
-        ///         test_list:
-        ///         '(' ')'
-        ///         | ['('] expr_list [')']
+        ///         test_list ::=
+        ///             '(' ')' |
+        ///             ['('] expr_list [')']
         ///     </c>
         /// </summary>
         private Expression ParseTestList(bool allowEmpty = false) {
@@ -36,6 +37,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 if (!allowEmpty) {
                     ReportError("Invalid expression.", stream.Peek);
                     expr = Error();
+                    stream.NextToken();
                 }
             }
             else {
@@ -54,13 +56,13 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     <c>
-        ///         target:
-        ///         ID
-        ///         | '(' target_list ')'
-        ///         | '[' target_list ']'
-        ///         | primary [trailer]
-        ///         target_list:
-        ///         target ("," target)* [","]
+        ///         target ::=
+        ///             ID
+        ///             | '(' target_list ')'
+        ///             | '[' target_list ']'
+        ///             | primary [trailer]
+        ///         target_list ::=
+        ///             target {',' target} [',']
         ///     </c>
         /// </summary>
         private List<Expression> ParseTargetList(out bool trailingComma) {

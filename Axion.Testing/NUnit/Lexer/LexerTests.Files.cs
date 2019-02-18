@@ -9,9 +9,15 @@ namespace Axion.Testing.NUnit.Lexer {
         [Test]
         public void DesignPatternsValidation() {
             for (var i = 0; i < sourceFiles.Count; i++) {
-                FileInfo file   = sourceFiles[i];
-                var      source = new SourceUnit(file, outPath + nameof(DesignPatternsValidation) + i + testExtension);
-                source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+                FileInfo file = sourceFiles[i];
+                var source = new SourceUnit(
+                    file,
+                    outPath + nameof(DesignPatternsValidation) + i + testExtension
+                );
+                source.Process(
+                    SourceProcessingMode.Lex,
+                    SourceProcessingOptions.SyntaxAnalysisDebugOutput
+                );
                 Assert.That(source.Blames.Count == 0, file.Name + ": Errors count > 0");
                 Assert.That(source.Tokens.Count > 0,  file.Name + ": Tokens count == 0");
             }
@@ -26,8 +32,12 @@ namespace Axion.Testing.NUnit.Lexer {
 
             // check for error
             for (var i = 1; i < files.Length + 1; i++) {
-                SourceUnit source = MakeSourceFromFile(nameof(NestedMultilineCommentInvalid) + "_" + i);
-                source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+                SourceUnit source =
+                    MakeSourceFromFile(nameof(NestedMultilineCommentInvalid) + "_" + i);
+                source.Process(
+                    SourceProcessingMode.Lex,
+                    SourceProcessingOptions.SyntaxAnalysisDebugOutput
+                );
                 Assert.AreEqual(1, source.Blames.Count);
             }
         }
@@ -41,8 +51,12 @@ namespace Axion.Testing.NUnit.Lexer {
 
             // validate
             for (var i = 1; i < files.Length + 1; i++) {
-                SourceUnit source = MakeSourceFromFile(nameof(NestedMultilineCommentValid) + "_" + i);
-                source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+                SourceUnit source =
+                    MakeSourceFromFile(nameof(NestedMultilineCommentValid) + "_" + i);
+                source.Process(
+                    SourceProcessingMode.Lex,
+                    SourceProcessingOptions.SyntaxAnalysisDebugOutput
+                );
                 Assert.AreEqual(0, source.Blames.Count);
             }
         }
@@ -50,14 +64,20 @@ namespace Axion.Testing.NUnit.Lexer {
         [Test]
         public void StringsValidation() {
             SourceUnit source = MakeSourceFromFile(nameof(StringsValidation));
-            source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+            source.Process(
+                SourceProcessingMode.Lex,
+                SourceProcessingOptions.SyntaxAnalysisDebugOutput
+            );
             Assert.AreEqual(6, source.Blames.Count);
         }
 
         [Test]
         public void VariousStuffValid() {
             SourceUnit source = MakeSourceFromFile(nameof(VariousStuffValid));
-            source.Process(SourceProcessingMode.Lex, SourceProcessingOptions.SyntaxAnalysisDebugOutput);
+            source.Process(
+                SourceProcessingMode.Lex,
+                SourceProcessingOptions.SyntaxAnalysisDebugOutput
+            );
             Assert.AreEqual(0, source.Blames.Count);
         }
     }

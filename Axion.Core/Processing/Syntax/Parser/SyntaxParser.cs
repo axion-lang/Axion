@@ -6,6 +6,8 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Axion.Core.Processing.Syntax.Tree.Statements;
+using Axion.Core.Processing.Syntax.Tree.Statements.Definitions;
+using Axion.Core.Processing.Syntax.Tree.Statements.Small;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntax.Parser {
@@ -21,19 +23,6 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private readonly TokenStream stream;
 
         /// <summary>
-        ///     Outgoing Abstract Syntax Tree.
-        /// </summary>
-        private readonly Ast ast;
-
-        private bool inLoop, inFinally, inFinallyLoop;
-
-        internal SyntaxParser(List<Token> tokens, Ast outAst, List<Exception> outBlames) {
-            stream = new TokenStream(this, tokens);
-            ast    = outAst ?? throw new ArgumentNullException(nameof(outAst));
-            blames = outBlames ?? new List<Exception>();
-        }
-
-        /// <summary>
         ///     Start position of current token in stream.
         /// </summary>
         private Position tokenStart => stream.Token.Span.StartPosition;
@@ -43,31 +32,66 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Position tokenEnd => stream.Token.Span.EndPosition;
 
-        internal void Process(bool returnValue) {
+        /// <summary>
+        ///     Outgoing Abstract Syntax Tree.
+        /// </summary>
+        private readonly Ast ast;
+
+        private bool inLoop, inFinally, inFinallyLoop;
+
+        private readonly Stack<FunctionDefinition> functions = new Stack<FunctionDefinition>();
+
+        internal SyntaxParser(List<Token> tokens, Ast outAst, List<Exception> outBlames) {
+            stream = new TokenStream(this, tokens);
+            ast    = outAst ?? throw new ArgumentNullException(nameof(outAst));
+            blames = outBlames ?? new List<Exception>();
+        }
+
+        internal void Process() {
             if (stream.Tokens.Count == 0) {
                 return;
             }
-            stream.MaybeEatNewline();
 
             var statements = new List<Statement>();
-
             while (!stream.MaybeEat(TokenType.EndOfCode)) {
-                if (stream.MaybeEatNewline()) {
-                    continue;
-                }
-                statements.Add(ParseStmt());
-                stream.MaybeEat(TokenType.Semicolon);
+                Statement statement = ParseStmt();
+                // TODO: automatically add imports to ast.
+                statements.Add(statement);
             }
 
-            // wrap last expr in return
-            // to allow user to write no 'return' keyword
-            if (returnValue && statements.Count > 0) {
-                if (statements[statements.Count - 1] is ExpressionStatement exprStmt) {
-                    statements[statements.Count - 1] = new ReturnStatement(exprStmt.Expression);
-                }
-            }
             ast.Root = new BlockStatement(statements.ToArray());
         }
+
+        #region Current function
+
+        private FunctionDefinition currentFunction {
+            get {
+                if (functions != null && functions.Count > 0) {
+                    return functions.Peek();
+                }
+                return null;
+            }
+        }
+
+        private FunctionDefinition PopFunction() {
+            if (functions != null && functions.Count > 0) {
+                return functions.Pop();
+            }
+            return null;
+        }
+
+        private void PushFunction(FunctionDefinition function) {
+            functions.Push(function);
+        }
+
+        #endregion
+
+        private Token StartExprOrStmt(TokenType type) {
+            stream.Eat(type);
+            return stream.Token;
+        }
+
+        #region Errors reporting
 
         internal void BlameInvalidSyntax(TokenType expectedType, SpannedRegion mark) {
             ReportError(
@@ -79,13 +103,6 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 mark
             );
         }
-
-        private Token StartExprOrStmt(TokenType type) {
-            stream.Eat(type);
-            return stream.Token;
-        }
-
-        // Errors reporting
 
         private ErrorExpression Error() {
             return new ErrorExpression(tokenStart, tokenEnd);
@@ -104,25 +121,26 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         private void ReportError(string message, SpannedRegion mark) {
-            blames.Add(new LanguageException(new Blame(message, BlameSeverity.Error, mark.Span), ast.Source));
-        }
-
-        private void ReportWarning(string message, SpannedRegion mark) {
-            blames.Add(new LanguageException(new Blame(message, BlameSeverity.Warning, mark.Span), ast.Source));
+            blames.Add(
+                new LanguageException(
+                    new Blame(message, BlameSeverity.Error, mark.Span),
+                    ast.Source
+                )
+            );
         }
 
         private void Blame(BlameType type, SpannedRegion region) {
             Blame(type, region.Span.StartPosition, region.Span.EndPosition);
         }
 
-        private void Blame(BlameType type, Span span) {
-            Blame(type, span.StartPosition, span.EndPosition);
-        }
-
         private void Blame(BlameType type, Position start, Position end) {
             Debug.Assert(type != BlameType.None);
 
-            blames.Add(new LanguageException(new Blame(type, Spec.Blames[type], start, end), ast.Source));
+            blames.Add(
+                new LanguageException(new Blame(type, Spec.Blames[type], start, end), ast.Source)
+            );
         }
+
+        #endregion
     }
 }

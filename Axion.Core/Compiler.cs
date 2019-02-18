@@ -52,7 +52,8 @@ namespace Axion.Core {
             }
         );
 
-        private const string helpHint = "Type '-h', or '--help' to get documentation about launch arguments.";
+        private const string helpHint =
+            "Type '-h', or '--help' to get documentation about launch arguments.";
 
         /// <summary>
         ///     Compiler files to process.
@@ -188,7 +189,9 @@ namespace Axion.Core {
                 }
                 InputFiles = new FileInfo[filesCount];
                 for (var i = 0; i < filesCount; i++) {
-                    InputFiles[i] = new FileInfo(Utilities.TrimMatchingChars(options.Files.ElementAt(i), '"'));
+                    InputFiles[i] = new FileInfo(
+                        Utilities.TrimMatchingChars(options.Files.ElementAt(i), '"')
+                    );
                 }
                 source = new SourceUnit(InputFiles[0]);
             }
@@ -196,7 +199,9 @@ namespace Axion.Core {
                 source = new SourceUnit(Utilities.TrimMatchingChars(options.Code, '"'));
             }
             else {
-                ConsoleUI.LogError("Neither code nor path to source file not specified.\n" + helpHint);
+                ConsoleUI.LogError(
+                    "Neither code nor path to source file not specified.\n" + helpHint
+                );
                 return;
             }
             if (!Enum.TryParse(options.Mode, true, out SourceProcessingMode processingMode)) {

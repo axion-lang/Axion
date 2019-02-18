@@ -28,7 +28,7 @@ namespace Axion.Core.Processing {
         public readonly string Code;
 
         /// <summary>
-        ///     Tokens list generated from [<see cref="Code"/>].
+        ///     Tokens list generated from [<see cref="Code" />].
         /// </summary>
         [JsonProperty]
         public readonly List<Token> Tokens = new List<Token>();
@@ -130,7 +130,9 @@ namespace Axion.Core.Processing {
             // [3] Show AST
             if (options.HasFlag(ShowAstJson)) {
                 string json = JsonConvert.SerializeObject(SyntaxTree, Compiler.JsonSerializer);
-                ConsoleUI.WriteLine(Regex.Replace(json, @"\$type.+?(\w+?),.*\""", "$type\": \"$1\""));
+                ConsoleUI.WriteLine(
+                    Regex.Replace(json, @"\$type.+?(\w+?),.*\""", "$type\": \"$1\"")
+                );
             }
             // [4] Code generation
             GenerateCode(mode);
@@ -173,7 +175,7 @@ namespace Axion.Core.Processing {
 
         private void ParseAST() {
             ConsoleUI.LogInfo("--- Abstract Syntax Tree generation");
-            new SyntaxParser(Tokens, SyntaxTree, Blames).Process(false);
+            new SyntaxParser(Tokens, SyntaxTree, Blames).Process();
         }
 
         private void GenerateCode(SourceProcessingMode mode) {
@@ -220,7 +222,10 @@ namespace Axion.Core.Processing {
         ///     information in JSON format.
         /// </summary>
         private void SaveDebugInfoToFile() {
-            File.WriteAllText(DebugFilePath, JsonConvert.SerializeObject(this, Compiler.JsonSerializer));
+            File.WriteAllText(
+                DebugFilePath,
+                JsonConvert.SerializeObject(this, Compiler.JsonSerializer)
+            );
         }
 
         #region File paths

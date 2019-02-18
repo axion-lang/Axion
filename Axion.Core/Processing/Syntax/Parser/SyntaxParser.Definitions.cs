@@ -16,8 +16,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
     public partial class SyntaxParser {
         /// <summary>
         ///     <c>
-        ///         decorated:
-        ///         decorators (class_def | enum_def | func_def)
+        ///         decorated ::=
+        ///             decorators (decorated_stmt)
         ///     </c>
         /// </summary>
         private Statement ParseDecorated() {
@@ -34,80 +34,31 @@ namespace Axion.Core.Processing.Syntax.Parser {
             return stmt;
         }
 
-        #region Class
-
-        /// <summary>
-        ///     <c>
-        ///         class_def:
-        ///         'class' ID ['(' args_list ')'] block
-        ///     </c>
-        /// </summary>
-        private ClassDefinition ParseClassDef() {
-            Token start = StartExprOrStmt(KeywordClass);
-
-            NameExpression name = ParseName();
-            if (name == null) {
-                // no name, assume there's no class.
-                return new ClassDefinition(null, new TypeName[0], new Expression[0], ErrorStmt());
-            }
-
-            Expression                       metaClass = null;
-            var                              bases     = new List<TypeName>();
-            var                              keywords  = new List<Expression>();
-            List<(NameExpression, TypeName)> types     = ParseTypeArgs(true);
-            foreach ((NameExpression name, TypeName type) type in types) {
-                if (type.name == null) {
-                    bases.Add(type.type);
-                }
-                else {
-                    keywords.Add(type.type);
-                    if (type.name.Name == "metaclass") {
-                        metaClass = type.type;
-                    }
-                }
-            }
-
-            var classDef = new ClassDefinition(name, bases.ToArray(), keywords.ToArray(), metaClass: metaClass);
-            ast.PushClass(classDef);
-
-            // Parse class block
-            Statement block = ParseTopLevelBlock();
-
-            ClassDefinition ret2 = ast.PopClass();
-            Debug.Assert(classDef == ret2);
-
-            classDef.Block = block;
-            classDef.MarkPosition(start.Span.StartPosition, tokenEnd);
-            return classDef;
-        }
-
-        #endregion
-
         #region Type name
 
         /// <summary>
         ///     <c>
-        ///         type:
-        ///         (simple_type  | tuple_type) trail_type
-        ///         trail_type:
-        ///         generic_type | union_type | array_type
-        ///         simple_type:
-        ///         name
-        ///         generic_type:
-        ///         name '&lt;' type (',' type)* '&gt;'
-        ///         union_type:
-        ///         type ('|' type)+
-        ///         tuple_type:
-        ///         '(' [type (',' type)*] ')'
-        ///         array_type:
-        ///         type '[' ']'
+        ///         type ::=
+        ///             (simple_type | tuple_type) [trail_type]
+        ///         trail_type ::=
+        ///             generic_type | union_type | array_type
+        ///         simple_type ::=
+        ///             name
+        ///         generic_type ::=
+        ///             name '&lt;' type {',' type} '&gt;'
+        ///         union_type ::=
+        ///             type ('|' type)+
+        ///         tuple_type ::=
+        ///             '(' [type {',' type}] ')'
+        ///         array_type ::=
+        ///             type '[' ']'
         ///     </c>
         /// </summary>
         private TypeName ParseTypeName() {
             TypeName leftTypeName = null;
             // simple
             if (stream.PeekIs(Identifier)) {
-                leftTypeName = new SimpleTypeName(ParseName(true));
+                leftTypeName = new SimpleTypeName(ParseQualifiedName());
             }
             // tuples
             else if (stream.MaybeEat(LeftParenthesis)) {
@@ -163,7 +114,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (stream.MaybeEat(LeftParenthesis)) {
                 if (stream.MaybeEat(RightParenthesis)) {
                     // redundant parens
-                    Blame(BlameType.RedundantEmptyListOfTypeArguments, (start.Span.StartPosition, tokenEnd));
+                    Blame(
+                        BlameType.RedundantEmptyListOfTypeArguments,
+                        start.Span.StartPosition,
+                        tokenEnd
+                    );
                 }
                 else {
                     do {
@@ -191,36 +146,66 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         #endregion
 
+        #region Module
+
+        /// <summary>
+        ///     <c>
+        ///         module_def ::=
+        ///             'module' name block
+        ///     </c>
+        /// </summary>
+        private ModuleDefinition ParseModuleDef() {
+            Token          start  = StartExprOrStmt(KeywordModule);
+            Expression     name   = ParseQualifiedName();
+            BlockStatement block  = ParseTopLevelBlock();
+            var            result = new ModuleDefinition(name, block);
+            result.MarkStart(start);
+            return result;
+        }
+
+        #endregion
+
         #region Enum
 
         /// <summary>
         ///     <c>
-        ///         enum_def:
-        ///         'enum' ID ['(' args_list ')'] block_start enum_item* block_terminator
+        ///         enum_def ::=
+        ///             'enum' name ['(' args_list ')']
+        ///             block_start enum_item* block_terminator
         ///     </c>
         /// </summary>
         private EnumDefinition ParseEnumDef() {
             Token start = StartExprOrStmt(KeywordEnum);
 
             NameExpression name = ParseName();
-            if (name == null || !name.IsSimple) {
-                return new EnumDefinition(start.Span.StartPosition, tokenEnd, name);
+            if (name == null) {
+                return new EnumDefinition(start.Span.StartPosition, tokenEnd, null);
             }
+            // TODO: support for functions in enums.
             TypeName[] bases = ParseTypeArgs(false).Select(it => it.Item2).ToArray();
             (TokenType terminator, _, bool error) = ParseBlockStart();
             var items = new List<EnumItem>();
+            
             if (!stream.MaybeEat(KeywordPass) && !error) {
                 do {
                     items.Add(ParseEnumItem());
-                } while (!stream.MaybeEat(terminator) && !CheckUnexpectedEOC() && stream.MaybeEat(Comma));
+                } while (!stream.MaybeEat(terminator)
+                      && !CheckUnexpectedEOC()
+                      && stream.MaybeEat(Comma));
             }
-            return new EnumDefinition(start.Span.StartPosition, tokenEnd, name, bases, items.ToArray());
+            return new EnumDefinition(
+                start.Span.StartPosition,
+                tokenEnd,
+                name,
+                bases,
+                items.ToArray()
+            );
         }
 
         /// <summary>
         ///     <c>
-        ///         enum_item:
-        ///         ID ['(' [type (',' type)*] ')'] ['=' constant_expr]
+        ///         enum_item ::=
+        ///             name ['(' [type {',' type}] ')'] ['=' constant_expr]
         ///     </c>
         /// </summary>
         private EnumItem ParseEnumItem() {
@@ -239,19 +224,66 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         #endregion
 
+        #region Class
+
+        /// <summary>
+        ///     <c>
+        ///         class_def ::=
+        ///             'class' name ['(' args_list ')'] block
+        ///     </c>
+        /// </summary>
+        private ClassDefinition ParseClassDef() {
+            Token start = StartExprOrStmt(KeywordClass);
+
+            Expression name = ParseName();
+            // TODO: add generic classes
+            if (name == null) {
+                // no name, assume there's no class.
+                return new ClassDefinition(null, new TypeName[0], new Expression[0], ErrorStmt());
+            }
+
+            Expression                       metaClass = null;
+            var                              bases     = new List<TypeName>();
+            var                              keywords  = new List<Expression>();
+            List<(NameExpression, TypeName)> types     = ParseTypeArgs(true);
+            foreach ((NameExpression name, TypeName type) type in types) {
+                if (type.name == null) {
+                    bases.Add(type.type);
+                }
+                else {
+                    keywords.Add(type.type);
+                    if (type.name.Name.Value == "metaclass") {
+                        metaClass = type.type;
+                    }
+                }
+            }
+            BlockStatement block = ParseTopLevelBlock();
+            var classDef = new ClassDefinition(
+                name,
+                bases.ToArray(),
+                keywords.ToArray(),
+                block,
+                metaClass
+            );
+            classDef.MarkPosition(start.Span.StartPosition, tokenEnd);
+            return classDef;
+        }
+
+        #endregion
+
         #region Function
 
         /// <summary>
         ///     <c>
-        ///         func_def:
-        ///         'fn' name parameters ['=>' type_name] block
-        ///         parameters:
-        ///         '(' [parameters_list] ')'
+        ///         func_def ::=
+        ///             'fn' name parameters ['=>' type_name] block
+        ///         parameters ::=
+        ///             '(' [parameters_list] ')'
         ///     </c>
         /// </summary>
         private FunctionDefinition ParseFunctionDef() {
-            Position       start    = StartExprOrStmt(KeywordFn).Span.StartPosition;
-            NameExpression funcName = ParseName(true);
+            Position   start    = StartExprOrStmt(KeywordFn).Span.StartPosition;
+            Expression funcName = ParseQualifiedName();
             // parameters
             stream.Eat(LeftParenthesis);
             Parameter[] parameters = ParseFunctionParameterList(RightParenthesis);
@@ -263,9 +295,9 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
             var ret = new FunctionDefinition(funcName, parameters, returnType);
 
-            ast.PushFunction(ret);
+            PushFunction(ret);
             Statement          block = ParseTopLevelBlock();
-            FunctionDefinition ret2  = ast.PopFunction();
+            FunctionDefinition ret2  = PopFunction();
             Debug.Assert(ret == ret2);
 
             ret.Block = block;
@@ -284,19 +316,17 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     <c>
-        ///         parameter_list:
-        ///         (named_parameter ",")*
-        ///         ( "*" [parameter] ("," named_parameter)* ["," "**" parameter]
-        ///         | "**" parameter
-        ///         | named_parameter[","] )
+        ///         parameter_list ::=
+        ///             {named_parameter ","}
+        ///             ( "*" [parameter] ("," named_parameter)* ["," "**" parameter]
+        ///             | "**" parameter
+        ///             | named_parameter[","] )
         ///     </c>
         /// </summary>
         private Parameter[] ParseFunctionParameterList(TokenType terminator) {
-            var parameters              = new List<Parameter>();
-            var names                   = new HashSet<string>(StringComparer.Ordinal);
-            var needDefault             = false;
-            var readMultiply            = false;
-            var hasKeywordOnlyParameter = false;
+            var  parameters  = new List<Parameter>();
+            var  names       = new HashSet<string>(StringComparer.Ordinal);
+            bool needDefault = false, readMultiply = false, hasKeywordOnlyParameter = false;
             // we want these to be the last two parameters
             Parameter listParameter = null;
             Parameter mapParameter  = null;
@@ -313,7 +343,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
                 if (stream.MaybeEat(OpMultiply)) {
                     if (readMultiply) {
-                        ReportError("Invalid syntax (ALE-1, description_not_implemented)", stream.Peek);
+                        ReportError(
+                            "Invalid syntax (ALE-1, description_not_implemented)",
+                            stream.Peek
+                        );
                         return new Parameter[0];
                     }
 
@@ -335,11 +368,19 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     Parameter parameter;
                     if (readMultiply) {
                         var _ = false;
-                        parameter               = ParseNamedParameter(names, ParameterKind.KeywordOnly, ref _);
+                        parameter = ParseNamedParameter(
+                            names,
+                            ParameterKind.KeywordOnly,
+                            ref _
+                        );
                         hasKeywordOnlyParameter = true;
                     }
                     else {
-                        parameter = ParseNamedParameter(names, ParameterKind.Normal, ref needDefault);
+                        parameter = ParseNamedParameter(
+                            names,
+                            ParameterKind.Normal,
+                            ref needDefault
+                        );
                     }
                     if (parameter == null) {
                         // no parameter, syntax error
@@ -355,7 +396,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
             }
 
-            if (readMultiply && listParameter == null && mapParameter != null && !hasKeywordOnlyParameter) {
+            if (readMultiply
+             && listParameter == null
+             && mapParameter != null
+             && !hasKeywordOnlyParameter) {
                 ReportError("named arguments must follow bare *", stream.Token);
             }
 
@@ -371,8 +415,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     <c>
-        ///         named_parameter:
-        ///         parameter ["=" test]
+        ///         named_parameter ::=
+        ///             parameter ["=" test]
         ///     </c>
         /// </summary>
         private Parameter ParseNamedParameter(
@@ -393,8 +437,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     <c>
-        ///         parameter:
-        ///         ID [':' type]
+        ///         parameter ::=
+        ///             ID [':' type]
         ///     </c>
         /// </summary>
         private Parameter ParseParameter(HashSet<string> names, ParameterKind parameterKind) {
@@ -408,7 +452,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 typeName = ParseTypeName();
             }
             var parameter = new Parameter(name, typeName, parameterKind);
-            CheckUniqueParameter(names, parameter.Name.NameParts[0]);
+            CheckUniqueParameter(names, parameter.Name.Name);
             return parameter;
         }
 

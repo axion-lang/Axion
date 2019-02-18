@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using Axion.Core.Processing.Syntax.Tree.Expressions;
 
-namespace Axion.Core.Processing.Syntax.Tree.Comprehensions {
+namespace Axion.Core.Processing.Syntax.Tree.Expressions.Comprehensions {
     public interface IComprehension {
         IList<ComprehensionIterator> Iterators { get; }
     }
@@ -24,7 +23,12 @@ namespace Axion.Core.Processing.Syntax.Tree.Comprehensions {
     }
 
     public sealed class SetComprehension : Expression, IComprehension {
-        public SetComprehension(Expression item, IList<ComprehensionIterator> iterators, Position start, Position end) {
+        public SetComprehension(
+            Expression                   item,
+            IList<ComprehensionIterator> iterators,
+            Position                     start,
+            Position                     end
+        ) {
             Item      = item;
             Iterators = iterators;
             MarkPosition(start, end);

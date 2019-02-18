@@ -7,14 +7,18 @@ namespace Axion.Core.Processing.Syntax.Parser {
     public partial class SyntaxParser {
         /// <summary>
         ///     <c>
-        ///         arg_list:
-        ///         (expr
-        ///         | expr '=' expr
-        ///         | expr 'for')*
+        ///         arg_list ::=
+        ///             {expr
+        ///             | expr '=' expr
+        ///             | expr 'for'}
         ///     </c>
         /// </summary>
         private Arg[] FinishGeneratorOrArgList() {
-            if (stream.PeekIs(TokenType.RightParenthesis, TokenType.OpMultiply, TokenType.OpPower)) {
+            if (stream.PeekIs(
+                TokenType.RightParenthesis,
+                TokenType.OpMultiply,
+                TokenType.OpPower
+            )) {
                 return ParseArgumentsList();
             }
             Position   start          = tokenStart;
@@ -60,8 +64,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (arg?.Name.Name == null) {
                 return;
             }
-            for (var i = 0; i < arguments.Count; i++) {
-                if (arguments[i].Name.Name == arg.Name.Name) {
+            foreach (Arg a in arguments) {
+                if (a.Name.Name == arg.Name.Name) {
                     Blame(BlameType.DuplicatedKeywordArgument, arg);
                 }
             }
@@ -69,10 +73,13 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     <c>
-        ///         arg_list:
-        ///         (argument ',')* (argument [',']| '*' expr [',' '**' expr] | '**' expr)
-        ///         argument:
-        ///         [expr '='] expr
+        ///         arg_list ::=
+        ///             {argument ','}
+        ///             (argument [',']
+        ///             | '*' expr [',' '**' expr]
+        ///             | '**' expr)
+        ///         argument ::=
+        ///             [expr '='] expr
         ///     </c>
         /// </summary>
         private Arg[] ParseArgumentsList(Arg first = null) {

@@ -1,16 +1,10 @@
-using Axion.Core.Processing.Syntax.Tree.Comprehensions;
+using Axion.Core.Processing.Syntax.Tree.Expressions.Comprehensions;
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class GeneratorExpression : Expression {
         private Expression iterable;
-
-        private ComprehensionIterator[] comprehensions;
-
-        public GeneratorExpression(Expression iterable, ComprehensionIterator[] comprehensions) {
-            Iterable       = iterable;
-            Comprehensions = comprehensions;
-        }
 
         [JsonProperty]
         internal Expression Iterable {
@@ -21,15 +15,24 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
+        private ComprehensionIterator[] comprehensions;
+
         [JsonProperty]
         internal ComprehensionIterator[] Comprehensions {
             get => comprehensions;
             set {
                 comprehensions = value;
-                foreach (ComprehensionIterator compr in comprehensions) {
-                    compr.Parent = this;
+                foreach (ComprehensionIterator comp in comprehensions) {
+                    comp.Parent = this;
                 }
             }
+        }
+
+        internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
+
+        public GeneratorExpression(Expression iterable, ComprehensionIterator[] comprehensions) {
+            Iterable       = iterable;
+            Comprehensions = comprehensions;
         }
     }
 }

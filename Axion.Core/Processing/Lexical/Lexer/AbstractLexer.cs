@@ -63,7 +63,9 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             Debug.Assert(type != BlameType.None);
 
             BlameSeverity severity = Spec.Blames[type];
-            blames.Add(new LanguageException(new Blame(type, severity, startPos, endPos), Stream.Source));
+            blames.Add(
+                new LanguageException(new Blame(type, severity, startPos, endPos), Stream.Source)
+            );
         }
     }
 }

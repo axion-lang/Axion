@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Processing.Syntax.Tree.Comprehensions;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
+using Axion.Core.Processing.Syntax.Tree.Expressions.Comprehensions;
 
 namespace Axion.Core.Processing.Syntax.Parser {
     public partial class SyntaxParser {
         /// <summary>
         ///     <c>
-        ///         comprehension_iterator '}'
+        ///         set_comp ::=
+        ///             comprehension_iterator '}'
         ///     </c>
         /// </summary>
         private SetComprehension FinishSetComprehension(Expression item, Position start) {
@@ -19,10 +20,15 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     <c>
-        ///         comprehension_iterator '}'
+        ///         map_comp ::=
+        ///             comprehension_iterator '}'
         ///     </c>
         /// </summary>
-        private MapComprehension FinishMapComprehension(Expression key, Expression value, Position start) {
+        private MapComprehension FinishMapComprehension(
+            Expression key,
+            Expression value,
+            Position   start
+        ) {
             ComprehensionIterator[] iterators = ParseComprehensionIterators();
             stream.Eat(TokenType.RightBrace);
 
@@ -31,13 +37,13 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     <c>
-        ///         comprehension_iterator:
-        ///         comprehension_for | comprehension_if
+        ///         comprehension_iterator ::=
+        ///             comprehension_for | comprehension_if
         ///     </c>
         /// </summary>
         private ComprehensionIterator[] ParseComprehensionIterators() {
             var              iterators = new List<ComprehensionIterator>();
-            ComprehensionFor firstFor  = ParseComprehensionFor();
+            ForComprehension firstFor  = ParseComprehensionFor();
             iterators.Add(firstFor);
 
             while (true) {
@@ -57,11 +63,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     <c>
-        ///         comprehension_for:
-        ///         'for target_list 'in' or_test [comprehension_iterator]
+        ///         comprehension_for ::=
+        ///             'for target_list 'in' or_test [comprehension_iterator]
         ///     </c>
         /// </summary>
-        private ComprehensionFor ParseComprehensionFor() {
+        private ForComprehension ParseComprehensionFor() {
             Token start = StartExprOrStmt(TokenType.KeywordFor);
 
             List<Expression> target = ParseTargetList(out bool trailingComma);
@@ -77,19 +83,19 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
             stream.Eat(TokenType.KeywordIn);
             Expression list = ParseOrExpr();
-            return new ComprehensionFor(start, test, list);
+            return new ForComprehension(start, test, list);
         }
 
         /// <summary>
         ///     <c>
-        ///         comprehension_if:
-        ///         'if' old_test [comprehension_iterator]
+        ///         comprehension_if ::=
+        ///             'if' old_test [comprehension_iterator]
         ///     </c>
         /// </summary>
-        private ComprehensionIf ParseComprehensionIf() {
+        private IfComprehension ParseComprehensionIf() {
             Token      start     = StartExprOrStmt(TokenType.KeywordIf);
             Expression condition = ParseTestExpr();
-            return new ComprehensionIf(start, condition);
+            return new IfComprehension(start, condition);
         }
     }
 }

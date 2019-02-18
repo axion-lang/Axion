@@ -1,20 +1,9 @@
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class ConditionalExpression : Expression {
         private Expression condition;
-
-        private Expression trueExpression;
-
-        private Expression falseExpression;
-
-        public ConditionalExpression(Expression condition, Expression trueExpression, Expression falseExpression) {
-            Condition       = condition;
-            TrueExpression  = trueExpression;
-            FalseExpression = falseExpression;
-
-            MarkPosition(condition, falseExpression ?? trueExpression);
-        }
 
         [JsonProperty]
         internal Expression Condition {
@@ -25,6 +14,8 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
+        private Expression trueExpression;
+
         [JsonProperty]
         internal Expression TrueExpression {
             get => trueExpression;
@@ -33,6 +24,8 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 trueExpression = value;
             }
         }
+
+        private Expression falseExpression;
 
         [JsonProperty]
         internal Expression FalseExpression {
@@ -43,6 +36,20 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 }
                 falseExpression = value;
             }
+        }
+
+        internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
+
+        public ConditionalExpression(
+            Expression condition,
+            Expression trueExpression,
+            Expression falseExpression
+        ) {
+            Condition       = condition;
+            TrueExpression  = trueExpression;
+            FalseExpression = falseExpression;
+
+            MarkPosition(condition, falseExpression ?? trueExpression);
         }
 
         public override string ToString() {

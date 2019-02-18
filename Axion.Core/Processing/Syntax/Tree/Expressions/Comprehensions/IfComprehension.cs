@@ -1,12 +1,11 @@
 using System;
-using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Newtonsoft.Json;
 
-namespace Axion.Core.Processing.Syntax.Tree.Comprehensions {
-    public class ComprehensionIf : ComprehensionIterator {
+namespace Axion.Core.Processing.Syntax.Tree.Expressions.Comprehensions {
+    public class IfComprehension : ComprehensionIterator {
         private Expression condition;
 
-        public ComprehensionIf(SpannedRegion start, Expression condition) {
+        public IfComprehension(SpannedRegion start, Expression condition) {
             Condition = condition ?? throw new ArgumentNullException(nameof(condition));
 
             MarkStart(start);

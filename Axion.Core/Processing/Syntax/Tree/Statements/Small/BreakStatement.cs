@@ -1,7 +1,7 @@
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Newtonsoft.Json;
 
-namespace Axion.Core.Processing.Syntax.Tree.Statements {
+namespace Axion.Core.Processing.Syntax.Tree.Statements.Small {
     public class BreakStatement : Statement {
         private Expression loopName;
 

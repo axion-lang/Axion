@@ -6,11 +6,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents a 'comment' literal placed on multiple lines.
     /// </summary>
     public class MultilineCommentToken : Token {
-        public MultilineCommentToken(Position startPosition, string value, bool isUnclosed = false) : base(
-            TokenType.Comment,
-            startPosition,
-            value
-        ) {
+        public MultilineCommentToken(Position startPosition, string value, bool isUnclosed = false)
+            : base(TokenType.Comment, startPosition, value) {
             IsUnclosed = isUnclosed;
 
             int linesCount        = value.Split(Spec.EndOfLines, StringSplitOptions.None).Length;
