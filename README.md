@@ -80,6 +80,15 @@ about arguments for compiler CLI interface.
 		do-something-else()
 	else call()
 	```
+- ***Loops***
+    ```python
+    for x in [0..10]
+        Console.print(x)
+
+    for i = 0; i < args.length; i++
+        Console.print(i)
+    ```
+
 - ***String and character literals***
 	```python
 	# simple
