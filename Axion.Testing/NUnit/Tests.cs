@@ -45,9 +45,9 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        protected const string testExtension = ".unit";
+        protected const string TestExtension = ".unit";
 
-        protected readonly List<FileInfo> sourceFiles = new List<FileInfo>();
+        protected readonly List<FileInfo> SourceFiles = new List<FileInfo>();
 
         /// <summary>
         ///     A quick way to clear unit tests debug output.
@@ -74,7 +74,7 @@ namespace Axion.Testing.NUnit {
         private void ScanSources(DirectoryInfo dir) {
             foreach (FileInfo file in dir.EnumerateFiles()) {
                 if (file.Extension == Spec.SourceFileExtension) {
-                    sourceFiles.Add(file);
+                    SourceFiles.Add(file);
                 }
             }
             foreach (DirectoryInfo childDir in dir.GetDirectories()) {
@@ -85,12 +85,12 @@ namespace Axion.Testing.NUnit {
         internal SourceUnit MakeSourceFromFile(string fileName) {
             return new SourceUnit(
                 new FileInfo(inPath + fileName + Spec.SourceFileExtension),
-                outPath + fileName + testExtension
+                outPath + fileName + TestExtension
             );
         }
 
         internal SourceUnit MakeSourceFromCode(string fileName, string code) {
-            return new SourceUnit(code, outPath + fileName + testExtension);
+            return new SourceUnit(code, outPath + fileName + TestExtension);
         }
     }
 }

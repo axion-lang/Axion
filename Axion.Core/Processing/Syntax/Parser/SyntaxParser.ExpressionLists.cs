@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///             expr {',' expr} [',']
         ///     </c>
         /// </summary>
-        private List<Expression> ParseExpressionList(out bool trailingComma) {
+        private List<Expression> ParseTestList(out bool trailingComma) {
             var list = new List<Expression>();
             trailingComma = false;
             do {
@@ -43,7 +43,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             else {
                 expr = ParseTestExpr();
                 if (stream.MaybeEat(Comma)) {
-                    List<Expression> list = ParseExpressionList(out bool trailingComma);
+                    List<Expression> list = ParseTestList(out bool trailingComma);
                     list.Insert(0, expr);
                     expr = MakeTupleOrExpr(list, trailingComma);
                 }

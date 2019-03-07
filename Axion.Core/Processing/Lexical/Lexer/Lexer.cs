@@ -20,7 +20,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         /// <summary>
         ///     Contains values, from which lexer should stop working.
         /// </summary>
-        private string[] _processingTerminators;
+        private string[] processingTerminators;
 
         /// <summary>
         ///     Contains all unclosed multiline comments found.
@@ -96,7 +96,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     tokens.Add(token);
                     // check for processing terminator
                     if (token.Type == TokenType.EndOfCode
-                     || _processingTerminators.Contains(token.Value)) {
+                     || processingTerminators.Contains(token.Value)) {
                         break;
                     }
                 }
@@ -143,12 +143,12 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         protected sealed override void AddPresets(
             List<MultilineCommentToken> unclosedMultilineComments = null,
             List<StringToken>           unclosedStrings           = null,
-            string[]                    processingTerminators     = null
+            string[]                    processTerminators        = null
         ) {
             _unclosedStrings = unclosedStrings ?? new List<StringToken>();
             _unclosedMultilineComments =
                 unclosedMultilineComments ?? new List<MultilineCommentToken>();
-            _processingTerminators = processingTerminators ?? new string[0];
+            processingTerminators = processTerminators ?? new string[0];
         }
 
         /// <summary>

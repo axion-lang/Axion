@@ -297,7 +297,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             // process interpolation
             {
                 var lexer = new Lexer(Stream, newInterpolation.Tokens, blames, options);
-                lexer.AddPresets(processingTerminators: new[] { "}" });
+                lexer.AddPresets(processTerminators: new[] { "}" });
                 lexer.Stream.Move(); // skip '{'
                 lexer._mismatchingPairs.Add(new Token(TokenType.LeftBrace, Stream.Position, "{"));
                 lexer.Process();

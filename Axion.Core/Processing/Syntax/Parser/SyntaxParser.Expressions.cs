@@ -15,8 +15,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     <c>
         ///         expr_stmt ::=
         ///             test_list (
-        ///                 (AUG_ASSIGN assign_value) |
-        ///                 {'='        assign_value}
+        ///                 (COMPOUND_ASSIGN assign_value) |
+        ///                 {'='             assign_value}
         ///             )
         ///         assign_value ::=
         ///             yield_expr | test_list
@@ -24,9 +24,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Expression ParseExpression() {
             Expression expr = ParseTestList();
-            if (expr is ErrorExpression) {
+            if (expr is ErrorExpression || expr is UnaryExpression) {
                 return expr;
             }
+
             if (stream.MaybeEat(Colon)) {
                 TypeName   type  = ParseTypeName();
                 Expression value = null;
@@ -38,15 +39,19 @@ namespace Axion.Core.Processing.Syntax.Parser {
                         value = ParseTestList();
                     }
                 }
+
                 if (expr.CannotAssignReason != null) {
                     ReportError(expr.CannotAssignReason, expr);
                 }
+
                 return new VarDefinitionExpression(expr, type, value);
             }
+
             if (stream.PeekIs(Assign)) {
                 return FinishAssignments(expr);
             }
-            if (stream.MaybeEat(Spec.AugmentedAssignOperators)) {
+
+            if (stream.MaybeEat(Spec.CompoundAssignOperators)) {
                 var        op = (SymbolToken) stream.Token;
                 Expression right;
                 if (stream.PeekIs(KeywordYield)) {
@@ -55,11 +60,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 else {
                     right = ParseTestList();
                 }
+
                 if (expr.CannotAssignReason != null) {
                     ReportError(expr.CannotAssignReason, expr);
                 }
-                return new AugmentedAssignExpression(expr, op, right);
+
+                return new CompoundAssignExpression(expr, op, right);
             }
+
             return expr;
         }
 
@@ -69,6 +77,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 if (right.CannotAssignReason != null) {
                     ReportError(right.CannotAssignReason, right);
                 }
+
                 left.Add(right);
 
                 if (stream.PeekIs(KeywordYield)) {
@@ -115,6 +124,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             else {
                 yieldExpr = ParseExpression() ?? new ConstantExpression(null, start, tokenEnd);
             }
+
             return new YieldExpression(yieldExpr, isYieldFrom, start, tokenEnd);
         }
 
@@ -127,18 +137,20 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Expression ParseTestExpr() {
             Expression expr = ParseOrExpr();
-            if (stream.PeekIs(KeywordIf, KeywordUnless) && stream.Token.Type != Newline) {
+            if (stream.PeekIs(KeywordIf, KeywordUnless)
+                && stream.Token.Type != Newline) {
                 expr = ParseConditionExpr(expr);
             }
+
             return expr;
         }
 
-        #region Arithmetic precedence-based expressions
+        #region Expressions with priority (from lower to higher precedence)
 
         /// <summary>
         ///     <c>
-        ///         cond_test:
-        ///         'if' or_test ['else' test]
+        ///         cond_test ::=
+        ///             'if' or_test ['else' test]
         ///     </c>
         /// </summary>
         private Expression ParseConditionExpr(Expression trueExpr) {
@@ -146,6 +158,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (!invert) {
                 stream.Eat(KeywordIf);
             }
+
             Expression expr      = ParseOrExpr();
             Expression falseExpr = null;
             if (stream.MaybeEat(KeywordElse)) {
@@ -155,15 +168,16 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 falseExpr = trueExpr;
                 trueExpr  = ParseTestExpr();
             }
+
             return invert
-                       ? new ConditionalExpression(expr, falseExpr, trueExpr)
-                       : new ConditionalExpression(expr, trueExpr,  falseExpr);
+                ? new ConditionalExpression(expr, falseExpr, trueExpr)
+                : new ConditionalExpression(expr, trueExpr, falseExpr);
         }
 
         /// <summary>
         ///     <c>
-        ///         or_test:
-        ///         and_test ('or' and_test)*
+        ///         or_test ::=
+        ///             and_test ('or' and_test)*
         ///     </c>
         /// </summary>
         private Expression ParseOrExpr() {
@@ -171,13 +185,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
             while (stream.MaybeEat(KeywordOr)) {
                 expr = new OrExpression(expr, ParseAndExpr());
             }
+
             return expr;
         }
 
         /// <summary>
         ///     <c>
-        ///         and_test:
-        ///         not_test ('and' not_test)*
+        ///         and_test ::=
+        ///             not_test ('and' not_test)*
         ///     </c>
         /// </summary>
         private Expression ParseAndExpr() {
@@ -185,63 +200,69 @@ namespace Axion.Core.Processing.Syntax.Parser {
             while (stream.MaybeEat(KeywordAnd)) {
                 expr = new AndExpression(expr, ParseAndExpr());
             }
+
             return expr;
         }
 
         /// <summary>
         ///     <c>
-        ///         not_test:
-        ///         'not' not_test | comparison
+        ///         not_test ::=
+        ///             'not' not_test | comparison
         ///     </c>
         /// </summary>
         private Expression ParseNotExpr() {
             if (stream.MaybeEat(KeywordNot)) {
-                Token      op   = stream.Token;
+                var        op   = (OperatorToken) stream.Token;
                 Expression expr = ParseNotExpr();
-                if (expr is UnaryExpression unary && unary.Operator.Type == KeywordNot) {
+                if (expr is UnaryExpression unary
+                    && unary.Operator.Type == KeywordNot) {
                     Blame(
                         BlameType.DoubleNegationIsMeaningless,
                         op.Span.StartPosition,
                         unary.Operator.Span.EndPosition
                     );
                 }
+
+                op.Properties.InputSide = InputSide.Left;
                 return new UnaryExpression(op, expr);
             }
+
             return ParseCompareExpr();
         }
 
         /// <summary>
         ///     <c>
-        ///         comparison:
-        ///         expr (COMPARISON_OPERATOR expr)*
+        ///         comparison ::=
+        ///             expr (COMPARISON_OPERATOR expr)*
         ///     </c>
         /// </summary>
         private Expression ParseCompareExpr() {
             Expression expr = ParsePriorityExpr();
             while (stream.MaybeEat(Spec.ComparisonOperators)) {
                 var op = (OperatorToken) stream.Token;
-                if (op.Type == OpLessThan) {
-                }
+                if (op.Type == OpLessThan) { }
+
                 Expression rhs = ParseCompareExpr();
                 expr = new BinaryExpression(expr, op, rhs);
             }
+
             return expr;
         }
 
         /// <summary>
         ///     <c>
-        ///         expr:
-        ///         xor_expr ('|' xor_expr)*
-        ///         xor_expr:
-        ///         and_expr ('^' and_expr)*
-        ///         and_expr:
-        ///         shift_expr ('&' shift_expr)*
-        ///         shift_expr:
-        ///         arithmetic_expr (('<<' | '>>') arithmetic_expr)*
-        ///         arithmetic_expr:
-        ///         term (('+'|'-') term)*
-        ///         term:
-        ///         factor (('*'|'@'|'/'|'%'|'//') factor)*
+        ///         expr ::=
+        ///             xor_expr ('|' xor_expr)*
+        ///         xor_expr ::=
+        ///             and_expr ('^' and_expr)*
+        ///         and_expr ::=
+        ///             shift_expr ('&amp;' shift_expr)*
+        ///         shift_expr ::=
+        ///             arithmetic_expr (('&lt;&lt;' | '>>') arithmetic_expr)*
+        ///         arithmetic_expr ::=
+        ///             term (('+' | '-') term)*
+        ///         term ::=
+        ///             factor (('*' | '@' | '/' | '%' | '//') factor)*
         ///     </c>
         /// </summary>
         private Expression ParsePriorityExpr(int precedence = 0) {
@@ -265,21 +286,24 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         /// <summary>
         ///     <c>
-        ///         factor:
-        ///         ('+'|'-'|'~') factor | power
+        ///         factor ::=
+        ///             ('+' | '-' | '~' | '++' | '--') factor | power
         ///     </c>
         /// </summary>
         private Expression ParseFactorExpr() {
-            if (stream.MaybeEat(OpAdd, OpSubtract, OpBitwiseNot)) {
-                return new UnaryExpression(stream.Token, ParseFactorExpr());
+            if (stream.MaybeEat(OpAdd, OpSubtract, OpBitwiseNot, OpIncrement, OpDecrement)) {
+                var op = (OperatorToken) stream.Token;
+                op.Properties.InputSide = InputSide.Left;
+                return new UnaryExpression(op, ParseFactorExpr());
             }
+
             return ParsePowerExpr();
         }
 
         /// <summary>
         ///     <c>
-        ///         power:
-        ///         atom_expr trailer* ['**' factor]
+        ///         power ::=
+        ///             atom_expr trailer* ['**' factor]
         ///     </c>
         /// </summary>
         private Expression ParsePowerExpr() {
@@ -287,6 +311,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (stream.MaybeEat(OpPower)) {
                 expr = new BinaryExpression(expr, stream.Token as OperatorToken, ParseFactorExpr());
             }
+
             return expr;
         }
 
@@ -295,7 +320,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <summary>
         ///     <c>
         ///         trailer ::=
-        ///             call
+        ///             (expr ('++' | '--'))
+        ///             | call
         ///             | '[' subscription_list ']'
         ///             | member
         ///         call ::=
@@ -307,6 +333,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private Expression ParseTrailingExpr(Expression result, bool allowGeneratorExpression) {
             while (true) {
                 switch (stream.Peek.Type) {
+                    case OpIncrement:
+                    case OpDecrement: {
+                        stream.NextToken();
+                        var op = (OperatorToken) stream.Token;
+                        op.Properties.InputSide = InputSide.Right;
+                        result = new UnaryExpression(op, result);
+                        break;
+                    }
                     case LeftParenthesis: {
                         if (!allowGeneratorExpression) {
                             // TODO: check
@@ -333,46 +367,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
                             ReportError(Spec.ERR_InvalidStatement, stream.Peek);
                             return Error();
                         }
+
                         return result;
                     }
                 }
             }
-        }
-
-        /// <summary>
-        ///     <c>
-        ///         name ::=
-        ///             ID
-        ///     </c>
-        /// </summary>
-        private NameExpression ParseName() {
-            NameExpression name = null;
-            if (stream.Eat(Identifier)) {
-                name = new NameExpression(stream.Token);
-            }
-            return name;
-        }
-
-        /// <summary>
-        ///     <c>
-        ///         name ::=
-        ///             name {member}
-        ///     </c>
-        /// </summary>
-        private Expression ParseQualifiedName() {
-            Expression name = null;
-            if (stream.Eat(Identifier)) {
-                name = new NameExpression(stream.Token);
-            }
-            // qualifiers
-            while (stream.MaybeEat(Dot)) {
-                NameExpression qualifier = null;
-                if (stream.Eat(Identifier)) {
-                    qualifier = new NameExpression(stream.Token);
-                }
-                name = new MemberExpression(name, qualifier);
-            }
-            return name;
         }
 
         /// <summary>
@@ -395,26 +394,70 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 if (!stream.PeekIs(Colon)) {
                     expr = ParseTestExpr();
                 }
+
                 if (stream.MaybeEat(Colon)) {
                     Expression stop = null;
                     if (!stream.PeekIs(Colon, Comma, RightBracket)) {
                         // [?:val:?]
                         stop = ParseTestExpr();
                     }
+
                     Expression step = null;
-                    if (stream.MaybeEat(Colon) && !stream.PeekIs(Comma, RightBracket)) {
+                    if (stream.MaybeEat(Colon)
+                        && !stream.PeekIs(Comma, RightBracket)) {
                         // [?:?:val]
                         step = ParseTestExpr();
                     }
 
                     return new SliceExpression(expr, stop, step);
                 }
+
                 expressions.Add(expr);
                 trailingComma = stream.MaybeEat(Comma);
             } while (trailingComma && !stream.PeekIs(RightBracket));
 
             stream.Eat(RightBracket);
             return MakeTupleOrExpr(expressions, trailingComma, true);
+        }
+        
+        /// <summary>
+        ///     <c>
+        ///         name ::=
+        ///             ID
+        ///     </c>
+        /// </summary>
+        private NameExpression ParseName() {
+            NameExpression name = null;
+            if (stream.Eat(Identifier)) {
+                name = new NameExpression(stream.Token);
+            }
+
+            return name;
+        }
+
+        /// <summary>
+        ///     <c>
+        ///         name ::=
+        ///             name {member}
+        ///     </c>
+        /// </summary>
+        private Expression ParseQualifiedName() {
+            Expression name = null;
+            if (stream.Eat(Identifier)) {
+                name = new NameExpression(stream.Token);
+            }
+
+            // qualifiers
+            while (stream.MaybeEat(Dot)) {
+                NameExpression qualifier = null;
+                if (stream.Eat(Identifier)) {
+                    qualifier = new NameExpression(stream.Token);
+                }
+
+                name = new MemberExpression(name, qualifier);
+            }
+
+            return name;
         }
     }
 }

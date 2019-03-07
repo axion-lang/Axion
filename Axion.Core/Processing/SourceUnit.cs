@@ -122,7 +122,7 @@ namespace Axion.Core.Processing {
                 return;
             }
             // [2] Parsing
-            ParseAST();
+            ParseAst();
             if (mode == Parsing) {
                 FinishCompilation();
                 return;
@@ -173,7 +173,7 @@ namespace Axion.Core.Processing {
             new Lexer(Code, Tokens, Blames, Options).Process();
         }
 
-        private void ParseAST() {
+        private void ParseAst() {
             ConsoleUI.LogInfo("--- Abstract Syntax Tree generation");
             new SyntaxParser(Tokens, SyntaxTree, Blames).Process();
         }

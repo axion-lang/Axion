@@ -190,7 +190,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 do {
                     items.Add(ParseEnumItem());
                 } while (!stream.MaybeEat(terminator)
-                      && !CheckUnexpectedEOC()
+                      && !CheckUnexpectedEoc()
                       && stream.MaybeEat(Comma));
             }
             return new EnumDefinition(

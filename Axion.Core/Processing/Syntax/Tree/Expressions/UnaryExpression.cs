@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class UnaryExpression : Expression {
-        public Token Operator { get; }
+        public OperatorToken Operator { get; }
 
         private Expression expression;
 
@@ -20,7 +20,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
 
         internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
 
-        public UnaryExpression(Token op, Expression expression) {
+        public UnaryExpression(OperatorToken op, Expression expression) {
             Operator   = op ?? throw new ArgumentNullException(nameof(op));
             Expression = expression;
 

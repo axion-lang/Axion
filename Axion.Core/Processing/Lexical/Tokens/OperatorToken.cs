@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents an 'operator' literal.
     /// </summary>
     public class OperatorToken : Token {
-        internal readonly OperatorProperties Properties;
+        internal OperatorProperties Properties;
 
         public OperatorToken(Position startPosition, OperatorProperties properties) : base(
             properties.Type,
@@ -35,10 +35,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     [JsonObject]
     public struct OperatorProperties {
         [JsonProperty]
-        internal readonly InputSide InputSide;
-
-        [JsonProperty]
-        internal readonly Associativity Associativity;
+        internal InputSide InputSide;
 
         [JsonProperty]
         internal readonly bool Overloadable;
@@ -50,38 +47,34 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         internal readonly TokenType Type;
 
         internal OperatorProperties(
-            TokenType     type,
-            InputSide     inputSide,
-            Associativity associativity,
-            bool          overloadable,
-            int           precedence
+            TokenType type,
+            bool      overloadable,
+            int       precedence
         ) {
-            Type          = type;
-            InputSide     = inputSide;
-            Associativity = associativity;
-            Overloadable  = overloadable;
-            Precedence    = precedence;
+            InputSide    = InputSide.Unknown;
+            Type         = type;
+            Overloadable = overloadable;
+            Precedence   = precedence;
         }
 
         public override bool Equals(object obj) {
             if (obj is OperatorProperties properties) {
                 return Equals(properties);
             }
+
             return false;
         }
 
         public bool Equals(OperatorProperties other) {
             return InputSide == other.InputSide
-                && Associativity == other.Associativity
-                && Overloadable == other.Overloadable
-                && Precedence == other.Precedence
-                && Type == other.Type;
+                   && Overloadable == other.Overloadable
+                   && Precedence == other.Precedence
+                   && Type == other.Type;
         }
 
         public override int GetHashCode() {
             unchecked {
                 var hashCode = (int) InputSide;
-                hashCode = (hashCode * 397) ^ (int) Associativity;
                 hashCode = (hashCode * 397) ^ Overloadable.GetHashCode();
                 hashCode = (hashCode * 397) ^ Precedence;
                 hashCode = (hashCode * 397) ^ (int) Type;
@@ -92,14 +85,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
     [JsonConverter(typeof(StringEnumConverter))]
     internal enum InputSide {
+        Unknown,
         Right,
-        Both,
-        SomeOne
-    }
-
-    [JsonConverter(typeof(StringEnumConverter))]
-    internal enum Associativity {
-        RightToLeft,
-        LeftToRight
+        Left
     }
 }

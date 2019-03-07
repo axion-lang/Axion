@@ -3,11 +3,11 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions.Binary {
-    public class AugmentedAssignExpression : LeftRightExpression {
+    public class CompoundAssignExpression : LeftRightExpression {
         [JsonProperty]
         internal SymbolToken Operator { get; }
 
-        public AugmentedAssignExpression(Expression left, SymbolToken op, Expression right) {
+        public CompoundAssignExpression(Expression left, SymbolToken op, Expression right) {
             Left     = left ?? throw new ArgumentNullException(nameof(left));
             Operator = op ?? throw new ArgumentNullException(nameof(op));
             Right    = right ?? throw new ArgumentNullException(nameof(right));

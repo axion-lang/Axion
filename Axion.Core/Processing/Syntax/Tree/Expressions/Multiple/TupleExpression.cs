@@ -12,5 +12,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions.Multiple {
                 );
             }
         }
+
+        public Expression this[int i] => Expressions[i];
     }
 }

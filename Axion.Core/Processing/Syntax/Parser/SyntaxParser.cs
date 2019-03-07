@@ -112,7 +112,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             return new ExpressionStatement(Error());
         }
 
-        private bool CheckUnexpectedEOC() {
+        private bool CheckUnexpectedEoc() {
             if (stream.PeekIs(TokenType.EndOfCode)) {
                 Blame(BlameType.UnexpectedEndOfCode, stream.Token);
                 return true;

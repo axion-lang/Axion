@@ -8,11 +8,11 @@ namespace Axion.Testing.NUnit.Lexer {
     public partial class LexerTests : Tests {
         [Test]
         public void DesignPatternsValidation() {
-            for (var i = 0; i < sourceFiles.Count; i++) {
-                FileInfo file = sourceFiles[i];
+            for (var i = 0; i < SourceFiles.Count; i++) {
+                FileInfo file = SourceFiles[i];
                 var source = new SourceUnit(
                     file,
-                    outPath + nameof(DesignPatternsValidation) + i + testExtension
+                    outPath + nameof(DesignPatternsValidation) + i + TestExtension
                 );
                 source.Process(
                     SourceProcessingMode.Lex,

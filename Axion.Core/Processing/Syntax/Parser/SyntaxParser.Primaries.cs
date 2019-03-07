@@ -129,7 +129,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (!stream.MaybeEat(TokenType.RightBracket)) {
                 expressions.Add(ParseTestExpr());
                 if (stream.MaybeEat(TokenType.Comma)) {
-                    expressions.AddRange(ParseExpressionList(out bool _));
+                    expressions.AddRange(ParseTestList(out bool _));
                 }
                 else if (stream.PeekIs(TokenType.KeywordFor)) {
                     ComprehensionIterator[] iterators = ParseComprehensionIterators();
