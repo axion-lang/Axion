@@ -68,7 +68,7 @@ about arguments for compiler CLI interface.
 	# etc.
 	```
 - ***Function calls***
-	```clojure
+	```
 	call(arg1, arg2, arg3)
 	function-call(nested-call(arg1, arg2), 12345)
 	```
