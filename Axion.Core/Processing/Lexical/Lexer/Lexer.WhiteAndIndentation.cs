@@ -41,10 +41,10 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             // skip all newline characters
             while (c == '\n' || c == '\r') {
                 tokenValue.Append(c);
-                Stream.Move();
+                stream.Move();
             }
-            if (Tokens.Count > 0 && Tokens[Tokens.Count - 1].Type == TokenType.Newline) {
-                Tokens[Tokens.Count - 1].AppendValue(tokenValue.ToString());
+            if (tokens.Count > 0 && tokens[0].Type == TokenType.Newline) {
+                tokens[tokens.Count - 1].AppendValue(tokenValue.ToString());
                 return null;
             }
             var endOfLineToken = new EndOfLineToken(tokenStartPosition, tokenValue.ToString());
@@ -55,12 +55,12 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             // if last newline doesn't starts
             // with whitespace - reset indentation to 0
             // add newline at first
-            Tokens.Add(endOfLineToken);
-            tokenStartPosition = Stream.Position;
+            tokens.Add(endOfLineToken);
+            tokenStartPosition = stream.Position;
             // then add outdents
             lastIndentLength = 0;
             while (indentLevel > 0) {
-                Tokens.Add(new OutdentToken(tokenStartPosition));
+                tokens.Add(new OutdentToken(tokenStartPosition));
                 indentLevel--;
             }
             return null;
@@ -69,13 +69,13 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         private Token ReadWhite() {
             while (Spec.IsSpaceOrTab(c)) {
                 tokenValue.Append(c);
-                Stream.Move();
+                stream.Move();
             }
 
             bool   nextIsIndent;
-            string restOfLine = Stream.GetRestOfLine();
+            string restOfLine = stream.GetRestOfLine();
             // BUG: Outdent dont adds, when we have empty string with spaces.
-            nextIsIndent = _mismatchingPairs.Count == 0
+            nextIsIndent = mismatchingPairs.Count == 0
                         && !(
                                 // rest is one-line comment
                                 restOfLine.StartsWith(Spec.SingleCommentStart)
@@ -88,7 +88,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             // if it is 1st token,
             // set default indentation level.
             // TODO use another approach with indentation (leadingWhitespaces property)
-            if (Tokens.Count == 0) {
+            if (tokens.Count == 0) {
                 lastIndentLength = tokenValue.Length;
                 return new Token(
                     TokenType.Whitespace,
@@ -98,22 +98,22 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 );
             }
 
-            if (Tokens[Tokens.Count - 1].Type == TokenType.Newline) {
+            if (tokens[tokens.Count - 1].Type == TokenType.Newline) {
                 if (nextIsIndent) {
                     // handle empty string with whitespaces, make newline
                     if (restOfLine.Trim().Length == 0) {
                         tokenValue.Append(restOfLine);
-                        Stream.Move(restOfLine.Length);
-                        Tokens.Add(new EndOfLineToken(tokenStartPosition, tokenValue.ToString()));
+                        stream.Move(restOfLine.Length);
+                        tokens.Add(new EndOfLineToken(tokenStartPosition, tokenValue.ToString()));
                         tokenValue.Clear();
-                        tokenStartPosition = Stream.Position;
+                        tokenStartPosition = stream.Position;
                     }
                     return ReadIndentation();
                 }
-                Tokens[Tokens.Count - 1].AppendValue(tokenValue.ToString());
+                tokens[tokens.Count - 1].AppendValue(tokenValue.ToString());
             }
             else {
-                Tokens[Tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
+                tokens[tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
             }
             return null;
         }
@@ -154,15 +154,15 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             }
             else if (newIndentLength < lastIndentLength) {
                 // whitespace
-                if (Tokens.Count > 0) {
+                if (tokens.Count > 0) {
                     // append it to last token
-                    Tokens[Tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
+                    tokens[tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
                 }
 
                 int temp = newIndentLength;
                 while (temp < lastIndentLength) {
                     // indent decreased
-                    Tokens.Add(new OutdentToken(tokenStartPosition));
+                    tokens.Add(new OutdentToken(tokenStartPosition));
                     indentLevel--;
                     temp += oneIndentSize;
                 }
@@ -170,9 +170,9 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             }
             else {
                 // whitespace
-                if (Tokens.Count > 0) {
+                if (tokens.Count > 0) {
                     // append it to last token
-                    Tokens[Tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
+                    tokens[tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
                 }
                 return null;
             }
@@ -180,10 +180,10 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             // warn user about inconsistency
             if (inconsistentIndentation
-             && Options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
-                Blame(BlameType.InconsistentIndentation, tokenStartPosition, Stream.Position);
+             && unit.Options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
+                unit.Blame(BlameType.InconsistentIndentation, tokenStartPosition, stream.Position);
                 // ignore future warnings
-                Options &= ~SourceProcessingOptions.CheckIndentationConsistency;
+                unit.Options &= ~SourceProcessingOptions.CheckIndentationConsistency;
             }
             return indentationToken;
         }

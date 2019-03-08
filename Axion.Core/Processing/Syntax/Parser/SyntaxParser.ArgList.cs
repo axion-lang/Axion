@@ -14,7 +14,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Arg[] FinishGeneratorOrArgList() {
-            if (Stream.PeekIs(
+            if (stream.PeekIs(
                 TokenType.RightParenthesis,
                 TokenType.OpMultiply,
                 TokenType.OpPower
@@ -28,11 +28,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
             var generator = false;
             Arg arg;
-            if (Stream.MaybeEat(TokenType.Assign)) {
+            if (stream.MaybeEat(TokenType.Assign)) {
                 // Keyword argument
                 arg = FinishKeywordArgument(argNameOrValue);
             }
-            else if (Stream.PeekIs(TokenType.KeywordFor)) {
+            else if (stream.PeekIs(TokenType.KeywordFor)) {
                 // Generator expr
                 arg       = new Arg(ParseGeneratorExpr(argNameOrValue));
                 generator = true;
@@ -42,11 +42,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
 
             // Was this all?
-            if (!generator && Stream.MaybeEat(TokenType.Comma)) {
+            if (!generator && stream.MaybeEat(TokenType.Comma)) {
                 return ParseArgumentsList(arg);
             }
 
-            Stream.Eat(TokenType.RightParenthesis);
+            stream.Eat(TokenType.RightParenthesis);
             arg.MarkPosition(start, tokenEnd);
             return new[] { arg };
         }
@@ -66,7 +66,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
             foreach (Arg a in arguments) {
                 if (a.Name.Name == arg.Name.Name) {
-                    Blame(BlameType.DuplicatedKeywordArgument, arg);
+                    unit.Blame(BlameType.DuplicatedKeywordArgument, arg);
                 }
             }
         }
@@ -89,15 +89,15 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 arguments.Add(first);
             }
 
-            while (!Stream.MaybeEat(TokenType.RightParenthesis)) {
+            while (!stream.MaybeEat(TokenType.RightParenthesis)) {
                 Expression nameOrValue = ParseTestExpr();
                 Arg        arg;
 
-                if (Stream.MaybeEat(TokenType.OpMultiply)) {
+                if (stream.MaybeEat(TokenType.OpMultiply)) {
                     arg = new Arg(nameOrValue);
                 }
                 else {
-                    if (Stream.MaybeEat(TokenType.Assign)) {
+                    if (stream.MaybeEat(TokenType.Assign)) {
                         arg = FinishKeywordArgument(nameOrValue);
                         CheckUniqueArgument(arguments, arg);
                     }
@@ -106,8 +106,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     }
                 }
                 arguments.Add(arg);
-                if (!Stream.MaybeEat(TokenType.Comma)) {
-                    Stream.Eat(TokenType.RightParenthesis);
+                if (!stream.MaybeEat(TokenType.Comma)) {
+                    stream.Eat(TokenType.RightParenthesis);
                     break;
                 }
             }

@@ -19,24 +19,24 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         private CharacterToken ReadCharLiteral() {
             var unescapedValue = "";
             // we're on char quote
-            Stream.Move();
+            stream.Move();
             switch (c) {
                 case '\\': {
                     // escape sequence
-                    Stream.Move();
+                    stream.Move();
                     (string value, string raw) = ReadEscapeSequence();
                     tokenValue.Append(value);
                     unescapedValue += raw;
                     break;
                 }
                 case Spec.CharLiteralQuote: {
-                    Blame(BlameType.EmptyCharacterLiteral, tokenStartPosition, Stream.Position);
+                    unit.Blame(BlameType.EmptyCharacterLiteral, tokenStartPosition, stream.Position);
                     break;
                 }
                 default: {
                     // any character
                     tokenValue.Append(c);
-                    Stream.Move();
+                    stream.Move();
                     break;
                 }
             }
@@ -44,19 +44,19 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             CharacterToken result;
 
             if (c != Spec.CharLiteralQuote) {
-                Blame(BlameType.CharacterLiteralTooLong, tokenStartPosition, Stream.Position);
+                unit.Blame(BlameType.CharacterLiteralTooLong, tokenStartPosition, stream.Position);
                 while (c != Spec.CharLiteralQuote) {
-                    if (Stream.AtEndOfLine() || c == Spec.EndOfStream) {
-                        Blame(
+                    if (stream.AtEndOfLine() || c == Spec.EndOfStream) {
+                        unit.Blame(
                             BlameType.UnclosedCharacterLiteral,
                             tokenStartPosition,
-                            Stream.Position
+                            stream.Position
                         );
                         break;
                     }
                     tokenValue.Append(c);
                     unescapedValue += c;
-                    Stream.Move();
+                    stream.Move();
                 }
 
                 // can be or too long, or unclosed.
@@ -74,7 +74,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     tokenValue.ToString(),
                     unescapedValue
                 );
-                Stream.Move();
+                stream.Move();
             }
             return result;
         }
@@ -94,7 +94,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             var rawValue       = new StringBuilder();
             var interpolations = new List<Interpolation>();
-            int startIndex     = Stream.CharIdx;
+            int startIndex     = stream.CharIdx;
 
             void AddPiece(string piece) {
                 tokenValue.Append(piece);
@@ -103,7 +103,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             while (true) {
                 if (c == '\\') {
-                    Stream.Move();
+                    stream.Move();
                     if (strOptions.IsRaw) {
                         AddPiece("\\");
                         continue;
@@ -116,17 +116,17 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
                 // found end of line
                 if (c == '\r' && strOptions.IsLineEndsNormalized) {
-                    Stream.Move();
+                    stream.Move();
                     // normalize line endings
                     if (c == '\n') {
-                        Stream.Move();
+                        stream.Move();
                     }
                     AddPiece("\n");
                 }
 
                 // check for end of line/stream
                 StringToken result;
-                if (c == Spec.EndOfStream || Stream.AtEndOfLine() && delimiter.Length == 1) {
+                if (c == Spec.EndOfStream || stream.AtEndOfLine() && delimiter.Length == 1) {
                     result = new StringToken(
                         tokenStartPosition,
                         strOptions,
@@ -134,26 +134,26 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         rawValue.ToString(),
                         isUnclosed: true
                     );
-                    _unclosedStrings.Add(result);
-                    Blame(BlameType.UnclosedString, tokenStartPosition, Stream.Position);
+                    unclosedStrings.Add(result);
+                    unit.Blame(BlameType.UnclosedString, tokenStartPosition, stream.Position);
                     return result;
                 }
 
                 // got non-escaped quote
                 if (c == strOptions.Quote) {
-                    Position startPosition = Stream.Position;
-                    Stream.Move();
+                    Position startPosition = stream.Position;
+                    stream.Move();
                     // ending "
                     if (delimiter.Length == 1) {
                         strOptions.TrailingQuotes = "";
                         break;
                     }
                     if (c == strOptions.Quote) {
-                        Stream.Move();
+                        stream.Move();
                         if (c == strOptions.Quote) {
                             // ending """
                             strOptions.TrailingQuotes = "";
-                            Stream.Move();
+                            stream.Move();
                             break;
                         }
                         strOptions.TrailingQuotes += strOptions.Quote;
@@ -168,7 +168,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         rawValue.ToString(),
                         isUnclosed: true
                     );
-                    Blame(BlameType.UnescapedQuoteInStringLiteral, startPosition, Stream.Position);
+                    unit.Blame(BlameType.UnescapedQuoteInStringLiteral, startPosition, stream.Position);
                     return result;
                 }
 
@@ -179,14 +179,14 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 }
                 // else
                 AddPiece(c.ToString());
-                Stream.Move();
+                stream.Move();
             }
             if (strOptions.IsFormatted) {
                 if (interpolations.Count == 0) {
-                    Blame(
+                    unit.Blame(
                         BlameType.RedundantStringFormatPrefix,
                         tokenStartPosition,
-                        Stream.Position
+                        stream.Position
                     );
                 }
             }
@@ -205,8 +205,8 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             out string               delimiter
         ) {
             if (continueUnclosedString) {
-                StringToken stringToken = _unclosedStrings.Last();
-                _unclosedStrings.RemoveAt(_unclosedStrings.Count - 1);
+                StringToken stringToken = unclosedStrings.Last();
+                unclosedStrings.RemoveAt(unclosedStrings.Count - 1);
                 strOptions = stringToken.Options;
                 delimiter  = new string(stringToken.Options.Quote, strOptions.QuotesCount);
             }
@@ -215,32 +215,32 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 {
                     // get letters before the string, process prefixes
                     (int line, int column) tempPosition = tokenStartPosition;
-                    int                    tempCharIdx  = Stream.CharIdx;
+                    int                    tempCharIdx  = stream.CharIdx;
                     // read string prefixes
                     var validPrefix = true;
                     while (tempPosition.column > 0 && validPrefix) {
                         tempCharIdx--;
                         tempPosition.column--;
-                        char pfc = Stream.Source[tempCharIdx];
+                        char pfc = stream.Source[tempCharIdx];
                         strOptions.AppendPrefix(pfc, out validPrefix, out bool duplicatedPrefix);
                         if (validPrefix) {
                             if (duplicatedPrefix) {
-                                Blame(
+                                unit.Blame(
                                     BlameType.DuplicatedStringPrefix,
                                     tempPosition,
-                                    Stream.Position
+                                    stream.Position
                                 );
                             }
                         }
                         // got invalid prefix letter or
                         // digit right before quote - error!
                         else if (char.IsLetterOrDigit(pfc)) {
-                            Blame(
+                            unit.Blame(
                                 BlameType.InvalidPrefixInStringLiteral,
                                 tempPosition,
-                                Stream.Position
+                                stream.Position
                             );
-                            Tokens.Add(new Token(TokenType.Identifier, tempPosition, c.ToString()));
+                            tokens.Add(new Token(TokenType.Identifier, tempPosition, c.ToString()));
                             break;
                         }
                     }
@@ -251,32 +251,32 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     // remove last token - it is string prefix meant as identifier.
                     tokenStartPosition = new Position(
                         tokenStartPosition.Line,
-                        tokenStartPosition.Column - Tokens[Tokens.Count - 1].Value.Length
+                        tokenStartPosition.Column - tokens[tokens.Count - 1].Value.Length
                     );
-                    Tokens.RemoveAt(Tokens.Count - 1);
+                    tokens.RemoveAt(tokens.Count - 1);
                 }
 
                 delimiter        = c.ToString();
                 strOptions.Quote = c;
-                Stream.Move();
+                stream.Move();
                 if (c == strOptions.Quote) {
                     delimiter += c;
-                    Stream.Move();
+                    stream.Move();
                     if (c == strOptions.Quote) {
                         delimiter += c;
-                        Stream.Move();
+                        stream.Move();
                     }
                     else {
                         // only 2 quotes - an empty string.
                         Token emptyString = new StringToken(tokenStartPosition, strOptions, "");
                         if (stringHasPrefixes) {
-                            Blame(
+                            unit.Blame(
                                 BlameType.RedundantPrefixesForEmptyString,
                                 tokenStartPosition,
-                                Stream.Position
+                                stream.Position
                             );
                         }
-                        Tokens.Add(emptyString);
+                        tokens.Add(emptyString);
                         return true;
                     }
                 }
@@ -292,24 +292,24 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             int                           stringStartIndex,
             in StringBuilder              rawValue
         ) {
-            var newInterpolation = new Interpolation(Stream.CharIdx - stringStartIndex);
+            var newInterpolation = new Interpolation(stream.CharIdx - stringStartIndex);
             interpolations.Add(newInterpolation);
             // process interpolation
             {
-                var lexer = new Lexer(Stream, newInterpolation.Tokens, Blames, Options);
-                lexer.AddPresets(processTerminators: new[] { "}" });
-                lexer.Stream.Move(); // skip '{'
-                lexer._mismatchingPairs.Add(new Token(TokenType.LeftBrace, Stream.Position, "{"));
+                var lexer = new Lexer(unit, stream, newInterpolation.Tokens);
+                lexer.AddPresets(processTerminators_: new[] { "}" });
+                lexer.stream.Move(); // skip '{'
+                lexer.mismatchingPairs.Add(new Token(TokenType.LeftBrace, stream.Position, "{"));
                 lexer.Process();
                 // remove usefulness closing curly
                 newInterpolation.Tokens.RemoveAt(newInterpolation.Tokens.Count - 1);
                 // restore character position
-                Stream = lexer.Stream;
+                stream = lexer.stream;
             }
             // append interpolated piece to main string token
-            newInterpolation.EndIndex = Stream.CharIdx - stringStartIndex;
-            string value = Stream.Source.Substring(
-                Stream.CharIdx - newInterpolation.Length,
+            newInterpolation.EndIndex = stream.CharIdx - stringStartIndex;
+            string value = stream.Source.Substring(
+                stream.CharIdx - newInterpolation.Length,
                 newInterpolation.Length
             );
             rawValue.Append(value);
@@ -323,13 +323,13 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         private (string value, string raw) ReadEscapeSequence() {
             // position is after \
             (string value, string raw) result        = ("", "");
-            (int line, int column)     startPosition = Stream.Position;
+            (int line, int column)     startPosition = stream.Position;
             startPosition.column--;
             // single-character sequence (\n, \t, etc.)
             if (Spec.EscapeSequences.TryGetValue(c, out string sequence)) {
                 result.value = sequence;
                 result.raw   = "\\" + c;
-                Stream.Move();
+                stream.Move();
                 return result;
             }
             switch (c) {
@@ -340,19 +340,19 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 case 'U': {
                     char u             = c;
                     int  unicodeSymLen = u == 'u' ? 4 : Spec.Unicode32BitHexLength;
-                    Stream.Move();
+                    stream.Move();
                     var number = "";
                     var error  = false;
                     while (number.Length < unicodeSymLen) {
                         if (c.IsValidHexadecimalDigit()) {
                             number += c;
-                            Stream.Move();
+                            stream.Move();
                         }
                         else if (number.Length < unicodeSymLen) {
-                            Blame(
+                            unit.Blame(
                                 BlameType.TruncatedEscapeSequence,
                                 startPosition,
-                                Stream.Position
+                                stream.Position
                             );
                             error = true;
                             break;
@@ -362,10 +362,10 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
                     if (!error && TryParseInt(number, 16, out int val)) {
                         if (val < 0 || val > 0x10ffff) {
-                            Blame(
+                            unit.Blame(
                                 BlameType.IllegalUnicodeCharacter,
                                 startPosition,
-                                Stream.Position
+                                stream.Position
                             );
                         }
                         else if (val < 0x010000) {
@@ -384,16 +384,16 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 // TODO: Add warnings for meaningless escapes, what can be shortened (e. g. \x00)
                 // hexadecimal character \xn[n][n][n]
                 case 'x': {
-                    Stream.Move();
+                    stream.Move();
                     var number = "";
                     var error  = false;
                     while (c.IsValidHexadecimalDigit() && number.Length < 4) {
                         number += c;
-                        Stream.Move();
+                        stream.Move();
                     }
                     if (number.Length == 0) {
                         error = true;
-                        Blame(BlameType.InvalidXEscapeFormat, startPosition, Stream.Position);
+                        unit.Blame(BlameType.InvalidXEscapeFormat, startPosition, stream.Position);
                     }
 
                     result.raw = "\\x" + number;
@@ -409,12 +409,12 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 case Spec.EndOfStream: {
                     result.value += '\\';
                     result.raw   += '\\';
-                    Blame(BlameType.TruncatedEscapeSequence, startPosition, Stream.Position);
+                    unit.Blame(BlameType.TruncatedEscapeSequence, startPosition, stream.Position);
                     return result;
                 }
                 // not a valid escape seq.
                 default: {
-                    Blame(BlameType.InvalidEscapeSequence, startPosition, Stream.Position);
+                    unit.Blame(BlameType.InvalidEscapeSequence, startPosition, stream.Position);
                     result.value += "\\" + c;
                     result.raw   += "\\" + c;
                     return result;

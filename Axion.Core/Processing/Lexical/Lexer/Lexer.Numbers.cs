@@ -10,23 +10,23 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             NumberOptions numberOptions;
             if (c == '0') {
                 tokenValue.Append("0");
-                Stream.Move();
+                stream.Move();
 
                 bool isOnBaseLetter;
                 // on second char (base letter, determines radix)
                 if (c == 'b' || c == 'B') {
                     tokenValue.Append(c);
-                    Stream.Move();
+                    stream.Move();
                     numberOptions = ReadBinaryNumber(out isOnBaseLetter);
                 }
                 else if (c == 'o' || c == 'O') {
                     tokenValue.Append(c);
-                    Stream.Move();
+                    stream.Move();
                     numberOptions = ReadOctalNumber(out isOnBaseLetter);
                 }
                 else if (c == 'x' || c == 'X') {
                     tokenValue.Append(c);
-                    Stream.Move();
+                    stream.Move();
                     numberOptions = ReadHexNumber(out isOnBaseLetter);
                 }
                 else {
@@ -35,17 +35,17 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     // skip leading zeros
                     while (c == '0') {
                         tokenValue.Append("0");
-                        Stream.Move();
+                        stream.Move();
                     }
                     numberOptions = ReadDecimalNumber(true);
                 }
 
                 // '0x', '0b', '0o'
                 if (isOnBaseLetter) {
-                    Blame(
+                    unit.Blame(
                         BlameType.ExpectedNumberValueAfterNumberBaseSpecifier,
                         tokenStartPosition,
-                        Stream.Position
+                        stream.Position
                     );
                 }
             }
@@ -71,8 +71,8 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 }
                 else if (c != '_') {
                     if (c == '.') {
-                        Position dotPosition = Stream.Position;
-                        if (!char.IsDigit(Stream.Peek)) {
+                        Position dotPosition = stream.Position;
+                        if (!char.IsDigit(stream.Peek)) {
                             // found non-digit after dot: '.' is operator on some number.
                             // leaving '.' to next token.
                             break;
@@ -80,11 +80,11 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         // if found second dot in number
                         if (numberOptions.Floating) {
                             tokenValue.Append(c);
-                            Stream.Move();
-                            Blame(
+                            stream.Move();
+                            unit.Blame(
                                 BlameType.RepeatedDotInNumberLiteral,
                                 dotPosition,
-                                Stream.Position
+                                stream.Position
                             );
                         }
                         else {
@@ -102,11 +102,11 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     }
                     else {
                         // invalid
-                        Blame(BlameType.InvalidNumberLiteral, tokenStartPosition, Stream.Position);
+                        unit.Blame(BlameType.InvalidNumberLiteral, tokenStartPosition, stream.Position);
                     }
                 }
                 tokenValue.Append(c);
-                Stream.Move();
+                stream.Move();
             }
             return numberOptions;
         }
@@ -161,12 +161,12 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                             return numberOptions;
                         }
                         // invalid
-                        Blame(BlameType.InvalidBinaryLiteral, tokenStartPosition, Stream.Position);
+                        unit.Blame(BlameType.InvalidBinaryLiteral, tokenStartPosition, stream.Position);
                         break;
                     }
                 }
                 tokenValue.Append(c);
-                Stream.Move();
+                stream.Move();
                 isOnBaseLetter = false;
             }
             return numberOptions;
@@ -186,10 +186,10 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         break;
                     }
                     // invalid
-                    Blame(BlameType.InvalidOctalLiteral, tokenStartPosition, Stream.Position);
+                    unit.Blame(BlameType.InvalidOctalLiteral, tokenStartPosition, stream.Position);
                 }
                 tokenValue.Append(c);
-                Stream.Move();
+                stream.Move();
                 isOnBaseLetter = false;
             }
             return numberOptions;
@@ -209,17 +209,17 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         break;
                     }
                     // invalid
-                    Blame(BlameType.InvalidHexadecimalLiteral, tokenStartPosition, Stream.Position);
+                    unit.Blame(BlameType.InvalidHexadecimalLiteral, tokenStartPosition, stream.Position);
                 }
                 tokenValue.Append(c);
-                Stream.Move();
+                stream.Move();
                 isOnBaseLetter = false;
             }
             return numberOptions;
         }
 
         private void ReadExponent(in NumberOptions numberOptions) {
-            Position ePosition = Stream.Position;
+            Position ePosition = stream.Position;
             // c == 'e'
             // check for '0'
             string num  = tokenValue.ToString().Replace("_", "").Trim('0');
@@ -229,10 +229,10 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             var hasValue   = false;
             var hasPostfix = false;
             tokenValue.Append(c);
-            Stream.Move();
+            stream.Move();
 
             if (zero) {
-                Blame(BlameType.RedundantExponentForZeroNumber, ePosition, Stream.Position);
+                unit.Blame(BlameType.RedundantExponentForZeroNumber, ePosition, stream.Position);
             }
 
             var eValue = "";
@@ -241,7 +241,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     eValue += c;
                 }
                 tokenValue.Append(c);
-                Stream.Move();
+                stream.Move();
             }
 
             while (Spec.IsLetterOrNumberPart(c)) {
@@ -255,15 +255,15 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 }
                 else if (c != '_') {
                     // invalid
-                    Blame(BlameType.ExpectedNumberAfterExponentSign, ePosition, Stream.Position);
+                    unit.Blame(BlameType.ExpectedNumberAfterExponentSign, ePosition, stream.Position);
                     break;
                 }
                 tokenValue.Append(c);
-                Stream.Move();
+                stream.Move();
             }
 
             if (!hasValue) {
-                Blame(BlameType.ExpectedNumberAfterExponentSign, ePosition, Stream.Position);
+                unit.Blame(BlameType.ExpectedNumberAfterExponentSign, ePosition, stream.Position);
             }
             else {
                 numberOptions.Exponent = int.Parse(eValue);
@@ -279,13 +279,13 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         #region Postfixes
 
         private void ReadNumberPostfix(in NumberOptions numberOptions, bool isOnBaseLetter) {
-            Position postfixPosition = Stream.Position;
+            Position postfixPosition = stream.Position;
             // c is letter here
             if (isOnBaseLetter) {
-                Blame(
+                unit.Blame(
                     BlameType.ExpectedNumberValueAfterNumberBaseSpecifier,
                     tokenStartPosition,
-                    Stream.Position
+                    stream.Position
                 );
             }
 
@@ -296,16 +296,16 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             );
 
             if (Spec.IsLetterOrNumberPart(c) && expectingEndOfNumber) {
-                Blame(BlameType.ExpectedEndOfNumberAfterPostfix, postfixPosition, Stream.Position);
+                unit.Blame(BlameType.ExpectedEndOfNumberAfterPostfix, postfixPosition, stream.Position);
             }
             else if (char.IsDigit(c)) {
-                Position bitRatePosition = Stream.Position;
+                Position bitRatePosition = stream.Position;
                 // Reading number bit rate
                 var bitRateStr = "";
                 while (char.IsDigit(c)) {
                     tokenValue.Append(c);
                     bitRateStr += c;
-                    Stream.Move();
+                    stream.Move();
                 }
 
                 numberOptions.Bits = int.Parse(bitRateStr);
@@ -313,32 +313,32 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 // check for invalid bit rates
                 if (numberOptions.Floating) {
                     if (!Spec.FloatBitRates.Contains(numberOptions.Bits)) {
-                        Blame(
+                        unit.Blame(
                             BlameType.InvalidFloatNumberBitRate,
                             bitRatePosition,
-                            Stream.Position
+                            stream.Position
                         );
                     }
                 }
                 else if (!Spec.IntegerBitRates.Contains(numberOptions.Bits)) {
-                    Blame(BlameType.InvalidIntegerNumberBitRate, bitRatePosition, Stream.Position);
+                    unit.Blame(BlameType.InvalidIntegerNumberBitRate, bitRatePosition, stream.Position);
                 }
 
                 if (char.IsLetter(c) || c == '_') {
                     // number can't be followed by these characters
-                    Blame(
+                    unit.Blame(
                         BlameType.ExpectedEndOfNumberAfterPostfix,
                         postfixPosition,
-                        Stream.Position
+                        stream.Position
                     );
                 }
             }
             else if (bitRateRequired) {
                 // expected digit after num 'i#' postfix
-                Blame(
+                unit.Blame(
                     BlameType.ExpectedABitRateAfterNumberPostfix,
                     postfixPosition,
-                    Stream.Position
+                    stream.Position
                 );
             }
         }
@@ -376,7 +376,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         numberOptions.Value = result;
                     }
                     else {
-                        Blame(BlameType.InvalidNumberLiteral, tokenStartPosition, Stream.Position);
+                        unit.Blame(BlameType.InvalidNumberLiteral, tokenStartPosition, stream.Position);
                     }
                     return;
                 }
@@ -394,25 +394,25 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                         numberOptions.Value = new Complex(0.0, imag);
                     }
                     else {
-                        Blame(
+                        unit.Blame(
                             BlameType.InvalidComplexNumberLiteral,
                             tokenStartPosition,
-                            Stream.Position
+                            stream.Position
                         );
                     }
                     break;
                 }
                 default: {
-                    Blame(
+                    unit.Blame(
                         BlameType.InvalidPostfixInNumberLiteral,
                         tokenStartPosition,
-                        Stream.Position
+                        stream.Position
                     );
                     return;
                 }
             }
             tokenValue.Append(c);
-            Stream.Move();
+            stream.Move();
         }
 
         #endregion

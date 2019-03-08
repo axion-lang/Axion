@@ -22,6 +22,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         OpSubtract,
         OpLeftShift,
         OpRightShift,
+        OpThreeWayCompare,
         OpLessThan,
         OpLessThanOrEqual,
         OpGreaterThan,

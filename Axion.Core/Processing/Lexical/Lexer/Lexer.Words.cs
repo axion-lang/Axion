@@ -10,40 +10,38 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         ///     Otherwise, returns identifier token.
         /// </summary>
         private Token ReadWord() {
-            // don't use StringBuilder, IDs
-            // are mostly < 50 characters length.
+            // don't use StringBuilder, language
+            // words are mostly too short.
             string id = "" + c;
-            Stream.Move();
+            stream.Move();
             while (Spec.IsValidIdChar(c)) {
                 id += c;
-                Stream.Move();
+                stream.Move();
             }
 
             // remove trailing restricted endings
             tokenValue.Append(id.TrimEnd(Spec.RestrictedIdentifierEndings));
             int explicitIdPartLength = id.Length - tokenValue.Length;
             if (explicitIdPartLength != 0) {
-                Stream.Move(-explicitIdPartLength);
+                stream.Move(-explicitIdPartLength);
             }
 
             if (Spec.Keywords.TryGetValue(tokenValue.ToString(), out TokenType kwType)) {
-                if (Tokens.Count > 0) {
-                    Token last = Tokens[Tokens.Count - 1];
+                if (tokens.Count > 0) {
+                    Token last = tokens[tokens.Count - 1];
                     // is not
                     if (last.Type == TokenType.KeywordIs && kwType == TokenType.KeywordNot) {
-                        Tokens[Tokens.Count - 1] = new KeywordToken(
-                            TokenType.KeywordIsNot,
+                        tokens[tokens.Count - 1] = new OperatorToken(
                             last.Span.StartPosition,
-                            value: last.Value + last.Whitespaces + tokenValue
+                            Spec.OperatorIsNot
                         );
                         return null;
                     }
                     // not in
                     if (last.Type == TokenType.KeywordNot && kwType == TokenType.KeywordIn) {
-                        Tokens[Tokens.Count - 1] = new KeywordToken(
-                            TokenType.KeywordNotIn,
+                        tokens[tokens.Count - 1] = new OperatorToken(
                             last.Span.StartPosition,
-                            value: last.Value + last.Whitespaces + tokenValue
+                            Spec.OperatorNotIn
                         );
                         return null;
                     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using Axion.Core.Processing.Errors;
@@ -10,8 +11,6 @@ using Axion.Core.Processing.Syntax.Tree;
 using Axion.Core.Specification;
 using ConsoleExtensions;
 using Newtonsoft.Json;
-using static Axion.Core.Processing.SourceProcessingMode;
-using static Axion.Core.Processing.SourceProcessingOptions;
 
 namespace Axion.Core.Processing {
     /// <summary>
@@ -45,6 +44,12 @@ namespace Axion.Core.Processing {
         /// </summary>
         [JsonProperty]
         public readonly List<Exception> Blames = new List<Exception>();
+        
+        
+        [JsonProperty]
+        public SourceProcessingOptions Options { get; internal set; }
+
+        #region Constructors
 
         /// <summary>
         ///     Creates new [<see cref="SourceUnit" />] instance
@@ -100,14 +105,13 @@ namespace Axion.Core.Processing {
             Code       = string.Join("\n", sourceLines) + "\n";
         }
 
-        [JsonProperty]
-        public SourceProcessingOptions Options { get; private set; }
+        #endregion
 
         /// <summary>
         ///     Performs [<see cref="SourceUnit" />] processing
         ///     with [<see cref="mode" />] and [<see cref="options" />].
         /// </summary>
-        public void Process(SourceProcessingMode mode, SourceProcessingOptions options = None) {
+        public void Process(SourceProcessingMode mode, SourceProcessingOptions options = SourceProcessingOptions.None) {
             Options = options;
             ConsoleUI.LogInfo($"- Compiling '{SourceFileName}'");
             if (Code.Length == 0) {
@@ -115,20 +119,20 @@ namespace Axion.Core.Processing {
                 FinishCompilation();
                 return;
             }
-            // [1] Tokenizing
-            Tokenizing();
-            if (mode == Lex) {
+            // [1] Lexical analysis
+            LexicalAnalysis();
+            if (mode == SourceProcessingMode.Lex) {
                 FinishCompilation();
                 return;
             }
             // [2] Parsing
             ParseAst();
-            if (mode == Parsing) {
+            if (mode == SourceProcessingMode.Parsing) {
                 FinishCompilation();
                 return;
             }
             // [3] Show AST
-            if (options.HasFlag(ShowAstJson)) {
+            if (options.HasFlag(SourceProcessingOptions.ShowAstJson)) {
                 string json = JsonConvert.SerializeObject(SyntaxTree, Compiler.JsonSerializer);
                 ConsoleUI.WriteLine(
                     Regex.Replace(json, @"\$type.+?(\w+?),.*\""", "$type\": \"$1\"")
@@ -168,23 +172,23 @@ namespace Axion.Core.Processing {
             OutputFilePath = outFilePath;
         }
 
-        private void Tokenizing() {
+        private void LexicalAnalysis() {
             ConsoleUI.LogInfo("--- Tokens list generation");
-            new Lexer(Code, Tokens, Blames, Options).Process();
+            new Lexer(this).Process();
         }
 
         private void ParseAst() {
             ConsoleUI.LogInfo("--- Abstract Syntax Tree generation");
-            new SyntaxParser(Tokens, SyntaxTree, Blames).Process();
+            new SyntaxParser(this).Process();
         }
 
         private void GenerateCode(SourceProcessingMode mode) {
             switch (mode) {
-                case Interpret: {
+                case SourceProcessingMode.Interpret: {
                     ConsoleUI.LogError("Interpretation support is in progress!");
                     break;
                 }
-                case ConvertC: {
+                case SourceProcessingMode.ConvertC: {
                     ConsoleUI.LogError("Transpiling to 'C' is not implemented yet.");
                     break;
                 }
@@ -196,7 +200,7 @@ namespace Axion.Core.Processing {
         }
 
         private void FinishCompilation() {
-            if (Options.HasFlag(SyntaxAnalysisDebugOutput)) {
+            if (Options.HasFlag(SourceProcessingOptions.SyntaxAnalysisDebugOutput)) {
                 ConsoleUI.LogInfo($"--- Saving debugging information to '{DebugFilePath}'");
                 SaveDebugInfoToFile();
             }
@@ -259,6 +263,31 @@ namespace Axion.Core.Processing {
         ///     Path to file where processing debug output is located.
         /// </summary>
         internal string DebugFilePath { get; private set; }
+
+        #endregion
+
+        #region Errors reporting
+
+        internal void ReportError(string message, SpannedRegion mark) {
+            Blames.Add(
+                new LanguageException(
+                    new Blame(message, BlameSeverity.Error, mark.Span),
+                    this
+                )
+            );
+        }
+
+        internal void Blame(BlameType type, SpannedRegion region) {
+            Blame(type, region.Span.StartPosition, region.Span.EndPosition);
+        }
+
+        internal void Blame(BlameType type, Position start, Position end) {
+            Debug.Assert(type != BlameType.None);
+
+            Blames.Add(
+                new LanguageException(new Blame(type, Spec.Blames[type], start, end), this)
+            );
+        }
 
         #endregion
     }

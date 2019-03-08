@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using Axion.Core.Processing;
 using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Lexical.Lexer;
 using Axion.Core.Processing.Lexical.Tokens;
@@ -31,19 +32,18 @@ namespace Axion.Core.Visual {
         ///     Errors and warnings occurred during code analysis.
         /// </param>
         public List<ColoredValue> Highlight(
-            IEnumerable<string> codeLines,
-            out Point           lastRenderEndPosition,
-            List<Exception>     blames
+            List<string>    codeLines,
+            out Point       lastRenderEndPosition,
+            List<Exception> blames
         ) {
             renderPosition = lastRenderEndPosition;
-            var stream = new CharStream(codeLines);
-            var tokens = new List<Token>();
-            var lexer  = new Lexer(stream, tokens, blames);
+            var unit = new SourceUnit(codeLines.ToArray());
+            var lexer  = new Lexer(unit);
             lexer.Process();
 
             var values = new List<ColoredValue>();
 
-            HighlightTokens(tokens, values, false);
+            HighlightTokens(unit.Tokens, values, false);
             MergeNeighbourColors(values);
 
             lastRenderEndPosition = renderPosition;

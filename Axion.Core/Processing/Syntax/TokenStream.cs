@@ -12,11 +12,11 @@ namespace Axion.Core.Processing.Syntax {
         /// </summary>
         internal readonly List<Token> Tokens;
 
-        private readonly ParserBase parser;
+        private readonly SyntaxParser parser;
 
         private bool inOneLineMode;
 
-        public TokenStream(ParserBase parser, List<Token> tokens) {
+        public TokenStream(SyntaxParser parser, List<Token> tokens) {
             this.parser = parser;
             Tokens      = tokens;
         }

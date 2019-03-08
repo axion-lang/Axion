@@ -18,8 +18,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
             trailingComma = false;
             do {
                 list.Add(ParseTestExpr());
-                trailingComma = Stream.MaybeEat(Comma);
-            } while (trailingComma && !Stream.PeekIs(Spec.NeverTestTypes));
+                trailingComma = stream.MaybeEat(Comma);
+            } while (trailingComma && !stream.PeekIs(Spec.NeverTestTypes));
             return list;
         }
 
@@ -31,25 +31,25 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Expression ParseTestList(bool allowEmpty = false) {
-            bool       parens = Stream.MaybeEat(LeftParenthesis);
+            bool       parens = stream.MaybeEat(LeftParenthesis);
             Expression expr   = null;
-            if (Stream.PeekIs(Spec.NeverTestTypes)) {
+            if (stream.PeekIs(Spec.NeverTestTypes)) {
                 if (!allowEmpty) {
-                    ReportError("Invalid expression.", Stream.Peek);
+                    unit.ReportError("Invalid expression.", stream.Peek);
                     expr = Error();
-                    Stream.NextToken();
+                    stream.NextToken();
                 }
             }
             else {
                 expr = ParseTestExpr();
-                if (Stream.MaybeEat(Comma)) {
+                if (stream.MaybeEat(Comma)) {
                     List<Expression> list = ParseTestList(out bool trailingComma);
                     list.Insert(0, expr);
                     expr = MakeTupleOrExpr(list, trailingComma);
                 }
             }
             if (parens) {
-                Stream.Eat(RightParenthesis);
+                stream.Eat(RightParenthesis);
             }
             return expr;
         }
@@ -69,19 +69,19 @@ namespace Axion.Core.Processing.Syntax.Parser {
             var list = new List<Expression>();
 
             do {
-                if (Stream.MaybeEat(LeftParenthesis, LeftBracket)) {
-                    var brace = (SymbolToken) Stream.Token;
+                if (stream.MaybeEat(LeftParenthesis, LeftBracket)) {
+                    var brace = (SymbolToken) stream.Token;
 
                     // parenthesis_form | generator_expr
                     list.Add(MakeTupleOrExpr(ParseTargetList(out trailingComma), trailingComma));
-                    Stream.Eat(brace.GetMatchingBrace());
+                    stream.Eat(brace.GetMatchingBrace());
                 }
                 else {
                     list.Add(ParseTrailingExpr(ParsePrimaryExpr(), false));
                 }
 
-                trailingComma = Stream.MaybeEat(Comma);
-            } while (trailingComma && !Stream.PeekIs(Spec.NeverTestTypes));
+                trailingComma = stream.MaybeEat(Comma);
+            } while (trailingComma && !stream.PeekIs(Spec.NeverTestTypes));
 
             return list;
         }

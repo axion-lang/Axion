@@ -12,10 +12,18 @@ namespace Axion.Core.Processing.Lexical.Lexer {
     ///     Static tool for splitting Axion
     ///     code into list of tokens.
     /// </summary>
-    public partial class Lexer : LexerBase {
+    public partial class Lexer {
         #region Current source properties
 
-        private char c => Stream.C;
+        private readonly SourceUnit  unit;
+        private readonly List<Token> tokens;
+
+        /// <summary>
+        ///     Current processing stream.
+        /// </summary>
+        private CharStream stream;
+
+        private char c => stream.C;
 
         /// <summary>
         ///     Contains values, from which lexer should stop working.
@@ -25,17 +33,17 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         /// <summary>
         ///     Contains all unclosed multiline comments found.
         /// </summary>
-        private List<MultilineCommentToken> _unclosedMultilineComments { get; set; }
+        private List<MultilineCommentToken> unclosedMultilineComments { get; set; }
 
         /// <summary>
         ///     Contains all unclosed strings found in source code.
         /// </summary>
-        private List<StringToken> _unclosedStrings { get; set; }
+        private List<StringToken> unclosedStrings { get; set; }
 
         /// <summary>
         ///     Contains unpaired parenthesis, brackets and braces.
         /// </summary>
-        private List<Token> _mismatchingPairs { get; } = new List<Token>();
+        private List<Token> mismatchingPairs { get; } = new List<Token>();
 
         #endregion
 
@@ -55,21 +63,21 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
         #region Constructors
 
-        public Lexer(
-            string                  codeToProcess,
-            List<Token>             outTokens,
-            List<Exception>         outBlames,
-            SourceProcessingOptions processingOptions = SourceProcessingOptions.None
-        ) : base(codeToProcess, outTokens, outBlames, processingOptions) {
+        public Lexer(SourceUnit unit) {
+            this.unit = unit;
+            stream    = new CharStream(unit.Code);
+            tokens    = unit.Tokens;
             AddPresets();
         }
 
-        public Lexer(
-            CharStream              fromStream,
-            List<Token>             outTokens,
-            List<Exception>         outBlames,
-            SourceProcessingOptions processingOptions = SourceProcessingOptions.None
-        ) : base(fromStream, outTokens, outBlames, processingOptions) {
+        private Lexer(
+            SourceUnit  unit,
+            CharStream  fromStream,
+            List<Token> outTokens
+        ) {
+            this.unit = unit;
+            stream    = new CharStream(fromStream);
+            tokens    = outTokens ?? new List<Token>();
             AddPresets();
         }
 
@@ -79,18 +87,18 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         ///     Divides code into list of tokens.
         /// </summary>
         public void Process() {
-            if (string.IsNullOrWhiteSpace(Stream.Source)) {
+            if (string.IsNullOrWhiteSpace(stream.Source)) {
                 return;
             }
-            
+
             Token token = null;
             // at first, check if we're after unclosed string
-            if (_unclosedStrings.Count > 0) {
+            if (unclosedStrings.Count > 0) {
                 token = ReadString(true);
             }
 
             // then, check if we're after unclosed multiline comment
-            if (_unclosedMultilineComments.Count > 0) {
+            if (unclosedMultilineComments.Count > 0) {
                 token = ReadMultilineComment();
             }
 
@@ -100,7 +108,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             while (true) {
                 if (token != null) {
-                    Tokens.Add(token);
+                    tokens.Add(token);
                     // check for processing terminator
                     if (token.Type == TokenType.EndOfCode
                         || processingTerminators.Contains(token.Value)) {
@@ -113,7 +121,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             #region Process mismatches
 
-            foreach (Token mismatch in _mismatchingPairs) {
+            foreach (Token mismatch in mismatchingPairs) {
                 BlameType errorType;
                 switch (mismatch.Type) {
                     case TokenType.LeftParenthesis:
@@ -134,7 +142,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     default: {
                         throw new NotSupportedException(
                             "Internal error: "
-                            + nameof(_mismatchingPairs)
+                            + nameof(mismatchingPairs)
                             + " grabbed invalid "
                             + nameof(TokenType)
                             + ": "
@@ -143,38 +151,41 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     }
                 }
 
-                Blame(errorType, mismatch.Span.StartPosition, mismatch.Span.EndPosition);
+                unit.Blame(errorType, mismatch.Span.StartPosition, mismatch.Span.EndPosition);
             }
 
             #endregion
         }
 
         private void AddPresets(
-            List<MultilineCommentToken> unclosedMultilineComments = null,
-            List<StringToken>           unclosedStrings           = null,
-            string[]                    processTerminators        = null
+            List<MultilineCommentToken> unclosedMultilineComments_ = null,
+            List<StringToken>           unclosedStrings_           = null,
+            string[]                    processTerminators_        = null
         ) {
-            _unclosedStrings = unclosedStrings ?? new List<StringToken>();
-            _unclosedMultilineComments =
-                unclosedMultilineComments ?? new List<MultilineCommentToken>();
-            processingTerminators = processTerminators ?? new string[0];
+            unclosedStrings =
+                unclosedStrings_ ?? new List<StringToken>();
+            unclosedMultilineComments =
+                unclosedMultilineComments_ ?? new List<MultilineCommentToken>();
+            processingTerminators =
+                processTerminators_ ?? new string[0];
         }
 
         /// <summary>
+        /// <c>
         ///     Reads next token from character stream.
-        ///     <para />
-        ///     Every time that method invoked, <see cref="CharStream.C" />
+        ///     Every time that method invoked, CharStream.C
         ///     property should be on first letter of current new reading token.
+        /// </c>
         /// </summary>
         private Token NextToken() {
             // reset token properties
-            tokenStartPosition = Stream.Position;
+            tokenStartPosition = stream.Position;
             tokenValue.Clear();
 
 #if DEBUG
-            if (Tokens.Count != 0
-                && Tokens[Tokens.Count - 1].Type != TokenType.Outdent) {
-                Token last = Tokens[Tokens.Count - 1];
+            if (tokens.Count != 0
+                && tokens[tokens.Count - 1].Type != TokenType.Outdent) {
+                Token last = tokens[tokens.Count - 1];
                 Debug.Assert(
                     tokenStartPosition
                     == (last.Span.EndPosition.Line,
@@ -188,7 +199,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             }
 
             if (c == '\r') {
-                Stream.Move();
+                stream.Move();
                 if (c == '\n') {
                     tokenValue.Append('\r');
                 }
@@ -211,7 +222,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             if (c.ToString() == Spec.SingleCommentStart) {
                 // one-line comment
-                if (c.ToString() + Stream.Peek == Spec.MultiCommentStart) {
+                if (c.ToString() + stream.Peek == Spec.MultiCommentStart) {
                     // multiline comment
                     return ReadMultilineComment();
                 }
@@ -241,8 +252,8 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             // invalid
             tokenValue.Append(c);
-            Stream.Move();
-            Blame(BlameType.InvalidSymbol, tokenStartPosition, Stream.Position);
+            stream.Move();
+            unit.Blame(BlameType.InvalidSymbol, tokenStartPosition, stream.Position);
             return new Token(TokenType.Invalid, tokenStartPosition, tokenValue.ToString());
         }
     }

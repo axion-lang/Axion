@@ -53,7 +53,7 @@ namespace Axion.Core.Processing.Errors {
             // Error: Mismatching parenthesis.
 
             // |   1 | func("string",
-            //             ^
+            // ------------^
             // |   2 |      'c',
             // |   3 |      123
             // ...

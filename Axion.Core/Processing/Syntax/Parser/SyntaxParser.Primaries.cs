@@ -21,10 +21,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Expression ParsePrimaryExpr() {
-            Token token = Stream.Peek;
+            Token token = stream.Peek;
             switch (token.Type) {
                 case TokenType.Identifier: {
-                    Stream.NextToken();
+                    stream.NextToken();
                     return new NameExpression(token);
                 }
                 case TokenType.LeftParenthesis: {
@@ -38,11 +38,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
                 default: {
                     if (Spec.ConstantValueTypes.Contains(token.Type)) {
-                        Stream.NextToken();
+                        stream.NextToken();
                         // TODO add pre-concatenation of literals
                         return new ConstantExpression(token);
                     }
-                    ReportError(Spec.ERR_PrimaryExpected, token);
+                    unit.ReportError(Spec.ERR_PrimaryExpected, token);
                     return Error();
                 }
             }
@@ -60,22 +60,22 @@ namespace Axion.Core.Processing.Syntax.Parser {
             Position start = StartExprOrStmt(TokenType.LeftParenthesis).Span.StartPosition;
 
             Expression result;
-            if (Stream.PeekIs(TokenType.RightParenthesis)) {
+            if (stream.PeekIs(TokenType.RightParenthesis)) {
                 result = new TupleExpression(false, new Expression[0]);
             }
             // yield_expr
-            else if (Stream.PeekIs(TokenType.KeywordYield)) {
+            else if (stream.PeekIs(TokenType.KeywordYield)) {
                 result = ParseYield();
             }
             else {
                 Expression expr = ParseExpression();
                 // tuple
-                if (Stream.MaybeEat(TokenType.Comma)) {
+                if (stream.MaybeEat(TokenType.Comma)) {
                     // '(' expr ',' ...
                     result = ParseTestList();
                 }
                 // generator_expr
-                else if (Stream.PeekIs(TokenType.KeywordFor)) {
+                else if (stream.PeekIs(TokenType.KeywordFor)) {
                     // '(' expr 'for' ...
                     result = ParseGeneratorExpr(expr);
                 }
@@ -87,7 +87,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                                  : new ParenthesisExpression(expr);
                 }
             }
-            Stream.Eat(TokenType.RightParenthesis);
+            stream.Eat(TokenType.RightParenthesis);
             result.MarkPosition(start, tokenEnd);
             return result;
         }
@@ -102,10 +102,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private Expression ParseGeneratorExpr(Expression expr) {
             var comprehensions = new List<ComprehensionIterator> { ParseComprehensionFor() };
             while (true) {
-                if (Stream.PeekIs(TokenType.KeywordFor)) {
+                if (stream.PeekIs(TokenType.KeywordFor)) {
                     comprehensions.Add(ParseComprehensionFor());
                 }
-                else if (Stream.PeekIs(TokenType.KeywordIf)) {
+                else if (stream.PeekIs(TokenType.KeywordIf)) {
                     comprehensions.Add(ParseComprehensionIf());
                 }
                 else {
@@ -126,17 +126,17 @@ namespace Axion.Core.Processing.Syntax.Parser {
             Position start = StartExprOrStmt(TokenType.LeftBracket).Span.StartPosition;
 
             var expressions = new List<Expression>();
-            if (!Stream.MaybeEat(TokenType.RightBracket)) {
+            if (!stream.MaybeEat(TokenType.RightBracket)) {
                 expressions.Add(ParseTestExpr());
-                if (Stream.MaybeEat(TokenType.Comma)) {
+                if (stream.MaybeEat(TokenType.Comma)) {
                     expressions.AddRange(ParseTestList(out bool _));
                 }
-                else if (Stream.PeekIs(TokenType.KeywordFor)) {
+                else if (stream.PeekIs(TokenType.KeywordFor)) {
                     ComprehensionIterator[] iterators = ParseComprehensionIterators();
-                    Stream.Eat(TokenType.RightBracket);
+                    stream.Eat(TokenType.RightBracket);
                     return new ListComprehension(expressions[0], iterators, start, tokenEnd);
                 }
-                Stream.Eat(TokenType.RightBracket);
+                stream.Eat(TokenType.RightBracket);
             }
             return new ListExpression((start, tokenEnd), expressions.ToArray());
         }
@@ -161,14 +161,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
             List<SliceExpression> mapMembers = null;
             List<Expression>      setMembers = null;
 
-            while (!Stream.MaybeEat(TokenType.RightBrace)) {
+            while (!stream.MaybeEat(TokenType.RightBrace)) {
                 var        first     = false;
                 Expression itemPart1 = ParseTestExpr();
 
                 // map item (expr : expr)
-                if (Stream.MaybeEat(TokenType.Colon)) {
+                if (stream.MaybeEat(TokenType.Colon)) {
                     if (setMembers != null) {
-                        ReportError("Single expression expected", Stream.Token);
+                        unit.ReportError("Single expression expected", stream.Token);
                     }
                     else if (mapMembers == null) {
                         mapMembers = new List<SliceExpression>();
@@ -176,11 +176,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     }
                     Expression itemPart2 = ParseTestExpr();
                     // map generator: { key: value for (key, value) in iterable }
-                    if (Stream.PeekIs(TokenType.KeywordFor)) {
+                    if (stream.PeekIs(TokenType.KeywordFor)) {
                         if (!first) {
-                            ReportError(
+                            unit.ReportError(
                                 "Generator can only be used as single map item",
-                                Stream.Token
+                                stream.Token
                             );
                         }
                         return FinishMapComprehension(itemPart1, itemPart2, start);
@@ -190,18 +190,18 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 // set item (expr)
                 else {
                     if (mapMembers != null) {
-                        ReportError("'Key : Value' expression expected", Stream.Token);
+                        unit.ReportError("'Key : Value' expression expected", stream.Token);
                     }
                     else if (setMembers == null) {
                         setMembers = new List<Expression>();
                         first      = true;
                     }
                     // set generator: { x * 2 for x in { 1, 2, 3 } }
-                    if (Stream.PeekIs(TokenType.KeywordFor)) {
+                    if (stream.PeekIs(TokenType.KeywordFor)) {
                         if (!first) {
-                            ReportError(
+                            unit.ReportError(
                                 "Generator can only be used as single set item",
-                                Stream.Token
+                                stream.Token
                             );
                         }
                         return FinishSetComprehension(itemPart1, start);
@@ -209,8 +209,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     setMembers?.Add(itemPart1);
                 }
 
-                if (!Stream.MaybeEat(TokenType.Comma)) {
-                    Stream.Eat(TokenType.RightBrace);
+                if (!stream.MaybeEat(TokenType.Comma)) {
+                    stream.Eat(TokenType.RightBrace);
                     break;
                 }
             }
