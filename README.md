@@ -139,8 +139,3 @@ about arguments for compiler CLI interface.
 	collection = { int, str }
 	collection = { 1: "Text1", 2: "Hello, world!", 55: "Other string" }
 	```
-
-### Licensed code usage:
-
-- **This project uses some code from [IronPython 2 compiler](https://github.com/IronLanguages/ironpython2)
-   that is licensed under Apache License 2.0**
