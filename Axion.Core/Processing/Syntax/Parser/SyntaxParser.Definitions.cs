@@ -57,21 +57,22 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private TypeName ParseTypeName() {
             TypeName leftTypeName = null;
             // simple
-            if (stream.PeekIs(Identifier)) {
+            if (Stream.PeekIs(Identifier)) {
                 leftTypeName = new SimpleTypeName(ParseQualifiedName());
             }
             // tuples
-            else if (stream.MaybeEat(LeftParenthesis)) {
+            else if (Stream.MaybeEat(LeftParenthesis)) {
                 var types = new List<TypeName>();
-                if (!stream.MaybeEat(RightParenthesis)) {
+                if (!Stream.MaybeEat(RightParenthesis)) {
                     while (true) {
                         types.Add(ParseTypeName());
-                        if (!stream.MaybeEat(Comma)) {
-                            stream.Eat(RightParenthesis);
+                        if (!Stream.MaybeEat(Comma)) {
+                            Stream.Eat(RightParenthesis);
                             break;
                         }
                     }
                 }
+
                 if (types.Count == 1) {
                     leftTypeName = types[0];
                 }
@@ -79,28 +80,33 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     leftTypeName = new TupleTypeName(types.ToArray());
                 }
             }
+
             // trailing
             if (leftTypeName != null) {
                 // generic
-                if (stream.MaybeEat(OpLessThan)) {
+                if (Stream.MaybeEat(OpLessThan)) {
                     var generics = new List<TypeName>();
                     do {
                         generics.Add(ParseTypeName());
-                    } while (stream.MaybeEat(Comma));
-                    stream.Eat(OpGreaterThan);
+                    } while (Stream.MaybeEat(Comma));
+
+                    Stream.Eat(OpGreaterThan);
                     leftTypeName = new GenericTypeName(leftTypeName, generics.ToArray());
                 }
+
                 // array
-                if (stream.MaybeEat(LeftBracket)) {
-                    stream.Eat(RightBracket);
+                if (Stream.MaybeEat(LeftBracket)) {
+                    Stream.Eat(RightBracket);
                     leftTypeName = new ArrayTypeName(leftTypeName);
                 }
+
                 // union
-                if (stream.MaybeEat(OpBitwiseOr)) {
+                if (Stream.MaybeEat(OpBitwiseOr)) {
                     TypeName right = ParseTypeName();
                     leftTypeName = new UnionTypeName(leftTypeName, right);
                 }
             }
+
             return leftTypeName;
         }
 
@@ -109,10 +115,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private List<(NameExpression, TypeName)> ParseTypeArgs(bool allowNamed) {
             var   typeArgs = new List<(NameExpression, TypeName)>();
-            Token start    = stream.Peek;
+            Token start    = Stream.Peek;
             // '(' type (',' type)* ')'
-            if (stream.MaybeEat(LeftParenthesis)) {
-                if (stream.MaybeEat(RightParenthesis)) {
+            if (Stream.MaybeEat(LeftParenthesis)) {
+                if (Stream.MaybeEat(RightParenthesis)) {
                     // redundant parens
                     Blame(
                         BlameType.RedundantEmptyListOfTypeArguments,
@@ -123,24 +129,28 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 else {
                     do {
                         NameExpression name     = null;
-                        int            startIdx = stream.Index;
-                        if (stream.MaybeEat(Identifier)) {
-                            Token id = stream.Token;
-                            if (stream.MaybeEat(Assign)) {
+                        int            startIdx = Stream.Index;
+                        if (Stream.MaybeEat(Identifier)) {
+                            Token id = Stream.Token;
+                            if (Stream.MaybeEat(Assign)) {
                                 if (!allowNamed) {
                                     ReportError("Base of this type cannot be named.", id);
                                 }
+
                                 name = new NameExpression(id);
                             }
                             else {
-                                stream.MoveTo(startIdx);
+                                Stream.MoveTo(startIdx);
                             }
                         }
+
                         typeArgs.Add((name, ParseTypeName()));
-                    } while (stream.MaybeEat(Comma));
-                    stream.Eat(RightParenthesis);
+                    } while (Stream.MaybeEat(Comma));
+
+                    Stream.Eat(RightParenthesis);
                 }
             }
+
             return typeArgs;
         }
 
@@ -181,18 +191,21 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (name == null) {
                 return new EnumDefinition(start.Span.StartPosition, tokenEnd, null);
             }
+
             // TODO: support for functions in enums.
             TypeName[] bases = ParseTypeArgs(false).Select(it => it.Item2).ToArray();
             (TokenType terminator, _, bool error) = ParseBlockStart();
             var items = new List<EnumItem>();
-            
-            if (!stream.MaybeEat(KeywordPass) && !error) {
+
+            if (!Stream.MaybeEat(KeywordPass)
+                && !error) {
                 do {
                     items.Add(ParseEnumItem());
-                } while (!stream.MaybeEat(terminator)
-                      && !CheckUnexpectedEoc()
-                      && stream.MaybeEat(Comma));
+                } while (!Stream.MaybeEat(terminator)
+                         && !CheckUnexpectedEoc()
+                         && Stream.MaybeEat(Comma));
             }
+
             return new EnumDefinition(
                 start.Span.StartPosition,
                 tokenEnd,
@@ -209,16 +222,17 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private EnumItem ParseEnumItem() {
-            stream.MaybeEatNewline();
+            Stream.MaybeEatNewline();
             NameExpression                   name     = ParseName();
             List<(NameExpression, TypeName)> typeArgs = ParseTypeArgs(false);
             ConstantExpression               value    = null;
-            if (stream.MaybeEat(Assign)) {
+            if (Stream.MaybeEat(Assign)) {
                 value = ParsePrimaryExpr() as ConstantExpression;
                 if (value == null) {
-                    Blame(BlameType.ConstantValueExpected, stream.Token);
+                    Blame(BlameType.ConstantValueExpected, Stream.Token);
                 }
             }
+
             return new EnumItem(name, typeArgs.Select(it => it.Item2).ToArray(), value);
         }
 
@@ -239,7 +253,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
             // TODO: add generic classes
             if (name == null) {
                 // no name, assume there's no class.
-                return new ClassDefinition(null, new TypeName[0], new Expression[0], ErrorStmt());
+                return new ClassDefinition(
+                    null,
+                    new TypeName[0],
+                    new Expression[0],
+                    ErrorStmt()
+                );
             }
 
             Expression                       metaClass = null;
@@ -257,6 +276,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     }
                 }
             }
+
             BlockStatement block = ParseTopLevelBlock();
             var classDef = new ClassDefinition(
                 name,
@@ -285,11 +305,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
             Position   start    = StartExprOrStmt(KeywordFn).Span.StartPosition;
             Expression funcName = ParseQualifiedName();
             // parameters
-            stream.Eat(LeftParenthesis);
+            Stream.Eat(LeftParenthesis);
             Parameter[] parameters = ParseFunctionParameterList(RightParenthesis);
             // return type
             TypeName returnType = null;
-            if (stream.MaybeEat(RightFatArrow)) {
+            if (Stream.MaybeEat(RightFatArrow)) {
                 returnType = ParseTypeName();
             }
 
@@ -311,6 +331,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (names.Contains(name.Value)) {
                 Blame(BlameType.DuplicatedParameterNameInFunctionDefinition, name);
             }
+
             names.Add(name.Value);
         }
 
@@ -330,27 +351,28 @@ namespace Axion.Core.Processing.Syntax.Parser {
             // we want these to be the last two parameters
             Parameter listParameter = null;
             Parameter mapParameter  = null;
-            while (!stream.MaybeEat(terminator)) {
-                if (stream.MaybeEat(OpPower)) {
+            while (!Stream.MaybeEat(terminator)) {
+                if (Stream.MaybeEat(OpPower)) {
                     mapParameter = ParseParameter(names, ParameterKind.Map);
                     if (mapParameter == null) {
                         // no parameter name, syntax error
                         return new Parameter[0];
                     }
-                    stream.Eat(terminator);
+
+                    Stream.Eat(terminator);
                     break;
                 }
 
-                if (stream.MaybeEat(OpMultiply)) {
+                if (Stream.MaybeEat(OpMultiply)) {
                     if (readMultiply) {
                         ReportError(
                             "Invalid syntax (ALE-1, description_not_implemented)",
-                            stream.Peek
+                            Stream.Peek
                         );
                         return new Parameter[0];
                     }
 
-                    if (stream.PeekIs(Comma)) {
+                    if (Stream.PeekIs(Comma)) {
                         // "*"
                     }
                     else {
@@ -382,6 +404,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                             ref needDefault
                         );
                     }
+
                     if (parameter == null) {
                         // no parameter, syntax error
                         return new Parameter[0];
@@ -390,22 +413,23 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     parameters.Add(parameter);
                 }
 
-                if (!stream.MaybeEat(Comma)) {
-                    stream.Eat(terminator);
+                if (!Stream.MaybeEat(Comma)) {
+                    Stream.Eat(terminator);
                     break;
                 }
             }
 
             if (readMultiply
-             && listParameter == null
-             && mapParameter != null
-             && !hasKeywordOnlyParameter) {
-                ReportError("named arguments must follow bare *", stream.Token);
+                && listParameter == null
+                && mapParameter != null
+                && !hasKeywordOnlyParameter) {
+                ReportError("named arguments must follow bare *", Stream.Token);
             }
 
             if (listParameter != null) {
                 parameters.Add(listParameter);
             }
+
             if (mapParameter != null) {
                 parameters.Add(mapParameter);
             }
@@ -425,13 +449,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
             ref bool        needDefault
         ) {
             Parameter parameter = ParseParameter(names, parameterKind);
-            if (stream.MaybeEat(Assign)) {
+            if (Stream.MaybeEat(Assign)) {
                 needDefault            = true;
                 parameter.DefaultValue = ParseTestExpr();
             }
             else if (needDefault) {
-                Blame(BlameType.ExpectedDefaultParameterValue, stream.Token);
+                Blame(BlameType.ExpectedDefaultParameterValue, Stream.Token);
             }
+
             return parameter;
         }
 
@@ -442,15 +467,17 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Parameter ParseParameter(HashSet<string> names, ParameterKind parameterKind) {
-            if (!stream.EnsureNext(Identifier)) {
+            if (!Stream.EnsureNext(Identifier)) {
                 return null;
             }
+
             NameExpression name = ParseName();
             // type
             TypeName typeName = null;
-            if (stream.MaybeEat(Colon)) {
+            if (Stream.MaybeEat(Colon)) {
                 typeName = ParseTypeName();
             }
+
             var parameter = new Parameter(name, typeName, parameterKind);
             CheckUniqueParameter(names, parameter.Name.Name);
             return parameter;

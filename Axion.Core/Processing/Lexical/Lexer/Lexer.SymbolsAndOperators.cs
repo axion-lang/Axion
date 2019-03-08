@@ -34,7 +34,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     }
                     else if (token.IsCloseBrace) {
                         if (_mismatchingPairs.Count == 0) {
-                            // got mismatching close brace (closing without opening)
+                            // got closing without opening
                             _mismatchingPairs.Add(token);
                         }
                         else if (_mismatchingPairs.Last().Type == token.GetMatchingBrace()) {

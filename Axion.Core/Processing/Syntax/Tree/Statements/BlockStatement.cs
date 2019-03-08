@@ -19,14 +19,10 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
         }
 
         internal BlockStatement(Statement[] statements) {
-            if (statements.Length == 0) {
-                throw new ArgumentException(
-                    "Value cannot be an empty collection.",
-                    nameof(statements)
-                );
+            Statements = statements ?? throw new ArgumentNullException(nameof(statements));
+            if (statements.Length != 0) {
+                MarkPosition(statements[0], statements[statements.Length - 1]);
             }
-            Statements = statements;
-            MarkPosition(statements[0], statements[statements.Length - 1]);
         }
 
         internal override CodeObject[] ToCSharpArray() {

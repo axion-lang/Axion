@@ -43,8 +43,8 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 tokenValue.Append(c);
                 Stream.Move();
             }
-            if (tokens.Count > 0 && tokens[tokens.Count - 1].Type == TokenType.Newline) {
-                tokens[tokens.Count - 1].AppendValue(tokenValue.ToString());
+            if (Tokens.Count > 0 && Tokens[Tokens.Count - 1].Type == TokenType.Newline) {
+                Tokens[Tokens.Count - 1].AppendValue(tokenValue.ToString());
                 return null;
             }
             var endOfLineToken = new EndOfLineToken(tokenStartPosition, tokenValue.ToString());
@@ -55,12 +55,12 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             // if last newline doesn't starts
             // with whitespace - reset indentation to 0
             // add newline at first
-            tokens.Add(endOfLineToken);
+            Tokens.Add(endOfLineToken);
             tokenStartPosition = Stream.Position;
             // then add outdents
             lastIndentLength = 0;
             while (indentLevel > 0) {
-                tokens.Add(new OutdentToken(tokenStartPosition));
+                Tokens.Add(new OutdentToken(tokenStartPosition));
                 indentLevel--;
             }
             return null;
@@ -88,7 +88,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             // if it is 1st token,
             // set default indentation level.
             // TODO use another approach with indentation (leadingWhitespaces property)
-            if (tokens.Count == 0) {
+            if (Tokens.Count == 0) {
                 lastIndentLength = tokenValue.Length;
                 return new Token(
                     TokenType.Whitespace,
@@ -98,22 +98,22 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 );
             }
 
-            if (tokens[tokens.Count - 1].Type == TokenType.Newline) {
+            if (Tokens[Tokens.Count - 1].Type == TokenType.Newline) {
                 if (nextIsIndent) {
                     // handle empty string with whitespaces, make newline
                     if (restOfLine.Trim().Length == 0) {
                         tokenValue.Append(restOfLine);
                         Stream.Move(restOfLine.Length);
-                        tokens.Add(new EndOfLineToken(tokenStartPosition, tokenValue.ToString()));
+                        Tokens.Add(new EndOfLineToken(tokenStartPosition, tokenValue.ToString()));
                         tokenValue.Clear();
                         tokenStartPosition = Stream.Position;
                     }
                     return ReadIndentation();
                 }
-                tokens[tokens.Count - 1].AppendValue(tokenValue.ToString());
+                Tokens[Tokens.Count - 1].AppendValue(tokenValue.ToString());
             }
             else {
-                tokens[tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
+                Tokens[Tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
             }
             return null;
         }
@@ -154,15 +154,15 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             }
             else if (newIndentLength < lastIndentLength) {
                 // whitespace
-                if (tokens.Count > 0) {
+                if (Tokens.Count > 0) {
                     // append it to last token
-                    tokens[tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
+                    Tokens[Tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
                 }
 
                 int temp = newIndentLength;
                 while (temp < lastIndentLength) {
                     // indent decreased
-                    tokens.Add(new OutdentToken(tokenStartPosition));
+                    Tokens.Add(new OutdentToken(tokenStartPosition));
                     indentLevel--;
                     temp += oneIndentSize;
                 }
@@ -170,9 +170,9 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             }
             else {
                 // whitespace
-                if (tokens.Count > 0) {
+                if (Tokens.Count > 0) {
                     // append it to last token
-                    tokens[tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
+                    Tokens[Tokens.Count - 1].AppendWhitespace(tokenValue.ToString());
                 }
                 return null;
             }
@@ -180,10 +180,10 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
             // warn user about inconsistency
             if (inconsistentIndentation
-             && options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
+             && Options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
                 Blame(BlameType.InconsistentIndentation, tokenStartPosition, Stream.Position);
                 // ignore future warnings
-                options &= ~SourceProcessingOptions.CheckIndentationConsistency;
+                Options &= ~SourceProcessingOptions.CheckIndentationConsistency;
             }
             return indentationToken;
         }

@@ -240,7 +240,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                                 tempPosition,
                                 Stream.Position
                             );
-                            tokens.Add(new Token(TokenType.Identifier, tempPosition, c.ToString()));
+                            Tokens.Add(new Token(TokenType.Identifier, tempPosition, c.ToString()));
                             break;
                         }
                     }
@@ -251,9 +251,9 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     // remove last token - it is string prefix meant as identifier.
                     tokenStartPosition = new Position(
                         tokenStartPosition.Line,
-                        tokenStartPosition.Column - tokens[tokens.Count - 1].Value.Length
+                        tokenStartPosition.Column - Tokens[Tokens.Count - 1].Value.Length
                     );
-                    tokens.RemoveAt(tokens.Count - 1);
+                    Tokens.RemoveAt(Tokens.Count - 1);
                 }
 
                 delimiter        = c.ToString();
@@ -276,7 +276,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                                 Stream.Position
                             );
                         }
-                        tokens.Add(emptyString);
+                        Tokens.Add(emptyString);
                         return true;
                     }
                 }
@@ -296,7 +296,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             interpolations.Add(newInterpolation);
             // process interpolation
             {
-                var lexer = new Lexer(Stream, newInterpolation.Tokens, blames, options);
+                var lexer = new Lexer(Stream, newInterpolation.Tokens, Blames, Options);
                 lexer.AddPresets(processTerminators: new[] { "}" });
                 lexer.Stream.Move(); // skip '{'
                 lexer._mismatchingPairs.Add(new Token(TokenType.LeftBrace, Stream.Position, "{"));

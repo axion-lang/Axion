@@ -6,64 +6,56 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Lexer {
-    public abstract class AbstractLexer {
+    public class LexerBase {
         /// <summary>
         ///     Reference to outgoing <see cref="List{T}" /> of tokens.
         /// </summary>
-        protected readonly List<Token> tokens;
+        protected readonly List<Token> Tokens;
 
         /// <summary>
         ///     All errors and warnings that found during lexical analysis.
         /// </summary>
-        protected readonly List<Exception> blames;
+        protected readonly List<Exception> Blames;
 
         /// <summary>
         ///     Lexical analysis options enum.
         /// </summary>
-        protected SourceProcessingOptions options;
+        protected SourceProcessingOptions Options;
 
         /// <summary>
         ///     Current processing stream.
         /// </summary>
         protected CharStream Stream;
 
-        protected AbstractLexer(
+        protected LexerBase(
             string                  codeToProcess,
             List<Token>             outTokens,
             List<Exception>         outBlames,
             SourceProcessingOptions processingOptions = SourceProcessingOptions.None
         ) {
             Stream  = new CharStream(codeToProcess);
-            tokens  = outTokens ?? new List<Token>();
-            blames  = outBlames ?? new List<Exception>();
-            options = processingOptions;
+            Tokens  = outTokens ?? new List<Token>();
+            Blames  = outBlames ?? new List<Exception>();
+            Options = processingOptions;
         }
 
-        protected AbstractLexer(
+        protected LexerBase(
             CharStream              fromStream,
             List<Token>             outTokens,
             List<Exception>         outBlames,
             SourceProcessingOptions processingOptions = SourceProcessingOptions.None
         ) {
             Stream  = new CharStream(fromStream);
-            tokens  = outTokens ?? new List<Token>();
-            blames  = outBlames ?? new List<Exception>();
-            options = processingOptions;
+            Tokens  = outTokens ?? new List<Token>();
+            Blames  = outBlames ?? new List<Exception>();
+            Options = processingOptions;
         }
-
-        public abstract void Process();
-
-        protected abstract void AddPresets(
-            List<MultilineCommentToken> unclosedMultilineComments = null,
-            List<StringToken>           unclosedStrings           = null,
-            string[]                    processingTerminators     = null
-        );
 
         protected void Blame(BlameType type, Position startPos, Position endPos) {
             Debug.Assert(type != BlameType.None);
 
             BlameSeverity severity = Spec.Blames[type];
-            blames.Add(
+            Blames.Add(
                 new LanguageException(new Blame(type, severity, startPos, endPos), Stream.Source)
             );
         }

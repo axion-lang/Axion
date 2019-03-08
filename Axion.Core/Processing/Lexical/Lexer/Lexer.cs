@@ -12,7 +12,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
     ///     Static tool for splitting Axion
     ///     code into list of tokens.
     /// </summary>
-    public partial class Lexer : AbstractLexer {
+    public partial class Lexer : LexerBase {
         #region Current source properties
 
         private char c => Stream.C;
@@ -78,28 +78,36 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         /// <summary>
         ///     Divides code into list of tokens.
         /// </summary>
-        public override void Process() {
+        public void Process() {
+            if (string.IsNullOrWhiteSpace(Stream.Source)) {
+                return;
+            }
+            
             Token token = null;
             // at first, check if we're after unclosed string
             if (_unclosedStrings.Count > 0) {
                 token = ReadString(true);
             }
+
             // then, check if we're after unclosed multiline comment
             if (_unclosedMultilineComments.Count > 0) {
                 token = ReadMultilineComment();
             }
+
             if (token == null) {
                 token = NextToken();
             }
+
             while (true) {
                 if (token != null) {
-                    tokens.Add(token);
+                    Tokens.Add(token);
                     // check for processing terminator
                     if (token.Type == TokenType.EndOfCode
-                     || processingTerminators.Contains(token.Value)) {
+                        || processingTerminators.Contains(token.Value)) {
                         break;
                     }
                 }
+
                 token = NextToken();
             }
 
@@ -126,21 +134,22 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     default: {
                         throw new NotSupportedException(
                             "Internal error: "
-                          + nameof(_mismatchingPairs)
-                          + " grabbed invalid "
-                          + nameof(TokenType)
-                          + ": "
-                          + mismatch.Type
+                            + nameof(_mismatchingPairs)
+                            + " grabbed invalid "
+                            + nameof(TokenType)
+                            + ": "
+                            + mismatch.Type
                         );
                     }
                 }
+
                 Blame(errorType, mismatch.Span.StartPosition, mismatch.Span.EndPosition);
             }
 
             #endregion
         }
 
-        protected sealed override void AddPresets(
+        private void AddPresets(
             List<MultilineCommentToken> unclosedMultilineComments = null,
             List<StringToken>           unclosedStrings           = null,
             string[]                    processTerminators        = null
@@ -163,12 +172,13 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             tokenValue.Clear();
 
 #if DEBUG
-            if (tokens.Count != 0 && tokens[tokens.Count - 1].Type != TokenType.Outdent) {
-                Token last = tokens[tokens.Count - 1];
+            if (Tokens.Count != 0
+                && Tokens[Tokens.Count - 1].Type != TokenType.Outdent) {
+                Token last = Tokens[Tokens.Count - 1];
                 Debug.Assert(
                     tokenStartPosition
-                 == (last.Span.EndPosition.Line,
-                     last.Span.EndPosition.Column + last.Whitespaces.Length)
+                    == (last.Span.EndPosition.Line,
+                        last.Span.EndPosition.Column + last.Whitespaces.Length)
                 );
             }
 #endif
@@ -187,6 +197,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     return null;
                 }
             }
+
             // this branch should forever be
             // right after \r check.
             if (c == '\n') {
@@ -204,6 +215,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     // multiline comment
                     return ReadMultilineComment();
                 }
+
                 return ReadSingleLineComment();
             }
 

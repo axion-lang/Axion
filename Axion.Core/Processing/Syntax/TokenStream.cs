@@ -12,11 +12,11 @@ namespace Axion.Core.Processing.Syntax {
         /// </summary>
         internal readonly List<Token> Tokens;
 
-        private readonly SyntaxParser parser;
+        private readonly ParserBase parser;
 
         private bool inOneLineMode;
 
-        public TokenStream(SyntaxParser parser, List<Token> tokens) {
+        public TokenStream(ParserBase parser, List<Token> tokens) {
             this.parser = parser;
             Tokens      = tokens;
         }
@@ -59,10 +59,12 @@ namespace Axion.Core.Processing.Syntax {
             inOneLineMode = false;
         }
 
-        public void NextToken(int pos = 1) {
+        public Token NextToken(int pos = 1) {
             if (Index + pos >= 0 && Index + pos < Tokens.Count) {
                 Index += pos;
             }
+
+            return Token;
         }
 
         internal bool Eat(TokenType type) {

@@ -8,13 +8,13 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <summary>
         ///     <c>
         ///         arg_list ::=
-        ///             {expr
+        ///             { expr
         ///             | expr '=' expr
-        ///             | expr 'for'}
+        ///             | expr 'for' }
         ///     </c>
         /// </summary>
         private Arg[] FinishGeneratorOrArgList() {
-            if (stream.PeekIs(
+            if (Stream.PeekIs(
                 TokenType.RightParenthesis,
                 TokenType.OpMultiply,
                 TokenType.OpPower
@@ -28,11 +28,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
             var generator = false;
             Arg arg;
-            if (stream.MaybeEat(TokenType.Assign)) {
+            if (Stream.MaybeEat(TokenType.Assign)) {
                 // Keyword argument
                 arg = FinishKeywordArgument(argNameOrValue);
             }
-            else if (stream.PeekIs(TokenType.KeywordFor)) {
+            else if (Stream.PeekIs(TokenType.KeywordFor)) {
                 // Generator expr
                 arg       = new Arg(ParseGeneratorExpr(argNameOrValue));
                 generator = true;
@@ -42,11 +42,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
 
             // Was this all?
-            if (!generator && stream.MaybeEat(TokenType.Comma)) {
+            if (!generator && Stream.MaybeEat(TokenType.Comma)) {
                 return ParseArgumentsList(arg);
             }
 
-            stream.Eat(TokenType.RightParenthesis);
+            Stream.Eat(TokenType.RightParenthesis);
             arg.MarkPosition(start, tokenEnd);
             return new[] { arg };
         }
@@ -74,12 +74,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// <summary>
         ///     <c>
         ///         arg_list ::=
-        ///             {argument ','}
-        ///             (argument [',']
+        ///             { argument ',' }
+        ///             ( argument [',']
         ///             | '*' expr [',' '**' expr]
-        ///             | '**' expr)
+        ///             | '**' expr )
         ///         argument ::=
-        ///             [expr '='] expr
+        ///             expr ['=' expr]
         ///     </c>
         /// </summary>
         private Arg[] ParseArgumentsList(Arg first = null) {
@@ -89,15 +89,15 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 arguments.Add(first);
             }
 
-            while (!stream.MaybeEat(TokenType.RightParenthesis)) {
+            while (!Stream.MaybeEat(TokenType.RightParenthesis)) {
                 Expression nameOrValue = ParseTestExpr();
                 Arg        arg;
 
-                if (stream.MaybeEat(TokenType.OpMultiply)) {
+                if (Stream.MaybeEat(TokenType.OpMultiply)) {
                     arg = new Arg(nameOrValue);
                 }
                 else {
-                    if (stream.MaybeEat(TokenType.Assign)) {
+                    if (Stream.MaybeEat(TokenType.Assign)) {
                         arg = FinishKeywordArgument(nameOrValue);
                         CheckUniqueArgument(arguments, arg);
                     }
@@ -106,8 +106,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     }
                 }
                 arguments.Add(arg);
-                if (!stream.MaybeEat(TokenType.Comma)) {
-                    stream.Eat(TokenType.RightParenthesis);
+                if (!Stream.MaybeEat(TokenType.Comma)) {
+                    Stream.Eat(TokenType.RightParenthesis);
                     break;
                 }
             }

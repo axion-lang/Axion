@@ -28,11 +28,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 return expr;
             }
 
-            if (stream.MaybeEat(Colon)) {
+            if (Stream.MaybeEat(Colon)) {
                 TypeName   type  = ParseTypeName();
                 Expression value = null;
-                if (stream.MaybeEat(Assign)) {
-                    if (stream.PeekIs(KeywordYield)) {
+                if (Stream.MaybeEat(Assign)) {
+                    if (Stream.PeekIs(KeywordYield)) {
                         value = ParseYield();
                     }
                     else {
@@ -47,14 +47,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 return new VarDefinitionExpression(expr, type, value);
             }
 
-            if (stream.PeekIs(Assign)) {
+            if (Stream.PeekIs(Assign)) {
                 return FinishAssignments(expr);
             }
 
-            if (stream.MaybeEat(Spec.CompoundAssignOperators)) {
-                var        op = (SymbolToken) stream.Token;
+            if (Stream.MaybeEat(Spec.CompoundAssignOperators)) {
+                var        op = (SymbolToken) Stream.Token;
                 Expression right;
-                if (stream.PeekIs(KeywordYield)) {
+                if (Stream.PeekIs(KeywordYield)) {
                     right = ParseYield();
                 }
                 else {
@@ -73,14 +73,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         private Expression FinishAssignments(Expression right) {
             var left = new List<Expression>();
-            while (stream.MaybeEat(Assign)) {
+            while (Stream.MaybeEat(Assign)) {
                 if (right.CannotAssignReason != null) {
                     ReportError(right.CannotAssignReason, right);
                 }
 
                 left.Add(right);
 
-                if (stream.PeekIs(KeywordYield)) {
+                if (Stream.PeekIs(KeywordYield)) {
                     right = ParseYield();
                 }
                 else {
@@ -116,7 +116,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             Expression yieldExpr;
 
             var isYieldFrom = false;
-            if (stream.MaybeEat(KeywordFrom)) {
+            if (Stream.MaybeEat(KeywordFrom)) {
                 yieldExpr = ParseTestExpr();
                 yieldExpr.MarkPosition(start, tokenEnd);
                 isYieldFrom = true;
@@ -137,8 +137,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Expression ParseTestExpr() {
             Expression expr = ParseOrExpr();
-            if (stream.PeekIs(KeywordIf, KeywordUnless)
-                && stream.Token.Type != Newline) {
+            if (Stream.PeekIs(KeywordIf, KeywordUnless)
+                && Stream.Token.Type != Newline) {
                 expr = ParseConditionExpr(expr);
             }
 
@@ -154,17 +154,17 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Expression ParseConditionExpr(Expression trueExpr) {
-            bool invert = stream.MaybeEat(KeywordUnless);
+            bool invert = Stream.MaybeEat(KeywordUnless);
             if (!invert) {
-                stream.Eat(KeywordIf);
+                Stream.Eat(KeywordIf);
             }
 
             Expression expr      = ParseOrExpr();
             Expression falseExpr = null;
-            if (stream.MaybeEat(KeywordElse)) {
+            if (Stream.MaybeEat(KeywordElse)) {
                 falseExpr = ParseTestExpr();
             }
-            else if (stream.MaybeEat(KeywordUnless)) {
+            else if (Stream.MaybeEat(KeywordUnless)) {
                 falseExpr = trueExpr;
                 trueExpr  = ParseTestExpr();
             }
@@ -182,7 +182,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Expression ParseOrExpr() {
             Expression expr = ParseAndExpr();
-            while (stream.MaybeEat(KeywordOr)) {
+            while (Stream.MaybeEat(KeywordOr)) {
                 expr = new OrExpression(expr, ParseAndExpr());
             }
 
@@ -197,7 +197,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Expression ParseAndExpr() {
             Expression expr = ParseNotExpr();
-            while (stream.MaybeEat(KeywordAnd)) {
+            while (Stream.MaybeEat(KeywordAnd)) {
                 expr = new AndExpression(expr, ParseAndExpr());
             }
 
@@ -211,8 +211,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Expression ParseNotExpr() {
-            if (stream.MaybeEat(KeywordNot)) {
-                var        op   = (OperatorToken) stream.Token;
+            if (Stream.MaybeEat(KeywordNot)) {
+                var        op   = (OperatorToken) Stream.Token;
                 Expression expr = ParseNotExpr();
                 if (expr is UnaryExpression unary
                     && unary.Operator.Type == KeywordNot) {
@@ -238,8 +238,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Expression ParseCompareExpr() {
             Expression expr = ParsePriorityExpr();
-            while (stream.MaybeEat(Spec.ComparisonOperators)) {
-                var op = (OperatorToken) stream.Token;
+            while (Stream.MaybeEat(Spec.ComparisonOperators)) {
+                var op = (OperatorToken) Stream.Token;
                 if (op.Type == OpLessThan) { }
 
                 Expression rhs = ParseCompareExpr();
@@ -268,13 +268,13 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private Expression ParsePriorityExpr(int precedence = 0) {
             Expression expr = ParseFactorExpr();
             while (true) {
-                if (!(stream.Peek is OperatorToken ot)) {
+                if (!(Stream.Peek is OperatorToken ot)) {
                     return expr;
                 }
 
                 int newPrecedence = ot.Properties.Precedence;
                 if (newPrecedence >= precedence) {
-                    stream.NextToken();
+                    Stream.NextToken();
                     // TODO: fix precedences
                     expr = new BinaryExpression(expr, ot, ParsePriorityExpr(newPrecedence + 1));
                 }
@@ -291,8 +291,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Expression ParseFactorExpr() {
-            if (stream.MaybeEat(OpAdd, OpSubtract, OpBitwiseNot, OpIncrement, OpDecrement)) {
-                var op = (OperatorToken) stream.Token;
+            if (Stream.MaybeEat(OpAdd, OpSubtract, OpBitwiseNot, OpIncrement, OpDecrement)) {
+                var op = (OperatorToken) Stream.Token;
                 op.Properties.InputSide = InputSide.Left;
                 return new UnaryExpression(op, ParseFactorExpr());
             }
@@ -308,8 +308,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Expression ParsePowerExpr() {
             Expression expr = ParseTrailingExpr(ParsePrimaryExpr(), true);
-            if (stream.MaybeEat(OpPower)) {
-                expr = new BinaryExpression(expr, stream.Token as OperatorToken, ParseFactorExpr());
+            if (Stream.MaybeEat(OpPower)) {
+                expr = new BinaryExpression(expr, Stream.Token as OperatorToken, ParseFactorExpr());
             }
 
             return expr;
@@ -332,11 +332,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Expression ParseTrailingExpr(Expression result, bool allowGeneratorExpression) {
             while (true) {
-                switch (stream.Peek.Type) {
+                switch (Stream.Peek.Type) {
                     case OpIncrement:
                     case OpDecrement: {
-                        stream.NextToken();
-                        var op = (OperatorToken) stream.Token;
+                        Stream.NextToken();
+                        var op = (OperatorToken) Stream.Token;
                         op.Properties.InputSide = InputSide.Right;
                         result = new UnaryExpression(op, result);
                         break;
@@ -347,7 +347,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                             return result;
                         }
 
-                        stream.NextToken();
+                        Stream.NextToken();
                         Arg[] args = FinishGeneratorOrArgList();
                         result = new CallExpression(result, args ?? new Arg[0], tokenEnd);
                         break;
@@ -357,14 +357,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
                         break;
                     }
                     case Dot: {
-                        stream.NextToken();
+                        Stream.NextToken();
                         result = new MemberExpression(result, ParseName());
                         break;
                     }
                     default: {
-                        if (stream.PeekIs(Spec.ConstantValueTypes)) {
+                        if (Stream.PeekIs(Spec.ConstantValueTypes)) {
                             // abc 1, abc "", abc 1L, abc 0j
-                            ReportError(Spec.ERR_InvalidStatement, stream.Peek);
+                            ReportError(Spec.ERR_InvalidStatement, Stream.Peek);
                             return Error();
                         }
 
@@ -385,26 +385,26 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Expression ParseSubscriptList() {
-            stream.Eat(LeftBracket);
+            Stream.Eat(LeftBracket);
 
             bool trailingComma;
             var  expressions = new List<Expression>();
             do {
                 Expression expr = null;
-                if (!stream.PeekIs(Colon)) {
+                if (!Stream.PeekIs(Colon)) {
                     expr = ParseTestExpr();
                 }
 
-                if (stream.MaybeEat(Colon)) {
+                if (Stream.MaybeEat(Colon)) {
                     Expression stop = null;
-                    if (!stream.PeekIs(Colon, Comma, RightBracket)) {
+                    if (!Stream.PeekIs(Colon, Comma, RightBracket)) {
                         // [?:val:?]
                         stop = ParseTestExpr();
                     }
 
                     Expression step = null;
-                    if (stream.MaybeEat(Colon)
-                        && !stream.PeekIs(Comma, RightBracket)) {
+                    if (Stream.MaybeEat(Colon)
+                        && !Stream.PeekIs(Comma, RightBracket)) {
                         // [?:?:val]
                         step = ParseTestExpr();
                     }
@@ -413,10 +413,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
 
                 expressions.Add(expr);
-                trailingComma = stream.MaybeEat(Comma);
-            } while (trailingComma && !stream.PeekIs(RightBracket));
+                trailingComma = Stream.MaybeEat(Comma);
+            } while (trailingComma && !Stream.PeekIs(RightBracket));
 
-            stream.Eat(RightBracket);
+            Stream.Eat(RightBracket);
             return MakeTupleOrExpr(expressions, trailingComma, true);
         }
         
@@ -428,8 +428,8 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private NameExpression ParseName() {
             NameExpression name = null;
-            if (stream.Eat(Identifier)) {
-                name = new NameExpression(stream.Token);
+            if (Stream.Eat(Identifier)) {
+                name = new NameExpression(Stream.Token);
             }
 
             return name;
@@ -443,15 +443,15 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Expression ParseQualifiedName() {
             Expression name = null;
-            if (stream.Eat(Identifier)) {
-                name = new NameExpression(stream.Token);
+            if (Stream.Eat(Identifier)) {
+                name = new NameExpression(Stream.Token);
             }
 
             // qualifiers
-            while (stream.MaybeEat(Dot)) {
+            while (Stream.MaybeEat(Dot)) {
                 NameExpression qualifier = null;
-                if (stream.Eat(Identifier)) {
-                    qualifier = new NameExpression(stream.Token);
+                if (Stream.Eat(Identifier)) {
+                    qualifier = new NameExpression(Stream.Token);
                 }
 
                 name = new MemberExpression(name, qualifier);
