@@ -81,7 +81,7 @@ about arguments for compiler CLI interface.
 	else call()
 	```
 - ***Loops***
-    ```python
+    ```rb
     for x in [0..10]
         Console.print(x)
 
