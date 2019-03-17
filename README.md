@@ -5,9 +5,9 @@
 
 ### Repository consists of 3 parts:
 
-- **Language core (lexer, parser, compiler, etc.) with flexible API to access language tools**
-- **A .NET Core wrapper around language core (mainly to provide unit-testing and simple launching)**
-- **Import of [ConsoleExtensions](https://github.com/F1uctus/ConsoleExtensions) project (to use the console code editor with syntax highlighting) (still unstable)**
+- **Language core (lexer, parser, interpreter, etc.)**
+- **A .NET Core wrapper around language core (mainly to provide unit-testing and launching)**
+- **Import of [ConsoleExtensions](https://github.com/F1uctus/ConsoleExtensions) project (to use the console code editor with syntax highlighting) (a bit unstable)**
 
 ### Objectives:
 
@@ -40,10 +40,14 @@ Designed to: <br/>
 
 ### Launching:
 
-Now compiler doesn't do anything useful for user
-(it just creates lists of language tokens),
-but if you want to see basic syntax and etc.
-you can launch compiler with `dotnet run Axion.dll`
+Now compiler supports interpretation of Axion source
+with `-i` option (through embedded code editor) and
+also file processing with `-f "<path>.ax" -m interpret` options.
+
+Interpretation is performed by transpiling Axion to C# and running
+it through Roslyn (still incomplete and doesn't support some syntax).
+
+You can launch compiler with `dotnet run Axion.dll`
 in bin folder and type `-h` in console to get support
 about arguments for compiler CLI interface.
 	
