@@ -34,6 +34,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 if (value != null) {
                     value.Parent = this;
                 }
+
                 falseExpression = value;
             }
         }
@@ -52,12 +53,12 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             MarkPosition(condition, falseExpression ?? trueExpression);
         }
 
-        public override string ToString() {
-            return ToAxionCode();
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + TrueExpression + " if " + Condition + " else " + FalseExpression;
         }
 
-        private string ToAxionCode() {
-            return TrueExpression + " if " + Condition + " else " + FalseExpression;
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            return c + Condition + " ? " + TrueExpression + " : " + FalseExpression;
         }
     }
 }

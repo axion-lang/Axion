@@ -3,11 +3,17 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Axion.Core.Processing;
+using Axion.Core.Processing.Errors;
+using Axion.Core.Processing.Lexical.Lexer;
+using Axion.Core.Processing.Syntax.Parser;
 using Axion.Core.Specification;
 using Axion.Core.Visual;
 using CommandLine;
 using ConsoleExtensions;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
 
 namespace Axion.Core {
@@ -64,6 +70,7 @@ namespace Axion.Core {
             if (!Directory.Exists(OutputDirectory)) {
                 Directory.CreateDirectory(OutputDirectory);
             }
+
             Spec.AssertNoErrorsInDefinitions();
 
             PrintIntro();
@@ -77,29 +84,35 @@ namespace Axion.Core {
                                      if (options.Exit) {
                                          Environment.Exit(0);
                                      }
+
                                      if (options.Version) {
                                          ConsoleUI.WriteLine(Version);
                                          return 0;
                                      }
+
                                      if (options.Help) {
                                          ConsoleUI.WriteLine(CommandLineArguments.HelpText);
                                          return 0;
                                      }
+
                                      if (options.Interactive) {
                                          EnterInteractiveMode();
                                          return 0;
                                      }
+
                                      ProcessSources(options);
                                      return 0;
                                  },
                                  errors => {
                                      foreach (Error error in errors) {
-                                         ConsoleUI.LogError(error.ToString());
+                                         Logger.Error(error.ToString());
                                      }
+
                                      return 0;
                                  }
                              );
                 }
+
                 // wait for next command
                 // TODO: add console commands history (up-down)
                 string command = ConsoleUI.Read(">>> ");
@@ -107,9 +120,11 @@ namespace Axion.Core {
                     ConsoleUI.ClearLine();
                     command = ConsoleUI.Read(">>> ");
                 }
+
                 ConsoleUI.WriteLine();
                 arguments = Utilities.SplitLaunchArguments(command).ToArray();
             }
+
             // It is infinite loop, breaks only by 'exit' command.
             // ReSharper disable once FunctionNeverReturns
         }
@@ -131,11 +146,11 @@ namespace Axion.Core {
         }
 
         private static void EnterInteractiveMode() {
-            ConsoleUI.LogInfo(
+            Logger.Info(
                 "Interactive mode.\n"
-              + "Now your input will be processed by Axion interpreter.\n"
-              + "Type 'exit' or 'quit' to quit interactive mode;\n"
-              + "Type 'cls' to clear screen."
+                + "Now your input will be processed by Axion interpreter.\n"
+                + "Type 'exit' or 'quit' to quit interactive mode;\n"
+                + "Type 'cls' to clear screen."
             );
             while (true) {
                 // code editor header
@@ -147,12 +162,14 @@ namespace Axion.Core {
                     ConsoleUI.ClearLine();
                     continue;
                 }
-                if (alignedInput == "EXIT" || alignedInput == "QUIT") {
+
+                if (alignedInput == "EXIT"
+                    || alignedInput == "QUIT") {
                     // exit from interpreter to main loop
-                    ConsoleUI.WriteLine();
-                    ConsoleUI.LogInfo("Interactive interpreter closed.");
+                    Logger.Info("\nInteractive interpreter closed.");
                     return;
                 }
+
                 if (alignedInput == "CLS") {
                     // clear screen
                     Console.Clear();
@@ -174,7 +191,7 @@ namespace Axion.Core {
                 );
                 string[] codeLines = editor.RunSession();
                 // interpret as source code and output result
-                new SourceUnit(codeLines).Process(SourceProcessingMode.Interpret);
+                Process(new SourceUnit(codeLines), SourceProcessingMode.Interpret);
             }
         }
 
@@ -184,38 +201,193 @@ namespace Axion.Core {
             if (options.Files.Any()) {
                 int filesCount = options.Files.Count();
                 if (filesCount > 1) {
-                    ConsoleUI.LogError("Compiler doesn't support multiple files processing yet.");
+                    Logger.Error("Compiler doesn't support multiple files processing yet.");
                     return;
                 }
+
                 InputFiles = new FileInfo[filesCount];
                 for (var i = 0; i < filesCount; i++) {
                     InputFiles[i] = new FileInfo(
                         Utilities.TrimMatchingChars(options.Files.ElementAt(i), '"')
                     );
                 }
+
                 source = new SourceUnit(InputFiles[0]);
             }
             else if (!string.IsNullOrWhiteSpace(options.Code)) {
                 source = new SourceUnit(Utilities.TrimMatchingChars(options.Code, '"'));
             }
             else {
-                ConsoleUI.LogError(
-                    "Neither code nor path to source file not specified.\n" + helpHint
-                );
+                Logger.Error("Neither code nor path to source file not specified.\n" + helpHint);
                 return;
             }
+
             if (!Enum.TryParse(options.Mode, true, out SourceProcessingMode processingMode)) {
                 processingMode = SourceProcessingMode.Compile;
             }
+
             var processingOptions = SourceProcessingOptions.CheckIndentationConsistency;
             if (options.Debug) {
                 processingOptions |= SourceProcessingOptions.SyntaxAnalysisDebugOutput;
             }
+
             if (options.AstJson) {
                 processingOptions |= SourceProcessingOptions.ShowAstJson;
             }
+
+            if (options.Rewrite) {
+                processingOptions |= SourceProcessingOptions.RewriteFromAst;
+            }
+
             // process source
-            source.Process(processingMode, processingOptions);
+            Process(source, processingMode, processingOptions);
         }
+
+        /// <summary>
+        ///     Performs [<see cref="SourceUnit" />] processing
+        ///     with [<see cref="mode" />] and [<see cref="options" />].
+        /// </summary>
+        public static void Process(
+            SourceUnit              unit,
+            SourceProcessingMode    mode,
+            SourceProcessingOptions options = SourceProcessingOptions.None
+        ) {
+            unit.ProcessingMode = mode;
+            unit.Options        = options;
+            Process(unit);
+            unit.ProcessingMode = SourceProcessingMode.None;
+            unit.Options        = SourceProcessingOptions.None;
+        }
+
+        private static void Process(SourceUnit unit) {
+            Logger.Task($"Compiling '{unit.SourceFileName}'");
+
+            if (string.IsNullOrWhiteSpace(unit.Code)) {
+                Logger.Error("Source is empty. Compilation aborted.");
+                FinishCompilation(unit);
+                return;
+            }
+
+            // [1] Lexical analysis
+            Logger.Step("Tokens list generation");
+            new Lexer(unit).Process();
+            if (unit.ProcessingMode == SourceProcessingMode.Lex) {
+                FinishCompilation(unit);
+                return;
+            }
+
+            // [2] Parsing
+            Logger.Step("Abstract Syntax Tree generation");
+            new SyntaxParser(unit).Process();
+            if (unit.ProcessingMode == SourceProcessingMode.Parsing) {
+                FinishCompilation(unit);
+                return;
+            }
+
+            // [3] Debug information
+            if (unit.Options.HasFlag(SourceProcessingOptions.ShowAstJson)) {
+                Logger.Log(AstToMinifiedJson(unit));
+            }
+
+            if (unit.Options.HasFlag(SourceProcessingOptions.RewriteFromAst)) {
+                Logger.Log(AstBackToSource(unit));
+            }
+
+            FinishCompilation(unit);
+
+            // [n] Code generation
+            GenerateCode(unit);
+        }
+
+        private static async void GenerateCode(SourceUnit unit) {
+            switch (unit.ProcessingMode) {
+                case SourceProcessingMode.Interpret: {
+                    Logger.Task("Interpretation");
+                    try {
+                        string csCode = unit.SyntaxTree.ToCSharp().ToFullString();
+                        if (unit.Options.HasFlag(
+                            SourceProcessingOptions.SyntaxAnalysisDebugOutput
+                        )) {
+                            Logger.Warn("Transpiler debug output:");
+                            Logger.Log(csCode);
+                        }
+
+                        Logger.Step("Program output:");
+                        ScriptState result = await CSharpScript.RunAsync(csCode);
+                        Logger.Step("Result: " + (result.ReturnValue ?? "<nothing>"));
+                    }
+                    catch (CompilationErrorException e) {
+                        Logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
+                    }
+                    catch (Exception e) {
+                        Logger.Error("Program has thrown an exception:");
+                        Logger.Log(e.Message);
+                    }
+
+                    Logger.Task("Interpretation finished");
+                    break;
+                }
+                case SourceProcessingMode.ConvertCS: {
+                    Logger.Warn("Transpiling to 'C#' is not fully implemented yet");
+                    Logger.Log(unit.SyntaxTree.ToCSharp().ToFullString());
+                    break;
+                }
+                case SourceProcessingMode.ConvertC: {
+                    Logger.Error("Transpiling to 'C' is not implemented yet");
+                    break;
+                }
+                default: {
+                    Logger.Error($"'{unit.ProcessingMode:G}' mode not implemented yet");
+                    break;
+                }
+            }
+        }
+
+        private static void FinishCompilation(SourceUnit unit) {
+            if (unit.Options.HasFlag(SourceProcessingOptions.SyntaxAnalysisDebugOutput)) {
+                Logger.Step($"Saving debugging information to '{unit.DebugFilePath}'");
+                SaveDebugInfoToFile(unit);
+            }
+
+            if (unit.Blames.Count > 0) {
+                foreach (Exception blame in unit.Blames) {
+                    var exception = (LanguageException) blame;
+                    exception.Print();
+                }
+
+                Logger.Task("Compilation aborted due to errors above");
+            }
+            else {
+                Logger.Task("Compilation finished");
+            }
+        }
+
+        #region Debug information
+
+        /// <summary>
+        ///     Saves processed source debug
+        ///     information in JSON format.
+        /// </summary>
+        private static void SaveDebugInfoToFile(SourceUnit unit) {
+            File.WriteAllText(
+                unit.DebugFilePath,
+                JsonConvert.SerializeObject(unit, JsonSerializer)
+            );
+        }
+
+        /// <summary>
+        ///     Prints generated AST in JSON format to console.
+        /// </summary>
+        private static string AstToMinifiedJson(SourceUnit unit) {
+            string json = JsonConvert.SerializeObject(unit.SyntaxTree, JsonSerializer);
+            // shorten 'type' members
+            return Regex.Replace(json, @"\$type.+?(\w+?),.*\""", "$type\": \"$1\"");
+        }
+
+        private static string AstBackToSource(SourceUnit unit) {
+            return unit.SyntaxTree.ToAxionCode(new AxionCodeBuilder());
+        }
+
+        #endregion
     }
 }

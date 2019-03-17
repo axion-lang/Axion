@@ -21,11 +21,13 @@ namespace Axion.Core.Processing.Syntax.Parser {
             )) {
                 return ParseArgumentsList();
             }
-            Position   start          = tokenStart;
+
+            Token      start          = stream.Token;
             Expression argNameOrValue = ParseTestExpr();
             if (argNameOrValue is ErrorExpression) {
                 return new Arg[0];
             }
+
             var generator = false;
             Arg arg;
             if (stream.MaybeEat(TokenType.Assign)) {
@@ -42,13 +44,16 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
 
             // Was this all?
-            if (!generator && stream.MaybeEat(TokenType.Comma)) {
+            if (!generator
+                && stream.MaybeEat(TokenType.Comma)) {
                 return ParseArgumentsList(arg);
             }
 
             stream.Eat(TokenType.RightParenthesis);
-            arg.MarkPosition(start, tokenEnd);
-            return new[] { arg };
+            arg.MarkPosition(start, stream.Token);
+            return new[] {
+                arg
+            };
         }
 
         private Arg FinishKeywordArgument(Expression expr) {
@@ -56,6 +61,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 Expression value = ParseTestExpr();
                 return new Arg(name, value);
             }
+
             BlameInvalidSyntax(TokenType.Identifier, expr);
             return new Arg(expr);
         }
@@ -64,6 +70,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             if (arg?.Name.Name == null) {
                 return;
             }
+
             foreach (Arg a in arguments) {
                 if (a.Name.Name == arg.Name.Name) {
                     unit.Blame(BlameType.DuplicatedKeywordArgument, arg);
@@ -105,6 +112,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                         arg = new Arg(nameOrValue);
                     }
                 }
+
                 arguments.Add(arg);
                 if (!stream.MaybeEat(TokenType.Comma)) {
                     stream.Eat(TokenType.RightParenthesis);

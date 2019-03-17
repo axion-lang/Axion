@@ -24,8 +24,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             Token token = stream.Peek;
             switch (token.Type) {
                 case TokenType.Identifier: {
-                    stream.NextToken();
-                    return new NameExpression(token);
+                    return new NameExpression((IdentifierToken) stream.NextToken());
                 }
                 case TokenType.LeftParenthesis: {
                     return ParsePrimaryInParenthesis();
@@ -42,6 +41,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                         // TODO add pre-concatenation of literals
                         return new ConstantExpression(token);
                     }
+
                     unit.ReportError(Spec.ERR_PrimaryExpected, token);
                     return Error();
                 }
@@ -57,38 +57,37 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Expression ParsePrimaryInParenthesis() {
-            Position start = StartExprOrStmt(TokenType.LeftParenthesis).Span.StartPosition;
+            Token start = StartExprOrStmt(TokenType.LeftParenthesis);
 
-            Expression result;
-            if (stream.PeekIs(TokenType.RightParenthesis)) {
-                result = new TupleExpression(false, new Expression[0]);
+            if (stream.MaybeEat(TokenType.RightParenthesis)) {
+                return new TupleExpression(false, new Expression[0], start, stream.Token);
             }
+
             // yield_expr
-            else if (stream.PeekIs(TokenType.KeywordYield)) {
+            Expression result;
+            if (stream.PeekIs(TokenType.KeywordYield)) {
                 result = ParseYield();
             }
             else {
                 Expression expr = ParseExpression();
                 // tuple
                 if (stream.MaybeEat(TokenType.Comma)) {
-                    // '(' expr ',' ...
                     result = ParseTestList();
                 }
                 // generator_expr
                 else if (stream.PeekIs(TokenType.KeywordFor)) {
-                    // '(' expr 'for' ...
                     result = ParseGeneratorExpr(expr);
                 }
                 // parenthesis_expr
                 else {
-                    // '(' expr ')'
                     result = expr is ParenthesisExpression || expr is TupleExpression
-                                 ? expr
-                                 : new ParenthesisExpression(expr);
+                        ? expr
+                        : new ParenthesisExpression(expr);
                 }
             }
+
             stream.Eat(TokenType.RightParenthesis);
-            result.MarkPosition(start, tokenEnd);
+            result.MarkEnd(stream.Token);
             return result;
         }
 
@@ -100,7 +99,9 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     "for" has NOT been stream.Eaten before entering this method
         /// </summary>
         private Expression ParseGeneratorExpr(Expression expr) {
-            var comprehensions = new List<ComprehensionIterator> { ParseComprehensionFor() };
+            var comprehensions = new List<ComprehensionIterator> {
+                ParseComprehensionFor()
+            };
             while (true) {
                 if (stream.PeekIs(TokenType.KeywordFor)) {
                     comprehensions.Add(ParseComprehensionFor());
@@ -112,6 +113,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     break;
                 }
             }
+
             return new GeneratorExpression(expr, comprehensions.ToArray());
         }
 
@@ -123,7 +125,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Expression ParsePrimaryInBrackets() {
-            Position start = StartExprOrStmt(TokenType.LeftBracket).Span.StartPosition;
+            Token start = StartExprOrStmt(TokenType.LeftBracket);
 
             var expressions = new List<Expression>();
             if (!stream.MaybeEat(TokenType.RightBracket)) {
@@ -134,11 +136,13 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 else if (stream.PeekIs(TokenType.KeywordFor)) {
                     ComprehensionIterator[] iterators = ParseComprehensionIterators();
                     stream.Eat(TokenType.RightBracket);
-                    return new ListComprehension(expressions[0], iterators, start, tokenEnd);
+                    return new ListComprehension(expressions[0], iterators, start, stream.Token);
                 }
+
                 stream.Eat(TokenType.RightBracket);
             }
-            return new ListExpression((start, tokenEnd), expressions.ToArray());
+
+            return new ListExpression(expressions.ToArray(), start, stream.Token);
         }
 
         /// <summary>
@@ -156,7 +160,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Expression ParseMapOrSetDisplay() {
-            Position start = StartExprOrStmt(TokenType.LeftBrace).Span.StartPosition;
+            Token start = StartExprOrStmt(TokenType.LeftBrace);
 
             List<SliceExpression> mapMembers = null;
             List<Expression>      setMembers = null;
@@ -174,6 +178,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                         mapMembers = new List<SliceExpression>();
                         first      = true;
                     }
+
                     Expression itemPart2 = ParseTestExpr();
                     // map generator: { key: value for (key, value) in iterable }
                     if (stream.PeekIs(TokenType.KeywordFor)) {
@@ -183,8 +188,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
                                 stream.Token
                             );
                         }
+
                         return FinishMapComprehension(itemPart1, itemPart2, start);
                     }
+
                     mapMembers?.Add(new SliceExpression(itemPart1, itemPart2, null));
                 }
                 // set item (expr)
@@ -196,6 +203,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                         setMembers = new List<Expression>();
                         first      = true;
                     }
+
                     // set generator: { x * 2 for x in { 1, 2, 3 } }
                     if (stream.PeekIs(TokenType.KeywordFor)) {
                         if (!first) {
@@ -204,8 +212,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
                                 stream.Token
                             );
                         }
+
                         return FinishSetComprehension(itemPart1, start);
                     }
+
                     setMembers?.Add(itemPart1);
                 }
 
@@ -215,13 +225,15 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
             }
 
-            if (mapMembers == null && setMembers != null) {
-                return new SetExpression(setMembers.ToArray(), start, tokenEnd);
+            if (mapMembers == null
+                && setMembers != null) {
+                return new SetExpression(setMembers.ToArray(), start, stream.Token);
             }
+
             return new MapExpression(
                 mapMembers?.ToArray() ?? new SliceExpression[0],
                 start,
-                tokenEnd
+                stream.Token
             );
         }
     }

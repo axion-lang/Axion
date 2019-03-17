@@ -8,20 +8,29 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents a 'string' literal.
     /// </summary>
     public class StringToken : Token {
+        [JsonProperty]
+        public string RawValue { get; }
+
+        [JsonProperty]
+        public bool IsUnclosed { get; }
+
+        [JsonProperty]
+        internal StringLiteralOptions Options { get; }
+
+        [JsonProperty]
+        internal List<Interpolation> Interpolations { get; }
+
         public StringToken(
-            Position             startPosition,
             StringLiteralOptions options,
             string               value,
             string               rawValue       = null,
             List<Interpolation>  interpolations = null,
-            bool                 isUnclosed     = false
-        ) : base(TokenType.String, startPosition, value) {
-            if (rawValue == null) {
-                rawValue = value;
-            }
+            bool                 isUnclosed     = false,
+            Position             startPosition  = default
+        ) : base(TokenType.String, value, startPosition) {
             Options        = options;
             Interpolations = interpolations ?? new List<Interpolation>();
-            RawValue       = rawValue;
+            RawValue       = rawValue ?? value;
             IsUnclosed     = isUnclosed;
             int endLine = Span.StartPosition.Line;
             int endCol  = Span.EndPosition.Column;
@@ -40,6 +49,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                 if (Options.IsRaw) {
                     endCol++;
                 }
+
                 if (Options.IsFormatted) {
                     endCol++;
                 }
@@ -56,40 +66,53 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                 if (!IsUnclosed) {
                     endCol += Options.QuotesCount;
                 }
+
                 endLine += lines.Length - 1;
             }
+
             Span = new Span(Span.StartPosition, (endLine, endCol));
         }
 
-        [JsonProperty]
-        public string RawValue { get; }
-
-        [JsonProperty]
-        public bool IsUnclosed { get; }
-
-        [JsonProperty]
-        internal StringLiteralOptions Options { get; }
-
-        [JsonProperty]
-        internal List<Interpolation> Interpolations { get; }
-
-        public override string ToAxionCode() {
-            var result = "";
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
             if (Options.IsFormatted) {
-                result += "f";
+                c += "f";
             }
+
             if (Options.IsRaw) {
-                result += "r";
+                c += "r";
             }
+
             int quotesCount = Options.QuotesCount;
-            result += new string(Options.Quote, quotesCount) + RawValue;
+            c = c + new string(Options.Quote, quotesCount) + RawValue;
             if (!IsUnclosed) {
-                result += new string(Options.Quote, quotesCount);
+                c += new string(Options.Quote, quotesCount);
             }
             else {
-                result += Options.TrailingQuotes;
+                c += Options.TrailingQuotes;
             }
-            return result + Whitespaces;
+
+            return c + Whitespaces;
+        }
+
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            if (Options.IsFormatted) {
+                c += "$";
+            }
+
+            if (Options.IsRaw || Options.QuotesCount == 3) {
+                c += "@";
+            }
+
+            c += Options.Quote.ToString();
+            c += RawValue;
+            if (!IsUnclosed) {
+                c += Options.Quote.ToString();
+            }
+            else {
+                c += Options.TrailingQuotes;
+            }
+
+            return c + Whitespaces;
         }
     }
 
@@ -106,9 +129,19 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     }
 
     public class StringLiteralOptions {
-        internal bool IsMultiline;
+        internal          bool   IsMultiline;
+        internal readonly bool   IsLineEndsNormalized;
+        public            bool   HasPrefixes    => IsFormatted || IsRaw;
+        public            int    QuotesCount    => IsMultiline ? 3 : 1;
+        internal          char   Quote          { get; set; }
+        internal          string TrailingQuotes { get; set; }
 
-        internal readonly bool IsLineEndsNormalized;
+        #region Prefix options
+
+        internal bool IsFormatted { get; private set; }
+        internal bool IsRaw       { get; private set; }
+
+        #endregion
 
         public StringLiteralOptions(
             char quote                = '"',
@@ -124,31 +157,23 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             IsRaw                = isRaw;
         }
 
-        public bool HasPrefixes => IsFormatted || IsRaw;
-
-        public int QuotesCount => IsMultiline ? 3 : 1;
-
-        internal char Quote { get; set; }
-
-        internal string TrailingQuotes { get; set; }
-
-        internal bool IsFormatted { get; private set; }
-
-        internal bool IsRaw { get; private set; }
-
         public void AppendPrefix(char c, out bool valid, out bool duplicated) {
             duplicated = false;
             valid      = true;
-            if (c == 'f' || c == 'F') {
+            if (c == 'f'
+                || c == 'F') {
                 if (IsFormatted) {
                     duplicated = true;
                 }
+
                 IsFormatted = true;
             }
-            else if (c == 'r' || c == 'R') {
+            else if (c == 'r'
+                     || c == 'R') {
                 if (IsRaw) {
                     duplicated = true;
                 }
+
                 IsRaw = true;
             }
             else {
@@ -161,9 +186,11 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             if (IsFormatted) {
                 result += "f";
             }
+
             if (IsRaw) {
                 result += "r";
             }
+
             return result;
         }
     }

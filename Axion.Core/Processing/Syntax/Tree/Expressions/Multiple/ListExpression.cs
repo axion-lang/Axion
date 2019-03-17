@@ -1,8 +1,14 @@
+using Axion.Core.Processing.Lexical.Tokens;
+
 namespace Axion.Core.Processing.Syntax.Tree.Expressions.Multiple {
     public class ListExpression : MultipleExpression<Expression> {
-        internal ListExpression(Span region, Expression[] expressions) {
+        internal ListExpression(Expression[] expressions) {
             Expressions = expressions;
-            Span        = region;
+        }
+
+        internal ListExpression(Expression[] expressions, Token start, Token end)
+            : this(expressions) {
+            MarkPosition(start, end);
         }
     }
 }

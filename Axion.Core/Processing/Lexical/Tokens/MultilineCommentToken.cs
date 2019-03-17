@@ -6,8 +6,14 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents a 'comment' literal placed on multiple lines.
     /// </summary>
     public class MultilineCommentToken : Token {
-        public MultilineCommentToken(Position startPosition, string value, bool isUnclosed = false)
-            : base(TokenType.Comment, startPosition, value) {
+        public bool IsUnclosed { get; }
+
+        public MultilineCommentToken(
+            string   value,
+            bool     isUnclosed    = false,
+            Position startPosition = default
+        )
+            : base(TokenType.Comment, value, startPosition) {
             IsUnclosed = isUnclosed;
 
             int linesCount        = value.Split(Spec.EndOfLines, StringSplitOptions.None).Length;
@@ -24,16 +30,22 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             else if (!isUnclosed) {
                 endCol += commentMarkLength;
             }
+
             Span = new Span(Span.StartPosition, (Span.EndPosition.Line, endCol));
         }
 
-        public bool IsUnclosed { get; }
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + (IsUnclosed
+                ? Spec.MultiCommentStart + Value
+                // closed
+                : Spec.MultiCommentStart + Value + Spec.MultiCommentEnd) + Whitespaces;
+        }
 
-        public override string ToAxionCode() {
-            return IsUnclosed
-                       ? Spec.MultiCommentStart + Value
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            return c + (IsUnclosed
+                       ? "/*" + Value
                        // closed
-                       : Spec.MultiCommentStart + Value + Spec.MultiCommentEnd + Whitespaces;
+                       : "/*" + Value + "*/") + Whitespaces;
         }
     }
 }

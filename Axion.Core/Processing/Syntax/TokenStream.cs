@@ -13,8 +13,7 @@ namespace Axion.Core.Processing.Syntax {
         internal readonly List<Token> Tokens;
 
         private readonly SyntaxParser parser;
-
-        private bool inOneLineMode;
+        private          bool         inOneLineMode;
 
         public TokenStream(SyntaxParser parser, List<Token> tokens) {
             this.parser = parser;
@@ -30,13 +29,13 @@ namespace Axion.Core.Processing.Syntax {
         internal int Index { get; private set; } = -1;
 
         public bool PeekIs(TokenType expected) {
-            return Peek.Type == expected;
+            return Peek.Is(expected);
         }
 
         public bool PeekIs(params TokenType[] expected) {
             SkipTrivial(expected);
             for (var i = 0; i < expected.Length; i++) {
-                if (Peek.Type == expected[i]) {
+                if (Peek.Is(expected[i])) {
                     return true;
                 }
             }
@@ -50,6 +49,7 @@ namespace Axion.Core.Processing.Syntax {
                 parser.BlameInvalidSyntax(type, Peek);
                 return false;
             }
+
             return true;
         }
 
@@ -60,7 +60,8 @@ namespace Axion.Core.Processing.Syntax {
         }
 
         public Token NextToken(int pos = 1) {
-            if (Index + pos >= 0 && Index + pos < Tokens.Count) {
+            if (Index + pos >= 0
+                && Index + pos < Tokens.Count) {
                 Index += pos;
             }
 
@@ -72,6 +73,7 @@ namespace Axion.Core.Processing.Syntax {
             if (matches) {
                 NextToken();
             }
+
             return matches;
         }
 
@@ -84,10 +86,11 @@ namespace Axion.Core.Processing.Syntax {
 
         internal bool MaybeEat(TokenType type) {
             SkipTrivial(type);
-            if (Peek.Type == type) {
+            if (Peek.Is(type)) {
                 NextToken();
                 return true;
             }
+
             return false;
         }
 
@@ -101,11 +104,12 @@ namespace Axion.Core.Processing.Syntax {
         internal bool MaybeEat(params TokenType[] types) {
             SkipTrivial(types);
             for (var i = 0; i < types.Length; i++) {
-                if (Peek.Type == types[i]) {
+                if (Peek.Is(types[i])) {
                     NextToken();
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -121,13 +125,14 @@ namespace Axion.Core.Processing.Syntax {
                 }
                 // if we got newline before wanted type, just skip it
                 // (except we WANT to get newline)
-                else if (Peek.Type == TokenType.Newline
-                      && !wantedTypes.Contains(TokenType.Newline)) {
+                else if (Peek.Is(TokenType.Newline)
+                         && !wantedTypes.Contains(TokenType.Newline)) {
                     if (inOneLineMode) {
                         throw new NotSupportedException(
                             "Syntax error: got newline in one-line expression."
                         );
                     }
+
                     NextToken();
                 }
                 else {

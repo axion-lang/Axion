@@ -5,19 +5,23 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     [JsonObject(MemberSerialization.OptIn)]
     public class NameExpression : Expression {
         [JsonProperty]
-        public Token Name { get; }
+        public IdentifierToken Name { get; }
 
-        public NameExpression(Token name) {
+        public NameExpression(string name) {
+            Name = new IdentifierToken(name);
+        }
+
+        public NameExpression(IdentifierToken name) {
             Name = name;
             MarkPosition(name);
         }
 
-        public override string ToString() {
-            return ToAxionCode();
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + Name.Value;
         }
 
-        private string ToAxionCode() {
-            return Name.ToAxionCode();
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            return c + Name.Value;
         }
     }
 }

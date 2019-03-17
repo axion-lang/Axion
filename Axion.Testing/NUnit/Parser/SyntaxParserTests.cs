@@ -1,3 +1,4 @@
+using Axion.Core;
 using Axion.Core.Processing;
 using NUnit.Framework;
 
@@ -48,7 +49,8 @@ namespace Axion.Testing.NUnit.Parser {
 
         private SourceUnit ParseTestFile(string testName) {
             SourceUnit source = MakeSourceFromFile(testName);
-            source.Process(
+            Compiler.Process(
+                source,
                 SourceProcessingMode.Parsing,
                 SourceProcessingOptions.SyntaxAnalysisDebugOutput
             );

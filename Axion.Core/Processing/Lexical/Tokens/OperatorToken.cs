@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Axion.Core.Specification;
+﻿using Axion.Core.Specification;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -10,25 +9,28 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     public class OperatorToken : Token {
         internal OperatorProperties Properties;
 
-        public OperatorToken(Position startPosition, OperatorProperties properties) : base(
+        public OperatorToken(
+            OperatorProperties properties,
+            Position           startPosition = default
+        ) : base(
             properties.Type,
-            startPosition
+            startPosition: startPosition
         ) {
             Properties = properties;
         }
 
-        public OperatorToken(Position startPosition, string value, string whitespaces = "") : base(
+        public OperatorToken(string value, Position startPosition = default) : base(
             TokenType.Invalid,
-            startPosition,
             value,
-            whitespaces
+            startPosition
         ) {
             Spec.Operators.TryGetValue(value, out Properties);
             Type = Properties.Type;
         }
 
-        public override string ToAxionCode() {
-            return Spec.Operators.First(kvp => kvp.Value.Equals(Properties)).Key + Whitespaces;
+        public OperatorToken(TokenType type) : base(type, Spec.OperatorTypes[type]) {
+            Spec.Operators.TryGetValue(Value, out Properties);
+            Type = Properties.Type;
         }
     }
 
@@ -48,13 +50,14 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         internal OperatorProperties(
             TokenType type,
-            bool      overloadable,
-            int       precedence
+            int       precedence,
+            InputSide inputSide    = InputSide.Both,
+            bool      overloadable = false
         ) {
-            InputSide    = InputSide.Unknown;
             Type         = type;
-            Overloadable = overloadable;
             Precedence   = precedence;
+            InputSide    = inputSide;
+            Overloadable = overloadable;
         }
 
         public override bool Equals(object obj) {
@@ -74,8 +77,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         public override int GetHashCode() {
             unchecked {
-                var hashCode = (int) InputSide;
-                hashCode = (hashCode * 397) ^ Overloadable.GetHashCode();
+                int hashCode = Overloadable.GetHashCode();
                 hashCode = (hashCode * 397) ^ Precedence;
                 hashCode = (hashCode * 397) ^ (int) Type;
                 return hashCode;
@@ -86,6 +88,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     [JsonConverter(typeof(StringEnumConverter))]
     internal enum InputSide {
         Unknown,
+        Both,
         Right,
         Left
     }

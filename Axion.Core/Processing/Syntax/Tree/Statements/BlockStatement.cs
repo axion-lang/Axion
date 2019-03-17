@@ -1,13 +1,9 @@
 using System;
-using System.CodeDom;
-using System.Linq;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class BlockStatement : Statement {
         private Statement[] statements;
 
-        [JsonProperty]
         public Statement[] Statements {
             get => statements;
             set {
@@ -18,15 +14,23 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
             }
         }
 
-        internal BlockStatement(Statement[] statements) {
+        internal BlockStatement(params Statement[] statements) {
             Statements = statements ?? throw new ArgumentNullException(nameof(statements));
             if (statements.Length != 0) {
                 MarkPosition(statements[0], statements[statements.Length - 1]);
             }
         }
 
-        internal override CodeObject[] ToCSharpArray() {
-            return Statements.Select(s => s.ToCSharp()).ToArray();
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            c += "{ ";
+            c.AppendJoin("; ", Statements);
+            return c + "; }";
+        }
+
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            c += "{ ";
+            c.AppendJoin("", Statements);
+            return c + " }";
         }
     }
 }

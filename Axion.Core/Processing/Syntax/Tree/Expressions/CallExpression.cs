@@ -1,3 +1,5 @@
+using System;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
 using Newtonsoft.Json;
 
@@ -29,20 +31,25 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
 
         internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
 
-        public CallExpression(Expression target, Arg[] args, Position end) {
-            Target = target;
+        public CallExpression(Expression target, Arg[] args) {
+            Target = target ?? throw new ArgumentNullException(nameof(target));
             Args   = args ?? new Arg[0];
-
-            MarkStart(target);
-            MarkEnd(end);
         }
 
-        public override string ToString() {
-            return ToAxionCode();
+        public CallExpression(Expression target, Arg[] args, Token end) : this(target, args) {
+            MarkPosition(target, end);
         }
 
-        private string ToAxionCode() {
-            return Target + "(" + string.Join<Arg>(",", Args) + ")";
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            c = c + Target + "(";
+            c.AppendJoin(",", Args);
+            return c + ")";
+        }
+
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            c = c + Target + "(";
+            c.AppendJoin(",", Args);
+            return c + ")";
         }
     }
 
@@ -67,33 +74,39 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             Name  = name;
             Value = value;
 
-            MarkStart(name);
-            MarkEnd(value);
-        }
-
-        public override string ToString() {
-            return ToAxionCode();
+            MarkPosition(name, value);
         }
 
         internal ArgumentKind GetArgumentInfo() {
             if (Name == null) {
                 return ArgumentKind.Simple;
             }
+
             if (Name.Name.Value == "*") {
                 return ArgumentKind.List;
             }
+
             if (Name.Name.Value == "**") {
                 return ArgumentKind.Map;
             }
+
             return ArgumentKind.Named;
         }
 
-        private string ToAxionCode() {
-            var name = "";
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
             if (Name != null) {
-                name = Name.Name + " = ";
+                c = c + Name + " = ";
             }
-            return name + Value;
+
+            return c + Value;
+        }
+
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            if (Name != null) {
+                c = c + Name + " = ";
+            }
+
+            return c + Value;
         }
     }
 }

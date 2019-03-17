@@ -14,29 +14,33 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
-        private Expression name;
+        private NameExpression member;
 
         [JsonProperty]
-        internal Expression Name {
-            get => name;
+        internal NameExpression Member {
+            get => member;
             set {
                 value.Parent = this;
-                name         = value;
+                member       = value;
             }
         }
 
         internal override string CannotAssignReason =>
-            Target.CannotAssignReason ?? Name.CannotAssignReason;
+            Target.CannotAssignReason ?? Member.CannotAssignReason;
 
-        public MemberExpression(Expression target, NameExpression identifier) {
+        public MemberExpression(Expression target, NameExpression member) {
             Target = target ?? throw new ArgumentNullException(nameof(target));
-            Name   = identifier ?? throw new ArgumentNullException(nameof(identifier));
+            Member = member ?? throw new ArgumentNullException(nameof(member));
 
-            MarkPosition(target, identifier);
+            MarkPosition(target, member);
         }
 
-        public override string ToString() {
-            return Target + "." + Name;
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + Target + "." + Member;
+        }
+
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            return c + Target + "." + Member;
         }
     }
 }

@@ -5,17 +5,25 @@ using System.Linq;
 using System.Text;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Specification;
+using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using static Axion.Core.Specification.Spec;
 
 namespace Axion.Core.Processing.Lexical.Lexer {
     /// <summary>
-    ///     Static tool for splitting Axion
+    ///     Tool for splitting Axion
     ///     code into list of tokens.
     /// </summary>
     public partial class Lexer {
         #region Current source properties
 
-        private readonly SourceUnit  unit;
+        /// <summary>
+        ///     Current processing <see cref="SourceUnit"/>.
+        /// </summary>
+        private readonly SourceUnit unit;
+
+        /// <summary>
+        ///     Resulting tokens list.
+        /// </summary>
         private readonly List<Token> tokens;
 
         /// <summary>
@@ -23,6 +31,9 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         /// </summary>
         private CharStream stream;
 
+        /// <summary>
+        ///     Short reference to current char in stream.
+        /// </summary>
         private char c => stream.C;
 
         /// <summary>
@@ -110,7 +121,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 if (token != null) {
                     tokens.Add(token);
                     // check for processing terminator
-                    if (token.Type == TokenType.EndOfCode
+                    if (token.Is(EndOfCode)
                         || processingTerminators.Contains(token.Value)) {
                         break;
                     }
@@ -124,18 +135,18 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             foreach (Token mismatch in mismatchingPairs) {
                 BlameType errorType;
                 switch (mismatch.Type) {
-                    case TokenType.LeftParenthesis:
-                    case TokenType.RightParenthesis: {
+                    case LeftParenthesis:
+                    case RightParenthesis: {
                         errorType = BlameType.MismatchedParenthesis;
                         break;
                     }
-                    case TokenType.LeftBracket:
-                    case TokenType.RightBracket: {
+                    case LeftBracket:
+                    case RightBracket: {
                         errorType = BlameType.MismatchedBracket;
                         break;
                     }
-                    case TokenType.LeftBrace:
-                    case TokenType.RightBrace: {
+                    case LeftBrace:
+                    case RightBrace: {
                         errorType = BlameType.MismatchedBrace;
                         break;
                     }
@@ -184,7 +195,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
 
 #if DEBUG
             if (tokens.Count != 0
-                && tokens[tokens.Count - 1].Type != TokenType.Outdent) {
+                && tokens[tokens.Count - 1].Type != Outdent) {
                 Token last = tokens[tokens.Count - 1];
                 Debug.Assert(
                     tokenStartPosition
@@ -194,7 +205,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             }
 #endif
 
-            if (c == Spec.EndOfStream) {
+            if (c == EndOfStream) {
                 return new EndOfCodeToken(tokenStartPosition);
             }
 
@@ -204,7 +215,6 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     tokenValue.Append('\r');
                 }
                 else {
-                    // skip carriage returns
                     return null;
                 }
             }
@@ -215,26 +225,24 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 return ReadNewline();
             }
 
-            if (Spec.IsSpaceOrTab(c)) {
-                // whitespaces & indentation
+            if (IsSpaceOrTab(c)) {
                 return ReadWhite();
             }
 
-            if (c.ToString() == Spec.SingleCommentStart) {
+            if (c.ToString() == SingleCommentStart) {
                 // one-line comment
-                if (c.ToString() + stream.Peek == Spec.MultiCommentStart) {
-                    // multiline comment
+                if (c.ToString() + stream.Peek == MultiCommentStart) {
                     return ReadMultilineComment();
                 }
 
                 return ReadSingleLineComment();
             }
 
-            if (c == Spec.CharLiteralQuote) {
+            if (c == CharacterLiteralQuote) {
                 return ReadCharLiteral();
             }
 
-            if (Spec.StringQuotes.Contains(c)) {
+            if (StringQuotes.Contains(c)) {
                 return ReadString(false);
             }
 
@@ -242,11 +250,11 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                 return ReadNumber();
             }
 
-            if (Spec.IsValidIdStart(c)) {
+            if (IsValidIdStart(c)) {
                 return ReadWord();
             }
 
-            if (Spec.SymbolicChars.Contains(c)) {
+            if (SymbolicChars.Contains(c)) {
                 return ReadSymbolic();
             }
 
@@ -254,7 +262,7 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             tokenValue.Append(c);
             stream.Move();
             unit.Blame(BlameType.InvalidSymbol, tokenStartPosition, stream.Position);
-            return new Token(TokenType.Invalid, tokenStartPosition, tokenValue.ToString());
+            return new Token(Invalid, tokenValue.ToString(), tokenStartPosition);
         }
     }
 }

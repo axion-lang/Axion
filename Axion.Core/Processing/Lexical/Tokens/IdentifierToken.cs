@@ -3,8 +3,7 @@
     ///     Represents an 'identifier'.
     /// </summary>
     public class IdentifierToken : Token {
-        public IdentifierToken(Position startPosition, string value, string whitespaces = "") :
-            base(TokenType.Identifier, startPosition, value, whitespaces) {
-        }
+        public IdentifierToken(string value, Position startPosition = default) :
+            base(TokenType.Identifier, value, startPosition) { }
     }
 }

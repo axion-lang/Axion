@@ -1,26 +1,12 @@
+using System;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements.Small {
     public class AssertStatement : Statement {
         private Expression condition;
 
-        private Expression falseExpression;
-
-        internal AssertStatement(
-            Expression    condition,
-            Expression    falseExpression,
-            SpannedRegion start
-        ) {
-            Condition       = condition;
-            FalseExpression = falseExpression;
-
-            MarkStart(start);
-            MarkEnd(falseExpression ?? condition);
-        }
-
-        [JsonProperty]
-        internal Expression Condition {
+        public Expression Condition {
             get => condition;
             set {
                 value.Parent = this;
@@ -28,13 +14,46 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Small {
             }
         }
 
-        [JsonProperty]
-        internal Expression FalseExpression {
-            get => falseExpression;
+        private Expression failExpression;
+
+        public Expression FailExpression {
+            get => failExpression;
             set {
-                value.Parent    = this;
-                falseExpression = value;
+                if (value != null) {
+                    value.Parent = this;
+                }
+
+                failExpression = value;
             }
+        }
+
+        internal AssertStatement(
+            Token      startToken,
+            Expression condition,
+            Expression failExpression
+        ) : base(startToken) {
+            Condition      = condition ?? throw new ArgumentNullException(nameof(condition));
+            FailExpression = failExpression;
+
+            MarkEnd(failExpression ?? condition);
+        }
+
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            c = c + "assert " + Condition;
+            if (FailExpression != null) {
+                c = c + ", " + FailExpression;
+            }
+
+            return c;
+        }
+
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            c = c + "Debug.Assert(" + Condition;
+            if (FailExpression != null) {
+                c = c + ", " + FailExpression;
+            }
+
+            return c + ");";
         }
     }
 }

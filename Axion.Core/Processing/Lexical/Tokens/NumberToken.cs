@@ -6,15 +6,23 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents a 'number' literal.
     /// </summary>
     public class NumberToken : Token {
-        public NumberToken(Position startPosition, object value, NumberOptions options = null) :
-            base(TokenType.Number, startPosition, value.ToString()) {
-            Options = options ?? new NumberOptions();
-        }
-
         public NumberOptions Options { get; }
 
-        public override string ToString() {
-            return ToAxionCode();
+        public NumberToken(
+            object        value,
+            NumberOptions options       = null,
+            Position      startPosition = default
+        ) :
+            base(TokenType.Number, value.ToString(), startPosition) {
+            Options = options ?? new NumberOptions();
+        }
+        
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + Options.Number.ToString();
+        }
+
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            return c + Options.Number.ToString();
         }
     }
 
@@ -23,6 +31,19 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     (base, reserved bits count, is it floating, etc.)
     /// </summary>
     public class NumberOptions {
+        [JsonIgnore]
+        public StringBuilder Number { get; set; } = new StringBuilder();
+
+        internal object Value       { get; set; }
+        public   int    Radix       { get; set; }
+        public   int    Bits        { get; set; }
+        public   bool   Floating    { get; set; }
+        public   bool   Imaginary   { get; set; }
+        public   bool   Unsigned    { get; set; }
+        public   bool   Unlimited   { get; set; }
+        public   bool   HasExponent { get; set; }
+        public   int    Exponent    { get; set; }
+
         public NumberOptions(
             int  radix       = 10,
             int  bits        = 32,
@@ -42,19 +63,5 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             HasExponent = hasExponent;
             Exponent    = exponent;
         }
-
-        [JsonIgnore]
-        public StringBuilder Number { get; set; } = new StringBuilder();
-
-        public int  Bits      { get; set; }
-        public int  Radix     { get; set; }
-        public bool Floating  { get; set; }
-        public bool Imaginary { get; set; }
-        public bool Unsigned  { get; set; }
-        public bool Unlimited { get; set; }
-
-        public   bool   HasExponent { get; set; }
-        public   int    Exponent    { get; set; }
-        internal object Value       { get; set; }
     }
 }

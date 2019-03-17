@@ -1,11 +1,11 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions {
     public class YieldExpression : Expression {
-        internal bool IsYieldFrom { get; }
-
-        private Expression expression;
+        internal bool       IsYieldFrom { get; }
+        private  Expression expression;
 
         [JsonProperty]
         internal Expression Expression {
@@ -21,19 +21,15 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
         internal YieldExpression(
             Expression expression,
             bool       isYieldFrom,
-            Position   start,
-            Position   end
+            Token      start,
+            Token      end
         ) : base(start, end) {
             Expression  = expression;
             IsYieldFrom = isYieldFrom;
         }
 
-        public override string ToString() {
-            return ToAxionCode();
-        }
-
-        private string ToAxionCode() {
-            return "yield " + Expression;
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + "yield " + Expression;
         }
     }
 }

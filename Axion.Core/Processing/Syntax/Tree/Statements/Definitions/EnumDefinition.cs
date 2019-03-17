@@ -1,15 +1,14 @@
 using System.Collections.Generic;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames;
 using Axion.Core.Processing.Syntax.Tree.Statements.Interfaces;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
-    public class EnumDefinition : Statement, IDecorated, ITopLevelDefinition {
+    public class EnumDefinition : Statement, IDecorated {
         private Expression name;
 
-        [JsonProperty]
-        internal Expression Name {
+        public Expression Name {
             get => name;
             set {
                 value.Parent = this;
@@ -19,8 +18,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
 
         private TypeName[] bases;
 
-        [JsonProperty]
-        internal TypeName[] Bases {
+        public TypeName[] Bases {
             get => bases;
             set {
                 bases = value;
@@ -32,8 +30,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
 
         private EnumItem[] items;
 
-        [JsonProperty]
-        internal EnumItem[] Items {
+        public EnumItem[] Items {
             get => items;
             set {
                 items = value;
@@ -43,14 +40,12 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             }
         }
 
-        public bool IsEmpty => Items.Length == 0;
-
-        [JsonProperty]
+        public bool             IsEmpty   => Items.Length == 0;
         public List<Expression> Modifiers { get; set; }
 
         public EnumDefinition(
-            Position   start,
-            Position   end,
+            Token      start,
+            Token      end,
             Expression name,
             TypeName[] bases = null,
             EnumItem[] items = null
@@ -72,7 +67,10 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             TypeList = typeList;
             Value    = value;
             MarkStart(Name);
-            MarkEnd(Value ?? (typeList.Length > 0 ? (SyntaxTreeNode) typeList[typeList.Length - 1] : Name));
+            MarkEnd(
+                Value
+                ?? (typeList.Length > 0 ? (SyntaxTreeNode) typeList[typeList.Length - 1] : Name)
+            );
         }
     }
 }

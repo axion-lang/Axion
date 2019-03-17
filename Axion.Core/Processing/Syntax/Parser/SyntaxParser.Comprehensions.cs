@@ -11,11 +11,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///             comprehension_iterator '}'
         ///     </c>
         /// </summary>
-        private SetComprehension FinishSetComprehension(Expression item, Position start) {
+        private SetComprehension FinishSetComprehension(
+            Expression item,
+            Token      start
+        ) {
             ComprehensionIterator[] iterators = ParseComprehensionIterators();
             stream.Eat(TokenType.RightBrace);
 
-            return new SetComprehension(item, iterators, start, tokenEnd);
+            return new SetComprehension(item, iterators, start, stream.Token);
         }
 
         /// <summary>
@@ -27,12 +30,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private MapComprehension FinishMapComprehension(
             Expression key,
             Expression value,
-            Position   start
+            Token      start
         ) {
             ComprehensionIterator[] iterators = ParseComprehensionIterators();
             stream.Eat(TokenType.RightBrace);
 
-            return new MapComprehension(key, value, iterators, start, tokenEnd);
+            return new MapComprehension(key, value, iterators, start, stream.Token);
         }
 
         /// <summary>
@@ -81,7 +84,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             // we either want just () or a or we want (a,b) and (a,b,c)
             // so we can do tupleExpr.EmitSet() or loneExpr.EmitSet()
 
-            stream.Eat(TokenType.KeywordIn);
+            stream.Eat(TokenType.OpIn);
             Expression list = ParseOperation();
             return new ForComprehension(start, test, list);
         }

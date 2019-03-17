@@ -38,6 +38,7 @@ namespace Axion.Core.Processing.Errors {
                     result.Append(c);
                 }
             }
+
             return result.ToString();
         }
     }

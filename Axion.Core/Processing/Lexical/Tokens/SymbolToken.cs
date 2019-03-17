@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.Contracts;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
@@ -7,25 +6,27 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents a 'symbol' literal.
     /// </summary>
     public class SymbolToken : Token {
-        public SymbolToken(Position startPosition, string value, string whitespaces = "") : base(
-            Spec.Symbols[value],
-            startPosition,
+        public SymbolToken(string value, Position startPosition = default) : base(
+            Spec.Symbols.Forward[value],
             value,
-            whitespaces
-        ) {
-        }
+            startPosition
+        ) { }
+
+        public SymbolToken(TokenType type) : base(
+            type,
+            Spec.Symbols.Reverse[type]
+        ) { }
 
         internal bool IsOpenBrace =>
-            Type == TokenType.LeftParenthesis
-         || Type == TokenType.LeftBracket
-         || Type == TokenType.LeftBrace;
+            Is(TokenType.LeftParenthesis)
+            || Is(TokenType.LeftBracket)
+            || Is(TokenType.LeftBrace);
 
         internal bool IsCloseBrace =>
-            Type == TokenType.RightParenthesis
-         || Type == TokenType.RightBracket
-         || Type == TokenType.RightBrace;
+            Is(TokenType.RightParenthesis)
+            || Is(TokenType.RightBracket)
+            || Is(TokenType.RightBrace);
 
-        [Pure]
         internal TokenType GetMatchingBrace() {
             switch (Type) {
                 // open : close

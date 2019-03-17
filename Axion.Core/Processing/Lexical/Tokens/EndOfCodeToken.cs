@@ -3,7 +3,9 @@
     ///     Represents an 'end of input stream' ('EOS') mark.
     /// </summary>
     public class EndOfCodeToken : Token {
-        public EndOfCodeToken(Position startPosition) : base(TokenType.EndOfCode, startPosition) {
-        }
+        public EndOfCodeToken(Position startPosition = default) : base(
+            TokenType.EndOfCode,
+            startPosition: startPosition
+        ) { }
     }
 }

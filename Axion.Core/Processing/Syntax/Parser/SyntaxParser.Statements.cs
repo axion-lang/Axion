@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
+using Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames;
 using Axion.Core.Processing.Syntax.Tree.Statements;
 using Axion.Core.Processing.Syntax.Tree.Statements.Small;
 using Axion.Core.Specification;
@@ -131,13 +132,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     firstStmt
                 };
 
-                while (stream.Token.Type == Semicolon
+                while (stream.Token.Is(Semicolon)
                        && !stream.MaybeEatNewline()
                        && !stream.PeekIs(terminator)) {
                     statements.Add(ParseStmt());
                     if (stream.MaybeEat(EndOfCode)) {
                         if (terminator != None) {
-                            // force error here (Terminator expected)
                             stream.Eat(terminator);
                         }
 
@@ -154,7 +154,6 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
 
             return firstStmt;
-
         }
 
         #region If statement
@@ -168,8 +167,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private IfStatement ParseIfStmt(bool elseIf = false) {
-            Position start =
-                StartExprOrStmt(elseIf ? KeywordElseIf : KeywordIf).Span.StartPosition;
+            Token      start     = StartExprOrStmt(elseIf ? KeywordElseIf : KeywordIf);
             Expression condition = ParseTestExpr();
             // if start block
             BlockStatement thenBlock = ParseFullBlock();
@@ -179,19 +177,13 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 elseBlock = ParseFullBlock();
             }
             else if (stream.MaybeEat(KeywordElseIf)) {
-                elseBlock = new BlockStatement(
-                    new Statement[] {
-                        ParseIfStmt(true)
-                    }
-                );
+                elseBlock = new BlockStatement(ParseIfStmt(true));
             }
             else {
                 BlameInvalidSyntax(KeywordElse, stream.Peek);
             }
 
-            var result = new IfStatement(condition, thenBlock, elseBlock);
-            result.MarkPosition(start, tokenEnd);
-            return result;
+            return new IfStatement(start, condition, thenBlock, elseBlock);
         }
 
         #endregion
@@ -214,7 +206,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 noBreakBlock = ParseFullBlock();
             }
 
-            return new WhileStatement(condition, block, noBreakBlock, start);
+            return new WhileStatement(start, condition, block, noBreakBlock);
         }
 
         #endregion
@@ -230,15 +222,36 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///             block ['else' block]
         ///     </c>
         /// </summary>
-        private ForStatement ParseForStmt() {
+        private LoopStatement ParseForStmt() {
             Token start    = StartExprOrStmt(KeywordFor);
             int   startIdx = stream.Index;
 
-            Expression initStmt = ParseExpression();
+            var        isForIndex = false;
+            Expression initStmt;
             if (stream.MaybeEat(Semicolon)) {
-                Expression condition = ParseTestExpr();
-                stream.Eat(Semicolon);
-                Expression     iterStmt  = ParseExpression();
+                // 'for' ';'
+                initStmt   = null;
+                isForIndex = true;
+            }
+            else {
+                initStmt = ParseExpression();
+                if (stream.MaybeEat(Semicolon)) {
+                    isForIndex = true;
+                }
+            }
+
+            if (isForIndex) {
+                Expression condition = null;
+                if (!stream.MaybeEat(Semicolon)) {
+                    condition = ParseTestExpr();
+                    stream.Eat(Semicolon);
+                }
+
+                Expression iterStmt = null;
+                if (!stream.MaybeEat(Spec.NeverTestTypes)) {
+                    iterStmt = ParseExpression();
+                }
+
                 BlockStatement block     = ParseLoopBlock();
                 BlockStatement elseBlock = null;
                 if (stream.MaybeEat(KeywordElse)) {
@@ -246,12 +259,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
 
                 return new ForIndexStatement(
+                    start,
                     initStmt,
                     condition,
                     iterStmt,
                     block,
-                    elseBlock,
-                    start
+                    elseBlock
                 );
             }
 
@@ -261,7 +274,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 ParseTargetList(out bool trailingComma),
                 trailingComma
             );
-            if (stream.MaybeEat(KeywordIn)) {
+            if (stream.MaybeEat(OpIn)) {
                 Expression     inList    = ParseTestList();
                 BlockStatement block     = ParseLoopBlock();
                 BlockStatement elseBlock = null;
@@ -270,11 +283,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
 
                 return new ForInStatement(
+                    start,
                     expressions,
                     inList,
                     block,
-                    elseBlock,
-                    start
+                    elseBlock
                 );
             }
 
@@ -309,7 +322,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             // anyway
             if (stream.MaybeEat(KeywordAnyway)) {
                 finallyBlock = ParseFinallyBlock();
-                return new TryStatement(block, null, null, finallyBlock, start);
+                return new TryStatement(start, block, null, null, finallyBlock);
             }
 
             // catch
@@ -336,21 +349,20 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
             // anyway
             if (stream.MaybeEat(KeywordAnyway)) {
-                // If this function has an except block, then it can set the current exception.
                 finallyBlock = ParseFinallyBlock();
             }
 
-            return new TryStatement(block, handlers.ToArray(), elseBlock, finallyBlock, start);
+            return new TryStatement(start, block, handlers.ToArray(), elseBlock, finallyBlock);
         }
 
         /// <summary>
         ///     <c>
         ///         try_handler ::=
-        ///             'catch' [expr ['as' name]]
+        ///             'catch' [expr ['as' name]] ['when' test]
         ///     </c>
         /// </summary>
         private TryStatementHandler ParseTryStmtHandler() {
-            stream.Eat(KeywordCatch);
+            Token start = StartExprOrStmt(KeywordCatch);
 
             // If this function has an except block,
             // then it can set the current exception.
@@ -358,17 +370,22 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 currentFunction.CanSetSysExcInfo = true;
             }
 
-            Position   start     = tokenStart;
-            Expression errorType = null, name = null;
+            TypeName   errorType = null;
+            Expression name      = null;
             if (!stream.PeekIs(Spec.BlockStarters)) {
-                errorType = ParseTestExpr();
-                if (stream.MaybeEat(KeywordAs)) {
+                errorType = ParseTypeName();
+                if (stream.MaybeEat(OpAs)) {
                     name = ParseName();
                 }
             }
 
+            Expression condition = null;
+            if (stream.MaybeEat(KeywordWhen)) {
+                condition = ParseTestExpr();
+            }
+
             BlockStatement block = ParseFullBlock();
-            return new TryStatementHandler(errorType, name, block, start);
+            return new TryStatementHandler(start, errorType, name, condition, block);
         }
 
         private BlockStatement ParseFinallyBlock() {
@@ -408,10 +425,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
             // TODO: add 'with' expression like in Kotlin
             var items = new List<WithStatementItem>();
             do {
-                Position   itemStart      = tokenStart;
+                Token      itemStart      = stream.Token;
                 Expression contextManager = ParseTestExpr();
                 Expression name           = null;
-                if (stream.MaybeEat(KeywordAs)) {
+                if (stream.MaybeEat(OpAs)) {
                     name = ParseName();
                 }
 
@@ -421,11 +438,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
             Statement block = ParseFullBlock();
             if (items.Count > 1) {
                 for (int i = items.Count - 1; i > 0; i--) {
-                    block = new WithStatement(items[i], block, start);
+                    block = new WithStatement(start, items[i], block);
                 }
             }
 
-            return new WithStatement(items[0], block, start);
+            return new WithStatement(start, items[0], block);
         }
 
         #endregion
@@ -484,14 +501,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
         /// </summary>
         private Expression ParseDecorator() {
             // on '@'
-            Position   start     = tokenStart;
+            Token      start     = stream.Token;
             Expression decorator = ParseExpression();
             if (stream.MaybeEat(LeftParenthesis)) {
                 Arg[] args = FinishGeneratorOrArgList();
-                decorator = new CallExpression(decorator, args, tokenEnd);
+                decorator = new CallExpression(decorator, args, stream.Token);
             }
 
-            decorator.MarkPosition(start, tokenEnd);
+            decorator.MarkPosition(start, stream.Token);
             return decorator;
         }
 
@@ -514,7 +531,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 falseExpression = ParseTestExpr();
             }
 
-            return new AssertStatement(condition, falseExpression, start);
+            return new AssertStatement(start, condition, falseExpression);
         }
 
         /// <summary>
@@ -572,7 +589,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
             }
 
-            return new DeleteStatement(expressions.ToArray(), start);
+            return new DeleteStatement(start, expressions.ToArray());
         }
 
         /// <summary>
@@ -592,7 +609,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 }
             }
 
-            return new RaiseStatement(expr, cause, start);
+            return new RaiseStatement(start, expr, cause);
         }
 
         /// <summary>
@@ -613,7 +630,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 expr = ParseTestList();
             }
 
-            return new ReturnStatement(expr, start);
+            return new ReturnStatement(start, expr);
         }
 
         /// <summary>
@@ -689,12 +706,10 @@ namespace Axion.Core.Processing.Syntax.Parser {
             // 1-2) newline
             bool hasNewline;
             if (hasColon) {
-                // ':' NL
                 hasNewline = stream.MaybeEatNewline();
             }
             else {
-                // NL
-                hasNewline = blockStart.Type == Newline;
+                hasNewline = blockStart.Is(Newline);
             }
 
             TokenType terminator;

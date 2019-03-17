@@ -10,7 +10,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
     public partial class SyntaxParser {
         private          bool                      inLoop, inFinally, inFinallyLoop;
         private readonly Stack<FunctionDefinition> functions = new Stack<FunctionDefinition>();
-        
+
         /// <summary>
         ///     Current processing stream.
         /// </summary>
@@ -18,26 +18,16 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
         private readonly SourceUnit unit;
 
-        /// <summary>
-        ///     Start position of current token in stream.
-        /// </summary>
-        private Position tokenStart => stream.Token.Span.StartPosition;
-
-        /// <summary>
-        ///     End position of current token in stream.
-        /// </summary>
-        private Position tokenEnd => stream.Token.Span.EndPosition;
-
         internal SyntaxParser(SourceUnit unit) {
-            stream = new TokenStream(this, unit.Tokens);
-            this.unit   = unit;
+            stream    = new TokenStream(this, unit.Tokens);
+            this.unit = unit;
         }
 
         internal void Process() {
             if (stream.Tokens.Count == 0) {
                 return;
             }
-            
+
             var statements = new List<Statement>();
             while (!stream.MaybeEat(TokenType.EndOfCode)) {
                 Statement statement = ParseStmt();
@@ -51,7 +41,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 stream.Tokens[stream.Tokens.Count - 1]
             );
         }
-        
+
         private Token StartExprOrStmt(TokenType type) {
             stream.Eat(type);
             return stream.Token;
@@ -84,7 +74,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         #endregion
-        
+
         #region Errors reporting
 
         internal void BlameInvalidSyntax(TokenType expectedType, SpannedRegion mark) {
@@ -99,7 +89,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         }
 
         private ErrorExpression Error() {
-            return new ErrorExpression(tokenStart, tokenEnd);
+            return new ErrorExpression().MarkPosition(stream.Token);
         }
 
         private ExpressionStatement ErrorStmt() {
@@ -111,6 +101,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 unit.Blame(BlameType.UnexpectedEndOfCode, stream.Token);
                 return true;
             }
+
             return false;
         }
 

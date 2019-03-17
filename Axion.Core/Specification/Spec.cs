@@ -30,14 +30,14 @@ namespace Axion.Core.Specification {
                 // testing
                 { "assert", KeywordAssert },
                 // bool operators
-                { "not", KeywordNot },
-                { "and", KeywordAnd },
-                { "or", KeywordOr },
-                { "in", KeywordIn },
-                { "not in", KeywordNotIn },
-                { "is", KeywordIs },
-                { "is not", KeywordIsNot },
-                { "as", KeywordAs },
+                { "not", OpNot },
+                { "and", OpAnd },
+                { "or", OpOr },
+                { "in", OpIn },
+                { "not in", OpNotIn },
+                { "is", OpIs },
+                { "is not", OpIsNot },
+                { "as", OpAs },
                 // branching
                 { "unless", KeywordUnless },
                 { "if", KeywordIf },
@@ -86,7 +86,8 @@ namespace Axion.Core.Specification {
                 { "self", KeywordSelf },
                 { "true", KeywordTrue },
                 { "false", KeywordFalse },
-                { "with", KeywordWith }
+                { "with", KeywordWith },
+                { "when", KeywordWhen }
             };
 
         internal const string SingleCommentStart       = "#";
@@ -126,7 +127,7 @@ namespace Axion.Core.Specification {
             RightParenthesis,
             Comma,
             KeywordFor,
-            KeywordIn,
+            OpIn,
             KeywordIf
         };
     }

@@ -1,12 +1,13 @@
+using System;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
-using Newtonsoft.Json;
+using Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class TryStatement : Statement {
         private BlockStatement block;
 
-        [JsonProperty]
-        internal BlockStatement Block {
+        public BlockStatement Block {
             get => block;
             set {
                 value.Parent = this;
@@ -16,8 +17,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
 
         private TryStatementHandler[] handlers;
 
-        [JsonProperty]
-        internal TryStatementHandler[] Handlers {
+        public TryStatementHandler[] Handlers {
             get => handlers;
             set {
                 handlers = value;
@@ -29,8 +29,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
 
         private BlockStatement elseBlock;
 
-        [JsonProperty]
-        internal BlockStatement ElseBlock {
+        public BlockStatement ElseBlock {
             get => elseBlock;
             set {
                 value.Parent = this;
@@ -40,8 +39,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
 
         private BlockStatement anywayBlock;
 
-        [JsonProperty]
-        internal BlockStatement AnywayBlock {
+        public BlockStatement AnywayBlock {
             get => anywayBlock;
             set {
                 value.Parent = this;
@@ -50,53 +48,83 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
         }
 
         internal TryStatement(
+            Token                 startToken,
             BlockStatement        block,
             TryStatementHandler[] handlers,
             BlockStatement        elseBlock,
-            BlockStatement        anywayBlock,
-            SpannedRegion         start
-        ) {
+            BlockStatement        anywayBlock
+        ) : base(startToken) {
             Block       = block;
             Handlers    = handlers ?? new TryStatementHandler[0];
             ElseBlock   = elseBlock;
             AnywayBlock = anywayBlock;
 
-            MarkStart(start);
             MarkEnd(
                 AnywayBlock
-             ?? ElseBlock
-             ?? (Handlers.Length > 0 ? Handlers[Handlers.Length - 1] : (SyntaxTreeNode) block)
+                ?? ElseBlock
+                ?? (Handlers.Length > 0
+                    ? Handlers[Handlers.Length - 1]
+                    : (SyntaxTreeNode) block)
             );
+        }
+
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            c = c + "try " + Block;
+            if (Handlers.Length > 0) {
+                c.AppendJoin(" ", Handlers);
+            }
+
+            if (AnywayBlock != null) {
+                c = c + " anyway " + AnywayBlock;
+            }
+
+            return c;
         }
     }
 
-    public class TryStatementHandler : SyntaxTreeNode {
-        private Expression errorType;
+    public class TryStatementHandler : Statement {
+        private TypeName errorType;
 
-        [JsonProperty]
-        internal Expression ErrorType {
+        public TypeName ErrorType {
             get => errorType;
             set {
-                value.Parent = this;
-                errorType    = value;
+                if (value != null) {
+                    value.Parent = this;
+                }
+
+                errorType = value;
             }
         }
 
         private Expression name;
 
-        [JsonProperty]
-        internal Expression Name {
+        public Expression Name {
             get => name;
             set {
-                value.Parent = this;
-                name         = value;
+                if (value != null) {
+                    value.Parent = this;
+                }
+
+                name = value;
+            }
+        }
+
+        private Expression condition;
+
+        public Expression Condition {
+            get => condition;
+            set {
+                if (value != null) {
+                    value.Parent = this;
+                }
+
+                condition = value;
             }
         }
 
         private BlockStatement block;
 
-        [JsonProperty]
-        internal BlockStatement Block {
+        public BlockStatement Block {
             get => block;
             set {
                 value.Parent = this;
@@ -105,17 +133,35 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
         }
 
         public TryStatementHandler(
-            Expression     errorType,
-            Expression     target,
-            BlockStatement block,
-            Position       start
-        ) {
+            Token          startToken,
+            TypeName       errorType,
+            Expression     errorName,
+            Expression     condition,
+            BlockStatement block
+        ) : base(startToken) {
             ErrorType = errorType;
-            Name      = target;
-            Block     = block;
+            Name      = errorName;
+            Condition = condition;
+            Block     = block ?? throw new ArgumentNullException(nameof(block));
 
-            MarkStart(start);
             MarkEnd(Block);
+        }
+
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            c += "catch";
+            if (ErrorType != null) {
+                c = c + " " + ErrorType;
+            }
+
+            if (Name != null) {
+                c = c + " as " + Name;
+            }
+
+            if (Condition != null) {
+                c = c + " when " + Condition;
+            }
+
+            return c + Block;
         }
     }
 }

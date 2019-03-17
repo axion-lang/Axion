@@ -1,3 +1,5 @@
+using System;
+
 namespace Axion.Core.Processing {
     /// <summary>
     ///     Abstract 'extension-class'
@@ -8,34 +10,32 @@ namespace Axion.Core.Processing {
 
         // Region
 
-        internal void MarkStart(SpannedRegion mark) {
+        internal dynamic MarkStart(SpannedRegion mark) {
             Span = new Span(mark.Span.StartPosition, Span.EndPosition);
+            return this;
         }
 
-        internal void MarkEnd(SpannedRegion mark) {
+        internal dynamic MarkEnd(SpannedRegion mark) {
             Span = new Span(Span.StartPosition, mark.Span.EndPosition);
+            return this;
         }
 
-        internal void MarkPosition(SpannedRegion mark) {
+        internal dynamic MarkPosition(SpannedRegion mark) {
             Span = mark.Span;
+            return this;
         }
 
-        internal void MarkPosition(SpannedRegion start, SpannedRegion end) {
+        internal dynamic MarkPosition(SpannedRegion start, SpannedRegion end) {
             Span = new Span(start.Span.StartPosition, end.Span.EndPosition);
+            return this;
         }
 
-        // Position
-
-        internal void MarkStart(Position position) {
-            Span = new Span(position, Span.EndPosition);
+        internal virtual AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            throw new InvalidOperationException();
         }
 
-        internal void MarkEnd(Position position) {
-            Span = new Span(Span.StartPosition, position);
-        }
-
-        internal void MarkPosition(Position start, Position end) {
-            Span = new Span(start, end);
+        internal virtual CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            throw new InvalidOperationException();
         }
     }
 }

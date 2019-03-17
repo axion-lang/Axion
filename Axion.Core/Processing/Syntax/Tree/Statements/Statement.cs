@@ -1,10 +1,11 @@
-﻿namespace Axion.Core.Processing.Syntax.Tree.Statements {
-    public class Statement : SyntaxTreeNode {
-        protected Statement() {
-        }
+﻿using Axion.Core.Processing.Lexical.Tokens;
 
-        protected Statement(SpannedRegion mark) {
-            MarkPosition(mark);
+namespace Axion.Core.Processing.Syntax.Tree.Statements {
+    public class Statement : SyntaxTreeNode {
+        protected Statement() { }
+
+        protected Statement(Token startToken) {
+            MarkStart(startToken);
         }
     }
 }

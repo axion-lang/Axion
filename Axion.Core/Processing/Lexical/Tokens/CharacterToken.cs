@@ -5,36 +5,43 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents a 'character' literal.
     /// </summary>
     public class CharacterToken : Token {
+        public string RawValue   { get; }
+        public bool   IsUnclosed { get; }
+
         public CharacterToken(
-            Position startPosition,
             string   value,
-            string   rawValue   = null,
-            bool     isUnclosed = false
-        ) : base(TokenType.Character, startPosition, value) {
-            if (rawValue == null) {
-                rawValue = value;
-            }
-            RawValue   = rawValue;
+            string   rawValue      = null,
+            bool     isUnclosed    = false,
+            Position startPosition = default
+        ) : base(TokenType.Character, value, startPosition) {
+            RawValue   = rawValue ?? value;
             IsUnclosed = isUnclosed;
             RecomputeEndPosition();
         }
 
-        public string RawValue { get; }
-
-        public bool IsUnclosed { get; }
-
-        public override string ToAxionCode() {
-            string result = Spec.CharLiteralQuote + RawValue;
-            if (!IsUnclosed) {
-                result += Spec.CharLiteralQuote;
-            }
-            return result + Whitespaces;
+        private void RecomputeEndPosition() {
+            int endCol = Span.StartPosition.Column
+                         + RawValue.Length
+                         + (IsUnclosed ? 1 : 2); // quotes length
+            Span = new Span(Span.StartPosition, (Span.EndPosition.Line, endCol));
         }
 
-        private void RecomputeEndPosition() {
-            int endCol = Span.StartPosition.Column + RawValue.Length;
-            endCol += IsUnclosed ? 1 : 2; // quotes length
-            Span   =  new Span(Span.StartPosition, (Span.EndPosition.Line, endCol));
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            c = c + Spec.CharacterLiteralQuote.ToString() + RawValue;
+            if (!IsUnclosed) {
+                c += Spec.CharacterLiteralQuote.ToString();
+            }
+
+            return c + Whitespaces;
+        }
+
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            c = c + "'" + RawValue;
+            if (!IsUnclosed) {
+                c += "'";
+            }
+
+            return c + Whitespaces;
         }
     }
 }

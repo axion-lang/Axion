@@ -3,13 +3,13 @@
 fn DoSomething (value1: i32, value2: i32 = 3) => (i32, List<i32>)
     return value1 + value2
 
-fn DoSomething (value1: i32, value2 = 3) => i32 | List<i32>
+fn DoSomething (value1: i32, value2: i32 = 3) => i32 | List<i32>
     return value1 + value2
 
-fn DoSomething (value1, value2: i32 = 3) => i32
+fn DoSomething (value1: i32, value2: i32 = 3) => i32
     return value1 + value2
 
-fn DoSomething (value1, value2 = 3)
+fn DoSomething (value1: i32, value2: i32 = 3)
     return value1 + value2
 
 # multiline parameters
@@ -22,19 +22,19 @@ fn DoSomething (
 
 fn DoSomething (
 	value1: i32,
-	value2 = 3
+	value2: i32 = 3
 ) => i32 | List<i32>
     return value1 + value2
 
 fn DoSomething (
-	value1,
+	value1: i32,
 	value2: i32 = 3
 ) => i32
     return value1 + value2
 
 fn DoSomething (
-	value1,
-	value2 = 3
+	value1: i32,
+	value2: i32 = 3
 )
     return value1 + value2
 
@@ -44,15 +44,15 @@ fn DoSomething (value1: i32, value2: i32 = 3) => (i32, List<i32>) {
     return value1 + value2
 }
 
-fn DoSomething (value1: i32, value2 = 3) => i32 | List<i32> {
+fn DoSomething (value1: i32, value2: i32 = 3) => i32 | List<i32> {
     return value1 + value2
 }
 
-fn DoSomething (value1, value2: i32 = 3) => i32 {
+fn DoSomething (value1: i32, value2: i32 = 3) => i32 {
     return value1 + value2
 }
 
-fn DoSomething (value1, value2 = 3) {
+fn DoSomething (value1: i32, value2: i32 = 3) {
     return value1 + value2
 }
 
@@ -67,21 +67,21 @@ fn DoSomething (
 
 fn DoSomething (
 	value1: i32,
-	value2 = 3
+	value2: i32 = 3
 ) => i32 | List<i32> {
     return value1 + value2
 }
 
 fn DoSomething (
-	value1,
+	value1: i32,
 	value2: i32 = 3
 ) => i32 {
     return value1 + value2
 }
 
 fn DoSomething (
-	value1,
-	value2 = 3
+	value1: i32,
+	value2: i32 = 3
 ) {
     return value1 + value2
 }

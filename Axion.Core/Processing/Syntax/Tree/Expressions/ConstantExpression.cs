@@ -9,21 +9,25 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
 
         internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
 
+        internal ConstantExpression(TokenType type) {
+            Value = new KeywordToken(type);
+        }
+
         internal ConstantExpression(Token value) {
             Value = value;
-            MarkPosition(value);
+            MarkPosition(Value);
         }
 
-        internal ConstantExpression(Token value, Position start, Position end) : base(start, end) {
+        internal ConstantExpression(Token value, Token start, Token end) : base(start, end) {
             Value = value;
         }
 
-        public override string ToString() {
-            return ToAxionCode();
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + Value;
         }
 
-        private string ToAxionCode() {
-            return Value.ToString();
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            return c + Value;
         }
     }
 }

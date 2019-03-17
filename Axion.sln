@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2000
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28711.60
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Axion.Core", "Axion.Core\Axion.Core.csproj", "{C2E01476-B639-4848-8E8A-02B99CC7FCAF}"
 EndProject
@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Axion.Testing", "Axion.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleExtensions", "..\ConsoleExtensions\ConsoleExtensions\ConsoleExtensions.csproj", "{4E15AD4B-C291-4512-BAE6-0F10C4A0282A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion", "Axion\Axion.csproj", "{88A53BF9-97F9-4837-B382-E812EA88E5E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Axion", "Axion\Axion.csproj", "{88A53BF9-97F9-4837-B382-E812EA88E5E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

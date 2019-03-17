@@ -1,55 +1,39 @@
+using System;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
-    public class WhileStatement : Statement {
+    public class WhileStatement : LoopStatement {
         private Expression condition;
 
-        private BlockStatement block;
-
-        [JsonProperty]
-        internal BlockStatement Block {
-            get => block;
-            set {
-                value.Parent = this;
-                block        = value;
-            }
-        }
-
-        private BlockStatement noBreakBlock;
-
-        [JsonProperty]
-        internal BlockStatement NoBreakBlock {
-            get => noBreakBlock;
-            set {
-                if (value != null) {
-                    value.Parent = this;
-                }
-                noBreakBlock = value;
-            }
-        }
-
-        internal WhileStatement(
-            Expression     condition,
-            BlockStatement block,
-            BlockStatement noBreakBlock,
-            SpannedRegion  start
-        ) {
-            Condition    = condition;
-            Block        = block;
-            NoBreakBlock = noBreakBlock;
-
-            MarkStart(start);
-            MarkEnd(NoBreakBlock ?? Block);
-        }
-
-        [JsonProperty]
-        internal Expression Condition {
+        public Expression Condition {
             get => condition;
             set {
                 value.Parent = this;
                 condition    = value;
             }
+        }
+
+        internal WhileStatement(
+            Token          startToken,
+            Expression     condition,
+            BlockStatement block,
+            BlockStatement noBreakBlock
+        ) : base(startToken, block, noBreakBlock) {
+            Condition    = condition ?? throw new ArgumentNullException(nameof(condition));
+            Block        = block ?? throw new ArgumentNullException(nameof(block));
+            NoBreakBlock = noBreakBlock;
+
+            MarkEnd(NoBreakBlock ?? Block);
+        }
+
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            c = c + "while " + Condition + " " + Block;
+            if (NoBreakBlock != null) {
+                c = c + " nobreak " + NoBreakBlock;
+            }
+
+            return c;
         }
     }
 }

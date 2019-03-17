@@ -3,7 +3,9 @@
     ///     Represents an 'indentation decreasing' mark.
     /// </summary>
     public class OutdentToken : Token {
-        public OutdentToken(Position startPosition) : base(TokenType.Outdent, startPosition) {
-        }
+        public OutdentToken(Position startPosition = default) : base(
+            TokenType.Outdent,
+            startPosition: startPosition
+        ) { }
     }
 }

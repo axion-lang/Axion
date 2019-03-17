@@ -20,6 +20,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 list.Add(ParseTestExpr());
                 trailingComma = stream.MaybeEat(Comma);
             } while (trailingComma && !stream.PeekIs(Spec.NeverTestTypes));
+
             return list;
         }
 
@@ -48,9 +49,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     expr = MakeTupleOrExpr(list, trailingComma);
                 }
             }
+
             if (parens) {
                 stream.Eat(RightParenthesis);
             }
+
             return expr;
         }
 
@@ -95,9 +98,11 @@ namespace Axion.Core.Processing.Syntax.Parser {
             bool             trailingComma,
             bool             expandable = false
         ) {
-            if (!trailingComma && expressions.Count == 1) {
+            if (!trailingComma
+                && expressions.Count == 1) {
                 return expressions[0];
             }
+
             return new TupleExpression(expandable && !trailingComma, expressions.ToArray());
         }
     }

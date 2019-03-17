@@ -1,7 +1,7 @@
 using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.Spec;
 
 namespace Axion.Core.Processing.Lexical.Lexer {
     public partial class Lexer {
@@ -14,40 +14,42 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         ///     Otherwise, returns invalid operator token.
         /// </summary>
         private Token ReadSymbolic() {
-            int    longestLength = Spec.SymbolicValues[0].Length;
+            int    longestLength = SortedSymbolicValues[0].Length;
             string nextCodePiece = c + stream.PeekPiece(longestLength - 1);
 
             for (int length = nextCodePiece.Length; length > 0; length--) {
                 string piece = nextCodePiece.Substring(0, length);
                 // grow sequence of symbols
-                if (!Spec.SymbolicValues.Contains(piece)) {
+                if (!SortedSymbolicValues.Contains(piece)) {
                     continue;
                 }
+
                 stream.Move(length);
-                if (Spec.Operators.ContainsKey(piece)) {
-                    return new OperatorToken(tokenStartPosition, piece);
+                if (Operators.ContainsKey(piece)) {
+                    return new OperatorToken(piece, tokenStartPosition);
                 }
-                if (Spec.Symbols.ContainsKey(piece)) {
-                    var token = new SymbolToken(tokenStartPosition, piece);
+
+                if (Symbols.Forward.ContainsKey(piece)) {
+                    var token = new SymbolToken(piece, tokenStartPosition);
                     if (token.IsOpenBrace) {
                         mismatchingPairs.Add(token);
                     }
                     else if (token.IsCloseBrace) {
                         if (mismatchingPairs.Count == 0) {
-                            // got closing without opening
                             mismatchingPairs.Add(token);
                         }
                         else {
-                            // got closing & opening
                             mismatchingPairs.RemoveAt(mismatchingPairs.Count - 1);
                         }
                     }
+
                     return token;
                 }
             }
+
             // operator or symbol not found in specification
             unit.Blame(BlameType.InvalidSymbol, tokenStartPosition, stream.Position);
-            return new Token(TokenType.Invalid, tokenStartPosition, tokenValue.ToString());
+            return new Token(TokenType.Invalid, tokenValue.ToString(), tokenStartPosition);
         }
     }
 }

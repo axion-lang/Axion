@@ -8,34 +8,26 @@ using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Errors {
     [JsonObject]
-    [Serializable]
     public class LanguageException : Exception {
-        private readonly SourceUnit src;
+        internal readonly SourceUnit Unit;
 
         [JsonProperty]
-        private readonly string code;
-
-        [JsonProperty]
-        private readonly string time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
-
-        [JsonProperty]
-        private readonly Blame blame;
+        internal readonly Blame Blame;
 
         [JsonProperty]
         public override string Message { get; }
 
+        [JsonProperty]
         public override string StackTrace { get; }
 
-        // TODO: deal with sourceless constructor
-        internal LanguageException(Blame blame, string code) {
-            this.blame = blame;
-            this.code  = code;
+        [JsonProperty]
+        private readonly string time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+
+        internal LanguageException(Blame blame, SourceUnit unit) {
+            Unit       = unit ?? throw new ArgumentNullException(nameof(unit));
+            Blame      = blame ?? throw new ArgumentNullException(nameof(blame));
             Message    = blame.AsMessage();
             StackTrace = new StackTrace(2).ToString();
-        }
-
-        internal LanguageException(Blame blame, SourceUnit source) : this(blame, source.Code) {
-            src = source;
         }
 
         /// <summary>
@@ -59,48 +51,48 @@ namespace Axion.Core.Processing.Errors {
             // ...
             //
 
-            ConsoleColor color = blame.Severity == BlameSeverity.Error
-                                     ? ConsoleColor.Red
-                                     : ConsoleColor.DarkYellow;
+            ConsoleColor color = Blame.Severity == BlameSeverity.Error
+                ? ConsoleColor.Red
+                : ConsoleColor.DarkYellow;
 
             // Write message
             ConsoleUI.WriteLine((Message, color));
             // Append file name if it's exists.
-            if (src != null) {
-                ConsoleUI.WriteLine("In file '" + src.SourceFilePath + "'.");
-            }
+            ConsoleUI.WriteLine("In file '" + Unit.SourceFilePath + "'.");
+
             Console.WriteLine();
 
-            string[] codeLines = code.Split(Spec.EndOfLines, StringSplitOptions.None);
+            string[] codeLines = Unit.Code.Split(Spec.EndOfLines, StringSplitOptions.None);
 
             var lines = new List<string>();
             // limit rest of code by 5 lines
-            for (int i = blame.Span.StartPosition.Line;
-                 i < codeLines.Length && lines.Count < 4;
-                 i++) {
+            for (int i = Blame.Span.StartPosition.Line;
+                i < codeLines.Length && lines.Count < 4;
+                i++) {
                 lines.Add(codeLines[i].TrimEnd('\n', Spec.EndOfStream));
             }
-            if (lines.Count > codeLines.Length - blame.Span.StartPosition.Line) {
+
+            if (lines.Count > codeLines.Length - Blame.Span.StartPosition.Line) {
                 lines.Add("...");
             }
 
             // first line
             // <line number>| <code line>
             int pointerTailLength =
-                ConsoleCodeEditor.LineNumberWidth + blame.Span.StartPosition.Column;
+                ConsoleCodeEditor.LineNumberWidth + Blame.Span.StartPosition.Column;
             int errorTokenLength;
-            if (blame.Span.EndPosition.Line > blame.Span.StartPosition.Line) {
-                // token multiline
-                errorTokenLength = lines[0].Length - blame.Span.StartPosition.Column;
+            if (Blame.Span.EndPosition.Line > Blame.Span.StartPosition.Line) {
+                errorTokenLength = lines[0].Length - Blame.Span.StartPosition.Column;
             }
             else {
-                errorTokenLength = blame.Span.EndPosition.Column - blame.Span.StartPosition.Column;
+                errorTokenLength = Blame.Span.EndPosition.Column - Blame.Span.StartPosition.Column;
             }
+
             // upside arrows (^), should be red-colored
             string pointer =
                 // tail of pointer
                 new string(' ', pointerTailLength)
-               +
+                +
                 // pointer arrows
                 new string(
                     '^', // TODO compute token value length: include tab lengths
@@ -110,18 +102,19 @@ namespace Axion.Core.Processing.Errors {
             // Drawing ==========
 
             // line with error
-            ConsoleCodeEditor.PrintLineNumber(blame.Span.StartPosition.Line + 1);
+            ConsoleCodeEditor.PrintLineNumber(Blame.Span.StartPosition.Line + 1);
             ConsoleUI.WriteLine(lines[0]);
             // error pointer
             ConsoleUI.WriteLine((pointer, color));
 
             // next lines
-            for (int lineIndex = blame.Span.StartPosition.Line + 1;
-                 lineIndex < lines.Count;
-                 lineIndex++) {
+            for (int lineIndex = Blame.Span.StartPosition.Line + 1;
+                lineIndex < lines.Count;
+                lineIndex++) {
                 ConsoleCodeEditor.PrintLineNumber(lineIndex + 1);
                 ConsoleUI.WriteLine(lines[lineIndex]);
             }
+
             Console.WriteLine();
         }
     }

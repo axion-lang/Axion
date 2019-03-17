@@ -6,24 +6,11 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents a 'keyword'.
     /// </summary>
     public class KeywordToken : Token {
-        public KeywordToken(TokenType tokenType, Position startPosition, string whitespaces = "") :
+        public KeywordToken(TokenType tokenType, Position startPosition = default) :
             base(
                 tokenType,
-                startPosition,
                 Spec.Keywords.First(kvp => kvp.Value == tokenType).Key,
-                whitespaces
-            ) {
-        }
-
-        /// <summary>
-        ///     Constructor for compound keywords.
-        /// </summary>
-        public KeywordToken(
-            TokenType tokenType,
-            Position  startPosition,
-            string    value,
-            string    whitespaces = ""
-        ) : base(tokenType, startPosition, value, whitespaces) {
-        }
+                startPosition
+            ) { }
     }
 }

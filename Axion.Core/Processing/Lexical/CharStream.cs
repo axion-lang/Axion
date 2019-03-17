@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical {
@@ -33,12 +32,6 @@ namespace Axion.Core.Processing.Lexical {
         private int prevLineLength;
 
         /// <summary>
-        ///     Initializes a new stream with specified lines of source code.
-        /// </summary>
-        public CharStream(IEnumerable<string> sourceLines) : this(string.Join("\n", sourceLines)) {
-        }
-
-        /// <summary>
         ///     Initializes a new stream with specified source.
         /// </summary>
         public CharStream(string source) {
@@ -46,6 +39,7 @@ namespace Axion.Core.Processing.Lexical {
             if (!source.EndsWith(Spec.EndOfStream.ToString())) {
                 source += Spec.EndOfStream;
             }
+
             Source = source;
         }
 
@@ -100,6 +94,7 @@ namespace Axion.Core.Processing.Lexical {
             if (indexOfNewline == -1) {
                 return fromCurrentIndex;
             }
+
             return fromCurrentIndex.Substring(0, indexOfNewline + 1);
         }
 
@@ -111,6 +106,7 @@ namespace Axion.Core.Processing.Lexical {
             if (CharIdx + 1 + length < Source.Length) {
                 return Source.Substring(CharIdx + 1, length);
             }
+
             return Source.Substring(CharIdx + 1, Source.Length - CharIdx - 1);
         }
 
@@ -130,6 +126,7 @@ namespace Axion.Core.Processing.Lexical {
                     else {
                         columnIdx++;
                     }
+
                     CharIdx++;
                 }
             }

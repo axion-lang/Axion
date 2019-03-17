@@ -8,7 +8,7 @@ using Axion.Core.Processing.Lexical.Tokens;
 namespace Axion.Core.Specification {
     public partial class Spec {
         /// <summary>
-        ///     First barrier, preventing silly
+        ///     First barrier preventing silly
         ///     errors in specification.
         ///     Checks, that all keywords, operators and blames
         ///     are declared in specification.
@@ -32,10 +32,14 @@ namespace Axion.Core.Specification {
                                              .Where(name => name.ToLower().StartsWith("op"));
             foreach (string op in definedOps) {
                 Enum.TryParse(op, out TokenType type);
-                if (Operators.Values.All(props => props.Type != type)) {
+                if (Operators.Values.All(props => props.Type != type)
+                    && type != TokenType.OpNotIn
+                    && type != TokenType.OpIsNot) {
                     Debug.Fail("Operator '" + op + "' is not defined in specification.");
                 }
             }
+
+            Debug.Assert(Operators.Count == OperatorTypes.Count);
 
             // check blames completeness
             IEnumerable<string> definedBls = Enum
@@ -53,38 +57,38 @@ namespace Axion.Core.Specification {
 
         internal static bool IsValidOctalDigit(this char c) {
             return c == '0'
-                || c == '1'
-                || c == '2'
-                || c == '3'
-                || c == '4'
-                || c == '5'
-                || c == '6'
-                || c == '7';
+                   || c == '1'
+                   || c == '2'
+                   || c == '3'
+                   || c == '4'
+                   || c == '5'
+                   || c == '6'
+                   || c == '7';
         }
 
         internal static bool IsValidHexadecimalDigit(this char c) {
             return c == '0'
-                || c == '1'
-                || c == '2'
-                || c == '3'
-                || c == '4'
-                || c == '5'
-                || c == '6'
-                || c == '7'
-                || c == '8'
-                || c == '9'
-                || c == 'a'
-                || c == 'b'
-                || c == 'c'
-                || c == 'd'
-                || c == 'e'
-                || c == 'f'
-                || c == 'A'
-                || c == 'B'
-                || c == 'C'
-                || c == 'D'
-                || c == 'E'
-                || c == 'F';
+                   || c == '1'
+                   || c == '2'
+                   || c == '3'
+                   || c == '4'
+                   || c == '5'
+                   || c == '6'
+                   || c == '7'
+                   || c == '8'
+                   || c == '9'
+                   || c == 'a'
+                   || c == 'b'
+                   || c == 'c'
+                   || c == 'd'
+                   || c == 'e'
+                   || c == 'f'
+                   || c == 'A'
+                   || c == 'B'
+                   || c == 'C'
+                   || c == 'D'
+                   || c == 'E'
+                   || c == 'F';
         }
 
         internal static bool IsSpaceOrTab(char c) {

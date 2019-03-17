@@ -18,12 +18,8 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             MarkPosition(expression);
         }
 
-        public override string ToString() {
-            return ToAxionCode();
-        }
-
-        private string ToAxionCode() {
-            return "(" + Expression + ")";
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + "(" + Expression + ")";
         }
     }
 }

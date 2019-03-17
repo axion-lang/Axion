@@ -1,14 +1,12 @@
 ﻿using System;
-using System.CodeDom;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
     public class IfStatement : Statement {
         private Expression condition;
 
-        [JsonProperty]
-        internal Expression Condition {
+        public Expression Condition {
             get => condition;
             set {
                 value.Parent = this;
@@ -18,8 +16,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
 
         private BlockStatement thenBlock;
 
-        [JsonProperty]
-        internal BlockStatement ThenBlock {
+        public BlockStatement ThenBlock {
             get => thenBlock;
             set {
                 value.Parent = this;
@@ -29,34 +26,40 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements {
 
         private BlockStatement elseBlock;
 
-        [JsonProperty]
         public BlockStatement ElseBlock {
             get => elseBlock;
             set {
                 if (value != null) {
                     value.Parent = this;
                 }
+
                 elseBlock = value;
             }
         }
 
         public IfStatement(
+            Token          startToken,
             Expression     condition,
             BlockStatement thenBlock,
             BlockStatement elseBlock
-        ) {
+        ) : base(startToken) {
             Condition = condition ?? throw new ArgumentNullException(nameof(condition));
             ThenBlock = thenBlock ?? throw new ArgumentNullException(nameof(thenBlock));
             ElseBlock = elseBlock;
-            MarkPosition(ThenBlock, ElseBlock ?? ThenBlock);
+
+            MarkEnd(ElseBlock ?? ThenBlock);
         }
 
-        internal override CodeObject ToCSharp() {
-            return new CodeConditionStatement(
-                (CodeExpression) Condition.ToCSharp(),
-                (CodeStatement[]) ThenBlock.ToCSharpArray(),
-                (CodeStatement[]) ElseBlock.ToCSharpArray()
-            );
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            c = c + "if " + Condition + " " + ThenBlock + " else ";
+            if (ElseBlock != null) {
+                c = c + ElseBlock;
+            }
+            else {
+                c = c + "{ }";
+            }
+
+            return c;
         }
     }
 }

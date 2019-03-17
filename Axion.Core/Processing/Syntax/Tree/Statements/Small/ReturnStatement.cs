@@ -1,29 +1,33 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements.Small {
     public class ReturnStatement : Statement {
         private Expression expression;
 
-        internal ReturnStatement(Expression expression) {
-            Expression = expression;
-            MarkPosition(expression);
-        }
-
-        internal ReturnStatement(Expression expression, SpannedRegion start) {
-            Expression = expression;
-
-            MarkStart(start);
-            MarkEnd(expression ?? start);
-        }
-
-        [JsonProperty]
-        internal Expression Expression {
+        public Expression Expression {
             get => expression;
             set {
                 value.Parent = this;
                 expression   = value;
             }
+        }
+
+        internal ReturnStatement(
+            Token      startToken,
+            Expression expression
+        ) : base(startToken) {
+            Expression = expression;
+
+            MarkEnd((SpannedRegion) expression ?? startToken);
+        }
+
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + "return " + Expression;
+        }
+
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            return c + "return " + Expression + ";";
         }
     }
 }

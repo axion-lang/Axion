@@ -61,7 +61,6 @@
         ///     Unicode character.
         /// </summary>
         IllegalUnicodeCharacter,
-
         InvalidXEscapeFormat,
         TruncatedEscapeSequence,
 
@@ -72,9 +71,7 @@
         ///     missing ending quote.
         /// </summary>
         UnclosedString,
-
         InvalidPrefixInStringLiteral,
-
         UnescapedQuoteInStringLiteral,
 
         #endregion
@@ -108,7 +105,6 @@
         InvalidBinaryLiteral,
         InvalidOctalLiteral,
         InvalidHexadecimalLiteral,
-
         InvalidPostfixInNumberLiteral,
 
         /// <summary>

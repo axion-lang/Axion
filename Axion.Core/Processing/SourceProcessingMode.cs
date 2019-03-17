@@ -4,6 +4,8 @@
     ///     [<see cref="SourceUnit" />] (e.g. [<see cref="Compile" />] or [<see cref="Interpret" />])
     /// </summary>
     public enum SourceProcessingMode {
+        None = 0,
+
         /// <summary>
         ///     Perform lexical analysis on source and generate tokens list from it.
         /// </summary>
@@ -39,17 +41,17 @@
         /// <summary>
         ///     Transpile Axion source into the C# programming language source.
         /// </summary>
-        ConvertCSharp = 0b001000011,
+        ConvertCS = 0b001000011,
 
         /// <summary>
         ///     Transpile Axion source into the JavaScript programming language source.
         /// </summary>
-        ConvertJavaScript = 0b010000011,
+        ConvertJS = 0b010000011,
 
         /// <summary>
         ///     Transpile Axion source into the Python programming language source.
         /// </summary>
-        ConvertPython = 0b100000011
+        ConvertPy = 0b100000011
 
         #endregion
     }

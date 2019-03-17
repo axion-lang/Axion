@@ -49,7 +49,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
             }
 
             if (stream.MaybeEat(Spec.CompoundAssignOperators)) {
-                var        op = (SymbolToken) stream.Token;
+                var op = (SymbolToken) stream.Token;
                 Expression right = stream.PeekIs(KeywordYield)
                     ? ParseYield()
                     : ParseTestList();
@@ -89,7 +89,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         ///     </c>
         /// </summary>
         private Expression ParseYield() {
-            Position start = StartExprOrStmt(KeywordYield).Span.StartPosition;
+            Token start = StartExprOrStmt(KeywordYield);
             // Mark that function as generator.
             // If we're in a generator expr, then we don't have a function yet.
             // g = ((yield i) for i in range(5))
@@ -107,15 +107,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
 
             var isYieldFrom = false;
             if (stream.MaybeEat(KeywordFrom)) {
-                yieldExpr = ParseTestExpr();
-                yieldExpr.MarkPosition(start, tokenEnd);
+                yieldExpr   = ParseTestExpr();
                 isYieldFrom = true;
             }
             else {
-                yieldExpr = ParseExpression() ?? new ConstantExpression(null, start, tokenEnd);
+                yieldExpr = ParseExpression() ?? new ConstantExpression(KeywordNil);
             }
 
-            return new YieldExpression(yieldExpr, isYieldFrom, start, tokenEnd);
+            return new YieldExpression(yieldExpr, isYieldFrom, start, stream.Token);
         }
 
         /// <summary>
@@ -255,13 +254,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
                     }
                     case LeftParenthesis: {
                         if (!allowGeneratorExpression) {
-                            // TODO: check
                             return result;
                         }
 
                         stream.NextToken();
                         Arg[] args = FinishGeneratorOrArgList();
-                        result = new CallExpression(result, args ?? new Arg[0], tokenEnd);
+                        result = new CallExpression(result, args ?? new Arg[0], stream.Token);
                         break;
                     }
                     case LeftBracket: {
@@ -310,14 +308,12 @@ namespace Axion.Core.Processing.Syntax.Parser {
                 if (stream.MaybeEat(Colon)) {
                     Expression stop = null;
                     if (!stream.PeekIs(Colon, Comma, RightBracket)) {
-                        // [?:val:?]
                         stop = ParseTestExpr();
                     }
 
                     Expression step = null;
                     if (stream.MaybeEat(Colon)
                         && !stream.PeekIs(Comma, RightBracket)) {
-                        // [?:?:val]
                         step = ParseTestExpr();
                     }
 
@@ -343,7 +339,7 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private NameExpression ParseName() {
             NameExpression name = null;
             if (stream.Eat(Identifier)) {
-                name = new NameExpression(stream.Token);
+                name = new NameExpression((IdentifierToken) stream.Token);
             }
 
             return name;
@@ -358,14 +354,14 @@ namespace Axion.Core.Processing.Syntax.Parser {
         private Expression ParseQualifiedName() {
             Expression name = null;
             if (stream.Eat(Identifier)) {
-                name = new NameExpression(stream.Token);
+                name = new NameExpression((IdentifierToken) stream.Token);
             }
 
             // qualifiers
             while (stream.MaybeEat(Dot)) {
                 NameExpression qualifier = null;
                 if (stream.Eat(Identifier)) {
-                    qualifier = new NameExpression(stream.Token);
+                    qualifier = new NameExpression((IdentifierToken) stream.Token);
                 }
 
                 name = new MemberExpression(name, qualifier);

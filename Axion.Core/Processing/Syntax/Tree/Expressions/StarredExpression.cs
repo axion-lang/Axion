@@ -1,4 +1,5 @@
 using System;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
 using Newtonsoft.Json;
 
@@ -17,11 +18,10 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
 
         internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
 
-        public StarredExpression(Position start, Expression value) {
+        public StarredExpression(Token start, Expression value) {
             Value = value ?? throw new ArgumentNullException(nameof(value));
 
-            MarkStart(start);
-            MarkEnd(value);
+            MarkPosition(start, value);
         }
     }
 }

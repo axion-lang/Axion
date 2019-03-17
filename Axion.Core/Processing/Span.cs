@@ -13,7 +13,7 @@ namespace Axion.Core.Processing {
         }
 
         public override string ToString() {
-            return "start (" + StartPosition + "), end (" + EndPosition + ")";
+            return "start: " + StartPosition + ", end: " + EndPosition;
         }
 
         public override bool Equals(object obj) {

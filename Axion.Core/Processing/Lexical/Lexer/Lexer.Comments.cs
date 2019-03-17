@@ -1,6 +1,6 @@
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.Spec;
 
 namespace Axion.Core.Processing.Lexical.Lexer {
     public partial class Lexer {
@@ -8,11 +8,13 @@ namespace Axion.Core.Processing.Lexical.Lexer {
             stream.Move();
 
             // skip all until end of line or end of stream
-            while (!stream.AtEndOfLine() && c != Spec.EndOfStream) {
+            while (!stream.AtEndOfLine()
+                   && c != EndOfStream) {
                 tokenValue.Append(c);
                 stream.Move();
             }
-            return new SingleCommentToken(tokenStartPosition, tokenValue.ToString());
+
+            return new SingleCommentToken(tokenValue.ToString(), tokenStartPosition);
         }
 
         /// <summary>
@@ -25,39 +27,51 @@ namespace Axion.Core.Processing.Lexical.Lexer {
         private MultilineCommentToken ReadMultilineComment() {
             if (unclosedMultilineComments.Count == 0) {
                 // we're on '/*'
-                stream.Move(Spec.MultiCommentStart.Length);
+                stream.Move(MultiCommentStart.Length);
                 unclosedMultilineComments.Add(
-                    new MultilineCommentToken(tokenStartPosition, "", true)
+                    new MultilineCommentToken("", true, tokenStartPosition)
                 );
             }
+
             while (unclosedMultilineComments.Count > 0) {
                 string nextPiece = c.ToString() + stream.Peek;
                 // found comment end
-                if (nextPiece == Spec.MultiCommentEnd) {
+                if (nextPiece == MultiCommentEnd) {
                     // don't add last comment '*/'
                     if (unclosedMultilineComments.Count != 1) {
-                        tokenValue.Append(Spec.MultiCommentEnd);
+                        tokenValue.Append(MultiCommentEnd);
                     }
-                    stream.Move(2);
+
+                    stream.Move(MultiCommentEnd.Length);
+
                     // decrease comment level
                     unclosedMultilineComments.RemoveAt(unclosedMultilineComments.Count - 1);
                 }
                 // found nested multiline comment start
-                else if (nextPiece == Spec.MultiCommentStart) {
-                    tokenValue.Append(Spec.MultiCommentStart);
-                    stream.Move(2);
+                else if (nextPiece == MultiCommentStart) {
+                    tokenValue.Append(MultiCommentStart);
+                    stream.Move(MultiCommentStart.Length);
+
                     // increase comment level
                     unclosedMultilineComments.Add(
-                        new MultilineCommentToken(tokenStartPosition, tokenValue.ToString(), true)
+                        new MultilineCommentToken(
+                            tokenValue.ToString(),
+                            true,
+                            tokenStartPosition
+                        )
                     );
                 }
                 // went through end of stream
-                else if (c == Spec.EndOfStream) {
-                    unit.Blame(BlameType.UnclosedMultilineComment, tokenStartPosition, stream.Position);
-                    return new MultilineCommentToken(
+                else if (c == EndOfStream) {
+                    unit.Blame(
+                        BlameType.UnclosedMultilineComment,
                         tokenStartPosition,
+                        stream.Position
+                    );
+                    return new MultilineCommentToken(
                         tokenValue.ToString(),
-                        true
+                        true,
+                        tokenStartPosition
                     );
                 }
                 // found any other character
@@ -66,7 +80,8 @@ namespace Axion.Core.Processing.Lexical.Lexer {
                     stream.Move();
                 }
             }
-            return new MultilineCommentToken(tokenStartPosition, tokenValue.ToString());
+
+            return new MultilineCommentToken(tokenValue.ToString(), false, tokenStartPosition);
         }
     }
 }

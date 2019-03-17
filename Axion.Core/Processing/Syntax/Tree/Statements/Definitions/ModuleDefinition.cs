@@ -1,16 +1,13 @@
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Axion.Core.Processing.Syntax.Tree.Statements.Interfaces;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
-    public class ModuleDefinition : Statement, IDecorated, ITopLevelDefinition {
+    public class ModuleDefinition : Statement, IDecorated {
         private Expression name;
 
-        [JsonProperty]
-        internal Expression Name {
+        public Expression Name {
             get => name;
             set {
                 value.Parent = this;
@@ -20,13 +17,13 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
 
         private BlockStatement block;
 
-        [JsonProperty]
-        internal BlockStatement Block {
+        public BlockStatement Block {
             get => block;
             set {
                 if (value != null) {
                     value.Parent = this;
                 }
+
                 block = value;
             }
         }
@@ -39,15 +36,12 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             MarkPosition(name, block);
         }
 
-        internal override CodeObject ToCSharp() {
-            var ns = new CodeNamespace(Name.ToString());
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + "module " + Name + " " + Block;
+        }
 
-            foreach (Statement s in Block.Statements) {
-                if (s is ClassDefinition || s is EnumDefinition) {
-                    ns.Types.Add((CodeTypeDeclaration) s.ToCSharp());
-                }
-            }
-            return ns;
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            return c + "namespace " + Name + " " + Block;
         }
     }
 }

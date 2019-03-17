@@ -1,5 +1,3 @@
-using System;
-using System.CodeDom;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree {
@@ -13,16 +11,9 @@ namespace Axion.Core.Processing.Syntax.Tree {
                 while (!(p is Ast)) {
                     p = p.Parent;
                 }
-                return ((Ast) p).Source;
+
+                return ((Ast) p).Unit;
             }
-        }
-
-        internal virtual CodeObject ToCSharp() {
-            throw new InvalidOperationException();
-        }
-
-        internal virtual CodeObject[] ToCSharpArray() {
-            throw new InvalidOperationException();
         }
     }
 }

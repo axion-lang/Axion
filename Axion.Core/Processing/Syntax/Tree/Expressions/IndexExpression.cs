@@ -33,12 +33,12 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             MarkEnd(index);
         }
 
-        public override string ToString() {
-            return ToAxionCode();
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + Target + "[" + Index + "]";
         }
 
-        private string ToAxionCode() {
-            return Target + "[" + Index + "]";
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            return c + Target + "[" + Index + "]";
         }
     }
 }

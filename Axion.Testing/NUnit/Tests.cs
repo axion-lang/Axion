@@ -11,43 +11,45 @@ namespace Axion.Testing.NUnit {
         private static readonly DirectoryInfo axionTestingDir =
             new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent;
 
-        private readonly string __samplesPath =
+        private readonly string samplesPath =
             axionTestingDir.Parent.FullName + "\\Other\\Code Examples\\";
 
-        protected string samplesPath {
+        protected string SamplesPath {
             get {
-                if (!Directory.Exists(__samplesPath)) {
-                    Directory.CreateDirectory(__samplesPath);
+                if (!Directory.Exists(samplesPath)) {
+                    Directory.CreateDirectory(samplesPath);
                 }
-                return __samplesPath;
+
+                return samplesPath;
             }
         }
 
-        protected readonly string __outPath = axionTestingDir.FullName + "\\Files\\out\\";
+        private readonly string outPath = axionTestingDir.FullName + "\\Files\\out\\";
 
-        protected string outPath {
+        protected string OutPath {
             get {
-                if (!Directory.Exists(__outPath)) {
-                    Directory.CreateDirectory(__outPath);
+                if (!Directory.Exists(outPath)) {
+                    Directory.CreateDirectory(outPath);
                 }
-                return __outPath;
+
+                return outPath;
             }
         }
 
-        private readonly string __inPath = axionTestingDir.FullName + "\\Files\\in\\";
+        private readonly string inPath = axionTestingDir.FullName + "\\Files\\in\\";
 
-        protected string inPath {
+        protected string InPath {
             get {
-                if (!Directory.Exists(__inPath)) {
-                    Directory.CreateDirectory(__inPath);
+                if (!Directory.Exists(inPath)) {
+                    Directory.CreateDirectory(inPath);
                 }
-                return __inPath;
+
+                return inPath;
             }
         }
 
-        protected const string TestExtension = ".unit";
-
-        protected readonly List<FileInfo> SourceFiles = new List<FileInfo>();
+        protected const    string         TestExtension = ".unit";
+        protected readonly List<FileInfo> SourceFiles   = new List<FileInfo>();
 
         /// <summary>
         ///     A quick way to clear unit tests debug output.
@@ -55,7 +57,7 @@ namespace Axion.Testing.NUnit {
         [OneTimeSetUp]
         public void ClearDebugDirectory() {
             // clear debugging output
-            string dbg = __outPath + "debug\\";
+            string dbg = outPath + "debug\\";
             if (Directory.Exists(dbg)) {
                 foreach (FileInfo file in new DirectoryInfo(dbg).EnumerateFiles()) {
                     file.Delete();
@@ -66,7 +68,7 @@ namespace Axion.Testing.NUnit {
             }
 
             // scan for sources
-            var patternsDir = new DirectoryInfo(samplesPath + "design patterns\\");
+            var patternsDir = new DirectoryInfo(SamplesPath + "design patterns\\");
             Assert.That(patternsDir.Exists);
             ScanSources(patternsDir);
         }
@@ -77,6 +79,7 @@ namespace Axion.Testing.NUnit {
                     SourceFiles.Add(file);
                 }
             }
+
             foreach (DirectoryInfo childDir in dir.GetDirectories()) {
                 ScanSources(childDir);
             }
@@ -84,13 +87,13 @@ namespace Axion.Testing.NUnit {
 
         internal SourceUnit MakeSourceFromFile(string fileName) {
             return new SourceUnit(
-                new FileInfo(inPath + fileName + Spec.SourceFileExtension),
-                outPath + fileName + TestExtension
+                new FileInfo(InPath + fileName + Spec.SourceFileExtension),
+                OutPath + fileName + TestExtension
             );
         }
 
         internal SourceUnit MakeSourceFromCode(string fileName, string code) {
-            return new SourceUnit(code, outPath + fileName + TestExtension);
+            return new SourceUnit(code, OutPath + fileName + TestExtension);
         }
     }
 }

@@ -6,8 +6,8 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
         private Expression[] left;
 
         /// <summary>
-        ///     left.len = 1 for x = 4
-        ///     left.len = 3 for x = y = z = 4
+        ///     len = 1 for x = 4;
+        ///     len = 3 for x = y = z = 4
         /// </summary>
         [JsonProperty]
         internal Expression[] Left {
@@ -31,17 +31,28 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             }
         }
 
+        public AssignmentExpression(Expression left, Expression right) {
+            Left = left != null
+                ? new[] {
+                    left
+                }
+                : throw new ArgumentNullException(nameof(left));
+            Right = right ?? throw new ArgumentNullException(nameof(right));
+        }
+
         public AssignmentExpression(Expression[] left, Expression right) {
             Left  = left ?? throw new ArgumentNullException(nameof(left));
             Right = right ?? throw new ArgumentNullException(nameof(right));
         }
 
-        public override string ToString() {
-            return ToAxionCode();
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            c.AppendJoin(" = ", Left);
+            return c + " = " + Right;
         }
 
-        private string ToAxionCode() {
-            return Left + " = " + Right;
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            c.AppendJoin(" = ", Left);
+            return c + " = " + Right;
         }
     }
 }

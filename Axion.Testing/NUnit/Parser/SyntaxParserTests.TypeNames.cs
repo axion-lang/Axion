@@ -1,4 +1,5 @@
 using System.Linq;
+using Axion.Core;
 using Axion.Core.Processing;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Axion.Core.Processing.Syntax.Tree.Expressions.Binary;
@@ -25,7 +26,8 @@ type8: (Type1<Int>[], (Array[] | AnotherType)[])
 type9: List< Map<T1, T2> > | (Type1<Int, Type2[]>[], (Array[] | AnotherType)[])
 "
             );
-            unit.Process(
+            Compiler.Process(
+                unit,
                 SourceProcessingMode.Parsing,
                 SourceProcessingOptions.SyntaxAnalysisDebugOutput
             );
@@ -47,7 +49,7 @@ type9: List< Map<T1, T2> > | (Type1<Int, Type2[]>[], (Array[] | AnotherType)[])
                     var type2 = (GenericTypeName) stmts[2];
                     var genT2 = (SimpleTypeName) type2.Target;
                     Assert.That(genT2.Name is NameExpression);
-                    var genG2 = (SimpleTypeName) type2.Generics[0];
+                    var genG2 = (SimpleTypeName) type2.TypeArguments[0];
                     Assert.That(genG2.Name is NameExpression);
                 }
             );

@@ -12,6 +12,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 if (value != null) {
                     value.Parent = this;
                 }
+
                 start = value;
             }
         }
@@ -25,6 +26,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 if (value != null) {
                     value.Parent = this;
                 }
+
                 stop = value;
             }
         }
@@ -38,6 +40,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
                 if (value != null) {
                     value.Parent = this;
                 }
+
                 step = value;
             }
         }
@@ -49,8 +52,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions {
             Stop  = stop;
             Step  = step;
 
-            MarkStart(start ?? stop ?? step);
-            MarkEnd(step ?? stop ?? start);
+            MarkPosition(start ?? stop ?? step, step ?? stop ?? start);
         }
     }
 }

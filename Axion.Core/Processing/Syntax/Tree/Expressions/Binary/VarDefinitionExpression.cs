@@ -1,12 +1,10 @@
 using System;
 using Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Expressions.Binary {
     public class VarDefinitionExpression : LeftRightExpression {
         private TypeName type;
 
-        [JsonProperty]
         public TypeName Type {
             get => type;
             private set {
@@ -21,12 +19,20 @@ namespace Axion.Core.Processing.Syntax.Tree.Expressions.Binary {
             Right = right;
         }
 
-        public override string ToString() {
-            return ToAxionCode();
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            c = c + Left + ": " + Type;
+            if (Right != null) {
+                c = c + " = " + Right;
+            }
+            return c;
         }
 
-        private string ToAxionCode() {
-            return Left + ": " + Type + (Right != null ? " = " + Right : "");
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            c = c + Type + " " + Left;
+            if (Right != null) {
+                c = c + " = " + Right;
+            }
+            return c;
         }
     }
 }

@@ -17,12 +17,14 @@ namespace Axion.Core.Specification {
         };
 
         #region Language string and character literals
+        
+        internal const char EscapeMark = '\\';
 
         /// <summary>
         ///     Quote used in language to specify
         ///     start/end of 'character' literal.
         /// </summary>
-        internal const char CharLiteralQuote = '`';
+        internal const char CharacterLiteralQuote = '`';
 
         /// <summary>
         ///     Contains all valid quotes for string literals.

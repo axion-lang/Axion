@@ -3,11 +3,10 @@
     ///     Represents an 'indentation increasing' mark.
     /// </summary>
     public class IndentToken : Token {
-        public IndentToken(Position startPosition, string value) : base(
+        public IndentToken(string value = "    ", Position startPosition = default) : base(
             TokenType.Indent,
-            startPosition,
-            value
-        ) {
-        }
+            value,
+            startPosition
+        ) { }
     }
 }

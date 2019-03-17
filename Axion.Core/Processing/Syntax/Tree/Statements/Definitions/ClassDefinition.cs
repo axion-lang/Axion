@@ -2,25 +2,25 @@ using System.Collections.Generic;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames;
 using Axion.Core.Processing.Syntax.Tree.Statements.Interfaces;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
-    public class ClassDefinition : Statement, IDecorated, ITopLevelDefinition {
-        private Expression name;
+    public class ClassDefinition : Statement, IDecorated {
+        private NameExpression name;
 
-        [JsonProperty]
-        internal Expression Name {
+        public NameExpression Name {
             get => name;
             set {
-                value.Parent = this;
-                name         = value;
+                if (value != null) {
+                    value.Parent = this;
+                }
+
+                name = value;
             }
         }
 
         private TypeName[] bases;
 
-        [JsonProperty]
-        internal TypeName[] Bases {
+        public TypeName[] Bases {
             get => bases;
             set {
                 bases = value;
@@ -32,8 +32,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
 
         private Expression[] keywords;
 
-        [JsonProperty]
-        internal Expression[] Keywords {
+        public Expression[] Keywords {
             get => keywords;
             set {
                 keywords = value;
@@ -45,26 +44,26 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
 
         private Expression metaClass;
 
-        [JsonProperty]
-        internal Expression MetaClass {
+        public Expression MetaClass {
             get => metaClass;
             set {
                 if (value != null) {
                     value.Parent = this;
                 }
+
                 metaClass = value;
             }
         }
 
-        private Statement block;
+        private BlockStatement block;
 
-        [JsonProperty]
-        internal Statement Block {
+        public BlockStatement Block {
             get => block;
             set {
                 if (value != null) {
                     value.Parent = this;
                 }
+
                 block = value;
             }
         }
@@ -72,17 +71,25 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
         public List<Expression> Modifiers { get; set; }
 
         public ClassDefinition(
-            Expression   name,
-            TypeName[]   bases,
-            Expression[] keywords,
-            Statement    block     = null,
-            Expression   metaClass = null
+            NameExpression name,
+            BlockStatement block,
+            TypeName[]     bases     = null,
+            Expression[]   keywords  = null,
+            Expression     metaClass = null
         ) {
             Name      = name;
-            Bases     = bases;
-            Keywords  = keywords;
             Block     = block;
+            Bases     = bases ?? new TypeName[0];
+            Keywords  = keywords ?? new Expression[0];
             MetaClass = metaClass;
+        }
+
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + "class " + Name + " " + Block;
+        }
+
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            return c + "class " + Name + " " + Block;
         }
     }
 }

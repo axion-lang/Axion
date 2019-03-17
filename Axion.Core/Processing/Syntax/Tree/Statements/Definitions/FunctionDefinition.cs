@@ -3,38 +3,39 @@ using System.Collections.Generic;
 using Axion.Core.Processing.Syntax.Tree.Expressions;
 using Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames;
 using Axion.Core.Processing.Syntax.Tree.Statements.Interfaces;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
-    public class FunctionDefinition : Statement, IDecorated, ITopLevelDefinition {
-        private Expression name;
+    public class FunctionDefinition : Statement, IDecorated {
+        public  string         Name { get; set; }
+        private NameExpression explicitInterfaceName;
 
-        [JsonProperty]
-        internal Expression Name {
-            get => name;
+        public NameExpression ExplicitInterfaceName {
+            get => explicitInterfaceName;
             set {
-                value.Parent = this;
-                name         = value;
+                if (value != null) {
+                    value.Parent = this;
+                }
+
+                explicitInterfaceName = value;
             }
         }
 
         private TypeName returnType;
 
-        [JsonProperty]
-        internal TypeName ReturnType {
+        public TypeName ReturnType {
             get => returnType;
             set {
                 if (value != null) {
                     value.Parent = this;
                 }
+
                 returnType = value;
             }
         }
 
         private Parameter[] parameters;
 
-        [JsonProperty]
-        internal Parameter[] Parameters {
+        public Parameter[] Parameters {
             get => parameters;
             set {
                 parameters = value;
@@ -44,15 +45,15 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             }
         }
 
-        private Statement block;
+        private BlockStatement block;
 
-        [JsonProperty]
-        internal Statement Block {
+        public BlockStatement Block {
             get => block;
             set {
                 if (value != null) {
                     value.Parent = this;
                 }
+
                 block = value;
             }
         }
@@ -63,32 +64,30 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
 
         // Called by parser to mark that this function can set sys.exc_info(). 
         // An alternative technique would be to just walk the body after the parse and look for a except block.
-        [JsonProperty]
-        internal bool CanSetSysExcInfo { get; set; }
+        public bool CanSetSysExcInfo { get; set; }
 
         // true if the function contains try/finally, used for generator optimization
-        [JsonProperty]
-        internal bool ContainsTryFinally { get; set; }
-
-        public List<Expression> Modifiers { get; set; }
+        public bool             ContainsTryFinally { get; set; }
+        public List<Expression> Modifiers          { get; set; }
 
         public FunctionDefinition(
-            Expression  name,
-            Parameter[] parameters,
-            TypeName    returnType = null
-        ) : this(name, parameters, null, returnType) {
+            string         name,
+            NameExpression explicitInterfaceName = null,
+            Parameter[]    parameters            = null,
+            BlockStatement block                 = null,
+            TypeName       returnType            = null
+        ) {
+            Name                  = name;
+            ExplicitInterfaceName = explicitInterfaceName;
+            Parameters            = parameters ?? new Parameter[0];
+            Block                 = block;
+            ReturnType            = returnType;
         }
 
-        public FunctionDefinition(
-            Expression  name,
-            Parameter[] parameters,
-            Statement   body,
-            TypeName    returnType = null
-        ) {
-            Name       = name;
-            Parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
-            Block      = body;
-            ReturnType = returnType;
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            c = c + ReturnType + " " + Name + "(";
+            c.AppendJoin(", ", Parameters);
+            return c + ") " + Block;
         }
     }
 
@@ -102,8 +101,7 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
     public class Parameter : Expression {
         private NameExpression name;
 
-        [JsonProperty]
-        internal NameExpression Name {
+        public NameExpression Name {
             get => name;
             set {
                 value.Parent = this;
@@ -113,21 +111,17 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
 
         private TypeName typeName;
 
-        [JsonProperty]
-        internal TypeName TypeName {
+        public TypeName TypeName {
             get => typeName;
             set {
-                if (value != null) {
-                    value.Parent = this;
-                }
-                typeName = value;
+                value.Parent = this;
+                typeName     = value;
             }
         }
 
         private Expression defaultValue;
 
-        [JsonProperty]
-        internal Expression DefaultValue {
+        public Expression DefaultValue {
             get => defaultValue;
             set {
                 value.Parent = this;
@@ -142,19 +136,16 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Definitions {
             TypeName       typeName,
             ParameterKind  kind = ParameterKind.Normal
         ) {
-            Name     = name;
-            TypeName = typeName;
+            Name     = name ?? throw new ArgumentNullException(nameof(name));
+            TypeName = typeName ?? throw new ArgumentNullException(nameof(typeName));
             Kind     = kind;
 
             MarkPosition(name);
         }
 
-        public override string ToString() {
-            return ToAxionCode();
-        }
-
-        private string ToAxionCode() {
-            return TypeName + " " + Name + (DefaultValue != null ? " = " + DefaultValue : "");
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            // BUG
+            return c + TypeName + " " + Name + (DefaultValue != null ? " = " + DefaultValue : "");
         }
     }
 }

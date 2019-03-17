@@ -5,10 +5,6 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Small {
     public class ExpressionStatement : Statement {
         private Expression expression;
 
-        internal ExpressionStatement(Expression expression) : base(expression) {
-            Expression = expression;
-        }
-
         [JsonProperty]
         public Expression Expression {
             get => expression;
@@ -16,6 +12,19 @@ namespace Axion.Core.Processing.Syntax.Tree.Statements.Small {
                 value.Parent = this;
                 expression   = value;
             }
+        }
+
+        internal ExpressionStatement(Expression expression) {
+            Expression = expression;
+            MarkPosition(expression);
+        }
+
+        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+            return c + Expression;
+        }
+
+        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+            return c + Expression + ";";
         }
     }
 }

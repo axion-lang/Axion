@@ -1,43 +1,40 @@
-using Newtonsoft.Json;
+using System;
+using Axion.Core.Processing.Lexical.Tokens;
 
 namespace Axion.Core.Processing.Syntax.Tree.Statements {
-    public class ForStatement : Statement {
+    public class LoopStatement : Statement {
         private BlockStatement block;
 
-        [JsonProperty]
-        internal BlockStatement Block {
+        public BlockStatement Block {
             get => block;
             set {
                 value.Parent = this;
                 block        = value;
             }
         }
-        
+
         private BlockStatement noBreakBlock;
 
-        [JsonProperty]
-        internal BlockStatement NoBreakBlock {
+        public BlockStatement NoBreakBlock {
             get => noBreakBlock;
             set {
                 if (value != null) {
                     value.Parent = this;
                 }
+
                 noBreakBlock = value;
             }
         }
 
-        public ForStatement(
+        public LoopStatement(
+            Token          startToken,
             BlockStatement block,
-            BlockStatement noBreakBlock,
-            SpannedRegion  start
-        ) {
-            Block        = block;
+            BlockStatement noBreakBlock
+        ) : base(startToken) {
+            Block        = block ?? throw new ArgumentNullException(nameof(block));
             NoBreakBlock = noBreakBlock;
 
-            MarkStart(start);
             MarkEnd(NoBreakBlock ?? Block);
         }
-
-        protected ForStatement() { }
     }
 }
