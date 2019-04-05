@@ -41,8 +41,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             // If we're in a generator expr, then we don't have a function yet.
             // g = ((yield i) for i in range(5))
             // In that case, the gen_expr will mark IsGenerator. 
-            if (Unit.Ast.currentFunction != null) {
-                Unit.Ast.currentFunction.IsGenerator = true;
+            if (Ast.CurrentFunction != null) {
+                Ast.CurrentFunction.IsGenerator = true;
             }
 
             // Parse expr list after yield. This can be:

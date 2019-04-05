@@ -10,20 +10,25 @@ namespace Axion.Core.Processing.Syntactic {
         [JsonIgnore]
         protected internal SyntaxTreeNode Parent;
 
+        private Ast ast;
+
         internal Ast Ast {
             get {
-                SyntaxTreeNode p = this;
-                while (!(p is Ast)) {
-                    p = p.Parent;
+                if (ast == null) {
+                    SyntaxTreeNode p = this;
+                    while (!(p is Ast)) {
+                        p = p.Parent;
+                    }
+
+                    ast = (Ast) p;
                 }
 
-                return (Ast) p;
+                return ast;
             }
         }
 
         // short links
         internal SourceUnit Unit   => Ast.SourceUnit;
-        internal int        _Index => Ast._Index;
         internal Token      Token  => Ast.Token;
         internal Token      Peek   => Ast.Peek;
 
@@ -108,9 +113,9 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         internal Token NextToken(int pos = 1) {
-            if (Ast._Index + pos >= 0
-                && Ast._Index + pos < Unit.Tokens.Count) {
-                Ast._Index += pos;
+            if (Ast.Index + pos >= 0
+                && Ast.Index + pos < Unit.Tokens.Count) {
+                Ast.Index += pos;
             }
 
             return Token;
@@ -166,7 +171,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         internal void MoveTo(int tokenIndex) {
             Debug.Assert(tokenIndex >= 0 && tokenIndex < Unit.Tokens.Count);
-            Ast._Index = tokenIndex;
+            Ast.Index = tokenIndex;
         }
 
         private void SkipTrivial(params TokenType[] wantedTypes) {

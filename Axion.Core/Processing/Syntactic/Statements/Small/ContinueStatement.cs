@@ -31,10 +31,10 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             }
             MarkEnd(Token);
             
-            if (!Unit.Ast.InLoop) {
+            if (!Ast.InLoop) {
                 Unit.Blame(BlameType.ContinueIsOutsideLoop, this);
             }
-            else if (Unit.Ast.InFinally && !Unit.Ast.InFinallyLoop) {
+            else if (Ast.InFinally && !Ast.InFinallyLoop) {
                 Unit.Blame(BlameType.ContinueNotSupportedInsideFinally, this);
             }
         }

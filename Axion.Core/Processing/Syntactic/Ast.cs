@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         private readonly Stack<FunctionDefinition> functions = new Stack<FunctionDefinition>();
 
-        public FunctionDefinition currentFunction {
+        public FunctionDefinition CurrentFunction {
             get {
                 if (functions != null
                     && functions.Count > 0) {
@@ -56,17 +56,17 @@ namespace Axion.Core.Processing.Syntactic {
             functions.Push(function);
         }
 
-        internal new int _Index = -1;
+        internal int Index = -1;
 
         internal new Token Token =>
-            _Index > -1
-            && _Index < Unit.Tokens.Count
-                ? Unit.Tokens[_Index]
+            Index > -1
+            && Index < Unit.Tokens.Count
+                ? Unit.Tokens[Index]
                 : Unit.Tokens.Last();
 
         internal new Token Peek =>
-            _Index + 1 < Unit.Tokens.Count
-                ? Unit.Tokens[_Index + 1]
+            Index + 1 < Unit.Tokens.Count
+                ? Unit.Tokens[Index + 1]
                 : Unit.Tokens.Last();
 
         internal Ast(SourceUnit unit) {

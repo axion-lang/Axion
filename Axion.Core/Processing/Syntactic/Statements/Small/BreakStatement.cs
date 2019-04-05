@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             }
             MarkEnd(Token);
             
-            if (!Unit.Ast.InLoop) {
+            if (!Ast.InLoop) {
                 Unit.Blame(BlameType.BreakIsOutsideLoop, this);
             }
         }

@@ -29,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             Parent = parent;
             StartNode(TokenType.KeywordReturn);
 
-            if (Unit.Ast.currentFunction == null) {
+            if (Ast.CurrentFunction == null) {
                 Unit.Blame(BlameType.MisplacedReturn, Token);
             }
 

@@ -49,7 +49,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         ///     </c>
         /// </summary>
         internal static LoopStatement ParseFor(SyntaxTreeNode parent) {
-            int startIdx = parent._Index;
+            int startIdx = parent.Ast.Index;
             parent.Eat(TokenType.KeywordFor);
 
             var isForIndex = false;

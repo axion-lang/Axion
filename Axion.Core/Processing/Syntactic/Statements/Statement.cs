@@ -94,7 +94,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                     case TokenType.KeywordYield: {
                         // For yield statements, continue to enforce that it's currently in a function. 
                         // This gives us better syntax error reporting for yield-statements than for yield-expressions.
-                        if (parent.Unit.Ast.currentFunction == null) {
+                        if (parent.Ast.CurrentFunction == null) {
                             parent.Unit.Blame(BlameType.MisplacedYield, parent.Token);
                         }
 

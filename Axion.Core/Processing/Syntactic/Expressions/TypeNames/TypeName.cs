@@ -72,7 +72,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                 else {
                     do {
                         NameExpression name     = null;
-                        int            startIdx = parent._Index;
+                        int            startIdx = parent.Ast.Index;
                         if (parent.PeekIs(TokenType.Identifier)) {
                             name = new NameExpression(parent);
                             if (parent.MaybeEat(TokenType.OpAssign)) {

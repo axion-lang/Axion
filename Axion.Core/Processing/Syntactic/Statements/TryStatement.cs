@@ -182,8 +182,8 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
             // If this function has an except block,
             // then it can set the current exception.
-            if (Unit.Ast.currentFunction != null) {
-                Unit.Ast.currentFunction.CanSetSysExcInfo = true;
+            if (Ast.CurrentFunction != null) {
+                Ast.CurrentFunction.CanSetSysExcInfo = true;
             }
 
             if (!PeekIs(Spec.BlockStarters)) {

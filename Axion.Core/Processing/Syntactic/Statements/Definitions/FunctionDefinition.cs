@@ -110,9 +110,9 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
                 ReturnType = TypeName.Parse(this);
             }
 
-            Unit.Ast.PushFunction(this);
+            Ast.PushFunction(this);
             Block = new BlockStatement(this, BlockType.Top);
-            FunctionDefinition ret2 = Unit.Ast.PopFunction();
+            FunctionDefinition ret2 = Ast.PopFunction();
             Debug.Assert(this == ret2);
 
             MarkEnd(Token);

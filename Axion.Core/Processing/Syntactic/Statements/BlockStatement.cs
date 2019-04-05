@@ -34,55 +34,55 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             Parent = parent;
             switch (type) {
                 case BlockType.Top: {
-                    bool isInLoop        = Unit.Ast.InLoop,
-                         isInFinally     = Unit.Ast.InFinally,
-                         isInFinallyLoop = Unit.Ast.InFinallyLoop;
+                    bool isInLoop        = Ast.InLoop,
+                         isInFinally     = Ast.InFinally,
+                         isInFinallyLoop = Ast.InFinallyLoop;
                     try {
-                        Unit.Ast.InLoop        = false;
-                        Unit.Ast.InFinally     = false;
-                        Unit.Ast.InFinallyLoop = false;
+                        Ast.InLoop        = false;
+                        Ast.InFinally     = false;
+                        Ast.InFinallyLoop = false;
                         Parse(parent);
                     }
                     finally {
-                        Unit.Ast.InLoop        = isInLoop;
-                        Unit.Ast.InFinally     = isInFinally;
-                        Unit.Ast.InFinallyLoop = isInFinallyLoop;
+                        Ast.InLoop        = isInLoop;
+                        Ast.InFinally     = isInFinally;
+                        Ast.InFinallyLoop = isInFinallyLoop;
                     }
 
                     break;
                 }
 
                 case BlockType.Loop: {
-                    bool wasInLoop        = Unit.Ast.InLoop,
-                         wasInFinallyLoop = Unit.Ast.InFinallyLoop;
+                    bool wasInLoop        = Ast.InLoop,
+                         wasInFinallyLoop = Ast.InFinallyLoop;
                     try {
-                        Unit.Ast.InLoop        = true;
-                        Unit.Ast.InFinallyLoop = Unit.Ast.InFinally;
+                        Ast.InLoop        = true;
+                        Ast.InFinallyLoop = Ast.InFinally;
                         Parse(parent);
                     }
                     finally {
-                        Unit.Ast.InLoop        = wasInLoop;
-                        Unit.Ast.InFinallyLoop = wasInFinallyLoop;
+                        Ast.InLoop        = wasInLoop;
+                        Ast.InFinallyLoop = wasInFinallyLoop;
                     }
 
                     break;
                 }
 
                 case BlockType.Anyway: {
-                    if (Unit.Ast.currentFunction != null) {
-                        Unit.Ast.currentFunction.ContainsTryFinally = true;
+                    if (Ast.CurrentFunction != null) {
+                        Ast.CurrentFunction.ContainsTryFinally = true;
                     }
 
-                    bool isInFinally     = Unit.Ast.InFinally,
-                         isInFinallyLoop = Unit.Ast.InFinallyLoop;
+                    bool isInFinally     = Ast.InFinally,
+                         isInFinallyLoop = Ast.InFinallyLoop;
                     try {
-                        Unit.Ast.InFinally     = true;
-                        Unit.Ast.InFinallyLoop = false;
+                        Ast.InFinally     = true;
+                        Ast.InFinallyLoop = false;
                         Parse(parent);
                     }
                     finally {
-                        Unit.Ast.InFinally     = isInFinally;
-                        Unit.Ast.InFinallyLoop = isInFinallyLoop;
+                        Ast.InFinally     = isInFinally;
+                        Ast.InFinallyLoop = isInFinallyLoop;
                     }
 
                     break;
