@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
@@ -10,42 +11,59 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         None,
         Invalid,
 
-        #region GENERATION_operators
+        #region GEN_operators
 
-        OpAdd,
+        OpBitAnd,
+        OpBitNot,
+        OpBitOr,
+        OpBitXor,
+        OpBitLeftShift,
+        OpBitRightShift,
         OpAnd,
+        OpOr,
         OpAs,
-        OpBitwiseAnd,
-        OpBitwiseNot,
-        OpBitwiseOr,
-        OpDecrement,
-        OpEquals,
-        OpExclusiveOr,
-        OpFloorDivide,
-        OpGreaterThan,
-        OpGreaterThanOrEqual,
-        OpIn,
-        OpIncrement,
         OpIs,
         OpIsNot,
-        OpLeftShift,
-        OpLessThan,
-        OpLessThanOrEqual,
-        OpMultiply,
         OpNot,
-        OpNotEquals,
+        OpIn,
         OpNotIn,
-        OpOr,
+        OpEqualsEquals,
+        OpNotEquals,
+        OpGreater,
+        OpGreaterOrEqual,
+        OpLess,
+        OpLessOrEqual,
+        OpPlus,
+        OpMinus,
+        OpIncrement,
+        OpDecrement,
+        OpMultiply,
         OpPower,
-        OpRemainder,
-        OpRightShift,
-        OpSubtract,
-        OpThreeWayCompare,
         OpTrueDivide,
+        OpFloorDivide,
+        OpRemainder,
+        Op3WayCompare,
+        Op2Question,
+        
+        // assignment marks
+        OpBitAndAssign,
+        OpBitOrAssign,
+        OpBitXorAssign,
+        OpBitLeftShiftAssign,
+        OpBitRightShiftAssign,
+        OpPlusAssign,
+        OpMinusAssign,
+        OpMultiplyAssign,
+        OpRemainderAssign,
+        OpFloorDivideAssign,
+        OpTrueDivideAssign,
+        OpPowerAssign,
+        OpNullCoalescingAssign,
+        OpAssign,
 
-        #endregion GENERATION_operators
+        #endregion
 
-        #region GENERATION_keywords
+        #region GEN_keywords
 
         KeywordAnyway,
         KeywordAssert,
@@ -84,7 +102,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         KeywordTry,
         KeywordUnless,
         KeywordUse,
-        KeywordVar,
+        KeywordLet,
         KeywordWhile,
         KeywordWith,
         KeywordWhen,
@@ -92,37 +110,28 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         #endregion
 
-        // symbols
-        AddAssign,
-        Assign,
-        At,
-        BitAndAssign,
-        BitExclusiveOrAssign,
-        BitLeftShiftAssign,
-        BitOrAssign,
-        BitRightShiftAssign,
-        Colon,
-        Comma,
-        Dot,
-        DoubleColon,
-        FloorDivideAssign,
-        LeftBrace,
-        LeftBracket,
-        LeftParenthesis,
-        LeftPipeline,
-        MultiplyAssign,
-        NullCoalescingAssign,
-        PowerAssign,
+        #region GEN_marks
+
         Question,
-        RemainderAssign,
-        RightBrace,
-        RightBracket,
         RightFatArrow,
-        RightParenthesis,
+        LeftPipeline,
         RightPipeline,
+        At,
+        Dot,
+        Comma,
         Semicolon,
-        SubtractAssign,
-        TrueDivideAssign,
+        Colon,
+        ColonColon,
+
+        // brackets
+        OpenBrace,
+        OpenBracket,
+        OpenParenthesis,
+        CloseBrace,
+        CloseBracket,
+        CloseParenthesis,
+
+        #endregion
 
         // literals
         Identifier,
@@ -136,6 +145,44 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         Newline,
         Indent,
         Outdent,
-        EndOfCode
+        End
+    }
+
+    public static class TokenTypeExtensions {
+        internal static bool IsOpenBracket(this TokenType type) {
+            return type == TokenType.OpenParenthesis
+                   || type == TokenType.OpenBracket
+                   || type == TokenType.OpenBrace;
+        }
+
+        internal static bool IsCloseBracket(this TokenType type) {
+            return type == TokenType.CloseParenthesis
+                   || type == TokenType.CloseBracket
+                   || type == TokenType.CloseBrace;
+        }
+
+        internal static TokenType GetMatchingBracket(this TokenType type) {
+            switch (type) {
+                // open : close
+                case TokenType.OpenParenthesis:
+                    return TokenType.CloseParenthesis;
+                case TokenType.OpenBracket:
+                    return TokenType.CloseBracket;
+                case TokenType.OpenBrace:
+                    return TokenType.CloseBrace;
+                // close : open
+                case TokenType.CloseParenthesis:
+                    return TokenType.OpenParenthesis;
+                case TokenType.CloseBracket:
+                    return TokenType.OpenBracket;
+                case TokenType.CloseBrace:
+                    return TokenType.OpenBrace;
+                // should never be thrown
+                default:
+                    throw new Exception(
+                        "Internal error: Cannot return matching bracket for non-bracket token type."
+                    );
+            }
+        }
     }
 }

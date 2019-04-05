@@ -1,4 +1,5 @@
 using System;
+using Axion.Core.Processing.CodeGen;
 
 namespace Axion.Core.Processing {
     /// <summary>
@@ -8,33 +9,32 @@ namespace Axion.Core.Processing {
     public abstract class SpannedRegion {
         public Span Span { get; protected set; }
 
+        public bool ShouldSerializeSpan() {
+            return !Compiler.Options.HasFlag(SourceProcessingOptions.ShowAstJson);
+        }
+
         // Region
-
-        internal dynamic MarkStart(SpannedRegion mark) {
+        internal void MarkStart(SpannedRegion mark) {
             Span = new Span(mark.Span.StartPosition, Span.EndPosition);
-            return this;
         }
 
-        internal dynamic MarkEnd(SpannedRegion mark) {
+        internal void MarkEnd(SpannedRegion mark) {
             Span = new Span(Span.StartPosition, mark.Span.EndPosition);
-            return this;
         }
 
-        internal dynamic MarkPosition(SpannedRegion mark) {
+        internal void MarkPosition(SpannedRegion mark) {
             Span = mark.Span;
-            return this;
         }
 
-        internal dynamic MarkPosition(SpannedRegion start, SpannedRegion end) {
+        internal void MarkPosition(SpannedRegion start, SpannedRegion end) {
             Span = new Span(start.Span.StartPosition, end.Span.EndPosition);
-            return this;
         }
 
-        internal virtual AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
+        internal virtual CodeBuilder ToAxionCode(CodeBuilder c) {
             throw new InvalidOperationException();
         }
 
-        internal virtual CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
+        internal virtual CodeBuilder ToCSharpCode(CodeBuilder c) {
             throw new InvalidOperationException();
         }
     }

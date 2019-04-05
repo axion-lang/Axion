@@ -96,10 +96,10 @@ module Axion.Core.Processing.Lexical.Lexer
                 for i = 0; i < _mismatchingPairs.Count; i++
                     mismatch:  Token = _mismatchingPairs[i]
                     errorType: BlameType
-                    switch mismatch.Type
-                        case TokenType.LeftParenthesis, TokenType.RightParenthesis: errorType = BlameType.MismatchedParenthesis
-                        case TokenType.LeftBracket, TokenType.RightBracket:         errorType = BlameType.MismatchedBracket
-                        case TokenType.LeftBrace, TokenType.RightBrace:             errorType = BlameType.MismatchedBrace
+                    errorType = match mismatch.Type
+                        case TokenType.LeftParenthesis, TokenType.RightParenthesis:  BlameType.MismatchedParenthesis
+                        case TokenType.LeftBracket, TokenType.RightBracket:          BlameType.MismatchedBracket
+                        case TokenType.LeftBrace, TokenType.RightBrace:              BlameType.MismatchedBrace
                         default:
                             throw new NotSupportedException (
                                 "Internal error: " + nameof (_mismatchingPairs) +

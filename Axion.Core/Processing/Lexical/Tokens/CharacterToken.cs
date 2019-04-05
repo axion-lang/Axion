@@ -1,47 +1,55 @@
-﻿using Axion.Core.Specification;
+﻿using System;
+using Axion.Core.Processing.CodeGen;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents a 'character' literal.
     /// </summary>
     public class CharacterToken : Token {
-        public string RawValue   { get; }
-        public bool   IsUnclosed { get; }
+        public string EscapedValue { get; }
+        public bool   IsUnclosed   { get; }
 
-        public CharacterToken(
+        public CharacterToken(string value) : base(TokenType.Character, value, default) {
+            if (Value.Length > 1) {
+                throw new Exception("Cannot create character literal with length > 1.");
+            }
+
+            EscapedValue = value;
+        }
+
+        internal CharacterToken(
             string   value,
-            string   rawValue      = null,
+            string   escapedValue  = null,
             bool     isUnclosed    = false,
             Position startPosition = default
-        ) : base(TokenType.Character, value, startPosition) {
-            RawValue   = rawValue ?? value;
-            IsUnclosed = isUnclosed;
-            RecomputeEndPosition();
-        }
+        ) : base(TokenType.Character, value) {
+            EscapedValue = escapedValue ?? value;
+            IsUnclosed   = isUnclosed;
 
-        private void RecomputeEndPosition() {
-            int endCol = Span.StartPosition.Column
-                         + RawValue.Length
+            // compute position
+            int endCol = startPosition.Column
+                         + Value.Length
                          + (IsUnclosed ? 1 : 2); // quotes length
-            Span = new Span(Span.StartPosition, (Span.EndPosition.Line, endCol));
+            Span = new Span(startPosition, (startPosition.Line, endCol));
         }
 
-        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
-            c = c + Spec.CharacterLiteralQuote.ToString() + RawValue;
+        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
+            c = c + Spec.CharacterLiteralQuote.ToString() + Value;
             if (!IsUnclosed) {
                 c += Spec.CharacterLiteralQuote.ToString();
             }
 
-            return c + Whitespaces;
+            return c + EndWhitespaces;
         }
 
-        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
-            c = c + "'" + RawValue;
+        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
+            c = c + "'" + Value;
             if (!IsUnclosed) {
                 c += "'";
             }
 
-            return c + Whitespaces;
+            return c + EndWhitespaces;
         }
     }
 }

@@ -345,3 +345,4 @@ ASALocalRun/
 
 
 Other/CodeGraphs/
+*.sonarBuild.bat

@@ -4,7 +4,7 @@ while condition:
     
 while condition:
     doIter()
-else:
+nobreak:
     doElse()
 
 while condition: doIter()
@@ -15,7 +15,7 @@ while condition
 
 while condition
     doIter()
-else
+nobreak
     doElse()
 
 # c style
@@ -26,6 +26,6 @@ while condition {
 while condition {
     doIter()
 }
-else {
+nobreak {
     doElse()
 }

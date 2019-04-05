@@ -1,6 +1,7 @@
 ﻿namespace Axion.Core.Processing.Errors {
     /// <summary>
-    ///     Contains all error IDs that can happen while processing <see cref="SourceUnit" />.
+    ///     Contains all error IDs that can
+    ///     happen while processing source.
     /// </summary>
     public enum BlameType {
         /// <summary>
@@ -17,28 +18,28 @@
         InvalidOperator,
 
         /// <summary>
-        ///     Indicates a symbol that isn't
+        ///     Indicates a char that isn't
         ///     declared in language specification.
         /// </summary>
-        InvalidSymbol,
+        InvalidCharacter,
 
         #region Mismatched pairs
 
         /// <summary>
-        ///     Indicates a '(' symbol in
-        ///     code without matching ')'.
+        ///     Indicates a '(' in code
+        ///     without matching ')'.
         /// </summary>
         MismatchedParenthesis,
 
         /// <summary>
-        ///     Indicates a '[' symbol in
-        ///     code without matching ']'.
+        ///     Indicates a '[' in code
+        ///     without matching ']'.
         /// </summary>
         MismatchedBracket,
 
         /// <summary>
-        ///     Indicates a '{' symbol in
-        ///     code without matching '}'.
+        ///     Indicates a '{' in code
+        ///     without matching '}'.
         /// </summary>
         MismatchedBrace,
 
@@ -52,7 +53,7 @@
 
         /// <summary>
         ///     Indicates that string or character
-        ///     literal uses invalid symbol to escape by '\'.
+        ///     literal uses invalid character escaped by '\'.
         /// </summary>
         InvalidEscapeSequence,
 

@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using Axion.Core.Processing;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Processing.Syntax.Tree;
 using Axion.Core.Specification;
 
 namespace Axion.Core {
@@ -90,128 +87,5 @@ namespace Axion.Core {
         }
 
         #endregion
-
-        #region StringBuilder extensions
-
-        public static string Join(this StringBuilder sb, string separator) {
-            if (sb == null) {
-                return string.Empty;
-            }
-
-            var lst = new List<string>();
-            for (var i = 0; i < sb.Length; i++) {
-                lst.Add(sb[i].ToString());
-            }
-
-            return string.Join(separator, lst.ToArray());
-        }
-
-        #endregion
-    }
-
-    /// <summary>
-    ///     This wraps the .NET <c>StringBuilder</c> in a slightly more easy-to-use format.
-    /// </summary>
-    public class CodeBuilder {
-        protected readonly StringBuilder Builder;
-
-        public int Length {
-            get => Builder.Length;
-            set => Builder.Length = value;
-        }
-
-        public CodeBuilder() {
-            Builder = new StringBuilder();
-        }
-
-        public CodeBuilder(int capacity) {
-            Builder = new StringBuilder(capacity);
-        }
-
-        public CodeBuilder Append(string s) {
-            Builder.Append(s);
-
-            return this;
-        }
-
-        public CodeBuilder Append(char c) {
-            Builder.Append(c);
-
-            return this;
-        }
-
-        public CodeBuilder Append(object o) {
-            Builder.Append(o);
-
-            return this;
-        }
-
-        public static CodeBuilder operator +(CodeBuilder sb, string s) {
-            return sb.Append(s);
-        }
-
-        public static CodeBuilder operator +(CodeBuilder sb, char c) {
-            return sb.Append(c);
-        }
-
-        public static CodeBuilder operator +(CodeBuilder sb, object o) {
-            return sb.Append(o);
-        }
-
-        public static implicit operator string(CodeBuilder sb) {
-            return sb.ToString();
-        }
-
-        public string ToString(int startIndex, int length) {
-            return Builder.ToString(startIndex, length);
-        }
-
-        public override string ToString() {
-            return Builder.ToString();
-        }
-    }
-
-    public class AxionCodeBuilder : CodeBuilder {
-        public static AxionCodeBuilder operator +(AxionCodeBuilder b, SpannedRegion node) {
-            return node.ToAxionCode(b);
-        }
-
-        public static AxionCodeBuilder operator +(AxionCodeBuilder b, string s) {
-            b.Append(s);
-            return b;
-        }
-
-        public void AppendJoin<T>(string separator, IList<T> items)
-            where T : SyntaxTreeNode {
-            if (items.Count > 0) {
-                for (var i = 0; i < items.Count - 1; i++) {
-                    items[i].ToAxionCode(this).Append(separator);
-                }
-
-                items[items.Count - 1].ToAxionCode(this);
-            }
-        }
-    }
-
-    public class CSharpCodeBuilder : CodeBuilder {
-        public static CSharpCodeBuilder operator +(CSharpCodeBuilder b, SpannedRegion node) {
-            return node.ToCSharpCode(b);
-        }
-
-        public static CSharpCodeBuilder operator +(CSharpCodeBuilder b, string s) {
-            b.Append(s);
-            return b;
-        }
-
-        public void AppendJoin<T>(string separator, IList<T> items)
-            where T : SyntaxTreeNode {
-            if (items.Count > 0) {
-                for (var i = 0; i < items.Count - 1; i++) {
-                    items[i].ToCSharpCode(this).Append(separator);
-                }
-
-                items[items.Count - 1].ToCSharpCode(this);
-            }
-        }
     }
 }

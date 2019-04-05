@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <Version>0.3.2.9</Version>
     <Authors>Nikitin Ilya</Authors>
     <Company>Fluctus Technologies</Company>
@@ -12,9 +11,11 @@ Built on .NET Standard.</Description>
     <PackageId>Axion.Core</PackageId>
     <AssemblyName>Axion.Core</AssemblyName>
     <RootNamespace>Axion.Core</RootNamespace>
-    <LangVersion>7.3</LangVersion>
-    <AssemblyVersion>0.3.2.9</AssemblyVersion>
-    <FileVersion>0.3.2.9</FileVersion>
+    <LangVersion>8.0</LangVersion>
+    <AssemblyVersion>0.3.4.0</AssemblyVersion>
+    <FileVersion>0.3.4.0</FileVersion>
+    <ProjectGuid>{B38A9261-F73C-40E4-83B6-46B8A2B1CDE5}</ProjectGuid>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -27,6 +28,7 @@ Built on .NET Standard.</Description>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.3.0" />
+    <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="3.0.0-beta4-final" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.0.0-beta4-final" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.0.0-beta4-final" />

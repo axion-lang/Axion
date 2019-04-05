@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Axion.Core.Processing;
+using Axion.Core.Processing.Errors;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
 using NUnit.Framework;
 
@@ -94,6 +98,61 @@ namespace Axion.Testing.NUnit {
 
         internal SourceUnit MakeSourceFromCode(string fileName, string code) {
             return new SourceUnit(code, OutPath + fileName + TestExtension);
+        }
+
+        /// <summary>
+        ///     First barrier preventing silly
+        ///     errors in specification.
+        ///     Checks, that all keywords, operators and blames
+        ///     are declared in specification.
+        /// </summary>
+        [Test]
+        public static void SpecificationCheck() {
+            // check keywords completeness
+            IEnumerable<string> definedKws =
+                Enum.GetNames(typeof(TokenType))
+                    .Where(name => name.ToLower().StartsWith("keyword"));
+
+            foreach (string kw in definedKws) {
+                Enum.TryParse(kw, out TokenType type);
+                Assert.That(
+                    Spec.Keywords.ContainsValue(type),
+                    "Keyword '" + kw + "' is not defined in specification."
+                );
+            }
+
+//            // check operators completeness
+//            IEnumerable<string> definedOps =
+//                Enum.GetNames(typeof(TokenType))
+//                    .Where(
+//                        name => name.ToLower().StartsWith("op")
+//                                && !name.ToLower().StartsWith("open")
+//                    );
+//
+//            foreach (string op in definedOps) {
+//                Enum.TryParse(op, out TokenType type);
+//                Assert.That(
+//                    Spec.Operators.Values.Any(props => props.Type == type)
+//                    || type == TokenType.NotIn
+//                    || type == TokenType.IsNot,
+//                    "Operator '" + op + "' is not defined in specification."
+//                );
+//            }
+
+            Debug.Assert(Spec.Operators.Count == Spec.OperatorTypes.Count);
+
+            // check blames completeness
+            IEnumerable<string> definedBls =
+                Enum.GetNames(typeof(BlameType))
+                    .Where(name => name != nameof(BlameType.None));
+
+            foreach (string bl in definedBls) {
+                Enum.TryParse(bl, out BlameType type);
+                Assert.That(
+                    Spec.Blames.ContainsKey(type),
+                    "Blame '" + bl + "' is not defined in specification."
+                );
+            }
         }
     }
 }

@@ -5,10 +5,9 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Axion.Core.Processing;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Lexical.Lexer;
-using Axion.Core.Processing.Syntax.Parser;
-using Axion.Core.Specification;
+using Axion.Core.Processing.Lexical;
 using Axion.Core.Visual;
 using CommandLine;
 using ConsoleExtensions;
@@ -33,22 +32,19 @@ namespace Axion.Core {
         /// <summary>
         ///     Path to directory where compiler executable is located.
         /// </summary>
-        internal static readonly string WorkDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        public static readonly string WorkDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
         /// <summary>
         ///     Path to directory where generated output is located.
         /// </summary>
-        internal static readonly string OutputDirectory = WorkDirectory + "output\\";
+        public static readonly string OutputDirectory = WorkDirectory + "output\\";
 
         /// <summary>
         ///     <see cref="Assembly" /> of <see cref="Core" /> namespace.
         /// </summary>
         private static readonly Assembly assembly = Assembly.GetExecutingAssembly();
 
-        /// <summary>
-        ///     Compiler version.
-        /// </summary>
-        internal static readonly string Version = assembly.GetName().Version.ToString();
+        public static readonly string Version = assembly.GetName().Version.ToString();
 
         private static readonly Parser cliParser = new Parser(
             settings => {
@@ -61,9 +57,6 @@ namespace Axion.Core {
         private const string helpHint =
             "Type '-h', or '--help' to get documentation about launch arguments.";
 
-        /// <summary>
-        ///     Compiler files to process.
-        /// </summary>
         internal static FileInfo[] InputFiles { get; private set; }
 
         public static void Init(string[] arguments) {
@@ -71,50 +64,55 @@ namespace Axion.Core {
                 Directory.CreateDirectory(OutputDirectory);
             }
 
-            Spec.AssertNoErrorsInDefinitions();
-
             PrintIntro();
 
             // main processing loop
             while (true) {
                 if (arguments.Length > 0) {
-                    cliParser.ParseArguments<CommandLineArguments>(arguments)
-                             .MapResult(
-                                 options => {
-                                     if (options.Exit) {
-                                         Environment.Exit(0);
-                                     }
+                    cliParser
+                        .ParseArguments<CommandLineArguments>(arguments)
+                        .MapResult(
+                            options => {
+                                if (options.Exit) {
+                                    Environment.Exit(0);
+                                }
 
-                                     if (options.Version) {
-                                         ConsoleUI.WriteLine(Version);
-                                         return 0;
-                                     }
+                                if (options.ClearScreen) {
+                                    Console.Clear();
+                                    PrintIntro();
+                                    return 0;
+                                }
 
-                                     if (options.Help) {
-                                         ConsoleUI.WriteLine(CommandLineArguments.HelpText);
-                                         return 0;
-                                     }
+                                if (options.Version) {
+                                    ConsoleUI.WriteLine(Version);
+                                    return 0;
+                                }
 
-                                     if (options.Interactive) {
-                                         EnterInteractiveMode();
-                                         return 0;
-                                     }
+                                if (options.Help) {
+                                    ConsoleUI.WriteLine(CommandLineArguments.HelpText);
+                                    return 0;
+                                }
 
-                                     ProcessSources(options);
-                                     return 0;
-                                 },
-                                 errors => {
-                                     foreach (Error error in errors) {
-                                         Logger.Error(error.ToString());
-                                     }
+                                if (options.Interactive) {
+                                    EnterInteractiveMode();
+                                    return 0;
+                                }
 
-                                     return 0;
-                                 }
-                             );
+                                ProcessSources(options);
+                                return 0;
+                            },
+                            errors => {
+                                foreach (Error e in errors) {
+                                    Logger.Error(e.ToString());
+                                }
+
+                                return 0;
+                            }
+                        );
                 }
 
                 // wait for next command
-                // TODO: add console commands history (up-down)
+                // TODO (UI) add console commands history (up-down)
                 string command = ConsoleUI.Read(">>> ");
                 while (command.Length == 0) {
                     ConsoleUI.ClearLine();
@@ -157,30 +155,19 @@ namespace Axion.Core {
                 string input        = ConsoleUI.Read("i>> ");
                 string alignedInput = input.Trim().ToUpper();
 
-                if (alignedInput.Length == 0) {
-                    // skip empty commands
-                    ConsoleUI.ClearLine();
-                    continue;
+                switch (alignedInput) {
+                    case "":
+                        // skip empty commands
+                        ConsoleUI.ClearLine();
+                        continue;
+                    case "EXIT":
+                    case "QUIT":
+                        // exit from interpreter to main loop
+                        Logger.Info("\nInteractive interpreter closed.");
+                        return;
                 }
 
-                if (alignedInput == "EXIT"
-                    || alignedInput == "QUIT") {
-                    // exit from interpreter to main loop
-                    Logger.Info("\nInteractive interpreter closed.");
-                    return;
-                }
-
-                if (alignedInput == "CLS") {
-                    // clear screen
-                    Console.Clear();
-                    PrintIntro();
-                    continue;
-                }
-                // TODO parse "help(module)" argument
-                //if (alignedInput.StartsWith("HELP")) {
-                //    // give help about some module/function.
-                //    // should have access to all standard library documentation.
-                //}
+                // TODO (UI) parse "help(module)" argument
 
                 // initialize editor
                 var editor = new ConsoleCodeEditor(
@@ -243,6 +230,8 @@ namespace Axion.Core {
             Process(source, processingMode, processingOptions);
         }
 
+        public static SourceProcessingOptions Options { get; set; }
+
         /// <summary>
         ///     Performs [<see cref="SourceUnit" />] processing
         ///     with [<see cref="mode" />] and [<see cref="options" />].
@@ -253,10 +242,10 @@ namespace Axion.Core {
             SourceProcessingOptions options = SourceProcessingOptions.None
         ) {
             unit.ProcessingMode = mode;
-            unit.Options        = options;
+            unit.Options        = Options = options;
             Process(unit);
             unit.ProcessingMode = SourceProcessingMode.None;
-            unit.Options        = SourceProcessingOptions.None;
+            unit.Options        = Options = SourceProcessingOptions.None;
         }
 
         private static void Process(SourceUnit unit) {
@@ -278,22 +267,17 @@ namespace Axion.Core {
 
             // [2] Parsing
             Logger.Step("Abstract Syntax Tree generation");
-            new SyntaxParser(unit).Process();
+            unit.Ast.Parse();
             if (unit.ProcessingMode == SourceProcessingMode.Parsing) {
                 FinishCompilation(unit);
                 return;
             }
 
-            // [3] Debug information
-            if (unit.Options.HasFlag(SourceProcessingOptions.ShowAstJson)) {
-                Logger.Log(AstToMinifiedJson(unit));
-            }
-
-            if (unit.Options.HasFlag(SourceProcessingOptions.RewriteFromAst)) {
-                Logger.Log(AstBackToSource(unit));
-            }
-
             FinishCompilation(unit);
+
+            if (unit.Blames.Count > 0) {
+                return;
+            }
 
             // [n] Code generation
             GenerateCode(unit);
@@ -304,7 +288,7 @@ namespace Axion.Core {
                 case SourceProcessingMode.Interpret: {
                     Logger.Task("Interpretation");
                     try {
-                        string csCode = unit.SyntaxTree.ToCSharp().ToFullString();
+                        string csCode = unit.Ast.ToCSharp().ToFullString();
                         if (unit.Options.HasFlag(
                             SourceProcessingOptions.SyntaxAnalysisDebugOutput
                         )) {
@@ -313,29 +297,33 @@ namespace Axion.Core {
                         }
 
                         Logger.Step("Program output:");
-                        ScriptState result = await CSharpScript.RunAsync(csCode);
+                        ScriptState result = await CSharpScript.RunAsync(
+                            csCode,
+                            // Add Linq reference
+                            ScriptOptions.Default.AddReferences(typeof(Enumerable).Assembly)
+                        );
+                        ConsoleUI.WriteLine();
                         Logger.Step("Result: " + (result.ReturnValue ?? "<nothing>"));
                     }
                     catch (CompilationErrorException e) {
                         Logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
                     }
-                    catch (Exception e) {
-                        Logger.Error("Program has thrown an exception:");
-                        Logger.Log(e.Message);
-                    }
 
                     Logger.Task("Interpretation finished");
                     break;
                 }
+
                 case SourceProcessingMode.ConvertCS: {
                     Logger.Warn("Transpiling to 'C#' is not fully implemented yet");
-                    Logger.Log(unit.SyntaxTree.ToCSharp().ToFullString());
+                    Logger.Log(unit.Ast.ToCSharp().ToFullString());
                     break;
                 }
+
                 case SourceProcessingMode.ConvertC: {
                     Logger.Error("Transpiling to 'C' is not implemented yet");
                     break;
                 }
+
                 default: {
                     Logger.Error($"'{unit.ProcessingMode:G}' mode not implemented yet");
                     break;
@@ -344,15 +332,23 @@ namespace Axion.Core {
         }
 
         private static void FinishCompilation(SourceUnit unit) {
+            if (unit.Options.HasFlag(SourceProcessingOptions.ShowAstJson)) {
+                Logger.Log(AstToMinifiedJson(unit));
+            }
+
+            if (unit.Options.HasFlag(SourceProcessingOptions.RewriteFromAst)) {
+                Logger.Log(AstBackToSource(unit));
+            }
+
             if (unit.Options.HasFlag(SourceProcessingOptions.SyntaxAnalysisDebugOutput)) {
                 Logger.Step($"Saving debugging information to '{unit.DebugFilePath}'");
                 SaveDebugInfoToFile(unit);
             }
 
             if (unit.Blames.Count > 0) {
-                foreach (Exception blame in unit.Blames) {
-                    var exception = (LanguageException) blame;
-                    exception.Print();
+                foreach (Exception e in unit.Blames) {
+                    var exception = (LanguageException) e;
+                    exception.Print(unit);
                 }
 
                 Logger.Task("Compilation aborted due to errors above");
@@ -379,13 +375,14 @@ namespace Axion.Core {
         ///     Prints generated AST in JSON format to console.
         /// </summary>
         private static string AstToMinifiedJson(SourceUnit unit) {
-            string json = JsonConvert.SerializeObject(unit.SyntaxTree, JsonSerializer);
-            // shorten 'type' members
-            return Regex.Replace(json, @"\$type.+?(\w+?),.*\""", "$type\": \"$1\"");
+            string json = JsonConvert.SerializeObject(unit.Ast, JsonSerializer);
+            json = Regex.Replace(json, @"\$type.+?(\w+?),.*\""", "$type\": \"$1\"");
+            json = json.Replace("  ", "   ");
+            return json;
         }
 
         private static string AstBackToSource(SourceUnit unit) {
-            return unit.SyntaxTree.ToAxionCode(new AxionCodeBuilder());
+            return unit.Ast.ToAxionCode(new CodeBuilder(OutLang.Axion));
         }
 
         #endregion

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Axion.Core;
 using Axion.Core.Processing;
@@ -12,156 +12,64 @@ namespace Axion.Testing.NUnit.Lexer {
         [Test]
         public void IndentationLengthComputedCorrectly() {
             // with tabs
-            var source1 = new SourceUnit(
-                "i = 0\r\n"
-                + "while i < 10:\r\n"
-                + "\tconsole.print 'OK.'\r\n"
-                + "\tj = 0\r\n"
-                + "\twhile j < 5:\r\n"
-                + "\t\tif i == 3 and j == 2:\r\n"
-                + "\t\t\tconsole.print 'Got it!'\r\n"
-                + "\t\tj++\r\n"
-                + "\ti++\r\n"
-                + "",
+            var unit = new SourceUnit(
+                string.Join(
+                    Environment.NewLine,
+                    "i = 0",
+                    "while i < 10:",
+                    "\tj = 0",
+                    "\twhile j < 5:",
+                    "\t\tif i == 3 and j == 2:",
+                    "\t\t\tConsole.print('Got it!')",
+                    "\t\tj++",
+                    "\ti++"
+                ),
                 OutPath + nameof(IndentationLengthComputedCorrectly) + "_tabs" + TestExtension
             );
 
-            const int indentIndex1 = 10;
-            const int indentIndex2 = 26;
-            const int indentIndex3 = 37;
-            const int indentIndex4 = 43;
-            const int indentIndex5 = 47;
+            LexIndent(unit);
 
-            Compiler.Process(
-                source1,
-                SourceProcessingMode.Lex,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput
-                | SourceProcessingOptions.CheckIndentationConsistency
-            );
-
-            Assert.AreEqual(0, source1.Blames.Count);
-
-            Assert.IsTrue(
-                source1.Tokens.ElementAt(indentIndex1).TokenEquals(new IndentToken("\t", (2, 0)))
-            );
-            Assert.IsTrue(
-                source1.Tokens.ElementAt(indentIndex2).TokenEquals(new IndentToken("\t\t", (5, 0)))
-            );
-            Assert.IsTrue(
-                source1.Tokens.ElementAt(indentIndex3)
-                       .TokenEquals(new IndentToken("\t\t\t", (6, 0)))
-            );
-            Assert.IsTrue(
-                source1.Tokens.ElementAt(indentIndex4).TokenEquals(new OutdentToken((7, 0)))
-            );
-            Assert.IsTrue(
-                source1.Tokens.ElementAt(indentIndex5).TokenEquals(new OutdentToken((8, 0)))
-            );
+            Assert.AreEqual(0, unit.Blames.Count);
 
             // with spaces
-            var source2 = new SourceUnit(
-                "i = 0\r\n"
-                + "while i < 10:\r\n"
-                + "    console.print 'OK.'\r\n"
-                + "    j = 0\r\n"
-                + "    while j < 5:\r\n"
-                + "        if i == 3 and j == 2:\r\n"
-                + "            console.print 'Got it!'\r\n"
-                + "        j++\r\n"
-                + "    i++\r\n"
-                + "",
+            unit = new SourceUnit(
+                string.Join(
+                    Environment.NewLine,
+                    "i = 0",
+                    "while i < 10:",
+                    "    j = 0",
+                    "    while j < 5:",
+                    "        if i == 3 and j == 2:",
+                    "            Console.print('Got it!')",
+                    "        j++",
+                    "    i++"
+                ),
                 OutPath + nameof(IndentationLengthComputedCorrectly) + "_spaces" + TestExtension
             );
 
-            Compiler.Process(
-                source2,
-                SourceProcessingMode.Lex,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput
-                | SourceProcessingOptions.CheckIndentationConsistency
-            );
+            LexIndent(unit);
 
-            Assert.AreEqual(0, source2.Blames.Count);
-
-            Assert.IsTrue(
-                source2.Tokens.ElementAt(indentIndex1)
-                       .TokenEquals(new IndentToken(new string(' ', 4), (2, 0)))
-            );
-            Assert.IsTrue(
-                source2.Tokens.ElementAt(indentIndex2)
-                       .TokenEquals(new IndentToken(new string(' ', 8), (5, 0)))
-            );
-            Assert.IsTrue(
-                source2.Tokens.ElementAt(indentIndex3)
-                       .TokenEquals(new IndentToken(new string(' ', 12), (6, 0)))
-            );
-            Assert.IsTrue(
-                source2.Tokens.ElementAt(indentIndex4).TokenEquals(new OutdentToken((7, 0)))
-            );
-            Assert.IsTrue(
-                source2.Tokens.ElementAt(indentIndex5).TokenEquals(new OutdentToken((8, 0)))
-            );
+            Assert.AreEqual(0, unit.Blames.Count);
 
             // mixed
-            var source3 = new SourceUnit(
-                // use double indent at line 5 to distinct 8-space tab from spaces.
-                "i = 0\r\n"
-                + // 1
-                "while i < 10:\r\n"
-                + // 2
-                "\tconsole.print 'OK.'\r\n"
-                + // 3
-                "\tj = 0\r\n"
-                + // 4
-                "\twhile j < 5:\r\n"
-                + // 5
-                "            if i == 3 and j == 2:\r\n"
-                + // 5
-                "            \tconsole.print 'Got it!'\r\n"
-                + // 7
-                "            j++\r\n"
-                + // 8
-                "        i++\r\n"
-                + // 9
-                "",
+            unit = new SourceUnit(
+                string.Join(
+                    Environment.NewLine,
+                    "i = 0",
+                    "while i < 10:",
+                    "\tj = 0",
+                    "    while j < 5:",
+                    "\t\tif i == 3 and j == 2:",
+                    "            Console.print('Got it!')",
+                    "\t\tj++",
+                    "\ti++"
+                ),
                 OutPath + nameof(IndentationLengthComputedCorrectly) + "_mixed" + TestExtension
             );
 
-            Compiler.Process(
-                source3,
-                SourceProcessingMode.Lex,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput
-                | SourceProcessingOptions.CheckIndentationConsistency
-            );
+            LexIndent(unit);
 
-            Assert.AreEqual(1, source3.Blames.Count);
-
-            Assert.IsTrue(
-                source3.Tokens.ElementAt(indentIndex1).TokenEquals(new IndentToken("\t", (2, 0)))
-            );
-            Assert.IsTrue(
-                source3.Tokens.ElementAt(indentIndex2)
-                       .TokenEquals(new IndentToken(new string(' ', 12), (5, 0)))
-            );
-            Assert.IsTrue(
-                source3.Tokens.ElementAt(indentIndex3)
-                       .TokenEquals(new IndentToken(new string(' ', 12) + "\t", (6, 0)))
-            );
-            Assert.IsTrue(
-                source3.Tokens.ElementAt(indentIndex4).TokenEquals(new OutdentToken((7, 0)))
-            );
-            Assert.IsTrue(
-                source3.Tokens.ElementAt(indentIndex5).TokenEquals(new OutdentToken((8, 0)))
-            );
-
-            string TokenString(Token tk) {
-                return "(" + tk.Value.Replace("\t", "    ") + ")";
-            }
-
-            Assert.AreEqual(
-                string.Join(";", source1.Tokens.Select(TokenString)),
-                string.Join(";", source2.Tokens.Select(TokenString))
-            );
-            Assert.AreEqual(source2.Tokens.Count, source3.Tokens.Count);
+            Assert.AreEqual(2, unit.Blames.Count);
         }
 
         [Test]
@@ -178,7 +86,6 @@ namespace Axion.Testing.NUnit.Lexer {
                 "12e5"
             };
             var pos = (0, 9);
-            // TODO complete numbers parsing test
             Token[] tokens = {
                 new NumberToken(
                     "123456",
@@ -264,17 +171,11 @@ namespace Axion.Testing.NUnit.Lexer {
                     "number = " + numbers[i] + " + 0b10010010",
                     OutPath + nameof(NumbersParsedCorrectly) + i + TestExtension
                 );
-                Assert.DoesNotThrow(
-                    () => Compiler.Process(
-                        source,
-                        SourceProcessingMode.Lex,
-                        SourceProcessingOptions.SyntaxAnalysisDebugOutput
-                    )
-                );
+                Assert.DoesNotThrow(() => Lex(source));
 
                 var expected = new List<Token> {
-                    new IdentifierToken("number", (0, 0)).AppendWhitespace(" "),
-                    new SymbolToken("=", (0, 7)).AppendWhitespace(" "),
+                    new WordToken("number", (0, 0)).AppendWhitespace(" "),
+                    new OperatorToken("=", (0, 7)).AppendWhitespace(" "),
                     tokens[i],
                     new OperatorToken("+", (0, tokens[i].Span.EndPosition.Column))
                         .AppendWhitespace(" "),
@@ -283,8 +184,7 @@ namespace Axion.Testing.NUnit.Lexer {
                         new NumberOptions(32),
                         (0, tokens[i].Span.EndPosition.Column + 2)
                     ),
-                    new EndOfLineToken(startPosition: (0, tokens[i].Span.EndPosition.Column + 12)),
-                    new EndOfCodeToken((1, 0))
+                    new Token(TokenType.End, (0, tokens[i].Span.EndPosition.Column + 12))
                 };
 
                 for (var k = 0; k < source.Tokens.Count; k++) {
@@ -294,7 +194,10 @@ namespace Axion.Testing.NUnit.Lexer {
                         Assert.IsTrue(num.Options.TestEquality(num2.Options));
                     }
                     else {
-                        Assert.IsTrue(expected[k].TokenEquals(source.Tokens[k]));
+                        Assert.That(
+                            expected[k].TokenEquals(source.Tokens[k]),
+                            $"{expected[k]}\n{source.Tokens[k]}"
+                        );
                     }
                 }
             }
@@ -311,53 +214,48 @@ namespace Axion.Testing.NUnit.Lexer {
                 OutPath + nameof(UseBlockValid) + TestExtension
             );
 
-            Compiler.Process(
-                source,
-                SourceProcessingMode.Lex,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput
-            );
+            Lex(source);
             Assert.AreEqual(0, source.Blames.Count);
 
             var expected = new List<Token> {
                 // line 1
-                new KeywordToken(TokenType.KeywordUse, (0, 0)).AppendWhitespace(" "),
-                new SymbolToken("(", (0, 4)),
-                new EndOfLineToken("\n   ", (0, 5)),
+                new WordToken(TokenType.KeywordUse, (0, 0)).AppendWhitespace(" "),
+                new MarkToken("(", (0, 4)),
+                new NewlineToken("\n   ", (0, 5)),
                 // line 2
-                new IdentifierToken("System", (1, 3)).AppendWhitespace(" "),
-                new SymbolToken("(", (1, 10)),
-                new IdentifierToken("IO", (1, 11)),
-                new SymbolToken(",", (1, 13)).AppendWhitespace(" "),
-                new IdentifierToken("Linq", (1, 15)),
-                new SymbolToken(")", (1, 19)),
-                new SymbolToken(",", (1, 20)),
-                new EndOfLineToken("\n   ", (1, 21)),
+                new WordToken("System", (1, 3)).AppendWhitespace(" "),
+                new MarkToken("(", (1, 10)),
+                new WordToken("IO", (1, 11)),
+                new MarkToken(",", (1, 13)).AppendWhitespace(" "),
+                new WordToken("Linq", (1, 15)),
+                new MarkToken(")", (1, 19)),
+                new MarkToken(",", (1, 20)),
+                new NewlineToken("\n   ", (1, 21)),
                 // line 3
-                new IdentifierToken("Axion", (2, 3)).AppendWhitespace(" "),
-                new SymbolToken("(", (2, 9)),
-                new IdentifierToken("Core", (2, 10)),
-                new SymbolToken(",", (2, 14)).AppendWhitespace(" "),
-                new IdentifierToken("Testing", (2, 16)),
-                new SymbolToken(")", (2, 23)),
-                new SymbolToken(",", (2, 24)),
-                new EndOfLineToken("\n   ", (2, 25)),
+                new WordToken("Axion", (2, 3)).AppendWhitespace(" "),
+                new MarkToken("(", (2, 9)),
+                new WordToken("Core", (2, 10)),
+                new MarkToken(",", (2, 14)).AppendWhitespace(" "),
+                new WordToken("Testing", (2, 16)),
+                new MarkToken(")", (2, 23)),
+                new MarkToken(",", (2, 24)),
+                new NewlineToken("\n   ", (2, 25)),
                 // line 4
-                new IdentifierToken("Some", (3, 3)),
-                new SymbolToken(".", (3, 7)),
-                new IdentifierToken("Long", (3, 8)),
-                new SymbolToken(".", (3, 12)),
-                new IdentifierToken("Namespace", (3, 13)),
-                new EndOfLineToken(startPosition: (3, 22)),
+                new WordToken("Some", (3, 3)),
+                new MarkToken(".", (3, 7)),
+                new WordToken("Long", (3, 8)),
+                new MarkToken(".", (3, 12)),
+                new WordToken("Namespace", (3, 13)),
+                new NewlineToken(startPosition: (3, 22)),
                 // line 5
-                new SymbolToken(")", (4, 0)),
-                new EndOfLineToken(startPosition: (4, 1)),
-                new EndOfCodeToken((5, 0))
+                new MarkToken(")", (4, 0)),
+                new Token(TokenType.End, (4, 1))
             };
 
             for (var i = 0; i < source.Tokens.Count; i++) {
                 Assert.IsTrue(
                     expected[i].TokenEquals(source.Tokens[i]),
-                    $"expected[{i}].TokenEquals(source.Tokens[{i}])"
+                    $"{expected[i]}\n{source.Tokens[i]}"
                 );
             }
 
@@ -365,13 +263,30 @@ namespace Axion.Testing.NUnit.Lexer {
             string t2 = JsonConvert.SerializeObject(expected, Compiler.JsonSerializer);
             Assert.AreEqual(t1, t2);
         }
+
+        private static void Lex(SourceUnit source) {
+            Compiler.Process(
+                source,
+                SourceProcessingMode.Lex,
+                SourceProcessingOptions.SyntaxAnalysisDebugOutput
+            );
+        }
+        
+        private static void LexIndent(SourceUnit source) {
+            Compiler.Process(
+                source,
+                SourceProcessingMode.Lex,
+                SourceProcessingOptions.SyntaxAnalysisDebugOutput |
+                SourceProcessingOptions.CheckIndentationConsistency
+            );
+        }
     }
 
     internal static class TokenUtils {
         internal static bool TokenEquals(this Token a, Token b) {
             return a.Is(b.Type)
                    && string.Equals(a.Value, b.Value)
-                   && string.Equals(a.Whitespaces, b.Whitespaces);
+                   && string.Equals(a.EndWhitespaces, b.EndWhitespaces);
         }
 
         internal static bool TestEquality(this NumberOptions t, NumberOptions other) {

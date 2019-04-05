@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Processing.Syntax.Tree;
+using Axion.Core.Processing.Syntactic;
 using Axion.Core.Specification;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing {
     /// <summary>
@@ -13,38 +12,30 @@ namespace Axion.Core.Processing {
     ///     different kinds of code processing
     ///     are performed with that class.
     /// </summary>
-    [JsonObject]
     public sealed class SourceUnit {
         /// <summary>
         ///     Source code picked from string or file.
         /// </summary>
-        [JsonProperty]
         public readonly string Code;
 
         /// <summary>
-        ///     Tokens list generated from [<see cref="Code" />].
+        ///     Tokens list generated from source code.
         /// </summary>
-        [JsonProperty]
         public readonly List<Token> Tokens = new List<Token>();
 
         /// <summary>
-        ///     Abstract Syntax Tree generated from [<see cref="Tokens" />].
+        ///     Abstract Syntax Tree generated from tokens list.
         /// </summary>
-        [JsonProperty]
-        public readonly Ast SyntaxTree;
+        public readonly Ast Ast;
 
         /// <summary>
         ///     Contains all errors, warnings and messages
         ///     that raised on time of source processing.
         /// </summary>
-        [JsonProperty]
         public readonly List<Exception> Blames = new List<Exception>();
 
-        [JsonProperty]
-        public SourceProcessingOptions Options { get; internal set; }
-
-        [JsonProperty]
-        public SourceProcessingMode ProcessingMode { get; internal set; }
+        public SourceProcessingOptions Options;
+        public SourceProcessingMode    ProcessingMode;
 
         #region File paths
 
@@ -58,43 +49,35 @@ namespace Axion.Core.Processing {
         ///     When not specified in constructor,
         ///     then file name assigned to date and time of instance creation.
         /// </summary>
-        internal string OutputFilePath { get; private set; }
+        public string OutputFilePath { get; private set; }
 
         /// <summary>
         ///     Path to file where source code is located.
         ///     When not specified in constructor,
         ///     then file name assigned to date and time of instance creation.
         /// </summary>
-        internal string SourceFilePath { get; private set; }
+        public string SourceFilePath { get; private set; }
 
         /// <summary>
         ///     Name of file where source code is located.
         ///     Created automatically from <see cref="SourceFilePath" />.
         /// </summary>
-        internal string SourceFileName { get; private set; }
+        public string SourceFileName { get; private set; }
 
         /// <summary>
         ///     Path to file where processing debug output is located.
         /// </summary>
-        internal string DebugFilePath { get; private set; }
+        public string DebugFilePath { get; private set; }
 
         #endregion
 
         #region Constructors
 
-        /// <summary>
-        ///     Creates new [<see cref="SourceUnit" />] instance
-        ///     using specified [<paramref name="code" />].
-        /// </summary>
         public SourceUnit(string code, string outFilePath = null) : this(
             code.Split(Spec.EndOfLines, StringSplitOptions.None),
             outFilePath
         ) { }
 
-        /// <summary>
-        ///     Creates new [<see cref="SourceUnit" />] instance
-        ///     using specified [<paramref name="file" />] info.
-        /// </summary>
         public SourceUnit(FileInfo file, string outFilePath = null) {
             // check source file
             if (!file.Exists) {
@@ -112,16 +95,13 @@ namespace Axion.Core.Processing {
             InitializeFilePaths(file.FullName, outFilePath);
 
             // set content
-            SyntaxTree = new Ast(this);
-            Code       = File.ReadAllText(file.FullName);
-            if (!Code.EndsWith("\n")) {
-                Code += "\n";
-            }
+            Ast  = new Ast(this);
+            Code = File.ReadAllText(file.FullName);
+            // add null-terminator
+            Code += Spec.EndOfCode;
         }
 
         /// <summary>
-        ///     Creates new [<see cref="SourceUnit" />] instance
-        ///     using specified [<paramref name="sourceLines" />].
         ///     Use only for interpreter and tests,
         ///     output is redirected to the compiler dir.
         /// </summary>
@@ -135,8 +115,10 @@ namespace Axion.Core.Processing {
             );
 
             // set content
-            SyntaxTree = new Ast(this);
-            Code       = string.Join("\n", sourceLines) + "\n";
+            Ast  = new Ast(this);
+            Code = string.Join("\n", sourceLines);
+            // add null-terminator
+            Code += Spec.EndOfCode;
         }
 
         #endregion
@@ -179,15 +161,10 @@ namespace Axion.Core.Processing {
 
         #endregion
 
-        #region Errors reporting
+        #region Blaming
 
         internal void ReportError(string message, SpannedRegion mark) {
-            Blames.Add(
-                new LanguageException(
-                    new Blame(message, BlameSeverity.Error, mark.Span),
-                    this
-                )
-            );
+            Blames.Add(new LanguageException(new Blame(message, BlameSeverity.Error, mark.Span)));
         }
 
         internal void Blame(BlameType type, SpannedRegion region) {
@@ -195,7 +172,7 @@ namespace Axion.Core.Processing {
         }
 
         internal void Blame(BlameType type, Position start, Position end) {
-            Blames.Add(new LanguageException(new Blame(type, Spec.Blames[type], start, end), this));
+            Blames.Add(new LanguageException(new Blame(type, Spec.Blames[type], start, end)));
         }
 
         #endregion

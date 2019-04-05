@@ -13,7 +13,7 @@ namespace Axion.Core.Specification {
         /// <summary>
         ///     End of source stream mark.
         /// </summary>
-        public const char EndOfStream = '\0';
+        public const char EndOfCode = '\0';
 
         public const int Unicode32BitHexLength = 6;
 
@@ -74,7 +74,7 @@ namespace Axion.Core.Specification {
                 { "enum", KeywordEnum },
                 { "fn", KeywordFn },
                 // variables
-                { "var", KeywordVar },
+                { "let", KeywordLet },
                 { "new", KeywordNew },
                 { "delete", KeywordDelete },
                 // returns
@@ -90,7 +90,7 @@ namespace Axion.Core.Specification {
                 { "when", KeywordWhen }
             };
 
-        internal const string SingleCommentStart       = "#";
+        internal const string CommentStart             = "#";
         internal const string MultiCommentStart        = "#|";
         internal const string MultiCommentStartPattern = @"#\|";
         internal const string MultiCommentEnd          = "|#";
@@ -101,30 +101,30 @@ namespace Axion.Core.Specification {
         /// <summary>
         ///     Types of token, that can start a 'block'.
         /// </summary>
-        internal static readonly TokenType[] BlockStarters = { Colon, Indent, LeftBrace };
+        internal static readonly TokenType[] BlockStarters = { Colon, Indent, OpenBrace };
 
         internal static readonly TokenType[] NeverTestTypes = {
-            Assign,
-            AddAssign,
-            SubtractAssign,
-            MultiplyAssign,
-            TrueDivideAssign,
-            RemainderAssign,
-            BitAndAssign,
-            BitOrAssign,
-            BitExclusiveOrAssign,
-            BitLeftShiftAssign,
-            BitRightShiftAssign,
-            PowerAssign,
-            FloorDivideAssign,
+            OpAssign,
+            OpPlusAssign,
+            OpMinusAssign,
+            OpMultiplyAssign,
+            OpTrueDivideAssign,
+            OpRemainderAssign,
+            OpBitAndAssign,
+            OpBitOrAssign,
+            OpBitXorAssign,
+            OpBitLeftShiftAssign,
+            OpBitRightShiftAssign,
+            OpPowerAssign,
+            OpFloorDivideAssign,
             Indent,
             Outdent,
             Newline,
-            EndOfCode,
+            End,
             Semicolon,
-            RightBrace,
-            RightBracket,
-            RightParenthesis,
+            CloseBrace,
+            CloseBracket,
+            CloseParenthesis,
             Comma,
             KeywordFor,
             OpIn,

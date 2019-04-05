@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Axion.Core.Processing;
-using Axion.Core.Processing.Lexical.Lexer;
+using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Specification;
 using ConsoleExtensions;
 
 namespace Axion.Core.Visual {
@@ -12,8 +14,7 @@ namespace Axion.Core.Visual {
     ///     syntax highlighter for console.
     /// </summary>
     internal class AxionSyntaxHighlighter : ISyntaxHighlighter {
-        private Point             renderPosition;
-        public  ConsoleCodeEditor Editor { get; set; }
+        private Point renderPosition;
 
         /// <summary>
         ///     Creates a pairs of (text, color) from given source,
@@ -27,18 +28,17 @@ namespace Axion.Core.Visual {
         /// <param name="lastRenderEndPosition">
         ///     Last position of cursor, where code was correctly rendered.
         /// </param>
-        /// <param name="blames">
-        ///     Errors and warnings occurred during code analysis.
-        /// </param>
+        /// <param name="blames"></param>
         public List<ColoredValue> Highlight(
-            List<string>    codeLines,
-            out Point       lastRenderEndPosition,
-            List<Exception> blames
+            List<string>        codeLines,
+            ref Point           lastRenderEndPosition,
+            out List<Exception> blames
         ) {
             renderPosition = lastRenderEndPosition;
             var unit  = new SourceUnit(codeLines.ToArray());
             var lexer = new Lexer(unit);
             lexer.Process();
+            blames = unit.Blames;
 
             var values = new List<ColoredValue>();
 
@@ -55,12 +55,13 @@ namespace Axion.Core.Visual {
             bool               foundRenderStart
         ) {
             foreach (Token token in tokens) {
-                bool tokenShouldBeSkipped = !foundRenderStart
-                                            && (token.Span.EndPosition.Line < renderPosition.Y
-                                                || token.Span.EndPosition.Line == renderPosition.Y
-                                                && token.Span.EndPosition.Column <= renderPosition.X
-                                                || token.Is(TokenType.EndOfCode));
-                // BUG: if code has error before that token, and it's fixed with next char, it'll be highlighted improperly (e. g. type '0..10')
+                bool tokenShouldBeSkipped =
+                    !foundRenderStart
+                    && (token.Span.EndPosition.Line < renderPosition.Y
+                        || token.Span.EndPosition.Line == renderPosition.Y
+                        && token.Span.EndPosition.Column <= renderPosition.X
+                        || token.Is(TokenType.End));
+                // BUG (UI) if code has error before that token, and it's fixed with next char, it'll be highlighted improperly (e. g. type '0..10')
 
                 #region Complex values
 
@@ -78,7 +79,7 @@ namespace Axion.Core.Visual {
                     foundRenderStart = true;
                 }
 
-                if (token.Is(TokenType.EndOfCode)) {
+                if (token.Is(TokenType.End)) {
                     break;
                 }
 
@@ -94,10 +95,16 @@ namespace Axion.Core.Visual {
 
                 if (token.Is(TokenType.Newline)) {
                     if (values.Count > 0) {
-                        values[values.Count - 1].AppendValue(token.ToAxionCode(new AxionCodeBuilder()));
+                        values[values.Count - 1]
+                            .AppendValue(token.ToAxionCode(new CodeBuilder(OutLang.Axion)));
                     }
                     else {
-                        values.Add(new ColoredValue(token.ToAxionCode(new AxionCodeBuilder()), ConsoleColor.White));
+                        values.Add(
+                            new ColoredValue(
+                                token.ToAxionCode(new CodeBuilder(OutLang.Axion)),
+                                ConsoleColor.White
+                            )
+                        );
                     }
 
                     continue;
@@ -106,10 +113,20 @@ namespace Axion.Core.Visual {
                 if (token.Is(TokenType.Identifier)) {
                     // highlight error types
                     if (token.Value.EndsWith("Error")) {
-                        values.Add(new ColoredValue(token.ToAxionCode(new AxionCodeBuilder()), ConsoleColor.DarkMagenta));
+                        values.Add(
+                            new ColoredValue(
+                                token.ToAxionCode(new CodeBuilder(OutLang.Axion)),
+                                ConsoleColor.DarkMagenta
+                            )
+                        );
                     }
                     else {
-                        values.Add(new ColoredValue(token.ToAxionCode(new AxionCodeBuilder()), ConsoleColor.Cyan));
+                        values.Add(
+                            new ColoredValue(
+                                token.ToAxionCode(new CodeBuilder(OutLang.Axion)),
+                                ConsoleColor.Cyan
+                            )
+                        );
                     }
 
                     continue;
@@ -125,14 +142,16 @@ namespace Axion.Core.Visual {
 
                 // simple values
                 ConsoleColor tokenColor = GetSimpleTokenColor(token);
-                values.Add(new ColoredValue(token.ToAxionCode(new AxionCodeBuilder()), tokenColor));
+                values.Add(
+                    new ColoredValue(token.ToAxionCode(new CodeBuilder(OutLang.Axion)), tokenColor)
+                );
             }
         }
 
         private static ConsoleColor GetSimpleTokenColor(Token token) {
             ConsoleColor tokenColor;
             if (token.Is(TokenType.Comment)) {
-                tokenColor = ConsoleColor.DarkGray;
+                tokenColor = ConsoleColor.DarkGreen;
             }
             else if (token.Is(TokenType.String)) {
                 tokenColor = ConsoleColor.DarkYellow;
@@ -143,11 +162,13 @@ namespace Axion.Core.Visual {
             else if (token.Is(TokenType.Number)) {
                 tokenColor = ConsoleColor.Yellow;
             }
-            else if (token is OperatorToken
-                     || token is SymbolToken) {
+            else if (token is OperatorToken) {
                 tokenColor = ConsoleColor.Red;
             }
-            else if (token is KeywordToken) {
+            else if (token is MarkToken) {
+                tokenColor = ConsoleColor.DarkGray;
+            }
+            else if (Spec.Keywords.ContainsValue(token.Type)) {
                 tokenColor = ConsoleColor.DarkCyan;
             }
             else {

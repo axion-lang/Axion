@@ -9,21 +9,20 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     public class OperatorToken : Token {
         internal OperatorProperties Properties;
 
-        public OperatorToken(
-            OperatorProperties properties,
-            Position           startPosition = default
-        ) : base(
-            properties.Type,
-            startPosition: startPosition
-        ) {
+        public OperatorToken(OperatorProperties properties, Position startPosition = default)
+            : base(
+                properties.Type,
+                startPosition
+            ) {
             Properties = properties;
         }
 
-        public OperatorToken(string value, Position startPosition = default) : base(
-            TokenType.Invalid,
-            value,
-            startPosition
-        ) {
+        public OperatorToken(string value, Position startPosition = default)
+            : base(
+                TokenType.Invalid,
+                value,
+                startPosition
+            ) {
             Spec.Operators.TryGetValue(value, out Properties);
             Type = Properties.Type;
         }
@@ -40,24 +39,24 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         internal InputSide InputSide;
 
         [JsonProperty]
-        internal readonly bool Overloadable;
+        internal readonly bool AllowOverload;
 
         [JsonProperty]
         internal readonly int Precedence;
 
         [JsonProperty]
-        internal readonly TokenType Type;
+        public readonly TokenType Type;
 
         internal OperatorProperties(
             TokenType type,
             int       precedence,
-            InputSide inputSide    = InputSide.Both,
-            bool      overloadable = false
+            InputSide inputSide     = InputSide.Both,
+            bool      allowOverload = false
         ) {
-            Type         = type;
-            Precedence   = precedence;
-            InputSide    = inputSide;
-            Overloadable = overloadable;
+            Type          = type;
+            Precedence    = precedence;
+            InputSide     = inputSide;
+            AllowOverload = allowOverload;
         }
 
         public override bool Equals(object obj) {
@@ -70,14 +69,14 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         public bool Equals(OperatorProperties other) {
             return InputSide == other.InputSide
-                   && Overloadable == other.Overloadable
+                   && AllowOverload == other.AllowOverload
                    && Precedence == other.Precedence
                    && Type == other.Type;
         }
 
         public override int GetHashCode() {
             unchecked {
-                int hashCode = Overloadable.GetHashCode();
+                int hashCode = AllowOverload.GetHashCode();
                 hashCode = (hashCode * 397) ^ Precedence;
                 hashCode = (hashCode * 397) ^ (int) Type;
                 return hashCode;

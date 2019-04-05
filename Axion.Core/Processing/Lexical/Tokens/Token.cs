@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Specification;
 using Newtonsoft.Json;
 
@@ -11,59 +12,70 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public TokenType Type { get; protected internal set; }
 
         [JsonProperty(Order = 2)]
-        public string Value { get; protected set; }
+        public string Value { get; private set; }
+
+        [JsonProperty(Order = 3)]
+        public string EndWhitespaces { get; private set; } = "";
 
         /// <summary>
-        ///     Whitespaces after that token.
-        ///     Used in code rendering.
+        ///     Constructor for token that has no length
+        ///     (such as 'end of code' or 'outdent')
         /// </summary>
-        [JsonProperty(Order = 3)]
-        public string Whitespaces { get; protected internal set; } = "";
-
-        public Token(string value) {
-            Value = value;
+        public Token(TokenType type, Position startPos) {
+            Type  = type;
+            Value = "";
+            Span  = new Span(startPos, startPos);
         }
 
+        /// <summary>
+        ///     Constructor for token without
+        ///     position in source.
+        /// </summary>
         public Token(TokenType type, string value = "") {
             Type  = type;
             Value = value;
         }
 
-        public Token(
-            TokenType type,
-            string    value         = "",
-            Position  startPosition = default
-        ) {
+        /// <summary>
+        ///     Constructor for Lexer and unit testing.
+        /// </summary>
+        public Token(TokenType type, string value = "", Position startPos = default) {
             Type  = type;
             Value = value;
 
-            // compute end line & end column
+            // compute position
             int      endLine;
             int      endCol;
-            string[] valueLines = value.Split(Spec.EndOfLines, StringSplitOptions.None);
+            string[] valueLines = value.Split('\n');
             if (valueLines.Length == 1) {
-                endLine = startPosition.Line;
-                endCol  = startPosition.Column + value.Length;
+                endLine = startPos.Line;
+                endCol  = startPos.Column + value.Length;
             }
             else {
-                endLine = startPosition.Line + valueLines.Length - 1;
+                endLine = startPos.Line + valueLines.Length - 1;
                 endCol  = valueLines[valueLines.Length - 1].Length;
             }
 
-            Span = new Span(startPosition, (endLine, endCol));
+            Span = new Span(startPos, (endLine, endCol));
         }
 
+        public bool ShouldSerializeEndWhitespaces() {
+            return !Compiler.Options.HasFlag(SourceProcessingOptions.ShowAstJson);
+        }
+
+        /// <summary>
+        ///     Checks if token is of any
+        ///     of specified <paramref name="types"/>.
+        /// </summary>
         public bool Is(params TokenType[] types) {
-            for (var i = 0; i < types.Length; i++) {
-                if (Type == types[i]) {
-                    return true;
-                }
-            }
-
-            return false;
+            return types.Any(t => Type == t);
         }
 
-        public Token AppendValue(string value) {
+        /// <summary>
+        ///     Appends specified <paramref name="value"/>
+        ///     to token's value.
+        /// </summary>
+        internal Token AppendValue(string value) {
             Value += value;
             string[] valueLines = value.Split(Spec.EndOfLines, StringSplitOptions.None);
 
@@ -82,6 +94,10 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             return this;
         }
 
+        /// <summary>
+        ///     Appends specified <paramref name="space"/>
+        ///     to token's end whitespaces.
+        /// </summary>
         public Token AppendWhitespace(string space) {
 #if DEBUG
             var whites = new[] {
@@ -89,7 +105,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             };
             Debug.Assert(space.All(c => whites.Contains(c)));
 #endif
-            Whitespaces += space;
+            EndWhitespaces += space;
             return this;
         }
 
@@ -97,13 +113,26 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         ///     Returns string representation of
         ///     this token in Axion language format.
         /// </summary>
-        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
-            return c + Value + Whitespaces;
+        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
+            return c + Value + EndWhitespaces;
+        }
+
+        /// <summary>
+        ///     Returns string representation of
+        ///     this token in C# language format.
+        /// </summary>
+        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
+            return c + Value;
         }
 
         public override string ToString() {
-            return
-                $"{Type} :: {Value.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t")} :: ({Span})";
+            return Type
+                   + " :: "
+                   + Value.Replace("\r", "\\r")
+                          .Replace("\n", "\\n")
+                          .Replace("\t", "\\t")
+                   + " :: "
+                   + Span;
         }
     }
 }

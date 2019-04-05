@@ -10,7 +10,7 @@ fn NextToken() => Token
     %if DEBUG
 
     if tokens.Count != 0 and tokens[tokens.Count - 1].Type != TokenType.Outdent
-        last: Token = tokens[tokens.Count - 1]
+        last = tokens[tokens.Count - 1]
         Debug.Assert (
             tokenStartPosition ==
             (last.Span.EndPosition.Line, last.Span.EndPosition.Column + last.Whitespaces.Length)

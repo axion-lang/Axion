@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using Axion.Core;
 using Axion.Core.Processing;
 using Axion.Core.Specification;
 using NUnit.Framework;
@@ -15,11 +14,7 @@ namespace Axion.Testing.NUnit.Lexer {
                     file,
                     OutPath + nameof(DesignPatternsValidation) + i + TestExtension
                 );
-                Compiler.Process(
-                    source,
-                    SourceProcessingMode.Lex,
-                    SourceProcessingOptions.SyntaxAnalysisDebugOutput
-                );
+                Lex(source);
                 Assert.That(source.Blames.Count == 0, file.Name + ": Errors count > 0");
                 Assert.That(source.Tokens.Count > 0, file.Name + ": Tokens count == 0");
             }
@@ -36,12 +31,8 @@ namespace Axion.Testing.NUnit.Lexer {
             for (var i = 1; i < files.Length + 1; i++) {
                 SourceUnit source =
                     MakeSourceFromFile(nameof(NestedMultilineCommentInvalid) + "_" + i);
-                Compiler.Process(
-                    source,
-                    SourceProcessingMode.Lex,
-                    SourceProcessingOptions.SyntaxAnalysisDebugOutput
-                );
-                Assert.AreEqual(1, source.Blames.Count);
+                Lex(source);
+                Assert.That(source.Blames.Count == 1, $"{i} blames != 1");
             }
         }
 
@@ -56,11 +47,7 @@ namespace Axion.Testing.NUnit.Lexer {
             for (var i = 1; i < files.Length + 1; i++) {
                 SourceUnit source =
                     MakeSourceFromFile(nameof(NestedMultilineCommentValid) + "_" + i);
-                Compiler.Process(
-                    source,
-                    SourceProcessingMode.Lex,
-                    SourceProcessingOptions.SyntaxAnalysisDebugOutput
-                );
+                Lex(source);
                 Assert.AreEqual(0, source.Blames.Count);
             }
         }
@@ -68,22 +55,14 @@ namespace Axion.Testing.NUnit.Lexer {
         [Test]
         public void StringsValidation() {
             SourceUnit source = MakeSourceFromFile(nameof(StringsValidation));
-            Compiler.Process(
-                source,
-                SourceProcessingMode.Lex,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput
-            );
+            Lex(source);
             Assert.AreEqual(6, source.Blames.Count);
         }
 
         [Test]
         public void VariousStuffValid() {
             SourceUnit source = MakeSourceFromFile(nameof(VariousStuffValid));
-            Compiler.Process(
-                source,
-                SourceProcessingMode.Lex,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput
-            );
+            Lex(source);
             Assert.AreEqual(0, source.Blames.Count);
         }
     }

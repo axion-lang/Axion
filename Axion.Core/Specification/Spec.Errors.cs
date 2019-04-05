@@ -13,7 +13,7 @@ namespace Axion.Core.Specification {
             new Dictionary<BlameType, BlameSeverity> {
                 // Errors
                 { InvalidOperator, Error },
-                { InvalidSymbol, Error },
+                { InvalidCharacter, Error },
                 { MismatchedParenthesis, Error },
                 { MismatchedBracket, Error },
                 { MismatchedBrace, Error },
@@ -64,6 +64,7 @@ namespace Axion.Core.Specification {
                 { ConstantValueExpected, Error },
                 { InvalidTypeNameExpression, Error },
                 { DecoratorCanOnlyBeANameWithOptionalArguments, Error },
+                { RedundantColonWithBraces, Error },
 
                 // Warnings
                 { InconsistentIndentation, Warning },
@@ -73,7 +74,6 @@ namespace Axion.Core.Specification {
                 { RedundantExponentForZeroNumber, Warning },
                 { RedundantEmptyUseStatement, Warning },
                 { DoubleNegationIsMeaningless, Warning },
-                { RedundantColonWithBraces, Warning },
                 { RedundantEmptyListOfTypeArguments, Warning }
             };
 

@@ -9,20 +9,11 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public NumberOptions Options { get; }
 
         public NumberToken(
-            object        value,
+            string        value,
             NumberOptions options       = null,
             Position      startPosition = default
-        ) :
-            base(TokenType.Number, value.ToString(), startPosition) {
+        ) : base(TokenType.Number, value, startPosition) {
             Options = options ?? new NumberOptions();
-        }
-        
-        internal override AxionCodeBuilder ToAxionCode(AxionCodeBuilder c) {
-            return c + Options.Number.ToString();
-        }
-
-        internal override CSharpCodeBuilder ToCSharpCode(CSharpCodeBuilder c) {
-            return c + Options.Number.ToString();
         }
     }
 
@@ -30,19 +21,20 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Contains information about number properties
     ///     (base, reserved bits count, is it floating, etc.)
     /// </summary>
+    [JsonObject(MemberSerialization.Fields)]
     public class NumberOptions {
         [JsonIgnore]
-        public StringBuilder Number { get; set; } = new StringBuilder();
+        public StringBuilder Number = new StringBuilder();
 
-        internal object Value       { get; set; }
-        public   int    Radix       { get; set; }
-        public   int    Bits        { get; set; }
-        public   bool   Floating    { get; set; }
-        public   bool   Imaginary   { get; set; }
-        public   bool   Unsigned    { get; set; }
-        public   bool   Unlimited   { get; set; }
-        public   bool   HasExponent { get; set; }
-        public   int    Exponent    { get; set; }
+        internal object Value;
+        public   int    Radix;
+        public   int    Bits;
+        public   bool   Floating;
+        public   bool   Imaginary;
+        public   bool   Unsigned;
+        public   bool   Unlimited;
+        public   bool   HasExponent;
+        public   int    Exponent;
 
         public NumberOptions(
             int  radix       = 10,

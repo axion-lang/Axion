@@ -7,7 +7,7 @@ namespace Axion.Core.Specification {
         ///     Type of tokens, that are treated as
         ///     compile-time constant values.
         /// </summary>
-        internal static readonly TokenType[] ConstantValueTypes = {
+        internal static readonly TokenType[] Literals = {
             TokenType.String,
             TokenType.Character,
             TokenType.Number,

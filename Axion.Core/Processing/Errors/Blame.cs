@@ -18,11 +18,6 @@ namespace Axion.Core.Processing.Errors {
             Span     = span;
         }
 
-        public string AsMessage() {
-            return
-                $"{Severity}: {Message} (line {Span.StartPosition.Line + 1}, column {Span.StartPosition.Column + 1})";
-        }
-
         private static string TypeToMessage(BlameType type) {
             string enumMemberName = type.ToString("G");
 
@@ -40,6 +35,10 @@ namespace Axion.Core.Processing.Errors {
             }
 
             return result.ToString();
+        }
+
+        public override string ToString() {
+            return $"{Severity}: {Message} ({Span})";
         }
     }
 }

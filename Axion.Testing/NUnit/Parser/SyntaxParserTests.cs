@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Parser {
     [TestFixture]
-    public partial class SyntaxParserTests : Tests {
+    public partial class SyntaxTreeNodeTests : Tests {
         [Test]
         public void ClassDefValid() {
             SourceUnit source = ParseTestFile(nameof(ClassDefValid));
@@ -49,12 +49,16 @@ namespace Axion.Testing.NUnit.Parser {
 
         private SourceUnit ParseTestFile(string testName) {
             SourceUnit source = MakeSourceFromFile(testName);
+            Parse(source);
+            return source;
+        }
+
+        private static void Parse(SourceUnit source) {
             Compiler.Process(
                 source,
                 SourceProcessingMode.Parsing,
                 SourceProcessingOptions.SyntaxAnalysisDebugOutput
             );
-            return source;
         }
     }
 }

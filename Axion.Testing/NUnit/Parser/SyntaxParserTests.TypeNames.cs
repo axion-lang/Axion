@@ -1,14 +1,13 @@
 using System.Linq;
-using Axion.Core;
 using Axion.Core.Processing;
-using Axion.Core.Processing.Syntax.Tree.Expressions;
-using Axion.Core.Processing.Syntax.Tree.Expressions.Binary;
-using Axion.Core.Processing.Syntax.Tree.Expressions.TypeNames;
-using Axion.Core.Processing.Syntax.Tree.Statements.Small;
+using Axion.Core.Processing.Syntactic.Expressions;
+using Axion.Core.Processing.Syntactic.Expressions.Binary;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Syntactic.Statements.Small;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Parser {
-    public partial class SyntaxParserTests {
+    public partial class SyntaxTreeNodeTests {
         [Test]
         public void TypeNameValid() {
             SourceUnit unit = MakeSourceFromCode(
@@ -26,25 +25,21 @@ type8: (Type1<Int>[], (Array[] | AnotherType)[])
 type9: List< Map<T1, T2> > | (Type1<Int, Type2[]>[], (Array[] | AnotherType)[])
 "
             );
-            Compiler.Process(
-                unit,
-                SourceProcessingMode.Parsing,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput
-            );
-            TypeName[] stmts = unit.SyntaxTree.Root.Statements.Cast<ExpressionStatement>()
+            Parse(unit);
+            TypeName[] stmts = unit.Ast.Root.Statements.Cast<ExpressionStatement>()
                                    .Select(s => ((VarDefinitionExpression) s.Expression).Type)
                                    .ToArray();
             Assert.That(stmts.Length == 10);
             Assert.DoesNotThrow(
                 () => {
                     var type0 = (SimpleTypeName) stmts[0];
-                    Assert.That(!(type0.Name is NameExpression));
+                    Assert.That(type0.Name is NameExpression);
 
                     var type1   = (UnionTypeName) stmts[1];
                     var union1L = (SimpleTypeName) type1.Left;
                     Assert.That(union1L.Name is NameExpression);
                     var union1R = (TupleTypeName) type1.Right;
-                    Assert.That(union1R.Types.Length == 0);
+                    Assert.That(union1R.Types.Count == 0);
 
                     var type2 = (GenericTypeName) stmts[2];
                     var genT2 = (SimpleTypeName) type2.Target;

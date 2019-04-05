@@ -4,36 +4,31 @@ using System.Diagnostics;
 using System.Globalization;
 using Axion.Core.Specification;
 using ConsoleExtensions;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Errors {
-    [JsonObject]
     public class LanguageException : Exception {
-        internal readonly SourceUnit Unit;
-
         [JsonProperty]
-        internal readonly Blame Blame;
+        [NotNull]
+        public readonly Blame Blame;
 
-        [JsonProperty]
-        public override string Message { get; }
-
-        [JsonProperty]
+        public override string Message    { get; }
         public override string StackTrace { get; }
 
         [JsonProperty]
         private readonly string time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
 
-        internal LanguageException(Blame blame, SourceUnit unit) {
-            Unit       = unit ?? throw new ArgumentNullException(nameof(unit));
-            Blame      = blame ?? throw new ArgumentNullException(nameof(blame));
-            Message    = blame.AsMessage();
+        internal LanguageException([NotNull] Blame blame) {
+            Blame      = blame;
+            Message    = blame.ToString();
             StackTrace = new StackTrace(2).ToString();
         }
 
         /// <summary>
         ///     Creates visual representation of occurred error in console.
         /// </summary>
-        internal void Print() {
+        internal void Print(SourceUnit unit) {
             //--------Error templates--------
             //
             // Error: Invalid operator.
@@ -58,18 +53,18 @@ namespace Axion.Core.Processing.Errors {
             // Write message
             ConsoleUI.WriteLine((Message, color));
             // Append file name if it's exists.
-            ConsoleUI.WriteLine("In file '" + Unit.SourceFilePath + "'.");
+            ConsoleUI.WriteLine("In file '" + unit.SourceFilePath + "'.");
 
             Console.WriteLine();
 
-            string[] codeLines = Unit.Code.Split(Spec.EndOfLines, StringSplitOptions.None);
+            string[] codeLines = unit.Code.Split(Spec.EndOfLines, StringSplitOptions.None);
 
             var lines = new List<string>();
             // limit rest of code by 5 lines
             for (int i = Blame.Span.StartPosition.Line;
                 i < codeLines.Length && lines.Count < 4;
                 i++) {
-                lines.Add(codeLines[i].TrimEnd('\n', Spec.EndOfStream));
+                lines.Add(codeLines[i].TrimEnd('\n', Spec.EndOfCode));
             }
 
             if (lines.Count > codeLines.Length - Blame.Span.StartPosition.Line) {
@@ -95,7 +90,7 @@ namespace Axion.Core.Processing.Errors {
                 +
                 // pointer arrows
                 new string(
-                    '^', // TODO compute token value length: include tab lengths
+                    '^', // TODO (UI) compute token value length: include tab lengths
                     errorTokenLength
                 );
 

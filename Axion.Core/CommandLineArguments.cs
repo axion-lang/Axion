@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
-using Axion.Core.Processing;
+﻿using System;
+using System.Collections.Generic;
 using CommandLine;
+using static Axion.Core.Processing.SourceProcessingMode;
 
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -10,74 +11,38 @@ namespace Axion.Core {
     ///     user arguments in command line.
     /// </summary>
     internal class CommandLineArguments {
-        internal const string HelpText =
-            "┌─────────────────────────────┬───────────────────────────────────────────────────────────────┐\r\n"
-            + "│        Argument name        │                                                               │\r\n"
-            + "├───────┬─────────────────────┤                       Usage description                       │\r\n"
-            + "│ short │        full         │                                                               │\r\n"
-            + "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤\r\n"
-            + "│  -i   │ --"
-            + nameof(Interactive)
-            + "       │ Launch compiler's interactive interpreter mode.               │\r\n"
-            + "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤\r\n"
-            + "│       │ \"<"
-            + nameof(Code)
-            + ">\"            │ Input code to process.                                        │\r\n"
-            + "│  -f   │ --"
-            + nameof(Files)
-            + " \"<path>\"    │ Input files to process.                                       │\r\n"
-            + "│  -p   │ --"
-            + nameof(Project)
-            + " \"<path>\"  │ Input Axion project to process. [not available yet]           │\r\n"
-            + "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤\r\n"
-            + "│  -m   │ --"
-            + nameof(Mode)
-            + " <value>      │ Source code processing mode (Default: compile). Available:    ├──┬── not available yet\r\n"
-            + "│       │ "
-            + nameof(SourceProcessingMode.Interpret)
-            + "           │     Interpret source code.                                    │  │\r\n"
-            + "│       │ "
-            + nameof(SourceProcessingMode.Compile)
-            + "             │     Compile source into machine code.                         │  │\r\n"
-            + "│       │ "
-            + nameof(SourceProcessingMode.ConvertC)
-            + "            │     Convert source to 'C' language.                           │  │\r\n"
-            + "│       │ "
-            + nameof(SourceProcessingMode.ConvertCpp)
-            + "          │     Convert source to 'C++' language.                         │  │\r\n"
-            + "│       │ "
-            + nameof(SourceProcessingMode.ConvertCS)
-            + "       │     Convert source to 'C#' language.                          │  │\r\n"
-            + "│       │ "
-            + nameof(SourceProcessingMode.ConvertJS)
-            + "   │     Convert source to 'JavaScript' language.                  │  │\r\n"
-            + "│       │ "
-            + nameof(SourceProcessingMode.ConvertPy)
-            + "       │     Convert source to 'Python' language.                      ├──┘\r\n"
-            + "│       │ "
-            + nameof(SourceProcessingMode.Lex)
-            + "                 │     Create tokens (lexemes) list from source.                 │\r\n"
-            + "│       │ "
-            + nameof(SourceProcessingMode.Parsing)
-            + "             │     Create tokens list and Abstract Syntax Tree from source.  │\r\n"
-            + "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤\r\n"
-            + "│  -d   │ --"
-            + nameof(Debug)
-            + "             │ Save debug information to '<compilerDir>\\output' directory.  │\r\n"
-            + "│  -d   │ --"
-            + nameof(AstJson)
-            + "           │ Show resulting AST in JSON format to the console.             │\r\n"
-            + "│  -h   │ --"
-            + nameof(Help)
-            + "              │ Display this help screen.                                     │\r\n"
-            + "│  -v   │ --"
-            + nameof(Version)
-            + "           │ Display information about compiler version.                   │\r\n"
-            + "│  -x   │ --"
-            + nameof(Exit)
-            + "              │ Exit the compiler.                                            │\r\n"
-            + "└───────┴─────────────────────┴───────────────────────────────────────────────────────────────┘\r\n"
-            + " (Argument names aren't case-sensitive; you can use '/' or '-' instead of '--'.)\r\n";
+        internal static readonly string HelpText = string.Join(
+            Environment.NewLine,
+            "┌─────────────────────────────┬───────────────────────────────────────────────────────────────┐",
+            "│        Argument name        │                                                               │",
+            "├───────┬─────────────────────┤                       Usage description                       │",
+            "│ short │        full         │                                                               │",
+            "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤",
+            "│  -i   │ --" + nameof(Interactive) + "       │ Launch compiler's interactive interpreter mode.               │",
+            "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤",
+            "│       │ \"<" + nameof(Code) + ">\"            │ Input code to process.                                        │",
+            "│  -f   │ --" + nameof(Files) + " \"<path>\"    │ Input files to process.                                       │",
+            "│  -p   │ --" + nameof(Project) + " \"<path>\"  │ Input Axion project to process. [not available yet]           │",
+            "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤",
+            "│  -m   │ --" + nameof(Mode) + " <value>      │ Source code processing mode (Default: compile). Available:    │",
+            "│       │ " + nameof(Lex) + "                 │     Create tokens (lexemes) list from source.                 │",
+            "│       │ " + nameof(Parsing) + "             │     Create tokens list and Abstract Syntax Tree from source.  │",
+            "│       │ " + nameof(Interpret) + "           │     Interpret source code.                                    │",
+            "│       │ " + nameof(ConvertCS) + "           │     Convert source to 'C#' language.                          │",
+            "│       │ " + nameof(Compile) + "             │     Compile source into machine code.                         ├──┬── not available yet",
+            "│       │ " + nameof(ConvertC) + "            │     Convert source to 'C' language.                           │  │",
+            "│       │ " + nameof(ConvertCpp) + "          │     Convert source to 'C++' language.                         │  │", 
+            "│       │ " + nameof(ConvertJS) + "           │     Convert source to 'JavaScript' language.                  │  │",
+            "│       │ " + nameof(ConvertPy) + "           │     Convert source to 'Python' language.                      ├──┘",
+            "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤",
+            "│  -d   │ --" + nameof(Debug) + "             │ Save debug information to '<compilerDir>\\output' directory.   │",
+            "│  -j   │ --" + nameof(AstJson) + "           │ Show resulting AST in JSON format in the console.             │",
+            "│  -h   │ --" + nameof(Help) + "              │ Display this help screen.                                     │",
+            "│  -v   │ --" + nameof(Version) + "           │ Display information about compiler version.                   │",
+            "│  -x   │ --" + nameof(Exit) + "              │ Exit the compiler.                                            │",
+            "└───────┴─────────────────────┴───────────────────────────────────────────────────────────────┘",
+            " (Argument names aren't case-sensitive.)"
+        );
 
         [Value(0)]
         public string Code { get; set; }
@@ -105,6 +70,9 @@ namespace Axion.Core {
 
         [Option('x', "exit")]
         public bool Exit { get; set; }
+
+        [Option("cls")]
+        public bool ClearScreen { get; set; }
 
         [Option('h', "help")]
         public bool Help { get; set; }
