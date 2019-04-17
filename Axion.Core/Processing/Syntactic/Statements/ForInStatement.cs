@@ -1,13 +1,17 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
+    /// <summary>
+    ///     <c>
+    ///         for_in_stmt:
+    ///             'for' list_primary 'in' list_test block
+    ///     </c>
+    /// </summary>
     public class ForInStatement : LoopStatement {
         private Expression item;
 
-        [NotNull]
         public Expression Item {
             get => item;
             set => SetNode(ref item, value);
@@ -15,34 +19,31 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         private Expression iterable;
 
-        [NotNull]
         public Expression Iterable {
             get => iterable;
             set => SetNode(ref iterable, value);
         }
 
-        public ForInStatement(
-            Token                startToken,
-            [NotNull] Expression item,
-            [NotNull] Expression iterable,
-            BlockStatement       block,
-            BlockStatement       noBreakBlock
-        ) : base(startToken, block, noBreakBlock) {
-            Item     = item;
-            Iterable = iterable;
-        }
+        #region Constructors
 
-        internal ForInStatement(SyntaxTreeNode parent) {
-            Parent = parent;
-            StartNode(TokenType.KeywordFor);
+        /// <summary>
+        ///     Constructs new <see cref="ForInStatement"/> from tokens.
+        /// </summary>
+        internal ForInStatement(SyntaxTreeNode parent) : base(parent) {
+            MarkStart(TokenType.KeywordFor);
 
-            Item = Expression.MaybeTuple(
-                Expression.TargetList(this, out bool trailingComma),
-                trailingComma
+            Item = Expression.ParseMultiple(
+                parent,
+                Expression.ParsePrimary,
+                typeof(NameExpression)
             );
-            if (MaybeEat(TokenType.OpIn)) {
-                Iterable = Expression.SingleOrTuple(this);
-                Block    = new BlockStatement(this, BlockType.Loop);
+            if (MaybeEat(TokenType.KeywordIn)) {
+                Iterable = Expression.ParseMultiple(
+                    parent,
+                    Expression.ParseTestExpr,
+                    Spec.TestExprs
+                );
+                Block = new BlockStatement(this, BlockType.Loop);
                 if (MaybeEat(TokenType.KeywordElse)) {
                     NoBreakBlock = new BlockStatement(this);
                 }
@@ -51,19 +52,51 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c = c
-                + "for "
-                + Item
-                + " in "
-                + Iterable
-                + " "
-                + Block;
-            if (NoBreakBlock != null) {
-                c = c + " nobreak " + NoBreakBlock;
-            }
-
-            return c;
+        /// <summary>
+        ///     Constructs plain <see cref="ForInStatement"/> without position in source.
+        /// </summary>
+        public ForInStatement(
+            Expression     item,
+            Expression     iterable,
+            BlockStatement block,
+            BlockStatement noBreakBlock
+        ) : base(block, noBreakBlock) {
+            Item     = item;
+            Iterable = iterable;
         }
+
+        #endregion
+
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(
+                "for ",
+                Item,
+                " in ",
+                Iterable,
+                " ",
+                Block
+            );
+            if (NoBreakBlock != null) {
+                c.Write(" nobreak ", NoBreakBlock);
+            }
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(
+                "foreach (",
+                Item,
+                " in ",
+                Iterable,
+                ") ",
+                Block
+            );
+            if (NoBreakBlock != null) {
+                Unit.ReportError("C# doesn't support 'nobreak' block", NoBreakBlock);
+            }
+        }
+
+        #endregion
     }
 }

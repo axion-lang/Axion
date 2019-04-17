@@ -1,45 +1,53 @@
-using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Statements.Interfaces;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
     /// <summary>
     ///     <c>
-    ///         module_def ::=
+    ///         module_def:
     ///             'module' name block
     ///     </c>
     /// </summary>
     public class ModuleDefinition : Statement, IDecorated {
-        private Expression name;
+        #region Properties
 
-        [NotNull]
-        public Expression Name {
+        private NameExpression name;
+
+        public NameExpression Name {
             get => name;
             set => SetNode(ref name, value);
         }
 
         private BlockStatement block;
 
-        [NotNull]
         public BlockStatement Block {
             get => block;
             set => SetNode(ref block, value);
         }
 
-        public List<Expression> Modifiers { get; set; }
+        private NodeList<Expression> modifiers;
 
-        internal ModuleDefinition([NotNull] Expression name, [NotNull] BlockStatement block) {
-            Name  = name;
-            Block = block;
-            MarkPosition(name, block);
+        public NodeList<Expression> Modifiers {
+            get => modifiers ??= new NodeList<Expression>(this);
+            set {
+                if (value != null) {
+                    modifiers = value;
+                }
+            }
         }
 
-        internal ModuleDefinition(SyntaxTreeNode parent) {
-            Parent = parent;
-            StartNode(TokenType.KeywordModule);
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        ///     Constructs new <see cref="ModuleDefinition"/> from Axion tokens.
+        /// </summary>
+        internal ModuleDefinition(SyntaxTreeNode parent) : base(parent) {
+            MarkStart(TokenType.KeywordModule);
 
             Name  = new NameExpression(this);
             Block = new BlockStatement(this, BlockType.Top);
@@ -47,12 +55,36 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            return c + "module " + Name + " " + Block;
+        /// <summary>
+        ///     Constructs new <see cref="ModuleDefinition"/> from C# syntax.
+        /// </summary>
+        internal ModuleDefinition(NamespaceDeclarationSyntax csNode) {
+            Name  = new NameExpression(this, csNode.Name);
+            Block = new BlockStatement(this, csNode.Members);
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            return c + "namespace " + Name + Block;
+        /// <summary>
+        ///     Constructs plain <see cref="ModuleDefinition"/> without position in source.
+        /// </summary>
+        internal ModuleDefinition(NameExpression name, BlockStatement block) {
+            Name  = name;
+            Block = block;
+
+            MarkPosition(Name, Block);
         }
+
+        #endregion
+
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("module ", Name, " ", Block);
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("namespace ", Name, Block);
+        }
+
+        #endregion
     }
 }

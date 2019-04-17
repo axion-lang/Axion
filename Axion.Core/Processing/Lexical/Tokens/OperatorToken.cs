@@ -1,4 +1,5 @@
-﻿using Axion.Core.Specification;
+﻿using System.Linq;
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -23,14 +24,14 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                 value,
                 startPosition
             ) {
-            Spec.Operators.TryGetValue(value, out Properties);
+            Spec.Operators.TryGetValue(Value, out Properties);
+            // overrides 'Invalid'
             Type = Properties.Type;
         }
 
-        public OperatorToken(TokenType type) : base(type, Spec.OperatorTypes[type]) {
-            Spec.Operators.TryGetValue(Value, out Properties);
-            Type = Properties.Type;
-        }
+        public OperatorToken(TokenType type) : this(
+            Spec.OperatorTypes.First(x => x.type == type).value
+        ) { }
     }
 
     [JsonObject]

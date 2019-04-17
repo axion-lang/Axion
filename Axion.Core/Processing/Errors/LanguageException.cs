@@ -2,26 +2,37 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using Axion.Core.Specification;
 using ConsoleExtensions;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Errors {
     public class LanguageException : Exception {
-        [JsonProperty]
-        [NotNull]
-        public readonly Blame Blame;
-
-        public override string Message    { get; }
-        public override string StackTrace { get; }
+        public override string        Message    { get; }
+        public override string        StackTrace { get; }
+        public          BlameSeverity Severity   { get; }
+        public          Span          Span       { get; }
 
         [JsonProperty]
         private readonly string time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
 
-        internal LanguageException([NotNull] Blame blame) {
-            Blame      = blame;
-            Message    = blame.ToString();
+        public LanguageException(
+            BlameType     type,
+            BlameSeverity severity,
+            Position      start,
+            Position      end
+        ) {
+            Severity   = severity;
+            Span       = new Span(start, end);
+            Message    = TypeToMessage(type);
+            StackTrace = new StackTrace(2).ToString();
+        }
+
+        public LanguageException(string message, BlameSeverity severity, Span span) {
+            Severity   = severity;
+            Span       = span;
+            Message    = message;
             StackTrace = new StackTrace(2).ToString();
         }
 
@@ -46,7 +57,7 @@ namespace Axion.Core.Processing.Errors {
             // ...
             //
 
-            ConsoleColor color = Blame.Severity == BlameSeverity.Error
+            ConsoleColor color = Severity == BlameSeverity.Error
                 ? ConsoleColor.Red
                 : ConsoleColor.DarkYellow;
 
@@ -61,26 +72,26 @@ namespace Axion.Core.Processing.Errors {
 
             var lines = new List<string>();
             // limit rest of code by 5 lines
-            for (int i = Blame.Span.StartPosition.Line;
+            for (int i = Span.StartPosition.Line;
                 i < codeLines.Length && lines.Count < 4;
                 i++) {
                 lines.Add(codeLines[i].TrimEnd('\n', Spec.EndOfCode));
             }
 
-            if (lines.Count > codeLines.Length - Blame.Span.StartPosition.Line) {
+            if (lines.Count > codeLines.Length - Span.StartPosition.Line) {
                 lines.Add("...");
             }
 
             // first line
             // <line number>| <code line>
             int pointerTailLength =
-                ConsoleCodeEditor.LineNumberWidth + Blame.Span.StartPosition.Column;
+                ConsoleCodeEditor.LineNumberWidth + Span.StartPosition.Column;
             int errorTokenLength;
-            if (Blame.Span.EndPosition.Line > Blame.Span.StartPosition.Line) {
-                errorTokenLength = lines[0].Length - Blame.Span.StartPosition.Column;
+            if (Span.EndPosition.Line > Span.StartPosition.Line) {
+                errorTokenLength = lines[0].Length - Span.StartPosition.Column;
             }
             else {
-                errorTokenLength = Blame.Span.EndPosition.Column - Blame.Span.StartPosition.Column;
+                errorTokenLength = Span.EndPosition.Column - Span.StartPosition.Column;
             }
 
             // upside arrows (^), should be red-colored
@@ -97,13 +108,13 @@ namespace Axion.Core.Processing.Errors {
             // Drawing ==========
 
             // line with error
-            ConsoleCodeEditor.PrintLineNumber(Blame.Span.StartPosition.Line + 1);
+            ConsoleCodeEditor.PrintLineNumber(Span.StartPosition.Line + 1);
             ConsoleUI.WriteLine(lines[0]);
             // error pointer
             ConsoleUI.WriteLine((pointer, color));
 
             // next lines
-            for (int lineIndex = Blame.Span.StartPosition.Line + 1;
+            for (int lineIndex = Span.StartPosition.Line + 1;
                 lineIndex < lines.Count;
                 lineIndex++) {
                 ConsoleCodeEditor.PrintLineNumber(lineIndex + 1);
@@ -111,6 +122,29 @@ namespace Axion.Core.Processing.Errors {
             }
 
             Console.WriteLine();
+        }
+
+        private static string TypeToMessage(BlameType type) {
+            string enumMemberName = type.ToString("G");
+
+            var result = new StringBuilder();
+            result.Append(char.ToUpper(enumMemberName[0]));
+
+            enumMemberName = enumMemberName.Remove(0, 1);
+            foreach (char c in enumMemberName) {
+                if (char.IsUpper(c)) {
+                    result.Append(" ").Append(char.ToLower(c));
+                }
+                else {
+                    result.Append(c);
+                }
+            }
+
+            return result.ToString();
+        }
+
+        public override string ToString() {
+            return $"{Severity}: {Message} ({Span})";
         }
     }
 }

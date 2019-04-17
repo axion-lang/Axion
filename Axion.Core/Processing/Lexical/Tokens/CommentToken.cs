@@ -1,5 +1,6 @@
 ﻿using System;
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Specification;
 using static Axion.Core.Specification.Spec;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
@@ -47,29 +48,39 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Span = new Span(Span.StartPosition, (Span.EndPosition.Line, endCol));
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            if (IsSingleLine) {
-                return c + CommentStart + Value + EndWhitespaces;
-            }
-
-            return c
-                   + (IsUnclosed
-                       ? MultiCommentStart + Value
-                       // closed
-                       : MultiCommentStart + Value + MultiCommentEnd)
-                   + EndWhitespaces;
+        internal override void ToOriginalAxionCode(CodeBuilder c) {
+            ToAxionCode(c);
+            c.Write(EndWhitespaces);
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             if (IsSingleLine) {
-                return c + "//" + Value;
+                c.Write(CommentStart + Value + EndWhitespaces);
             }
 
-            c += IsUnclosed
-                ? "/*" + Value
-                // closed
-                : "/*" + Value + "*/";
-            return c;
+            else {
+                c.Write(
+                    IsUnclosed
+                        ? MultiCommentStart + Value
+                        // closed
+                        : MultiCommentStart + Value + MultiCommentEnd
+                );
+            }
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            if (IsSingleLine) {
+                c.Write("//" + Value);
+            }
+
+            else {
+                c.Write(
+                    IsUnclosed
+                        ? "/*" + Value
+                        // closed
+                        : "/*" + Value + "*/"
+                );
+            }
         }
     }
 }

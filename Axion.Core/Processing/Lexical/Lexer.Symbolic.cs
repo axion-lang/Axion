@@ -5,15 +5,15 @@ using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical {
     public partial class Lexer {
-        private Token ReadMarkOrOperator() {
-            int    longestLength = Spec.SortedSymbolicValues[0].Length;
+        private Token ReadSymbolic() {
+            int    longestLength = Spec.SortedSymbolics[0].Length;
             string nextCodePiece = PeekPiece(longestLength);
             var    value         = "";
-            Token  result        = null;
+            Token? result        = null;
             for (int length = nextCodePiece.Length; length > 0; length--) {
                 value = nextCodePiece.Substring(0, length);
                 // grow sequence of characters
-                if (!Spec.SortedSymbolicValues.Contains(value)) {
+                if (!Spec.SortedSymbolics.Contains(value)) {
                     continue;
                 }
 
@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Lexical {
                 }
 
                 if (Spec.Symbols.ContainsKey(value)) {
-                    result = new MarkToken(value, tokenStartPosition);
+                    result = new SymbolToken(value, tokenStartPosition);
                     if (result.Type.IsOpenBracket()) {
                         mismatchingPairs.Add(result);
                     }
@@ -42,9 +42,10 @@ namespace Axion.Core.Processing.Lexical {
 
             Move(value.Length);
             if (result == null) {
+                // creating operator with 'invalid' type
+                result = new OperatorToken(value, tokenStartPosition);
                 // not found in specification
                 unit.Blame(BlameType.InvalidCharacter, tokenStartPosition, Position);
-                return new Token(TokenType.Invalid, value, tokenStartPosition);
             }
 
             return result;

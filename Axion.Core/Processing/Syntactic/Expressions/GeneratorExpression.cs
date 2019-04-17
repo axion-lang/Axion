@@ -1,30 +1,29 @@
+using System;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Specification;
-using JetBrains.Annotations;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     public class GeneratorExpression : Expression {
-        private Expression comprehension;
+        private ForComprehension comprehension;
 
-        [NotNull]
-        public Expression Comprehension {
+        public ForComprehension Comprehension {
             get => comprehension;
             set => SetNode(ref comprehension, value);
         }
 
-        internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
+        internal override TypeName ValueType => Comprehension.Parent.ValueType;
 
-        public GeneratorExpression([NotNull] Expression comprehension) {
+        public GeneratorExpression(ForComprehension comprehension) {
+            Parent        = comprehension.Parent;
             Comprehension = comprehension;
         }
-        
-        public GeneratorExpression([NotNull] SyntaxTreeNode parent, Expression target) {
-            Parent = parent;
-            Comprehension = new ForComprehension(target);
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("(", Comprehension, ")");
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            return c;
+        internal override void ToCSharpCode(CodeBuilder c) {
+            throw new NotSupportedException();
         }
     }
 }

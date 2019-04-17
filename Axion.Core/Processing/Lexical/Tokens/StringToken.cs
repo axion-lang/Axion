@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
@@ -15,10 +16,10 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public StringToken(
             StringLiteralOptions options,
             string               value,
-            string               escapedValue   = null,
-            List<Interpolation>  interpolations = null,
+            string?              escapedValue   = null,
+            List<Interpolation>? interpolations = null,
             bool                 isUnclosed     = false,
-            string               trailingQuotes = null,
+            string?              trailingQuotes = null,
             Position             startPosition  = default
         ) : base(TokenType.String, value) {
             Options        = options;
@@ -50,39 +51,37 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Span = new Span(startPosition, (endLine, endCol));
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c += Options.GetPrefixes();
-            int quotesCount = Options.QuotesCount;
-            c = c + new string(Options.Quote, quotesCount) + Value;
-            if (!IsUnclosed) {
-                c += new string(Options.Quote, quotesCount);
-            }
-            else {
-                c += TrailingQuotes;
-            }
-
-            return c + EndWhitespaces;
+        internal override void ToOriginalAxionCode(CodeBuilder c) {
+            ToAxionCode(c);
+            c.Write(EndWhitespaces);
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(Options.GetPrefixes());
+            int quotesCount = Options.QuotesCount;
+            c.Write(new string(Options.Quote, quotesCount) + Value);
+            if (IsUnclosed) {
+                c.Write(TrailingQuotes);
+            }
+            else {
+                c.Write(new string(Options.Quote, quotesCount));
+            }
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
             if (Options.IsFormatted) {
-                c += "$";
+                c.Write("$");
             }
 
             if (Options.IsRaw || Options.QuotesCount == 3) {
-                c += "@";
+                c.Write("@");
             }
 
-            c += "\"";
-            c += Value;
+            c.Write("\"");
+            c.Write(Value);
             if (!IsUnclosed) {
-                c += "\"";
+                c.Write("\"");
             }
-            else {
-                c += TrailingQuotes;
-            }
-
-            return c;
         }
     }
 

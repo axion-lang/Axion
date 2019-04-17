@@ -1,19 +1,17 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Small {
     /// <summary>
     ///     <c>
-    ///         assert_stmt ::=
+    ///         assert_stmt:
     ///             'assert' test [',' test]
     ///     </c>
     /// </summary>
     public class AssertStatement : Statement {
         private Expression condition;
 
-        [NotNull]
         public Expression Condition {
             get => condition;
             set => SetNode(ref condition, value);
@@ -26,19 +24,13 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             set => SetNode(ref failExpression, value);
         }
 
-        public AssertStatement(
-            [NotNull] Expression condition,
-            Expression           failExpression
-        ) {
-            Condition      = condition;
-            FailExpression = failExpression;
+        #region Constructors
 
-            MarkEnd(failExpression ?? condition);
-        }
-
-        internal AssertStatement(SyntaxTreeNode parent) {
-            Parent = parent;
-            StartNode(TokenType.KeywordAssert);
+        /// <summary>
+        ///     Constructs new <see cref="AssertStatement"/> from tokens.
+        /// </summary>
+        internal AssertStatement(SyntaxTreeNode parent) : base(parent) {
+            MarkStart(TokenType.KeywordAssert);
 
             Condition = Expression.ParseTestExpr(this);
             if (MaybeEat(TokenType.Comma)) {
@@ -48,22 +40,37 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c = c + "assert " + Condition;
-            if (FailExpression != null) {
-                c = c + ", " + FailExpression;
-            }
-
-            return c;
+        /// <summary>
+        ///     Constructs plain <see cref="AssertStatement"/> without position in source.
+        /// </summary>
+        public AssertStatement(
+            Expression condition,
+            Expression failExpression
+        ) {
+            Condition      = condition;
+            FailExpression = failExpression;
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            c = c + "Debug.Assert(" + Condition;
+        #endregion
+
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("assert ", Condition);
             if (FailExpression != null) {
-                c = c + "," + FailExpression;
+                c.Write(", ", FailExpression);
+            }
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("Debug.Assert(", Condition);
+            if (FailExpression != null) {
+                c.Write(", ", FailExpression);
             }
 
-            return c + ");";
+            c.Write(");");
         }
+
+        #endregion
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
-using Axion.Core.Processing.Lexical.Tokens;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Specification {
     /// <summary>
@@ -15,120 +14,87 @@ namespace Axion.Core.Specification {
         /// </summary>
         public const char EndOfCode = '\0';
 
-        public const int Unicode32BitHexLength = 6;
-
         /// <summary>
         ///     Contains all valid newline sequences.
         /// </summary>
         public static readonly string[] EndOfLines = { "\r\n", "\n" };
+        
+        internal const string CommentStart             = "#";
+        internal const string MultiCommentStart        = "#|";
+        internal const string MultiCommentStartPattern = @"\#\|";
+        internal const string MultiCommentEnd          = "|#";
+        internal const string MultiCommentEndPattern   = @"\|\#";
+
+        internal static readonly char[] RestrictedIdentifierEndings = { '-' };
 
         /// <summary>
         ///     Contains all language keywords.
         /// </summary>
         public static readonly Dictionary<string, TokenType> Keywords =
             new Dictionary<string, TokenType> {
-                // testing
-                { "assert", KeywordAssert },
+                { "all",       KeywordAll      },
                 // bool operators
-                { "not", OpNot },
-                { "and", OpAnd },
-                { "or", OpOr },
-                { "in", OpIn },
-                { "not in", OpNotIn },
-                { "is", OpIs },
-                { "is not", OpIsNot },
-                { "as", OpAs },
+                { "not",       KeywordNot      },
+                { "and",       OpAnd           },
+                { "or",        OpOr            },
+                { "in",        KeywordIn       },
+                { "not in",    KeywordNotIn    },
+                { "is",        KeywordIs       },
+                { "is not",    KeywordIsNot    },
+                { "as",        KeywordAs       },
+                // testing
+                { "assert",    KeywordAssert   },
                 // branching
-                { "unless", KeywordUnless },
-                { "if", KeywordIf },
-                { "elif", KeywordElseIf },
-                { "else", KeywordElse },
-                { "match", KeywordMatch },
-                { "case", KeywordCase },
-                { "default", KeywordDefault },
+                { "unless",    KeywordUnless   },
+                { "if",        KeywordIf       },
+                { "elif",      KeywordElseIf   },
+                { "else",      KeywordElse     },
+                { "match",     KeywordMatch    },
+                { "case",      KeywordCase     },
+                { "default",   KeywordDefault  },
                 // loops
-                { "for", KeywordFor },
-                { "do", KeywordDo },
-                { "while", KeywordWhile },
-                { "break", KeywordBreak },
-                { "nobreak", KeywordNoBreak },
-                { "continue", KeywordContinue },
+                { "for",       KeywordFor      },
+                { "do",        KeywordDo       },
+                { "while",     KeywordWhile    },
+                { "break",     KeywordBreak    },
+                { "nobreak",   KeywordNoBreak  },
+                { "continue",  KeywordContinue },
                 // exceptions
-                { "try", KeywordTry },
-                { "raise", KeywordRaise },
-                { "catch", KeywordCatch },
-                { "anyway", KeywordAnyway },
-                { "const", KeywordConst },
+                { "try",       KeywordTry      },
+                { "raise",     KeywordRaise    },
+                { "catch",     KeywordCatch    },
+                { "anyway",    KeywordAnyway   },
+                { "const",     KeywordConst    },
                 // asynchronous
-                { "async", KeywordAsync },
-                { "await", KeywordAwait },
+                { "async",     KeywordAsync    },
+                { "await",     KeywordAwait    },
                 // modules
-                { "use", KeywordUse },
-                { "module", KeywordModule },
-                { "mixin", KeywordMixin },
-                { "from", KeywordFrom },
+                { "use",       KeywordUse      },
+                { "module",    KeywordModule   },
+                { "mixin",     KeywordMixin    },
+                { "from",      KeywordFrom     },
                 // structures
-                { "class", KeywordClass },
-                { "extends", KeywordExtends },
-                { "struct", KeywordStruct },
-                { "enum", KeywordEnum },
-                { "fn", KeywordFn },
+                { "class",     KeywordClass    },
+                { "extends",   KeywordExtends  },
+                { "struct",    KeywordStruct   },
+                { "enum",      KeywordEnum     },
+                { "fn",        KeywordFn       },
                 // variables
-                { "let", KeywordLet },
-                { "new", KeywordNew },
-                { "delete", KeywordDelete },
+                { "let",       KeywordLet      },
+                { "new",       KeywordNew      },
+                { "delete",    KeywordDelete   },
                 // returns
-                { "yield", KeywordYield },
-                { "return", KeywordReturn },
-                { "pass", KeywordPass },
+                { "yield",     KeywordYield    },
+                { "return",    KeywordReturn   },
+                { "pass",      KeywordPass     },
                 // values
-                { "nil", KeywordNil },
-                { "self", KeywordSelf },
-                { "true", KeywordTrue },
-                { "false", KeywordFalse },
-                { "with", KeywordWith },
-                { "when", KeywordWhen }
+                { "nil",       KeywordNil      },
+                { "self",      KeywordSelf     },
+                { "true",      KeywordTrue     },
+                { "false",     KeywordFalse    },
+                { "with",      KeywordWith     },
+                { "when",      KeywordWhen     }
+
             };
-
-        internal const string CommentStart             = "#";
-        internal const string MultiCommentStart        = "#|";
-        internal const string MultiCommentStartPattern = @"#\|";
-        internal const string MultiCommentEnd          = "|#";
-        internal const string MultiCommentEndPattern   = @"\|#";
-
-        internal static readonly char[] RestrictedIdentifierEndings = { '-' };
-
-        /// <summary>
-        ///     Types of token, that can start a 'block'.
-        /// </summary>
-        internal static readonly TokenType[] BlockStarters = { Colon, Indent, OpenBrace };
-
-        internal static readonly TokenType[] NeverTestTypes = {
-            OpAssign,
-            OpPlusAssign,
-            OpMinusAssign,
-            OpMultiplyAssign,
-            OpTrueDivideAssign,
-            OpRemainderAssign,
-            OpBitAndAssign,
-            OpBitOrAssign,
-            OpBitXorAssign,
-            OpBitLeftShiftAssign,
-            OpBitRightShiftAssign,
-            OpPowerAssign,
-            OpFloorDivideAssign,
-            Indent,
-            Outdent,
-            Newline,
-            End,
-            Semicolon,
-            CloseBrace,
-            CloseBracket,
-            CloseParenthesis,
-            Comma,
-            KeywordFor,
-            OpIn,
-            KeywordIf
-        };
     }
 }

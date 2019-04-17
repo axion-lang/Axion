@@ -20,7 +20,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         internal CharacterToken(
             string   value,
-            string   escapedValue  = null,
+            string?  escapedValue  = null,
             bool     isUnclosed    = false,
             Position startPosition = default
         ) : base(TokenType.Character, value) {
@@ -34,22 +34,23 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Span = new Span(startPosition, (startPosition.Line, endCol));
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c = c + Spec.CharacterLiteralQuote.ToString() + Value;
-            if (!IsUnclosed) {
-                c += Spec.CharacterLiteralQuote.ToString();
-            }
-
-            return c + EndWhitespaces;
+        internal override void ToOriginalAxionCode(CodeBuilder c) {
+            ToAxionCode(c);
+            c.Write(EndWhitespaces);
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            c = c + "'" + Value;
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(Spec.CharacterLiteralQuote, Value);
             if (!IsUnclosed) {
-                c += "'";
+                c.Write(Spec.CharacterLiteralQuote);
             }
+        }
 
-            return c + EndWhitespaces;
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("'", Value);
+            if (!IsUnclosed) {
+                c.Write("'");
+            }
         }
     }
 }

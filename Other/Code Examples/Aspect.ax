@@ -13,17 +13,17 @@ class Account
 aspect AccountAspect
     final int MIN_BALANCE = 10
  
-    pointcut callWithDraw(amount : int, acc : Account) ->
+    pointcut callWithDraw(amount : int, acc : Account) =>
      call(Account.withdraw(int)) and args(amount) and target(acc)
  
     @advice
-    before(amount : int, acc : Account) -> callWithDraw(amount, acc) : pass
+    before(amount : int, acc : Account) => callWithDraw(amount, acc) : pass
  
     @advice
-    boolean around(amount : int, acc : Account) -> callWithDraw(amount, acc)
+    boolean around(amount : int, acc : Account) => callWithDraw(amount, acc)
         if acc.balance < amount
             return false
         return proceed(amount, acc)
  
     @advice
-    after(amount : int, balance : Account) -> callWithDraw(amount, balance) : pass
+    after(amount : int, balance : Account) => callWithDraw(amount, balance) : pass

@@ -38,7 +38,7 @@ namespace Axion.Core.Visual {
             var unit  = new SourceUnit(codeLines.ToArray());
             var lexer = new Lexer(unit);
             lexer.Process();
-            blames = unit.Blames;
+            blames = new List<Exception>(unit.Blames);
 
             var values = new List<ColoredValue>();
 
@@ -94,14 +94,15 @@ namespace Axion.Core.Visual {
                 }
 
                 if (token.Is(TokenType.Newline)) {
+                    var code = new CodeBuilder(OutLang.Axion);
+                    token.ToOriginalAxionCode(code);
                     if (values.Count > 0) {
-                        values[values.Count - 1]
-                            .AppendValue(token.ToAxionCode(new CodeBuilder(OutLang.Axion)));
+                        values[values.Count - 1].AppendValue(code.ToString());
                     }
                     else {
                         values.Add(
                             new ColoredValue(
-                                token.ToAxionCode(new CodeBuilder(OutLang.Axion)),
+                                code.ToString(),
                                 ConsoleColor.White
                             )
                         );
@@ -111,11 +112,13 @@ namespace Axion.Core.Visual {
                 }
 
                 if (token.Is(TokenType.Identifier)) {
+                    var code = new CodeBuilder(OutLang.Axion);
+                    token.ToOriginalAxionCode(code);
                     // highlight error types
                     if (token.Value.EndsWith("Error")) {
                         values.Add(
                             new ColoredValue(
-                                token.ToAxionCode(new CodeBuilder(OutLang.Axion)),
+                                code.ToString(),
                                 ConsoleColor.DarkMagenta
                             )
                         );
@@ -123,7 +126,7 @@ namespace Axion.Core.Visual {
                     else {
                         values.Add(
                             new ColoredValue(
-                                token.ToAxionCode(new CodeBuilder(OutLang.Axion)),
+                                code.ToString(),
                                 ConsoleColor.Cyan
                             )
                         );
@@ -141,10 +144,10 @@ namespace Axion.Core.Visual {
                 #endregion
 
                 // simple values
-                ConsoleColor tokenColor = GetSimpleTokenColor(token);
-                values.Add(
-                    new ColoredValue(token.ToAxionCode(new CodeBuilder(OutLang.Axion)), tokenColor)
-                );
+                ConsoleColor tokenColor  = GetSimpleTokenColor(token);
+                var          codeBuilder = new CodeBuilder(OutLang.Axion);
+                token.ToOriginalAxionCode(codeBuilder);
+                values.Add(new ColoredValue(codeBuilder.ToString(), tokenColor));
             }
         }
 
@@ -165,7 +168,7 @@ namespace Axion.Core.Visual {
             else if (token is OperatorToken) {
                 tokenColor = ConsoleColor.Red;
             }
-            else if (token is MarkToken) {
+            else if (token is SymbolToken) {
                 tokenColor = ConsoleColor.DarkGray;
             }
             else if (Spec.Keywords.ContainsValue(token.Type)) {

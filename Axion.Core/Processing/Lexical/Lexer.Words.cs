@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Lexical {
         ///     Gets a language keyword or identifier
         ///     from next piece of source.
         /// </summary>
-        private WordToken ReadWord() {
+        private Token? ReadWord() {
             // don't use StringBuilder, language
             // words are mostly too short.
             string id = c.ToString();
@@ -28,21 +28,26 @@ namespace Axion.Core.Processing.Lexical {
             if (Spec.Keywords.TryGetValue(tokenValue.ToString(), out TokenType kwType)) {
                 if (tokens.Count > 0) {
                     Token last = tokens.Last();
-                    if (last.Is(TokenType.OpIs) && kwType == TokenType.OpNot) {
+                    if (last.Is(TokenType.KeywordIs) && kwType == TokenType.KeywordNot) {
                         tokens[tokens.Count - 1] = new OperatorToken(
-                            Spec.OperatorIsNot,
+                            Spec.Operators["is not"],
                             last.Span.StartPosition
                         );
                         return null;
                     }
 
-                    if (last.Is(TokenType.OpNot) && kwType == TokenType.OpIn) {
+                    if (last.Is(TokenType.KeywordNot) && kwType == TokenType.KeywordIn) {
                         tokens[tokens.Count - 1] = new OperatorToken(
-                            Spec.OperatorNotIn,
+                            Spec.Operators["not in"],
                             last.Span.StartPosition
                         );
                         return null;
                     }
+                }
+
+                // for 'and', 'or', 'is', etc.
+                if (Spec.OperatorTypes.Select(x => x.type).Contains(kwType)) {
+                    return new OperatorToken(tokenValue.ToString(), tokenStartPosition);
                 }
 
                 return new WordToken(kwType, tokenStartPosition);

@@ -167,7 +167,7 @@
         InvalidIndentation,
         DefaultCatchMustBeLast,
         UnexpectedEndOfCode,
-        DuplicatedKeywordArgument,
+        DuplicatedNamedArgument,
         InvalidSyntax,
         ExpectedDefaultParameterValue,
         CannotUseAccessModifierOutsideClass,

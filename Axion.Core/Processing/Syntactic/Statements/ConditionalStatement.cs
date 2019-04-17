@@ -1,21 +1,21 @@
 ﻿using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     /// <summary>
     ///     <c>
-    ///         cond_stmt ::=
+    ///         cond_stmt:
     ///             ('if' | 'unless') test block
     ///             {'elif' test block}
     ///             ['else' block]
     ///     </c>
     /// </summary>
     public class ConditionalStatement : Statement {
+        #region Properties
+
         private Expression condition;
 
-        [NotNull]
         public Expression Condition {
             get => condition;
             set => SetNode(ref condition, value);
@@ -23,43 +23,36 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         private BlockStatement thenBlock;
 
-        [NotNull]
         public BlockStatement ThenBlock {
             get => thenBlock;
             set => SetNode(ref thenBlock, value);
         }
 
-        private BlockStatement elseBlock;
+        private BlockStatement? elseBlock;
 
-        public BlockStatement ElseBlock {
+        public BlockStatement? ElseBlock {
             get => elseBlock;
             set => SetNode(ref elseBlock, value);
         }
 
-        public ConditionalStatement(
-            [NotNull] Expression     condition,
-            [NotNull] BlockStatement thenBlock,
-            BlockStatement           elseBlock
-        ) {
-            Condition = condition;
-            ThenBlock = thenBlock;
-            ElseBlock = elseBlock;
+        #endregion
 
-            MarkEnd(ElseBlock ?? ThenBlock);
-        }
+        #region Constructors
 
-        internal ConditionalStatement(SyntaxTreeNode parent, bool elseIf = false) {
-            Parent = parent;
+        /// <summary>
+        ///     Constructs new <see cref="ConditionalStatement"/> from tokens.
+        /// </summary>
+        internal ConditionalStatement(SyntaxTreeNode parent, bool elseIf = false) : base(parent) {
             var invert = false;
             if (elseIf) {
                 MarkStart(Token);
             }
             else if (PeekIs(TokenType.KeywordUnless)) {
-                StartNode(TokenType.KeywordUnless);
+                MarkStart(TokenType.KeywordUnless);
                 invert = true;
             }
             else {
-                StartNode(TokenType.KeywordIf);
+                MarkStart(TokenType.KeywordIf);
             }
 
             Condition = Expression.ParseTestExpr(this);
@@ -82,30 +75,39 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c = c
-                + "if "
-                + Condition
-                + " "
-                + ThenBlock;
-            if (ElseBlock != null) {
-                c = c + " else " + ElseBlock;
-            }
+        /// <summary>
+        ///     Constructs new <see cref="ConditionalStatement"/> without position in source.
+        /// </summary>
+        public ConditionalStatement(
+            Expression      condition,
+            BlockStatement  thenBlock,
+            BlockStatement? elseBlock
+        ) {
+            Condition = condition;
+            ThenBlock = thenBlock;
+            ElseBlock = elseBlock;
 
-            return c;
+            MarkEnd(ElseBlock ?? ThenBlock);
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            c = c
-                + "if("
-                + Condition
-                + ") "
-                + ThenBlock;
-            if (ElseBlock != null) {
-                c = c + "else" + ElseBlock;
-            }
+        #endregion
 
-            return c;
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("if ", Condition, " ", ThenBlock);
+            if (ElseBlock != null) {
+                c.Write("else ", ElseBlock);
+            }
         }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("if (", Condition, ") ", ThenBlock);
+            if (ElseBlock != null) {
+                c.Write("else ", ElseBlock);
+            }
+        }
+
+        #endregion
     }
 }

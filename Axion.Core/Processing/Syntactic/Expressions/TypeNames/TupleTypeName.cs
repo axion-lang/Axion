@@ -1,13 +1,14 @@
 using System.Collections.Generic;
+using System.Linq;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
-    ///         tuple_type ::=
-    ///             '(' [type {',' type}] ')'
+    ///         tuple_type:
+    ///             '(' [type {',' type}] ')';
     ///     </c>
     /// </summary>
     public class TupleTypeName : TypeName {
@@ -18,34 +19,62 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => SetNode(ref types, value);
         }
 
-        public TupleTypeName(IEnumerable<TypeName> types) {
-            Types = new NodeList<TypeName>(this, types);
-        }
+        #region Constructors
 
+        /// <summary>
+        ///     Constructs new <see cref="TupleTypeName"/> from Axion tokens.
+        /// </summary>
         public TupleTypeName(SyntaxTreeNode parent) {
             Parent = parent;
             Types  = new NodeList<TypeName>(this);
 
-            StartNode(TokenType.OpenParenthesis);
+            MarkStart(TokenType.OpenParenthesis);
             if (!PeekIs(TokenType.CloseParenthesis)) {
                 do {
-                    Types.Add(Parse(parent));
+                    Types.Add(ParseTypeName(parent));
                 } while (MaybeEat(TokenType.Comma));
             }
+
             Eat(TokenType.CloseParenthesis);
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c += "(";
-            c.AppendJoin(", ", types);
-            return c + ")";
+        /// <summary>
+        ///     Constructs new <see cref="TupleTypeName"/> from C# syntax.
+        /// </summary>
+        public TupleTypeName(SyntaxTreeNode parent, TupleTypeSyntax csNode) {
+            Parent = parent;
+            // TODO: add names for tuple items
+            Types = new NodeList<TypeName>(
+                this,
+                csNode.Elements.Select(i => FromCSharp(this, i.Type))
+            );
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            c += "(";
-            c.AppendJoin(", ", types);
-            return c + ")";
+        /// <summary>
+        ///     Constructs plain <see cref="TupleTypeName"/> without position in source.
+        /// </summary>
+        public TupleTypeName(SyntaxTreeNode parent, IEnumerable<TypeName> types) {
+            Parent = parent;
+            Types  = new NodeList<TypeName>(this, types);
         }
+
+        #endregion
+
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("(");
+            c.AddJoin(", ", types);
+            c.Write(")");
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("(");
+            c.AddJoin(", ", types);
+            c.Write(")");
+        }
+
+        #endregion
     }
 }

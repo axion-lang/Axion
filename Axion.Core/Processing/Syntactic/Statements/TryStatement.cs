@@ -1,16 +1,14 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
-using JetBrains.Annotations;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     /// <summary>
     ///     <c>
-    ///         try_stmt ::=
+    ///         try_stmt:
     ///             ('try' block
     ///             ((try_handler block)+
     ///             ['else' block]
@@ -19,9 +17,10 @@ namespace Axion.Core.Processing.Syntactic.Statements {
     ///     </c>
     /// </summary>
     public class TryStatement : Statement {
+        #region Properties
+
         private BlockStatement block;
 
-        [NotNull]
         public BlockStatement Block {
             get => block;
             set => SetNode(ref block, value);
@@ -29,7 +28,6 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         private NodeList<TryStatementHandler> handlers;
 
-        [NotNull]
         public NodeList<TryStatementHandler> Handlers {
             get => handlers;
             set => SetNode(ref handlers, value);
@@ -49,30 +47,15 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             set => SetNode(ref anywayBlock, value);
         }
 
-        public TryStatement(
-            [NotNull] BlockStatement                   block,
-            [NotNull] IEnumerable<TryStatementHandler> handlers,
-            BlockStatement                             elseBlock,
-            BlockStatement                             anywayBlock
-        ) {
-            Block    = block;
-            Handlers = new NodeList<TryStatementHandler>(this, handlers);
+        #endregion
 
-            ElseBlock   = elseBlock;
-            AnywayBlock = anywayBlock;
+        #region Constructors
 
-            MarkEnd(
-                AnywayBlock
-                ?? ElseBlock
-                ?? (Handlers.Count > 0
-                    ? Handlers[Handlers.Count - 1]
-                    : (SyntaxTreeNode) block)
-            );
-        }
-
-        internal TryStatement(SyntaxTreeNode parent) {
-            Parent = parent;
-            StartNode(TokenType.KeywordTry);
+        /// <summary>
+        ///     Constructs new <see cref="TryStatement"/> from tokens.
+        /// </summary>
+        internal TryStatement(SyntaxTreeNode parent) : base(parent) {
+            MarkStart(TokenType.KeywordTry);
 
             // try
             Block = new BlockStatement(this);
@@ -112,83 +95,104 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c = c + "try " + Block;
+        /// <summary>
+        ///     Constructs plain <see cref="TryStatement"/> without position in source.
+        /// </summary>
+        public TryStatement(
+            BlockStatement                   block,
+            IEnumerable<TryStatementHandler> handlers,
+            BlockStatement                   elseBlock,
+            BlockStatement                   anywayBlock
+        ) {
+            Block       = block;
+            Handlers    = new NodeList<TryStatementHandler>(this, handlers);
+            ElseBlock   = elseBlock;
+            AnywayBlock = anywayBlock;
+        }
+
+        #endregion
+
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("try ", Block);
             if (Handlers.Count > 0) {
-                c.AppendJoin(" ", Handlers);
+                c.AddJoin(" ", Handlers);
             }
 
             if (AnywayBlock != null) {
-                c = c + " anyway " + AnywayBlock;
+                c.Write(" anyway ", AnywayBlock);
+            }
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("try ", Block);
+            if (Handlers.Count > 0) {
+                c.AddJoin(" ", Handlers);
             }
 
-            return c;
+            if (AnywayBlock != null) {
+                c.Write(" finally ", AnywayBlock);
+            }
         }
+
+        #endregion
     }
 
     /// <summary>
     ///     <c>
-    ///         try_handler ::=
+    ///         try_handler:
     ///             'catch' [expr ['as' name]] ['when' test]
     ///     </c>
     /// </summary>
     public class TryStatementHandler : Statement {
-        private TypeName errorType;
+        #region Properties
 
-        public TypeName ErrorType {
+        private TypeName? errorType;
+
+        public TypeName? ErrorType {
             get => errorType;
             set => SetNode(ref errorType, value);
         }
 
-        private Expression errorName;
+        private Expression? errorName;
 
-        public Expression ErrorName {
+        public Expression? ErrorName {
             get => errorName;
             set => SetNode(ref errorName, value);
         }
 
-        private Expression condition;
+        private Expression? condition;
 
-        public Expression Condition {
+        public Expression? Condition {
             get => condition;
             set => SetNode(ref condition, value);
         }
 
         private BlockStatement block;
 
-        [NotNull]
         public BlockStatement Block {
             get => block;
             set => SetNode(ref block, value);
         }
 
-        public TryStatementHandler(
-            TypeName                 errorType,
-            Expression               errorName,
-            Expression               condition,
-            [NotNull] BlockStatement block
-        ) {
-            ErrorType = errorType;
-            ErrorName = errorName;
-            Condition = condition;
-            Block     = block;
+        #endregion
 
-            MarkEnd(Block);
-        }
+        #region Constructors
 
-        internal TryStatementHandler(SyntaxTreeNode parent) {
-            Parent = parent;
-            StartNode(TokenType.KeywordCatch);
+        /// <summary>
+        ///     Constructs new <see cref="TryStatementHandler"/> from tokens.
+        /// </summary>
+        internal TryStatementHandler(SyntaxTreeNode parent) : base(parent) {
+            MarkStart(TokenType.KeywordCatch);
 
             // If this function has an except block,
             // then it can set the current exception.
-            if (Ast.CurrentFunction != null) {
-                Ast.CurrentFunction.CanSetSysExcInfo = true;
-            }
+            if (Ast.CurrentFunction != null) { }
 
             if (!PeekIs(Spec.BlockStarters)) {
-                ErrorType = TypeName.Parse(this);
-                if (MaybeEat(TokenType.OpAs)) {
+                ErrorType = TypeName.ParseTypeName(this);
+                if (MaybeEat(TokenType.KeywordAs)) {
                     ErrorName = new NameExpression(this, true);
                 }
             }
@@ -202,21 +206,62 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c += "catch";
+        /// <summary>
+        ///     Constructs plain <see cref="TryStatementHandler"/> without position in source.
+        /// </summary>
+        public TryStatementHandler(
+            TypeName?      errorType,
+            Expression?    errorName,
+            Expression?    condition,
+            BlockStatement block
+        ) {
+            ErrorType = errorType;
+            ErrorName = errorName;
+            Condition = condition;
+            Block     = block;
+        }
+
+        #endregion
+
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("catch");
             if (ErrorType != null) {
-                c = c + " " + ErrorType;
+                c.Write(" ", ErrorType);
             }
 
             if (ErrorName != null) {
-                c = c + " as " + ErrorName;
+                c.Write(" as ", ErrorName);
             }
 
             if (Condition != null) {
-                c = c + " when " + Condition;
+                c.Write(" when ", Condition);
             }
 
-            return c + Block;
+            c.Write(Block);
         }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("catch (");
+
+            if (ErrorName != null) {
+                c.Write(ErrorName, " ");
+            }
+
+            if (ErrorType != null) {
+                c.Write(ErrorType);
+            }
+
+            c.Write(")");
+
+            if (Condition != null) {
+                c.Write(" when (", Condition, ")");
+            }
+
+            c.Write(Block);
+        }
+
+        #endregion
     }
 }

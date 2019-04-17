@@ -68,7 +68,13 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         ///     of specified <paramref name="types"/>.
         /// </summary>
         public bool Is(params TokenType[] types) {
-            return types.Any(t => Type == t);
+            for (var i = 0; i < types.Length; i++) {
+                if (Type == types[i]) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -111,18 +117,28 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         /// <summary>
         ///     Returns string representation of
+        ///     this token in Axion language format,
+        ///     with original formatting of whitespaces.
+        /// </summary>
+        internal override void ToOriginalAxionCode(CodeBuilder c) {
+            ToAxionCode(c);
+            c.Write(EndWhitespaces);
+        }
+
+        /// <summary>
+        ///     Returns string representation of
         ///     this token in Axion language format.
         /// </summary>
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            return c + Value + EndWhitespaces;
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(Value);
         }
 
         /// <summary>
         ///     Returns string representation of
         ///     this token in C# language format.
         /// </summary>
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            return c + Value;
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(Value);
         }
 
         public override string ToString() {

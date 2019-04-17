@@ -1,14 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Syntactic.Statements;
 using Axion.Core.Processing.Syntactic.Statements.Definitions;
+using Axion.Core.Specification;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Formatting;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Axion.Core.Processing.Syntactic {
@@ -17,6 +15,7 @@ namespace Axion.Core.Processing.Syntactic {
         internal          bool           InLoop;
         internal          bool           InFinally;
         internal          bool           InFinallyLoop;
+        internal          int            Index = -1;
         private           BlockStatement root;
 
         public BlockStatement Root {
@@ -32,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         private readonly Stack<FunctionDefinition> functions = new Stack<FunctionDefinition>();
 
-        public FunctionDefinition CurrentFunction {
+        public FunctionDefinition? CurrentFunction {
             get {
                 if (functions != null
                     && functions.Count > 0) {
@@ -43,7 +42,7 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        public FunctionDefinition PopFunction() {
+        public FunctionDefinition? PopFunction() {
             if (functions != null
                 && functions.Count > 0) {
                 return functions.Pop();
@@ -56,31 +55,16 @@ namespace Axion.Core.Processing.Syntactic {
             functions.Push(function);
         }
 
-        internal int Index = -1;
-
-        internal new Token Token =>
-            Index > -1
-            && Index < Unit.Tokens.Count
-                ? Unit.Tokens[Index]
-                : Unit.Tokens.Last();
-
-        internal new Token Peek =>
-            Index + 1 < Unit.Tokens.Count
-                ? Unit.Tokens[Index + 1]
-                : Unit.Tokens.Last();
-
         internal Ast(SourceUnit unit) {
             SourceUnit = unit;
+            Root       = new BlockStatement(this);
         }
 
         internal void Parse() {
             Parent = this;
-            var statements = new List<Statement>();
             while (!MaybeEat(TokenType.End)) {
-                statements.Add(Statement.ParseStmt(this));
+                Root.Statements.Add(Statement.ParseStmt(this));
             }
-
-            Root = new BlockStatement(statements);
         }
 
         internal CSharpSyntaxNode ToCSharp() {
@@ -93,20 +77,21 @@ namespace Axion.Core.Processing.Syntactic {
             if (SourceUnit.ProcessingMode == SourceProcessingMode.Interpret) {
                 foreach (Statement stmt in Root.Statements) {
                     if (stmt is ModuleDefinition) {
-                        // no modules in interactive c#
-                        continue;
+                        Unit.ReportError("Modules are not supported in interpretation mode", stmt);
                     }
 
-                    if (stmt is ClassDefinition || stmt is FunctionDefinition) {
+                    else if (stmt is ClassDefinition || stmt is FunctionDefinition) {
                         stmt.ToCSharpCode(builder);
-                        continue;
+                    }
+                    else {
+                        builder.Write(stmt);
                     }
 
-                    builder += stmt;
+                    builder.Write("\n");
                 }
             }
             else {
-                var rootStmts = new List<Statement>();
+                var rootStmts = new NodeList<Statement>(this);
                 foreach (Statement stmt in Root.Statements) {
                     if (stmt is ModuleDefinition) {
                         stmt.ToCSharpCode(builder);
@@ -115,30 +100,39 @@ namespace Axion.Core.Processing.Syntactic {
                     }
 
                     if (stmt is ClassDefinition) {
-                        builder += "namespace _Root_ {";
+                        builder.WriteLine("namespace _Root_ {");
+                        builder.Writer.Indent++;
                         stmt.ToCSharpCode(builder);
-                        builder += "}";
+                        builder.Writer.Indent--;
+                        builder.Write("}");
                         continue;
                     }
 
                     if (stmt is FunctionDefinition) {
-                        builder += "namespace _Root_ {";
-                        builder += "public partial class _RootClass_ {";
+                        builder.WriteLine("namespace _Root_ {");
+                        builder.Writer.Indent++;
+                        builder.WriteLine("public partial class _RootClass_ {");
+                        builder.Writer.Indent++;
                         stmt.ToCSharpCode(builder);
-                        builder += "}}";
+                        builder.Writer.Indent--;
+                        builder.WriteLine("}");
+                        builder.Writer.Indent--;
+                        builder.Write("}");
                         continue;
                     }
 
                     rootStmts.Add(stmt);
                 }
 
-                builder += "public partial class _RootClass_ {";
-                builder += new FunctionDefinition(
-                    "Main",
-                    block: new BlockStatement(rootStmts.ToArray()),
-                    returnType: new SimpleTypeName("void")
+                builder.WriteLine("public partial class _RootClass_ {");
+                builder.Write(
+                    new FunctionDefinition(
+                        "Main",
+                        block: new BlockStatement(rootStmts),
+                        returnType: new SimpleTypeName("void")
+                    )
                 );
-                builder += "}";
+                builder.Write("\n}");
             }
 
             SyntaxTree tree = CSharpSyntaxTree.ParseText(builder);
@@ -150,23 +144,26 @@ namespace Axion.Core.Processing.Syntactic {
                        UsingDirective(ParseName("System")),
                        UsingDirective(ParseName("System.IO")),
                        UsingDirective(ParseName("System.Linq")),
+                       UsingDirective(ParseName("System.Text")),
+                       UsingDirective(ParseName("System.Threading")),
                        UsingDirective(ParseName("System.Diagnostics")),
-                       UsingDirective(ParseName("System.Collections"))
+                       UsingDirective(ParseName("System.Collections")),
+                       UsingDirective(ParseName("System.Collections.Generic"))
                    )
                    .NormalizeWhitespace();
 
             // format
-            var ws = new AdhocWorkspace();
-            unit = (CompilationUnitSyntax) Formatter.Format(unit, ws);
+            //var ws = new AdhocWorkspace();
+            //unit = (CompilationUnitSyntax) Formatter.Format(unit, ws);
             return unit;
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            return c + Root;
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.AddJoin("\n", Root.Statements);
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            return c + Root;
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(Root);
         }
     }
 }

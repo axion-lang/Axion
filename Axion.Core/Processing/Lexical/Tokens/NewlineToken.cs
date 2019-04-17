@@ -1,4 +1,6 @@
-﻿namespace Axion.Core.Processing.Lexical.Tokens {
+﻿using Axion.Core.Specification;
+
+namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
     ///     Represents a 'newline' ('\n' or '\r\n') mark.
     /// </summary>

@@ -1,47 +1,52 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
+    /// <summary>
+    ///     <c>
+    ///         for_index_stmt:
+    ///             'for' [expr] ';' [expr] ';' [expr] block
+    ///     </c>
+    /// </summary>
     public class ForIndexStatement : LoopStatement {
-        private Expression initStmt;
+        #region Properties
 
-        public Expression InitStmt {
+        private Expression? initStmt;
+
+        public Expression? InitStmt {
             get => initStmt;
             set => SetNode(ref initStmt, value);
         }
 
-        private Expression condition;
+        private Expression? condition;
 
-        public Expression Condition {
+        public Expression? Condition {
             get => condition;
             set => SetNode(ref condition, value);
         }
 
-        private Expression iterStmt;
+        private Expression? iterStmt;
 
-        public Expression IterStmt {
+        public Expression? IterStmt {
             get => iterStmt;
             set => SetNode(ref iterStmt, value);
         }
 
-        public ForIndexStatement(
-            Token          startToken,
-            Expression     initStmt,
-            Expression     condition,
-            Expression     iterStmt,
-            BlockStatement block,
-            BlockStatement noBreakBlock
-        ) : base(startToken, block, noBreakBlock) {
-            InitStmt  = initStmt;
-            Condition = condition;
-            IterStmt  = iterStmt;
-        }
+        #endregion
 
-        internal ForIndexStatement(SyntaxTreeNode parent) {
-            Parent = parent;
-            StartNode(TokenType.KeywordFor);
+        #region Constructors
+
+        /// <summary>
+        ///     Constructs new <see cref="ForIndexStatement"/> from tokens.
+        /// </summary>
+        internal ForIndexStatement(SyntaxTreeNode parent) : base(parent) {
+            MarkStart(TokenType.KeywordFor);
+
+            if (!MaybeEat(TokenType.Semicolon)) {
+                InitStmt = Expression.ParseExpression(parent);
+                Eat(TokenType.Semicolon);
+            }
 
             if (!MaybeEat(TokenType.Semicolon)) {
                 Condition = Expression.ParseTestExpr(this);
@@ -60,35 +65,57 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c = c
-                + "for "
-                + InitStmt
-                + "; "
-                + Condition
-                + "; "
-                + IterStmt
-                + " "
-                + Block;
+        /// <summary>
+        ///     Constructs plain <see cref="ForIndexStatement"/> without position in source.
+        /// </summary>
+        public ForIndexStatement(
+            BlockStatement  block,
+            Expression?     initStmt     = null,
+            Expression?     condition    = null,
+            Expression?     iterStmt     = null,
+            BlockStatement? noBreakBlock = null
+        ) : base(block, noBreakBlock) {
+            InitStmt  = initStmt;
+            Condition = condition;
+            IterStmt  = iterStmt;
+        }
+
+        #endregion
+
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(
+                "for ",
+                InitStmt,
+                "; ",
+                Condition,
+                "; ",
+                IterStmt,
+                " ",
+                Block
+            );
             if (NoBreakBlock != null) {
-                c = c + " nobreak " + NoBreakBlock;
+                c.Write(" nobreak ", NoBreakBlock);
             }
-
-            return c;
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            c = c
-                + "for("
-                + InitStmt
-                + ";"
-                + Condition
-                + ";"
-                + IterStmt
-                + ")"
-                + Block;
-
-            return c;
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(
+                "for(",
+                InitStmt,
+                ";",
+                Condition,
+                ";",
+                IterStmt,
+                ") ",
+                Block
+            );
+            if (NoBreakBlock != null) {
+                Unit.ReportError("C# doesn't support 'nobreak' block", NoBreakBlock);
+            }
         }
+
+        #endregion
     }
 }

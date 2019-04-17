@@ -1,4 +1,7 @@
-using Axion.Core.Processing.Lexical.Tokens;
+using System;
+using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
@@ -16,18 +19,31 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref condition, value);
         }
 
-        internal ConditionalComprehension(SyntaxTreeNode left) {
-            Parent = left;
+        internal override TypeName ValueType => Parent.ValueType;
+
+        internal ConditionalComprehension(SyntaxTreeNode parent) : base(parent) {
             if (PeekIs(TokenType.KeywordIf)) {
-                StartNode(TokenType.KeywordIf);
+                MarkStart(TokenType.KeywordIf);
                 Condition = ParseOperation(this);
             }
             else {
-                StartNode(TokenType.KeywordUnless);
-                Condition = new UnaryExpression(TokenType.OpNot, ParseOperation(this));
+                MarkStart(TokenType.KeywordUnless);
+                Condition = new UnaryOperationExpression(
+                    this,
+                    TokenType.KeywordNot,
+                    ParseOperation(this)
+                );
             }
 
             MarkEnd(Token);
+        }
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(" if ", Condition);
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            throw new NotSupportedException();
         }
     }
 }

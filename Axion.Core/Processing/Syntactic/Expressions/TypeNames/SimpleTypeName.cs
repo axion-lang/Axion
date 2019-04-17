@@ -1,36 +1,38 @@
 using Axion.Core.Processing.CodeGen;
-using JetBrains.Annotations;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
-    ///         simple_type ::=
+    ///         simple_type:
     ///             name
     ///     </c>
     /// </summary>
     public class SimpleTypeName : TypeName {
-        private Expression name;
+        private NameExpression name;
 
-        public Expression Name {
+        public NameExpression Name {
             get => name;
             set => SetNode(ref name, value);
         }
 
-        public SimpleTypeName([NotNull] string name) {
-            Name = new NameExpression(name);
-        }
-
-        public SimpleTypeName([NotNull] Expression name) {
+        /// <summary>
+        ///     Constructs new <see cref="SimpleTypeName"/> from Axion tokens.
+        /// </summary>
+        public SimpleTypeName(NameExpression name) {
             Name = name;
             MarkPosition(Name);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            return c + Name;
+        public SimpleTypeName(string name) {
+            Name = new NameExpression(null, name);
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            return c + Name;
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(Name);
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(Name);
         }
     }
 }

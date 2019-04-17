@@ -4,6 +4,7 @@ using System.Text;
 using Axion.Core;
 using Axion.Core.Processing;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -220,35 +221,35 @@ namespace Axion.Testing.NUnit.Lexer {
             var expected = new List<Token> {
                 // line 1
                 new WordToken(TokenType.KeywordUse, (0, 0)).AppendWhitespace(" "),
-                new MarkToken("(", (0, 4)),
+                new SymbolToken("(", (0, 4)),
                 new NewlineToken("\n   ", (0, 5)),
                 // line 2
                 new WordToken("System", (1, 3)).AppendWhitespace(" "),
-                new MarkToken("(", (1, 10)),
+                new SymbolToken("(", (1, 10)),
                 new WordToken("IO", (1, 11)),
-                new MarkToken(",", (1, 13)).AppendWhitespace(" "),
+                new SymbolToken(",", (1, 13)).AppendWhitespace(" "),
                 new WordToken("Linq", (1, 15)),
-                new MarkToken(")", (1, 19)),
-                new MarkToken(",", (1, 20)),
+                new SymbolToken(")", (1, 19)),
+                new SymbolToken(",", (1, 20)),
                 new NewlineToken("\n   ", (1, 21)),
                 // line 3
                 new WordToken("Axion", (2, 3)).AppendWhitespace(" "),
-                new MarkToken("(", (2, 9)),
+                new SymbolToken("(", (2, 9)),
                 new WordToken("Core", (2, 10)),
-                new MarkToken(",", (2, 14)).AppendWhitespace(" "),
+                new SymbolToken(",", (2, 14)).AppendWhitespace(" "),
                 new WordToken("Testing", (2, 16)),
-                new MarkToken(")", (2, 23)),
-                new MarkToken(",", (2, 24)),
+                new SymbolToken(")", (2, 23)),
+                new SymbolToken(",", (2, 24)),
                 new NewlineToken("\n   ", (2, 25)),
                 // line 4
                 new WordToken("Some", (3, 3)),
-                new MarkToken(".", (3, 7)),
+                new SymbolToken(".", (3, 7)),
                 new WordToken("Long", (3, 8)),
-                new MarkToken(".", (3, 12)),
+                new SymbolToken(".", (3, 12)),
                 new WordToken("Namespace", (3, 13)),
                 new NewlineToken(startPosition: (3, 22)),
                 // line 5
-                new MarkToken(")", (4, 0)),
+                new SymbolToken(")", (4, 0)),
                 new Token(TokenType.End, (4, 1))
             };
 
@@ -271,13 +272,13 @@ namespace Axion.Testing.NUnit.Lexer {
                 SourceProcessingOptions.SyntaxAnalysisDebugOutput
             );
         }
-        
+
         private static void LexIndent(SourceUnit source) {
             Compiler.Process(
                 source,
                 SourceProcessingMode.Lex,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput |
-                SourceProcessingOptions.CheckIndentationConsistency
+                SourceProcessingOptions.SyntaxAnalysisDebugOutput
+                | SourceProcessingOptions.CheckIndentationConsistency
             );
         }
     }

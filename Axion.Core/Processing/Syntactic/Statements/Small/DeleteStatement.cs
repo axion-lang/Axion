@@ -1,13 +1,12 @@
 using System;
-using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Small {
     /// <summary>
     ///     <c>
-    ///         delete_stmt ::=
+    ///         delete_stmt:
     ///             'delete' expr_list
     ///     </c>
     ///     <para />
@@ -16,38 +15,39 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
     ///     This is the reason we don't call ParseTargetList.
     /// </summary>
     public class DeleteStatement : Statement {
-        private TestList values;
+        private Expression value;
 
-        [NotNull]
-        public TestList Values {
-            get => values;
-            set => SetNode(ref values, value);
+        public Expression Value {
+            get => value;
+            set => SetNode(ref this.value, value);
         }
 
-        public DeleteStatement([NotNull] TestList expressions) {
-            Values = expressions;
-            if (Values.Count == 0) {
-                throw new ArgumentException(
-                    "Value cannot be an empty collection.",
-                    nameof(expressions)
-                );
-            }
+        #region Constructors
 
-            MarkEnd(Values[Values.Count - 1]);
-        }
-
-        internal DeleteStatement(SyntaxTreeNode parent) {
-            Parent = parent;
-            StartNode(TokenType.KeywordDelete);
-
-            Values = new TestList(this, out bool _);
-            foreach (Expression expr in Values.Expressions) {
-                if (expr.CannotDeleteReason != null) {
-                    Unit.Blame(BlameType.InvalidExpressionToDelete, expr);
-                }
-            }
-
+        /// <summary>
+        ///     Constructs new <see cref="DeleteStatement"/> from tokens.
+        /// </summary>
+        internal DeleteStatement(SyntaxTreeNode parent) : base(parent) {
+            MarkStart(TokenType.KeywordDelete);
+            Value = Expression.ParseMultiple(this, expectedTypes: Spec.DeletableExprs);
             MarkEnd(Token);
+        }
+
+        /// <summary>
+        ///     Constructs plain <see cref="DeleteStatement"/> without position in source.
+        /// </summary>
+        public DeleteStatement(Expression value) {
+            Value = value;
+        }
+
+        #endregion
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("delete ", Value);
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            throw new NotSupportedException();
         }
     }
 }

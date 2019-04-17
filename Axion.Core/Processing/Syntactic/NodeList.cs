@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace Axion.Core.Processing.Syntactic {
-    public class NodeList<T> : IList<T> where T : SyntaxTreeNode {
+    public class NodeList<T> : IList<T> where T : SyntaxTreeNode? {
         private readonly SyntaxTreeNode nodesParent;
         private readonly List<T>        items;
 
@@ -89,12 +89,12 @@ namespace Axion.Core.Processing.Syntactic {
         IEnumerator IEnumerable.GetEnumerator() {
             return GetEnumerator();
         }
-        
+
         [Obsolete]
         void IList<T>.Insert(int index, T item) {
             throw new NotSupportedException();
         }
-        
+
         [Obsolete]
         void ICollection<T>.Add(T item) {
             throw new NotSupportedException();

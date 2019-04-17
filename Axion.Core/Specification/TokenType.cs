@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Axion.Core.Processing.Lexical.Tokens {
+namespace Axion.Core.Specification {
     /// <summary>
     ///     Contains all types of tokens, available in language specification.
     /// </summary>
@@ -21,12 +21,12 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         OpBitRightShift,
         OpAnd,
         OpOr,
-        OpAs,
-        OpIs,
-        OpIsNot,
-        OpNot,
-        OpIn,
-        OpNotIn,
+        KeywordAs,
+        KeywordIs,
+        KeywordIsNot,
+        KeywordNot,
+        KeywordIn,
+        KeywordNotIn,
         OpEqualsEquals,
         OpNotEquals,
         OpGreater,
@@ -44,7 +44,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         OpRemainder,
         Op3WayCompare,
         Op2Question,
-        
+
         // assignment marks
         OpBitAndAssign,
         OpBitOrAssign,
@@ -65,6 +65,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         #region GEN_keywords
 
+        KeywordAll,
         KeywordAnyway,
         KeywordAssert,
         KeywordAsync,
@@ -110,7 +111,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         #endregion
 
-        #region GEN_marks
+        #region GEN_symbols
 
         Question,
         RightFatArrow,

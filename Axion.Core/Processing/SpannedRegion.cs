@@ -30,12 +30,11 @@ namespace Axion.Core.Processing {
             Span = new Span(start.Span.StartPosition, end.Span.EndPosition);
         }
 
-        internal virtual CodeBuilder ToAxionCode(CodeBuilder c) {
-            throw new InvalidOperationException();
+        internal virtual void ToOriginalAxionCode(CodeBuilder c) {
+            throw new NotSupportedException();
         }
 
-        internal virtual CodeBuilder ToCSharpCode(CodeBuilder c) {
-            throw new InvalidOperationException();
-        }
+        internal abstract void ToAxionCode(CodeBuilder  c);
+        internal abstract void ToCSharpCode(CodeBuilder c);
     }
 }

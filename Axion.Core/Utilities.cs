@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Axion.Core.Processing.Lexical.Tokens;
+using System.Text;
 using Axion.Core.Specification;
 
 namespace Axion.Core {
@@ -39,6 +39,25 @@ namespace Axion.Core {
             }
 
             return type.ToString("G");
+        }
+
+        internal static string GetExprFriendlyName(Type expressionType) {
+            string exprOriginalName = expressionType.Name.Replace("Expression", "");
+            var    result           = new StringBuilder();
+            result.Append("'" + char.ToLower(exprOriginalName[0]));
+
+            exprOriginalName = exprOriginalName.Remove(0, 1);
+            foreach (char c in exprOriginalName) {
+                if (char.IsUpper(c)) {
+                    result.Append(" ").Append(char.ToLower(c));
+                }
+                else {
+                    result.Append(c);
+                }
+            }
+
+            result.Append("' expression");
+            return result.ToString();
         }
 
         #region Get user input and split it into launch arguments

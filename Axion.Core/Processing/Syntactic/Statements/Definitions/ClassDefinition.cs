@@ -1,22 +1,22 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Syntactic.Statements.Interfaces;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
     /// <summary>
     ///     <c>
-    ///         class_def ::=
+    ///         class_def:
     ///             'class' name ['(' args_list ')'] block
     ///     </c>
     /// </summary>
     public class ClassDefinition : Statement, IDecorated {
+        #region Properties
+
         private NameExpression name;
 
-        [NotNull]
         public NameExpression Name {
             get => name;
             set => SetNode(ref name, value);
@@ -36,55 +36,64 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             set => SetNode(ref keywords, value);
         }
 
-        private Expression metaClass;
+        private Expression? metaClass;
 
-        public Expression MetaClass {
+        public Expression? MetaClass {
             get => metaClass;
             set => SetNode(ref metaClass, value);
         }
 
         private BlockStatement block;
 
-        [NotNull]
         public BlockStatement Block {
             get => block;
             set => SetNode(ref block, value);
         }
 
-        public List<Expression> Modifiers { get; set; }
+        private NodeList<Expression> modifiers;
+
+        public NodeList<Expression> Modifiers {
+            get => modifiers ??= new NodeList<Expression>(this);
+            set {
+                if (value != null) {
+                    modifiers = value;
+                }
+            }
+        }
+
+        #endregion
 
         public ClassDefinition(
-            [NotNull] NameExpression name,
-            [NotNull] BlockStatement block,
-            NodeList<TypeName>       bases     = null,
-            NodeList<Expression>     keywords  = null,
-            Expression               metaClass = null
+            NameExpression        name,
+            BlockStatement        block,
+            NodeList<TypeName>?   bases     = null,
+            NodeList<Expression>? keywords  = null,
+            Expression?           metaClass = null
         ) {
             Name      = name;
             Block     = block;
-            Bases     = bases;
-            Keywords  = keywords;
+            Bases     = bases ?? new NodeList<TypeName>(this);
+            Keywords  = keywords ?? new NodeList<Expression>(this);
             MetaClass = metaClass;
         }
 
-        internal ClassDefinition(SyntaxTreeNode parent) {
-            Parent   = parent;
+        internal ClassDefinition(SyntaxTreeNode parent) : base(parent) {
             Bases    = new NodeList<TypeName>(this);
             Keywords = new NodeList<Expression>(this);
-            StartNode(TokenType.KeywordClass);
+            MarkStart(TokenType.KeywordClass);
 
             Name = new NameExpression(this, true);
             // TODO: add generic classes
             MetaClass = null;
-            List<(NameExpression, TypeName)> types = TypeName.ParseTypeArgs(this, true);
-            foreach ((NameExpression typeLabel, TypeName type) in types) {
+            List<(TypeName?, NameExpression?)> types = TypeName.ParseNamedTypeArgs(this);
+            foreach ((TypeName? type, NameExpression? typeLabel) in types) {
                 if (typeLabel == null) {
                     Bases.Add(type);
                 }
                 else {
                     Keywords.Add(type);
                     if (typeLabel.Qualifiers.Count == 1
-                        && typeLabel.Qualifiers[0].Value == "metaclass") {
+                        && typeLabel.Qualifiers[0] == "metaclass") {
                         MetaClass = type;
                     }
                 }
@@ -95,12 +104,16 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            return c + "class " + Name + " " + Block;
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("class ", Name, " ", Block);
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            return c + "class " + Name + Block;
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("public class ", Name, " ", Block);
         }
+
+        #endregion
     }
 }

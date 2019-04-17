@@ -1,39 +1,29 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     /// <summary>
     ///     <c>
-    ///         while_stmt ::=
+    ///         while_stmt:
     ///             'while' test block ['else' block]
     ///     </c>
     /// </summary>
     public class WhileStatement : LoopStatement {
         private Expression condition;
 
-        [NotNull]
         public Expression Condition {
             get => condition;
             set => SetNode(ref condition, value);
         }
 
-        internal WhileStatement(
-            [NotNull] Expression     condition,
-            [NotNull] BlockStatement block,
-            BlockStatement           noBreakBlock
-        ) : base(block, noBreakBlock) {
-            Condition    = condition;
-            Block        = block;
-            NoBreakBlock = noBreakBlock;
+        #region Constructors
 
-            MarkEnd(NoBreakBlock ?? Block);
-        }
-
-        internal WhileStatement(SyntaxTreeNode parent) {
-            Parent = parent;
-            StartNode(TokenType.KeywordWhile);
+        /// <summary>
+        ///     Constructs new <see cref="WhileStatement"/> from tokens.
+        /// </summary>
+        internal WhileStatement(SyntaxTreeNode parent) : base(parent) {
+            MarkStart(TokenType.KeywordWhile);
 
             Condition = Expression.ParseTestExpr(this);
             Block     = new BlockStatement(this);
@@ -44,13 +34,37 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c = c + "while " + Condition + " " + Block;
-            if (NoBreakBlock != null) {
-                c = c + " nobreak " + NoBreakBlock;
-            }
-
-            return c;
+        /// <summary>
+        ///     Constructs plain <see cref="WhileStatement"/> without position in source.
+        /// </summary>
+        internal WhileStatement(
+            Expression     condition,
+            BlockStatement block,
+            BlockStatement noBreakBlock
+        ) : base(block, noBreakBlock) {
+            Condition    = condition;
+            Block        = block;
+            NoBreakBlock = noBreakBlock;
         }
+
+        #endregion
+
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("while ", Condition, " ", Block);
+            if (NoBreakBlock != null) {
+                c.Write(" nobreak ", NoBreakBlock);
+            }
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("while (", Condition, ") ", Block);
+            if (NoBreakBlock != null) {
+                Unit.ReportError("C# doesn't support 'nobreak' block", NoBreakBlock);
+            }
+        }
+
+        #endregion
     }
 }

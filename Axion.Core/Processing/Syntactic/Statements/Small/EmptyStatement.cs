@@ -1,17 +1,25 @@
 using Axion.Core.Processing.CodeGen;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Small {
+    /// <summary>
+    ///     empty_stmt:
+    ///         (';' | 'pass')
+    /// </summary>
     public class EmptyStatement : Statement {
-        public EmptyStatement(SpannedRegion mark) {
-            MarkPosition(mark);
+        /// <summary>
+        ///     Constructs new <see cref="EmptyStatement"/> from tokens.
+        /// </summary>
+        public EmptyStatement(SyntaxTreeNode parent) : base(parent) {
+            Move();
+            MarkPosition(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            return c + "pass";
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("pass");
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            return c + ";";
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(";");
         }
     }
 }

@@ -88,7 +88,7 @@ namespace Axion.Core.Processing.Lexical {
                 return;
             }
 
-            Token token = null;
+            Token? token = null;
             // at first, check if we're after unclosed string
             if (unclosedStrings.Count > 0) {
                 token = ReadString(true);
@@ -156,7 +156,7 @@ namespace Axion.Core.Processing.Lexical {
             #endregion
         }
 
-        private Token ReadNextToken() {
+        private Token? ReadNextToken() {
             // reset token properties
             tokenStartPosition = Position;
             tokenValue.Clear();
@@ -224,7 +224,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             if (Spec.SymbolicChars.Contains(c)) {
-                return ReadMarkOrOperator();
+                return ReadSymbolic();
             }
 
             // invalid

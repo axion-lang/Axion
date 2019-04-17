@@ -3,17 +3,17 @@ using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     /// <summary>
-    ///     Represents a 'symbolic mark' literal.
+    ///     Represents a 'symbol' token.
     /// </summary>
-    public class MarkToken : Token {
-        public MarkToken(string value, Position startPosition = default)
+    public class SymbolToken : Token {
+        public SymbolToken(string value, Position startPosition = default)
             : base(
                 Spec.Symbols[value],
                 value,
                 startPosition
             ) { }
 
-        public MarkToken(TokenType type)
+        public SymbolToken(TokenType type)
             : base(
                 type,
                 Spec.Symbols.First(kvp => kvp.Value == type).Key

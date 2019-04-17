@@ -32,7 +32,7 @@ namespace Axion.Core.Processing {
         ///     Contains all errors, warnings and messages
         ///     that raised on time of source processing.
         /// </summary>
-        public readonly List<Exception> Blames = new List<Exception>();
+        public readonly List<LanguageException> Blames = new List<LanguageException>();
 
         public SourceProcessingOptions Options;
         public SourceProcessingMode    ProcessingMode;
@@ -49,36 +49,36 @@ namespace Axion.Core.Processing {
         ///     When not specified in constructor,
         ///     then file name assigned to date and time of instance creation.
         /// </summary>
-        public string OutputFilePath { get; private set; }
+        public string OutputFilePath { get; private set; } = "";
 
         /// <summary>
         ///     Path to file where source code is located.
         ///     When not specified in constructor,
         ///     then file name assigned to date and time of instance creation.
         /// </summary>
-        public string SourceFilePath { get; private set; }
+        public string SourceFilePath { get; private set; } = "";
 
         /// <summary>
         ///     Name of file where source code is located.
         ///     Created automatically from <see cref="SourceFilePath" />.
         /// </summary>
-        public string SourceFileName { get; private set; }
+        public string SourceFileName { get; private set; } = "";
 
         /// <summary>
         ///     Path to file where processing debug output is located.
         /// </summary>
-        public string DebugFilePath { get; private set; }
+        public string DebugFilePath { get; private set; } = "";
 
         #endregion
 
         #region Constructors
 
-        public SourceUnit(string code, string outFilePath = null) : this(
+        public SourceUnit(string code, string? outFilePath = null) : this(
             code.Split(Spec.EndOfLines, StringSplitOptions.None),
             outFilePath
         ) { }
 
-        public SourceUnit(FileInfo file, string outFilePath = null) {
+        public SourceUnit(FileInfo file, string? outFilePath = null) {
             // check source file
             if (!file.Exists) {
                 throw new FileNotFoundException("Source file doesn't exists", file.FullName);
@@ -105,7 +105,7 @@ namespace Axion.Core.Processing {
         ///     Use only for interpreter and tests,
         ///     output is redirected to the compiler dir.
         /// </summary>
-        public SourceUnit(string[] sourceLines, string outFilePath = null) {
+        public SourceUnit(string[] sourceLines, string? outFilePath = null) {
             InitializeFilePaths(
                 Compiler.OutputDirectory
                 + "Temp_"
@@ -125,12 +125,12 @@ namespace Axion.Core.Processing {
 
         #region File path helpers
 
-        private void InitializeFilePaths(string sourceFilePath, string outFilePath = null) {
+        private void InitializeFilePaths(string sourceFilePath, string? outFilePath = null) {
             SourceFilePath = sourceFilePath;
             SourceFileName = Path.GetFileNameWithoutExtension(SourceFilePath);
             BuildOutputPath(outFilePath);
 
-            string debugDir = new FileInfo(OutputFilePath).Directory.FullName + "\\debug\\";
+            string debugDir = new FileInfo(OutputFilePath).Directory?.FullName + "\\debug\\";
             if (!Directory.Exists(debugDir)) {
                 Directory.CreateDirectory(debugDir);
             }
@@ -138,7 +138,7 @@ namespace Axion.Core.Processing {
             DebugFilePath = debugDir + SourceFileName + debugExtension;
         }
 
-        private void BuildOutputPath(string outFilePath) {
+        private void BuildOutputPath(string? outFilePath) {
             if (string.IsNullOrWhiteSpace(outFilePath)) {
                 outFilePath = SourceFileName;
             }
@@ -164,7 +164,7 @@ namespace Axion.Core.Processing {
         #region Blaming
 
         internal void ReportError(string message, SpannedRegion mark) {
-            Blames.Add(new LanguageException(new Blame(message, BlameSeverity.Error, mark.Span)));
+            Blames.Add(new LanguageException(message, BlameSeverity.Error, mark.Span));
         }
 
         internal void Blame(BlameType type, SpannedRegion region) {
@@ -172,7 +172,7 @@ namespace Axion.Core.Processing {
         }
 
         internal void Blame(BlameType type, Position start, Position end) {
-            Blames.Add(new LanguageException(new Blame(type, Spec.Blames[type], start, end)));
+            Blames.Add(new LanguageException(type, Spec.Blames[type], start, end));
         }
 
         #endregion

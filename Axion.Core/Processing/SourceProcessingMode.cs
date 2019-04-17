@@ -29,33 +29,33 @@
         ///     Compile Axion source into machine code.
         /// </summary>
         Compile = 0b000001011,
-        
+
         /// <summary>
-        ///     Transpile Axion source into
+        ///     Conversion Axion source into
         ///     C# programming language source.
         /// </summary>
         ConvertCS = 0b001000011,
 
         /// <summary>
-        ///     Transpile Axion source into
+        ///     Conversion Axion source into
         ///     C programming language source.
         /// </summary>
         ConvertC = 0b000010011,
 
         /// <summary>
-        ///     Transpile Axion source into
+        ///     Conversion Axion source into
         ///     C++ programming language source.
         /// </summary>
         ConvertCpp = 0b000100011,
 
         /// <summary>
-        ///     Transpile Axion source into
+        ///     Conversion Axion source into
         ///     JavaScript programming language source.
         /// </summary>
         ConvertJS = 0b010000011,
 
         /// <summary>
-        ///     Transpile Axion source into
+        ///     Conversion Axion source into
         ///     Python programming language source.
         /// </summary>
         ConvertPy = 0b100000011

@@ -1,11 +1,11 @@
-# py style
-while condition:
-    doIter()
-    
 while condition:
     doIter()
 nobreak:
     doElse()
+
+# py style
+while condition:
+    doIter()
 
 while condition: doIter()
 

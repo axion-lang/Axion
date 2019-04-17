@@ -18,28 +18,66 @@ namespace Axion.Core {
             "├───────┬─────────────────────┤                       Usage description                       │",
             "│ short │        full         │                                                               │",
             "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤",
-            "│  -i   │ --" + nameof(Interactive) + "       │ Launch compiler's interactive interpreter mode.               │",
+            "│  -i   │ --"
+            + nameof(Interactive)
+            + "       │ Launch compiler's interactive interpreter mode.               │",
             "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤",
-            "│       │ \"<" + nameof(Code) + ">\"            │ Input code to process.                                        │",
-            "│  -f   │ --" + nameof(Files) + " \"<path>\"    │ Input files to process.                                       │",
-            "│  -p   │ --" + nameof(Project) + " \"<path>\"  │ Input Axion project to process. [not available yet]           │",
+            "│       │ \"<"
+            + nameof(Code)
+            + ">\"            │ Input code to process.                                        │",
+            "│  -f   │ --"
+            + nameof(Files)
+            + " \"<path>\"    │ Input files to process.                                       │",
+            "│  -p   │ --"
+            + nameof(Project)
+            + " \"<path>\"  │ Input Axion project to process. [not available yet]           │",
             "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤",
-            "│  -m   │ --" + nameof(Mode) + " <value>      │ Source code processing mode (Default: compile). Available:    │",
-            "│       │ " + nameof(Lex) + "                 │     Create tokens (lexemes) list from source.                 │",
-            "│       │ " + nameof(Parsing) + "             │     Create tokens list and Abstract Syntax Tree from source.  │",
-            "│       │ " + nameof(Interpret) + "           │     Interpret source code.                                    │",
-            "│       │ " + nameof(ConvertCS) + "           │     Convert source to 'C#' language.                          │",
-            "│       │ " + nameof(Compile) + "             │     Compile source into machine code.                         ├──┬── not available yet",
-            "│       │ " + nameof(ConvertC) + "            │     Convert source to 'C' language.                           │  │",
-            "│       │ " + nameof(ConvertCpp) + "          │     Convert source to 'C++' language.                         │  │", 
-            "│       │ " + nameof(ConvertJS) + "           │     Convert source to 'JavaScript' language.                  │  │",
-            "│       │ " + nameof(ConvertPy) + "           │     Convert source to 'Python' language.                      ├──┘",
+            "│  -m   │ --"
+            + nameof(Mode)
+            + " <value>      │ Source code processing mode (Default: compile). Available:    │",
+            "│       │ "
+            + nameof(Lex)
+            + "                 │     Create tokens (lexemes) list from source.                 │",
+            "│       │ "
+            + nameof(Parsing)
+            + "             │     Create tokens list and Abstract Syntax Tree from source.  │",
+            "│       │ "
+            + nameof(Interpret)
+            + "           │     Interpret source code.                                    │",
+            "│       │ "
+            + nameof(ConvertCS)
+            + "           │     Convert source to 'C#' language.                          │",
+            "│       │ "
+            + nameof(Compile)
+            + "             │     Compile source into machine code.                         ├──┬── not available yet",
+            "│       │ "
+            + nameof(ConvertC)
+            + "            │     Convert source to 'C' language.                           │  │",
+            "│       │ "
+            + nameof(ConvertCpp)
+            + "          │     Convert source to 'C++' language.                         │  │",
+            "│       │ "
+            + nameof(ConvertJS)
+            + "           │     Convert source to 'JavaScript' language.                  │  │",
+            "│       │ "
+            + nameof(ConvertPy)
+            + "           │     Convert source to 'Python' language.                      ├──┘",
             "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤",
-            "│  -d   │ --" + nameof(Debug) + "             │ Save debug information to '<compilerDir>\\output' directory.   │",
-            "│  -j   │ --" + nameof(AstJson) + "           │ Show resulting AST in JSON format in the console.             │",
-            "│  -h   │ --" + nameof(Help) + "              │ Display this help screen.                                     │",
-            "│  -v   │ --" + nameof(Version) + "           │ Display information about compiler version.                   │",
-            "│  -x   │ --" + nameof(Exit) + "              │ Exit the compiler.                                            │",
+            "│  -d   │ --"
+            + nameof(Debug)
+            + "             │ Save debug information to '<compilerDir>\\output' directory.   │",
+            "│  -j   │ --"
+            + nameof(AstJson)
+            + "           │ Show resulting AST in JSON format in the console.             │",
+            "│  -h   │ --"
+            + nameof(Help)
+            + "              │ Display this help screen.                                     │",
+            "│  -v   │ --"
+            + nameof(Version)
+            + "           │ Display information about compiler version.                   │",
+            "│  -x   │ --"
+            + nameof(Exit)
+            + "              │ Exit the compiler.                                            │",
             "└───────┴─────────────────────┴───────────────────────────────────────────────────────────────┘",
             " (Argument names aren't case-sensitive.)"
         );
@@ -77,7 +115,10 @@ namespace Axion.Core {
         [Option('h', "help")]
         public bool Help { get; set; }
 
-        [Option('v', "version")]
+        [Option('v', "verbose")]
+        public bool Verbose { get; set; }
+
+        [Option("version")]
         public bool Version { get; set; }
     }
 }

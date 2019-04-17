@@ -1,16 +1,16 @@
-using System.Collections.Generic;
+using System;
 using System.Diagnostics;
 using System.Linq;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
-using Newtonsoft.Json;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic {
-    public class SyntaxTreeNode : SpannedRegion {
-        [JsonIgnore]
+    public abstract class SyntaxTreeNode : SpannedRegion {
         protected internal SyntaxTreeNode Parent;
-
-        private Ast ast;
+        private            Ast            ast;
 
         internal Ast Ast {
             get {
@@ -27,14 +27,49 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        // short links
-        internal SourceUnit Unit   => Ast.SourceUnit;
-        internal Token      Token  => Ast.Token;
-        internal Token      Peek   => Ast.Peek;
+        internal virtual TypeName ValueType => throw new NotSupportedException();
 
-        protected bool SetNode<T>(ref T field, T value) where T : SyntaxTreeNode {
-            if (EqualityComparer<T>.Default.Equals(field, value)) {
-                return false;
+        internal SyntaxTreeNode(SyntaxTreeNode parent) {
+            Parent = parent;
+        }
+
+        protected SyntaxTreeNode() { }
+
+        public override string ToString() {
+            var code = new CodeBuilder(OutLang.Axion);
+            ToAxionCode(code);
+            return code.ToString();
+        }
+
+        #region AST properties short links
+
+        internal SourceUnit Unit => Ast.SourceUnit;
+
+        internal Token Token =>
+            Ast.Index > -1
+            && Ast.Index < Unit.Tokens.Count
+                ? Unit.Tokens[Ast.Index]
+                : Unit.Tokens[Unit.Tokens.Count - 1];
+
+        private Token exactPeek =>
+            Ast.Index + 1 < Unit.Tokens.Count
+                ? Unit.Tokens[Ast.Index + 1]
+                : Unit.Tokens[Unit.Tokens.Count - 1];
+
+        internal Token Peek {
+            get {
+                SkipTrivial();
+                return exactPeek;
+            }
+        }
+
+        #endregion
+
+        #region Syntax node's property setter helpers
+
+        protected void SetNode<T>(ref T field, T value) where T : SyntaxTreeNode? {
+            if (field == value) {
+                return;
             }
 
             if (value != null) {
@@ -42,33 +77,19 @@ namespace Axion.Core.Processing.Syntactic {
             }
 
             field = value;
-            return true;
         }
 
-        protected bool SetNode<T>(ref T[] field, T[] value) where T : SyntaxTreeNode {
+        protected void SetNode<T>(ref NodeList<T> field, NodeList<T> value)
+            where T : SyntaxTreeNode? {
             if (field == value) {
-                return false;
+                return;
             }
 
             if (value != null) {
                 foreach (T expr in value) {
-                    expr.Parent = this;
-                }
-            }
-
-            field = value;
-            return true;
-        }
-
-        protected bool SetNode<T>(ref NodeList<T> field, NodeList<T> value)
-            where T : SyntaxTreeNode {
-            if (field == value) {
-                return false;
-            }
-
-            if (value != null) {
-                foreach (T expr in value) {
-                    expr.Parent = this;
+                    if (expr != null) {
+                        expr.Parent = this;
+                    }
                 }
             }
             else {
@@ -76,43 +97,68 @@ namespace Axion.Core.Processing.Syntactic {
             }
 
             field = value;
-            return true;
         }
 
-        internal Token StartNode(TokenType type) {
+        #endregion
+
+        #region Errors reporting
+
+        internal void BlameInvalidSyntax(TokenType expectedType, SpannedRegion mark) {
+            Unit.ReportError(
+                "Invalid syntax, expected '"
+                + expectedType.GetValue()
+                + "', got '"
+                + exactPeek.Type.GetValue()
+                + "'.",
+                mark
+            );
+        }
+
+        public void CheckUnexpectedEoc() {
+            if (!PeekIs(TokenType.End)) {
+                return;
+            }
+
+            Unit.Blame(BlameType.UnexpectedEndOfCode, Token);
+        }
+
+        #endregion
+
+        #region Token stream controllers
+
+        /// <summary>
+        ///     Eats specified <paramref name="type"/>
+        ///     and marks current token as node start.
+        /// </summary>
+        internal Token MarkStart(TokenType type) {
             Eat(type);
             MarkStart(Token);
             return Token;
         }
 
-        public bool PeekIs(TokenType expected) {
-            return Peek.Is(expected);
-        }
-
         internal bool PeekIs(params TokenType[] expected) {
+            return PeekByIs(1, expected);
+        }
+
+        internal bool PeekByIs(int peekBy, params TokenType[] expected) {
             SkipTrivial(expected);
-            for (var i = 0; i < expected.Length; i++) {
-                if (Peek.Is(expected[i])) {
-                    return true;
+            if (Ast.Index + peekBy < Unit.Tokens.Count) {
+                Token peekN = Unit.Tokens[Ast.Index + peekBy];
+                for (var i = 0; i < expected.Length; i++) {
+                    if (peekN.Is(expected[i])) {
+                        return true;
+                    }
                 }
             }
 
             return false;
         }
 
-        private bool EnsureNext(params TokenType[] expected) {
-            SkipTrivial(expected);
-            for (var i = 0; i < expected.Length; i++) {
-                if (Peek.Is(expected[i])) {
-                    return true;
-                }
-            }
-
-            BlameInvalidSyntax(expected[0], Peek);
-            return false;
-        }
-
-        internal Token NextToken(int pos = 1) {
+        /// <summary>
+        ///     Adjusts [<see cref="Ast"/>.Index] by [<paramref name="pos"/>]
+        ///     and returns token by current index.
+        /// </summary>
+        internal Token Move(int pos = 1) {
             if (Ast.Index + pos >= 0
                 && Ast.Index + pos < Unit.Tokens.Count) {
                 Ast.Index += pos;
@@ -129,7 +175,7 @@ namespace Axion.Core.Processing.Syntactic {
         internal bool Eat(TokenType type) {
             bool matches = EnsureNext(type);
             if (matches) {
-                NextToken();
+                Move();
             }
 
             return matches;
@@ -141,8 +187,8 @@ namespace Axion.Core.Processing.Syntactic {
         /// </summary>
         internal bool MaybeEat(TokenType type) {
             SkipTrivial(type);
-            if (Peek.Is(type)) {
-                NextToken();
+            if (exactPeek.Is(type)) {
+                Move();
                 return true;
             }
 
@@ -160,8 +206,8 @@ namespace Axion.Core.Processing.Syntactic {
         internal bool MaybeEat(params TokenType[] types) {
             SkipTrivial(types);
             for (var i = 0; i < types.Length; i++) {
-                if (Peek.Is(types[i])) {
-                    NextToken();
+                if (exactPeek.Is(types[i])) {
+                    Move();
                     return true;
                 }
             }
@@ -169,20 +215,36 @@ namespace Axion.Core.Processing.Syntactic {
             return false;
         }
 
+        /// <summary>
+        ///     Moves current token index by absolute value.
+        /// </summary>
         internal void MoveTo(int tokenIndex) {
-            Debug.Assert(tokenIndex >= 0 && tokenIndex < Unit.Tokens.Count);
+            Debug.Assert(tokenIndex >= -1 && tokenIndex < Unit.Tokens.Count);
             Ast.Index = tokenIndex;
+        }
+
+        internal bool EnsureNext(params TokenType[] expected) {
+            SkipTrivial(expected);
+            for (var i = 0; i < expected.Length; i++) {
+                if (exactPeek.Is(expected[i])) {
+                    return true;
+                }
+            }
+
+            BlameInvalidSyntax(expected[0], exactPeek);
+            return false;
         }
 
         private void SkipTrivial(params TokenType[] wantedTypes) {
             while (true) {
-                if (PeekIs(TokenType.Comment)) {
-                    NextToken();
+                if (exactPeek.Is(TokenType.Comment)) {
+                    Move();
                 }
                 // if we got newline before wanted type, just skip it
                 // (except we WANT to get newline)
-                else if (Peek.Is(TokenType.Newline) && !wantedTypes.Contains(TokenType.Newline)) {
-                    NextToken();
+                else if (exactPeek.Is(TokenType.Newline)
+                         && !wantedTypes.Contains(TokenType.Newline)) {
+                    Move();
                 }
                 else {
                     break;
@@ -190,24 +252,6 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        internal void BlameInvalidSyntax(TokenType expectedType, SpannedRegion mark) {
-            Unit.ReportError(
-                "Invalid syntax, expected '"
-                + expectedType.GetValue()
-                + "', got '"
-                + Peek.Type.GetValue()
-                + "'.",
-                mark
-            );
-        }
-
-        public bool CheckUnexpectedEoc() {
-            if (!PeekIs(TokenType.End)) {
-                return false;
-            }
-
-            Unit.Blame(BlameType.UnexpectedEndOfCode, Token);
-            return true;
-        }
+        #endregion
     }
 }

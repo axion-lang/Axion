@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
@@ -9,9 +10,9 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public NumberOptions Options { get; }
 
         public NumberToken(
-            string        value,
-            NumberOptions options       = null,
-            Position      startPosition = default
+            string         value,
+            NumberOptions? options       = null,
+            Position       startPosition = default
         ) : base(TokenType.Number, value, startPosition) {
             Options = options ?? new NumberOptions();
         }
@@ -46,6 +47,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             bool hasExponent = false,
             int  exponent    = 0
         ) {
+            Value       = 0;
             Radix       = radix;
             Bits        = bits;
             Floating    = floating;

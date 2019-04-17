@@ -1,47 +1,51 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Specification;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///         name ::=
+    ///         name:
     ///             ID {'.' ID}
     ///     </c>
     /// </summary>
     public class NameExpression : Expression {
-        public List<WordToken> Qualifiers { get; } = new List<WordToken>();
+        public List<string> Qualifiers { get; } = new List<string>();
 
-        public NameExpression(string name) {
-            Qualifiers.Add(new WordToken(name));
-        }
-
-        public NameExpression(WordToken name) {
-            Qualifiers.Add(name);
-            MarkPosition(name);
-        }
-
-        internal NameExpression(SyntaxTreeNode parent, bool needSimple = false) {
+        public NameExpression(SyntaxTreeNode parent, string name) {
             Parent = parent;
-            
+            Qualifiers.Add(name);
+        }
+
+        internal NameExpression(SyntaxTreeNode parent, NameSyntax csNode) : base(parent) {
+            Qualifiers.AddRange(
+                csNode
+                    .ToString()
+                    .Split('.')
+            );
+        }
+
+        internal NameExpression(SyntaxTreeNode parent, bool needSimple = false) : base(parent) {
             MarkStart(Peek);
             do {
                 Eat(TokenType.Identifier);
-                Qualifiers.Add((WordToken) Token);
+                Qualifiers.Add(Token.Value);
             } while (MaybeEat(TokenType.Dot));
+
             MarkEnd(Token);
-            
+
             if (needSimple && Qualifiers.Count > 1) {
                 Unit.ReportError("Simple name expected.", this);
             }
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            return c + string.Join(".", Qualifiers);
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(string.Join(".", Qualifiers));
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            return c.AppendJoin(".", Qualifiers);
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(string.Join(".", Qualifiers));
         }
     }
 }

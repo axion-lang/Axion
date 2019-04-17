@@ -6,7 +6,7 @@ namespace Axion.Core.Processing {
     public struct Span {
         public readonly Position StartPosition;
         public readonly Position EndPosition;
-        
+
         public Span(Position start, Position end) {
             StartPosition = start;
             EndPosition   = end;

@@ -1,13 +1,11 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Specification;
-using JetBrains.Annotations;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Small {
     /// <summary>
     ///     <c>
-    ///         raise_stmt ::=
+    ///         raise_stmt:
     ///             'raise' [test ['from' test]]
     ///     </c>
     /// </summary>
@@ -26,14 +24,13 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             set => SetNode(ref cause, value);
         }
 
-        public RaiseStatement([NotNull] Expression exception, [NotNull] Expression cause) {
-            Exception = exception;
-            Cause     = cause;
-        }
+        #region Constructors
 
-        internal RaiseStatement(SyntaxTreeNode parent) {
-            Parent = parent;
-            StartNode(TokenType.KeywordRaise);
+        /// <summary>
+        ///     Constructs new <see cref="RaiseStatement"/> from tokens.
+        /// </summary>
+        internal RaiseStatement(SyntaxTreeNode parent) : base(parent) {
+            MarkStart(TokenType.KeywordRaise);
 
             if (!PeekIs(Spec.NeverTestTypes)) {
                 Exception = Expression.ParseTestExpr(this);
@@ -45,26 +42,38 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c += "raise";
+        /// <summary>
+        ///     Constructs plain <see cref="RaiseStatement"/> without position in source.
+        /// </summary>
+        public RaiseStatement(Expression exception, Expression cause) {
+            Exception = exception;
+            Cause     = cause;
+        }
+
+        #endregion
+
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("raise");
             if (Exception != null) {
-                c = c + " " + Exception;
+                c.Write(" ", Exception);
             }
 
             if (Cause != null) {
-                c = c + " " + Cause;
+                c.Write(" ", Cause);
             }
-
-            return c;
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            c += "throw new Exception(";
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("throw new Exception(");
             if (Exception is ConstantExpression constant) {
-                c = c + constant + ".ToString()";
+                c.Write(constant, ".ToString()");
             }
 
-            return c + ");";
+            c.Write(");");
         }
+
+        #endregion
     }
 }

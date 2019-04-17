@@ -1,6 +1,5 @@
 using System.Linq;
 using Axion.Core.Processing;
-using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.Binary;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Syntactic.Statements.Small;
@@ -26,26 +25,23 @@ type9: List< Map<T1, T2> > | (Type1<Int, Type2[]>[], (Array[] | AnotherType)[])
 "
             );
             Parse(unit);
+            Assert.That(unit.Blames.Count == 0, $"unit.Blames.Count == {unit.Blames.Count}");
             TypeName[] stmts = unit.Ast.Root.Statements.Cast<ExpressionStatement>()
-                                   .Select(s => ((VarDefinitionExpression) s.Expression).Type)
+                                   .Select(s => ((VariableDefinitionExpression) s.Expression).Type)
                                    .ToArray();
             Assert.That(stmts.Length == 10);
             Assert.DoesNotThrow(
                 () => {
-                    var type0 = (SimpleTypeName) stmts[0];
-                    Assert.That(type0.Name is NameExpression);
+                    //var type0 = (SimpleTypeName) stmts[0];
 
                     var type1   = (UnionTypeName) stmts[1];
-                    var union1L = (SimpleTypeName) type1.Left;
-                    Assert.That(union1L.Name is NameExpression);
+                    //var union1L = (SimpleTypeName) type1.Left;
                     var union1R = (TupleTypeName) type1.Right;
                     Assert.That(union1R.Types.Count == 0);
 
-                    var type2 = (GenericTypeName) stmts[2];
-                    var genT2 = (SimpleTypeName) type2.Target;
-                    Assert.That(genT2.Name is NameExpression);
-                    var genG2 = (SimpleTypeName) type2.TypeArguments[0];
-                    Assert.That(genG2.Name is NameExpression);
+                    //var type2 = (GenericTypeName) stmts[2];
+                    //var genT2 = (SimpleTypeName) type2.Target;
+                    //var genG2 = (SimpleTypeName) type2.TypeArguments[0];
                 }
             );
         }

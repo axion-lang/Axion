@@ -1,188 +1,138 @@
+using System;
 using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Binary;
 using Axion.Core.Processing.Syntactic.Expressions.Multiple;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     public abstract class Expression : SyntaxTreeNode {
-        internal virtual string CannotDeleteReason => null;
-        internal virtual string CannotAssignReason => null;
+        protected Expression(SyntaxTreeNode parent) : base(parent) { }
+        protected Expression() { }
 
         /// <summary>
         ///     <c>
-        ///         primary ::=
-        ///             ID
+        ///         primary
+        ///             : ID
         ///             | CONSTANT
+        ///             | await_expr
+        ///             | new_expr
         ///             | parenthesis_expr
         ///             | list_expr
         ///             | hash_collection
-        ///             | trailer
         ///     </c>
         /// </summary>
         internal static Expression ParsePrimary(SyntaxTreeNode parent) {
-            Token token = parent.Peek;
-            switch (token.Type) {
-                case TokenType.Identifier: {
-                    return new NameExpression(parent);
+            Expression value;
+            switch (parent.Peek.Type) {
+                case Identifier: {
+                    value = new NameExpression(parent);
+                    break;
                 }
 
-                case TokenType.OpenParenthesis: {
-                    return ParenthesisExpression.Parse(parent);
+                case KeywordAwait: {
+                    value = new AwaitExpression(parent);
+                    break;
                 }
 
-                case TokenType.OpenBracket: {
-                    return new ListExpression(parent);
+                case KeywordYield: {
+                    value = new YieldExpression(parent);
+                    break;
                 }
 
-                case TokenType.OpenBrace: {
-                    return new HashCollectionExpression(parent);
+                case KeywordNew: {
+                    value = new TypeInitializerExpression(parent);
+                    break;
+                }
+
+                case OpenParenthesis: {
+                    value = ParseMultiple(parent, expectedTypes: Spec.PrimaryExprs);
+                    break;
+                }
+
+                case OpenBracket: {
+                    value = new ListInitializerExpression(parent);
+                    break;
+                }
+
+                case OpenBrace: {
+                    value = new HashCollectionExpression(parent);
+                    break;
                 }
 
                 default: {
-                    if (Spec.Literals.Contains(token.Type)) {
-                        parent.NextToken();
+                    parent.Move();
+                    if (Spec.Literals.Contains(parent.Token.Type)) {
                         // TODO add pre-concatenation of literals
-                        return new ConstantExpression(token);
+                        value = new ConstantExpression(parent, parent.Token);
+                    }
+                    else {
+                        parent.Unit.ReportError(Spec.ERR_PrimaryExpected, parent.Token);
+                        value = new ErrorExpression(parent);
                     }
 
-                    parent.NextToken();
-                    parent.Unit.ReportError(Spec.ERR_PrimaryExpected, token);
-                    return new ErrorExpression(parent.Token);
+                    break;
                 }
             }
-        }
 
-        /// <summary>
-        ///     If <paramref name="trailingComma" />, creates a tuple,
-        ///     otherwise, returns first expr from list.
-        /// </summary>
-        internal static Expression MaybeTuple(
-            NodeList<Expression> expressions,
-            bool                 trailingComma
-        ) {
-            if (!trailingComma && expressions.Count == 1) {
-                return expressions[0];
-            }
-
-            return new TupleExpression(!trailingComma, expressions);
+            return value;
         }
 
         /// <summary>
         ///     <c>
-        ///         test_list ::=
-        ///             ['('] [expr_list] [')']
+        ///         extended:
+        ///             (( primary {'|>' primary }) # pipeline
+        ///              | { member | call_expr | index_expr })
+        ///             ['++' | '--']
         ///     </c>
         /// </summary>
-        internal static Expression SingleOrTuple(
+        internal static Expression ParseExtended(
             SyntaxTreeNode parent,
-            bool           allowEmptyTuple = false
+            bool           allowGenerator = false
         ) {
-            Expression expr = null;
-            if (parent.PeekIs(Spec.NeverTestTypes)) {
-                if (!allowEmptyTuple) {
-                    parent.Unit.ReportError("Invalid expression.", parent.Peek);
-                    expr = new ErrorExpression(parent.Token);
-                    parent.NextToken();
-                }
-            }
-            else {
-                expr = ParseTestExpr(parent);
-                if (parent.MaybeEat(TokenType.Comma)) {
-                    var list = new TestList(parent, out bool trailingComma);
-                    list.Insert(0, expr);
-                    expr = MaybeTuple(list.Expressions, trailingComma);
-                }
-            }
-
-            return expr;
-        }
-
-        /// <summary>
-        ///     <c>
-        ///         target ::=
-        ///             ID
-        ///             | '(' target_list ')'
-        ///             | '[' target_list ']'
-        ///             | primary [trailer]
-        ///         target_list ::=
-        ///             target {',' target} [',']
-        ///     </c>
-        /// </summary>
-        internal static NodeList<Expression> TargetList(
-            SyntaxTreeNode parent,
-            out bool       trailingComma
-        ) {
-            var list = new NodeList<Expression>(parent);
-
-            do {
-                if (parent.MaybeEat(TokenType.OpenParenthesis, TokenType.OpenBracket)) {
-                    var brace = (MarkToken) parent.Token;
-
-                    // parenthesis_form | generator_expr
-                    list.Add(MaybeTuple(TargetList(parent, out trailingComma), trailingComma));
-                    parent.Eat(brace.Type.GetMatchingBracket());
-                }
-                else {
-                    list.Add(ParseTrailingExpr(parent, false));
-                }
-
-                trailingComma = parent.MaybeEat(TokenType.Comma);
-            } while (trailingComma && !parent.PeekIs(Spec.NeverTestTypes));
-
-            return list;
-        }
-
-        /// <summary>
-        ///     <c>
-        ///         trailing ::=
-        ///             | '[' subscription_list ']'
-        ///             | '++' | '--'
-        ///             | call
-        ///         call ::=
-        ///             '(' [args_list | comprehension] ')'
-        ///         member ::=
-        ///             '.' ID
-        ///     </c>
-        /// </summary>
-        internal static Expression ParseTrailingExpr(
-            SyntaxTreeNode parent,
-            bool           allowGeneratorExpression
-        ) {
-            Expression result = ParsePrimary(parent);
-            while (true) {
-                if (parent.MaybeEat(TokenType.Dot)) {
-                    result = new MemberExpression(result, new NameExpression(parent));
-                }
-
-                if (parent.MaybeEat(TokenType.RightPipeline)) {
-                    result = new CallExpression(
+            Expression value = ParsePrimary(parent);
+            // pipeline cannot be combined with other trailers
+            if (parent.MaybeEat(RightPipeline)) {
+                do {
+                    value = new FunctionCallExpression(
                         parent,
-                        ParseTestExpr(parent),
-                        new Arg(result)
+                        ParsePrimary(parent),
+                        new CallArgument(parent, value)
                     );
+                } while (parent.MaybeEat(RightPipeline));
+
+                return value;
+            }
+
+            while (true) {
+                if (parent.PeekIs(Dot)) {
+                    value = new MemberAccessExpression(parent, value);
                 }
-                else if (parent.Peek.Type == TokenType.OpenBracket) {
-                    result = new IndexExpression(result, IndexExpression.Parse(parent));
+                else if (parent.PeekIs(OpenParenthesis)) {
+                    value = new FunctionCallExpression(parent, value, allowGenerator);
                 }
-                else if (parent.MaybeEat(TokenType.OpIncrement, TokenType.OpDecrement)) {
-                    var op = (OperatorToken) parent.Token;
-                    op.Properties.InputSide = InputSide.Right;
-                    result                  = new UnaryExpression(op, result);
-                }
-                else if (parent.PeekIs(TokenType.OpenParenthesis)) {
-                    result = new CallExpression(parent, result, allowGeneratorExpression);
+                else if (parent.PeekIs(OpenBracket)) {
+                    value = new IndexerExpression(parent, value);
                 }
                 else {
-                    return result;
+                    break;
                 }
             }
+
+            if (parent.MaybeEat(OpIncrement, OpDecrement)) {
+                var op = (OperatorToken) value.Token;
+                op.Properties.InputSide = InputSide.Right;
+                value                   = new UnaryOperationExpression(parent, op, value);
+            }
+
+            return value;
         }
 
         /// <summary>
         ///     <c>
-        ///         unary_left ::=
+        ///         unary_left:
         ///             (UNARY_LEFT unary_left) | trailer
         ///     </c>
         /// </summary>
@@ -190,24 +140,23 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             if (parent.MaybeEat(Spec.UnaryLeftOperators)) {
                 var op = (OperatorToken) parent.Token;
                 op.Properties.InputSide = InputSide.Left;
-                return new UnaryExpression(op, ParseUnaryLeftExpr(parent));
+                return new UnaryOperationExpression(parent, op, ParseUnaryLeftExpr(parent));
             }
 
-            return ParseTrailingExpr(parent, true);
+            return ParseExtended(parent, true);
         }
 
         /// <summary>
         ///     <c>
-        ///         priority_expr ::=
+        ///         priority_expr:
         ///             factor OPERATOR priority_expr
         ///     </c>
         /// </summary>
         internal static Expression ParseOperation(SyntaxTreeNode parent, int precedence = 0) {
             Expression expr = ParseUnaryLeftExpr(parent);
-            while (parent.Peek is OperatorToken op
-                   && op.Properties.Precedence >= precedence) {
-                parent.NextToken();
-                expr = new BinaryExpression(
+            while (parent.Peek is OperatorToken op && op.Properties.Precedence >= precedence) {
+                parent.Move();
+                expr = new BinaryOperationExpression(
                     expr,
                     op,
                     ParseOperation(parent, op.Properties.Precedence + 1)
@@ -219,15 +168,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         /// <summary>
         ///     <c>
-        ///         test ::=
+        ///         test:
         ///             priority_expr [cond_expr]
         ///             | lambda_def
         ///     </c>
         /// </summary>
         internal static Expression ParseTestExpr(SyntaxTreeNode parent) {
             Expression expr = ParseOperation(parent);
-            if (parent.PeekIs(TokenType.KeywordIf, TokenType.KeywordUnless)
-                && parent.Token.Type != TokenType.Newline) {
+            if (parent.PeekIs(KeywordIf, KeywordUnless)
+                && parent.Token.Type != Newline) {
                 expr = new ConditionalExpression(parent, expr);
             }
 
@@ -236,64 +185,135 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         /// <summary>
         ///     <c>
-        ///         expr ::=
-        ///             ['let'] test_list [':' type] '=' assign_value
-        ///         assign_value ::=
+        ///         expr:
+        ///             test | (['let'] assignable [':' type] ['=' assign_value])
+        ///         assign_value:
         ///             yield_expr | test_list
         ///     </c>
         /// </summary>
         internal static Expression ParseExpression(SyntaxTreeNode parent) {
-            bool isImmutable = parent.MaybeEat(TokenType.KeywordLet);
+            bool isImmutable = parent.MaybeEat(KeywordLet);
 
-            Expression expr = SingleOrTuple(parent);
+            Expression expr = ParseMultiple(parent, ParseTestExpr);
+
             if (expr is ErrorExpression
-                || expr is UnaryExpression) {
+                || expr is UnaryOperationExpression
+                || !(isImmutable
+                     || Spec.AssignableExprs.Contains(expr.GetType())
+                     && parent.PeekIs(Colon, OpAssign))) {
                 return expr;
             }
 
-            // 'let' expr: type ['=' expr]
-            if (isImmutable) {
-                if (expr.CannotAssignReason != null) {
-                    parent.Unit.ReportError(expr.CannotAssignReason, expr);
-                }
-
-                TypeName   type  = null;
-                Expression value = null;
-                if (parent.MaybeEat(TokenType.Colon)) {
-                    type = TypeName.Parse(parent);
-                }
-
-                if (parent.MaybeEat(TokenType.OpAssign)) {
-                    value = ParseValue(parent);
-                }
-
-                return new VarDefinitionExpression(expr, type, value) {
-                    IsImmutable = true
+            if (expr is BinaryOperationExpression bin && bin.Operator.Is(OpAssign)) {
+                return new VariableDefinitionExpression(bin.Left, null, bin.Right) {
+                    IsImmutable = isImmutable
                 };
             }
 
-            // expr: type ['=' expr]
-            if (parent.MaybeEat(TokenType.Colon)) {
-                TypeName   type  = TypeName.Parse(parent);
-                Expression value = null;
-                if (parent.MaybeEat(TokenType.OpAssign)) {
-                    value = ParseValue(parent);
-                }
-
-                if (expr.CannotAssignReason != null) {
-                    parent.Unit.ReportError(expr.CannotAssignReason, expr);
-                }
-
-                return new VarDefinitionExpression(expr, type, value);
+            if (!Spec.AssignableExprs.Contains(expr.GetType())) {
+                parent.Unit.ReportError(Spec.ERR_InvalidAssignmentTarget, expr);
             }
 
-            return expr;
+            TypeName   type  = null;
+            Expression value = null;
+            if (parent.MaybeEat(Colon)) {
+                type = TypeName.ParseTypeName(parent);
+            }
+
+            if (parent.MaybeEat(OpAssign)) {
+                value = ParseMultiple(parent, expectedTypes: Spec.TestExprs);
+            }
+
+            return new VariableDefinitionExpression(expr, type, value) {
+                IsImmutable = isImmutable
+            };
         }
 
-        private static Expression ParseValue(SyntaxTreeNode parent) {
-            return parent.PeekIs(TokenType.KeywordYield)
-                ? new YieldExpression(parent)
-                : SingleOrTuple(parent);
+        /// <summary>
+        ///     <c>
+        ///         ['('] expr {',' expr} [')']
+        ///     </c>
+        ///     Helper for parsing multiple comma-separated
+        ///     expressions with optional parenthesis
+        ///     (e.g. tuples)
+        /// </summary>
+        internal static Expression ParseMultiple(
+            SyntaxTreeNode                   parent,
+            Func<SyntaxTreeNode, Expression> parserFunc = null,
+            params Type[]                    expectedTypes
+        ) {
+            parserFunc??=ParseExpression;
+            bool  parens = parent.MaybeEat(OpenParenthesis);
+            Token start  = parent.Token;
+            // empty tuple
+            if (parent.MaybeEat(CloseParenthesis)) {
+                return new TupleExpression(parent, start, parent.Token);
+            }
+
+            var list = new NodeList<Expression>(parent) {
+                parserFunc(parent)
+            };
+
+            // tuple
+            if (parent.MaybeEat(Comma)) {
+                bool trailingComma;
+                do {
+                    list.Add(parserFunc(parent));
+                    trailingComma = parent.MaybeEat(Comma);
+                } while (trailingComma);
+            }
+            // generator | comprehension
+            else if (parent.PeekIs(KeywordFor)) {
+                list[0] = new ForComprehension(parent, list[0]);
+                if (parens) {
+                    list[0] = new GeneratorExpression((ForComprehension) list[0]);
+                }
+            }
+            // parenthesized
+            else {
+                if (parens
+                    && !(list[0] is ParenthesizedExpression)
+                    && !(list[0] is TupleExpression)) {
+                    list[0] = new ParenthesizedExpression(list[0]);
+                }
+            }
+
+            if (parens) {
+                parent.Eat(CloseParenthesis);
+            }
+
+            if (expectedTypes.Length > 0) {
+                for (var i = 0; i < list.Count; i++) {
+                    Type itemType = list[i].GetType();
+                    if (!expectedTypes.Contains(itemType)) {
+                        parent.Unit.ReportError(
+                            "Expected "
+                            + Utilities.GetExprFriendlyName(expectedTypes[0])
+                            + ", got "
+                            + Utilities.GetExprFriendlyName(itemType),
+                            list[i]
+                        );
+                    }
+                }
+            }
+
+            return MaybeTuple(parent, list, false);
+        }
+
+        /// <summary>
+        ///     If <paramref name="trailingComma" />, creates a tuple,
+        ///     otherwise, returns first expr from list.
+        /// </summary>
+        internal static Expression MaybeTuple(
+            SyntaxTreeNode       parent,
+            NodeList<Expression> expressions,
+            bool                 trailingComma
+        ) {
+            if (!trailingComma && expressions.Count == 1) {
+                return expressions[0];
+            }
+
+            return new TupleExpression(parent, !trailingComma, expressions);
         }
     }
 }

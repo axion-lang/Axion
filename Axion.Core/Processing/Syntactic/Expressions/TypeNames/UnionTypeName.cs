@@ -1,18 +1,17 @@
+using System;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
-    ///         union_type ::=
+    ///         union_type:
     ///             type ('|' type)+
     ///     </c>
     /// </summary>
     public class UnionTypeName : TypeName {
         private TypeName left;
 
-        [NotNull]
         public TypeName Left {
             get => left;
             set => SetNode(ref left, value);
@@ -20,32 +19,41 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         private TypeName right;
 
-        [NotNull]
         public TypeName Right {
             get => right;
             set => SetNode(ref right, value);
         }
 
-        public UnionTypeName([NotNull] TypeName left, [NotNull] TypeName right) {
-            Left  = left;
-            Right = right;
-            //MarkPosition(Left, Right);
-        }
-
-        public UnionTypeName([NotNull] SyntaxTreeNode parent, [NotNull] TypeName left) {
+        /// <summary>
+        ///     Constructs new <see cref="UnionTypeName"/> from Axion tokens.
+        /// </summary>
+        public UnionTypeName(SyntaxTreeNode parent, TypeName left) {
             Parent = parent;
             Left   = left;
-            
+
             MarkStart(Left);
-            
+
             Eat(TokenType.OpBitOr);
-            Right = Parse(this);
-            
+            Right = ParseTypeName(this);
+
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            return c + Left + " | " + Right;
+        /// <summary>
+        ///     Constructs plain <see cref="UnionTypeName"/> without position in source.
+        /// </summary>
+        public UnionTypeName(TypeName left, TypeName right) {
+            Left  = left;
+            Right = right;
+            MarkPosition(Left, Right);
+        }
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(Left, " | ", Right);
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            throw new NotSupportedException();
         }
     }
 }

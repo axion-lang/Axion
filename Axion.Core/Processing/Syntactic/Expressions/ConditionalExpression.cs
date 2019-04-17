@@ -1,12 +1,11 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
-using JetBrains.Annotations;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///         cond_expr ::=
+    ///         cond_expr:
     ///             expr ('if' | 'unless') priority_expr ['else' expr]
     ///     </c>
     /// </summary>
@@ -20,7 +19,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         private Expression trueExpression;
 
-        [NotNull]
         public Expression TrueExpression {
             get => trueExpression;
             set => SetNode(ref trueExpression, value);
@@ -33,12 +31,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref falseExpression, value);
         }
 
-        internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
+        internal override TypeName ValueType => TrueExpression.ValueType;
 
         public ConditionalExpression(
-            Expression           condition,
-            [NotNull] Expression trueExpression,
-            Expression           falseExpression
+            Expression condition,
+            Expression trueExpression,
+            Expression falseExpression
         ) {
             Condition       = condition;
             TrueExpression  = trueExpression;
@@ -47,8 +45,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkPosition(condition, falseExpression ?? trueExpression);
         }
 
-        internal ConditionalExpression(SyntaxTreeNode parent, [NotNull] Expression trueExpression) {
-            Parent = parent;
+        internal ConditionalExpression(SyntaxTreeNode parent, Expression trueExpression) : base(
+            parent
+        ) {
             bool invert = MaybeEat(TokenType.KeywordUnless);
             if (!invert) {
                 Eat(TokenType.KeywordIf);
@@ -66,28 +65,25 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             if (invert) {
                 (TrueExpression, FalseExpression) = (FalseExpression, TrueExpression);
             }
-            
+
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c = c + TrueExpression + "if" + Condition;
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(TrueExpression, " if ", Condition);
             if (FalseExpression != null) {
-                c = c + " else " + FalseExpression;
+                c.Write(" else ", FalseExpression);
             }
-            return c;
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            c = c + Condition + "?" + TrueExpression + ":";
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(Condition, " ? ", TrueExpression, " : ");
             if (FalseExpression == null) {
-                c += "default";
+                c.Write("default");
             }
             else {
-                c += FalseExpression;
+                c.Write(FalseExpression);
             }
-
-            return c;
         }
     }
 }

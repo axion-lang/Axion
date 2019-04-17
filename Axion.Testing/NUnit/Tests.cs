@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using Axion.Core.Processing;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
 using NUnit.Framework;
 

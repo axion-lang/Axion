@@ -1,24 +1,23 @@
-using System.Collections.Generic;
-using System.Linq;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Syntactic.Statements.Interfaces;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
     /// <summary>
     ///     <c>
-    ///         enum_def ::=
+    ///         enum_def:
     ///             'enum' name ['(' args_list ')']
-    ///             block_start enum_item* block_terminator
+    ///             block_start enum_item {',' enum_item} block_terminator
     ///     </c>
     /// </summary>
     public class EnumDefinition : Statement, IDecorated {
+        #region Properties
+
         private Expression name;
 
-        [NotNull]
         public Expression Name {
             get => name;
             set => SetNode(ref name, value);
@@ -38,32 +37,38 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             set => SetNode(ref items, value);
         }
 
-        public List<Expression> Modifiers { get; set; }
+        private NodeList<Expression> modifiers;
 
-        public EnumDefinition(
-            [NotNull] SyntaxTreeNode parent,
-            [NotNull] Expression     name,
-            NodeList<TypeName>       bases = null,
-            NodeList<EnumItem>       items = null
-        ) {
-            Parent = parent;
-            Name   = name;
-            Bases  = bases;
-            Items  = items;
+        public NodeList<Expression> Modifiers {
+            get => modifiers ??= new NodeList<Expression>(this);
+            set {
+                if (value != null) {
+                    modifiers = value;
+                }
+            }
         }
 
-        internal EnumDefinition(SyntaxTreeNode parent) {
-            Parent = parent;
-            Items  = new NodeList<EnumItem>(this);
-            StartNode(TokenType.KeywordEnum);
+        #endregion
+
+        public EnumDefinition(
+            SyntaxTreeNode      parent,
+            Expression          name,
+            NodeList<TypeName>? bases = null,
+            NodeList<EnumItem>? items = null
+        ) : base(parent) {
+            Name  = name;
+            Bases = bases ?? new NodeList<TypeName>(this);
+            Items = items ?? new NodeList<EnumItem>(this);
+        }
+
+        internal EnumDefinition(SyntaxTreeNode parent) : base(parent) {
+            Items = new NodeList<EnumItem>(this);
+            MarkStart(TokenType.KeywordEnum);
 
             Name = new NameExpression(this, true);
 
             // TODO: support for functions in enums.
-            Bases = new NodeList<TypeName>(
-                parent,
-                TypeName.ParseTypeArgs(this, false).Select(it => it.Item2)
-            );
+            Bases                                 = TypeName.ParseTypeArgs(this);
             (TokenType terminator, _, bool error) = BlockStatement.ParseStart(this);
 
             if (!MaybeEat(terminator) && !MaybeEat(TokenType.KeywordPass) && !error) {
@@ -71,24 +76,55 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
                     MaybeEatNewline();
                     Items.Add(new EnumItem(this));
                 } while (!MaybeEat(terminator)
-                         && !CheckUnexpectedEoc()
                          && MaybeEat(TokenType.Comma));
             }
 
             MarkEnd(Token);
         }
+
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("enum ", Name);
+            if (Bases.Count > 0) {
+                c.Write(" (");
+                c.AddJoin(",", Bases);
+                c.Write(")");
+            }
+
+            if (Items.Count > 0) {
+                c.Write(" {");
+                c.AddJoin(",", Items);
+                c.Write("}");
+            }
+            else {
+                c.Write(" pass");
+            }
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("enum ", Name);
+            if (Bases.Count > 1) {
+                Unit.ReportError("C# enum cannot be inherited from more than 1 type.", Bases[1]);
+            }
+
+            c.Write(" {");
+            c.AddJoin(",", Items);
+            c.Write("}");
+        }
+
+        #endregion
     }
 
     /// <summary>
     ///     <c>
-    ///         enum_item ::=
+    ///         enum_item:
     ///             name ['(' [type {',' type}] ')'] ['=' constant_expr]
     ///     </c>
     /// </summary>
     public class EnumItem : Expression {
         private NameExpression name;
 
-        [NotNull]
         public NameExpression Name {
             get => name;
             set => SetNode(ref name, value);
@@ -96,26 +132,24 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
 
         private NodeList<TypeName> typeList;
 
-        [NotNull]
         public NodeList<TypeName> TypeList {
             get => typeList;
             set => SetNode(ref typeList, value);
         }
 
-        private ConstantExpression val;
+        private ConstantExpression? val;
 
-        public ConstantExpression Value {
+        public ConstantExpression? Value {
             get => val;
             set => SetNode(ref val, value);
         }
 
         public EnumItem(
-            [NotNull] SyntaxTreeNode parent,
-            [NotNull] NameExpression name,
-            NodeList<TypeName>       typeList = null,
-            ConstantExpression       value    = null
-        ) {
-            Parent   = parent;
+            SyntaxTreeNode      parent,
+            NameExpression      name,
+            NodeList<TypeName>? typeList = null,
+            ConstantExpression? value    = null
+        ) : base(parent) {
             Name     = name;
             TypeList = typeList ?? new NodeList<TypeName>(this);
             Value    = value;
@@ -126,15 +160,11 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             );
         }
 
-        internal EnumItem(SyntaxTreeNode parent) {
-            Parent = parent;
+        internal EnumItem(SyntaxTreeNode parent) : base(parent) {
             MarkStart(Token);
 
-            Name = new NameExpression(this, true);
-            TypeList = new NodeList<TypeName>(
-                this,
-                TypeName.ParseTypeArgs(this, false).Select(it => it.Item2).ToList()
-            );
+            Name     = new NameExpression(this, true);
+            TypeList = TypeName.ParseTypeArgs(this);
             if (MaybeEat(TokenType.OpAssign)) {
                 Value = ParsePrimary(this) as ConstantExpression;
                 if (Value == null) {
@@ -144,5 +174,33 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
 
             MarkEnd(Token);
         }
+
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(Name);
+            if (TypeList.Count > 0) {
+                c.Write(" (");
+                c.AddJoin(",", TypeList);
+                c.Write(")");
+            }
+
+            if (Value != null) {
+                c.Write(" = ", Value);
+            }
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(Name);
+            if (TypeList.Count > 0) {
+                Unit.ReportError("C# doesn't support enum items with types.", TypeList[0]);
+            }
+
+            if (Value != null) {
+                c.Write(" = ", Value);
+            }
+        }
+
+        #endregion
     }
 }

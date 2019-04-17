@@ -11,19 +11,19 @@ n3 = ++n + n++
 if val in collection:
     ++n
     c_if(val)
-    while i = 0, i < 123456789, i++:
+    for i = 0; i < 123456789; i++:
         print(collection[i])
         nextloop()
     n2 = n++ + ++n
 
-main(entryValue = if n2 == null: value1 else: value2, 12345)
+main(value1 if n2 == null else value2, 12345)
 
 if val in collection and val in collection:
 	++n
 	call(val, c_if_nest())
-	while i = 0, 
-	      i < 123456789, 
-	      i++:
+	for i = 0;
+	    i < 123456789;
+	    i++:
 		print(collection[i])
 	++n
 elif condition and condition:

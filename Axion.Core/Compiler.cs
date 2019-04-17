@@ -58,6 +58,7 @@ namespace Axion.Core {
             "Type '-h', or '--help' to get documentation about launch arguments.";
 
         internal static FileInfo[] InputFiles { get; private set; }
+        internal static bool       Verbose;
 
         public static void Init(string[] arguments) {
             if (!Directory.Exists(OutputDirectory)) {
@@ -73,6 +74,8 @@ namespace Axion.Core {
                         .ParseArguments<CommandLineArguments>(arguments)
                         .MapResult(
                             options => {
+                                Verbose = options.Verbose;
+
                                 if (options.Exit) {
                                     Environment.Exit(0);
                                 }
@@ -249,41 +252,46 @@ namespace Axion.Core {
         }
 
         private static void Process(SourceUnit unit) {
-            Logger.Task($"Compiling '{unit.SourceFileName}'");
+            Logger.Task($"Processing '{unit.SourceFileName}'");
 
             if (string.IsNullOrWhiteSpace(unit.Code)) {
-                Logger.Error("Source is empty. Compilation aborted.");
-                FinishCompilation(unit);
+                Logger.Error("Source is empty. Processing aborted.");
+                FinishProcessing(unit);
                 return;
             }
 
             // [1] Lexical analysis
-            Logger.Step("Tokens list generation");
+            if (Verbose) {
+                Logger.Step("Tokens list generation");
+            }
+
             new Lexer(unit).Process();
             if (unit.ProcessingMode == SourceProcessingMode.Lex) {
-                FinishCompilation(unit);
+                FinishProcessing(unit);
                 return;
             }
 
             // [2] Parsing
-            Logger.Step("Abstract Syntax Tree generation");
-            unit.Ast.Parse();
-            if (unit.ProcessingMode == SourceProcessingMode.Parsing) {
-                FinishCompilation(unit);
-                return;
+            if (Verbose) {
+                Logger.Step("Abstract Syntax Tree generation");
             }
 
-            FinishCompilation(unit);
-
-            if (unit.Blames.Count > 0) {
+            unit.Ast.Parse();
+            if (unit.ProcessingMode == SourceProcessingMode.Parsing) {
+                FinishProcessing(unit);
                 return;
             }
 
             // [n] Code generation
             GenerateCode(unit);
+            FinishProcessing(unit);
         }
 
         private static async void GenerateCode(SourceUnit unit) {
+            if (unit.Blames.Any(e => e.Severity == BlameSeverity.Error)) {
+                return;
+            }
+
             switch (unit.ProcessingMode) {
                 case SourceProcessingMode.Interpret: {
                     Logger.Task("Interpretation");
@@ -292,7 +300,7 @@ namespace Axion.Core {
                         if (unit.Options.HasFlag(
                             SourceProcessingOptions.SyntaxAnalysisDebugOutput
                         )) {
-                            Logger.Warn("Transpiler debug output:");
+                            Logger.Step("Converter debug output:");
                             Logger.Log(csCode);
                         }
 
@@ -309,18 +317,17 @@ namespace Axion.Core {
                         Logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
                     }
 
-                    Logger.Task("Interpretation finished");
                     break;
                 }
 
                 case SourceProcessingMode.ConvertCS: {
-                    Logger.Warn("Transpiling to 'C#' is not fully implemented yet");
+                    Logger.Warn("Conversion to 'C#' is not fully implemented yet");
                     Logger.Log(unit.Ast.ToCSharp().ToFullString());
                     break;
                 }
 
                 case SourceProcessingMode.ConvertC: {
-                    Logger.Error("Transpiling to 'C' is not implemented yet");
+                    Logger.Error("Conversion to 'C' is not implemented yet");
                     break;
                 }
 
@@ -331,7 +338,7 @@ namespace Axion.Core {
             }
         }
 
-        private static void FinishCompilation(SourceUnit unit) {
+        private static void FinishProcessing(SourceUnit unit) {
             if (unit.Options.HasFlag(SourceProcessingOptions.ShowAstJson)) {
                 Logger.Log(AstToMinifiedJson(unit));
             }
@@ -345,17 +352,20 @@ namespace Axion.Core {
                 SaveDebugInfoToFile(unit);
             }
 
-            if (unit.Blames.Count > 0) {
-                foreach (Exception e in unit.Blames) {
-                    var exception = (LanguageException) e;
-                    exception.Print(unit);
-                }
 
-                Logger.Task("Compilation aborted due to errors above");
+            var errCount = 0;
+            foreach (LanguageException e in unit.Blames) {
+                e.Print(unit);
+                if (e.Severity == BlameSeverity.Error) {
+                    errCount++;
+                }
             }
-            else {
-                Logger.Task("Compilation finished");
-            }
+
+            Logger.Task(
+                errCount > 0
+                    ? "Processing terminated due to errors above"
+                    : "Processing finished"
+            );
         }
 
         #region Debug information
@@ -382,7 +392,9 @@ namespace Axion.Core {
         }
 
         private static string AstBackToSource(SourceUnit unit) {
-            return unit.Ast.ToAxionCode(new CodeBuilder(OutLang.Axion));
+            var code = new CodeBuilder(OutLang.Axion);
+            unit.Ast.ToAxionCode(code);
+            return code.ToString();
         }
 
         #endregion

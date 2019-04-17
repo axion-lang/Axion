@@ -1,28 +1,25 @@
 using System.Collections.Generic;
-using Axion.Core.Processing.Lexical.Tokens;
 
 namespace Axion.Core.Specification {
     public partial class Spec {
-        /// <summary>
-        ///     Type of tokens, that are treated as
-        ///     compile-time constant values.
-        /// </summary>
-        internal static readonly TokenType[] Literals = {
-            TokenType.String,
-            TokenType.Character,
-            TokenType.Number,
-            TokenType.KeywordTrue,
-            TokenType.KeywordFalse,
-            TokenType.KeywordNil
-        };
-
-        #region Language string and character literals
+        // =============================
+        // String and character literals
+        // =============================
         
+        /// <summary>
+        ///     Max. count of digits in escape
+        ///     sequence for Unicode char.
+        /// </summary>
+        internal const int  Unicode32BitHexLength = 6;
+        
+        /// <summary>
+        ///     Character used for escaping sequences in string/char literals.
+        /// </summary>
         internal const char EscapeMark = '\\';
 
         /// <summary>
-        ///     Quote used in language to specify
-        ///     start/end of 'character' literal.
+        ///     Quote used to specify start/end
+        ///     of char literal.
         /// </summary>
         internal const char CharacterLiteralQuote = '`';
 
@@ -32,41 +29,27 @@ namespace Axion.Core.Specification {
         internal static readonly char[] StringQuotes = { '"', '\'' };
 
         /// <summary>
-        ///     Contains all valid escape sequences in string and character literals.
+        ///     Contains all valid escape sequences in string/char literals.
         /// </summary>
-        internal static readonly Dictionary<char, string> EscapeSequences =
-            new Dictionary<char, string> {
-                { '0', "\u0000" },
-                { 'a', "\u0007" },
-                { 'b', "\u0008" },
-                { 'f', "\u000c" },
-                { 'n', "\u000a" },
-                { 'r', "\u000d" },
-                { 't', "\u0009" },
-                { 'v', "\u000b" },
-                { '\\', "\\" },
-                { '\'', "\'" },
-                { '\"', "\"" },
-                { '`', "\\`" }
-            };
-
-        #endregion
-
-        #region Language number literals
-
-        internal static readonly char[] NumberPostfixes = {
-            'f',
-            'F', // float
-            'l',
-            'L', // long
-            'i',
-            'I', // int (followed by bit rate)
-            'u',
-            'U', // unsigned
-            'j',
-            'J' // complex
+        internal static readonly Dictionary<char, string> EscapeSequences = new Dictionary<char, string> {
+            { '0', "\u0000" },
+            { 'a', "\u0007" },
+            { 'b', "\u0008" },
+            { 'f', "\u000c" },
+            { 'n', "\u000a" },
+            { 'r', "\u000d" },
+            { 't', "\u0009" },
+            { 'v', "\u000b" },
+            { '\\', "\\" },
+            { '\'', "\'" },
+            { '\"', "\"" },
+            { '`', "\\`" }
         };
 
+        // ===============
+        // Number literals
+        // ===============
+        
         internal const int MinNumberBitRate = 8;
         internal const int MaxNumberBitRate = 64;
 
@@ -76,6 +59,12 @@ namespace Axion.Core.Specification {
 
         internal static readonly int[] FloatBitRates = { 32, 64, 128 };
 
-        #endregion
+        internal static readonly char[] NumberPostfixes = {
+            'f', 'F', // float
+            'l', 'L', // long
+            'i', 'I', // int (followed by bit rate)
+            'u', 'U', // unsigned
+            'j', 'J'  // complex
+        };
     }
 }

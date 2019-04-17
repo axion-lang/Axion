@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Axion.Core.Processing.Errors;
+﻿using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Statements.Definitions;
@@ -8,20 +7,23 @@ using Axion.Core.Processing.Syntactic.Statements.Small;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
-    public class Statement : SyntaxTreeNode {
+    public abstract class Statement : SyntaxTreeNode {
+        protected Statement(SyntaxTreeNode parent) : base(parent) { }
+        protected Statement() { }
+
         /// <summary>
         ///     <c>
-        ///         single_stmt ::=
+        ///         single_stmt:
         ///             cond_stmt | while_stmt | for_stmt    |
         ///             try_stmt  | with_stmt  | import_stmt |
         ///             decorated
-        ///         decorated ::=
+        ///         decorated:
         ///             module_def | class_def  | enum_def |
         ///             func_def   | small_stmt
-        ///         small_stmt ::=
+        ///         small_stmt:
         ///             assert_stmt | delete_stmt | pass_stmt |
         ///             expr_stmt   | flow_stmt
-        ///         flow_stmt ::=
+        ///         flow_stmt:
         ///             break_stmt | continue_stmt | return_stmt |
         ///             raise_stmt | yield_stmt
         ///     </c>
@@ -55,42 +57,35 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
                     #region Small statements
 
-                    // assert
                     case TokenType.KeywordAssert: {
                         return new AssertStatement(parent);
                     }
 
-                    // pass
+                    case TokenType.Semicolon:
                     case TokenType.KeywordPass: {
-                        return new EmptyStatement(parent.NextToken());
+                        return new EmptyStatement(parent);
                     }
 
-                    // break
                     case TokenType.KeywordBreak: {
                         return new BreakStatement(parent);
                     }
 
-                    // continue
                     case TokenType.KeywordContinue: {
                         return new ContinueStatement(parent);
                     }
 
-                    // delete
                     case TokenType.KeywordDelete: {
                         return new DeleteStatement(parent);
                     }
 
-                    // raise
                     case TokenType.KeywordRaise: {
                         return new RaiseStatement(parent);
                     }
 
-                    // return
                     case TokenType.KeywordReturn: {
                         return new ReturnStatement(parent);
                     }
 
-                    // yield
                     case TokenType.KeywordYield: {
                         // For yield statements, continue to enforce that it's currently in a function. 
                         // This gives us better syntax error reporting for yield-statements than for yield-expressions.
@@ -104,7 +99,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                     #endregion
 
                     case TokenType.CloseBracket: {
-                        List<Expression> decorators = ParseDecorators(parent);
+                        NodeList<Expression> decorators = ParseDecorators(parent);
 
                         Statement stmt = ParseSingleStmt(parent, true);
                         if (stmt is IDecorated def) {
@@ -153,7 +148,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         /// <summary>
         ///     <c>
-        ///         stmt ::=
+        ///         stmt:
         ///             single_stmt {';' single_stmt} ';' [ (terminator | NEWLINE)
         ///     </c>
         /// </summary>
@@ -166,7 +161,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 return firstStmt;
             }
 
-            var statements = new List<Statement> {
+            var statements = new NodeList<Statement>(parent) {
                 firstStmt
             };
 
@@ -188,7 +183,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 }
             }
 
-            return new BlockStatement(statements.ToArray());
+            return new BlockStatement(statements);
         }
 
         /// <summary>
@@ -199,8 +194,8 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         ///             name ['(' [arg_list [',']] ')']
         ///     </c>
         /// </summary>
-        private static List<Expression> ParseDecorators(SyntaxTreeNode parent) {
-            var decorators = new List<Expression>();
+        private static NodeList<Expression> ParseDecorators(SyntaxTreeNode parent) {
+            var decorators = new NodeList<Expression>(parent);
 
             while (parent.MaybeEat(TokenType.OpenBracket)) {
                 do {
@@ -208,7 +203,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                     Token      start     = parent.Token;
                     Expression decorator = Expression.ParseExpression(parent);
                     if (parent.PeekIs(TokenType.OpenParenthesis)) {
-                        decorator = new CallExpression(parent, decorator);
+                        decorator = new FunctionCallExpression(parent, decorator);
                     }
 
                     decorator.MarkPosition(start, parent.Token);

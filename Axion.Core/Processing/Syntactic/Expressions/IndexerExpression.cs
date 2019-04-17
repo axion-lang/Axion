@@ -1,12 +1,18 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
-    public class IndexExpression : Expression {
+    /// <summary>
+    ///     <c>
+    ///         index_expr:
+    ///             primary '[' (expr | slice) {',' (expr | slice)} [','] ']'
+    ///         slice:
+    ///             [expr] ':' [expr] [':' [expr]]
+    ///     </c>
+    /// </summary>
+    public class IndexerExpression : Expression {
         private Expression target;
 
-        [NotNull]
         public Expression Target {
             get => target;
             set => SetNode(ref target, value);
@@ -14,51 +20,43 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         private Expression index;
 
-        [NotNull]
         public Expression Index {
             get => index;
             set => SetNode(ref index, value);
         }
 
-        public IndexExpression([NotNull] Expression target, [NotNull] Expression index) {
+        public IndexerExpression(SyntaxTreeNode parent, Expression target) : base(parent) {
             Target = target;
             Index  = index;
 
-            MarkPosition(target, index);
-        }
-
-        /// <summary>
-        ///     <c>
-        ///         indexer ::=
-        ///             '[' (expr | slice) {',' (expr | slice)} [','] ']'
-        ///         slice ::=
-        ///             [expr] ':' [expr] [':' [expr]]
-        ///     </c>
-        /// </summary>
-        internal static Expression Parse(SyntaxTreeNode parent) {
             parent.Eat(TokenType.OpenBracket);
 
-            bool trailingComma;
-            var  expressions = new NodeList<Expression>(parent);
+            var trailingComma = false;
+            var expressions   = new NodeList<Expression>(parent);
             do {
-                Expression start = null;
+                Expression? start = null;
                 if (!parent.PeekIs(TokenType.Colon)) {
                     start = ParseTestExpr(parent);
                 }
 
                 if (parent.MaybeEat(TokenType.Colon)) {
-                    Expression stop = null;
+                    Expression? stop = null;
                     if (!parent.PeekIs(TokenType.Colon, TokenType.Comma, TokenType.CloseBracket)) {
                         stop = ParseTestExpr(parent);
                     }
 
-                    Expression step = null;
+                    Expression? step = null;
                     if (parent.MaybeEat(TokenType.Colon)
                         && !parent.PeekIs(TokenType.Comma, TokenType.CloseBracket)) {
                         step = ParseTestExpr(parent);
                     }
 
-                    return new SliceExpression(start, stop, step);
+                    expressions.Add(new SliceExpression(parent, start, stop, step));
+                    break;
+                }
+
+                if (start == null) {
+                    parent.Unit.ReportError("Index expression expected.", parent.Token);
                 }
 
                 expressions.Add(start);
@@ -66,15 +64,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             } while (trailingComma && !parent.PeekIs(TokenType.CloseBracket));
 
             parent.Eat(TokenType.CloseBracket);
-            return MaybeTuple(expressions, trailingComma);
+            Index = MaybeTuple(parent, expressions, trailingComma);
+
+            MarkPosition(Target, Index);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            return c + Target + "[" + Index + "]";
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(Target, "[", Index, "]");
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            return c + Target + "[" + Index + "]";
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(Target, "[", Index, "]");
         }
     }
 }

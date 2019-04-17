@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Axion.Core.Processing.Lexical.Tokens;
 
 // ReSharper disable once CheckNamespace
 namespace Axion.Core.Specification {
@@ -23,15 +22,15 @@ namespace Axion.Core.Specification {
                     { TokenType.OpEqualsEquals,        "==" },
                     { TokenType.OpNotEquals,           "!=" },
                 
-                    { TokenType.OpAs,                  "as" },
-                    { TokenType.OpIs,                  "is" },
+                    { TokenType.KeywordAs,                  "as" },
+                    { TokenType.KeywordIs,                  "is" },
 
                 
                     { TokenType.OpLess,                "<"  },
                     { TokenType.OpGreater,             ">"  },
                     { TokenType.OpLessOrEqual,         "<=" },
                     { TokenType.OpGreaterOrEqual,      ">=" },
-                    { TokenType.OpAssign,              "="},
+                    { TokenType.OpAssign,              "="  },
                     { TokenType.OpPlusAssign,          "+="  },
                     { TokenType.OpTrueDivideAssign,    "/="  },
                     { TokenType.OpRemainderAssign,     "%="  },

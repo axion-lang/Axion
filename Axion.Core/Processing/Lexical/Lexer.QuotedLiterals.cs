@@ -87,7 +87,7 @@ namespace Axion.Core.Processing.Lexical {
 
         #region String literal
 
-        private StringToken ReadString(bool continueUnclosedString) {
+        private StringToken? ReadString(bool continueUnclosedString) {
             bool isStringEmpty = ReadStringPrefixes(
                 ref continueUnclosedString,
                 out StringLiteralOptions strOptions,
@@ -318,7 +318,7 @@ namespace Axion.Core.Processing.Lexical {
                 var lexer = new Lexer(unit, charIdx, lineIdx, columnIdx, newInterpolation.Tokens);
                 lexer.processCancellers.Add("}");
                 lexer.Move(); // skip '{'
-                lexer.mismatchingPairs.Add(new MarkToken(TokenType.OpenBrace));
+                lexer.mismatchingPairs.Add(new SymbolToken(TokenType.OpenBrace));
                 lexer.Process();
 
                 // remove usefulness closing curly

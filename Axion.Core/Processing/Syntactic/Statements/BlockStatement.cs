@@ -1,13 +1,15 @@
-using System.Collections.Generic;
+using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     /// <summary>
     ///     <c>
-    ///         block ::=
+    ///         block:
     ///               (':' stmt)
     ///             | ('{' stmt+ '}')
     ///             | (':' NEWLINE INDENT stmt+ OUTDENT)
@@ -16,19 +18,78 @@ namespace Axion.Core.Processing.Syntactic.Statements {
     public class BlockStatement : Statement {
         private NodeList<Statement> statements;
 
-        [NotNull]
         public NodeList<Statement> Statements {
             get => statements;
             set => SetNode(ref statements, value);
         }
 
-        internal BlockStatement([NotNull] IEnumerable<Statement> statements) {
+        #region Constructors
+
+        /// <summary>
+        ///     Constructor for root AST block.
+        /// </summary>
+        internal BlockStatement(Ast parent) {
+            Parent     = parent;
+            Statements = new NodeList<Statement>(this);
+        }
+
+        /// <summary>
+        ///     Constructs new <see cref="BlockStatement"/> from C# syntax.
+        /// </summary>
+        internal BlockStatement(SyntaxTreeNode parent, BlockSyntax csMembers) {
+            Parent = parent;
+            Statements = new NodeList<Statement>(
+                this,
+                csMembers.Statements.Select(s => (Statement) CSharpToAxion.ConvertNode(s))
+            );
+
+            if (Statements.Count != 0) {
+                MarkPosition(Statements.First, Statements.Last);
+            }
+        }
+
+        /// <summary>
+        ///     Constructs new <see cref="BlockStatement"/> from C# syntax.
+        /// </summary>
+        internal BlockStatement(
+            SyntaxTreeNode                      parent,
+            SyntaxList<MemberDeclarationSyntax> csMembers
+        ) {
+            Parent = parent;
+            Statements = new NodeList<Statement>(
+                this,
+                csMembers.Select(m => (Statement) CSharpToAxion.ConvertNode(m))
+            );
+
+            if (Statements.Count != 0) {
+                MarkPosition(Statements.First, Statements.Last);
+            }
+        }
+
+        /// <summary>
+        ///     Constructs new <see cref="BlockStatement"/> from tokens.
+        /// </summary>
+        internal BlockStatement(SyntaxTreeNode parent, params Statement[] statements) {
+            Parent     = parent;
             Statements = new NodeList<Statement>(this, statements);
 
             if (Statements.Count != 0) {
                 MarkPosition(Statements.First, Statements.Last);
             }
         }
+
+        /// <summary>
+        ///     Constructs plain <see cref="BlockStatement"/> without position in source.
+        /// </summary>
+        internal BlockStatement(NodeList<Statement> statements) {
+            Statements = statements;
+
+            if (Statements.Count != 0) {
+                MarkPosition(Statements.First, Statements.Last);
+            }
+        }
+
+        #endregion
 
         internal BlockStatement(SyntaxTreeNode parent, BlockType type = BlockType.Default) {
             Parent = parent;
@@ -69,9 +130,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 }
 
                 case BlockType.Anyway: {
-                    if (Ast.CurrentFunction != null) {
-                        Ast.CurrentFunction.ContainsTryFinally = true;
-                    }
+                    if (Ast.CurrentFunction != null) { }
 
                     bool isInFinally     = Ast.InFinally,
                          isInFinallyLoop = Ast.InFinallyLoop;
@@ -177,17 +236,25 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             return (terminator, false, false);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            c += "{ ";
-            c.AppendJoin("; ", Statements);
-            return c + "; }";
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.WriteLine("");
+            c.Writer.Indent++;
+            c.AddJoin("", Statements, true);
+            c.Writer.Indent--;
+            c.WriteLine("");
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            c += "{";
-            c.AppendJoin("", Statements);
-            return c + "}";
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.WriteLine("{");
+            c.Writer.Indent++;
+            c.AddJoin("", Statements, true);
+            c.Writer.Indent--;
+            c.Write("}");
         }
+
+        #endregion
     }
 
     public enum BlockType {

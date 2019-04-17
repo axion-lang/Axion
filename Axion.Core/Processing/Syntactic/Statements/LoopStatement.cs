@@ -1,27 +1,25 @@
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
-using JetBrains.Annotations;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
-    public class LoopStatement : Statement {
+    public abstract class LoopStatement : Statement {
         private BlockStatement block;
 
-        [NotNull]
         public BlockStatement Block {
             get => block;
             set => SetNode(ref block, value);
         }
 
-        private BlockStatement noBreakBlock;
+        private BlockStatement? noBreakBlock;
 
-        public BlockStatement NoBreakBlock {
+        public BlockStatement? NoBreakBlock {
             get => noBreakBlock;
             set => SetNode(ref noBreakBlock, value);
         }
 
         public LoopStatement(
-            [NotNull] BlockStatement block,
-            BlockStatement           noBreakBlock
+            BlockStatement  block,
+            BlockStatement? noBreakBlock
         ) {
             Block        = block;
             NoBreakBlock = noBreakBlock;
@@ -29,25 +27,9 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkEnd(NoBreakBlock ?? Block);
         }
 
-        public LoopStatement(
-            Token          startToken,
-            BlockStatement block,
-            BlockStatement noBreakBlock
-        ) : this(block, noBreakBlock) {
-            MarkPosition(startToken, NoBreakBlock ?? Block);
-        }
-
         protected LoopStatement() { }
+        protected LoopStatement(SyntaxTreeNode parent) : base(parent) { }
 
-        /// <summary>
-        ///     <c>
-        ///         for_stmt ::=
-        ///             'for'
-        ///                 (expr_list 'in' test_list) |
-        ///                 ([expr_stmt] ';' [expr_stmt] ';' [expr_stmt])
-        ///             block ['else' block]
-        ///     </c>
-        /// </summary>
         internal static LoopStatement ParseFor(SyntaxTreeNode parent) {
             int startIdx = parent.Ast.Index;
             parent.Eat(TokenType.KeywordFor);

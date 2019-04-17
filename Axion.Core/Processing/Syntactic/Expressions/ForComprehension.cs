@@ -1,14 +1,26 @@
 using System;
-using Axion.Core.Processing.Lexical.Tokens;
-using JetBrains.Annotations;
+using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Specification;
+using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///          parent 'for' target_list 'in' operation [right]
+    ///          target 'for' target_list 'in' operation [right]
     ///     </c>
     /// </summary>
     public class ForComprehension : Expression {
+        #region Properties
+
+        private Expression target;
+
+        [JsonIgnore]
+        public Expression Target {
+            get => target;
+            set => SetNode(ref target, value);
+        }
+
         private Expression item;
 
         public Expression Item {
@@ -30,29 +42,41 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref right, value);
         }
 
-        public ForComprehension([NotNull] Expression left, Expression item, Expression iterable) {
-            Parent   = left ?? throw new ArgumentNullException(nameof(left));
-            Item     = item ?? throw new ArgumentNullException(nameof(item));
-            Iterable = iterable ?? throw new ArgumentNullException(nameof(iterable));
-        }
+        internal override TypeName ValueType => Parent.ValueType;
 
-        public ForComprehension(SyntaxTreeNode parent) {
-            Parent = parent;
+        #endregion
 
-            StartNode(TokenType.KeywordFor);
-            Item = MaybeTuple(
-                TargetList(this, out bool trailingComma),
-                trailingComma
-            );
-            Eat(TokenType.OpIn);
-            Iterable = ParseOperation(this);
+        public ForComprehension(SyntaxTreeNode parent, Expression target) : base(parent) {
+            Target = target;
+
+            MarkStart(TokenType.KeywordFor);
+            Item = ParseMultiple(this, ParsePrimary, typeof(NameExpression));
+            Eat(TokenType.KeywordIn);
+            Iterable = ParseMultiple(parent, ParseTestExpr, Spec.TestExprs);
 
             if (PeekIs(TokenType.KeywordFor)) {
-                Right = new ForComprehension(this);
+                Right = new ForComprehension(Parent, this);
             }
             else if (PeekIs(TokenType.KeywordIf, TokenType.KeywordUnless)) {
                 Right = new ConditionalComprehension(this);
             }
+
+            MarkEnd(Token);
+        }
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(
+                Target,
+                " for ",
+                Item,
+                " in ",
+                Iterable,
+                Right
+            );
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            throw new NotSupportedException();
         }
     }
 }

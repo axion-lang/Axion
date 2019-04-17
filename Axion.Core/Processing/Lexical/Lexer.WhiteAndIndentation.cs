@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Lexical {
     public partial class Lexer {
@@ -32,14 +34,14 @@ namespace Axion.Core.Processing.Lexical {
 
         #endregion
 
-        private NewlineToken ReadNewline() {
+        private NewlineToken? ReadNewline() {
             // skip all newline characters
             while (c == '\n' || c == '\r') {
                 tokenValue.Append(c);
                 Move();
             }
 
-            if (tokens.Count > 0 && tokens.Last().Is(TokenType.Newline)) {
+            if (tokens.Count > 0 && tokens.Last().Is(Newline)) {
                 tokens[tokens.Count - 1].AppendValue(tokenValue.ToString());
                 return null;
             }
@@ -57,14 +59,14 @@ namespace Axion.Core.Processing.Lexical {
             // then add outdents
             lastIndentLength = 0;
             while (indentLevel > 0) {
-                tokens.Add(new Token(TokenType.Outdent, tokenStartPosition));
+                tokens.Add(new Token(Outdent, tokenStartPosition));
                 indentLevel--;
             }
 
             return null;
         }
 
-        private Token ReadWhite() {
+        private Token? ReadWhite() {
             while (c.IsSpaceOrTab()) {
                 tokenValue.Append(c);
                 Move();
@@ -76,16 +78,17 @@ namespace Axion.Core.Processing.Lexical {
             if (tokens.Count == 0) {
                 lastIndentLength = tokenValue.Length;
                 return new Token(
-                    TokenType.Whitespace,
+                    Whitespace,
                     tokenValue.ToString(),
                     tokenStartPosition
                 );
             }
 
             string restOfLine = GetRestOfLine();
+            int    restLen    = restOfLine.Trim().Length;
 
             bool prevIsBinOp =
-                tokens.Last() is OperatorToken op
+                tokens[tokens.Count - 1] is OperatorToken op
                 && op.Properties.InputSide == InputSide.Both;
 
             bool hasUnclosedComment =
@@ -94,16 +97,27 @@ namespace Axion.Core.Processing.Lexical {
                 && Regex.Matches(restOfLine, Spec.MultiCommentStartPattern).Count
                 > Regex.Matches(restOfLine, Spec.MultiCommentEndPattern).Count;
 
+            // todo optimize
+            var any = false;
+            foreach (KeyValuePair<string, OperatorProperties> kvp in Spec.Operators) {
+                if (kvp.Value.InputSide == InputSide.Both
+                    && restOfLine.StartsWith(kvp.Key)) {
+                    any = true;
+                    break;
+                }
+            }
+
             bool nextCanBeIndent =
                 !prevIsBinOp
                 && !hasUnclosedComment
                 && mismatchingPairs.Count == 0
-                && restOfLine.Trim().Length > 0
-                && !restOfLine.StartsWith(Spec.CommentStart);
+                && restLen > 0
+                && !restOfLine.StartsWith(Spec.CommentStart)
+                && !any;
 
-            if (tokens.Last().Is(TokenType.Newline)) {
+            if (tokens[tokens.Count - 1].Is(Newline)) {
                 // handle empty string with whitespaces, make newline
-                if (restOfLine.Trim().Length == 0) {
+                if (restLen == 0 && !Spec.EndOfLines.Contains(restOfLine)) {
                     tokenValue.Append(restOfLine);
                     Move(restOfLine.Length);
                     tokens.Add(new NewlineToken(tokenValue.ToString(), tokenStartPosition));
@@ -125,7 +139,7 @@ namespace Axion.Core.Processing.Lexical {
             return null;
         }
 
-        private Token ReadIndentation() {
+        private Token? ReadIndentation() {
             // set indent character if it is unknown
             if (indentChar == '\0') {
                 indentChar = tokenValue[0];
@@ -161,10 +175,14 @@ namespace Axion.Core.Processing.Lexical {
                 oneIndentSize = newIndentLength;
             }
 
-            Token indentationToken;
+            Token? indentationToken;
             if (newIndentLength > lastIndentLength) {
                 // indent increased
-                indentationToken = new Token(TokenType.Indent, tokenValue.ToString(), tokenStartPosition);
+                indentationToken = new Token(
+                    Indent,
+                    tokenValue.ToString(),
+                    tokenStartPosition
+                );
                 indentLevel++;
             }
             else {
@@ -175,7 +193,7 @@ namespace Axion.Core.Processing.Lexical {
 
                 while (newIndentLength < lastIndentLength) {
                     // indent decreased
-                    tokens.Add(new Token(TokenType.Outdent, tokenStartPosition));
+                    tokens.Add(new Token(Outdent, tokenStartPosition));
                     indentLevel--;
                     lastIndentLength -= oneIndentSize;
                 }

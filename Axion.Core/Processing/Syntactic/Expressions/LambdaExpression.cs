@@ -1,8 +1,8 @@
+using System;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Syntactic.Statements;
 using Axion.Core.Processing.Syntactic.Statements.Definitions;
-using Axion.Core.Specification;
-using JetBrains.Annotations;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     public class LambdaExpression : Expression {
@@ -13,10 +13,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref returnType, value);
         }
 
-        private NodeList<Parameter> parameters;
+        private NodeList<FunctionParameter> parameters;
 
-        [NotNull]
-        public NodeList<Parameter> Parameters {
+        public NodeList<FunctionParameter> Parameters {
             get => parameters;
             set => SetNode(ref parameters, value);
         }
@@ -28,14 +27,20 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref block, value);
         }
 
-        internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
-
         public LambdaExpression(
-            [NotNull] BlockStatement block,
-            NodeList<Parameter>      parameters = null
+            BlockStatement               block,
+            NodeList<FunctionParameter>? parameters = null
         ) {
             Block      = block;
-            Parameters = parameters ?? new NodeList<Parameter>(this);
+            Parameters = parameters ?? new NodeList<FunctionParameter>(this);
+        }
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            throw new NotSupportedException();
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            throw new NotSupportedException();
         }
     }
 }

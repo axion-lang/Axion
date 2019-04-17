@@ -1,29 +1,31 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
-using JetBrains.Annotations;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Small {
     public class ExpressionStatement : Statement {
         private Expression expression;
 
-        [NotNull]
         public Expression Expression {
             get => expression;
             set => SetNode(ref expression, value);
         }
 
-        public ExpressionStatement([NotNull] Expression expression) {
+        public ExpressionStatement(Expression expression) {
+            Parent     = expression.Parent;
             Expression = expression;
             MarkPosition(expression);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            return c + Expression;
+        #region Code converters
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(Expression);
         }
 
-        internal override CodeBuilder ToCSharpCode(CodeBuilder c) {
-            c += Expression;
-            return c + ";";
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(Expression, ";");
         }
+
+        #endregion
     }
 }

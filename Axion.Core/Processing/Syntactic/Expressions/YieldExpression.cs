@@ -1,27 +1,23 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
-using JetBrains.Annotations;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///         yield_expr ::=
+    ///         yield_expr:
     ///             'yield' ['from' test | test_list]
     ///     </c>
     /// </summary>
     public class YieldExpression : Expression {
-        private  Expression val;
+        private Expression val;
 
-        [NotNull]
         public Expression Value {
             get => val;
             set => SetNode(ref val, value);
         }
-        
-        internal bool IsYieldFrom { get; }
 
-        internal override string CannotAssignReason => Spec.ERR_InvalidAssignmentTarget;
+        internal bool IsYieldFrom { get; }
 
         internal YieldExpression(
             Expression value,
@@ -34,16 +30,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkPosition(start, end);
         }
 
-        internal YieldExpression(SyntaxTreeNode parent) {
-            Parent = parent;
-            StartNode(TokenType.KeywordYield);
+        internal YieldExpression(SyntaxTreeNode parent) : base(parent) {
+            MarkStart(TokenType.KeywordYield);
             // Mark that function as generator.
             // If we're in a generator expr, then we don't have a function yet.
             // g = ((yield i) for i in range(5))
             // In that case, the gen_expr will mark IsGenerator. 
-            if (Ast.CurrentFunction != null) {
-                Ast.CurrentFunction.IsGenerator = true;
-            }
+            if (Ast.CurrentFunction != null) { }
 
             // Parse expr list after yield. This can be:
             // 1) empty, in which case it becomes 'yield nil'
@@ -54,14 +47,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 IsYieldFrom = true;
             }
             else {
-                Value = ParseExpression(this) ?? new ConstantExpression(TokenType.KeywordNil);
+                Value = ParseMultiple(this, ParseTestExpr)
+                        ?? new ConstantExpression(TokenType.KeywordNil);
             }
 
             MarkEnd(Token);
         }
 
-        internal override CodeBuilder ToAxionCode(CodeBuilder c) {
-            return c + "yield " + Value;
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write("yield ", Value);
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("yield ", Value);
         }
     }
 }

@@ -1,25 +1,32 @@
-using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Binary;
-using JetBrains.Annotations;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
     /// <summary>
     ///     <c>
-    ///         hash_collection ::=
+    ///         hash_collection:
     ///             '{' [comprehension | hash_initializer] '}'
-    ///         hash_initializer ::=
+    ///         hash_initializer:
     ///             ({test ':' test ','} | {test ','}) [',']
     ///     </c>
     /// </summary>
     public class HashCollectionExpression : MultipleExpression<Expression> {
         public HashCollectionType Type { get; } = HashCollectionType.Map;
 
+        internal override TypeName ValueType =>
+            Type switch {
+                HashCollectionType.Map => Spec.MapType(),
+                HashCollectionType.Set => Spec.SetType()
+                };
+
         internal HashCollectionExpression(SyntaxTreeNode parent) {
             Parent      = parent;
             Expressions = new NodeList<Expression>(this);
-            StartNode(TokenType.OpenBrace);
+            MarkStart(TokenType.OpenBrace);
 
-            while (!MaybeEat(TokenType.CloseBrace)) {
+            do {
                 Expression itemPart1 = ParseTestExpr(this);
                 // map item (expr : expr)
                 if (MaybeEat(TokenType.Colon)) {
@@ -28,10 +35,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
                     }
 
                     Type = HashCollectionType.Map;
-                    var pair = new PairExpression(itemPart1, ParseTestExpr(this));
+                    var pair = new MapItemExpression(itemPart1, ParseTestExpr(this));
                     if (PeekIs(TokenType.KeywordFor)) {
                         // { key : value for (key, value) in iterable }
-                        Expressions.Add(new ForComprehension(this));
+                        Expressions.Add(new ForComprehension(this, pair));
                         Eat(TokenType.CloseBrace);
                         break;
                     }
@@ -47,7 +54,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
                     Type = HashCollectionType.Set;
                     if (PeekIs(TokenType.KeywordFor)) {
                         // { x * 2 for x in { 1, 2, 3 } }
-                        Expressions.Add(new ForComprehension(this));
+                        Expressions.Add(new ForComprehension(this, itemPart1));
                         Eat(TokenType.CloseBrace);
                         break;
                     }
@@ -61,16 +68,38 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
 
                 Eat(TokenType.CloseBrace);
                 break;
-            }
+            } while (!MaybeEat(TokenType.CloseBrace));
 
             MarkEnd(Token);
         }
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.WriteLine("{");
+            c.AddJoin("", Expressions, true);
+            c.WriteLine();
+            c.Write("}");
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.WriteLine("{");
+            c.AddJoin("", Expressions, true);
+            c.WriteLine();
+            c.Write("}");
+        }
     }
 
-    public class PairExpression : LeftRightExpression {
-        public PairExpression([NotNull] Expression left, [NotNull] Expression right) {
+    public class MapItemExpression : LeftRightExpression {
+        public MapItemExpression(Expression left, Expression right) {
             Left  = left;
             Right = right;
+        }
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(Left, " : ", Right);
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write("{ ", Left, ", ", Right, " }");
         }
     }
 
