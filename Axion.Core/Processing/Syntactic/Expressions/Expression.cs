@@ -66,7 +66,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     parent.Move();
                     if (Spec.Literals.Contains(parent.Token.Type)) {
                         // TODO add pre-concatenation of literals
-                        value = new ConstantExpression(parent, parent.Token);
+                        value = new ConstantExpression(parent);
                     }
                     else {
                         parent.Unit.ReportError(Spec.ERR_PrimaryExpected, parent.Token);
@@ -242,9 +242,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Func<SyntaxTreeNode, Expression> parserFunc = null,
             params Type[]                    expectedTypes
         ) {
-            parserFunc??=ParseExpression;
-            bool  parens = parent.MaybeEat(OpenParenthesis);
-            Token start  = parent.Token;
+            parserFunc   ??= ParseExpression;
+            bool  parens =   parent.MaybeEat(OpenParenthesis);
+            Token start  =   parent.Token;
             // empty tuple
             if (parent.MaybeEat(CloseParenthesis)) {
                 return new TupleExpression(parent, start, parent.Token);
@@ -297,23 +297,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
             }
 
-            return MaybeTuple(parent, list, false);
+            return MaybeTuple(parent, list);
         }
 
-        /// <summary>
-        ///     If <paramref name="trailingComma" />, creates a tuple,
-        ///     otherwise, returns first expr from list.
-        /// </summary>
         internal static Expression MaybeTuple(
             SyntaxTreeNode       parent,
-            NodeList<Expression> expressions,
-            bool                 trailingComma
+            NodeList<Expression> expressions
         ) {
-            if (!trailingComma && expressions.Count == 1) {
+            if (expressions.Count == 1) {
                 return expressions[0];
             }
 
-            return new TupleExpression(parent, !trailingComma, expressions);
+            return new TupleExpression(parent, expressions);
         }
     }
 }

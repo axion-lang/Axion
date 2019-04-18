@@ -27,7 +27,6 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkEnd(NoBreakBlock ?? Block);
         }
 
-        protected LoopStatement() { }
         protected LoopStatement(SyntaxTreeNode parent) : base(parent) { }
 
         internal static LoopStatement ParseFor(SyntaxTreeNode parent) {

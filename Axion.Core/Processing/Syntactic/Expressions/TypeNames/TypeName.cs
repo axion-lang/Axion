@@ -57,8 +57,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             }
 
             // middle
-            // generic
-            if (parent.PeekIs(TokenType.OpLess)) {
+            // generic ('[' followed by not ']')
+            if (parent.PeekIs(TokenType.OpenBracket) && !parent.PeekByIs(2, TokenType.CloseBracket)) {
                 leftTypeName = new GenericTypeName(parent, leftTypeName);
             }
 

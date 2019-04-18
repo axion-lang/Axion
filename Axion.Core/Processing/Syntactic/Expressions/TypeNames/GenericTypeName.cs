@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
     ///         generic_type:
-    ///             type '&lt;' type {',' type} '&gt;'
+    ///             type '[' type {',' type} ']'
     ///     </c>
     /// </summary>
     public class GenericTypeName : TypeName {
@@ -42,12 +42,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
             MarkStart(Target);
 
-            Eat(TokenType.OpLess);
+            Eat(TokenType.OpenBracket);
             do {
                 TypeArguments.Add(ParseTypeName(parent));
             } while (MaybeEat(TokenType.Comma));
 
-            Eat(TokenType.OpGreater);
+            Eat(TokenType.CloseBracket);
 
             MarkEnd(Token);
         }
@@ -89,9 +89,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         #region Code converters
 
         internal override void ToAxionCode(CodeBuilder c) {
-            c.Write(Target + "<");
+            c.Write(Target + "[");
             c.AddJoin(",", typeArguments);
-            c.Write(">");
+            c.Write("]");
         }
 
         internal override void ToCSharpCode(CodeBuilder c) {

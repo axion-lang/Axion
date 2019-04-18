@@ -89,7 +89,6 @@ namespace Axion.Core.Specification {
                 { "pass",      KeywordPass     },
                 // values
                 { "nil",       KeywordNil      },
-                { "self",      KeywordSelf     },
                 { "true",      KeywordTrue     },
                 { "false",     KeywordFalse    },
                 { "with",      KeywordWith     },

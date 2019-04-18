@@ -41,11 +41,6 @@ namespace Axion.Core.Processing.Lexical {
                 Move();
             }
 
-            if (tokens.Count > 0 && tokens.Last().Is(Newline)) {
-                tokens[tokens.Count - 1].AppendValue(tokenValue.ToString());
-                return null;
-            }
-
             var endOfLine = new NewlineToken(tokenValue.ToString(), tokenStartPosition);
             if (c.IsSpaceOrTab()) {
                 return endOfLine;

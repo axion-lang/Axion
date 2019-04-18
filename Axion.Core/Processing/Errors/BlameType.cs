@@ -4,11 +4,6 @@
     ///     happen while processing source.
     /// </summary>
     public enum BlameType {
-        /// <summary>
-        ///     Nothing occurred.
-        /// </summary>
-        None,
-
         #region ERRORS BY DEFAULT
 
         /// <summary>

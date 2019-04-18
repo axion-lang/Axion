@@ -1,5 +1,4 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
 
@@ -13,21 +12,22 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
     public class ListInitializerExpression : MultipleExpression<Expression> {
         internal override TypeName ValueType => Spec.ListType(Expressions[0].ValueType);
 
-        public ListInitializerExpression(NodeList<Expression> expressions) {
+        public ListInitializerExpression(SyntaxTreeNode parent, NodeList<Expression> expressions) : base(parent) {
             Expressions = expressions ?? new NodeList<Expression>(this);
         }
 
-        internal ListInitializerExpression(NodeList<Expression> expressions, Token start, Token end)
-            : this(expressions) {
-            MarkPosition(start, end);
-        }
-
-        internal ListInitializerExpression(SyntaxTreeNode parent) {
-            Parent      = parent;
-            Expressions = new NodeList<Expression>(this);
-
+        internal ListInitializerExpression(SyntaxTreeNode parent) : base(parent) {
             MarkStart(TokenType.OpenBracket);
-            Expressions.Add(ParseMultiple(this, expectedTypes: Spec.TestExprs));
+            Expression expr = ParseMultiple(this, expectedTypes: Spec.TestExprs);
+            // unpack multiple expressions wrapped in tuple
+            if (expr is TupleExpression t) {
+                Expressions = t.Expressions;
+            }
+            else {
+                Expressions = new NodeList<Expression>(this) {
+                    expr
+                };
+            }
             Eat(TokenType.CloseBracket);
             MarkEnd(Token);
         }

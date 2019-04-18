@@ -1,9 +1,9 @@
 # simple
 
-fn DoSomething (value1: i32, value2: i32 = 3) => (i32, List<i32>)
+fn DoSomething (value1: i32, value2: i32 = 3) => (i32, List[i32])
     return value1 + value2
 
-fn DoSomething (value1: i32, value2: i32 = 3) => i32 | List<i32>
+fn DoSomething (value1: i32, value2: i32 = 3) => i32 | List[i32]
     return value1 + value2
 
 fn DoSomething (value1: i32, value2: i32 = 3) => i32
@@ -17,13 +17,13 @@ fn DoSomething (value1: i32, value2: i32 = 3)
 fn DoSomething (
 	value1: i32,
 	value2: i32 = 3
-) => (i32, List<i32>)
+) => (i32, List[i32])
     return value1 + value2
 
 fn DoSomething (
 	value1: i32,
 	value2: i32 = 3
-) => i32 | List<i32>
+) => i32 | List[i32]
     return value1 + value2
 
 fn DoSomething (
@@ -40,11 +40,11 @@ fn DoSomething (
 
 # embraced
 
-fn DoSomething (value1: i32, value2: i32 = 3) => (i32, List<i32>) {
+fn DoSomething (value1: i32, value2: i32 = 3) => (i32, List[i32]) {
     return value1 + value2
 }
 
-fn DoSomething (value1: i32, value2: i32 = 3) => i32 | List<i32> {
+fn DoSomething (value1: i32, value2: i32 = 3) => i32 | List[i32] {
     return value1 + value2
 }
 
@@ -61,14 +61,14 @@ fn DoSomething (value1: i32, value2: i32 = 3) {
 fn DoSomething (
 	value1: i32,
 	value2: i32 = 3
-) => (i32, List<i32>) {
+) => (i32, List[i32]) {
     return value1 + value2
 }
 
 fn DoSomething (
 	value1: i32,
 	value2: i32 = 3
-) => i32 | List<i32> {
+) => i32 | List[i32] {
     return value1 + value2
 }
 

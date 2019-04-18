@@ -8,81 +8,51 @@ namespace Axion.Core.Processing.Lexical {
     public partial class Lexer {
         /// <summary>
         ///     Gets a character literal from next piece of source.
-        ///     Returns valid char literal if next piece of source
-        ///     is either validly escape sequence or just a char
-        ///     with length of 1.
-        ///     Otherwise, returns error token,
-        ///     that can be either too long char literal,
-        ///     or just unclosed char literal.
         /// </summary>
         private CharacterToken ReadCharLiteral() {
             var escapedValue = "";
-            // we're on char quote
-            Move();
-            switch (c) {
-                case Spec.EscapeMark: {
+            Move(); // eat opening quote
+            var isUnclosed = false;
+            while (true) {
+                if (c == Spec.CharacterLiteralQuote) {
+                    Move(); // eat closing quote
+                    break;
+                }
+
+                if (AtEndOfLine) {
+                    isUnclosed = true;
+                    break;
+                }
+
+                if (c == Spec.EscapeMark) {
                     (string raw, string escaped) = ReadEscapeSequence();
                     tokenValue.Append(raw);
                     escapedValue += escaped;
-                    break;
                 }
-
-                case Spec.CharacterLiteralQuote: {
-                    unit.Blame(
-                        BlameType.EmptyCharacterLiteral,
-                        tokenStartPosition,
-                        Position
-                    );
-                    break;
-                }
-
-                default: {
-                    // any character
-                    tokenValue.Append(c);
-                    Move();
-                    break;
-                }
-            }
-
-            CharacterToken result;
-
-            if (c != Spec.CharacterLiteralQuote) {
-                unit.Blame(BlameType.CharacterLiteralTooLong, tokenStartPosition, Position);
-                while (c != Spec.CharacterLiteralQuote) {
-                    if (AtEndOfLine) {
-                        unit.Blame(
-                            BlameType.UnclosedCharacterLiteral,
-                            tokenStartPosition,
-                            Position
-                        );
-                        break;
-                    }
-
+                else {
                     tokenValue.Append(c);
                     escapedValue += c;
                     Move();
                 }
-
-                // can be or too long, or unclosed.
-                result = new CharacterToken(
-                    tokenValue.ToString(),
-                    escapedValue,
-                    true,
-                    tokenStartPosition
-                );
-            }
-            else {
-                // OK, valid literal
-                result = new CharacterToken(
-                    tokenValue.ToString(),
-                    escapedValue,
-                    false,
-                    tokenStartPosition
-                );
-                Move();
             }
 
-            return result;
+            if (escapedValue.Length == 0) {
+                unit.Blame(BlameType.EmptyCharacterLiteral, tokenStartPosition, Position);
+            }
+            else if (escapedValue.Length > 1) {
+                unit.Blame(BlameType.CharacterLiteralTooLong, tokenStartPosition, Position);
+            }
+
+            if (isUnclosed) {
+                unit.Blame(BlameType.UnclosedCharacterLiteral, tokenStartPosition, Position);
+            }
+
+            return new CharacterToken(
+                tokenValue.ToString(),
+                escapedValue,
+                isUnclosed,
+                tokenStartPosition
+            );
         }
 
         #region String literal

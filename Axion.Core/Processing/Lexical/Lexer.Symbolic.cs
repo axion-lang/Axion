@@ -24,13 +24,16 @@ namespace Axion.Core.Processing.Lexical {
 
                 if (Spec.Symbols.ContainsKey(value)) {
                     result = new SymbolToken(value, tokenStartPosition);
+                    // yet unclosed bracket
                     if (result.Type.IsOpenBracket()) {
                         mismatchingPairs.Add(result);
                     }
                     else if (result.Type.IsCloseBracket()) {
+                        // unopened close bracket
                         if (mismatchingPairs.Count == 0) {
                             mismatchingPairs.Add(result);
                         }
+                        // matching bracket
                         else {
                             mismatchingPairs.RemoveAt(mismatchingPairs.Count - 1);
                         }
@@ -45,7 +48,7 @@ namespace Axion.Core.Processing.Lexical {
                 // creating operator with 'invalid' type
                 result = new OperatorToken(value, tokenStartPosition);
                 // not found in specification
-                unit.Blame(BlameType.InvalidCharacter, tokenStartPosition, Position);
+                unit.Blame(BlameType.InvalidOperator, tokenStartPosition, Position);
             }
 
             return result;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Axion.Core.Processing;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Specification;
@@ -11,6 +12,8 @@ using NUnit.Framework;
 namespace Axion.Testing.NUnit {
     [TestFixture]
     public class Tests {
+        #region Test source files locations
+
         private static readonly DirectoryInfo axionTestingDir =
             new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent;
 
@@ -27,9 +30,9 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        private readonly string outPath = axionTestingDir.FullName + "\\Files\\out\\";
+        private static readonly string outPath = axionTestingDir.FullName + "\\Files\\out\\";
 
-        protected string OutPath {
+        protected static string OutPath {
             get {
                 if (!Directory.Exists(outPath)) {
                     Directory.CreateDirectory(outPath);
@@ -39,9 +42,9 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        private readonly string inPath = axionTestingDir.FullName + "\\Files\\in\\";
+        private static readonly string inPath = axionTestingDir.FullName + "\\Files\\in\\";
 
-        protected string InPath {
+        protected static string InPath {
             get {
                 if (!Directory.Exists(inPath)) {
                     Directory.CreateDirectory(inPath);
@@ -50,6 +53,8 @@ namespace Axion.Testing.NUnit {
                 return inPath;
             }
         }
+
+        #endregion
 
         protected const    string         TestExtension = ".unit";
         protected readonly List<FileInfo> SourceFiles   = new List<FileInfo>();
@@ -88,14 +93,14 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        internal SourceUnit MakeSourceFromFile(string fileName) {
+        internal static SourceUnit MakeSourceFromFile([CallerMemberName] string fileName = null) {
             return new SourceUnit(
                 new FileInfo(InPath + fileName + Spec.SourceFileExtension),
                 OutPath + fileName + TestExtension
             );
         }
 
-        internal SourceUnit MakeSourceFromCode(string fileName, string code) {
+        internal static SourceUnit MakeSourceFromCode(string code, [CallerMemberName] string fileName = null) {
             return new SourceUnit(code, OutPath + fileName + TestExtension);
         }
 
@@ -110,7 +115,7 @@ namespace Axion.Testing.NUnit {
             // check keywords completeness
             IEnumerable<string> definedKws =
                 Enum.GetNames(typeof(TokenType))
-                    .Where(name => name.ToLower().StartsWith("keyword"));
+                    .Where(name => name.ToUpper().StartsWith("ERROR"));
 
             foreach (string kw in definedKws) {
                 Enum.TryParse(kw, out TokenType type);
@@ -120,36 +125,14 @@ namespace Axion.Testing.NUnit {
                 );
             }
 
-//            // check operators completeness
-//            IEnumerable<string> definedOps =
-//                Enum.GetNames(typeof(TokenType))
-//                    .Where(
-//                        name => name.ToLower().StartsWith("op")
-//                                && !name.ToLower().StartsWith("open")
-//                    );
-//
-//            foreach (string op in definedOps) {
-//                Enum.TryParse(op, out TokenType type);
-//                Assert.That(
-//                    Spec.Operators.Values.Any(props => props.Type == type)
-//                    || type == TokenType.NotIn
-//                    || type == TokenType.IsNot,
-//                    "Operator '" + op + "' is not defined in specification."
-//                );
-//            }
-
             Debug.Assert(Spec.Operators.Count == Spec.OperatorTypes.Count);
 
             // check blames completeness
-            IEnumerable<string> definedBls =
-                Enum.GetNames(typeof(BlameType))
-                    .Where(name => name != nameof(BlameType.None));
-
-            foreach (string bl in definedBls) {
-                Enum.TryParse(bl, out BlameType type);
+            foreach (string blame in Enum.GetNames(typeof(BlameType))) {
+                Enum.TryParse(blame, out BlameType type);
                 Assert.That(
                     Spec.Blames.ContainsKey(type),
-                    "Blame '" + bl + "' is not defined in specification."
+                    "Blame '" + blame + "' is not defined in specification."
                 );
             }
         }

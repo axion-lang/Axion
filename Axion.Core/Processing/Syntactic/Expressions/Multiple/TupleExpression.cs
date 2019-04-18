@@ -7,11 +7,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
     /// <summary>
     ///     <c>
     ///         tuple_expr:
-    ///             ['('] expr* [')']
+    ///             ['('] expr {',' expr}  [')']
     ///     </c>
     /// </summary>
     public class TupleExpression : MultipleExpression<Expression> {
-        internal          bool     Expandable;
         internal override TypeName ValueType => Spec.TupleType();
 
         /// <summary>
@@ -21,20 +20,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
             SyntaxTreeNode parent,
             Token          start,
             Token          end
-        ) {
-            Parent      = parent;
+        ) : base(parent) {
             Expressions = new NodeList<Expression>(this);
             MarkPosition(start, end);
         }
 
         internal TupleExpression(
             SyntaxTreeNode       parent,
-            bool                 expandable,
             NodeList<Expression> expressions
-        ) {
-            Parent      = parent;
+        ) : base(parent) {
             Expressions = expressions;
-            Expandable  = expandable;
             if (Expressions.Count > 0) {
                 MarkPosition(
                     Expressions[0],

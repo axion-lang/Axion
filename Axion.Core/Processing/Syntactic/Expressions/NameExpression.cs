@@ -45,7 +45,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         internal override void ToCSharpCode(CodeBuilder c) {
-            c.Write(string.Join(".", Qualifiers));
+            string value = string.Join(".", Qualifiers);
+            if (value == "self") {
+                c.Write("this");
+                return;
+            }
+            c.Write(value);
         }
     }
 }

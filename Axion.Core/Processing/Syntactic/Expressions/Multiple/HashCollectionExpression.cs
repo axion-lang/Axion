@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
     ///     </c>
     /// </summary>
     public class HashCollectionExpression : MultipleExpression<Expression> {
-        public HashCollectionType Type { get; } = HashCollectionType.Map;
+        public HashCollectionType Type { get; } = HashCollectionType.Unknown;
 
         internal override TypeName ValueType =>
             Type switch {
@@ -21,8 +21,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
                 HashCollectionType.Set => Spec.SetType()
                 };
 
-        internal HashCollectionExpression(SyntaxTreeNode parent) {
-            Parent      = parent;
+        internal HashCollectionExpression(SyntaxTreeNode parent) : base(parent) {
             Expressions = new NodeList<Expression>(this);
             MarkStart(TokenType.OpenBrace);
 
@@ -104,6 +103,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
     }
 
     public enum HashCollectionType {
+        Unknown,
         Map,
         Set
     }

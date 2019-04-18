@@ -31,8 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
             parent.Eat(TokenType.OpenBracket);
 
-            var trailingComma = false;
-            var expressions   = new NodeList<Expression>(parent);
+            var expressions = new NodeList<Expression>(parent);
             do {
                 Expression? start = null;
                 if (!parent.PeekIs(TokenType.Colon)) {
@@ -60,11 +59,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
 
                 expressions.Add(start);
-                trailingComma = parent.MaybeEat(TokenType.Comma);
-            } while (trailingComma && !parent.PeekIs(TokenType.CloseBracket));
+            } while (parent.MaybeEat(TokenType.Comma));
 
             parent.Eat(TokenType.CloseBracket);
-            Index = MaybeTuple(parent, expressions, trailingComma);
+            Index = MaybeTuple(parent, expressions);
 
             MarkPosition(Target, Index);
         }

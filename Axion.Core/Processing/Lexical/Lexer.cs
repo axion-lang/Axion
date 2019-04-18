@@ -178,18 +178,11 @@ namespace Axion.Core.Processing.Lexical {
                 return new Token(TokenType.End, tokenStartPosition);
             }
 
+            // keep this condition before \n check.
             if (c == '\r') {
                 Move();
-                if (c == '\n') {
-                    tokenValue.Append('\r');
-                }
-                else {
-                    return null;
-                }
+                tokenValue.Append('\r');
             }
-
-            // this branch should forever be
-            // right after \r check.
             if (c == '\n') {
                 return ReadNewline();
             }

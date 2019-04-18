@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
@@ -102,6 +103,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             Ast.PushFunction(this);
             Block = new BlockStatement(this, BlockType.Top);
             MarkEnd(Token);
+            Contract.Assert(this == Ast.PopFunction());
         }
 
         /// <summary>

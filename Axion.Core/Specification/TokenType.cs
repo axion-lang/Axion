@@ -97,7 +97,6 @@ namespace Axion.Core.Specification {
         KeywordPass,
         KeywordRaise,
         KeywordReturn,
-        KeywordSelf,
         KeywordStruct,
         KeywordTrue,
         KeywordTry,

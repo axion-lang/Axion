@@ -19,8 +19,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Value = new WordToken(type);
         }
 
-        internal ConstantExpression(SyntaxTreeNode parent, Token value) : base(parent) {
-            Value = value;
+        internal ConstantExpression(SyntaxTreeNode parent) : base(parent) {
+            Value = Token;
             MarkPosition(Value);
         }
 

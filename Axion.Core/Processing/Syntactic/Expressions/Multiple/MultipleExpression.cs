@@ -6,5 +6,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
             get => expressions;
             set => SetNode(ref expressions, value);
         }
+        
+        protected MultipleExpression(SyntaxTreeNode parent) : base(parent) { }
     }
 }

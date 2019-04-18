@@ -130,8 +130,6 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 }
 
                 case BlockType.Anyway: {
-                    if (Ast.CurrentFunction != null) { }
-
                     bool isInFinally     = Ast.InFinally,
                          isInFinallyLoop = Ast.InFinallyLoop;
                     try {
