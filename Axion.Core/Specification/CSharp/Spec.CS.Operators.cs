@@ -22,8 +22,8 @@ namespace Axion.Core.Specification {
                     { TokenType.OpEqualsEquals,        "==" },
                     { TokenType.OpNotEquals,           "!=" },
                 
-                    { TokenType.KeywordAs,                  "as" },
-                    { TokenType.KeywordIs,                  "is" },
+                    { TokenType.OpAs,                  "as" },
+                    { TokenType.OpIs,                  "is" },
 
                 
                     { TokenType.OpLess,                "<"  },

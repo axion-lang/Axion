@@ -11,7 +11,7 @@ namespace Axion.Core.Specification {
 
             { "**",     new OperatorProperties(OpPower,                16) },
 
-            { "not",    new OperatorProperties(KeywordNot,                  15, InputSide.Left) },
+            { "not",    new OperatorProperties(OpNot,                  15, InputSide.Left) },
             { "~",      new OperatorProperties(OpBitNot,               15, InputSide.Left) },
 
             { "*",      new OperatorProperties(OpMultiply,             14) },
@@ -37,12 +37,12 @@ namespace Axion.Core.Specification {
             { "^",      new OperatorProperties(OpBitXor,               7)  },
             { "|",      new OperatorProperties(OpBitOr,                6)  },
 
-            { "as",     new OperatorProperties(KeywordAs,                   5)  },
-            { "is",     new OperatorProperties(KeywordIs,                   5)  },
-            { "is not", new OperatorProperties(KeywordIsNot,                5)  },
+            { "as",     new OperatorProperties(OpAs,                   5)  },
+            { "is",     new OperatorProperties(OpIs,                   5)  },
+            { "is not", new OperatorProperties(OpIsNot,                5)  },
 
-            { "in",     new OperatorProperties(KeywordIn,                   4)  },
-            { "not in", new OperatorProperties(KeywordNotIn,                4)  },
+            { "in",     new OperatorProperties(OpIn,                   4)  },
+            { "not in", new OperatorProperties(OpNotIn,                4)  },
 
             { "and",    new OperatorProperties(OpAnd,                  3)  },
             { "&&",     new OperatorProperties(OpAnd,                  3)  },
@@ -75,7 +75,7 @@ namespace Axion.Core.Specification {
             OpPlus,
             OpMinus,
             OpBitNot,
-            KeywordNot,
+            OpNot,
             OpIncrement,
             OpDecrement
         };

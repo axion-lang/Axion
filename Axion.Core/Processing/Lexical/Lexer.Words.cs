@@ -1,4 +1,3 @@
-using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
 
@@ -16,35 +15,34 @@ namespace Axion.Core.Processing.Lexical {
                      || c == '-'
                      && Peek.IsValidIdChar());
 
-            if (Spec.Keywords.TryGetValue(tokenValue.ToString(), out TokenType kwType)) {
+            string value = tokenValue.ToString();
+            // for operators, written as words
+            if (Spec.Operators.TryGetValue(value, out OperatorProperties props)) {
                 if (tokens.Count > 0) {
-                    Token last = tokens.Last();
-                    if (last.Is(TokenType.KeywordIs) && kwType == TokenType.KeywordNot) {
+                    Token last = tokens[tokens.Count - 1];
+                    if (last.Is(TokenType.OpIs) && props.Type == TokenType.OpNot) {
                         tokens[tokens.Count - 1] = new OperatorToken(
                             Spec.Operators["is not"],
-                            last.Span.StartPosition
+                            last.Span.StartPosition,
+                            Position
                         );
                         return null;
                     }
 
-                    if (last.Is(TokenType.KeywordNot) && kwType == TokenType.KeywordIn) {
+                    if (last.Is(TokenType.OpNot) && props.Type == TokenType.OpIn) {
                         tokens[tokens.Count - 1] = new OperatorToken(
                             Spec.Operators["not in"],
-                            last.Span.StartPosition
+                            last.Span.StartPosition,
+                            Position
                         );
                         return null;
                     }
                 }
 
-                // for 'and', 'or', 'is', etc.
-                if (Spec.OperatorTypes.Select(x => x.type).Contains(kwType)) {
-                    return new OperatorToken(tokenValue.ToString(), tokenStartPosition);
-                }
-
-                return new WordToken(kwType, tokenStartPosition);
+                return new OperatorToken(value, tokenStartPosition);
             }
 
-            return new WordToken(tokenValue.ToString(), tokenStartPosition);
+            return new WordToken(value, tokenStartPosition);
         }
     }
 }

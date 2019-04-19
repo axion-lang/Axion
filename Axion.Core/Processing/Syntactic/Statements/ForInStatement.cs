@@ -37,7 +37,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 Expression.ParsePrimaryExpr,
                 typeof(NameExpression)
             );
-            if (MaybeEat(TokenType.KeywordIn)) {
+            if (MaybeEat(TokenType.OpIn)) {
                 Iterable = Expression.ParseMultiple(
                     parent,
                     Expression.ParseTestExpr,

@@ -10,12 +10,16 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     public class OperatorToken : Token {
         internal OperatorProperties Properties;
 
-        public OperatorToken(OperatorProperties properties, Position startPosition = default)
+        /// <summary>
+        ///     Constructor for compound word operators.
+        /// </summary>
+        public OperatorToken(OperatorProperties properties, Position startPos, Position endPos)
             : base(
                 properties.Type,
-                startPosition
+                startPos
             ) {
             Properties = properties;
+            Span = new Span(startPos, endPos);
         }
 
         public OperatorToken(string value, Position startPosition = default)

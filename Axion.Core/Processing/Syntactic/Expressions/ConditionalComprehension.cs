@@ -30,7 +30,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 MarkStart(TokenType.KeywordUnless);
                 Condition = new UnaryOperationExpression(
                     this,
-                    TokenType.KeywordNot,
+                    TokenType.OpNot,
                     ParseOperation(this)
                 );
             }

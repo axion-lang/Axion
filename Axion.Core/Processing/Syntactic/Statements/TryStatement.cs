@@ -197,7 +197,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
             if (!Peek.Is(Spec.BlockStarters)) {
                 ErrorType = TypeName.ParseTypeName(this);
-                if (MaybeEat(TokenType.KeywordAs)) {
+                if (MaybeEat(TokenType.OpAs)) {
                     ErrorName = new NameExpression(this, true);
                 }
             }

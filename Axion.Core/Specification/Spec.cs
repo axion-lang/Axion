@@ -30,16 +30,6 @@ namespace Axion.Core.Specification {
         /// </summary>
         public static readonly Dictionary<string, TokenType> Keywords =
             new Dictionary<string, TokenType> {
-                { "all",       KeywordAll      },
-                // bool operators
-                { "not",       KeywordNot      },
-                { "and",       OpAnd           },
-                { "or",        OpOr            },
-                { "in",        KeywordIn       },
-                { "not in",    KeywordNotIn    },
-                { "is",        KeywordIs       },
-                { "is not",    KeywordIsNot    },
-                { "as",        KeywordAs       },
                 // testing
                 { "assert",    KeywordAssert   },
                 // branching
@@ -91,7 +81,6 @@ namespace Axion.Core.Specification {
                 { "false",     KeywordFalse    },
                 { "with",      KeywordWith     },
                 { "when",      KeywordWhen     }
-
             };
     }
 }

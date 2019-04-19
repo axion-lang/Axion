@@ -113,7 +113,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkStart(Token);
 
             ContextManager = Expression.ParseExtendedExpr(this);
-            if (MaybeEat(TokenType.KeywordAs)) {
+            if (MaybeEat(TokenType.OpAs)) {
                 Name = new NameExpression(this, true);
             }
 

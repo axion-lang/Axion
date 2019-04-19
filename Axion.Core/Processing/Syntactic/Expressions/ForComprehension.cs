@@ -51,7 +51,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
             MarkStart(TokenType.KeywordFor);
             Item = ParseMultiple(this, ParsePrimaryExpr, typeof(NameExpression));
-            Eat(TokenType.KeywordIn);
+            Eat(TokenType.OpIn);
             Iterable = ParseMultiple(parent, ParseTestExpr, Spec.TestExprs);
 
             if (Peek.Is(TokenType.KeywordFor)) {

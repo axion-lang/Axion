@@ -68,7 +68,7 @@ namespace Axion.Core.Specification {
             CloseParenthesis,
             Comma,
             KeywordFor,
-            KeywordIn,
+            OpIn,
             KeywordIf
         };
 
