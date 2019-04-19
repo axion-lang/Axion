@@ -10,7 +10,7 @@ using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical;
 using Axion.Core.Visual;
 using CommandLine;
-using ConsoleExtensions;
+using FluentConsole;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;

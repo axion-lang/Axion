@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         internal override TypeName ValueType => Parent.ValueType;
 
         internal ConditionalComprehension(SyntaxTreeNode parent) : base(parent) {
-            if (PeekIs(TokenType.KeywordIf)) {
+            if (Peek.Is(TokenType.KeywordIf)) {
                 MarkStart(TokenType.KeywordIf);
                 Condition = ParseOperation(this);
             }

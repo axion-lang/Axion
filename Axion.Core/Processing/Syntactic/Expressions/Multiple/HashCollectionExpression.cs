@@ -35,7 +35,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
 
                     Type = HashCollectionType.Map;
                     var pair = new MapItemExpression(itemPart1, ParseTestExpr(this));
-                    if (PeekIs(TokenType.KeywordFor)) {
+                    if (Peek.Is(TokenType.KeywordFor)) {
                         // { key : value for (key, value) in iterable }
                         Expressions.Add(new ForComprehension(this, pair));
                         Eat(TokenType.CloseBrace);
@@ -51,7 +51,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
                     }
 
                     Type = HashCollectionType.Set;
-                    if (PeekIs(TokenType.KeywordFor)) {
+                    if (Peek.Is(TokenType.KeywordFor)) {
                         // { x * 2 for x in { 1, 2, 3 } }
                         Expressions.Add(new ForComprehension(this, itemPart1));
                         Eat(TokenType.CloseBrace);

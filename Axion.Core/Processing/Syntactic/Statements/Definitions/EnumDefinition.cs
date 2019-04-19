@@ -68,8 +68,8 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             Name = new NameExpression(this, true);
 
             // TODO: support for functions in enums.
-            Bases                                 = TypeName.ParseTypeArgs(this);
-            (TokenType terminator, _, bool error) = BlockStatement.ParseStart(this);
+            Bases                              = TypeName.ParseTypeArgs(this);
+            (TokenType terminator, bool error) = BlockStatement.ParseStart(this);
 
             if (!MaybeEat(terminator) && !MaybeEat(TokenType.KeywordPass) && !error) {
                 do {
@@ -166,7 +166,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             Name     = new NameExpression(this, true);
             TypeList = TypeName.ParseTypeArgs(this);
             if (MaybeEat(TokenType.OpAssign)) {
-                Value = ParsePrimary(this) as ConstantExpression;
+                Value = ParsePrimaryExpr(this) as ConstantExpression;
                 if (Value == null) {
                     Unit.Blame(BlameType.ConstantValueExpected, Token);
                 }

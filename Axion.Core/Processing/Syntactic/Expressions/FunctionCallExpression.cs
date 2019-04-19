@@ -113,7 +113,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         ///     </c>
         /// </summary>
         internal static NodeList<CallArgument> ParseGeneratorOrArgList(SyntaxTreeNode parent) {
-            if (parent.PeekIs(CloseParenthesis, OpMultiply, OpPower)) {
+            if (parent.Peek.Is(CloseParenthesis, OpMultiply, OpPower)) {
                 return ParseArgList(parent);
             }
 
@@ -124,7 +124,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 // Keyword argument
                 arg = FinishNamedArg(parent, nameOrValue);
             }
-            else if (parent.PeekIs(KeywordFor)) {
+            else if (parent.Peek.Is(KeywordFor)) {
                 // Generator expr
                 arg = new CallArgument(
                     parent,

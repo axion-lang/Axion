@@ -50,6 +50,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 c.Write("this");
                 return;
             }
+
             c.Write(value);
         }
     }

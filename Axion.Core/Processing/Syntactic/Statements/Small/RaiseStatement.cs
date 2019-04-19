@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
         internal RaiseStatement(SyntaxTreeNode parent) : base(parent) {
             MarkStart(TokenType.KeywordRaise);
 
-            if (!PeekIs(Spec.NeverTestTypes)) {
+            if (!Peek.Is(Spec.NeverTestTypes)) {
                 Exception = Expression.ParseTestExpr(this);
                 if (MaybeEat(TokenType.KeywordFrom)) {
                     Cause = Expression.ParseTestExpr(this);

@@ -34,7 +34,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
             Item = Expression.ParseMultiple(
                 parent,
-                Expression.ParsePrimary,
+                Expression.ParsePrimaryExpr,
                 typeof(NameExpression)
             );
             if (MaybeEat(TokenType.KeywordIn)) {

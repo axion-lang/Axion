@@ -28,7 +28,7 @@ namespace Axion.Core.Specification {
         ///     Types of token, that can start a 'block'.
         /// </summary>
         internal static readonly TokenType[] BlockStarters = {
-            Colon, Indent, OpenBrace
+            Colon, Newline, Indent, OpenBrace
         };
 
         /// <summary>
@@ -84,56 +84,56 @@ namespace Axion.Core.Specification {
         };
 
         internal static readonly Type[] PrimaryExprs = AssignableExprs.Union(
-            new[] {
-              typeof(
-                  AwaitExpression),
-              typeof(
-                  YieldExpression),
-              typeof(
-                  TypeInitializerExpression
-              ),
-              typeof(
-                  HashCollectionExpression
-              ),
-              typeof(
-                  ListInitializerExpression
-              ),
-              typeof(
-                  FunctionCallExpression
-              ),
-              typeof(
-                  ConstantExpression
-              )
-            }
-            )
-            .ToArray();
+                                                                          new[] {
+                                                                              typeof(
+                                                                                  AwaitExpression),
+                                                                              typeof(
+                                                                                  YieldExpression),
+                                                                              typeof(
+                                                                                  TypeInitializerExpression
+                                                                              ),
+                                                                              typeof(
+                                                                                  HashCollectionExpression
+                                                                              ),
+                                                                              typeof(
+                                                                                  ListInitializerExpression
+                                                                              ),
+                                                                              typeof(
+                                                                                  FunctionCallExpression
+                                                                              ),
+                                                                              typeof(
+                                                                                  ConstantExpression
+                                                                              )
+                                                                          }
+                                                                      )
+                                                                      .ToArray();
 
         internal static readonly Type[] TestExprs = PrimaryExprs.Union(
-            new[] {
-                typeof(
-                    FunctionCallExpression
-                ),
-                typeof(IndexerExpression),
-                typeof(
-                    UnaryOperationExpression
-                ),
-                typeof(
-                    BinaryOperationExpression
-                ),
-                typeof(
-                    ConditionalExpression),
-                typeof(ForComprehension)
-            }
-            )
-            .ToArray();
+                                                                    new[] {
+                                                                        typeof(
+                                                                            FunctionCallExpression
+                                                                        ),
+                                                                        typeof(IndexerExpression),
+                                                                        typeof(
+                                                                            UnaryOperationExpression
+                                                                        ),
+                                                                        typeof(
+                                                                            BinaryOperationExpression
+                                                                        ),
+                                                                        typeof(
+                                                                            ConditionalExpression),
+                                                                        typeof(ForComprehension)
+                                                                    }
+                                                                )
+                                                                .ToArray();
 
         internal static readonly Type[] AllExprs = TestExprs.Union(
-                new[] {
-                    typeof(
-                        VariableDefinitionExpression
-                    )
-                }
-            )
-            .ToArray();
+                                                                new[] {
+                                                                    typeof(
+                                                                        VariableDefinitionExpression
+                                                                    )
+                                                                }
+                                                            )
+                                                            .ToArray();
     }
 }

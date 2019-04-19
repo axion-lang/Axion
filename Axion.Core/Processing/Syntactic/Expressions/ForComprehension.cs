@@ -50,14 +50,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Target = target;
 
             MarkStart(TokenType.KeywordFor);
-            Item = ParseMultiple(this, ParsePrimary, typeof(NameExpression));
+            Item = ParseMultiple(this, ParsePrimaryExpr, typeof(NameExpression));
             Eat(TokenType.KeywordIn);
             Iterable = ParseMultiple(parent, ParseTestExpr, Spec.TestExprs);
 
-            if (PeekIs(TokenType.KeywordFor)) {
+            if (Peek.Is(TokenType.KeywordFor)) {
                 Right = new ForComprehension(Parent, this);
             }
-            else if (PeekIs(TokenType.KeywordIf, TokenType.KeywordUnless)) {
+            else if (Peek.Is(TokenType.KeywordIf, TokenType.KeywordUnless)) {
                 Right = new ConditionalComprehension(this);
             }
 

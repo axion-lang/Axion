@@ -12,7 +12,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
     public class ListInitializerExpression : MultipleExpression<Expression> {
         internal override TypeName ValueType => Spec.ListType(Expressions[0].ValueType);
 
-        public ListInitializerExpression(SyntaxTreeNode parent, NodeList<Expression> expressions) : base(parent) {
+        public ListInitializerExpression(
+            SyntaxTreeNode       parent,
+            NodeList<Expression> expressions
+        ) : base(parent) {
             Expressions = expressions ?? new NodeList<Expression>(this);
         }
 
@@ -28,6 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
                     expr
                 };
             }
+
             Eat(TokenType.CloseBracket);
             MarkEnd(Token);
         }

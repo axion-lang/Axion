@@ -5,14 +5,15 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     /// <summary>
     ///     <c>
     ///         block:
     ///               (':' stmt)
-    ///             | ('{' stmt+ '}')
-    ///             | (':' NEWLINE INDENT stmt+ OUTDENT)
+    ///             | ([':'] '{' stmt* '}')
+    ///             | ([':'] NEWLINE INDENT stmt+ OUTDENT)
     ///     </c>
     /// </summary>
     public class BlockStatement : Statement {
@@ -89,8 +90,6 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             }
         }
 
-        #endregion
-
         internal BlockStatement(SyntaxTreeNode parent, BlockType type = BlockType.Default) {
             Parent = parent;
             switch (type) {
@@ -152,26 +151,26 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             }
         }
 
-        private void Parse(SyntaxTreeNode parent, bool usesColon = true) {
-            Parent     = parent;
-            Statements = new NodeList<Statement>(this);
-            (TokenType terminator, bool oneLine, bool error)
-                = ParseStart(this, usesColon);
+        #endregion
 
-            if (oneLine) {
-                Statements.Add(ParseStmt(this));
+        private void Parse(SyntaxTreeNode parent) {
+            Parent                             = parent;
+            Statements                         = new NodeList<Statement>(this);
+            (TokenType terminator, bool error) = ParseStart(this);
+
+            if (terminator == Newline) {
+                Statements.AddRange(ParseStmt(this));
             }
             else if (!error && !MaybeEat(terminator)) {
                 while (true) {
-                    Statements.Add(ParseStmt(this, terminator));
+                    Statements.AddRange(ParseStmt(this, terminator));
                     if (MaybeEat(terminator)) {
                         break;
                     }
 
-                    if (PeekIs(TokenType.End)) {
-                        // report error for unclosed block, if it is not outdent.
-                        if (terminator != TokenType.Outdent) {
-                            CheckUnexpectedEoc();
+                    if (Peek.Is(End)) {
+                        if (terminator != Outdent) {
+                            Unit.Blame(BlameType.UnexpectedEndOfCode, Token);
                         }
 
                         break;
@@ -184,54 +183,44 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         ///     Starts parsing the statement's block,
         ///     returns terminator what can be used to parse block end.
         /// </summary>
-        internal static (TokenType terminator, bool oneLine, bool error) ParseStart(
-            SyntaxTreeNode parent,
-            bool           usesColon = true
-        ) {
-            // 1) colon
-            bool  hasColon   = parent.MaybeEat(TokenType.Colon);
+        internal static (TokenType terminator, bool error) ParseStart(SyntaxTreeNode parent) {
+            // colon
+            bool  hasColon   = parent.MaybeEat(Colon);
             Token blockStart = parent.Token;
 
-            // 1-2) newline
-            bool hasNewline;
-            hasNewline = hasColon
+            // newline
+            bool hasNewline = hasColon
                 ? parent.MaybeEatNewline()
-                : blockStart.Is(TokenType.Newline);
+                : blockStart.Is(Newline);
 
-            TokenType terminator;
-            // 1-3) '{'
-            if (parent.MaybeEat(TokenType.OpenBrace)) {
-                terminator = TokenType.CloseBrace;
-            }
-            // 3) INDENT
-            else if (parent.MaybeEat(TokenType.Indent)) {
-                terminator = TokenType.Outdent;
-            }
-            else {
-                // no indent or brace? - report block error
-                if (hasNewline) {
-                    // newline but with invalid follower
-                    parent.Unit.Blame(BlameType.ExpectedBlockDeclaration, parent.Peek);
-                    return (TokenType.None, false, true);
+            // '{'
+            if (parent.MaybeEat(OpenBrace)) {
+                if (hasColon) { // ':' '{'
+                    parent.Unit.Blame(BlameType.RedundantColonWithBraces, blockStart);
                 }
 
-                // no newline
-                if (!hasColon && usesColon) {
-                    // must have a colon
-                    parent.BlameInvalidSyntax(TokenType.Colon, parent.Peek);
-                    return (TokenType.None, true, true);
-                }
-
-                return (TokenType.Newline, true, false);
+                return (CloseBrace, false);
             }
 
-            // ':' followed by '{'
-            if (hasColon && terminator == TokenType.CloseBrace) {
-                parent.Unit.Blame(BlameType.RedundantColonWithBraces, blockStart);
+            // indent
+            if (parent.MaybeEat(Indent)) {
+                return (Outdent, false);
             }
 
-            parent.MaybeEatNewline();
-            return (terminator, false, false);
+            if (hasNewline) {
+                // newline followed by not indent or '{'
+                parent.Unit.Blame(BlameType.ExpectedBlockDeclaration, parent.Peek);
+                return (Newline, true);
+            }
+
+            // exactly a 1-line block
+            if (!hasColon) {
+                // one line block must have a colon
+                parent.BlameInvalidSyntax(Colon, parent.Peek);
+                return (Newline, true);
+            }
+
+            return (Newline, false);
         }
 
         #region Code converters

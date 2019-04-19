@@ -9,21 +9,12 @@ namespace Axion.Core.Processing.Lexical {
         ///     from next piece of source.
         /// </summary>
         private Token? ReadWord() {
-            // don't use StringBuilder, language
-            // words are mostly too short.
-            string id = c.ToString();
-            Move();
-            while (c.IsValidIdChar()) {
-                id += c;
+            do {
+                tokenValue.Append(c);
                 Move();
-            }
-
-            // return trailing restricted endings
-            tokenValue.Append(id.TrimEnd(Spec.RestrictedIdentifierEndings));
-            int explicitIdPartLength = id.Length - tokenValue.Length;
-            if (explicitIdPartLength != 0) {
-                Move(-explicitIdPartLength);
-            }
+            } while (c.IsValidIdChar()
+                     || c == '-'
+                     && Peek.IsValidIdChar());
 
             if (Spec.Keywords.TryGetValue(tokenValue.ToString(), out TokenType kwType)) {
                 if (tokens.Count > 0) {

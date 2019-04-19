@@ -178,7 +178,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
                         return new NodeList<FunctionParameter>(parent);
                     }
 
-                    if (parent.PeekIs(TokenType.Comma)) {
+                    if (parent.Peek.Is(TokenType.Comma)) {
                         // "*"
                     }
                     else {

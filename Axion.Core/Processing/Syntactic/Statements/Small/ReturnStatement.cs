@@ -28,7 +28,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
                 Unit.Blame(BlameType.MisplacedReturn, Token);
             }
 
-            if (!PeekIs(Spec.NeverTestTypes)) {
+            if (!Peek.Is(Spec.NeverTestTypes)) {
                 Value = Expression.ParseMultiple(parent, expectedTypes: Spec.TestExprs);
             }
 

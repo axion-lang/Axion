@@ -63,7 +63,7 @@ namespace Axion.Core.Processing.Syntactic {
         internal void Parse() {
             Parent = this;
             while (!MaybeEat(TokenType.End)) {
-                Root.Statements.Add(Statement.ParseStmt(this));
+                Root.Statements.AddRange(Statement.ParseStmt(this));
             }
         }
 

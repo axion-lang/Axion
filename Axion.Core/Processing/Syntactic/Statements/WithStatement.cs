@@ -112,7 +112,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         internal WithStatementItem(SyntaxTreeNode parent) : base(parent) {
             MarkStart(Token);
 
-            ContextManager = Expression.ParseExtended(this);
+            ContextManager = Expression.ParseExtendedExpr(this);
             if (MaybeEat(TokenType.KeywordAs)) {
                 Name = new NameExpression(this, true);
             }
@@ -137,7 +137,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         internal override void ToCSharpCode(CodeBuilder c) {
-            c.Write(Name, " = ", ContextManager);
+            c.Write("var ", Name, " = ", ContextManager);
         }
 
         #endregion

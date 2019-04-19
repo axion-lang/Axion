@@ -25,8 +25,6 @@ namespace Axion.Core.Specification {
         internal const string MultiCommentEnd          = "|#";
         internal const string MultiCommentEndPattern   = @"\|\#";
 
-        internal static readonly char[] RestrictedIdentifierEndings = { '-' };
-
         /// <summary>
         ///     Contains all language keywords.
         /// </summary>

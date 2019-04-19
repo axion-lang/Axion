@@ -136,7 +136,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 default: {
                     if (onlyDecorated) {
                         parent.Unit.ReportError("Invalid decorated statement", parent.Peek);
-                        return ParseStmt(parent);
+                        return new BlockStatement(ParseStmt(parent));
                     }
 
                     break;
@@ -152,38 +152,34 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         ///             single_stmt {';' single_stmt} ';' [ (terminator | NEWLINE)
         ///     </c>
         /// </summary>
-        internal static Statement ParseStmt(
+        internal static NodeList<Statement> ParseStmt(
             SyntaxTreeNode parent,
             TokenType      terminator = TokenType.None
         ) {
-            Statement firstStmt = ParseSingleStmt(parent);
-            if (!parent.MaybeEat(TokenType.Semicolon)) {
-                return firstStmt;
-            }
-
             var statements = new NodeList<Statement>(parent) {
-                firstStmt
+                ParseSingleStmt(parent)
             };
+            if (parent.MaybeEat(TokenType.Semicolon)) {
+                while (parent.Token.Is(TokenType.Semicolon)
+                       && !parent.MaybeEatNewline()
+                       && !parent.Peek.Is(terminator)) {
+                    statements.Add(ParseSingleStmt(parent));
+                    if (parent.MaybeEat(TokenType.End)) {
+                        if (terminator != TokenType.None) {
+                            parent.Eat(terminator);
+                        }
 
-            while (parent.Token.Is(TokenType.Semicolon)
-                   && !parent.MaybeEatNewline()
-                   && !parent.PeekIs(terminator)) {
-                statements.Add(ParseSingleStmt(parent));
-                if (parent.MaybeEat(TokenType.End)) {
-                    if (terminator != TokenType.None) {
-                        parent.Eat(terminator);
+                        // else EOC implies a new line
+                        break;
                     }
 
-                    // else EOC implies a new line
-                    break;
-                }
-
-                if (!parent.MaybeEat(TokenType.Semicolon)) {
-                    parent.Eat(TokenType.Newline);
+                    if (!parent.MaybeEat(TokenType.Semicolon)) {
+                        parent.Eat(TokenType.Newline);
+                    }
                 }
             }
 
-            return new BlockStatement(statements);
+            return statements;
         }
 
         /// <summary>
@@ -202,7 +198,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                     // on '['
                     Token      start     = parent.Token;
                     Expression decorator = Expression.ParseExpression(parent);
-                    if (parent.PeekIs(TokenType.OpenParenthesis)) {
+                    if (parent.Peek.Is(TokenType.OpenParenthesis)) {
                         decorator = new FunctionCallExpression(parent, decorator);
                     }
 

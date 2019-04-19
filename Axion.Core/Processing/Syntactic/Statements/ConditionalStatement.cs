@@ -47,7 +47,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             if (elseIf) {
                 MarkStart(Token);
             }
-            else if (PeekIs(TokenType.KeywordUnless)) {
+            else if (Peek.Is(TokenType.KeywordUnless)) {
                 MarkStart(TokenType.KeywordUnless);
                 invert = true;
             }
@@ -62,7 +62,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 ElseBlock = new BlockStatement(this);
             }
             else if (MaybeEat(TokenType.KeywordElseIf)) {
-                ElseBlock = new BlockStatement(new ConditionalStatement(this, true));
+                ElseBlock = new BlockStatement(this, new ConditionalStatement(this, true));
             }
             else {
                 BlameInvalidSyntax(TokenType.KeywordElse, Peek);

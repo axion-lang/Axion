@@ -100,7 +100,10 @@ namespace Axion.Testing.NUnit {
             );
         }
 
-        internal static SourceUnit MakeSourceFromCode(string code, [CallerMemberName] string fileName = null) {
+        internal static SourceUnit MakeSourceFromCode(
+            string                    code,
+            [CallerMemberName] string fileName = null
+        ) {
             return new SourceUnit(code, OutPath + fileName + TestExtension);
         }
 

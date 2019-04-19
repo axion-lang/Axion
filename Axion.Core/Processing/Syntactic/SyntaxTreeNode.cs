@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
@@ -114,14 +113,6 @@ namespace Axion.Core.Processing.Syntactic {
             );
         }
 
-        public void CheckUnexpectedEoc() {
-            if (!PeekIs(TokenType.End)) {
-                return;
-            }
-
-            Unit.Blame(BlameType.UnexpectedEndOfCode, Token);
-        }
-
         #endregion
 
         #region Token stream controllers
@@ -134,10 +125,6 @@ namespace Axion.Core.Processing.Syntactic {
             Eat(type);
             MarkStart(Token);
             return Token;
-        }
-
-        internal bool PeekIs(params TokenType[] expected) {
-            return PeekByIs(1, expected);
         }
 
         internal bool PeekByIs(int peekBy, params TokenType[] expected) {

@@ -64,8 +64,8 @@ namespace Axion.Testing.NUnit.Lexer {
             Lex(unit);
             // 2 warns for redundant prefixes for empty strings
             Assert.AreEqual(2, unit.Blames.Count);
-        } 
-        
+        }
+
         [Test]
         public void IsFail_StringInvalidEscape() {
             SourceUnit unit = MakeSourceFromCode(
@@ -77,7 +77,7 @@ namespace Axion.Testing.NUnit.Lexer {
             Lex(unit);
             Assert.AreEqual(1, unit.Blames.Count);
         }
-        
+
         [Test]
         public void IsFail_StringTruncatedUEscape() {
             SourceUnit unit = MakeSourceFromCode(
@@ -90,7 +90,7 @@ namespace Axion.Testing.NUnit.Lexer {
             Lex(unit);
             Assert.AreEqual(2, unit.Blames.Count);
         }
-        
+
         [Test]
         public void IsOK_StringEscSequences() {
             SourceUnit unit = MakeSourceFromCode(

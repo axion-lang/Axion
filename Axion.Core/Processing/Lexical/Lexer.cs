@@ -183,6 +183,7 @@ namespace Axion.Core.Processing.Lexical {
                 Move();
                 tokenValue.Append('\r');
             }
+
             if (c == '\n') {
                 return ReadNewline();
             }

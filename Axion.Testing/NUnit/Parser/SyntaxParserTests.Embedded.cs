@@ -54,9 +54,7 @@ let _tup = (1, 2, ""three"", true)
             Assert.That(unit.Blames.Count == 0, $"unit.Blames.Count == {unit.Blames.Count}");
             VariableDefinitionExpression[] stmts =
                 unit.Ast.Root.Statements.Cast<ExpressionStatement>()
-                    .Select(
-                        s => (VariableDefinitionExpression) s.Expression
-                    )
+                    .Select(s => (VariableDefinitionExpression) s.Expression)
                     .ToArray();
             Assert.That(stmts.Length == 4);
             Assert.DoesNotThrow(
@@ -68,23 +66,31 @@ let _tup = (1, 2, ""three"", true)
                     // set
                     var set = (HashCollectionExpression) stmts[1].Right;
                     Assert.That(set.Type == HashCollectionType.Set);
-                    var setValues = new[] { "one", "two", "three" };
+                    var setValues = new[] {
+                        "one", "two", "three"
+                    };
                     Assert.That(set.Expressions.Count == setValues.Length);
                     for (var i = 0; i < set.Expressions.Count; i++) {
                         var constant = (ConstantExpression) set.Expressions[i];
                         Assert.That(constant.Value.Value == setValues[i]);
                     }
+
                     // list
                     var lst = (ListInitializerExpression) stmts[2].Right;
-                    var lstValues = new[] { "1", "2", "3", "4", "5" };
+                    var lstValues = new[] {
+                        "1", "2", "3", "4", "5"
+                    };
                     Assert.That(lst.Expressions.Count == lstValues.Length);
                     for (var i = 0; i < lst.Expressions.Count; i++) {
                         var constant = (ConstantExpression) lst.Expressions[i];
                         Assert.That(constant.Value.Value == lstValues[i]);
                     }
+
                     //tuple
                     var tup = (TupleExpression) stmts[3].Right;
-                    var tupValues = new[] { "1", "2", "three", "true" };
+                    var tupValues = new[] {
+                        "1", "2", "three", "true"
+                    };
                     Assert.That(tup.Expressions.Count == tupValues.Length);
                     for (var i = 0; i < tup.Expressions.Count; i++) {
                         var constant = (ConstantExpression) tup.Expressions[i];

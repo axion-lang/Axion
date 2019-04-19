@@ -34,19 +34,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             var expressions = new NodeList<Expression>(parent);
             do {
                 Expression? start = null;
-                if (!parent.PeekIs(TokenType.Colon)) {
+                if (!parent.Peek.Is(TokenType.Colon)) {
                     start = ParseTestExpr(parent);
                 }
 
                 if (parent.MaybeEat(TokenType.Colon)) {
                     Expression? stop = null;
-                    if (!parent.PeekIs(TokenType.Colon, TokenType.Comma, TokenType.CloseBracket)) {
+                    if (!parent.Peek.Is(TokenType.Colon, TokenType.Comma, TokenType.CloseBracket)) {
                         stop = ParseTestExpr(parent);
                     }
 
                     Expression? step = null;
                     if (parent.MaybeEat(TokenType.Colon)
-                        && !parent.PeekIs(TokenType.Comma, TokenType.CloseBracket)) {
+                        && !parent.Peek.Is(TokenType.Comma, TokenType.CloseBracket)) {
                         step = ParseTestExpr(parent);
                     }
 

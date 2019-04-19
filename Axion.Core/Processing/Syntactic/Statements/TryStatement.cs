@@ -68,6 +68,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             }
 
             // catch
+            Handlers = new NodeList<TryStatementHandler>(this);
             TryStatementHandler defaultHandler = null;
             do {
                 var handler = new TryStatementHandler(this);
@@ -80,7 +81,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 if (handler.ErrorType == null) {
                     defaultHandler = handler;
                 }
-            } while (PeekIs(TokenType.KeywordCatch));
+            } while (Peek.Is(TokenType.KeywordCatch));
 
             // else
             if (MaybeEat(TokenType.KeywordElse)) {
@@ -117,22 +118,26 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         internal override void ToAxionCode(CodeBuilder c) {
             c.Write("try ", Block);
             if (Handlers.Count > 0) {
-                c.AddJoin(" ", Handlers);
+                c.AddJoin("", Handlers);
             }
 
             if (AnywayBlock != null) {
-                c.Write(" anyway ", AnywayBlock);
+                c.Write("else ", ElseBlock);
+            }
+
+            if (AnywayBlock != null) {
+                c.Write("anyway ", AnywayBlock);
             }
         }
 
         internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("try ", Block);
             if (Handlers.Count > 0) {
-                c.AddJoin(" ", Handlers);
+                c.AddJoin("", Handlers);
             }
 
             if (AnywayBlock != null) {
-                c.Write(" finally ", AnywayBlock);
+                c.Write("finally ", AnywayBlock);
             }
         }
 
@@ -190,7 +195,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             // then it can set the current exception.
             if (Ast.CurrentFunction != null) { }
 
-            if (!PeekIs(Spec.BlockStarters)) {
+            if (!Peek.Is(Spec.BlockStarters)) {
                 ErrorType = TypeName.ParseTypeName(this);
                 if (MaybeEat(TokenType.KeywordAs)) {
                     ErrorName = new NameExpression(this, true);

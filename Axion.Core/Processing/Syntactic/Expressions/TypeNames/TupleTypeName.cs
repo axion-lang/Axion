@@ -29,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             Types  = new NodeList<TypeName>(this);
 
             MarkStart(TokenType.OpenParenthesis);
-            if (!PeekIs(TokenType.CloseParenthesis)) {
+            if (!Peek.Is(TokenType.CloseParenthesis)) {
                 do {
                     Types.Add(ParseTypeName(parent));
                 } while (MaybeEat(TokenType.Comma));

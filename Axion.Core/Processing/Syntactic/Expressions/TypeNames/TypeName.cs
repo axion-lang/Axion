@@ -40,7 +40,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             // leading
             TypeName? leftTypeName = null;
             // simple
-            if (parent.PeekIs(TokenType.OpenParenthesis)) {
+            if (parent.Peek.Is(TokenType.OpenParenthesis)) {
                 var tuple = new TupleTypeName(parent);
                 leftTypeName = tuple.Types.Count == 1
                     ? tuple.Types[0]
@@ -58,18 +58,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
             // middle
             // generic ('[' followed by not ']')
-            if (parent.PeekIs(TokenType.OpenBracket) && !parent.PeekByIs(2, TokenType.CloseBracket)) {
+            if (parent.Peek.Is(TokenType.OpenBracket)
+                && !parent.PeekByIs(2, TokenType.CloseBracket)) {
                 leftTypeName = new GenericTypeName(parent, leftTypeName);
             }
 
             // array
-            if (parent.PeekIs(TokenType.OpenBracket)) {
+            if (parent.Peek.Is(TokenType.OpenBracket)) {
                 leftTypeName = new ArrayTypeName(parent, leftTypeName);
             }
 
             // trailing
             // union
-            if (parent.PeekIs(TokenType.OpBitOr)) {
+            if (parent.Peek.Is(TokenType.OpBitOr)) {
                 leftTypeName = new UnionTypeName(parent, leftTypeName);
             }
 
@@ -84,11 +85,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             var   typeArgs = new List<(TypeName?, NameExpression?)>();
             Token start    = parent.Peek;
             if (parent.MaybeEat(TokenType.OpenParenthesis)) {
-                if (!parent.PeekIs(TokenType.CloseParenthesis)) {
+                if (!parent.Peek.Is(TokenType.CloseParenthesis)) {
                     do {
                         NameExpression? name     = null;
                         int             startIdx = parent.Ast.Index;
-                        if (parent.PeekIs(TokenType.Identifier)) {
+                        if (parent.Peek.Is(TokenType.Identifier)) {
                             name = new NameExpression(parent);
                             if (!parent.MaybeEat(TokenType.OpAssign)) {
                                 parent.MoveTo(startIdx);
@@ -124,7 +125,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             var   typeArgs = new NodeList<TypeName?>(parent);
             Token start    = parent.Peek;
             if (parent.MaybeEat(TokenType.OpenParenthesis)) {
-                if (!parent.PeekIs(TokenType.CloseParenthesis)) {
+                if (!parent.Peek.Is(TokenType.CloseParenthesis)) {
                     do {
                         typeArgs.Add(ParseTypeName(parent));
                     } while (parent.MaybeEat(TokenType.Comma));

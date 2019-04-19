@@ -102,11 +102,11 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(
-                "for(",
+                "for (",
                 InitStmt,
-                ";",
+                "; ",
                 Condition,
-                ";",
+                "; ",
                 IterStmt,
                 ") ",
                 Block

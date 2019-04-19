@@ -16,15 +16,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         ///     <c>
         ///         primary
         ///             : ID
-        ///             | CONSTANT
         ///             | await_expr
+        ///             | yield_expr
         ///             | new_expr
         ///             | parenthesis_expr
         ///             | list_expr
         ///             | hash_collection
+        ///             | CONSTANT
         ///     </c>
         /// </summary>
-        internal static Expression ParsePrimary(SyntaxTreeNode parent) {
+        internal static Expression ParsePrimaryExpr(SyntaxTreeNode parent) {
             Expression value;
             switch (parent.Peek.Type) {
                 case Identifier: {
@@ -88,17 +89,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         ///             ['++' | '--']
         ///     </c>
         /// </summary>
-        internal static Expression ParseExtended(
+        internal static Expression ParseExtendedExpr(
             SyntaxTreeNode parent,
             bool           allowGenerator = false
         ) {
-            Expression value = ParsePrimary(parent);
+            Expression value = ParsePrimaryExpr(parent);
             // pipeline cannot be combined with other trailers
             if (parent.MaybeEat(RightPipeline)) {
                 do {
                     value = new FunctionCallExpression(
                         parent,
-                        ParsePrimary(parent),
+                        ParsePrimaryExpr(parent),
                         new CallArgument(parent, value)
                     );
                 } while (parent.MaybeEat(RightPipeline));
@@ -107,13 +108,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
 
             while (true) {
-                if (parent.PeekIs(Dot)) {
+                if (parent.Peek.Is(Dot)) {
                     value = new MemberAccessExpression(parent, value);
                 }
-                else if (parent.PeekIs(OpenParenthesis)) {
+                else if (parent.Peek.Is(OpenParenthesis)) {
                     value = new FunctionCallExpression(parent, value, allowGenerator);
                 }
-                else if (parent.PeekIs(OpenBracket)) {
+                else if (parent.Peek.Is(OpenBracket)) {
                     value = new IndexerExpression(parent, value);
                 }
                 else {
@@ -143,7 +144,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 return new UnaryOperationExpression(parent, op, ParseUnaryLeftExpr(parent));
             }
 
-            return ParseExtended(parent, true);
+            return ParseExtendedExpr(parent, true);
         }
 
         /// <summary>
@@ -175,7 +176,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         /// </summary>
         internal static Expression ParseTestExpr(SyntaxTreeNode parent) {
             Expression expr = ParseOperation(parent);
-            if (parent.PeekIs(KeywordIf, KeywordUnless)
+            if (parent.Peek.Is(KeywordIf, KeywordUnless)
                 && parent.Token.Type != Newline) {
                 expr = new ConditionalExpression(parent, expr);
             }
@@ -200,7 +201,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 || expr is UnaryOperationExpression
                 || !(isImmutable
                      || Spec.AssignableExprs.Contains(expr.GetType())
-                     && parent.PeekIs(Colon, OpAssign))) {
+                     && parent.Peek.Is(Colon, OpAssign))) {
                 return expr;
             }
 
@@ -242,9 +243,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Func<SyntaxTreeNode, Expression> parserFunc = null,
             params Type[]                    expectedTypes
         ) {
-            parserFunc   ??= ParseExpression;
-            bool  parens =   parent.MaybeEat(OpenParenthesis);
-            Token start  =   parent.Token;
+            parserFunc??=ParseExpression;
+            bool  parens = parent.MaybeEat(OpenParenthesis);
+            Token start  = parent.Token;
             // empty tuple
             if (parent.MaybeEat(CloseParenthesis)) {
                 return new TupleExpression(parent, start, parent.Token);
@@ -263,7 +264,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 } while (trailingComma);
             }
             // generator | comprehension
-            else if (parent.PeekIs(KeywordFor)) {
+            else if (parent.Peek.Is(KeywordFor)) {
                 list[0] = new ForComprehension(parent, list[0]);
                 if (parens) {
                     list[0] = new GeneratorExpression((ForComprehension) list[0]);

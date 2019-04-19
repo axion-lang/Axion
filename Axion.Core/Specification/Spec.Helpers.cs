@@ -49,7 +49,7 @@ namespace Axion.Core.Specification {
         }
 
         internal static bool IsValidIdChar(this char c) {
-            return char.IsLetterOrDigit(c) || c == '_' || c == '-';
+            return char.IsLetterOrDigit(c) || c == '_';
         }
     }
 }

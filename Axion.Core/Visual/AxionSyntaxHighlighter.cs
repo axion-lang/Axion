@@ -6,7 +6,7 @@ using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
-using ConsoleExtensions;
+using FluentConsole;
 
 namespace Axion.Core.Visual {
     /// <summary>
