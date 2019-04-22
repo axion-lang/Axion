@@ -24,14 +24,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         public SimpleTypeName(string name) {
-            Name = new NameExpression(null, name);
+            Name = NameExpression.ParseName(this, name);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(Name);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(Name);
         }
     }

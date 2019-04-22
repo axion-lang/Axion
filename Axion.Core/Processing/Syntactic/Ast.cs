@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Syntactic.Statements;
 using Axion.Core.Processing.Syntactic.Statements.Definitions;
@@ -87,7 +88,7 @@ namespace Axion.Core.Processing.Syntactic {
                         builder.Write(stmt);
                     }
 
-                    builder.Write("\n");
+                    builder.WriteLine();
                 }
             }
             else {
@@ -125,14 +126,14 @@ namespace Axion.Core.Processing.Syntactic {
                 }
 
                 builder.WriteLine("public partial class _RootClass_ {");
-                builder.Write(
+                builder.WriteLine(
                     new FunctionDefinition(
-                        "Main",
+                        new SimpleNameExpression("Main"),
                         block: new BlockStatement(rootStmts),
                         returnType: new SimpleTypeName("void")
                     )
                 );
-                builder.Write("\n}");
+                builder.Write("}");
             }
 
             SyntaxTree tree = CSharpSyntaxTree.ParseText(builder);
@@ -152,17 +153,14 @@ namespace Axion.Core.Processing.Syntactic {
                    )
                    .NormalizeWhitespace();
 
-            // format
-            //var ws = new AdhocWorkspace();
-            //unit = (CompilationUnitSyntax) Formatter.Format(unit, ws);
             return unit;
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.AddJoin("\n", Root.Statements);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(Root);
         }
     }

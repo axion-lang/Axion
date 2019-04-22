@@ -1,5 +1,6 @@
 using System.Linq;
 using Axion.Core.Processing;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.Binary;
 using Axion.Core.Processing.Syntactic.Expressions.Multiple;
@@ -98,6 +99,35 @@ let _tup = (1, 2, ""three"", true)
                     }
                 }
             );
+        }
+
+        [Test]
+        public void IsOK_PipelineOperator() {
+            SourceUnit unit1 = MakeSourceFromCode(
+                "person |> parseData |> getAge |> validateAge"
+            );
+            Parse(unit1);
+            Assert.That(unit1.Blames.Count == 0, $"unit1.Blames.Count == {unit1.Blames.Count}");
+            
+            SourceUnit unit2 = MakeSourceFromCode(
+                "validateAge(getAge(parseData(person)))"
+            );
+            Parse(unit2);
+            Assert.That(unit2.Blames.Count == 0, $"unit2.Blames.Count == {unit2.Blames.Count}");
+            var a = new CodeBuilder(OutLang.Axion);
+            unit2.Ast.ToAxionCode(a);
+            var b = new CodeBuilder(OutLang.Axion);
+            unit1.Ast.ToAxionCode(b);
+            Assert.AreEqual(a, b);
+        }
+        
+        [Test]
+        public void IsOK_ModuleDef() {
+            SourceUnit unit1 = MakeSourceFromCode(
+                "module ExampleModule: pass"
+            );
+            Parse(unit1);
+            Assert.That(unit1.Blames.Count == 0, $"unit1.Blames.Count == {unit1.Blames.Count}");
         }
     }
 }

@@ -13,16 +13,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         internal override TypeName ValueType => Comprehension.Parent.ValueType;
 
-        public GeneratorExpression(ForComprehension comprehension) {
-            Parent        = comprehension.Parent;
+        public GeneratorExpression(SyntaxTreeNode parent, ForComprehension comprehension) : base(
+            parent
+        ) {
             Comprehension = comprehension;
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public GeneratorExpression(ForComprehension comprehension) {
+            Comprehension = comprehension;
+        }
+
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("(", Comprehension, ")");
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             throw new NotSupportedException();
         }
     }

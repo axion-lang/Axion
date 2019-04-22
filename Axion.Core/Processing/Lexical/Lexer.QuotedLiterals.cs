@@ -14,7 +14,7 @@ namespace Axion.Core.Processing.Lexical {
             Move(); // eat opening quote
             var isUnclosed = false;
             while (true) {
-                if (c == Spec.CharacterLiteralQuote) {
+                if (CharIs(Spec.CharQuotes)) {
                     Move(); // eat closing quote
                     break;
                 }
@@ -312,8 +312,7 @@ namespace Axion.Core.Processing.Lexical {
         #region Escape sequences reading
 
         private (string raw, string escaped) ReadEscapeSequence() {
-            var raw     = "";
-            var escaped = "";
+            string raw, escaped;
             // on \
             (int line, int column) escapePosition = Position;
             Move();
@@ -337,7 +336,7 @@ namespace Axion.Core.Processing.Lexical {
                     var number = "";
                     var error  = false;
                     while (number.Length < unicodeSymLen) {
-                        if (c.IsValidHexadecimalDigit()) {
+                        if (CharIs(Spec.HexadecimalDigits)) {
                             number += c;
                             Move();
                         }
@@ -363,6 +362,7 @@ namespace Axion.Core.Processing.Lexical {
                                 escapePosition,
                                 Position
                             );
+                            escaped = raw;
                         }
                         else if (val < 0x010000) {
                             escaped = ((char) val).ToString();
@@ -385,8 +385,7 @@ namespace Axion.Core.Processing.Lexical {
                     Move();
                     var number = "";
                     var error  = false;
-                    while (c.IsValidHexadecimalDigit()
-                           && number.Length < 4) {
+                    while (CharIs(Spec.HexadecimalDigits) && number.Length < 4) {
                         number += c;
                         Move();
                     }

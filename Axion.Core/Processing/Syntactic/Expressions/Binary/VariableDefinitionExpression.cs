@@ -19,16 +19,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Binary {
         public bool IsImmutable { get; set; }
 
         public VariableDefinitionExpression(
-            Expression  assignable,
-            TypeName?   type,
-            Expression? value
-        ) {
+            SyntaxTreeNode parent,
+            Expression     assignable,
+            TypeName?      type,
+            Expression?    value
+        ) : base(parent) {
             Left  = assignable;
             Type  = type;
             Right = value;
+            if (ParentBlock.HasVariable((SimpleNameExpression) Left)) {
+                Unit.ReportError(
+                    "Cannot declare variable, because it's already declared in this scope.'",
+                    this
+                );
+            }
+            else {
+                ParentBlock.Variables.Add(this);
+            }
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             if (IsImmutable) {
                 c.Write("let ");
             }
@@ -43,7 +53,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Binary {
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             if (Right == null) {
                 c.Write(Type, " ", Left);
             }

@@ -44,7 +44,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkStart(TokenType.KeywordFor);
 
             if (!MaybeEat(TokenType.Semicolon)) {
-                InitStmt = Expression.ParseExpression(parent);
+                InitStmt = Expression.ParseSingleExpr(parent);
                 Eat(TokenType.Semicolon);
             }
 
@@ -54,7 +54,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             }
 
             if (!MaybeEat(Spec.NeverTestTypes)) {
-                IterStmt = Expression.ParseExpression(this);
+                IterStmt = Expression.ParseSingleExpr(this);
             }
 
             Block = new BlockStatement(this, BlockType.Loop);
@@ -84,7 +84,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(
                 "for ",
                 InitStmt,
@@ -100,7 +100,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(
                 "for (",
                 InitStmt,

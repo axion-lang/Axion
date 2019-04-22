@@ -39,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         internal static TypeName? ParseTypeName(SyntaxTreeNode parent) {
             // leading
             TypeName? leftTypeName = null;
-            // simple
+            // tuple
             if (parent.Peek.Is(TokenType.OpenParenthesis)) {
                 var tuple = new TupleTypeName(parent);
                 leftTypeName = tuple.Types.Count == 1
@@ -47,9 +47,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                     : tuple;
             }
 
-            // tuple
+            // simple
             else if (parent.EnsureNext(TokenType.Identifier)) {
-                leftTypeName = new SimpleTypeName(new NameExpression(parent));
+                leftTypeName = new SimpleTypeName(NameExpression.ParseName(parent));
             }
 
             if (leftTypeName == null) {
@@ -80,17 +80,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         /// <summary>
         ///     for class, enum, enum item.
         /// </summary>
-        internal static List<(TypeName?, NameExpression?)>
-            ParseNamedTypeArgs(SyntaxTreeNode parent) {
-            var   typeArgs = new List<(TypeName?, NameExpression?)>();
+        internal static List<(TypeName?, SimpleNameExpression?)> ParseNamedTypeArgs(
+            SyntaxTreeNode parent
+        ) {
+            var   typeArgs = new List<(TypeName?, SimpleNameExpression?)>();
             Token start    = parent.Peek;
             if (parent.MaybeEat(TokenType.OpenParenthesis)) {
                 if (!parent.Peek.Is(TokenType.CloseParenthesis)) {
                     do {
-                        NameExpression? name     = null;
-                        int             startIdx = parent.Ast.Index;
+                        SimpleNameExpression? name     = null;
+                        int                   startIdx = parent.Ast.Index;
                         if (parent.Peek.Is(TokenType.Identifier)) {
-                            name = new NameExpression(parent);
+                            name = new SimpleNameExpression(parent);
                             if (!parent.MaybeEat(TokenType.OpAssign)) {
                                 parent.MoveTo(startIdx);
                             }

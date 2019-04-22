@@ -84,9 +84,9 @@ namespace Axion.Core.Processing {
                 throw new FileNotFoundException("Source file doesn't exists", file.FullName);
             }
 
-            if (file.Extension != Spec.SourceFileExtension) {
+            if (file.Extension != Compiler.SourceFileExtension) {
                 throw new ArgumentException(
-                    "Source file must have '" + Spec.SourceFileExtension + "' extension.",
+                    "Source file must have '" + Compiler.SourceFileExtension + "' extension.",
                     nameof(file)
                 );
             }
@@ -110,7 +110,7 @@ namespace Axion.Core.Processing {
                 Compiler.OutputDirectory
                 + "Temp_"
                 + DateTime.Now.ToFileName()
-                + Spec.SourceFileExtension,
+                + Compiler.SourceFileExtension,
                 outFilePath
             );
 
@@ -144,7 +144,7 @@ namespace Axion.Core.Processing {
             }
 
             if (!Path.HasExtension(outFilePath)) {
-                outFilePath += Spec.OutputFileExtension;
+                outFilePath += Compiler.OutputFileExtension;
             }
 
             if (!Path.IsPathRooted(outFilePath)) {

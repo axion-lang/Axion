@@ -68,11 +68,11 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("with ", Item, " ", Block);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("using (", item, ") ", Block);
         }
 
@@ -95,9 +95,9 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             set => SetNode(ref contextManager, value);
         }
 
-        private Expression name;
+        private SimpleNameExpression name;
 
-        public Expression Name {
+        public SimpleNameExpression Name {
             get => name;
             set => SetNode(ref name, value);
         }
@@ -114,7 +114,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
             ContextManager = Expression.ParseExtendedExpr(this);
             if (MaybeEat(TokenType.OpAs)) {
-                Name = new NameExpression(this, true);
+                Name = new SimpleNameExpression(this);
             }
 
             MarkEnd(Token);
@@ -123,7 +123,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         /// <summary>
         ///     Constructs plain <see cref="WithStatement"/> without position in source.
         /// </summary>
-        public WithStatementItem(Expression contextManager, Expression name) {
+        public WithStatementItem(Expression contextManager, SimpleNameExpression name) {
             ContextManager = contextManager;
             Name           = name;
         }
@@ -132,11 +132,11 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(ContextManager, " as ", Name);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("var ", Name, " = ", ContextManager);
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Syntactic.Statements;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic {
@@ -23,6 +24,28 @@ namespace Axion.Core.Processing.Syntactic {
                 }
 
                 return ast;
+            }
+        }
+
+        private BlockStatement parentBlock;
+
+        internal BlockStatement ParentBlock {
+            get {
+                if (parentBlock == null) {
+                    SyntaxTreeNode p = this;
+                    while (!(p is BlockStatement) && !(p is Ast)) {
+                        p = p.Parent;
+                    }
+
+                    if (p is Ast a) {
+                        parentBlock = a.Root;
+                    }
+                    else {
+                        parentBlock = (BlockStatement) p;
+                    }
+                }
+
+                return parentBlock;
             }
         }
 

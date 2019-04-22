@@ -29,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Expression value;
             switch (parent.Peek.Type) {
                 case Identifier: {
-                    value = new NameExpression(parent);
+                    value = NameExpression.ParseName(parent);
                     break;
                 }
 
@@ -49,7 +49,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
 
                 case OpenParenthesis: {
-                    value = ParseMultiple(parent, expectedTypes: Spec.PrimaryExprs);
+                    value = ParseExpression(parent, expectedTypes: Spec.PrimaryExprs);
                     break;
                 }
 
@@ -84,22 +84,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         /// <summary>
         ///     <c>
         ///         extended:
-        ///             (( primary {'|>' primary }) # pipeline
-        ///              | { member | call_expr | index_expr })
+        ///             (pipeline | { member | call_expr | index_expr })
         ///             ['++' | '--']
+        ///         pipeline:
+        ///             primary {'|>' primary }
         ///     </c>
         /// </summary>
-        internal static Expression ParseExtendedExpr(
-            SyntaxTreeNode parent,
-            bool           allowGenerator = false
-        ) {
+        internal static Expression ParseExtendedExpr(SyntaxTreeNode parent) {
             Expression value = ParsePrimaryExpr(parent);
-            // pipeline cannot be combined with other trailers
             if (parent.MaybeEat(RightPipeline)) {
                 do {
                     value = new FunctionCallExpression(
                         parent,
-                        ParsePrimaryExpr(parent),
+                        ParseExtendedExprInternal(parent, ParsePrimaryExpr(parent)),
                         new CallArgument(parent, value)
                     );
                 } while (parent.MaybeEat(RightPipeline));
@@ -107,12 +104,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 return value;
             }
 
+            return ParseExtendedExprInternal(parent, value);
+        }
+
+        private static Expression ParseExtendedExprInternal(
+            SyntaxTreeNode parent,
+            Expression     value
+        ) {
             while (true) {
                 if (parent.Peek.Is(Dot)) {
                     value = new MemberAccessExpression(parent, value);
                 }
                 else if (parent.Peek.Is(OpenParenthesis)) {
-                    value = new FunctionCallExpression(parent, value, allowGenerator);
+                    value = new FunctionCallExpression(parent, value, true);
                 }
                 else if (parent.Peek.Is(OpenBracket)) {
                     value = new IndexerExpression(parent, value);
@@ -144,7 +148,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 return new UnaryOperationExpression(parent, op, ParseUnaryLeftExpr(parent));
             }
 
-            return ParseExtendedExpr(parent, true);
+            return ParseExtendedExpr(parent);
         }
 
         /// <summary>
@@ -158,6 +162,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             while (parent.Peek is OperatorToken op && op.Properties.Precedence >= precedence) {
                 parent.Move();
                 expr = new BinaryOperationExpression(
+                    parent,
                     expr,
                     op,
                     ParseOperation(parent, op.Properties.Precedence + 1)
@@ -192,26 +197,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         ///             yield_expr | test_list
         ///     </c>
         /// </summary>
-        internal static Expression ParseExpression(SyntaxTreeNode parent) {
+        internal static Expression ParseSingleExpr(SyntaxTreeNode parent) {
             bool isImmutable = parent.MaybeEat(KeywordLet);
 
-            Expression expr = ParseMultiple(parent, ParseTestExpr);
+            Expression expr = ParseExpression(parent, ParseTestExpr);
 
-            if (expr is ErrorExpression
-                || expr is UnaryOperationExpression
-                || !(isImmutable
-                     || Spec.AssignableExprs.Contains(expr.GetType())
-                     && parent.Peek.Is(Colon, OpAssign))) {
-                return expr;
-            }
-
-            if (expr is BinaryOperationExpression bin && bin.Operator.Is(OpAssign)) {
-                return new VariableDefinitionExpression(bin.Left, null, bin.Right) {
+            // ['let'] name '=' expr
+            // name is undefined
+            if (expr is BinaryOperationExpression bin
+                && bin.Left is SimpleNameExpression name
+                && bin.Operator.Is(OpAssign)
+                && !bin.ParentBlock.HasVariable(name)) {
+                return new VariableDefinitionExpression(parent, bin.Left, null, bin.Right) {
                     IsImmutable = isImmutable
                 };
             }
 
-            if (!Spec.AssignableExprs.Contains(expr.GetType())) {
+            if (!parent.Peek.Is(Colon)) {
+                return expr;
+            }
+
+            if (!Spec.VariableLeftExprs.Contains(expr.GetType())) {
                 parent.Unit.ReportError(Spec.ERR_InvalidAssignmentTarget, expr);
             }
 
@@ -222,28 +228,32 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
 
             if (parent.MaybeEat(OpAssign)) {
-                value = ParseMultiple(parent, expectedTypes: Spec.TestExprs);
+                value = ParseExpression(parent, expectedTypes: Spec.TestExprs);
             }
 
-            return new VariableDefinitionExpression(expr, type, value) {
+            return new VariableDefinitionExpression(parent, expr, type, value) {
                 IsImmutable = isImmutable
             };
         }
 
         /// <summary>
         ///     <c>
-        ///         ['('] expr {',' expr} [')']
+        ///         ['('] %expr {',' %expr} [')']
         ///     </c>
         ///     Helper for parsing multiple comma-separated
         ///     expressions with optional parenthesis
         ///     (e.g. tuples)
         /// </summary>
-        internal static Expression ParseMultiple(
+        internal static Expression ParseExpression(
             SyntaxTreeNode                   parent,
             Func<SyntaxTreeNode, Expression> parserFunc = null,
             params Type[]                    expectedTypes
         ) {
-            parserFunc??=ParseExpression;
+            if (expectedTypes.Length == 0 || parserFunc == ParseSingleExpr) {
+                expectedTypes = Spec.AllExprs;
+            }
+
+            parserFunc??=ParseSingleExpr;
             bool  parens = parent.MaybeEat(OpenParenthesis);
             Token start  = parent.Token;
             // empty tuple
@@ -267,7 +277,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             else if (parent.Peek.Is(KeywordFor)) {
                 list[0] = new ForComprehension(parent, list[0]);
                 if (parens) {
-                    list[0] = new GeneratorExpression((ForComprehension) list[0]);
+                    list[0] = new GeneratorExpression(parent, (ForComprehension) list[0]);
                 }
             }
             // parenthesized
@@ -275,7 +285,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 if (parens
                     && !(list[0] is ParenthesizedExpression)
                     && !(list[0] is TupleExpression)) {
-                    list[0] = new ParenthesizedExpression(list[0]);
+                    list[0] = new ParenthesizedExpression(start, list[0]);
                 }
             }
 
@@ -287,13 +297,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 for (var i = 0; i < list.Count; i++) {
                     Type itemType = list[i].GetType();
                     if (!expectedTypes.Contains(itemType)) {
-                        parent.Unit.ReportError(
-                            "Expected "
-                            + Utilities.GetExprFriendlyName(expectedTypes[0])
-                            + ", got "
-                            + Utilities.GetExprFriendlyName(itemType),
-                            list[i]
-                        );
+                        if (expectedTypes.Length > 1) {
+                            parent.Unit.ReportError(
+                                "Expected "
+                                + "'"
+                                + parserFunc.Method.Name
+                                + "'"
+                                + ", got "
+                                + Utilities.GetExprFriendlyName(itemType),
+                                list[i]
+                            );
+                        }
+                        else {
+                            parent.Unit.ReportError(
+                                "Expected "
+                                + Utilities.GetExprFriendlyName(expectedTypes[0])
+                                + ", got "
+                                + Utilities.GetExprFriendlyName(itemType),
+                                list[i]
+                            );
+                        }
                     }
                 }
             }

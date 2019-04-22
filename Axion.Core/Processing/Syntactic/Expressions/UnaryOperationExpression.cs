@@ -24,6 +24,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public UnaryOperationExpression(
+            OperatorToken op,
+            Expression    expression
+        ) {
+            Operator = op;
+            Value    = expression;
+
+            MarkPosition(op, expression);
+        }
+
+        public UnaryOperationExpression(
             SyntaxTreeNode parent,
             TokenType      opType,
             Expression     expression
@@ -34,7 +44,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkPosition(Value);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public UnaryOperationExpression(
+            TokenType  opType,
+            Expression expression
+        ) {
+            Operator = new OperatorToken(opType);
+            Value    = expression;
+
+            MarkPosition(Value);
+        }
+
+        public override void ToAxionCode(CodeBuilder c) {
             if (Operator.Properties.InputSide == InputSide.Left) {
                 c.Write(Value, Operator.Value);
             }
@@ -42,7 +62,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             c.Write(Operator.Value, Value);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             if (Operator.Properties.InputSide == InputSide.Left) {
                 c.Write(Value, Operator.Value);
             }

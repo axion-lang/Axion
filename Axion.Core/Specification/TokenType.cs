@@ -1,6 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Specification {
     /// <summary>
@@ -65,7 +66,6 @@ namespace Axion.Core.Specification {
 
         #region GEN_keywords
 
-        KeywordAll,
         KeywordAnyway,
         KeywordAssert,
         KeywordAsync,
@@ -150,33 +150,33 @@ namespace Axion.Core.Specification {
 
     public static class TokenTypeExtensions {
         internal static bool IsOpenBracket(this TokenType type) {
-            return type == TokenType.OpenParenthesis
-                   || type == TokenType.OpenBracket
-                   || type == TokenType.OpenBrace;
+            return type == OpenParenthesis
+                   || type == OpenBracket
+                   || type == OpenBrace;
         }
 
         internal static bool IsCloseBracket(this TokenType type) {
-            return type == TokenType.CloseParenthesis
-                   || type == TokenType.CloseBracket
-                   || type == TokenType.CloseBrace;
+            return type == CloseParenthesis
+                   || type == CloseBracket
+                   || type == CloseBrace;
         }
 
         internal static TokenType GetMatchingBracket(this TokenType type) {
             switch (type) {
                 // open : close
-                case TokenType.OpenParenthesis:
-                    return TokenType.CloseParenthesis;
-                case TokenType.OpenBracket:
-                    return TokenType.CloseBracket;
-                case TokenType.OpenBrace:
-                    return TokenType.CloseBrace;
+                case OpenParenthesis:
+                    return CloseParenthesis;
+                case OpenBracket:
+                    return CloseBracket;
+                case OpenBrace:
+                    return CloseBrace;
                 // close : open
-                case TokenType.CloseParenthesis:
-                    return TokenType.OpenParenthesis;
-                case TokenType.CloseBracket:
-                    return TokenType.OpenBracket;
-                case TokenType.CloseBrace:
-                    return TokenType.OpenBrace;
+                case CloseParenthesis:
+                    return OpenParenthesis;
+                case CloseBracket:
+                    return OpenBracket;
+                case CloseBrace:
+                    return OpenBrace;
                 // should never be thrown
                 default:
                     throw new Exception(

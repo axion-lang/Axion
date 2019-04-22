@@ -8,5 +8,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
         }
 
         protected MultipleExpression(SyntaxTreeNode parent) : base(parent) { }
+        protected MultipleExpression() { }
     }
 }

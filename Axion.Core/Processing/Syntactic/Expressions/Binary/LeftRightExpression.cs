@@ -13,5 +13,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Binary {
             get => right;
             set => SetNode(ref right, value);
         }
+
+        protected LeftRightExpression(SyntaxTreeNode parent) {
+            Parent = parent;
+        }
     }
 }

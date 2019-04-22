@@ -1,14 +1,14 @@
 using System;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         parent  ('if' | 'unless') operation
     ///     </c>
-    ///     Closes comprehensions tree,
+    ///     Closes comprehensions list,
     ///     cannot be continued with other comprehensions.
     /// </summary>
     public class ConditionalComprehension : Expression {
@@ -21,29 +21,43 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         internal override TypeName ValueType => Parent.ValueType;
 
+        #region Constructors
+
+        /// <summary>
+        ///     Constructs new <see cref="ConditionalComprehension"/> from tokens.
+        /// </summary>
         internal ConditionalComprehension(SyntaxTreeNode parent) : base(parent) {
-            if (Peek.Is(TokenType.KeywordIf)) {
-                MarkStart(TokenType.KeywordIf);
+            if (Peek.Is(KeywordIf)) {
+                MarkStart(KeywordIf);
                 Condition = ParseOperation(this);
             }
             else {
-                MarkStart(TokenType.KeywordUnless);
-                Condition = new UnaryOperationExpression(
-                    this,
-                    TokenType.OpNot,
-                    ParseOperation(this)
-                );
+                MarkStart(KeywordUnless);
+                Condition = new UnaryOperationExpression(OpNot, ParseOperation(this));
             }
 
             MarkEnd(Token);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        /// <summary>
+        ///     Constructs plain <see cref="ConditionalComprehension"/> without position in source.
+        /// </summary>
+        internal ConditionalComprehension(Expression condition) {
+            Condition = condition;
+        }
+
+        #endregion
+
+        #region Transpilers
+
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(" if ", Condition);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
-            throw new NotSupportedException();
+        public override void ToCSharpCode(CodeBuilder c) {
+            throw new NotImplementedException();
         }
+
+        #endregion
     }
 }

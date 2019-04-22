@@ -43,8 +43,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             bool           allowGenerator = false
         ) : base(parent) {
             Target = target;
-
-            MarkStart(Parent);
+            MarkStart(Target);
 
             Eat(OpenParenthesis);
             Args = allowGenerator
@@ -54,13 +53,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkEnd(Token);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public FunctionCallExpression(Expression target, NodeList<CallArgument> args = null) {
+            Target = target;
+            Args   = args ?? new NodeList<CallArgument>(this);
+        }
+
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(Target, "(");
             c.AddJoin(", ", Args);
             c.Write(")");
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(Target, "(");
             c.AddJoin(", ", Args);
             c.Write(")");
@@ -75,9 +79,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     }
 
     public sealed class CallArgument : Expression {
-        private NameExpression name;
+        private SimpleNameExpression name;
 
-        public NameExpression Name {
+        public SimpleNameExpression Name {
             get => name;
             set => SetNode(ref name, value);
         }
@@ -95,9 +99,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkPosition(Value);
         }
 
-        internal CallArgument(SyntaxTreeNode parent, NameExpression name, Expression value) : base(
-            parent
-        ) {
+        internal CallArgument(
+            SyntaxTreeNode       parent,
+            SimpleNameExpression name,
+            Expression           value
+        ) : base(parent) {
             Name  = name;
             Value = value;
 
@@ -128,7 +134,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 // Generator expr
                 arg = new CallArgument(
                     parent,
-                    new GeneratorExpression(new ForComprehension(parent, nameOrValue))
+                    new GeneratorExpression(parent, new ForComprehension(parent, nameOrValue))
                 );
                 generator = true;
             }
@@ -198,7 +204,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         private static CallArgument FinishNamedArg(SyntaxTreeNode parent, Expression nameOrValue) {
-            if (nameOrValue is NameExpression name) {
+            if (nameOrValue is SimpleNameExpression name) {
                 Expression value = ParseTestExpr(parent);
                 return new CallArgument(parent, name, value);
             }
@@ -208,12 +214,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         private static bool IsUniqueNamedArg(IEnumerable<CallArgument> args, CallArgument arg) {
-            if (arg.Name.Qualifiers.Count == 0) {
-                return true;
-            }
-
             foreach (CallArgument a in args) {
-                if (a.Name.Qualifiers == arg.Name.Qualifiers) {
+                if (a.Name.Name == arg.Name.Name) {
                     return false;
                 }
             }
@@ -221,7 +223,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return true;
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             if (Name != null) {
                 c.Write(Name + " = ");
             }
@@ -229,7 +231,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             c.Write(Value);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             if (Name != null) {
                 c.Write(Name + " = ");
             }

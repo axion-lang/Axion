@@ -39,13 +39,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkEnd(Token);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("new " + Value + "(");
             c.AddJoin(", ", Args);
             c.Write(")");
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("new " + Value + "(");
             c.AddJoin(", ", Args);
             c.Write(")");

@@ -18,11 +18,11 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(Expression);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(Expression, ";");
         }
 

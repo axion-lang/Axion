@@ -29,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             }
 
             if (!Peek.Is(Spec.NeverTestTypes)) {
-                Value = Expression.ParseMultiple(parent, expectedTypes: Spec.TestExprs);
+                Value = Expression.ParseExpression(parent, expectedTypes: Spec.TestExprs);
             }
 
             MarkEnd(Token);
@@ -44,11 +44,11 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("return ", Value);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("return ", Value, ";");
         }
 

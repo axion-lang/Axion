@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Axion.Core.Processing.Syntactic {
     public class NodeList<T> : IList<T> where T : SyntaxTreeNode? {
-        private readonly SyntaxTreeNode nodesParent;
+        private readonly SyntaxTreeNode itemsParent;
         private readonly List<T>        items;
 
         void IList<T>.RemoveAt(int index) {
@@ -34,23 +34,23 @@ namespace Axion.Core.Processing.Syntactic {
                 : throw new IndexOutOfRangeException();
 
         internal NodeList(SyntaxTreeNode parent) {
-            nodesParent = parent;
+            itemsParent = parent;
             items       = new List<T>();
         }
 
         internal NodeList(SyntaxTreeNode parent, IEnumerable<T> array) {
-            nodesParent = parent;
+            itemsParent = parent;
             items       = new List<T>(array);
         }
 
         public NodeList<T> Insert(int index, T item) {
-            item.Parent = nodesParent;
+            item.Parent = itemsParent;
             items.Insert(index, item);
             return this;
         }
 
         public NodeList<T> Add(T item) {
-            item.Parent = nodesParent;
+            item.Parent = itemsParent;
             items.Add(item);
             return this;
         }
@@ -65,7 +65,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         public NodeList<T> AddRange(IEnumerable<T> collection) {
             foreach (T syntaxTreeNode in collection) {
-                syntaxTreeNode.Parent = nodesParent;
+                syntaxTreeNode.Parent = itemsParent;
                 items.Add(syntaxTreeNode);
             }
 

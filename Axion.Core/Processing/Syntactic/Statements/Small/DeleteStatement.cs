@@ -29,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
         /// </summary>
         internal DeleteStatement(SyntaxTreeNode parent) : base(parent) {
             MarkStart(TokenType.KeywordDelete);
-            Value = Expression.ParseMultiple(this, expectedTypes: Spec.DeletableExprs);
+            Value = Expression.ParseExpression(this, expectedTypes: Spec.AssignableExprs);
             MarkEnd(Token);
         }
 
@@ -42,11 +42,11 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
 
         #endregion
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("delete ", Value);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             throw new NotSupportedException();
         }
     }

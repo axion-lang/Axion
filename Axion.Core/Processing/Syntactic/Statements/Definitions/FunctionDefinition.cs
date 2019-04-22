@@ -27,13 +27,6 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             set => SetNode(ref name, value);
         }
 
-        private NameExpression? explicitInterfaceName;
-
-        public NameExpression? ExplicitInterfaceName {
-            get => explicitInterfaceName;
-            set => SetNode(ref explicitInterfaceName, value);
-        }
-
         private TypeName returnType;
 
         public TypeName ReturnType {
@@ -75,21 +68,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
         /// </summary>
         internal FunctionDefinition(SyntaxTreeNode parent) : base(parent) {
             MarkStart(TokenType.KeywordFn);
-            Name = new NameExpression(this);
-            if (Name.Qualifiers.Count > 0
-                && Name.Qualifiers.Count < 3) {
-                if (Name.Qualifiers.Count == 2) {
-                    ExplicitInterfaceName = new NameExpression(this, Name.Qualifiers[0]);
-                    Name                  = new NameExpression(this, Name.Qualifiers[1]);
-                }
-            }
-            else {
-                Unit.ReportError(
-                    "Function name must be simple, or declare one explicit interface name.",
-                    Name
-                );
-            }
-
+            Name = NameExpression.ParseName(this);
             // parameters
             if (MaybeEat(TokenType.OpenParenthesis)) {
                 Parameters = ParseParameterList(this, TokenType.CloseParenthesis);
@@ -104,6 +83,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             Block = new BlockStatement(this, BlockType.Top);
             MarkEnd(Token);
             Contract.Assert(this == Ast.PopFunction());
+            ParentBlock.Functions.Add(this);
         }
 
         /// <summary>
@@ -112,28 +92,27 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
         internal FunctionDefinition(SyntaxTreeNode parent, MethodDeclarationSyntax csNode) : base(
             parent
         ) {
-            Name = new NameExpression(this, csNode.Identifier.Text);
+            Name = NameExpression.ParseName(this, csNode.Identifier.Text);
             Parameters = new NodeList<FunctionParameter>(
                 this,
                 csNode.ParameterList.Parameters.Select(p => new FunctionParameter(this, p))
             );
             ReturnType = TypeName.FromCSharp(this, csNode.ReturnType);
             Block      = new BlockStatement(this, csNode.Body);
+            ParentBlock.Functions.Add(this);
         }
 
         /// <summary>
         ///     Constructs plain <see cref="FunctionDefinition"/> without position in source.
         /// </summary>
         public FunctionDefinition(
-            string                       name,
-            NameExpression?              explicitInterfaceName = null,
-            NodeList<FunctionParameter>? parameters            = null,
-            BlockStatement?              block                 = null,
-            TypeName?                    returnType            = null
+            NameExpression               name,
+            NodeList<FunctionParameter>? parameters = null,
+            BlockStatement?              block      = null,
+            TypeName?                    returnType = null
         ) {
-            Name                  = new NameExpression(this, name);
-            ExplicitInterfaceName = explicitInterfaceName;
-            Parameters            = parameters ?? new NodeList<FunctionParameter>(this);
+            Name       = name;
+            Parameters = parameters ?? new NodeList<FunctionParameter>(this);
 
             Block      = block ?? new BlockStatement(this);
             ReturnType = returnType;
@@ -244,7 +223,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("fn " + Name);
             if (Parameters.Count > 0) {
                 c.Write(" (");
@@ -259,7 +238,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             c.Write(" ", Block);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("public ", ReturnType, " ", Name, "(");
             c.AddJoin(", ", Parameters);
             c.Write(") ", Block);
@@ -277,9 +256,9 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
     public sealed class FunctionParameter : Expression {
         #region Properties
 
-        private NameExpression name;
+        private SimpleNameExpression name;
 
-        public NameExpression Name {
+        public SimpleNameExpression Name {
             get => name;
             set => SetNode(ref name, value);
         }
@@ -310,15 +289,15 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             HashSet<string> names
         ) : base(parent) {
             MarkStart(Token);
-            Name = new NameExpression(this, true);
+            Name = new SimpleNameExpression(this);
             Eat(TokenType.Colon);
             Type = TypeName.ParseTypeName(this);
 
-            if (names.Contains(Name.Qualifiers[0])) {
+            if (names.Contains(Name.Name)) {
                 Unit.Blame(BlameType.DuplicatedParameterNameInFunctionDefinition, name);
             }
 
-            names.Add(Name.Qualifiers[0]);
+            names.Add(Name.Name);
 
             if (MaybeEat(TokenType.OpAssign)) {
                 DefaultValue = ParseTestExpr(this);
@@ -334,23 +313,24 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             SyntaxTreeNode  parent,
             ParameterSyntax csNode
         ) : base(parent) {
-            Name         = new NameExpression(this, csNode.Identifier.Text);
-            Type         = TypeName.FromCSharp(this, csNode.Type);
-            DefaultValue = (Expression) CSharpToAxion.ConvertNode(csNode.Default.Value);
+            Name = new SimpleNameExpression(this, csNode.Identifier.Text);
+            Type = TypeName.FromCSharp(this, csNode.Type);
+            throw new NotImplementedException();
+            //DefaultValue = Expression.FromCSharp(csNode.Default.Value);
         }
 
         #endregion
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(Name, ": ", Type);
             if (DefaultValue != null) {
                 c.Write(" = ", DefaultValue);
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(Type, " ", Name);
             if (DefaultValue != null) {
                 c.Write(" = ", DefaultValue);

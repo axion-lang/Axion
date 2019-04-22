@@ -120,7 +120,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         ///     this token in Axion language format,
         ///     with original formatting of whitespaces.
         /// </summary>
-        internal override void ToOriginalAxionCode(CodeBuilder c) {
+        public override void ToOriginalAxionCode(CodeBuilder c) {
             ToAxionCode(c);
             c.Write(EndWhitespaces);
         }
@@ -129,7 +129,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         ///     Returns string representation of
         ///     this token in Axion language format.
         /// </summary>
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(Value);
         }
 
@@ -137,7 +137,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         ///     Returns string representation of
         ///     this token in C# language format.
         /// </summary>
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(Value);
         }
 

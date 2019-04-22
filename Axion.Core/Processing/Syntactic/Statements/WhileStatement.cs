@@ -26,7 +26,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkStart(TokenType.KeywordWhile);
 
             Condition = Expression.ParseTestExpr(this);
-            Block     = new BlockStatement(this);
+            Block     = new BlockStatement(this, BlockType.Loop);
             if (MaybeEat(TokenType.KeywordNoBreak)) {
                 NoBreakBlock = new BlockStatement(this);
             }
@@ -51,14 +51,14 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("while ", Condition, " ", Block);
             if (NoBreakBlock != null) {
                 c.Write(" nobreak ", NoBreakBlock);
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("while (", Condition, ") ", Block);
             if (NoBreakBlock != null) {
                 Unit.ReportError("C# doesn't support 'nobreak' block", NoBreakBlock);

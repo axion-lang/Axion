@@ -63,13 +63,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("(");
             c.AddJoin(", ", types);
             c.Write(")");
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("(");
             c.AddJoin(", ", types);
             c.Write(")");

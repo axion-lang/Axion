@@ -5,6 +5,63 @@ using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Specification {
     public partial class Spec {
+        /// <summary>
+        ///     Contains all language keywords.
+        /// </summary>
+        public static readonly Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType> {
+            // testing
+            { "assert",    KeywordAssert   },
+            // branching
+            { "unless",    KeywordUnless   },
+            { "if",        KeywordIf       },
+            { "elif",      KeywordElseIf   },
+            { "else",      KeywordElse     },
+            { "match",     KeywordMatch    },
+            { "case",      KeywordCase     },
+            { "default",   KeywordDefault  },
+            // loops
+            { "for",       KeywordFor      },
+            { "do",        KeywordDo       },
+            { "while",     KeywordWhile    },
+            { "break",     KeywordBreak    },
+            { "nobreak",   KeywordNoBreak  },
+            { "continue",  KeywordContinue },
+            // exceptions
+            { "try",       KeywordTry      },
+            { "raise",     KeywordRaise    },
+            { "catch",     KeywordCatch    },
+            { "anyway",    KeywordAnyway   },
+            { "const",     KeywordConst    },
+            // asynchronous
+            { "async",     KeywordAsync    },
+            { "await",     KeywordAwait    },
+            // modules
+            { "use",       KeywordUse      },
+            { "module",    KeywordModule   },
+            { "mixin",     KeywordMixin    },
+            { "from",      KeywordFrom     },
+            // structures
+            { "class",     KeywordClass    },
+            { "extends",   KeywordExtends  },
+            { "struct",    KeywordStruct   },
+            { "enum",      KeywordEnum     },
+            { "fn",        KeywordFn       },
+            // variables
+            { "let",       KeywordLet      },
+            { "new",       KeywordNew      },
+            { "delete",    KeywordDelete   },
+            // returns
+            { "yield",     KeywordYield    },
+            { "return",    KeywordReturn   },
+            { "pass",      KeywordPass     },
+            // values
+            { "nil",       KeywordNil      },
+            { "true",      KeywordTrue     },
+            { "false",     KeywordFalse    },
+            { "with",      KeywordWith     },
+            { "when",      KeywordWhen     }
+        };
+                        
         public static readonly Dictionary<string, OperatorProperties> Operators = new Dictionary<string, OperatorProperties> {
             { "++",     new OperatorProperties(OpIncrement,            17, InputSide.Unknown) },
             { "--",     new OperatorProperties(OpDecrement,            17, InputSide.Unknown) },
@@ -106,11 +163,11 @@ namespace Axion.Core.Specification {
         public static readonly string[] SortedSymbolics =
             Operators.Keys.Union(Symbols.Keys).OrderByDescending(val => val.Length).ToArray();
 
-        public static readonly HashSet<char> SymbolicChars =
+        public static readonly char[] SymbolicChars =
             new HashSet<char>(
             SortedSymbolics
                 .Select(val => val[0])
                 .Where(c => !char.IsLetterOrDigit(c))
-            );
+            ).ToArray();
     }
 }

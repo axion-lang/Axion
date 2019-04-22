@@ -11,9 +11,9 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
     ///     </c>
     /// </summary>
     public class ContinueStatement : Statement {
-        private NameExpression? loopName;
+        private SimpleNameExpression? loopName;
 
-        public NameExpression? LoopName {
+        public SimpleNameExpression? LoopName {
             get => loopName;
             set => SetNode(ref loopName, value);
         }
@@ -26,7 +26,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
         internal ContinueStatement(SyntaxTreeNode parent) : base(parent) {
             MarkStart(TokenType.KeywordContinue);
             if (MaybeEat(TokenType.Identifier)) {
-                LoopName = new NameExpression(this, true);
+                LoopName = new SimpleNameExpression(this);
             }
 
             MarkEnd(Token);
@@ -42,7 +42,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
         /// <summary>
         ///     Constructs plain <see cref="ContinueStatement"/> without position in source.
         /// </summary>
-        public ContinueStatement(NameExpression? loopName = null) {
+        public ContinueStatement(SimpleNameExpression? loopName = null) {
             LoopName = loopName;
         }
 
@@ -50,14 +50,14 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("continue");
             if (LoopName != null) {
                 c.Write(" ", LoopName);
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             if (LoopName == null) {
                 c.Write("continue;");
                 return;

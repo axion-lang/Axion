@@ -72,68 +72,60 @@ namespace Axion.Core.Specification {
             KeywordIf
         };
 
-        internal static readonly Type[] DeletableExprs = {
-            typeof(NameExpression), typeof(MemberAccessExpression), typeof(IndexerExpression)
+        internal static readonly Type[] VariableLeftExprs = {
+            typeof(SimpleNameExpression), typeof(TupleExpression)
         };
 
-        internal static readonly Type[] AssignableExprs = {
-            typeof(NameExpression),
-            typeof(TupleExpression),
-            typeof(MemberAccessExpression),
-            typeof(IndexerExpression)
-        };
+        internal static readonly Type[] AssignableExprs =
+            VariableLeftExprs
+                .Union(
+                    new[] {
+                        typeof(SimpleNameExpression),
+                        typeof(TupleExpression),
+                        typeof(MemberAccessExpression),
+                        typeof(IndexerExpression)
+                    }
+                )
+                .ToArray();
 
-        internal static readonly Type[] PrimaryExprs = AssignableExprs.Union(
-                                                                          new[] {
-                                                                              typeof(
-                                                                                  AwaitExpression),
-                                                                              typeof(
-                                                                                  YieldExpression),
-                                                                              typeof(
-                                                                                  TypeInitializerExpression
-                                                                              ),
-                                                                              typeof(
-                                                                                  HashCollectionExpression
-                                                                              ),
-                                                                              typeof(
-                                                                                  ListInitializerExpression
-                                                                              ),
-                                                                              typeof(
-                                                                                  FunctionCallExpression
-                                                                              ),
-                                                                              typeof(
-                                                                                  ConstantExpression
-                                                                              )
-                                                                          }
-                                                                      )
-                                                                      .ToArray();
+        internal static readonly Type[] PrimaryExprs =
+            AssignableExprs
+                .Union(
+                    new[] {
+                        typeof(AwaitExpression),
+                        typeof(YieldExpression),
+                        typeof(TypeInitializerExpression),
+                        typeof(HashCollectionExpression),
+                        typeof(ListInitializerExpression),
+                        typeof(FunctionCallExpression),
+                        typeof(ConstantExpression),
+                        typeof(ParenthesizedExpression)
+                    }
+                )
+                .ToArray();
 
-        internal static readonly Type[] TestExprs = PrimaryExprs.Union(
-                                                                    new[] {
-                                                                        typeof(
-                                                                            FunctionCallExpression
-                                                                        ),
-                                                                        typeof(IndexerExpression),
-                                                                        typeof(
-                                                                            UnaryOperationExpression
-                                                                        ),
-                                                                        typeof(
-                                                                            BinaryOperationExpression
-                                                                        ),
-                                                                        typeof(
-                                                                            ConditionalExpression),
-                                                                        typeof(ForComprehension)
-                                                                    }
-                                                                )
-                                                                .ToArray();
+        internal static readonly Type[] TestExprs =
+            PrimaryExprs
+                .Union(
+                    new[] {
+                        typeof(FunctionCallExpression),
+                        typeof(IndexerExpression),
+                        typeof(UnaryOperationExpression),
+                        typeof(BinaryOperationExpression),
+                        typeof(ConditionalExpression)
+                    }
+                )
+                .ToArray();
 
-        internal static readonly Type[] AllExprs = TestExprs.Union(
-                                                                new[] {
-                                                                    typeof(
-                                                                        VariableDefinitionExpression
-                                                                    )
-                                                                }
-                                                            )
-                                                            .ToArray();
+        internal static readonly Type[] AllExprs =
+            TestExprs
+                .Union(
+                    new[] {
+                        typeof(VariableDefinitionExpression),
+                        typeof(GeneratorExpression),
+                        typeof(ForComprehension)
+                    }
+                )
+                .ToArray();
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using Axion.Core.Processing.CodeGen;
+﻿using Axion.Core.Processing.CodeGen;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
@@ -9,14 +8,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     public class CharacterToken : Token {
         public string EscapedValue { get; }
         public bool   IsUnclosed   { get; }
-
-        public CharacterToken(string value) : base(TokenType.Character, value, default) {
-            if (Value.Length > 1) {
-                throw new Exception("Cannot create character literal with length > 1.");
-            }
-
-            EscapedValue = value;
-        }
 
         internal CharacterToken(
             string   value,
@@ -34,19 +25,19 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Span = new Span(startPosition, (startPosition.Line, endCol));
         }
 
-        internal override void ToOriginalAxionCode(CodeBuilder c) {
+        public override void ToOriginalAxionCode(CodeBuilder c) {
             ToAxionCode(c);
             c.Write(EndWhitespaces);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
-            c.Write(Spec.CharacterLiteralQuote, Value);
+        public override void ToAxionCode(CodeBuilder c) {
+            c.Write(Spec.CharQuotes, Value);
             if (!IsUnclosed) {
-                c.Write(Spec.CharacterLiteralQuote);
+                c.Write(Spec.CharQuotes);
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("'", Value);
             if (!IsUnclosed) {
                 c.Write("'");

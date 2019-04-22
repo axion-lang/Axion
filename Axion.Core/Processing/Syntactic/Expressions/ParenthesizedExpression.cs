@@ -1,4 +1,5 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
@@ -21,17 +22,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         internal override TypeName ValueType => Value.ValueType;
 
-        internal ParenthesizedExpression(Expression value) {
+        internal ParenthesizedExpression(Token start, Expression value) {
             Parent = value.Parent;
-            Value  = value;
-            MarkPosition(value);
+            MarkStart(start);
+            Value = value;
+            MarkEnd(value);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("(", Value, ")");
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("(", Value, ")");
         }
     }

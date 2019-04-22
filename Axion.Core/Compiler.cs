@@ -58,6 +58,8 @@ namespace Axion.Core {
             "Type '-h', or '--help' to get documentation about launch arguments.";
 
         internal static FileInfo[] InputFiles { get; private set; }
+        public const    string     SourceFileExtension = ".ax";
+        public const    string     OutputFileExtension = ".ax";
         internal static bool       Verbose;
 
         public static void Init(string[] arguments) {
@@ -374,7 +376,7 @@ namespace Axion.Core {
         ///     Saves processed source debug
         ///     information in JSON format.
         /// </summary>
-        private static void SaveDebugInfoToFile(SourceUnit unit) {
+        public static void SaveDebugInfoToFile(SourceUnit unit) {
             File.WriteAllText(
                 unit.DebugFilePath,
                 JsonConvert.SerializeObject(unit, JsonSerializer)
@@ -384,7 +386,7 @@ namespace Axion.Core {
         /// <summary>
         ///     Prints generated AST in JSON format to console.
         /// </summary>
-        private static string AstToMinifiedJson(SourceUnit unit) {
+        public static string AstToMinifiedJson(SourceUnit unit) {
             string json = JsonConvert.SerializeObject(unit.Ast, JsonSerializer);
             json = Regex.Replace(json, @"\$type.+?(\w+?),.*\""", "$type\": \"$1\"");
             json = json.Replace("  ", "   ");

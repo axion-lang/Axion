@@ -15,9 +15,9 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
     public class ClassDefinition : Statement, IDecorated {
         #region Properties
 
-        private NameExpression name;
+        private SimpleNameExpression name;
 
-        public NameExpression Name {
+        public SimpleNameExpression Name {
             get => name;
             set => SetNode(ref name, value);
         }
@@ -63,37 +63,22 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
 
         #endregion
 
-        public ClassDefinition(
-            NameExpression        name,
-            BlockStatement        block,
-            NodeList<TypeName>?   bases     = null,
-            NodeList<Expression>? keywords  = null,
-            Expression?           metaClass = null
-        ) {
-            Name      = name;
-            Block     = block;
-            Bases     = bases ?? new NodeList<TypeName>(this);
-            Keywords  = keywords ?? new NodeList<Expression>(this);
-            MetaClass = metaClass;
-        }
-
         internal ClassDefinition(SyntaxTreeNode parent) : base(parent) {
             Bases    = new NodeList<TypeName>(this);
             Keywords = new NodeList<Expression>(this);
             MarkStart(TokenType.KeywordClass);
 
-            Name = new NameExpression(this, true);
+            Name = new SimpleNameExpression(this);
             // TODO: add generic classes
             MetaClass = null;
-            List<(TypeName?, NameExpression?)> types = TypeName.ParseNamedTypeArgs(this);
-            foreach ((TypeName? type, NameExpression? typeLabel) in types) {
+            List<(TypeName?, SimpleNameExpression?)> types = TypeName.ParseNamedTypeArgs(this);
+            foreach ((TypeName? type, SimpleNameExpression? typeLabel) in types) {
                 if (typeLabel == null) {
                     Bases.Add(type);
                 }
                 else {
                     Keywords.Add(type);
-                    if (typeLabel.Qualifiers.Count == 1
-                        && typeLabel.Qualifiers[0] == "metaclass") {
+                    if (typeLabel.Name == "metaclass") {
                         MetaClass = type;
                     }
                 }
@@ -102,15 +87,16 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             Block = new BlockStatement(this, BlockType.Top);
 
             MarkEnd(Token);
+            ParentBlock.Classes.Add(this);
         }
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("class ", Name, " ", Block);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("public class ", Name, " ", Block);
         }
 

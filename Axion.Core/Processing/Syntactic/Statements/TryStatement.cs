@@ -115,7 +115,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("try ", Block);
             if (Handlers.Count > 0) {
                 c.AddJoin("", Handlers);
@@ -130,7 +130,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("try ", Block);
             if (Handlers.Count > 0) {
                 c.AddJoin("", Handlers);
@@ -198,7 +198,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             if (!Peek.Is(Spec.BlockStarters)) {
                 ErrorType = TypeName.ParseTypeName(this);
                 if (MaybeEat(TokenType.OpAs)) {
-                    ErrorName = new NameExpression(this, true);
+                    ErrorName = new SimpleNameExpression(this);
                 }
             }
 
@@ -230,7 +230,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("catch");
             if (ErrorType != null) {
                 c.Write(" ", ErrorType);
@@ -247,7 +247,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             c.Write(Block);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("catch (");
 
             if (ErrorName != null) {

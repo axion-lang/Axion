@@ -75,7 +75,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             // c is digit or dot except 0 here
-            while (c.IsLetterOrNumberPart()) {
+            while (Spec.IsLetterOrNumberPart(c)) {
                 if (char.IsDigit(c)) {
                     numberOptions.Number.Append(c);
                 }
@@ -136,7 +136,7 @@ namespace Axion.Core.Processing.Lexical {
             var        longValue = 0L;
             BigInteger bigInt    = BigInteger.Zero;
             isOnBaseLetter = true;
-            while (c.IsLetterOrNumberPart()) {
+            while (Spec.IsLetterOrNumberPart(c)) {
                 switch (c) {
                     case '0': {
                         if (longValue != 0L) {
@@ -209,8 +209,8 @@ namespace Axion.Core.Processing.Lexical {
             };
             isOnBaseLetter = true;
 
-            while (c.IsLetterOrNumberPart()) {
-                if (c.IsValidOctalDigit()) {
+            while (Spec.IsLetterOrNumberPart(c)) {
+                if (CharIs(Spec.OctalDigits)) {
                     numberOptions.Number.Append(c);
                 }
                 else if (c != '_') {
@@ -237,8 +237,8 @@ namespace Axion.Core.Processing.Lexical {
             };
             isOnBaseLetter = true;
 
-            while (c.IsLetterOrNumberPart()) {
-                if (c.IsValidHexadecimalDigit()) {
+            while (Spec.IsLetterOrNumberPart(c)) {
+                if (CharIs(Spec.HexadecimalDigits)) {
                     numberOptions.Number.Append(c);
                 }
                 else if (c != '_') {
@@ -280,18 +280,13 @@ namespace Axion.Core.Processing.Lexical {
                 unit.Blame(BlameType.RedundantExponentForZeroNumber, ePosition, Position);
             }
 
-            var eValue = "";
-            if (c == '-'
-                || c == '+') {
-                if (c == '-') {
-                    eValue += c;
-                }
-
+            string eValue = c == '-' ? "-" : "";
+            if (c == '-' || c == '+') {
                 tokenValue.Append(c);
                 Move();
             }
 
-            while (c.IsLetterOrNumberPart()) {
+            while (Spec.IsLetterOrNumberPart(c)) {
                 if (char.IsDigit(c)) {
                     hasValue =  true;
                     eValue   += c;
@@ -347,7 +342,7 @@ namespace Axion.Core.Processing.Lexical {
                 out bool bitRateRequired
             );
 
-            if (c.IsLetterOrNumberPart() && expectingEndOfNumber) {
+            if (Spec.IsLetterOrNumberPart(c) && expectingEndOfNumber) {
                 unit.Blame(
                     BlameType.ExpectedEndOfNumberAfterPostfix,
                     postfixPosition,

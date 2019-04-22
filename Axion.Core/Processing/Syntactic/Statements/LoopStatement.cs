@@ -39,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 isForIndex = true;
             }
             else {
-                Expression.ParseExpression(parent);
+                Expression.ParseSingleExpr(parent);
                 if (parent.MaybeEat(TokenType.Semicolon)) {
                     isForIndex = true;
                 }

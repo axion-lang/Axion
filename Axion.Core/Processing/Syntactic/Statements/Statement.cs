@@ -1,5 +1,4 @@
 ﻿using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Statements.Definitions;
 using Axion.Core.Processing.Syntactic.Statements.Interfaces;
@@ -143,7 +142,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 }
             }
 
-            return new ExpressionStatement(Expression.ParseExpression(parent));
+            return new ExpressionStatement(Expression.ParseSingleExpr(parent));
         }
 
         /// <summary>
@@ -196,13 +195,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             while (parent.MaybeEat(TokenType.OpenBracket)) {
                 do {
                     // on '['
-                    Token      start     = parent.Token;
-                    Expression decorator = Expression.ParseExpression(parent);
-                    if (parent.Peek.Is(TokenType.OpenParenthesis)) {
-                        decorator = new FunctionCallExpression(parent, decorator);
-                    }
-
-                    decorator.MarkPosition(start, parent.Token);
+                    Expression decorator = Expression.ParseSingleExpr(parent);
                     decorators.Add(decorator);
                 } while (parent.MaybeEat(TokenType.Comma));
 

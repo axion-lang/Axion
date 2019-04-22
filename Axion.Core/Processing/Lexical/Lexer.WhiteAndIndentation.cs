@@ -89,8 +89,8 @@ namespace Axion.Core.Processing.Lexical {
             bool hasUnclosedComment =
                 restOfLine.StartsWith(Spec.MultiCommentStart)
                 // that continues on the next line
-                && Regex.Matches(restOfLine, Spec.MultiCommentStartPattern).Count
-                > Regex.Matches(restOfLine, Spec.MultiCommentEndPattern).Count;
+                && Regex.Matches(restOfLine, Regex.Escape(Spec.MultiCommentStart)).Count
+                > Regex.Matches(restOfLine, Regex.Escape(Spec.MultiCommentEnd)).Count;
 
             // todo optimize
             var any = false;

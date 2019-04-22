@@ -32,16 +32,15 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         internal ForInStatement(SyntaxTreeNode parent) : base(parent) {
             MarkStart(TokenType.KeywordFor);
 
-            Item = Expression.ParseMultiple(
+            Item = Expression.ParseExpression(
                 parent,
                 Expression.ParsePrimaryExpr,
-                typeof(NameExpression)
+                typeof(SimpleNameExpression)
             );
             if (MaybeEat(TokenType.OpIn)) {
-                Iterable = Expression.ParseMultiple(
+                Iterable = Expression.ParseExpression(
                     parent,
-                    Expression.ParseTestExpr,
-                    Spec.TestExprs
+                    Expression.ParseTestExpr
                 );
                 Block = new BlockStatement(this, BlockType.Loop);
                 if (MaybeEat(TokenType.KeywordElse)) {
@@ -69,7 +68,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(
                 "for ",
                 Item,
@@ -83,7 +82,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(
                 "foreach (",
                 Item,

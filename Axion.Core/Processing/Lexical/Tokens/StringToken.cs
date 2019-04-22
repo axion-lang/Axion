@@ -51,12 +51,12 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Span = new Span(startPosition, (endLine, endCol));
         }
 
-        internal override void ToOriginalAxionCode(CodeBuilder c) {
+        public override void ToOriginalAxionCode(CodeBuilder c) {
             ToAxionCode(c);
             c.Write(EndWhitespaces);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(Options.GetPrefixes());
             int quotesCount = Options.QuotesCount;
             c.Write(new string(Options.Quote, quotesCount) + Value);
@@ -68,7 +68,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             if (Options.IsFormatted) {
                 c.Write("$");
             }

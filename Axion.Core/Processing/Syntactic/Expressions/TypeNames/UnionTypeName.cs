@@ -48,11 +48,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             MarkPosition(Left, Right);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(Left, " | ", Right);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             throw new NotSupportedException();
         }
     }

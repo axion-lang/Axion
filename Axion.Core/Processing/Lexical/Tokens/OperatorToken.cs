@@ -19,7 +19,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                 startPos
             ) {
             Properties = properties;
-            Span = new Span(startPos, endPos);
+            Span       = new Span(startPos, endPos);
         }
 
         public OperatorToken(string value, Position startPosition = default)

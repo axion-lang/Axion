@@ -14,11 +14,11 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             MarkPosition(Token);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("pass");
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(";");
         }
     }

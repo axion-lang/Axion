@@ -13,10 +13,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Binary {
         public readonly OperatorToken Operator;
 
         public BinaryOperationExpression(
-            Expression    left,
-            OperatorToken op,
-            Expression    right
-        ) {
+            SyntaxTreeNode parent,
+            Expression     left,
+            OperatorToken  op,
+            Expression     right
+        ) : base(parent) {
             Left     = left;
             Operator = op;
             Right    = right;
@@ -29,6 +30,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Binary {
             TokenType  opType,
             Expression right
         ) : this(
+            null,
             left,
             new OperatorToken(opType),
             right
@@ -39,16 +41,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Binary {
             string     op,
             Expression right
         ) : this(
+            null,
             left,
             new OperatorToken(op),
             right
         ) { }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(Left, " ", Operator.Value, " ", Right);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(Left, " ");
             if (Spec.CSharp.BinaryOperators.TryGetValue(Operator.Type, out string op)) {
                 c.Write(op);

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Axion.Core;
 using Axion.Core.Processing;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Specification;
@@ -83,7 +84,7 @@ namespace Axion.Testing.NUnit {
 
         private void ScanSources(DirectoryInfo dir) {
             foreach (FileInfo file in dir.EnumerateFiles()) {
-                if (file.Extension == Spec.SourceFileExtension) {
+                if (file.Extension == Compiler.SourceFileExtension) {
                     SourceFiles.Add(file);
                 }
             }
@@ -95,7 +96,7 @@ namespace Axion.Testing.NUnit {
 
         internal static SourceUnit MakeSourceFromFile([CallerMemberName] string fileName = null) {
             return new SourceUnit(
-                new FileInfo(InPath + fileName + Spec.SourceFileExtension),
+                new FileInfo(InPath + fileName + Compiler.SourceFileExtension),
                 OutPath + fileName + TestExtension
             );
         }
@@ -118,7 +119,7 @@ namespace Axion.Testing.NUnit {
             // check keywords completeness
             IEnumerable<string> definedKws =
                 Enum.GetNames(typeof(TokenType))
-                    .Where(name => name.ToUpper().StartsWith("ERROR"));
+                    .Where(name => name.ToUpper().StartsWith("KEYWORD"));
 
             foreach (string kw in definedKws) {
                 Enum.TryParse(kw, out TokenType type);

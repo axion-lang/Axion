@@ -2,10 +2,9 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
-using Axion.Core.Processing.Syntactic;
 
 namespace Axion.Core.Processing.CodeGen {
-    internal class CodeBuilder : IDisposable {
+    public class CodeBuilder : IDisposable {
         private readonly  StringWriter       baseWriter;
         internal readonly IndentedTextWriter Writer;
         private readonly  OutLang            outLang;
@@ -53,23 +52,9 @@ namespace Axion.Core.Processing.CodeGen {
         }
 
         internal void WriteLine(params object[] values) {
-            for (var i = 0; i < values.Length; i++) {
-                object val = values[i];
-                if (val is SyntaxTreeNode n) {
-                    n.ToAxionCode(this);
-                }
-                else {
-                    Write(val);
-                }
-            }
-
+            Write(values);
             Writer.WriteLine();
         }
-
-//        public static CodeBuilder operator +(CodeBuilder sb, string s) {
-//            sb.Write(s);
-//            return sb;
-//        }
 
         public static implicit operator string(CodeBuilder sb) {
             return sb.ToString();
@@ -78,24 +63,6 @@ namespace Axion.Core.Processing.CodeGen {
         public override string ToString() {
             return baseWriter.ToString();
         }
-
-//        public static CodeBuilder operator +(CodeBuilder b, SpannedRegion node) {
-//            switch (b.outLang) {
-//                case OutLang.Axion: {
-//                    node?.ToAxionCode(b);
-//                    return b;
-//                }
-//
-//                case OutLang.CSharp: {
-//                    node?.ToCSharpCode(b);
-//                    return b;
-//                }
-//
-//                default: {
-//                    throw new NotSupportedException();
-//                }
-//            }
-//        }
 
         public void AddJoin<T>(string separator, IList<T> items, bool indent = false)
             where T : SpannedRegion {
@@ -136,13 +103,28 @@ namespace Axion.Core.Processing.CodeGen {
             }
         }
 
+        protected bool Equals(CodeBuilder other) {
+            return Equals(Writer.ToString(), other.Writer.ToString())
+                   && outLang == other.outLang;
+        }
+
+        public override bool Equals(object obj) {
+            return Equals((CodeBuilder) obj);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                return ((Writer != null ? Writer.GetHashCode() : 0) * 397) ^ (int) outLang;
+            }
+        }
+
         public void Dispose() {
             baseWriter.Dispose();
             Writer.Dispose();
         }
     }
 
-    internal enum OutLang {
+    public enum OutLang {
         Axion,
         CSharp
     }

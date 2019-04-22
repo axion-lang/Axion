@@ -24,11 +24,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkPosition(Value);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        internal ConstantExpression(Token value) {
+            Value = value;
+        }
+
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(Value);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(Value);
         }
     }

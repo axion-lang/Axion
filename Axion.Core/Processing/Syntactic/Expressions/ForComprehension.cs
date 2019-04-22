@@ -2,12 +2,12 @@ using System;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///          target 'for' target_list 'in' operation [right]
+    ///         for_comprehension:
+    ///             target 'for' ((name)) 'in' test [comprehension]
     ///     </c>
     /// </summary>
     public class ForComprehension : Expression {
@@ -15,7 +15,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         private Expression target;
 
-        [JsonIgnore]
         public Expression Target {
             get => target;
             set => SetNode(ref target, value);
@@ -49,10 +48,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         public ForComprehension(SyntaxTreeNode parent, Expression target) : base(parent) {
             Target = target;
 
-            MarkStart(TokenType.KeywordFor);
-            Item = ParseMultiple(this, ParsePrimaryExpr, typeof(NameExpression));
+            MarkStart(target);
+            Eat(TokenType.KeywordFor);
+            Item = ParseExpression(this, ParsePrimaryExpr, typeof(SimpleNameExpression));
             Eat(TokenType.OpIn);
-            Iterable = ParseMultiple(parent, ParseTestExpr, Spec.TestExprs);
+            Iterable = ParseExpression(parent, expectedTypes: Spec.TestExprs);
 
             if (Peek.Is(TokenType.KeywordFor)) {
                 Right = new ForComprehension(Parent, this);
@@ -64,7 +64,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkEnd(Token);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public ForComprehension(
+            Expression target,
+            Expression item,
+            Expression iterable,
+            Expression rightComprehension = null
+        ) {
+            Target   = target;
+            Item     = item;
+            Iterable = iterable;
+            Right    = rightComprehension;
+        }
+
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(
                 Target,
                 " for ",
@@ -75,7 +87,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             );
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             throw new NotSupportedException();
         }
     }

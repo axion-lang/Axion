@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using Axion.Core.Specification;
 
@@ -32,7 +33,9 @@ namespace Axion.Core.Processing.Lexical {
         ///     Returns character next to current.
         /// </summary>
         private char Peek =>
-            charIdx + 1 < unit.Code.Length ? unit.Code[charIdx + 1] : Spec.EndOfCode;
+            charIdx + 1 < unit.Code.Length
+                ? unit.Code[charIdx + 1]
+                : Spec.EndOfCode;
 
         /// <summary>
         ///     Length of previously processed line.
@@ -72,6 +75,28 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             return unit.Code.Substring(charIdx, unit.Code.Length - charIdx);
+        }
+
+        /// <summary>
+        ///     Checks if next piece of string
+        ///     (from current char) is equal to <paramref name="expected"/>.
+        /// </summary>
+        private bool NextIs(string expected) {
+            return PeekPiece(expected.Length) == expected;
+        }
+
+        /// <summary>
+        ///     Checks if next piece of string
+        ///     (from current char) is equal to <paramref name="expected"/>.
+        /// </summary>
+        private bool CharIs(IReadOnlyList<char> expected) {
+            for (var i = 0; i < expected.Count; i++) {
+                if (c == expected[i]) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

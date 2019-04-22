@@ -39,26 +39,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             if (Ast.CurrentFunction != null) { }
 
             // Parse expr list after yield. This can be:
-            // 1) empty, in which case it becomes 'yield nil'
-            // 2) a single expr
-            // 3) multiple expressions, in which case it's wrapped in a tuple.
+            // 1) a single expr
+            // 2) multiple expressions, in which case it's wrapped in a tuple.
             if (MaybeEat(TokenType.KeywordFrom)) {
                 Value       = ParseTestExpr(this);
                 IsYieldFrom = true;
             }
             else {
-                Value = ParseMultiple(this, ParseTestExpr)
-                        ?? new ConstantExpression(TokenType.KeywordNil);
+                Value = ParseExpression(this, expectedTypes: Spec.TestExprs);
             }
 
             MarkEnd(Token);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("yield ", Value);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("yield ", Value);
         }
     }

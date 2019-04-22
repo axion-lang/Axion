@@ -1,7 +1,12 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions;
+using Axion.Core.Processing.Syntactic.Expressions.Binary;
+using Axion.Core.Processing.Syntactic.Statements.Definitions;
 using Axion.Core.Specification;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,6 +29,14 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             set => SetNode(ref statements, value);
         }
 
+        public readonly List<VariableDefinitionExpression> Variables =
+            new List<VariableDefinitionExpression>();
+
+        public readonly List<FunctionDefinition> Functions = new List<FunctionDefinition>();
+        public readonly List<ClassDefinition>    Classes   = new List<ClassDefinition>();
+        public readonly List<EnumDefinition>     Enums     = new List<EnumDefinition>();
+        public readonly List<ModuleDefinition>   Modules   = new List<ModuleDefinition>();
+
         #region Constructors
 
         /// <summary>
@@ -39,14 +52,11 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         /// </summary>
         internal BlockStatement(SyntaxTreeNode parent, BlockSyntax csMembers) {
             Parent = parent;
-            Statements = new NodeList<Statement>(
-                this,
-                csMembers.Statements.Select(s => (Statement) CSharpToAxion.ConvertNode(s))
-            );
-
-            if (Statements.Count != 0) {
-                MarkPosition(Statements.First, Statements.Last);
-            }
+            throw new NotImplementedException(csMembers.ToString());
+//            Statements = new NodeList<Statement>(
+//                this,
+//                csMembers.Statements.Select(s => (Statement) CSharpToAxion.ConvertNode(s))
+//            );
         }
 
         /// <summary>
@@ -57,14 +67,11 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             SyntaxList<MemberDeclarationSyntax> csMembers
         ) {
             Parent = parent;
-            Statements = new NodeList<Statement>(
-                this,
-                csMembers.Select(m => (Statement) CSharpToAxion.ConvertNode(m))
-            );
-
-            if (Statements.Count != 0) {
-                MarkPosition(Statements.First, Statements.Last);
-            }
+            throw new NotImplementedException(csMembers.ToString());
+//            Statements = new NodeList<Statement>(
+//                this,
+//                csMembers.Select(m => (Statement) CSharpToAxion.ConvertNode(m))
+//            );
         }
 
         /// <summary>
@@ -223,9 +230,13 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             return (Newline, false);
         }
 
+        internal bool HasVariable(SimpleNameExpression name) {
+            return Variables.Select(v => ((SimpleNameExpression) v.Left).Name).Contains(name.Name);
+        }
+
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.WriteLine("");
             c.Writer.Indent++;
             c.AddJoin("", Statements, true);
@@ -233,7 +244,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             c.WriteLine("");
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.WriteLine("{");
             c.Writer.Indent++;
             c.AddJoin("", Statements, true);

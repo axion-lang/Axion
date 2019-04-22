@@ -55,14 +55,14 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("assert ", Condition);
             if (FailExpression != null) {
                 c.Write(", ", FailExpression);
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("Debug.Assert(", Condition);
             if (FailExpression != null) {
                 c.Write(", ", FailExpression);

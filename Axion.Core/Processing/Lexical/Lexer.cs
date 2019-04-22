@@ -6,6 +6,7 @@ using System.Text;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Lexical {
     /// <summary>
@@ -13,6 +14,8 @@ namespace Axion.Core.Processing.Lexical {
     ///     code into list of tokens.
     /// </summary>
     public partial class Lexer {
+        #region Properties
+
         /// <summary>
         ///     Current processing source unit.
         /// </summary>
@@ -54,6 +57,8 @@ namespace Axion.Core.Processing.Lexical {
         ///     Start position of current reading token.
         /// </summary>
         private Position tokenStartPosition = (0, 0);
+
+        #endregion
 
         #endregion
 
@@ -107,7 +112,7 @@ namespace Axion.Core.Processing.Lexical {
                 if (token != null) {
                     tokens.Add(token);
                     // check for processing terminator
-                    if (token.Is(TokenType.End) || processCancellers.Contains(token.Value)) {
+                    if (token.Is(End) || processCancellers.Contains(token.Value)) {
                         break;
                     }
                 }
@@ -120,20 +125,20 @@ namespace Axion.Core.Processing.Lexical {
             foreach (Token mismatch in mismatchingPairs) {
                 BlameType errorType;
                 switch (mismatch.Type) {
-                    case TokenType.OpenParenthesis:
-                    case TokenType.CloseParenthesis: {
+                    case OpenParenthesis:
+                    case CloseParenthesis: {
                         errorType = BlameType.MismatchedParenthesis;
                         break;
                     }
 
-                    case TokenType.OpenBracket:
-                    case TokenType.CloseBracket: {
+                    case OpenBracket:
+                    case CloseBracket: {
                         errorType = BlameType.MismatchedBracket;
                         break;
                     }
 
-                    case TokenType.OpenBrace:
-                    case TokenType.CloseBrace: {
+                    case OpenBrace:
+                    case CloseBrace: {
                         errorType = BlameType.MismatchedBrace;
                         break;
                     }
@@ -164,7 +169,7 @@ namespace Axion.Core.Processing.Lexical {
 #if DEBUG
             if (tokens.Count != 0) {
                 Token last = tokens.Last();
-                if (last.Type != TokenType.Outdent) {
+                if (last.Type != Outdent) {
                     Debug.Assert(
                         tokenStartPosition
                         == (last.Span.EndPosition.Line,
@@ -174,58 +179,149 @@ namespace Axion.Core.Processing.Lexical {
             }
 #endif
 
-            if (c == Spec.EndOfCode) {
-                return new Token(TokenType.End, tokenStartPosition);
-            }
-
-            // keep this condition before \n check.
             if (c == '\r') {
-                Move();
                 tokenValue.Append('\r');
+                Move();
+                return ReadNewline();
             }
 
             if (c == '\n') {
                 return ReadNewline();
             }
 
+            // TODO: check for length of starters
+            if (c == Spec.EndOfCode) {
+                return new Token(End, tokenStartPosition);
+            }
+
             if (c.IsSpaceOrTab()) {
                 return ReadWhite();
             }
 
-            if (c.ToString() == Spec.CommentStart) {
-                // one-line comment
-                if (c.ToString() + Peek == Spec.MultiCommentStart) {
-                    return ReadMultilineComment();
-                }
+            if (NextIs(Spec.MultiCommentStart)) {
+                return ReadMultilineComment();
+            }
 
+            if (NextIs(Spec.CommentStart)) {
                 return ReadSingleLineComment();
             }
 
-            if (c == Spec.CharacterLiteralQuote) {
+            if (CharIs(Spec.CharQuotes)) {
                 return ReadCharLiteral();
             }
 
-            if (Spec.StringQuotes.Contains(c)) {
+            if (CharIs(Spec.StringQuotes)) {
                 return ReadString(false);
             }
 
-            if (char.IsDigit(c)) {
+            if (Spec.IsNumberStart(c)) {
                 return ReadNumber();
             }
 
-            if (c.IsValidIdStart()) {
+            if (Spec.IsIdStart(c)) {
                 return ReadWord();
             }
 
-            if (Spec.SymbolicChars.Contains(c)) {
+            if (CharIs(Spec.SymbolicChars)) {
                 return ReadSymbolic();
             }
 
             // invalid
             tokenValue.Append(c);
-            Move();
             unit.Blame(BlameType.InvalidCharacter, tokenStartPosition, Position);
-            return new Token(TokenType.Invalid, tokenValue.ToString(), tokenStartPosition);
+            Move();
+            return new Token(Invalid, tokenValue.ToString(), tokenStartPosition);
+        }
+
+        /// <summary>
+        ///     Gets a language keyword or identifier
+        ///     from next piece of source.
+        /// </summary>
+        private Token? ReadWord() {
+            do {
+                tokenValue.Append(c);
+                Move();
+            } while (Spec.IsIdPart(c)
+                     || c == '-'
+                     && Spec.IsIdPart(Peek));
+
+            string value = tokenValue.ToString();
+            // for operators, written as words
+            if (Spec.Operators.TryGetValue(value, out OperatorProperties props)) {
+                if (tokens.Count > 0) {
+                    Token last = tokens[tokens.Count - 1];
+                    if (last.Is(OpIs) && props.Type == OpNot) {
+                        tokens[tokens.Count - 1] = new OperatorToken(
+                            Spec.Operators["is not"],
+                            last.Span.StartPosition,
+                            Position
+                        );
+                        return null;
+                    }
+
+                    if (last.Is(OpNot) && props.Type == OpIn) {
+                        tokens[tokens.Count - 1] = new OperatorToken(
+                            Spec.Operators["not in"],
+                            last.Span.StartPosition,
+                            Position
+                        );
+                        return null;
+                    }
+                }
+
+                return new OperatorToken(value, tokenStartPosition);
+            }
+
+            return new WordToken(value, tokenStartPosition);
+        }
+
+        private Token ReadSymbolic() {
+            int    longestLength = Spec.SortedSymbolics[0].Length;
+            string nextCodePiece = PeekPiece(longestLength);
+            var    value         = "";
+            Token? result        = null;
+            for (int length = nextCodePiece.Length; length > 0; length--) {
+                value = nextCodePiece.Substring(0, length);
+                // grow sequence of characters
+                if (!Spec.SortedSymbolics.Contains(value)) {
+                    continue;
+                }
+
+                if (Spec.Operators.ContainsKey(value)) {
+                    result = new OperatorToken(value, tokenStartPosition);
+                    break;
+                }
+
+                if (Spec.Symbols.ContainsKey(value)) {
+                    result = new SymbolToken(value, tokenStartPosition);
+                    // yet unclosed bracket
+                    if (result.Type.IsOpenBracket()) {
+                        mismatchingPairs.Add(result);
+                    }
+                    else if (result.Type.IsCloseBracket()) {
+                        // unopened close bracket
+                        if (mismatchingPairs.Count == 0) {
+                            mismatchingPairs.Add(result);
+                        }
+                        // matching bracket
+                        else {
+                            mismatchingPairs.RemoveAt(mismatchingPairs.Count - 1);
+                        }
+                    }
+
+                    break;
+                }
+            }
+
+            Move(value.Length);
+            if (result == null) {
+                // creating operator with 'invalid' type
+                result = new OperatorToken(value, tokenStartPosition);
+                // not found in specification
+                unit.Blame(BlameType.InvalidOperator, tokenStartPosition, Position);
+            }
+
+            return result;
         }
     }
 }

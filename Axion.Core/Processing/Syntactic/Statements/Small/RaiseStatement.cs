@@ -54,7 +54,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("raise");
             if (Exception != null) {
                 c.Write(" ", Exception);
@@ -65,7 +65,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("throw new Exception(");
             if (Exception is ConstantExpression constant) {
                 c.Write(constant, ".ToString()");

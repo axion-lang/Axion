@@ -1,6 +1,6 @@
 using System.IO;
+using Axion.Core;
 using Axion.Core.Processing;
-using Axion.Core.Specification;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Lexer {
@@ -9,7 +9,7 @@ namespace Axion.Testing.NUnit.Lexer {
         public void IsFail_UnclosedBlockComment() {
             string[] files = Directory.GetFiles(
                 InPath,
-                $"{nameof(IsFail_UnclosedBlockComment)}*{Spec.SourceFileExtension}"
+                $"{nameof(IsFail_UnclosedBlockComment)}*{Compiler.SourceFileExtension}"
             );
 
             // check for error
@@ -25,7 +25,7 @@ namespace Axion.Testing.NUnit.Lexer {
         public void IsOK_ValidBlockComment() {
             string[] files = Directory.GetFiles(
                 InPath,
-                $"{nameof(IsOK_ValidBlockComment)}*{Spec.SourceFileExtension}"
+                $"{nameof(IsOK_ValidBlockComment)}*{Compiler.SourceFileExtension}"
             );
 
             // validate

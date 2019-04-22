@@ -34,7 +34,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
                     }
 
                     Type = HashCollectionType.Map;
-                    var pair = new MapItemExpression(itemPart1, ParseTestExpr(this));
+                    var pair = new MapItemExpression(this, itemPart1, ParseTestExpr(this));
                     if (Peek.Is(TokenType.KeywordFor)) {
                         // { key : value for (key, value) in iterable }
                         Expressions.Add(new ForComprehension(this, pair));
@@ -72,14 +72,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
             MarkEnd(Token);
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.WriteLine("{");
             c.AddJoin("", Expressions, true);
             c.WriteLine();
             c.Write("}");
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.WriteLine("{");
             c.AddJoin("", Expressions, true);
             c.WriteLine();
@@ -88,16 +88,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
     }
 
     public class MapItemExpression : LeftRightExpression {
-        public MapItemExpression(Expression left, Expression right) {
+        public MapItemExpression(SyntaxTreeNode parent, Expression left, Expression right) : base(
+            parent
+        ) {
             Left  = left;
             Right = right;
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(Left, " : ", Right);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("{ ", Left, ", ", Right, " }");
         }
     }

@@ -9,11 +9,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             ErrorToken = Token;
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write(ErrorToken);
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write(ErrorToken);
         }
     }

@@ -64,7 +64,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             else if (MaybeEat(TokenType.KeywordElseIf)) {
                 ElseBlock = new BlockStatement(this, new ConditionalStatement(this, true));
             }
-            else {
+            else if (elseIf) {
                 BlameInvalidSyntax(TokenType.KeywordElse, Peek);
             }
 
@@ -94,14 +94,14 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("if ", Condition, " ", ThenBlock);
             if (ElseBlock != null) {
                 c.Write("else ", ElseBlock);
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             c.Write("if (", Condition, ") ", ThenBlock);
             if (ElseBlock != null) {
                 c.Write("else ", ElseBlock);

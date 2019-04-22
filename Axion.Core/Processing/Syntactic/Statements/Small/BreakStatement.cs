@@ -11,9 +11,9 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
     ///     </c>
     /// </summary>
     public class BreakStatement : Statement {
-        private NameExpression? loopName;
+        private SimpleNameExpression? loopName;
 
-        public NameExpression? LoopName {
+        public SimpleNameExpression? LoopName {
             get => loopName;
             set => SetNode(ref loopName, value);
         }
@@ -26,7 +26,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
         internal BreakStatement(SyntaxTreeNode parent) : base(parent) {
             MarkStart(TokenType.KeywordBreak);
             if (MaybeEat(TokenType.Identifier)) {
-                LoopName = new NameExpression(this, true);
+                LoopName = new SimpleNameExpression(this);
             }
 
             MarkEnd(Token);
@@ -39,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
         /// <summary>
         ///     Constructs plain <see cref="BreakStatement"/> without position in source.
         /// </summary>
-        public BreakStatement(NameExpression? loopName = null) {
+        public BreakStatement(SimpleNameExpression? loopName = null) {
             LoopName = loopName;
         }
 
@@ -47,14 +47,14 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
 
         #region Code converters
 
-        internal override void ToAxionCode(CodeBuilder c) {
+        public override void ToAxionCode(CodeBuilder c) {
             c.Write("break");
             if (LoopName != null) {
                 c.Write(" ", LoopName);
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
+        public override void ToCSharpCode(CodeBuilder c) {
             if (LoopName == null) {
                 c.Write("break;");
                 return;
