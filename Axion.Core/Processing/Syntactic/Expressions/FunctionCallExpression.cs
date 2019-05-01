@@ -7,7 +7,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         call_expr:
-    ///             primary '(' [args_list | comprehension] ')'
+    ///             primary '(' [arg_list | (arg comprehension)] ')'
     ///     </c>
     /// </summary>
     public class FunctionCallExpression : Expression {
@@ -58,13 +58,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Args   = args ?? new NodeList<CallArgument>(this);
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Target, "(");
             c.AddJoin(", ", Args);
             c.Write(")");
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(Target, "(");
             c.AddJoin(", ", Args);
             c.Write(")");
@@ -123,7 +123,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 return ParseArgList(parent);
             }
 
-            Expression   nameOrValue = ParseTestExpr(parent);
+            Expression   nameOrValue = ParsePreGlobalExpr(parent);
             var          generator   = false;
             CallArgument arg;
             if (parent.MaybeEat(OpAssign)) {
@@ -175,7 +175,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
 
             while (!parent.MaybeEat(CloseParenthesis)) {
-                Expression   nameOrValue = ParseTestExpr(parent);
+                Expression   nameOrValue = ParsePreGlobalExpr(parent);
                 CallArgument arg;
 
                 if (parent.MaybeEat(OpMultiply)) {
@@ -205,7 +205,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         private static CallArgument FinishNamedArg(SyntaxTreeNode parent, Expression nameOrValue) {
             if (nameOrValue is SimpleNameExpression name) {
-                Expression value = ParseTestExpr(parent);
+                Expression value = ParsePreGlobalExpr(parent);
                 return new CallArgument(parent, name, value);
             }
 
@@ -223,7 +223,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return true;
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             if (Name != null) {
                 c.Write(Name + " = ");
             }
@@ -231,7 +231,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             c.Write(Value);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             if (Name != null) {
                 c.Write(Name + " = ");
             }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Syntactic.Statements;
@@ -30,9 +31,9 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        private readonly Stack<FunctionDefinition> functions = new Stack<FunctionDefinition>();
+        private readonly Stack<IFunctionNode> functions = new Stack<IFunctionNode>();
 
-        public FunctionDefinition? CurrentFunction {
+        public IFunctionNode? CurrentFunction {
             get {
                 if (functions != null
                     && functions.Count > 0) {
@@ -43,7 +44,7 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        public FunctionDefinition? PopFunction() {
+        public IFunctionNode? PopFunction() {
             if (functions != null
                 && functions.Count > 0) {
                 return functions.Pop();
@@ -52,7 +53,7 @@ namespace Axion.Core.Processing.Syntactic {
             return null;
         }
 
-        public void PushFunction(FunctionDefinition function) {
+        public void PushFunction(IFunctionNode function) {
             functions.Push(function);
         }
 
@@ -73,94 +74,83 @@ namespace Axion.Core.Processing.Syntactic {
                 return CompilationUnit();
             }
 
-            var builder = new CodeBuilder(OutLang.CSharp);
+            var b = new CodeBuilder(OutLang.CSharp);
 
             if (SourceUnit.ProcessingMode == SourceProcessingMode.Interpret) {
                 foreach (Statement stmt in Root.Statements) {
                     if (stmt is ModuleDefinition) {
-                        Unit.ReportError("Modules are not supported in interpretation mode", stmt);
-                    }
-
-                    else if (stmt is ClassDefinition || stmt is FunctionDefinition) {
-                        stmt.ToCSharpCode(builder);
+                        Unit.Blame(BlameType.ModulesAreNotSupportedInInterpretationMode, stmt);
                     }
                     else {
-                        builder.Write(stmt);
+                        b.Write(stmt);
                     }
 
-                    builder.WriteLine();
+                    b.WriteLine();
                 }
             }
             else {
                 var rootStmts = new NodeList<Statement>(this);
                 foreach (Statement stmt in Root.Statements) {
                     if (stmt is ModuleDefinition) {
-                        stmt.ToCSharpCode(builder);
-
-                        continue;
+                        b.Write(stmt);
                     }
-
-                    if (stmt is ClassDefinition) {
-                        builder.WriteLine("namespace _Root_ {");
-                        builder.Writer.Indent++;
-                        stmt.ToCSharpCode(builder);
-                        builder.Writer.Indent--;
-                        builder.Write("}");
-                        continue;
+                    else if (stmt is ClassDefinition) {
+                        b.WriteLine("namespace _Root_ {");
+                        b.Writer.Indent++;
+                        b.Write(stmt);
+                        b.Writer.Indent--;
+                        b.Write("}");
                     }
-
-                    if (stmt is FunctionDefinition) {
-                        builder.WriteLine("namespace _Root_ {");
-                        builder.Writer.Indent++;
-                        builder.WriteLine("public partial class _RootClass_ {");
-                        builder.Writer.Indent++;
-                        stmt.ToCSharpCode(builder);
-                        builder.Writer.Indent--;
-                        builder.WriteLine("}");
-                        builder.Writer.Indent--;
-                        builder.Write("}");
-                        continue;
+                    else if (stmt is FunctionDefinition) {
+                        b.WriteLine("namespace _Root_ {");
+                        b.Writer.Indent++;
+                        b.WriteLine("public partial class _RootClass_ {");
+                        b.Writer.Indent++;
+                        b.Write(stmt);
+                        b.Writer.Indent--;
+                        b.WriteLine("}");
+                        b.Writer.Indent--;
+                        b.Write("}");
                     }
-
-                    rootStmts.Add(stmt);
+                    else {
+                        rootStmts.Add(stmt);
+                    }
                 }
 
-                builder.WriteLine("public partial class _RootClass_ {");
-                builder.WriteLine(
+                b.WriteLine("public partial class _RootClass_ {");
+                b.WriteLine(
                     new FunctionDefinition(
                         new SimpleNameExpression("Main"),
                         block: new BlockStatement(rootStmts),
                         returnType: new SimpleTypeName("void")
                     )
                 );
-                builder.Write("}");
+                b.Write("}");
             }
 
-            SyntaxTree tree = CSharpSyntaxTree.ParseText(builder);
-
-            // add imports
-            var unit = (CompilationUnitSyntax) tree.GetRoot();
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(b);
+            var        unit = (CompilationUnitSyntax) tree.GetRoot();
             unit = unit
                    .AddUsings(
                        UsingDirective(ParseName("System")),
                        UsingDirective(ParseName("System.IO")),
                        UsingDirective(ParseName("System.Linq")),
                        UsingDirective(ParseName("System.Text")),
+                       UsingDirective(ParseName("System.Numerics")),
                        UsingDirective(ParseName("System.Threading")),
                        UsingDirective(ParseName("System.Diagnostics")),
                        UsingDirective(ParseName("System.Collections")),
                        UsingDirective(ParseName("System.Collections.Generic"))
                    )
                    .NormalizeWhitespace();
-
             return unit;
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.AddJoin("\n", Root.Statements);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(Root);
         }
     }

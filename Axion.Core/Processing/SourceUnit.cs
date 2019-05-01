@@ -96,9 +96,7 @@ namespace Axion.Core.Processing {
 
             // set content
             Ast  = new Ast(this);
-            Code = File.ReadAllText(file.FullName);
-            // add null-terminator
-            Code += Spec.EndOfCode;
+            Code = File.ReadAllText(file.FullName) + Spec.EndOfCode;
         }
 
         /// <summary>
@@ -116,9 +114,7 @@ namespace Axion.Core.Processing {
 
             // set content
             Ast  = new Ast(this);
-            Code = string.Join("\n", sourceLines);
-            // add null-terminator
-            Code += Spec.EndOfCode;
+            Code = string.Join("\n", sourceLines) + Spec.EndOfCode;
         }
 
         #endregion

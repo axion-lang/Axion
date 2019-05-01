@@ -141,12 +141,7 @@
         ///     Indicates a floating point number with invalid bit rate.
         /// </summary>
         InvalidFloatNumberBitRate,
-
-        #endregion
-
-        BadCharacterForIntegerValue,
         InvalidComplexNumberLiteral,
-        ComplexLiteralTooLarge,
 
         #region High-level syntax errors
 
@@ -157,20 +152,14 @@
         MisplacedYield,
         InvalidExpressionToDelete,
         DuplicatedParameterNameInFunctionDefinition,
-        ExpectedIndentation,
-        UnexpectedIndentation,
-        InvalidIndentation,
         DefaultCatchMustBeLast,
         UnexpectedEndOfCode,
         DuplicatedNamedArgument,
-        InvalidSyntax,
         ExpectedDefaultParameterValue,
-        CannotUseAccessModifierOutsideClass,
-        AsyncModifierIsInapplicableToThatStatement,
         ExpectedBlockDeclaration,
         ConstantValueExpected,
-        InvalidTypeNameExpression,
-        DecoratorCanOnlyBeANameWithOptionalArguments,
+
+        #endregion
 
         #endregion
 
@@ -207,6 +196,15 @@
         ///     by exponent, that's meaningless.
         /// </summary>
         RedundantExponentForZeroNumber,
+        ModulesAreNotSupportedInInterpretationMode,
+        InvalidDecoratorPlacement,
+        ThisExpressionTargetIsNotAssignable,
+        LambdaCannotHaveIndentedBody,
+        CannotRedeclareVariableAlreadyDeclaredInThisScope,
+        EmptyCollectionLiteralNotSupported,
+        CannotHaveMoreThan1ListParameter,
+        InvalidIndexerExpression,
+        CollectionInitializerCannotContainItemsAfterComprehension,
 
         #region High-level syntax warnings
 

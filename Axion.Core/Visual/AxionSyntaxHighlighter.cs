@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Axion.Core.Processing;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
-using FluentConsole;
+using ConsoleExtensions;
+using static System.ConsoleColor;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Visual {
     /// <summary>
@@ -55,17 +56,15 @@ namespace Axion.Core.Visual {
             bool               foundRenderStart
         ) {
             foreach (Token token in tokens) {
-                bool tokenShouldBeSkipped =
+                bool tokenHighlightingNotNeeded =
                     !foundRenderStart
                     && (token.Span.EndPosition.Line < renderPosition.Y
                         || token.Span.EndPosition.Line == renderPosition.Y
                         && token.Span.EndPosition.Column <= renderPosition.X
-                        || token.Is(TokenType.End));
+                        || token.Is(End));
                 // BUG (UI) if code has error before that token, and it's fixed with next char, it'll be highlighted improperly (e. g. type '0..10')
 
-                #region Complex values
-
-                if (tokenShouldBeSkipped) {
+                if (tokenHighlightingNotNeeded) {
                     continue;
                 }
 
@@ -79,120 +78,81 @@ namespace Axion.Core.Visual {
                     foundRenderStart = true;
                 }
 
-                if (token.Is(TokenType.End)) {
+                if (token.Is(End)) {
                     break;
                 }
 
-                if (token.Is(TokenType.Whitespace)) {
+                string text = token.ToOriginalAxionCode();
+
+                if (token.Is(Whitespace)) {
+                    values.Add(new ColoredValue(text, DarkGray));
+                }
+                else if (token.Is(Newline)) {
                     values.Add(
-                        new ColoredValue(
-                            new string(' ', token.Value.Length),
-                            ConsoleColor.DarkGray
-                        )
+                        values.Count > 0
+                            ? new ColoredValue(text, values[values.Count - 1].Color)
+                            : new ColoredValue(text, White)
                     );
-                    continue;
                 }
-
-                if (token.Is(TokenType.Newline)) {
-                    var code = new CodeBuilder(OutLang.Axion);
-                    token.ToOriginalAxionCode(code);
-                    if (values.Count > 0) {
-                        values[values.Count - 1].AppendValue(code.ToString());
-                    }
-                    else {
-                        values.Add(
-                            new ColoredValue(
-                                code.ToString(),
-                                ConsoleColor.White
-                            )
-                        );
-                    }
-
-                    continue;
-                }
-
-                if (token.Is(TokenType.Identifier)) {
-                    var code = new CodeBuilder(OutLang.Axion);
-                    token.ToOriginalAxionCode(code);
+                else if (token.Is(Identifier)) {
                     // highlight error types
-                    if (token.Value.EndsWith("Error")) {
-                        values.Add(
-                            new ColoredValue(
-                                code.ToString(),
-                                ConsoleColor.DarkMagenta
-                            )
-                        );
-                    }
-                    else {
-                        values.Add(
-                            new ColoredValue(
-                                code.ToString(),
-                                ConsoleColor.Cyan
-                            )
-                        );
-                    }
-
-                    continue;
+                    values.Add(
+                        token.Value.EndsWith("Error")
+                            ? new ColoredValue(text, DarkMagenta)
+                            : new ColoredValue(text, Cyan)
+                    );
                 }
-
-                if (token is StringToken strToken
-                    && strToken.Interpolations.Count > 0) {
+                else if (token is StringToken strToken
+                         && strToken.Interpolations.Count > 0) {
                     HighlightInterpolatedString(strToken, values);
-                    continue;
                 }
-
-                #endregion
-
-                // simple values
-                ConsoleColor tokenColor  = GetSimpleTokenColor(token);
-                var          codeBuilder = new CodeBuilder(OutLang.Axion);
-                token.ToOriginalAxionCode(codeBuilder);
-                values.Add(new ColoredValue(codeBuilder.ToString(), tokenColor));
+                else {
+                    ConsoleColor tokenColor = GetSimpleTokenColor(token);
+                    values.Add(new ColoredValue(text, tokenColor));
+                }
             }
         }
 
         private static ConsoleColor GetSimpleTokenColor(Token token) {
             ConsoleColor tokenColor;
-            if (token.Is(TokenType.Comment)) {
-                tokenColor = ConsoleColor.DarkGreen;
+            if (token.Is(Comment)) {
+                tokenColor = DarkGreen;
             }
             else if (token.Is(TokenType.String)) {
-                tokenColor = ConsoleColor.DarkYellow;
+                tokenColor = DarkYellow;
             }
-            else if (token.Is(TokenType.Character)) {
-                tokenColor = ConsoleColor.DarkYellow;
+            else if (token.Is(Character)) {
+                tokenColor = DarkYellow;
             }
-            else if (token.Is(TokenType.Number)) {
-                tokenColor = ConsoleColor.Yellow;
+            else if (token.Is(Number)) {
+                tokenColor = Yellow;
             }
             else if (token is OperatorToken) {
-                tokenColor = ConsoleColor.Red;
+                tokenColor = Red;
             }
             else if (token is SymbolToken) {
-                tokenColor = ConsoleColor.DarkGray;
+                tokenColor = DarkGray;
             }
             else if (Spec.Keywords.ContainsValue(token.Type)) {
-                tokenColor = ConsoleColor.DarkCyan;
+                tokenColor = DarkCyan;
             }
             else {
-                tokenColor = ConsoleColor.White;
+                tokenColor = White;
             }
 
             return tokenColor;
         }
 
-        private void HighlightInterpolatedString(StringToken token, List<ColoredValue> values) {
+        private void HighlightInterpolatedString(
+            StringToken        token,
+            List<ColoredValue> values
+        ) {
             // prefixes
-            values.Add(new ColoredValue(token.Options.GetPrefixes(), ConsoleColor.Cyan));
+            values.Add(new ColoredValue(token.Options.GetPrefixes(), Cyan));
 
             int quotesCount = token.Options.QuotesCount;
             // opening quotes
-            values.Add(
-                new ColoredValue(
-                    new string(token.Options.Quote, quotesCount),
-                    ConsoleColor.DarkYellow
-                )
-            );
+            values.Add(new ColoredValue(new string(token.Options.Quote, quotesCount), DarkYellow));
 
             // interpolations
             var interpolationI = 0;
@@ -201,15 +161,15 @@ namespace Axion.Core.Visual {
                 if (interpolationI < token.Interpolations.Count
                     && i == token.Interpolations[interpolationI].StartIndex) {
                     Interpolation interpolation = token.Interpolations[interpolationI];
-                    values.Add(new ColoredValue("{", ConsoleColor.White));
+                    values.Add(new ColoredValue("{", White));
                     HighlightTokens(interpolation.Tokens, values, true);
-                    values.Add(new ColoredValue("}", ConsoleColor.White));
+                    values.Add(new ColoredValue("}", White));
                     i += interpolation.Length - 1; // -1 because iteration incremented it.
                     interpolationI++;
                     continue;
                 }
 
-                values.Add(new ColoredValue(c.ToString(), ConsoleColor.DarkYellow));
+                values.Add(new ColoredValue(c.ToString(), DarkYellow));
             }
 
             // closing quotes
@@ -217,7 +177,7 @@ namespace Axion.Core.Visual {
                 values.Add(
                     new ColoredValue(
                         new string(token.Options.Quote, quotesCount),
-                        ConsoleColor.DarkYellow
+                        DarkYellow
                     )
                 );
             }
@@ -230,7 +190,7 @@ namespace Axion.Core.Visual {
                 ColoredValue diffItem = values[0];
                 for (var i = 1; i < values.Count;) {
                     if (values[i].Color == diffItem.Color) {
-                        diffItem.AppendValue(values[i].Value);
+                        diffItem.Value += values[i].Value;
                         values.RemoveAt(i);
                     }
                     else {

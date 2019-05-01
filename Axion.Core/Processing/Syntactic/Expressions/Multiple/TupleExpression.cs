@@ -1,17 +1,18 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
     /// <summary>
     ///     <c>
     ///         tuple_expr:
-    ///             ['('] expr {',' expr}  [')']
+    ///             tuple_paren_expr | (expr_list [',']);
+    ///         tuple_paren_expr:
+    ///             '(' expr_list [','] ')';
     ///     </c>
     /// </summary>
     public class TupleExpression : MultipleExpression<Expression> {
-        internal override TypeName ValueType => Spec.TupleType();
+        public override TypeName ValueType => new TupleTypeName(this, Expressions);
 
         /// <summary>
         ///     Constructor for empty tuple.
@@ -38,13 +39,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
             }
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("(");
             c.AddJoin(", ", Expressions);
             c.Write(")");
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("(");
             c.AddJoin(", ", Expressions);
             c.Write(")");

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,12 +9,14 @@ using Axion.Core.Processing;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical;
+using Axion.Core.Specification;
 using Axion.Core.Visual;
 using CommandLine;
-using FluentConsole;
+using ConsoleExtensions;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Axion.Core {
     /// <summary>
@@ -26,6 +29,7 @@ namespace Axion.Core {
         public static readonly JsonSerializerSettings JsonSerializer = new JsonSerializerSettings {
             Formatting           = Formatting.Indented,
             TypeNameHandling     = TypeNameHandling.Auto,
+            ContractResolver     = new CompilerJsonContractResolver(),
             DefaultValueHandling = DefaultValueHandling.Ignore
         };
 
@@ -150,17 +154,15 @@ namespace Axion.Core {
 
         private static void EnterInteractiveMode() {
             Logger.Info(
-                "Interactive mode.\n"
-                + "Now your input will be processed by Axion interpreter.\n"
-                + "Type 'exit' or 'quit' to quit interactive mode;\n"
-                + "Type 'cls' to clear screen."
+                "Axion code editor & interpreter mode.\n"
+                + "Type 'exit' or 'quit' to exit mode, 'cls' to clear screen."
             );
             while (true) {
                 // code editor header
-                string input        = ConsoleUI.Read("i>> ");
-                string alignedInput = input.Trim().ToUpper();
+                string rawInput = ConsoleUI.Read("i>> ");
+                string input    = rawInput.Trim().ToUpper();
 
-                switch (alignedInput) {
+                switch (input) {
                     case "":
                         // skip empty commands
                         ConsoleUI.ClearLine();
@@ -178,7 +180,7 @@ namespace Axion.Core {
                 var editor = new ConsoleCodeEditor(
                     false,
                     true,
-                    firstCodeLine: input,
+                    firstCodeLine: rawInput,
                     highlighter: new AxionSyntaxHighlighter()
                 );
                 string[] codeLines = editor.RunSession();
@@ -235,12 +237,8 @@ namespace Axion.Core {
             Process(source, processingMode, processingOptions);
         }
 
-        public static SourceProcessingOptions Options { get; set; }
+        public static SourceProcessingOptions Options { get; private set; }
 
-        /// <summary>
-        ///     Performs [<see cref="SourceUnit" />] processing
-        ///     with [<see cref="mode" />] and [<see cref="options" />].
-        /// </summary>
         public static void Process(
             SourceUnit              unit,
             SourceProcessingMode    mode,
@@ -309,8 +307,7 @@ namespace Axion.Core {
                         Logger.Step("Program output:");
                         ScriptState result = await CSharpScript.RunAsync(
                             csCode,
-                            // Add Linq reference
-                            ScriptOptions.Default.AddReferences(typeof(Enumerable).Assembly)
+                            ScriptOptions.Default.AddReferences(Spec.CSharp.DefaultImports)
                         );
                         ConsoleUI.WriteLine();
                         Logger.Step("Result: " + (result.ReturnValue ?? "<nothing>"));
@@ -395,10 +392,44 @@ namespace Axion.Core {
 
         private static string AstBackToSource(SourceUnit unit) {
             var code = new CodeBuilder(OutLang.Axion);
-            unit.Ast.ToAxionCode(code);
+            code.Write(unit.Ast);
             return code.ToString();
         }
 
         #endregion
+    }
+
+    public class CompilerJsonContractResolver : DefaultContractResolver {
+        protected override JsonProperty CreateProperty(
+            MemberInfo          member,
+            MemberSerialization memberSerialization
+        ) {
+            JsonProperty property = base.CreateProperty(member, memberSerialization);
+
+            Predicate<object> shouldSerialize = property.ShouldSerialize;
+            property.ShouldSerialize = obj =>
+                (shouldSerialize == null || shouldSerialize(obj))
+                && !IsEmptyCollection(property, obj);
+            return property;
+        }
+
+        private static bool IsEmptyCollection(JsonProperty property, object target) {
+            object value = property.ValueProvider.GetValue(target);
+            if (value is ICollection collection && collection.Count == 0) {
+                return true;
+            }
+
+            if (!typeof(IEnumerable).IsAssignableFrom(property.PropertyType)) {
+                return false;
+            }
+
+            PropertyInfo countProp = property.PropertyType.GetProperty("Count");
+            if (countProp == null) {
+                return false;
+            }
+
+            var count = (int) countProp.GetValue(value, null);
+            return count == 0;
+        }
     }
 }

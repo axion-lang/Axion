@@ -1,19 +1,17 @@
 ﻿using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     /// <summary>
     ///     <c>
     ///         cond_stmt:
-    ///             ('if' | 'unless') test block
-    ///             {'elif' test block}
+    ///             ('if' | 'unless') preglobal_expr block
+    ///             {'elif' preglobal_expr block}
     ///             ['else' block]
     ///     </c>
     /// </summary>
     public class ConditionalStatement : Statement {
-        #region Properties
-
         private Expression condition;
 
         public Expression Condition {
@@ -35,37 +33,33 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             set => SetNode(ref elseBlock, value);
         }
 
-        #endregion
-
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="ConditionalStatement"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
         internal ConditionalStatement(SyntaxTreeNode parent, bool elseIf = false) : base(parent) {
             var invert = false;
             if (elseIf) {
                 MarkStart(Token);
             }
-            else if (Peek.Is(TokenType.KeywordUnless)) {
-                MarkStart(TokenType.KeywordUnless);
+            else if (Peek.Is(KeywordUnless)) {
+                EatStartMark(KeywordUnless);
                 invert = true;
             }
             else {
-                MarkStart(TokenType.KeywordIf);
+                EatStartMark(KeywordIf);
             }
 
-            Condition = Expression.ParseTestExpr(this);
+            Condition = Expression.ParsePreGlobalExpr(this);
             ThenBlock = new BlockStatement(this);
 
-            if (MaybeEat(TokenType.KeywordElse)) {
+            if (MaybeEat(KeywordElse)) {
                 ElseBlock = new BlockStatement(this);
             }
-            else if (MaybeEat(TokenType.KeywordElseIf)) {
+            else if (MaybeEat(KeywordElseIf)) {
                 ElseBlock = new BlockStatement(this, new ConditionalStatement(this, true));
             }
             else if (elseIf) {
-                BlameInvalidSyntax(TokenType.KeywordElse, Peek);
+                BlameInvalidSyntax(KeywordElse, Peek);
             }
 
             if (invert) {
@@ -76,7 +70,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         /// <summary>
-        ///     Constructs new <see cref="ConditionalStatement"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public ConditionalStatement(
             Expression      condition,
@@ -90,24 +84,18 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             MarkEnd(ElseBlock ?? ThenBlock);
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("if ", Condition, " ", ThenBlock);
             if (ElseBlock != null) {
                 c.Write("else ", ElseBlock);
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("if (", Condition, ") ", ThenBlock);
             if (ElseBlock != null) {
                 c.Write("else ", ElseBlock);
             }
         }
-
-        #endregion
     }
 }

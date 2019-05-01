@@ -1,17 +1,16 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///         cond_expr:
-    ///             expr ('if' | 'unless') operation ['else' expr]
+    ///         conditional_expr:
+    ///             expr_list ('if' | 'unless') operation_expr ['else' expr_list];
     ///     </c>
     /// </summary>
     public class ConditionalExpression : Expression {
-        #region Properties
-
         private Expression condition;
 
         public Expression Condition {
@@ -33,28 +32,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref falseExpression, value);
         }
 
-        #endregion
-
-        internal override TypeName ValueType => TrueExpression.ValueType;
-
-        #region Constructors
+        public override TypeName ValueType => TrueExpression.ValueType;
 
         /// <summary>
-        ///     Constructs new <see cref="ConditionalExpression"/> from tokens.
+        ///     Constructs expression from tokens.
         /// </summary>
         internal ConditionalExpression(SyntaxTreeNode parent, Expression trueExpression) : base(
             parent
         ) {
-            bool invert = MaybeEat(TokenType.KeywordUnless);
+            bool invert = MaybeEat(KeywordUnless);
             if (!invert) {
-                Eat(TokenType.KeywordIf);
+                Eat(KeywordIf);
             }
 
             MarkStart(Token);
             TrueExpression = trueExpression;
             Condition      = ParseOperation(this);
-            if (MaybeEat(TokenType.KeywordElse)) {
-                FalseExpression = ParseTestExpr(this);
+            if (MaybeEat(KeywordElse)) {
+                FalseExpression = ParseMultiple(this, expectedTypes: Spec.PreGlobalExprs);
             }
 
             if (invert) {
@@ -65,7 +60,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="ConditionalExpression"/> without position in source.
+        ///     Constructs expression without position in source.
         /// </summary>
         public ConditionalExpression(
             Expression condition,
@@ -77,18 +72,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             FalseExpression = falseExpression;
         }
 
-        #endregion
-
-        #region Transpilers
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(TrueExpression, " if ", Condition);
             if (FalseExpression != null) {
                 c.Write(" else ", FalseExpression);
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(Condition, " ? ", TrueExpression, " : ");
             if (FalseExpression == null) {
                 c.Write("default");
@@ -97,7 +88,5 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 c.Write(FalseExpression);
             }
         }
-
-        #endregion
     }
 }

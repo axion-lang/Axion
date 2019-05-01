@@ -1,12 +1,13 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Small {
     /// <summary>
     ///     <c>
     ///         raise_stmt:
-    ///             'raise' [test ['from' test]]
+    ///             'raise' [preglobal_expr ['from' preglobal_expr]]
     ///     </c>
     /// </summary>
     public class RaiseStatement : Statement {
@@ -24,18 +25,16 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             set => SetNode(ref cause, value);
         }
 
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="RaiseStatement"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
         internal RaiseStatement(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordRaise);
+            EatStartMark(KeywordRaise);
 
-            if (!Peek.Is(Spec.NeverTestTypes)) {
-                Exception = Expression.ParseTestExpr(this);
-                if (MaybeEat(TokenType.KeywordFrom)) {
-                    Cause = Expression.ParseTestExpr(this);
+            if (!Peek.Is(Spec.NeverExprStartTypes)) {
+                Exception = Expression.ParsePreGlobalExpr(this);
+                if (MaybeEat(KeywordFrom)) {
+                    Cause = Expression.ParsePreGlobalExpr(this);
                 }
             }
 
@@ -43,18 +42,14 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="RaiseStatement"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public RaiseStatement(Expression exception, Expression cause) {
             Exception = exception;
             Cause     = cause;
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("raise");
             if (Exception != null) {
                 c.Write(" ", Exception);
@@ -65,7 +60,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("throw new Exception(");
             if (Exception is ConstantExpression constant) {
                 c.Write(constant, ".ToString()");
@@ -73,7 +68,5 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
 
             c.Write(");");
         }
-
-        #endregion
     }
 }

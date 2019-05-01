@@ -48,7 +48,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         /// <summary>
-        ///     Constructs new <see cref="BlockStatement"/> from C# syntax.
+        ///     Constructs expression from C# syntax.
         /// </summary>
         internal BlockStatement(SyntaxTreeNode parent, BlockSyntax csMembers) {
             Parent = parent;
@@ -60,7 +60,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         /// <summary>
-        ///     Constructs new <see cref="BlockStatement"/> from C# syntax.
+        ///     Constructs expression from C# syntax.
         /// </summary>
         internal BlockStatement(
             SyntaxTreeNode                      parent,
@@ -75,7 +75,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         /// <summary>
-        ///     Constructs new <see cref="BlockStatement"/> from tokens.
+        ///     Constructs expression from tokens.
         /// </summary>
         internal BlockStatement(SyntaxTreeNode parent, params Statement[] statements) {
             Parent     = parent;
@@ -87,7 +87,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="BlockStatement"/> without position in source.
+        ///     Constructs expression without position in source.
         /// </summary>
         internal BlockStatement(NodeList<Statement> statements) {
             Statements = statements;
@@ -108,7 +108,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                         Ast.InLoop        = false;
                         Ast.InFinally     = false;
                         Ast.InFinallyLoop = false;
-                        Parse(parent);
+                        Parse(parent, type);
                     }
                     finally {
                         Ast.InLoop        = isInLoop;
@@ -125,7 +125,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                     try {
                         Ast.InLoop        = true;
                         Ast.InFinallyLoop = Ast.InFinally;
-                        Parse(parent);
+                        Parse(parent, type);
                     }
                     finally {
                         Ast.InLoop        = wasInLoop;
@@ -141,7 +141,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                     try {
                         Ast.InFinally     = true;
                         Ast.InFinallyLoop = false;
-                        Parse(parent);
+                        Parse(parent, type);
                     }
                     finally {
                         Ast.InFinally     = isInFinally;
@@ -152,7 +152,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 }
 
                 default: {
-                    Parse(parent);
+                    Parse(parent, type);
                     break;
                 }
             }
@@ -160,10 +160,14 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         #endregion
 
-        private void Parse(SyntaxTreeNode parent) {
+        private void Parse(SyntaxTreeNode parent, BlockType blockType) {
             Parent                             = parent;
             Statements                         = new NodeList<Statement>(this);
             (TokenType terminator, bool error) = ParseStart(this);
+
+            if (terminator == Outdent && blockType == BlockType.Lambda) {
+                Unit.Blame(BlameType.LambdaCannotHaveIndentedBody, this);
+            }
 
             if (terminator == Newline) {
                 Statements.AddRange(ParseStmt(this));
@@ -231,12 +235,13 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         internal bool HasVariable(SimpleNameExpression name) {
-            return Variables.Select(v => ((SimpleNameExpression) v.Left).Name).Contains(name.Name);
+            return Variables.Select(v => (v?.Left as SimpleNameExpression)?.Name)
+                            .Contains(name?.Name);
         }
 
         #region Code converters
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.WriteLine("");
             c.Writer.Indent++;
             c.AddJoin("", Statements, true);
@@ -244,7 +249,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             c.WriteLine("");
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.WriteLine("{");
             c.Writer.Indent++;
             c.AddJoin("", Statements, true);
@@ -259,6 +264,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         Default,
         Top,
         Loop,
+        Lambda,
         Anyway
     }
 }

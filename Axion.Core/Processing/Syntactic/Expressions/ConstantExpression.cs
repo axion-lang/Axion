@@ -1,5 +1,5 @@
-using System;
 using System.Diagnostics;
+using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -7,15 +7,15 @@ using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     public class ConstantExpression : Expression {
-        public readonly   Token    Value;
-        internal override TypeName ValueType => throw new NotImplementedException();
+        public readonly Token    Value;
+        public override TypeName ValueType => Value.ValueType;
 
         /// <summary>
         ///     Constructor for 'word' constants
         ///     (such as 'true', 'nil', etc.)
         /// </summary>
         internal ConstantExpression(TokenType type) {
-            Debug.Assert(Spec.Keywords.ContainsValue(type));
+            Debug.Assert(Spec.Constants.Contains(type));
             Value = new WordToken(type);
         }
 
@@ -28,11 +28,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Value = value;
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Value);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(Value);
         }
     }

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     /// <summary>
@@ -11,8 +11,6 @@ namespace Axion.Core.Processing.Syntactic.Statements {
     ///     </c>
     /// </summary>
     public class WithStatement : Statement {
-        #region Properties
-
         private WithStatementItem item;
 
         public WithStatementItem Item {
@@ -27,21 +25,17 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             set => SetNode(ref block, value);
         }
 
-        #endregion
-
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="WithStatement"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
         internal WithStatement(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordWith);
+            EatStartMark(KeywordWith);
 
             // TODO: add 'with' expression like in Kotlin
             var items = new List<WithStatementItem>();
             do {
                 items.Add(new WithStatementItem(this));
-            } while (MaybeEat(TokenType.Comma));
+            } while (MaybeEat(Comma));
 
             Block = new BlockStatement(this);
             if (items.Count > 1) {
@@ -57,26 +51,20 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="WithStatement"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public WithStatement(WithStatementItem item, BlockStatement block) {
             Item  = item;
             Block = block;
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("with ", Item, " ", Block);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("using (", item, ") ", Block);
         }
-
-        #endregion
     }
 
     /// <summary>
@@ -86,8 +74,6 @@ namespace Axion.Core.Processing.Syntactic.Statements {
     ///     </c>
     /// </summary>
     public class WithStatementItem : Statement {
-        #region Properties
-
         private Expression contextManager;
 
         public Expression ContextManager {
@@ -102,18 +88,14 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             set => SetNode(ref name, value);
         }
 
-        #endregion
-
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="WithStatementItem"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
         internal WithStatementItem(SyntaxTreeNode parent) : base(parent) {
             MarkStart(Token);
 
             ContextManager = Expression.ParseExtendedExpr(this);
-            if (MaybeEat(TokenType.OpAs)) {
+            if (MaybeEat(OpAs)) {
                 Name = new SimpleNameExpression(this);
             }
 
@@ -121,25 +103,19 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="WithStatement"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public WithStatementItem(Expression contextManager, SimpleNameExpression name) {
             ContextManager = contextManager;
             Name           = name;
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(ContextManager, " as ", Name);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("var ", Name, " = ", ContextManager);
         }
-
-        #endregion
     }
 }

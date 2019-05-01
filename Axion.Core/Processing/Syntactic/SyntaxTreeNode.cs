@@ -1,10 +1,10 @@
-using System;
 using System.Diagnostics;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Syntactic.Statements;
+using Axion.Core.Processing.Syntactic.Statements.Definitions;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic {
@@ -48,8 +48,6 @@ namespace Axion.Core.Processing.Syntactic {
                 return parentBlock;
             }
         }
-
-        internal virtual TypeName ValueType => throw new NotSupportedException();
 
         internal SyntaxTreeNode(SyntaxTreeNode parent) {
             Parent = parent;
@@ -144,9 +142,19 @@ namespace Axion.Core.Processing.Syntactic {
         ///     Eats specified <paramref name="type"/>
         ///     and marks current token as node start.
         /// </summary>
-        internal Token MarkStart(TokenType type) {
+        internal Token EatStartMark(TokenType type) {
             Eat(type);
             MarkStart(Token);
+            return Token;
+        }
+
+        /// <summary>
+        ///     Eats specified <paramref name="type"/>
+        ///     and marks current token as node end.
+        /// </summary>
+        internal Token EatEndMark(TokenType type) {
+            Eat(type);
+            MarkEnd(Token);
             return Token;
         }
 
@@ -182,7 +190,7 @@ namespace Axion.Core.Processing.Syntactic {
         ///     if the next token type is not
         ///     the same as passed in parameter.
         /// </summary>
-        internal bool Eat(TokenType type) {
+        internal bool Eat(params TokenType[] type) {
             bool matches = EnsureNext(type);
             if (matches) {
                 Move();
@@ -263,5 +271,10 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         #endregion
+    }
+
+    public interface IFunctionNode {
+        NodeList<FunctionParameter> Parameters { get; set; }
+        TypeName                    ReturnType { get; set; }
     }
 }

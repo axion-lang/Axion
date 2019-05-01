@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Specification;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
     ///         generic_type:
-    ///             type '[' type {',' type} ']'
+    ///             type '[' type {',' type} ']';
     ///     </c>
     /// </summary>
     public class GenericTypeName : TypeName {
@@ -27,10 +27,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => SetNode(ref typeArguments, value);
         }
 
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="ArrayTypeName"/> from Axion tokens.
+        ///     Constructs expression from Axion tokens.
         /// </summary>
         public GenericTypeName(
             SyntaxTreeNode parent,
@@ -42,18 +40,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
             MarkStart(Target);
 
-            Eat(TokenType.OpenBracket);
+            Eat(OpenBracket);
             do {
                 TypeArguments.Add(ParseTypeName(parent));
-            } while (MaybeEat(TokenType.Comma));
+            } while (MaybeEat(Comma));
 
-            Eat(TokenType.CloseBracket);
+            Eat(CloseBracket);
 
             MarkEnd(Token);
         }
 
         /// <summary>
-        ///     Constructs new <see cref="ArrayTypeName"/> from C# syntax.
+        ///     Constructs expression from C# syntax.
         /// </summary>
         public GenericTypeName(
             SyntaxTreeNode    parent,
@@ -68,7 +66,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="ArrayTypeName"/> without position in source.
+        ///     Constructs expression without position in source.
         /// </summary>
         public GenericTypeName(
             TypeName              target,
@@ -84,22 +82,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             }
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Target + "[");
             c.AddJoin(",", typeArguments);
             c.Write("]");
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(Target + "<");
             c.AddJoin(",", typeArguments);
             c.Write(">");
         }
-
-        #endregion
     }
 }

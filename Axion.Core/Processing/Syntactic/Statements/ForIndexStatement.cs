@@ -1,17 +1,18 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     /// <summary>
     ///     <c>
     ///         for_index_stmt:
-    ///             'for' [expr] ';' [expr] ';' [expr] block
+    ///             'for' [expr] ';' [preglobal_expr] ';' [preglobal_expr]
+    ///             block
+    ///             ['nobreak' block]
     ///     </c>
     /// </summary>
     public class ForIndexStatement : LoopStatement {
-        #region Properties
-
         private Expression? initStmt;
 
         public Expression? InitStmt {
@@ -33,32 +34,28 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             set => SetNode(ref iterStmt, value);
         }
 
-        #endregion
-
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="ForIndexStatement"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
         internal ForIndexStatement(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordFor);
+            EatStartMark(KeywordFor);
 
-            if (!MaybeEat(TokenType.Semicolon)) {
-                InitStmt = Expression.ParseSingleExpr(parent);
-                Eat(TokenType.Semicolon);
+            if (!MaybeEat(Semicolon)) {
+                InitStmt = Expression.ParseGlobalExpr(parent);
+                Eat(Semicolon);
             }
 
-            if (!MaybeEat(TokenType.Semicolon)) {
-                Condition = Expression.ParseTestExpr(this);
-                Eat(TokenType.Semicolon);
+            if (!MaybeEat(Semicolon)) {
+                Condition = Expression.ParsePreGlobalExpr(this);
+                Eat(Semicolon);
             }
 
-            if (!MaybeEat(Spec.NeverTestTypes)) {
-                IterStmt = Expression.ParseSingleExpr(this);
+            if (!MaybeEat(Spec.NeverExprStartTypes)) {
+                IterStmt = Expression.ParsePreGlobalExpr(this);
             }
 
             Block = new BlockStatement(this, BlockType.Loop);
-            if (MaybeEat(TokenType.KeywordNoBreak)) {
+            if (MaybeEat(KeywordNoBreak)) {
                 NoBreakBlock = new BlockStatement(this);
             }
 
@@ -66,7 +63,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="ForIndexStatement"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public ForIndexStatement(
             BlockStatement  block,
@@ -80,11 +77,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             IterStmt  = iterStmt;
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(
                 "for ",
                 InitStmt,
@@ -100,7 +93,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(
                 "for (",
                 InitStmt,
@@ -115,7 +108,5 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 Unit.ReportError("C# doesn't support 'nobreak' block", NoBreakBlock);
             }
         }
-
-        #endregion
     }
 }

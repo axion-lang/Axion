@@ -1,5 +1,5 @@
 using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     public abstract class LoopStatement : Statement {
@@ -31,16 +31,16 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
         internal static LoopStatement ParseFor(SyntaxTreeNode parent) {
             int startIdx = parent.Ast.Index;
-            parent.Eat(TokenType.KeywordFor);
+            parent.Eat(KeywordFor);
 
             var isForIndex = false;
-            if (parent.MaybeEat(TokenType.Semicolon)) {
+            if (parent.MaybeEat(Semicolon)) {
                 // 'for' ';'
                 isForIndex = true;
             }
             else {
-                Expression.ParseSingleExpr(parent);
-                if (parent.MaybeEat(TokenType.Semicolon)) {
+                Expression.ParseGlobalExpr(parent);
+                if (parent.MaybeEat(Semicolon)) {
                     isForIndex = true;
                 }
             }

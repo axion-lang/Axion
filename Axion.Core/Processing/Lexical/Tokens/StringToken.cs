@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
@@ -7,11 +8,12 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents a 'string' literal.
     /// </summary>
     public class StringToken : Token {
-        public string               EscapedValue   { get; }
-        public bool                 IsUnclosed     { get; }
-        public string               TrailingQuotes { get; }
-        public StringLiteralOptions Options        { get; }
-        public List<Interpolation>  Interpolations { get; }
+        public          string               EscapedValue   { get; }
+        public          bool                 IsUnclosed     { get; }
+        public          string               TrailingQuotes { get; }
+        public          StringLiteralOptions Options        { get; }
+        public          List<Interpolation>  Interpolations { get; }
+        public override TypeName             ValueType      => Spec.StringType;
 
         public StringToken(
             StringLiteralOptions options,
@@ -51,12 +53,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Span = new Span(startPosition, (endLine, endCol));
         }
 
-        public override void ToOriginalAxionCode(CodeBuilder c) {
-            ToAxionCode(c);
-            c.Write(EndWhitespaces);
-        }
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Options.GetPrefixes());
             int quotesCount = Options.QuotesCount;
             c.Write(new string(Options.Quote, quotesCount) + Value);
@@ -68,7 +65,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             if (Options.IsFormatted) {
                 c.Write("$");
             }

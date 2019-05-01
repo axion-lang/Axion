@@ -6,7 +6,7 @@ using static Axion.Core.Specification.TokenType;
 namespace Axion.Core.Specification {
     public partial class Spec {
         /// <summary>
-        ///     Contains all language keywords.
+        ///     Maps language keyword's string value to it's token type.
         /// </summary>
         public static readonly Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType> {
             // testing
@@ -61,7 +61,10 @@ namespace Axion.Core.Specification {
             { "with",      KeywordWith     },
             { "when",      KeywordWhen     }
         };
-                        
+        
+        /// <summary>
+        ///     Maps language operator's string value to it's operator properties.
+        /// </summary>
         public static readonly Dictionary<string, OperatorProperties> Operators = new Dictionary<string, OperatorProperties> {
             { "++",     new OperatorProperties(OpIncrement,            17, InputSide.Unknown) },
             { "--",     new OperatorProperties(OpDecrement,            17, InputSide.Unknown) },
@@ -125,18 +128,30 @@ namespace Axion.Core.Specification {
             { "^=",     new OperatorProperties(OpBitXorAssign,         0)  }
         };
 
-        public static readonly IReadOnlyList<(TokenType type, string value)> OperatorTypes =
-            Operators.Select(kvp => (kvp.Value.Type, kvp.Key)).ToList();
-        
-        public static readonly TokenType[] UnaryLeftOperators = {
-            OpPlus,
-            OpMinus,
-            OpBitNot,
-            OpNot,
-            OpIncrement,
-            OpDecrement
-        };
+        /// <summary>
+        ///     Token types that applicable to unary expression (left).
+        /// </summary>
+        public static readonly TokenType[] UnaryLeftOperators =
+            Operators.Values
+                     .Where(p => p.InputSide != InputSide.Right)
+                     .Select(p => p.Type).ToArray();
 
+        /// <summary>
+        ///     Token types that applicable to assignment expression.
+        /// </summary>
+        public static readonly TokenType[] AssignmentOperators = 
+            Operators.Values
+                     .Where(
+                        p => p.Type.ToString("G")
+                            .ToUpper()
+                            .EndsWith("ASSIGN")
+                     )
+                     .Select(p => p.Type)
+                     .ToArray();
+
+        /// <summary>
+        ///     Maps language symbol's string value to it's token type.
+        /// </summary>
         internal static readonly Dictionary<string, TokenType> Symbols = new Dictionary<string, TokenType> {
             { ".",  Dot },
             { "|>", RightPipeline },
@@ -157,17 +172,26 @@ namespace Axion.Core.Specification {
             { ";",  Semicolon }
         };
 
+
         /// <summary>
-        ///     Symbolic = Operators + Symbols
+        ///     Contains all operators and symbols.
+        ///     Sorted by descending.
         /// </summary>
         public static readonly string[] SortedSymbolics =
-            Operators.Keys.Union(Symbols.Keys).OrderByDescending(val => val.Length).ToArray();
+            Operators
+                .Keys
+                .Union(Symbols.Keys)
+                .OrderByDescending(val => val.Length)
+                .ToArray();
 
+        /// <summary>
+        ///     Contains all characters that start an operator or symbol.
+        /// </summary>
         public static readonly char[] SymbolicChars =
-            new HashSet<char>(
-            SortedSymbolics
-                .Select(val => val[0])
-                .Where(c => !char.IsLetterOrDigit(c))
-            ).ToArray();
+             SortedSymbolics
+                 .Select(val => val[0])
+                 .Distinct()
+                 .Where(c => !char.IsLetter(c))
+                 .ToArray();
     }
 }

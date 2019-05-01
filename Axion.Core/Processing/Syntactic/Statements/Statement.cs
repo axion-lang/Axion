@@ -4,6 +4,7 @@ using Axion.Core.Processing.Syntactic.Statements.Definitions;
 using Axion.Core.Processing.Syntactic.Statements.Interfaces;
 using Axion.Core.Processing.Syntactic.Statements.Small;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     public abstract class Statement : SyntaxTreeNode {
@@ -27,122 +28,108 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         ///             raise_stmt | yield_stmt
         ///     </c>
         /// </summary>
-        private static Statement ParseSingleStmt(
-            SyntaxTreeNode parent,
-            bool           onlyDecorated = false
-        ) {
-            if (!onlyDecorated) {
-                switch (parent.Peek.Type) {
-                    case TokenType.KeywordIf:
-                    case TokenType.KeywordUnless: {
-                        return new ConditionalStatement(parent);
-                    }
-
-                    case TokenType.KeywordWhile: {
-                        return new WhileStatement(parent);
-                    }
-
-                    case TokenType.KeywordFor: {
-                        return LoopStatement.ParseFor(parent);
-                    }
-
-                    case TokenType.KeywordTry: {
-                        return new TryStatement(parent);
-                    }
-
-                    case TokenType.KeywordWith: {
-                        return new WithStatement(parent);
-                    }
-
-                    #region Small statements
-
-                    case TokenType.KeywordAssert: {
-                        return new AssertStatement(parent);
-                    }
-
-                    case TokenType.Semicolon:
-                    case TokenType.KeywordPass: {
-                        return new EmptyStatement(parent);
-                    }
-
-                    case TokenType.KeywordBreak: {
-                        return new BreakStatement(parent);
-                    }
-
-                    case TokenType.KeywordContinue: {
-                        return new ContinueStatement(parent);
-                    }
-
-                    case TokenType.KeywordDelete: {
-                        return new DeleteStatement(parent);
-                    }
-
-                    case TokenType.KeywordRaise: {
-                        return new RaiseStatement(parent);
-                    }
-
-                    case TokenType.KeywordReturn: {
-                        return new ReturnStatement(parent);
-                    }
-
-                    case TokenType.KeywordYield: {
-                        // For yield statements, continue to enforce that it's currently in a function. 
-                        // This gives us better syntax error reporting for yield-statements than for yield-expressions.
-                        if (parent.Ast.CurrentFunction == null) {
-                            parent.Unit.Blame(BlameType.MisplacedYield, parent.Token);
-                        }
-
-                        return new ExpressionStatement(new YieldExpression(parent));
-                    }
-
-                    #endregion
-
-                    case TokenType.CloseBracket: {
-                        NodeList<Expression> decorators = ParseDecorators(parent);
-
-                        Statement stmt = ParseSingleStmt(parent, true);
-                        if (stmt is IDecorated def) {
-                            def.Modifiers = decorators;
-                        }
-                        else {
-                            parent.Unit.ReportError(Spec.ERR_InvalidDecoratorPosition, stmt);
-                        }
-
-                        return stmt;
-                    }
-
-                    // there should be no 'default' case!
-                }
-            }
-
+        private static Statement ParseSingleStmt(SyntaxTreeNode parent) {
             switch (parent.Peek.Type) {
-                case TokenType.KeywordModule: {
+                case KeywordIf:
+                case KeywordUnless: {
+                    return new ConditionalStatement(parent);
+                }
+
+                case KeywordDo: {
+                    return new WhileStatement(parent, true);
+                }
+
+                case KeywordWhile: {
+                    return new WhileStatement(parent);
+                }
+
+                case KeywordFor: {
+                    return LoopStatement.ParseFor(parent);
+                }
+
+                case KeywordTry: {
+                    return new TryStatement(parent);
+                }
+
+                case KeywordWith: {
+                    return new WithStatement(parent);
+                }
+
+                #region Small statements
+
+                case KeywordAssert: {
+                    return new AssertStatement(parent);
+                }
+
+                case Semicolon:
+                case KeywordPass: {
+                    return new EmptyStatement(parent);
+                }
+
+                case KeywordBreak: {
+                    return new BreakStatement(parent);
+                }
+
+                case KeywordContinue: {
+                    return new ContinueStatement(parent);
+                }
+
+                case KeywordDelete: {
+                    return new DeleteStatement(parent);
+                }
+
+                case KeywordRaise: {
+                    return new RaiseStatement(parent);
+                }
+
+                case KeywordReturn: {
+                    return new ReturnStatement(parent);
+                }
+
+                case KeywordYield: {
+                    // For yield statements, continue to enforce that it's currently in a function. 
+                    // This gives us better syntax error reporting for yield-statements than for yield-expressions.
+                    if (parent.Ast.CurrentFunction == null) {
+                        parent.Unit.Blame(BlameType.MisplacedYield, parent.Token);
+                    }
+
+                    return new ExpressionStatement(new YieldExpression(parent));
+                }
+
+                #endregion
+
+                case OpenBracket: {
+                    NodeList<Expression> decorators = ParseDecorators(parent);
+
+                    Statement stmt = ParseSingleStmt(parent);
+                    if (stmt is IDecorated def) {
+                        def.Modifiers = decorators;
+                    }
+                    else {
+                        parent.Unit.Blame(BlameType.InvalidDecoratorPlacement, stmt);
+                    }
+
+                    return stmt;
+                }
+
+                case KeywordModule: {
                     return new ModuleDefinition(parent);
                 }
 
-                case TokenType.KeywordClass: {
+                case KeywordClass: {
                     return new ClassDefinition(parent);
                 }
 
-                case TokenType.KeywordEnum: {
+                case KeywordEnum: {
                     return new EnumDefinition(parent);
                 }
 
-                case TokenType.KeywordFn: {
+                case KeywordFn: {
                     return new FunctionDefinition(parent);
-                }
-
-                default: {
-                    if (onlyDecorated) {
-                        parent.Unit.ReportError("Invalid decorated statement", parent.Peek);
-                        return new BlockStatement(ParseStmt(parent));
-                    }
-
-                    break;
                 }
             }
 
-            return new ExpressionStatement(Expression.ParseSingleExpr(parent));
+            return new ExpressionStatement(Expression.ParseGlobalExpr(parent));
         }
 
         /// <summary>
@@ -153,18 +140,18 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         /// </summary>
         internal static NodeList<Statement> ParseStmt(
             SyntaxTreeNode parent,
-            TokenType      terminator = TokenType.None
+            TokenType      terminator = None
         ) {
             var statements = new NodeList<Statement>(parent) {
                 ParseSingleStmt(parent)
             };
-            if (parent.MaybeEat(TokenType.Semicolon)) {
-                while (parent.Token.Is(TokenType.Semicolon)
+            if (parent.MaybeEat(Semicolon)) {
+                while (parent.Token.Is(Semicolon)
                        && !parent.MaybeEatNewline()
-                       && !parent.Peek.Is(terminator)) {
+                       && !parent.Peek.Is(terminator, End)) {
                     statements.Add(ParseSingleStmt(parent));
-                    if (parent.MaybeEat(TokenType.End)) {
-                        if (terminator != TokenType.None) {
+                    if (parent.MaybeEat(End)) {
+                        if (terminator != None) {
                             parent.Eat(terminator);
                         }
 
@@ -172,8 +159,8 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                         break;
                     }
 
-                    if (!parent.MaybeEat(TokenType.Semicolon)) {
-                        parent.Eat(TokenType.Newline);
+                    if (!parent.MaybeEat(Semicolon)) {
+                        parent.Eat(Newline);
                     }
                 }
             }
@@ -192,15 +179,15 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         private static NodeList<Expression> ParseDecorators(SyntaxTreeNode parent) {
             var decorators = new NodeList<Expression>(parent);
 
-            while (parent.MaybeEat(TokenType.OpenBracket)) {
+            while (parent.MaybeEat(OpenBracket)) {
                 do {
-                    // on '['
-                    Expression decorator = Expression.ParseSingleExpr(parent);
-                    decorators.Add(decorator);
-                } while (parent.MaybeEat(TokenType.Comma));
+                    decorators.Add(Expression.ParsePreGlobalExpr(parent));
+                } while (parent.MaybeEat(Comma));
 
-                parent.Eat(TokenType.CloseBracket);
+                parent.Eat(CloseBracket);
             }
+
+            Expression.CheckType(decorators, Spec.DecoratorExprs);
 
             return decorators;
         }

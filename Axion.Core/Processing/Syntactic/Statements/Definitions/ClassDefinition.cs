@@ -3,18 +3,16 @@ using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Syntactic.Statements.Interfaces;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
     /// <summary>
     ///     <c>
     ///         class_def:
-    ///             'class' name ['(' args_list ')'] block
+    ///             'class' name ['(' type_arg_list ')'] block
     ///     </c>
     /// </summary>
     public class ClassDefinition : Statement, IDecorated {
-        #region Properties
-
         private SimpleNameExpression name;
 
         public SimpleNameExpression Name {
@@ -61,25 +59,31 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             }
         }
 
-        #endregion
-
+        /// <summary>
+        ///     Constructs from tokens.
+        /// </summary>
         internal ClassDefinition(SyntaxTreeNode parent) : base(parent) {
             Bases    = new NodeList<TypeName>(this);
             Keywords = new NodeList<Expression>(this);
-            MarkStart(TokenType.KeywordClass);
+            // TODO: pushclass => popclass & add to ready classes.
+            ParentBlock.Classes.Add(this);
+            EatStartMark(KeywordClass);
 
             Name = new SimpleNameExpression(this);
             // TODO: add generic classes
             MetaClass = null;
-            List<(TypeName?, SimpleNameExpression?)> types = TypeName.ParseNamedTypeArgs(this);
-            foreach ((TypeName? type, SimpleNameExpression? typeLabel) in types) {
-                if (typeLabel == null) {
-                    Bases.Add(type);
-                }
-                else {
-                    Keywords.Add(type);
-                    if (typeLabel.Name == "metaclass") {
-                        MetaClass = type;
+            if (MaybeEat(OpenParenthesis)) {
+                List<(TypeName, SimpleNameExpression?)> types = TypeName.ParseNamedTypeArgs(this);
+                Eat(CloseParenthesis);
+                foreach ((TypeName type, SimpleNameExpression? typeLabel) in types) {
+                    if (typeLabel == null) {
+                        Bases.Add(type);
+                    }
+                    else {
+                        Keywords.Add(type);
+                        if (typeLabel.Name == "metaclass") {
+                            MetaClass = type;
+                        }
                     }
                 }
             }
@@ -87,19 +91,19 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             Block = new BlockStatement(this, BlockType.Top);
 
             MarkEnd(Token);
-            ParentBlock.Classes.Add(this);
         }
 
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("class ", Name, " ", Block);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
-            c.Write("public class ", Name, " ", Block);
-        }
+        internal override void ToCSharpCode(CodeBuilder c) {
+            bool haveAccessMod = c.WriteDecorators(Modifiers);
+            if (!haveAccessMod) {
+                c.Write("public ");
+            }
 
-        #endregion
+            c.Write("class ", Name, " ", Block);
+        }
     }
 }

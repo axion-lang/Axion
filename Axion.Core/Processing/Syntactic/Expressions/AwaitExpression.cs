@@ -1,12 +1,13 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         await_expr:
-    ///             'await' expr
+    ///             'await' expr_list;
     ///     </c>
     /// </summary>
     public class AwaitExpression : Expression {
@@ -17,39 +18,31 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref val, value);
         }
 
-        internal override TypeName ValueType => Value.ValueType;
-
-        #region Constructors
+        public override TypeName ValueType => Value.ValueType;
 
         /// <summary>
-        ///     Constructs new <see cref="AwaitExpression"/> from tokens.
+        ///     Constructs expression from tokens.
         /// </summary>
         internal AwaitExpression(SyntaxTreeNode parent) : base(parent) {
             // TODO: add 'in async context' check            
-            MarkStart(TokenType.KeywordAwait);
-            Value = ParseExpression(parent, expectedTypes: Spec.TestExprs);
+            EatStartMark(KeywordAwait);
+            Value = ParseMultiple(parent, expectedTypes: Spec.PreGlobalExprs);
             MarkEnd(Token);
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="AwaitExpression"/> without position in source.
+        ///     Constructs expression without position in source.
         /// </summary>
         public AwaitExpression(Expression value) {
             Value = value;
         }
 
-        #endregion
-
-        #region Transpilers
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("await ", Value);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("await ", Value);
         }
-
-        #endregion
     }
 }

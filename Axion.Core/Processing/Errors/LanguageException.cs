@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using Axion.Core.Specification;
-using FluentConsole;
+using ConsoleExtensions;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Errors {

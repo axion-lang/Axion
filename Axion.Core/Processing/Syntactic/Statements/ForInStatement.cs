@@ -1,12 +1,14 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     /// <summary>
     ///     <c>
     ///         for_in_stmt:
-    ///             'for' list_primary 'in' list_test block
+    ///             'for' simple_name_list 'in' preglobal_list
+    ///             block
+    ///             ['nobreak' block]
     ///     </c>
     /// </summary>
     public class ForInStatement : LoopStatement {
@@ -24,35 +26,32 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             set => SetNode(ref iterable, value);
         }
 
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="ForInStatement"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
         internal ForInStatement(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordFor);
+            EatStartMark(KeywordFor);
 
-            Item = Expression.ParseExpression(
+            Item = Expression.ParseMultiple(
                 parent,
                 Expression.ParsePrimaryExpr,
-                typeof(SimpleNameExpression)
+                expectedTypes: typeof(SimpleNameExpression)
             );
-            if (MaybeEat(TokenType.OpIn)) {
-                Iterable = Expression.ParseExpression(
-                    parent,
-                    Expression.ParseTestExpr
-                );
-                Block = new BlockStatement(this, BlockType.Loop);
-                if (MaybeEat(TokenType.KeywordElse)) {
-                    NoBreakBlock = new BlockStatement(this);
-                }
+            Eat(OpIn);
+            Iterable = Expression.ParseMultiple(
+                parent,
+                Expression.ParsePreGlobalExpr
+            );
+            Block = new BlockStatement(this, BlockType.Loop);
+            if (MaybeEat(KeywordNoBreak)) {
+                NoBreakBlock = new BlockStatement(this);
             }
 
             MarkEnd(Token);
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="ForInStatement"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public ForInStatement(
             Expression     item,
@@ -64,11 +63,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             Iterable = iterable;
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(
                 "for ",
                 Item,
@@ -82,7 +77,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(
                 "foreach (",
                 Item,
@@ -95,7 +90,5 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 Unit.ReportError("C# doesn't support 'nobreak' block", NoBreakBlock);
             }
         }
-
-        #endregion
     }
 }

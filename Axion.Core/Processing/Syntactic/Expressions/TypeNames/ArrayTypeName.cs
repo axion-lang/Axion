@@ -1,12 +1,12 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Specification;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
     ///         array_type:
-    ///             type '[' ']'
+    ///             type '[' ']';
     ///     </c>
     /// </summary>
     public class ArrayTypeName : TypeName {
@@ -17,23 +17,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => SetNode(ref elementType, value);
         }
 
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="ArrayTypeName"/> from Axion tokens.
+        ///     Constructs expression from Axion tokens.
         /// </summary>
         public ArrayTypeName(SyntaxTreeNode parent, TypeName elementType) {
             Parent      = parent;
             ElementType = elementType;
 
             MarkStart(ElementType);
-            Eat(TokenType.OpenBracket);
-            Eat(TokenType.CloseBracket);
+            Eat(OpenBracket);
+            Eat(CloseBracket);
             MarkEnd(Token);
         }
 
         /// <summary>
-        ///     Constructs new <see cref="ArrayTypeName"/> from C# syntax.
+        ///     Constructs expression from C# syntax.
         /// </summary>
         public ArrayTypeName(SyntaxTreeNode parent, ArrayTypeSyntax csNode) {
             Parent      = parent;
@@ -41,24 +39,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="ArrayTypeName"/> without position in source.
+        ///     Constructs expression without position in source.
         /// </summary>
         public ArrayTypeName(TypeName elementType) {
             ElementType = elementType;
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(elementType, "[]");
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(elementType, "[]");
         }
-
-        #endregion
     }
 }

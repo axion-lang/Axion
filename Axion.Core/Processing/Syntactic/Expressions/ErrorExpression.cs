@@ -1,20 +1,24 @@
+using System;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     public class ErrorExpression : Expression {
-        public readonly Token ErrorToken;
-
         public ErrorExpression(SyntaxTreeNode parent) : base(parent) {
-            ErrorToken = Token;
+            MarkStart(Token);
+            while (!Peek.Is(TokenType.Newline, TokenType.End)) {
+                Move();
+            }
+
+            MarkEnd(Token);
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
-            c.Write(ErrorToken);
+        internal override void ToAxionCode(CodeBuilder c) {
+            throw new NotSupportedException();
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
-            c.Write(ErrorToken);
+        internal override void ToCSharpCode(CodeBuilder c) {
+            throw new NotSupportedException();
         }
     }
 }

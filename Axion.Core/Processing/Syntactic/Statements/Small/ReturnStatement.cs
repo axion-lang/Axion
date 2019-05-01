@@ -7,7 +7,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
     /// <summary>
     ///     <c>
     ///         return_stmt:
-    ///             'return' [list_test]
+    ///             'return' [preglobal_list]
     ///     </c>
     /// </summary>
     public class ReturnStatement : Statement {
@@ -19,39 +19,35 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
         }
 
         /// <summary>
-        ///     Constructs new <see cref="ReturnStatement"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
         internal ReturnStatement(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordReturn);
+            EatStartMark(TokenType.KeywordReturn);
 
             if (Ast.CurrentFunction == null) {
                 Unit.Blame(BlameType.MisplacedReturn, Token);
             }
 
-            if (!Peek.Is(Spec.NeverTestTypes)) {
-                Value = Expression.ParseExpression(parent, expectedTypes: Spec.TestExprs);
+            if (!Peek.Is(Spec.NeverExprStartTypes)) {
+                Value = Expression.ParseMultiple(parent, expectedTypes: Spec.PreGlobalExprs);
             }
 
             MarkEnd(Token);
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="ReturnStatement"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public ReturnStatement(Expression value) {
             Value = value;
         }
 
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("return ", Value);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("return ", Value, ";");
         }
-
-        #endregion
     }
 }

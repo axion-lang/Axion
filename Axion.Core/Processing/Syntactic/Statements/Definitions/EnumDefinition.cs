@@ -1,21 +1,21 @@
+using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Syntactic.Statements.Interfaces;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
     /// <summary>
     ///     <c>
     ///         enum_def:
-    ///             'enum' name ['(' args_list ')']
+    ///             'enum' name ['(' type_arg_list ')']
     ///             block_start enum_item {',' enum_item} block_terminator
     ///     </c>
     /// </summary>
     public class EnumDefinition : Statement, IDecorated {
-        #region Properties
-
         private Expression name;
 
         public Expression Name {
@@ -48,8 +48,6 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             }
         }
 
-        #endregion
-
         public EnumDefinition(
             SyntaxTreeNode      parent,
             Expression          name,
@@ -64,29 +62,37 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
 
         internal EnumDefinition(SyntaxTreeNode parent) : base(parent) {
             Items = new NodeList<EnumItem>(this);
-            MarkStart(TokenType.KeywordEnum);
+            EatStartMark(KeywordEnum);
 
             Name = new SimpleNameExpression(this);
 
             // TODO: support for functions in enums.
-            Bases                              = TypeName.ParseTypeArgs(this);
+            if (MaybeEat(OpenParenthesis)) {
+                Bases = new NodeList<TypeName>(
+                    this,
+                    TypeName.ParseNamedTypeArgs(this).Select(a => a.type)
+                );
+                Eat(CloseParenthesis);
+            }
+            else {
+                Bases = new NodeList<TypeName>(this);
+            }
+
             (TokenType terminator, bool error) = BlockStatement.ParseStart(this);
 
-            if (!MaybeEat(terminator) && !MaybeEat(TokenType.KeywordPass) && !error) {
+            if (!MaybeEat(terminator) && !MaybeEat(KeywordPass) && !error) {
                 do {
                     MaybeEatNewline();
                     Items.Add(new EnumItem(this));
                 } while (!MaybeEat(terminator)
-                         && MaybeEat(TokenType.Comma));
+                         && MaybeEat(Comma));
             }
 
             MarkEnd(Token);
             ParentBlock.Enums.Add(this);
         }
 
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("enum ", Name);
             if (Bases.Count > 0) {
                 c.Write(" (");
@@ -104,7 +110,12 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
+            bool haveAccessMod = c.WriteDecorators(Modifiers);
+            if (!haveAccessMod) {
+                c.Write("public ");
+            }
+
             c.Write("enum ", Name);
             if (Bases.Count > 1) {
                 Unit.ReportError("C# enum cannot be inherited from more than 1 type.", Bases[1]);
@@ -114,8 +125,6 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             c.AddJoin(",", Items);
             c.Write("}");
         }
-
-        #endregion
     }
 
     /// <summary>
@@ -165,9 +174,19 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
         internal EnumItem(SyntaxTreeNode parent) : base(parent) {
             MarkStart(Token);
 
-            Name     = new SimpleNameExpression(this);
-            TypeList = TypeName.ParseTypeArgs(this);
-            if (MaybeEat(TokenType.OpAssign)) {
+            Name = new SimpleNameExpression(this);
+            if (MaybeEat(OpenParenthesis)) {
+                TypeList = new NodeList<TypeName>(
+                    this,
+                    TypeName.ParseNamedTypeArgs(this).Select(a => a.type)
+                );
+                Eat(CloseParenthesis);
+            }
+            else {
+                TypeList = new NodeList<TypeName>(this);
+            }
+
+            if (MaybeEat(OpAssign)) {
                 Value = ParsePrimaryExpr(this) as ConstantExpression;
                 if (Value == null) {
                     Unit.Blame(BlameType.ConstantValueExpected, Token);
@@ -177,9 +196,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             MarkEnd(Token);
         }
 
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Name);
             if (TypeList.Count > 0) {
                 c.Write(" (");
@@ -192,7 +209,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(Name);
             if (TypeList.Count > 0) {
                 Unit.ReportError("C# doesn't support enum items with types.", TypeList[0]);
@@ -202,7 +219,5 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
                 c.Write(" = ", Value);
             }
         }
-
-        #endregion
     }
 }

@@ -37,7 +37,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkPosition(start ?? stop ?? step, step ?? stop ?? start);
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(
                 "[",
                 Start,
@@ -49,7 +49,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             );
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             throw new NotSupportedException();
         }
     }

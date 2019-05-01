@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Binary;
 using Axion.Core.Processing.Syntactic.Expressions.Multiple;
@@ -8,6 +10,16 @@ using Axion.Core.Specification;
 using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
+    /// <summary>
+    ///     <c>
+    ///         expr_list:
+    ///             expr {',' expr}
+    ///         preglobal_list:
+    ///             preglobal_expr {',' preglobal_expr}
+    ///         simple_name_list:
+    ///             simple_name_expr {',' simple_name_expr}
+    ///     </c>
+    /// </summary>
     public abstract class Expression : SyntaxTreeNode {
         protected Expression(SyntaxTreeNode parent) : base(parent) { }
         protected Expression() { }
@@ -15,10 +27,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         /// <summary>
         ///     <c>
         ///         primary
-        ///             : ID
+        ///             : name
         ///             | await_expr
         ///             | yield_expr
-        ///             | new_expr
+        ///             | type_initializer_expr
         ///             | parenthesis_expr
         ///             | list_expr
         ///             | hash_collection
@@ -48,8 +60,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     break;
                 }
 
-                case OpenParenthesis: {
-                    value = ParseExpression(parent, expectedTypes: Spec.PrimaryExprs);
+                case KeywordFn: {
+                    value = new LambdaExpression(parent);
                     break;
                 }
 
@@ -59,18 +71,30 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
 
                 case OpenBrace: {
-                    value = new HashCollectionExpression(parent);
+                    value = new BraceCollectionExpression(parent);
+                    break;
+                }
+
+                case OpenParenthesis: {
+                    Token start = parent.Token;
+                    parent.Eat(OpenParenthesis);
+                    // empty tuple
+                    if (parent.MaybeEat(CloseParenthesis)) {
+                        return new TupleExpression(parent, start, parent.Token);
+                    }
+
+                    value = ParseMultiple(parent, parens: true);
+                    parent.Eat(CloseParenthesis);
                     break;
                 }
 
                 default: {
                     parent.Move();
-                    if (Spec.Literals.Contains(parent.Token.Type)) {
+                    if (Spec.Constants.Contains(parent.Token.Type)) {
                         // TODO add pre-concatenation of literals
                         value = new ConstantExpression(parent);
                     }
                     else {
-                        parent.Unit.ReportError(Spec.ERR_PrimaryExpected, parent.Token);
                         value = new ErrorExpression(parent);
                     }
 
@@ -138,7 +162,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         /// <summary>
         ///     <c>
         ///         unary_left:
-        ///             (UNARY_LEFT unary_left) | trailer
+        ///             (UNARY_LEFT_OPERATOR unary_left) | trailer
         ///     </c>
         /// </summary>
         internal static Expression ParseUnaryLeftExpr(SyntaxTreeNode parent) {
@@ -153,13 +177,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         /// <summary>
         ///     <c>
-        ///         priority_expr:
+        ///         operation_expr:
         ///             factor OPERATOR priority_expr
         ///     </c>
         /// </summary>
         internal static Expression ParseOperation(SyntaxTreeNode parent, int precedence = 0) {
             Expression expr = ParseUnaryLeftExpr(parent);
-            while (parent.Peek is OperatorToken op && op.Properties.Precedence >= precedence) {
+            while (!parent.Peek.Is(Spec.AssignmentOperators)
+                   && parent.Peek is OperatorToken op
+                   && op.Properties.Precedence >= precedence) {
                 parent.Move();
                 expr = new BinaryOperationExpression(
                     parent,
@@ -174,16 +200,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         /// <summary>
         ///     <c>
-        ///         test:
-        ///             priority_expr [cond_expr]
-        ///             | lambda_def
+        ///         preglobal_expr:
+        ///             operation_expr [ASSIGN_OPERATOR preglobal_expr]
         ///     </c>
+        ///     assignment operators
+        ///     RIGHT to LEFT
         /// </summary>
-        internal static Expression ParseTestExpr(SyntaxTreeNode parent) {
+        internal static Expression ParsePreGlobalExpr(SyntaxTreeNode parent) {
             Expression expr = ParseOperation(parent);
-            if (parent.Peek.Is(KeywordIf, KeywordUnless)
-                && parent.Token.Type != Newline) {
+            if (parent.Peek.Is(KeywordIf, KeywordUnless) && parent.Token.Type != Newline) {
                 expr = new ConditionalExpression(parent, expr);
+            }
+
+            if (parent.MaybeEat(Spec.AssignmentOperators)) {
+                var op = (OperatorToken) parent.Token;
+                expr = new BinaryOperationExpression(
+                    parent,
+                    expr,
+                    op,
+                    ParsePreGlobalExpr(parent)
+                );
             }
 
             return expr;
@@ -191,26 +227,29 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         /// <summary>
         ///     <c>
-        ///         expr:
-        ///             test | (['let'] assignable [':' type] ['=' assign_value])
-        ///         assign_value:
-        ///             yield_expr | test_list
+        ///         assign_expr
+        ///         | (['let'] assignable
+        ///            [':' type]
+        ///            ['=' (assign_value)])
         ///     </c>
         /// </summary>
-        internal static Expression ParseSingleExpr(SyntaxTreeNode parent) {
+        internal static Expression ParseGlobalExpr(SyntaxTreeNode parent) {
             bool isImmutable = parent.MaybeEat(KeywordLet);
 
-            Expression expr = ParseExpression(parent, ParseTestExpr);
+            Expression expr = ParseMultiple(parent, ParsePreGlobalExpr);
 
             // ['let'] name '=' expr
-            // name is undefined
             if (expr is BinaryOperationExpression bin
                 && bin.Left is SimpleNameExpression name
                 && bin.Operator.Is(OpAssign)
                 && !bin.ParentBlock.HasVariable(name)) {
-                return new VariableDefinitionExpression(parent, bin.Left, null, bin.Right) {
-                    IsImmutable = isImmutable
-                };
+                return new VariableDefinitionExpression(
+                    parent,
+                    bin.Left,
+                    null,
+                    bin.Right,
+                    isImmutable
+                );
             }
 
             if (!parent.Peek.Is(Colon)) {
@@ -218,7 +257,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
 
             if (!Spec.VariableLeftExprs.Contains(expr.GetType())) {
-                parent.Unit.ReportError(Spec.ERR_InvalidAssignmentTarget, expr);
+                parent.Unit.Blame(BlameType.ThisExpressionTargetIsNotAssignable, expr);
             }
 
             TypeName   type  = null;
@@ -228,12 +267,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
 
             if (parent.MaybeEat(OpAssign)) {
-                value = ParseExpression(parent, expectedTypes: Spec.TestExprs);
+                value = ParseMultiple(parent, expectedTypes: Spec.PreGlobalExprs);
             }
 
-            return new VariableDefinitionExpression(parent, expr, type, value) {
-                IsImmutable = isImmutable
-            };
+            return new VariableDefinitionExpression(parent, expr, type, value, isImmutable);
         }
 
         /// <summary>
@@ -244,26 +281,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         ///     expressions with optional parenthesis
         ///     (e.g. tuples)
         /// </summary>
-        internal static Expression ParseExpression(
+        internal static Expression ParseMultiple(
             SyntaxTreeNode                   parent,
             Func<SyntaxTreeNode, Expression> parserFunc = null,
+            bool                             parens     = false,
             params Type[]                    expectedTypes
         ) {
-            if (expectedTypes.Length == 0 || parserFunc == ParseSingleExpr) {
-                expectedTypes = Spec.AllExprs;
+            if (expectedTypes.Length == 0 || parserFunc == ParseGlobalExpr) {
+                expectedTypes = Spec.GlobalExprs;
             }
 
-            parserFunc??=ParseSingleExpr;
-            bool  parens = parent.MaybeEat(OpenParenthesis);
-            Token start  = parent.Token;
-            // empty tuple
-            if (parent.MaybeEat(CloseParenthesis)) {
-                return new TupleExpression(parent, start, parent.Token);
-            }
-
+            parserFunc??=ParseGlobalExpr;
             var list = new NodeList<Expression>(parent) {
                 parserFunc(parent)
             };
+
+            if (parens && parent.Peek.Is(CloseParenthesis)) {
+                return list[0];
+            }
 
             // tuple
             if (parent.MaybeEat(Comma)) {
@@ -274,51 +309,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 } while (trailingComma);
             }
             // generator | comprehension
-            else if (parent.Peek.Is(KeywordFor)) {
+            else if (parent.Peek.Is(KeywordFor) && parent.Token.Type != Newline) {
                 list[0] = new ForComprehension(parent, list[0]);
                 if (parens) {
                     list[0] = new GeneratorExpression(parent, (ForComprehension) list[0]);
                 }
             }
-            // parenthesized
-            else {
-                if (parens
-                    && !(list[0] is ParenthesizedExpression)
-                    && !(list[0] is TupleExpression)) {
-                    list[0] = new ParenthesizedExpression(start, list[0]);
-                }
-            }
 
-            if (parens) {
-                parent.Eat(CloseParenthesis);
-            }
+            CheckType(list, expectedTypes);
 
-            if (expectedTypes.Length > 0) {
-                for (var i = 0; i < list.Count; i++) {
-                    Type itemType = list[i].GetType();
-                    if (!expectedTypes.Contains(itemType)) {
-                        if (expectedTypes.Length > 1) {
-                            parent.Unit.ReportError(
-                                "Expected "
-                                + "'"
-                                + parserFunc.Method.Name
-                                + "'"
-                                + ", got "
-                                + Utilities.GetExprFriendlyName(itemType),
-                                list[i]
-                            );
-                        }
-                        else {
-                            parent.Unit.ReportError(
-                                "Expected "
-                                + Utilities.GetExprFriendlyName(expectedTypes[0])
-                                + ", got "
-                                + Utilities.GetExprFriendlyName(itemType),
-                                list[i]
-                            );
-                        }
-                    }
-                }
+            if (parens && list.Count == 1) {
+                return new ParenthesizedExpression(list[0]);
             }
 
             return MaybeTuple(parent, list);
@@ -333,6 +334,60 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
 
             return new TupleExpression(parent, expressions);
+        }
+
+        /// <summary>
+        ///     Checks if every expression in collection
+        ///     belong to any of <paramref name="expectedTypes"/>.
+        /// </summary>
+        internal static void CheckType(
+            IEnumerable<Expression> expressions,
+            params Type[]           expectedTypes
+        ) {
+            if (expectedTypes.Length == 0) {
+                return;
+            }
+
+            foreach (Expression e in expressions) {
+                CheckType(e);
+            }
+        }
+
+        /// <summary>
+        ///     Checks if expression
+        ///     belongs to any of <paramref name="expectedTypes"/>.
+        /// </summary>
+        internal static void CheckType(
+            Expression    expr,
+            params Type[] expectedTypes
+        ) {
+            if (expectedTypes.Length == 0) {
+                return;
+            }
+
+            Type itemType = expr.GetType();
+            if (expectedTypes.Contains(itemType)) {
+                return;
+            }
+
+            if (Spec.ExprGroupNames.ContainsKey(expectedTypes)) {
+                expr.Unit.ReportError(
+                    "Expected "
+                    + Spec.ExprGroupNames[expectedTypes]
+                    + ", got "
+                    + Utilities.GetExprFriendlyName(itemType.Name),
+                    expr
+                );
+            }
+            else {
+                expr.Unit.ReportError(
+                    "Expected "
+                    + Utilities.GetExprFriendlyName(expectedTypes[0].Name)
+                    + ", got "
+                    + Utilities.GetExprFriendlyName(itemType.Name),
+                    expr
+                );
+            }
         }
     }
 }

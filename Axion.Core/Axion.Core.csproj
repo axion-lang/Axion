@@ -11,8 +11,8 @@ Built on .NET Standard.</Description>
     <AssemblyName>Axion.Core</AssemblyName>
     <RootNamespace>Axion.Core</RootNamespace>
     <LangVersion>8.0</LangVersion>
-    <AssemblyVersion>0.3.4.4</AssemblyVersion>
-    <FileVersion>0.3.4.4</FileVersion>
+    <AssemblyVersion>0.3.4.5</AssemblyVersion>
+    <FileVersion>0.3.4.5</FileVersion>
     <ProjectGuid>{B38A9261-F73C-40E4-83B6-46B8A2B1CDE5}</ProjectGuid>
     <TargetFramework>netstandard2.0</TargetFramework>
     <NullableContextOptions>enable</NullableContextOptions>
@@ -37,7 +37,7 @@ Built on .NET Standard.</Description>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ConsoleExtensions\ConsoleExtensions\FluentConsole.csproj" />
+    <ProjectReference Include="..\..\ConsoleExtensions\ConsoleExtensions\ConsoleExtensions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.CodeGen {
             Writer     = new IndentedTextWriter(baseWriter);
         }
 
-        internal void Write(params object[] values) {
+        public void Write(params object[] values) {
             switch (outLang) {
                 case OutLang.Axion: {
                     for (var i = 0; i < values.Length; i++) {

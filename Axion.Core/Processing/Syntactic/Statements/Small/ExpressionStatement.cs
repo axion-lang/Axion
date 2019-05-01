@@ -1,5 +1,6 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Small {
     public class ExpressionStatement : Statement {
@@ -13,19 +14,16 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
         public ExpressionStatement(Expression expression) {
             Parent     = expression.Parent;
             Expression = expression;
+            Expression.CheckType(expression, Spec.StatementExprs);
             MarkPosition(expression);
         }
 
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Expression);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(Expression, ";");
         }
-
-        #endregion
     }
 }

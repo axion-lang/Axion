@@ -120,16 +120,18 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         ///     this token in Axion language format,
         ///     with original formatting of whitespaces.
         /// </summary>
-        public override void ToOriginalAxionCode(CodeBuilder c) {
-            ToAxionCode(c);
-            c.Write(EndWhitespaces);
+        internal string ToOriginalAxionCode() {
+            var b = new CodeBuilder(OutLang.Axion);
+            ToAxionCode(b);
+            b.Write(EndWhitespaces);
+            return b.ToString();
         }
 
         /// <summary>
         ///     Returns string representation of
         ///     this token in Axion language format.
         /// </summary>
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Value);
         }
 
@@ -137,7 +139,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         ///     Returns string representation of
         ///     this token in C# language format.
         /// </summary>
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(Value);
         }
 
@@ -149,6 +151,47 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                           .Replace("\t", "\\t")
                    + " :: "
                    + Span;
+        }
+
+        protected bool Equals(Token other) {
+            return Type == other.Type
+                   && string.Equals(Value, other.Value)
+                   && string.Equals(EndWhitespaces, other.EndWhitespaces);
+        }
+
+        public override bool Equals(object obj) {
+            if (ReferenceEquals(null, obj)) {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj)) {
+                return true;
+            }
+
+            if (obj.GetType() != GetType()) {
+                return false;
+            }
+
+            return Equals((Token) obj);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                // ReSharper disable NonReadonlyMemberInGetHashCode
+                var hashCode = (int) Type;
+                hashCode = (hashCode * 397) ^ Value.GetHashCode();
+                hashCode = (hashCode * 397) ^ EndWhitespaces.GetHashCode();
+                // ReSharper restore NonReadonlyMemberInGetHashCode
+                return hashCode;
+            }
+        }
+
+        public static bool operator ==(Token left, Token right) {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(Token left, Token right) {
+            return !Equals(left, right);
         }
     }
 }

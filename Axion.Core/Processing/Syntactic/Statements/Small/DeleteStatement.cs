@@ -22,31 +22,27 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             set => SetNode(ref this.value, value);
         }
 
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="DeleteStatement"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
         internal DeleteStatement(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordDelete);
-            Value = Expression.ParseExpression(this, expectedTypes: Spec.AssignableExprs);
+            EatStartMark(TokenType.KeywordDelete);
+            Value = Expression.ParseMultiple(this, expectedTypes: Spec.AssignableExprs);
             MarkEnd(Token);
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="DeleteStatement"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public DeleteStatement(Expression value) {
             Value = value;
         }
 
-        #endregion
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("delete ", Value);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             throw new NotSupportedException();
         }
     }

@@ -1,7 +1,7 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Small {
     /// <summary>
@@ -18,14 +18,12 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             set => SetNode(ref loopName, value);
         }
 
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="ContinueStatement"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
         internal ContinueStatement(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordContinue);
-            if (MaybeEat(TokenType.Identifier)) {
+            EatStartMark(KeywordContinue);
+            if (MaybeEat(Identifier)) {
                 LoopName = new SimpleNameExpression(this);
             }
 
@@ -40,24 +38,20 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="ContinueStatement"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public ContinueStatement(SimpleNameExpression? loopName = null) {
             LoopName = loopName;
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("continue");
             if (LoopName != null) {
                 c.Write(" ", LoopName);
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             if (LoopName == null) {
                 c.Write("continue;");
                 return;
@@ -68,7 +62,5 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
                 LoopName
             );
         }
-
-        #endregion
     }
 }

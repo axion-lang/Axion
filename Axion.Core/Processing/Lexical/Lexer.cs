@@ -189,7 +189,6 @@ namespace Axion.Core.Processing.Lexical {
                 return ReadNewline();
             }
 
-            // TODO: check for length of starters
             if (c == Spec.EndOfCode) {
                 return new Token(End, tokenStartPosition);
             }
@@ -215,7 +214,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             if (Spec.IsNumberStart(c)) {
-                return ReadNumber();
+                return ReadNumberStart();
             }
 
             if (Spec.IsIdStart(c)) {

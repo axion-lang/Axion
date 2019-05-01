@@ -129,8 +129,6 @@ namespace Axion.Testing.NUnit {
                 );
             }
 
-            Debug.Assert(Spec.Operators.Count == Spec.OperatorTypes.Count);
-
             // check blames completeness
             foreach (string blame in Enum.GetNames(typeof(BlameType))) {
                 Enum.TryParse(blame, out BlameType type);

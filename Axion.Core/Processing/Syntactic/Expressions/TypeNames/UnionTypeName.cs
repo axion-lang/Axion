@@ -1,12 +1,12 @@
 using System;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
     ///         union_type:
-    ///             type ('|' type)+
+    ///             type ('|' type)+;
     ///     </c>
     /// </summary>
     public class UnionTypeName : TypeName {
@@ -25,7 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         /// <summary>
-        ///     Constructs new <see cref="UnionTypeName"/> from Axion tokens.
+        ///     Constructs expression from Axion tokens.
         /// </summary>
         public UnionTypeName(SyntaxTreeNode parent, TypeName left) {
             Parent = parent;
@@ -33,14 +33,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
             MarkStart(Left);
 
-            Eat(TokenType.OpBitOr);
+            Eat(OpBitOr);
             Right = ParseTypeName(this);
 
             MarkEnd(Token);
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="UnionTypeName"/> without position in source.
+        ///     Constructs expression without position in source.
         /// </summary>
         public UnionTypeName(TypeName left, TypeName right) {
             Left  = left;
@@ -48,11 +48,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             MarkPosition(Left, Right);
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Left, " | ", Right);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             throw new NotSupportedException();
         }
     }

@@ -54,7 +54,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkPosition(Value);
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             if (Operator.Properties.InputSide == InputSide.Left) {
                 c.Write(Value, Operator.Value);
             }
@@ -62,7 +62,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             c.Write(Operator.Value, Value);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             if (Operator.Properties.InputSide == InputSide.Left) {
                 c.Write(Value, Operator.Value);
             }

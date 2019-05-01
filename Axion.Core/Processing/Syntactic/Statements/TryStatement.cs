@@ -4,21 +4,20 @@ using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements {
     /// <summary>
     ///     <c>
     ///         try_stmt:
-    ///             ('try' block
-    ///             ((try_handler block)+
+    ///             'try' block
+    ///             ('anyway' block)
+    ///           | (try_handler+
     ///             ['else' block]
-    ///             ['finally' block] |
-    ///             'finally' block))
+    ///             ['anyway' block])
     ///     </c>
     /// </summary>
     public class TryStatement : Statement {
-        #region Properties
-
         private BlockStatement block;
 
         public BlockStatement Block {
@@ -26,9 +25,9 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             set => SetNode(ref block, value);
         }
 
-        private NodeList<TryStatementHandler> handlers;
+        private NodeList<TryHandlerStatement> handlers;
 
-        public NodeList<TryStatementHandler> Handlers {
+        public NodeList<TryHandlerStatement> Handlers {
             get => handlers;
             set => SetNode(ref handlers, value);
         }
@@ -47,31 +46,27 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             set => SetNode(ref anywayBlock, value);
         }
 
-        #endregion
-
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="TryStatement"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
         internal TryStatement(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordTry);
+            EatStartMark(KeywordTry);
 
             // try
             Block = new BlockStatement(this);
 
             // anyway
-            if (MaybeEat(TokenType.KeywordAnyway)) {
+            if (MaybeEat(KeywordAnyway)) {
                 AnywayBlock = new BlockStatement(this, BlockType.Anyway);
                 MarkEnd(Token);
                 return;
             }
 
             // catch
-            Handlers = new NodeList<TryStatementHandler>(this);
-            TryStatementHandler defaultHandler = null;
+            Handlers = new NodeList<TryHandlerStatement>(this);
+            TryHandlerStatement defaultHandler = null;
             do {
-                var handler = new TryStatementHandler(this);
+                var handler = new TryHandlerStatement(this);
                 Handlers.Add(handler);
 
                 if (defaultHandler != null) {
@@ -81,15 +76,15 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 if (handler.ErrorType == null) {
                     defaultHandler = handler;
                 }
-            } while (Peek.Is(TokenType.KeywordCatch));
+            } while (Peek.Is(KeywordCatch));
 
             // else
-            if (MaybeEat(TokenType.KeywordElse)) {
+            if (MaybeEat(KeywordElse)) {
                 ElseBlock = new BlockStatement(this);
             }
 
             // anyway
-            if (MaybeEat(TokenType.KeywordAnyway)) {
+            if (MaybeEat(KeywordAnyway)) {
                 AnywayBlock = new BlockStatement(this, BlockType.Anyway);
             }
 
@@ -97,25 +92,21 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="TryStatement"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public TryStatement(
             BlockStatement                   block,
-            IEnumerable<TryStatementHandler> handlers,
+            IEnumerable<TryHandlerStatement> handlers,
             BlockStatement                   elseBlock,
             BlockStatement                   anywayBlock
         ) {
             Block       = block;
-            Handlers    = new NodeList<TryStatementHandler>(this, handlers);
+            Handlers    = new NodeList<TryHandlerStatement>(this, handlers);
             ElseBlock   = elseBlock;
             AnywayBlock = anywayBlock;
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("try ", Block);
             if (Handlers.Count > 0) {
                 c.AddJoin("", Handlers);
@@ -130,7 +121,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("try ", Block);
             if (Handlers.Count > 0) {
                 c.AddJoin("", Handlers);
@@ -140,19 +131,15 @@ namespace Axion.Core.Processing.Syntactic.Statements {
                 c.Write("finally ", AnywayBlock);
             }
         }
-
-        #endregion
     }
 
     /// <summary>
     ///     <c>
     ///         try_handler:
-    ///             'catch' [expr ['as' name]] ['when' test]
+    ///             'catch' [type ['as' name]] ['when' preglobal_expr]
     ///     </c>
     /// </summary>
-    public class TryStatementHandler : Statement {
-        #region Properties
-
+    public class TryHandlerStatement : Statement {
         private TypeName? errorType;
 
         public TypeName? ErrorType {
@@ -181,15 +168,11 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             set => SetNode(ref block, value);
         }
 
-        #endregion
-
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="TryStatementHandler"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
-        internal TryStatementHandler(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordCatch);
+        internal TryHandlerStatement(SyntaxTreeNode parent) : base(parent) {
+            EatStartMark(KeywordCatch);
 
             // If this function has an except block,
             // then it can set the current exception.
@@ -197,13 +180,13 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
             if (!Peek.Is(Spec.BlockStarters)) {
                 ErrorType = TypeName.ParseTypeName(this);
-                if (MaybeEat(TokenType.OpAs)) {
+                if (MaybeEat(OpAs)) {
                     ErrorName = new SimpleNameExpression(this);
                 }
             }
 
-            if (MaybeEat(TokenType.KeywordWhen)) {
-                Condition = Expression.ParseTestExpr(this);
+            if (MaybeEat(KeywordWhen)) {
+                Condition = Expression.ParsePreGlobalExpr(this);
             }
 
             Block = new BlockStatement(this);
@@ -212,9 +195,9 @@ namespace Axion.Core.Processing.Syntactic.Statements {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="TryStatementHandler"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
-        public TryStatementHandler(
+        public TryHandlerStatement(
             TypeName?      errorType,
             Expression?    errorName,
             Expression?    condition,
@@ -226,11 +209,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             Block     = block;
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("catch");
             if (ErrorType != null) {
                 c.Write(" ", ErrorType);
@@ -247,7 +226,7 @@ namespace Axion.Core.Processing.Syntactic.Statements {
             c.Write(Block);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("catch (");
 
             if (ErrorName != null) {
@@ -266,7 +245,5 @@ namespace Axion.Core.Processing.Syntactic.Statements {
 
             c.Write(Block);
         }
-
-        #endregion
     }
 }

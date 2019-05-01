@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Axion.Core.Processing.Errors;
 using static Axion.Core.Processing.Errors.BlameSeverity;
@@ -37,32 +38,31 @@ namespace Axion.Core.Specification {
             { ExpectedEndOfNumberAfterPostfix,                                        Error }, 
             { ExpectedABitRateAfterNumberPostfix,                                     Error }, 
             { InvalidIntegerNumberBitRate,                                            Error }, 
-            { InvalidFloatNumberBitRate,                                              Error }, 
-            { BadCharacterForIntegerValue,                                            Error }, 
-            { InvalidComplexNumberLiteral,                                            Error }, 
-            { ComplexLiteralTooLarge,                                                 Error }, 
-            { AsyncModifierIsInapplicableToThatStatement,                             Error }, 
+            { InvalidFloatNumberBitRate,                                              Error },
+            { InvalidComplexNumberLiteral,                                            Error },
             { BreakIsOutsideLoop,                                                     Error }, 
             { ContinueIsOutsideLoop,                                                  Error }, 
             { ContinueNotSupportedInsideFinally,                                      Error }, 
             { MisplacedReturn,                                                        Error }, 
             { MisplacedYield,                                                         Error }, 
             { InvalidExpressionToDelete,                                              Error }, 
-            { DuplicatedParameterNameInFunctionDefinition,                            Error }, 
-            { ExpectedIndentation,                                                    Error }, 
-            { UnexpectedIndentation,                                                  Error }, 
-            { InvalidIndentation,                                                     Error }, 
+            { DuplicatedParameterNameInFunctionDefinition,                            Error },
             { DefaultCatchMustBeLast,                                                 Error }, 
             { UnexpectedEndOfCode,                                                    Error }, 
-            { DuplicatedNamedArgument,                                                Error }, 
-            { InvalidSyntax,                                                          Error }, 
-            { ExpectedDefaultParameterValue,                                          Error }, 
-            { CannotUseAccessModifierOutsideClass,                                    Error }, 
+            { DuplicatedNamedArgument,                                                Error },
+            { ExpectedDefaultParameterValue,                                          Error },
             { ExpectedBlockDeclaration,                                               Error }, 
-            { ConstantValueExpected,                                                  Error }, 
-            { InvalidTypeNameExpression,                                              Error }, 
-            { DecoratorCanOnlyBeANameWithOptionalArguments,                           Error }, 
+            { ConstantValueExpected,                                                  Error },
             { RedundantColonWithBraces,                                               Error }, 
+            { ModulesAreNotSupportedInInterpretationMode,                             Error },
+            { InvalidDecoratorPlacement,                                              Error },
+            { ThisExpressionTargetIsNotAssignable,                                    Error },
+            { LambdaCannotHaveIndentedBody,                                           Error },
+            { CannotRedeclareVariableAlreadyDeclaredInThisScope,                      Error },
+            { EmptyCollectionLiteralNotSupported,                                     Error },
+            { CannotHaveMoreThan1ListParameter,                                       Error },
+            { InvalidIndexerExpression,                                               Error },
+            { CollectionInitializerCannotContainItemsAfterComprehension,              Error },
             
             { InconsistentIndentation,                                                Warning },
             { DuplicatedStringPrefix,                                                 Warning },
@@ -74,13 +74,25 @@ namespace Axion.Core.Specification {
             { RedundantEmptyListOfTypeArguments,                                      Warning }
         };
 
-        internal const string ERR_PrimaryExpected =
-            "Expected an identifier, list, map or other primary expression.";
+        internal static BlameType InvalidNumberLiteralError(int radix) {
+            switch (radix) {
+                case 2:
+                    return InvalidBinaryLiteral;
+                case 8:
+                    return InvalidOctalLiteral;
+                case 10:
+                    return InvalidNumberLiteral;
+                case 16:
+                    return InvalidHexadecimalLiteral;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
 
-        internal const string ERR_InvalidDecoratorPosition =
-            "Decorator can be applied only to the top level definition.";
-
-        internal const string ERR_InvalidAssignmentTarget =
-            "The assignment target must be an assignable variable, property or indexer.";
+        internal static string CannotInferTypeError(Type exprType) {
+            return "Cannot infer type of "
+                   + Utilities.GetExprFriendlyName(exprType.Name)
+                   + " due to invalid context";
+        }
     }
 }

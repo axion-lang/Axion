@@ -1,13 +1,16 @@
+using System;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Specification;
+using Axion.Core.Processing.Errors;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         index_expr:
-    ///             primary '[' (expr | slice) {',' (expr | slice)} [','] ']'
+    ///             primary '[' (preglobal_expr | slice) {',' (preglobal_expr | slice)} [','] ']'
     ///         slice:
-    ///             [expr] ':' [expr] [':' [expr]]
+    ///             [preglobal_expr] ':' [preglobal_expr] [':' [preglobal_expr]]
     ///     </c>
     /// </summary>
     public class IndexerExpression : Expression {
@@ -25,53 +28,59 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref index, value);
         }
 
+        public override TypeName ValueType => throw new NotImplementedException();
+
         public IndexerExpression(SyntaxTreeNode parent, Expression target) : base(parent) {
             Target = target;
-            Index  = index;
-
-            parent.Eat(TokenType.OpenBracket);
 
             var expressions = new NodeList<Expression>(parent);
-            do {
-                Expression? start = null;
-                if (!parent.Peek.Is(TokenType.Colon)) {
-                    start = ParseTestExpr(parent);
-                }
-
-                if (parent.MaybeEat(TokenType.Colon)) {
-                    Expression? stop = null;
-                    if (!parent.Peek.Is(TokenType.Colon, TokenType.Comma, TokenType.CloseBracket)) {
-                        stop = ParseTestExpr(parent);
+            parent.Eat(OpenBracket);
+            if (!parent.Peek.Is(CloseBracket)) {
+                while (true) {
+                    Expression? start = null;
+                    if (!parent.Peek.Is(Colon)) {
+                        start = ParsePreGlobalExpr(parent);
                     }
 
-                    Expression? step = null;
-                    if (parent.MaybeEat(TokenType.Colon)
-                        && !parent.Peek.Is(TokenType.Comma, TokenType.CloseBracket)) {
-                        step = ParseTestExpr(parent);
+                    if (parent.MaybeEat(Colon)) {
+                        Expression? stop = null;
+                        if (!parent.Peek.Is(Colon, Comma, CloseBracket)) {
+                            stop = ParsePreGlobalExpr(parent);
+                        }
+
+                        Expression? step = null;
+                        if (parent.MaybeEat(Colon)
+                            && !parent.Peek.Is(Comma, CloseBracket)) {
+                            step = ParsePreGlobalExpr(parent);
+                        }
+
+                        expressions.Add(new SliceExpression(parent, start, stop, step));
+                        break;
                     }
 
-                    expressions.Add(new SliceExpression(parent, start, stop, step));
-                    break;
+                    if (start == null) {
+                        parent.Unit.Blame(BlameType.InvalidIndexerExpression, parent.Token);
+                    }
+
+                    expressions.Add(start);
+                    if (parent.Peek.Is(CloseBracket)) {
+                        break;
+                    }
+
+                    Eat(Comma);
                 }
+            }
 
-                if (start == null) {
-                    parent.Unit.ReportError("Index expression expected.", parent.Token);
-                }
-
-                expressions.Add(start);
-            } while (parent.MaybeEat(TokenType.Comma));
-
-            parent.Eat(TokenType.CloseBracket);
+            parent.Eat(CloseBracket);
             Index = MaybeTuple(parent, expressions);
-
             MarkPosition(Target, Index);
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Target, "[", Index, "]");
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(Target, "[", Index, "]");
         }
     }

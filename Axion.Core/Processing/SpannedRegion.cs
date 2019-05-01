@@ -1,5 +1,7 @@
 using System;
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Newtonsoft.Json;
 
 namespace Axion.Core.Processing {
     /// <summary>
@@ -10,7 +12,7 @@ namespace Axion.Core.Processing {
         public Span Span { get; protected set; }
 
         public bool ShouldSerializeSpan() {
-            return !Compiler.Options.HasFlag(SourceProcessingOptions.ShowAstJson);
+            return false;
         }
 
         // Region
@@ -30,11 +32,34 @@ namespace Axion.Core.Processing {
             Span = new Span(start.Span.StartPosition, end.Span.EndPosition);
         }
 
-        public virtual void ToOriginalAxionCode(CodeBuilder c) {
-            throw new NotSupportedException();
+        [JsonIgnore]
+        public virtual TypeName ValueType {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
         }
 
-        public abstract void ToAxionCode(CodeBuilder  c);
-        public abstract void ToCSharpCode(CodeBuilder c);
+        [JsonProperty]
+        public string ValueTypeString {
+            get {
+                try {
+                    return ValueType.ToString();
+                }
+                catch {
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Converts this token/statement/expression
+        ///     to it's string representation in Axion language.
+        /// </summary>
+        internal abstract void ToAxionCode(CodeBuilder  c);
+        
+        /// <summary>
+        ///     Converts this token/statement/expression
+        ///     to it's string representation in C# language.
+        /// </summary>
+        internal abstract void ToCSharpCode(CodeBuilder c);
     }
 }

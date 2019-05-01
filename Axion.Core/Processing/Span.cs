@@ -100,5 +100,13 @@ namespace Axion.Core.Processing {
         public static implicit operator Position((int, int) position) {
             return new Position(position.Item1, position.Item2);
         }
+
+        public static Position operator +(Position a, Position b) {
+            return new Position(a.Line + b.Line, a.Column + b.Column);
+        }
+
+        public static Position operator -(Position a, Position b) {
+            return new Position(a.Line - b.Line, a.Column - b.Column);
+        }
     }
 }

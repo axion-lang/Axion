@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Text;
+using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic;
+using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Specification;
 
 namespace Axion.Core {
@@ -20,6 +25,23 @@ namespace Axion.Core {
         /// <returns>file name without extension.</returns>
         internal static string ToFileName(this DateTime dt) {
             return dt.ToString(timedFileNameFormat, dateTimeFormat);
+        }
+
+        public static BigInteger RadixLess10ToBigInt(string value, int toRadix) {
+            Contract.Assert(toRadix <= 10);
+            BigInteger res = 0;
+            BigInteger num = BigInteger.Parse(value, NumberStyles.AllowExponent);
+            // 1 = (radix^0)
+            var radix = 1;
+            while (num > 0) {
+                // take last digit 
+                var lastDigit = (int) (num % 10);
+                num   /= 10;
+                res   += lastDigit * radix;
+                radix *= toRadix;
+            }
+
+            return res;
         }
 
         internal static string GetValue(this TokenType type) {
@@ -41,8 +63,12 @@ namespace Axion.Core {
             return type.ToString("G");
         }
 
-        internal static string GetExprFriendlyName(Type expressionType) {
-            string exprOriginalName = expressionType.Name.Replace("Expression", "");
+        /// <summary>
+        ///     In:  SampleExpression
+        ///     Out: 'sample' expression
+        /// </summary>
+        internal static string GetExprFriendlyName(string expressionTypeName) {
+            string exprOriginalName = expressionTypeName.Replace("Expression", "");
             var    result           = new StringBuilder();
             result.Append("'" + char.ToLower(exprOriginalName[0]));
 
@@ -58,6 +84,26 @@ namespace Axion.Core {
 
             result.Append("' expression");
             return result.ToString();
+        }
+
+        internal static bool WriteDecorators(this CodeBuilder c, NodeList<Expression> decorators) {
+            var haveAccessMod = false;
+            for (var i = 0; i < decorators.Count; i++) {
+                Expression modifier = decorators[i];
+                if (modifier is NameExpression n && Spec.CSharp.AccessModifiers.Contains(n.Name)) {
+                    haveAccessMod = true;
+                }
+
+                c.Write(modifier, " ");
+                if (i == decorators.Count - 1) {
+                    c.Write(" ");
+                }
+                else {
+                    c.Write(", ");
+                }
+            }
+
+            return haveAccessMod;
         }
 
         #region Get user input and split it into launch arguments

@@ -1,15 +1,16 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///         name:
-    ///             ID {'.' ID}
+    ///         simple_name: ID
     ///     </c>
     /// </summary>
     public class SimpleNameExpression : NameExpression {
-        public string Name { get; }
+        public override string Name { get; }
 
         public SimpleNameExpression(string name) {
             Name = name;
@@ -20,19 +21,25 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Name   = name;
         }
 
+        public SimpleNameExpression(SyntaxTreeNode parent, Token name) {
+            Parent = parent;
+            Name   = name.Value;
+            MarkPosition(name);
+        }
+
         internal SimpleNameExpression(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.Identifier);
+            EatStartMark(Identifier);
             Name = Token.Value;
             MarkEnd(Token);
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Name);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
-            if (Name == "self") {
-                c.Write("this");
+        internal override void ToCSharpCode(CodeBuilder c) {
+            if (Spec.CSharp.BuiltInNames.ContainsKey(Name)) {
+                c.Write(Spec.CSharp.BuiltInNames[Name]);
                 return;
             }
 

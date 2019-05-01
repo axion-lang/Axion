@@ -3,6 +3,12 @@ using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
+    /// <summary>
+    ///     <c>
+    ///         generator_expr:
+    ///             '(' comprehension ')'
+    ///     </c>
+    /// </summary>
     public class GeneratorExpression : Expression {
         private ForComprehension comprehension;
 
@@ -11,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref comprehension, value);
         }
 
-        internal override TypeName ValueType => Comprehension.Parent.ValueType;
+        public override TypeName ValueType => Comprehension.ValueType;
 
         public GeneratorExpression(SyntaxTreeNode parent, ForComprehension comprehension) : base(
             parent
@@ -23,11 +29,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Comprehension = comprehension;
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("(", Comprehension, ")");
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             throw new NotSupportedException();
         }
     }

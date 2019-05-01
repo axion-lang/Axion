@@ -4,7 +4,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
     ///         simple_type:
-    ///             name
+    ///             name;
     ///     </c>
     /// </summary>
     public class SimpleTypeName : TypeName {
@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         /// <summary>
-        ///     Constructs new <see cref="SimpleTypeName"/> from Axion tokens.
+        ///     Constructs expression from Axion tokens.
         /// </summary>
         public SimpleTypeName(NameExpression name) {
             Name = name;
@@ -27,11 +27,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             Name = NameExpression.ParseName(this, name);
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Name);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(Name);
         }
     }

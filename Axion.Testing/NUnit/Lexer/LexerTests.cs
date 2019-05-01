@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using Axion.Core;
 using Axion.Core.Processing;
-using Axion.Core.Processing.Lexical.Tokens;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Lexer {
@@ -27,26 +26,6 @@ namespace Axion.Testing.NUnit.Lexer {
                 SourceProcessingMode.Lex,
                 SourceProcessingOptions.SyntaxAnalysisDebugOutput
             );
-        }
-    }
-
-    internal static class TokenUtils {
-        internal static bool TokenEquals(this Token a, Token b) {
-            return a.Is(b.Type)
-                   && string.Equals(a.Value, b.Value)
-                   && string.Equals(a.EndWhitespaces, b.EndWhitespaces);
-        }
-
-        internal static bool TestEquality(this NumberOptions t, NumberOptions other) {
-            // don't check value equality
-            return t.Radix == other.Radix
-                   && t.Bits == other.Bits
-                   && t.Floating == other.Floating
-                   && t.Imaginary == other.Imaginary
-                   && t.Unsigned == other.Unsigned
-                   && t.Unlimited == other.Unlimited
-                   && t.HasExponent == other.HasExponent
-                   && t.Exponent == other.Exponent;
         }
     }
 }

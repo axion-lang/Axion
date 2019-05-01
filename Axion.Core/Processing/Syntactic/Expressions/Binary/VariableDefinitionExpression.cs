@@ -1,51 +1,53 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Binary {
     /// <summary>
     ///     <c>
-    ///         var_def_expr:
-    ///             ['let'] test_list [':' type] '=' test_list | yield_expr
+    ///         variable_definition_expr:
+    ///             ['let'] simple_name_list
+    ///             [':' type]
+    ///             ['=' expr_list];
     ///     </c>
     /// </summary>
     public class VariableDefinitionExpression : LeftRightExpression {
-        private TypeName type;
+        private TypeName valueType;
 
-        public TypeName Type {
-            get => type;
-            set => SetNode(ref type, value);
+        public sealed override TypeName ValueType {
+            get => valueType /* BUG here ?? Right?.ValueType*/;
+            set => SetNode(ref valueType, value);
         }
 
-        public bool IsImmutable { get; set; }
+        public bool IsImmutable { get; }
 
         public VariableDefinitionExpression(
             SyntaxTreeNode parent,
             Expression     assignable,
             TypeName?      type,
-            Expression?    value
+            Expression?    value,
+            bool           immutable = false
         ) : base(parent) {
-            Left  = assignable;
-            Type  = type;
-            Right = value;
+            Left        = assignable;
+            ValueType   = type;
+            Right       = value;
+            IsImmutable = immutable;
             if (ParentBlock.HasVariable((SimpleNameExpression) Left)) {
-                Unit.ReportError(
-                    "Cannot declare variable, because it's already declared in this scope.'",
-                    this
-                );
+                Unit.Blame(BlameType.CannotRedeclareVariableAlreadyDeclaredInThisScope, this);
             }
             else {
                 ParentBlock.Variables.Add(this);
             }
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             if (IsImmutable) {
                 c.Write("let ");
             }
 
             c.Write(Left);
-            if (Type != null) {
-                c.Write(": ", Type);
+            if (ValueType != null) {
+                c.Write(": ", ValueType);
             }
 
             if (Right != null) {
@@ -53,12 +55,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Binary {
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             if (Right == null) {
-                c.Write(Type, " ", Left);
+                c.Write(ValueType, " ", Left);
             }
             else {
-                c.Write("var ", Left, " = ", Right);
+                c.Write((object) ValueType ?? "var", " ", Left, " = ", Right);
             }
         }
     }

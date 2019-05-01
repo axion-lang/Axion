@@ -6,7 +6,8 @@ using static Axion.Core.Specification.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///         parent  ('if' | 'unless') operation
+    ///         conditional_comprehension:
+    ///             ('if' | 'unless') operation_expr;
     ///     </c>
     ///     Closes comprehensions list,
     ///     cannot be continued with other comprehensions.
@@ -19,20 +20,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref condition, value);
         }
 
-        internal override TypeName ValueType => Parent.ValueType;
-
-        #region Constructors
+        public override TypeName ValueType => Parent.ValueType;
 
         /// <summary>
-        ///     Constructs new <see cref="ConditionalComprehension"/> from tokens.
+        ///     Constructs expression from tokens.
         /// </summary>
         internal ConditionalComprehension(SyntaxTreeNode parent) : base(parent) {
             if (Peek.Is(KeywordIf)) {
-                MarkStart(KeywordIf);
+                EatStartMark(KeywordIf);
                 Condition = ParseOperation(this);
             }
             else {
-                MarkStart(KeywordUnless);
+                EatStartMark(KeywordUnless);
                 Condition = new UnaryOperationExpression(OpNot, ParseOperation(this));
             }
 
@@ -40,24 +39,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="ConditionalComprehension"/> without position in source.
+        ///     Constructs expression without position in source.
         /// </summary>
         internal ConditionalComprehension(Expression condition) {
             Condition = condition;
         }
 
-        #endregion
-
-        #region Transpilers
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(" if ", Condition);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             throw new NotImplementedException();
         }
-
-        #endregion
     }
 }

@@ -9,17 +9,16 @@ using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Syntactic.Statements.Interfaces;
 using Axion.Core.Specification;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
     /// <summary>
     ///     <c>
     ///         func_def:
-    ///             'fn' [ID '.'] ID ['(' [parameters_list] ')'] ['=>' type_name] block
+    ///             'fn' [ID '.'] ID ['(' [parameters_list] ')'] ['=>' type] block
     ///     </c>
     /// </summary>
-    public class FunctionDefinition : Statement, IDecorated {
-        #region Properties
-
+    public class FunctionDefinition : Statement, IDecorated, IFunctionNode {
         private NameExpression name;
 
         public NameExpression Name {
@@ -59,23 +58,23 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             }
         }
 
-        #endregion
-
-        #region Constructors
+        public override TypeName ValueType =>
+            Spec.FuncType(Parameters.Select(p => p.ValueType), ReturnType);
 
         /// <summary>
-        ///     Constructs new <see cref="FunctionDefinition"/> from Axion tokens.
+        ///     Constructs from Axion tokens.
         /// </summary>
         internal FunctionDefinition(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordFn);
+            EatStartMark(KeywordFn);
             Name = NameExpression.ParseName(this);
             // parameters
-            if (MaybeEat(TokenType.OpenParenthesis)) {
-                Parameters = ParseParameterList(this, TokenType.CloseParenthesis);
+            if (MaybeEat(OpenParenthesis)) {
+                Parameters = ParseParameterList(this, CloseParenthesis);
+                Eat(CloseParenthesis);
             }
 
             // return type
-            if (MaybeEat(TokenType.RightFatArrow)) {
+            if (MaybeEat(RightFatArrow)) {
                 ReturnType = TypeName.ParseTypeName(this);
             }
 
@@ -87,7 +86,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
         }
 
         /// <summary>
-        ///     Constructs new <see cref="FunctionDefinition"/> from C# syntax.
+        ///     Constructs from C# syntax.
         /// </summary>
         internal FunctionDefinition(SyntaxTreeNode parent, MethodDeclarationSyntax csNode) : base(
             parent
@@ -103,7 +102,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="FunctionDefinition"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public FunctionDefinition(
             NameExpression               name,
@@ -118,8 +117,6 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             ReturnType = returnType;
         }
 
-        #endregion
-
         /// <summary>
         ///     <c>
         ///         parameter_list:
@@ -129,9 +126,9 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
         ///             | named_parameter[","] )
         ///     </c>
         /// </summary>
-        private static NodeList<FunctionParameter> ParseParameterList(
-            SyntaxTreeNode parent,
-            TokenType      terminator
+        internal static NodeList<FunctionParameter> ParseParameterList(
+            SyntaxTreeNode     parent,
+            params TokenType[] terminator
         ) {
             var parameters               = new NodeList<FunctionParameter>(parent);
             var names                    = new HashSet<string>(StringComparer.Ordinal);
@@ -141,66 +138,67 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             FunctionParameter? listParameter = null;
             FunctionParameter? mapParameter  = null;
             var                needDefault   = false;
-            while (!parent.MaybeEat(terminator)) {
-                if (parent.MaybeEat(TokenType.OpPower)) {
-                    mapParameter = new FunctionParameter(parent, names);
-                    parent.Eat(terminator);
-                    break;
-                }
-
-                if (parent.MaybeEat(TokenType.OpMultiply)) {
-                    if (haveMultiply) {
-                        parent.Unit.ReportError(
-                            "Cannot have more than 1 list parameter.",
-                            parent.Peek
-                        );
-                        return new NodeList<FunctionParameter>(parent);
+            if (!parent.Peek.Is(terminator)) {
+                while (true) {
+                    if (parent.MaybeEat(OpPower)) {
+                        mapParameter = new FunctionParameter(parent, names);
+                        parent.Eat(terminator);
+                        break;
                     }
 
-                    if (parent.Peek.Is(TokenType.Comma)) {
-                        // "*"
-                    }
-                    else {
-                        listParameter = new FunctionParameter(parent, names);
-                    }
+                    if (parent.MaybeEat(OpMultiply)) {
+                        if (haveMultiply) {
+                            parent.Unit.Blame(
+                                BlameType.CannotHaveMoreThan1ListParameter,
+                                parent.Peek
+                            );
+                            return new NodeList<FunctionParameter>(parent);
+                        }
 
-                    haveMultiply = true;
-                }
-                else {
-                    // If a parameter has a default value,
-                    // all following parameters up until
-                    // the "*" must also have a default value.
-                    FunctionParameter param;
-                    if (haveMultiply) {
-                        param = new FunctionParameter(
-                            parent,
-                            names
-                        );
-                        haveKeywordOnlyParameter = true;
+                        if (parent.Peek.Is(Comma)) {
+                            // "*"
+                        }
+                        else {
+                            listParameter = new FunctionParameter(parent, names);
+                        }
+
+                        haveMultiply = true;
                     }
                     else {
-                        param = new FunctionParameter(
-                            parent,
-                            names
-                        );
+                        // If a parameter has a default value,
+                        // all following parameters up until
+                        // the "*" must also have a default value.
+                        FunctionParameter param;
+                        if (haveMultiply) {
+                            param = new FunctionParameter(
+                                parent,
+                                names
+                            );
+                            haveKeywordOnlyParameter = true;
+                        }
+                        else {
+                            param = new FunctionParameter(
+                                parent,
+                                names
+                            );
+                        }
+
+                        if (param.DefaultValue != null) {
+                            needDefault = true;
+                        }
+                        else if (needDefault && param.DefaultValue == null) {
+                            parent.Unit.Blame(BlameType.ExpectedDefaultParameterValue, parent);
+                        }
+
+                        parameters.Add(param);
                     }
 
-                    if (param.DefaultValue != null) {
-                        needDefault = true;
-                    }
-                    else if (needDefault && param.DefaultValue == null) {
-                        parent.Unit.Blame(BlameType.ExpectedDefaultParameterValue, parent);
+                    if (parent.Peek.Is(terminator)) {
+                        break;
                     }
 
-                    parameters.Add(param);
+                    parent.Eat(Comma);
                 }
-
-                if (parent.MaybeEat(TokenType.Comma)) {
-                    continue;
-                }
-
-                parent.Eat(terminator);
-                break;
             }
 
             if (haveMultiply
@@ -221,9 +219,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             return parameters;
         }
 
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("fn " + Name);
             if (Parameters.Count > 0) {
                 c.Write(" (");
@@ -238,13 +234,16 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             c.Write(" ", Block);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
-            c.Write("public ", ReturnType, " ", Name, "(");
+        internal override void ToCSharpCode(CodeBuilder c) {
+            bool haveAccessMod = c.WriteDecorators(Modifiers);
+            if (!haveAccessMod) {
+                c.Write("public ");
+            }
+
+            c.Write(ReturnType, " ", Name, "(");
             c.AddJoin(", ", Parameters);
             c.Write(") ", Block);
         }
-
-        #endregion
     }
 
     /// <summary>
@@ -254,8 +253,6 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
     ///     </c>
     /// </summary>
     public sealed class FunctionParameter : Expression {
-        #region Properties
-
         private SimpleNameExpression name;
 
         public SimpleNameExpression Name {
@@ -265,7 +262,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
 
         private TypeName type;
 
-        public TypeName Type {
+        public override TypeName ValueType {
             get => type;
             set => SetNode(ref type, value);
         }
@@ -277,12 +274,8 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             set => SetNode(ref defaultValue, value);
         }
 
-        #endregion
-
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="FunctionParameter"/> from Axion tokens.
+        ///     Constructs from Axion tokens.
         /// </summary>
         internal FunctionParameter(
             SyntaxTreeNode  parent,
@@ -290,8 +283,8 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
         ) : base(parent) {
             MarkStart(Token);
             Name = new SimpleNameExpression(this);
-            Eat(TokenType.Colon);
-            Type = TypeName.ParseTypeName(this);
+            Eat(Colon);
+            ValueType = TypeName.ParseTypeName(this);
 
             if (names.Contains(Name.Name)) {
                 Unit.Blame(BlameType.DuplicatedParameterNameInFunctionDefinition, name);
@@ -299,44 +292,38 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
 
             names.Add(Name.Name);
 
-            if (MaybeEat(TokenType.OpAssign)) {
-                DefaultValue = ParseTestExpr(this);
+            if (MaybeEat(OpAssign)) {
+                DefaultValue = ParsePreGlobalExpr(this);
             }
 
             MarkEnd(Token);
         }
 
         /// <summary>
-        ///     Constructs new <see cref="FunctionParameter"/> from C# syntax.
+        ///     Constructs from C# syntax.
         /// </summary>
         internal FunctionParameter(
             SyntaxTreeNode  parent,
             ParameterSyntax csNode
         ) : base(parent) {
-            Name = new SimpleNameExpression(this, csNode.Identifier.Text);
-            Type = TypeName.FromCSharp(this, csNode.Type);
+            Name      = new SimpleNameExpression(this, csNode.Identifier.Text);
+            ValueType = TypeName.FromCSharp(this, csNode.Type);
             throw new NotImplementedException();
             //DefaultValue = Expression.FromCSharp(csNode.Default.Value);
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
-            c.Write(Name, ": ", Type);
+        internal override void ToAxionCode(CodeBuilder c) {
+            c.Write(Name, ": ", ValueType);
             if (DefaultValue != null) {
                 c.Write(" = ", DefaultValue);
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
-            c.Write(Type, " ", Name);
+        internal override void ToCSharpCode(CodeBuilder c) {
+            c.Write(ValueType, " ", Name);
             if (DefaultValue != null) {
                 c.Write(" = ", DefaultValue);
             }
         }
-
-        #endregion
     }
 }

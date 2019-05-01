@@ -1,5 +1,5 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
@@ -26,17 +26,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         public MemberAccessExpression(SyntaxTreeNode parent, Expression target) : base(parent) {
             Target = target;
 
-            Eat(TokenType.Dot);
+            Eat(Dot);
             Member = new SimpleNameExpression(this);
 
             MarkPosition(Target, Member);
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(Target, ".", Member);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write(Target, ".", Member);
         }
     }

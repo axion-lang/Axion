@@ -29,7 +29,7 @@ type9: List[Map[T1, T2]]| (Type1[Int, Type2[]][], (Array[] | AnotherType)[])
             Assert.That(unit.Blames.Count == 0, $"unit.Blames.Count == {unit.Blames.Count}");
             TypeName[] stmts =
                 unit.Ast.Root.Statements.Cast<ExpressionStatement>()
-                    .Select(s => ((VariableDefinitionExpression) s.Expression).Type)
+                    .Select(s => ((VariableDefinitionExpression) s.Expression).ValueType)
                     .ToArray();
             Assert.That(stmts.Length == 10);
             Assert.DoesNotThrow(
@@ -61,12 +61,12 @@ let _tup = (1, 2, ""three"", true)
             Assert.DoesNotThrow(
                 () => {
                     // map
-                    var map = (HashCollectionExpression) stmts[0].Right;
-                    Assert.That(map.Type == HashCollectionType.Map);
+                    var map = (BraceCollectionExpression) stmts[0].Right;
+                    Assert.That(map.Type == BraceCollectionType.Map);
                     Assert.That(map.Expressions.Cast<MapItemExpression>().Count() == 3);
                     // set
-                    var set = (HashCollectionExpression) stmts[1].Right;
-                    Assert.That(set.Type == HashCollectionType.Set);
+                    var set = (BraceCollectionExpression) stmts[1].Right;
+                    Assert.That(set.Type == BraceCollectionType.Set);
                     var setValues = new[] {
                         "one", "two", "three"
                     };
@@ -103,29 +103,23 @@ let _tup = (1, 2, ""three"", true)
 
         [Test]
         public void IsOK_PipelineOperator() {
-            SourceUnit unit1 = MakeSourceFromCode(
-                "person |> parseData |> getAge |> validateAge"
-            );
+            SourceUnit unit1 = MakeSourceFromCode("person |> parseData |> getAge |> validateAge");
             Parse(unit1);
             Assert.That(unit1.Blames.Count == 0, $"unit1.Blames.Count == {unit1.Blames.Count}");
-            
-            SourceUnit unit2 = MakeSourceFromCode(
-                "validateAge(getAge(parseData(person)))"
-            );
+
+            SourceUnit unit2 = MakeSourceFromCode("validateAge(getAge(parseData(person)))");
             Parse(unit2);
             Assert.That(unit2.Blames.Count == 0, $"unit2.Blames.Count == {unit2.Blames.Count}");
             var a = new CodeBuilder(OutLang.Axion);
-            unit2.Ast.ToAxionCode(a);
+            a.Write(unit2.Ast);
             var b = new CodeBuilder(OutLang.Axion);
-            unit1.Ast.ToAxionCode(b);
+            b.Write(unit1.Ast);
             Assert.AreEqual(a, b);
         }
-        
+
         [Test]
         public void IsOK_ModuleDef() {
-            SourceUnit unit1 = MakeSourceFromCode(
-                "module ExampleModule: pass"
-            );
+            SourceUnit unit1 = MakeSourceFromCode("module ExampleModule: pass");
             Parse(unit1);
             Assert.That(unit1.Blames.Count == 0, $"unit1.Blames.Count == {unit1.Blames.Count}");
         }

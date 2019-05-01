@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Diagnostics;
 using Axion.Core.Specification;
 
@@ -89,8 +88,8 @@ namespace Axion.Core.Processing.Lexical {
         ///     Checks if next piece of string
         ///     (from current char) is equal to <paramref name="expected"/>.
         /// </summary>
-        private bool CharIs(IReadOnlyList<char> expected) {
-            for (var i = 0; i < expected.Count; i++) {
+        private bool CharIs(params char[] expected) {
+            for (var i = 0; i < expected.Length; i++) {
                 if (c == expected[i]) {
                     return true;
                 }

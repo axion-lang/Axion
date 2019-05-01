@@ -1,12 +1,12 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Small {
     /// <summary>
     ///     <c>
     ///         assert_stmt:
-    ///             'assert' test [',' test]
+    ///             'assert' preglobal_expr [',' preglobal_expr]
     ///     </c>
     /// </summary>
     public class AssertStatement : Statement {
@@ -24,24 +24,22 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             set => SetNode(ref failExpression, value);
         }
 
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="AssertStatement"/> from tokens.
+        ///     Constructs from tokens.
         /// </summary>
         internal AssertStatement(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordAssert);
+            EatStartMark(KeywordAssert);
 
-            Condition = Expression.ParseTestExpr(this);
-            if (MaybeEat(TokenType.Comma)) {
-                FailExpression = Expression.ParseTestExpr(this);
+            Condition = Expression.ParsePreGlobalExpr(this);
+            if (MaybeEat(Comma)) {
+                FailExpression = Expression.ParsePreGlobalExpr(this);
             }
 
             MarkEnd(Token);
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="AssertStatement"/> without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public AssertStatement(
             Expression condition,
@@ -51,18 +49,14 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
             FailExpression = failExpression;
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("assert ", Condition);
             if (FailExpression != null) {
                 c.Write(", ", FailExpression);
             }
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("Debug.Assert(", Condition);
             if (FailExpression != null) {
                 c.Write(", ", FailExpression);
@@ -70,7 +64,5 @@ namespace Axion.Core.Processing.Syntactic.Statements.Small {
 
             c.Write(");");
         }
-
-        #endregion
     }
 }

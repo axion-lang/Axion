@@ -2,17 +2,16 @@ using System;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         for_comprehension:
-    ///             target 'for' ((name)) 'in' test [comprehension]
+    ///             'for' simple_name_list 'in' preglobal_expr [comprehension];
     ///     </c>
     /// </summary>
     public class ForComprehension : Expression {
-        #region Properties
-
         private Expression target;
 
         public Expression Target {
@@ -41,23 +40,25 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref right, value);
         }
 
-        internal override TypeName ValueType => Parent.ValueType;
-
-        #endregion
+        public override TypeName ValueType => Target.ValueType;
 
         public ForComprehension(SyntaxTreeNode parent, Expression target) : base(parent) {
             Target = target;
 
             MarkStart(target);
-            Eat(TokenType.KeywordFor);
-            Item = ParseExpression(this, ParsePrimaryExpr, typeof(SimpleNameExpression));
-            Eat(TokenType.OpIn);
-            Iterable = ParseExpression(parent, expectedTypes: Spec.TestExprs);
+            Eat(KeywordFor);
+            Item = ParseMultiple(
+                this,
+                ParsePrimaryExpr,
+                expectedTypes: typeof(SimpleNameExpression)
+            );
+            Eat(OpIn);
+            Iterable = ParseMultiple(parent, expectedTypes: Spec.PreGlobalExprs);
 
-            if (Peek.Is(TokenType.KeywordFor)) {
+            if (Peek.Is(KeywordFor)) {
                 Right = new ForComprehension(Parent, this);
             }
-            else if (Peek.Is(TokenType.KeywordIf, TokenType.KeywordUnless)) {
+            else if (Peek.Is(KeywordIf, KeywordUnless)) {
                 Right = new ConditionalComprehension(this);
             }
 
@@ -76,7 +77,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Right    = rightComprehension;
         }
 
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write(
                 Target,
                 " for ",
@@ -87,7 +88,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             );
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             throw new NotSupportedException();
         }
     }

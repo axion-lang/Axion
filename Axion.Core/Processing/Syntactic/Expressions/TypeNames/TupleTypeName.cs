@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Specification;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
     ///         tuple_type:
-    ///             '(' [type {',' type}] ')';
+    ///             tuple_paren_expr;
     ///     </c>
     /// </summary>
     public class TupleTypeName : TypeName {
@@ -19,28 +19,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => SetNode(ref types, value);
         }
 
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="TupleTypeName"/> from Axion tokens.
+        ///     Constructs expression from Axion tokens.
         /// </summary>
         public TupleTypeName(SyntaxTreeNode parent) {
             Parent = parent;
             Types  = new NodeList<TypeName>(this);
 
-            MarkStart(TokenType.OpenParenthesis);
-            if (!Peek.Is(TokenType.CloseParenthesis)) {
+            EatStartMark(OpenParenthesis);
+            if (!Peek.Is(CloseParenthesis)) {
                 do {
                     Types.Add(ParseTypeName(parent));
-                } while (MaybeEat(TokenType.Comma));
+                } while (MaybeEat(Comma));
             }
 
-            Eat(TokenType.CloseParenthesis);
+            Eat(CloseParenthesis);
             MarkEnd(Token);
         }
 
         /// <summary>
-        ///     Constructs new <see cref="TupleTypeName"/> from C# syntax.
+        ///     Constructs expression from C# syntax.
         /// </summary>
         public TupleTypeName(SyntaxTreeNode parent, TupleTypeSyntax csNode) {
             Parent = parent;
@@ -52,29 +50,23 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="TupleTypeName"/> without position in source.
+        ///     Constructs expression without position in source.
         /// </summary>
-        public TupleTypeName(SyntaxTreeNode parent, IEnumerable<TypeName> types) {
+        public TupleTypeName(SyntaxTreeNode parent, IEnumerable<Expression> exprs) {
             Parent = parent;
-            Types  = new NodeList<TypeName>(this, types);
+            Types  = new NodeList<TypeName>(this, exprs.Select(e => e.ValueType));
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("(");
             c.AddJoin(", ", types);
             c.Write(")");
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("(");
             c.AddJoin(", ", types);
             c.Write(")");
         }
-
-        #endregion
     }
 }

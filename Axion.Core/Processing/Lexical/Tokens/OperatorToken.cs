@@ -34,7 +34,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
 
         public OperatorToken(TokenType type) : this(
-            Spec.OperatorTypes.First(x => x.type == type).value
+            type.GetValue()
         ) { }
     }
 

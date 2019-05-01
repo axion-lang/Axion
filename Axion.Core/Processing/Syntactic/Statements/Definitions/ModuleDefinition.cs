@@ -1,8 +1,8 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Statements.Interfaces;
-using Axion.Core.Specification;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
     /// <summary>
@@ -12,8 +12,6 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
     ///     </c>
     /// </summary>
     public class ModuleDefinition : Statement, IDecorated {
-        #region Properties
-
         private NameExpression name;
 
         public NameExpression Name {
@@ -39,15 +37,11 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             }
         }
 
-        #endregion
-
-        #region Constructors
-
         /// <summary>
-        ///     Constructs new <see cref="ModuleDefinition"/> from Axion tokens.
+        ///     Constructs expression from Axion tokens.
         /// </summary>
         internal ModuleDefinition(SyntaxTreeNode parent) : base(parent) {
-            MarkStart(TokenType.KeywordModule);
+            EatStartMark(KeywordModule);
 
             Name  = NameExpression.ParseName(parent);
             Block = new BlockStatement(this, BlockType.Top);
@@ -57,7 +51,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
         }
 
         /// <summary>
-        ///     Constructs new <see cref="ModuleDefinition"/> from C# syntax.
+        ///     Constructs expression from C# syntax.
         /// </summary>
         internal ModuleDefinition(NamespaceDeclarationSyntax csNode) {
             Name  = NameExpression.ParseName(this, csNode.Name.ToString());
@@ -65,7 +59,7 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
         }
 
         /// <summary>
-        ///     Constructs plain <see cref="ModuleDefinition"/> without position in source.
+        ///     Constructs expression without position in source.
         /// </summary>
         internal ModuleDefinition(
             SyntaxTreeNode parent,
@@ -79,18 +73,12 @@ namespace Axion.Core.Processing.Syntactic.Statements.Definitions {
             ParentBlock.Modules.Add(this);
         }
 
-        #endregion
-
-        #region Code converters
-
-        public override void ToAxionCode(CodeBuilder c) {
+        internal override void ToAxionCode(CodeBuilder c) {
             c.Write("module ", Name, " ", Block);
         }
 
-        public override void ToCSharpCode(CodeBuilder c) {
+        internal override void ToCSharpCode(CodeBuilder c) {
             c.Write("namespace ", Name, Block);
         }
-
-        #endregion
     }
 }

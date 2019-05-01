@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Axion.Core.Processing.Syntactic {
     public class NodeList<T> : IList<T> where T : SyntaxTreeNode? {
-        private readonly SyntaxTreeNode itemsParent;
+        public readonly  SyntaxTreeNode Parent;
         private readonly List<T>        items;
 
         void IList<T>.RemoveAt(int index) {
@@ -23,34 +23,54 @@ namespace Axion.Core.Processing.Syntactic {
         public int  Count      => items.Count;
         public bool IsReadOnly => false;
 
-        public T First =>
-            items.Count > 0
-                ? items[0]
-                : throw new IndexOutOfRangeException();
+        public T First {
+            get =>
+                items.Count > 0
+                    ? items[0]
+                    : throw new IndexOutOfRangeException();
+            set {
+                if (items.Count > 0) {
+                    items[0] = value;
+                }
+                else {
+                    throw new IndexOutOfRangeException();
+                }
+            }
+        }
 
-        public T Last =>
-            items.Count > 0
-                ? items[items.Count - 1]
-                : throw new IndexOutOfRangeException();
+        public T Last {
+            get =>
+                items.Count > 0
+                    ? items[items.Count - 1]
+                    : throw new IndexOutOfRangeException();
+            set {
+                if (items.Count > 0) {
+                    items[items.Count - 1] = value;
+                }
+                else {
+                    throw new IndexOutOfRangeException();
+                }
+            }
+        }
 
         internal NodeList(SyntaxTreeNode parent) {
-            itemsParent = parent;
-            items       = new List<T>();
+            Parent = parent;
+            items  = new List<T>();
         }
 
         internal NodeList(SyntaxTreeNode parent, IEnumerable<T> array) {
-            itemsParent = parent;
-            items       = new List<T>(array);
+            Parent = parent;
+            items  = new List<T>(array);
         }
 
         public NodeList<T> Insert(int index, T item) {
-            item.Parent = itemsParent;
+            item.Parent = Parent;
             items.Insert(index, item);
             return this;
         }
 
         public NodeList<T> Add(T item) {
-            item.Parent = itemsParent;
+            item.Parent = Parent;
             items.Add(item);
             return this;
         }
@@ -65,7 +85,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         public NodeList<T> AddRange(IEnumerable<T> collection) {
             foreach (T syntaxTreeNode in collection) {
-                syntaxTreeNode.Parent = itemsParent;
+                syntaxTreeNode.Parent = Parent;
                 items.Add(syntaxTreeNode);
             }
 
