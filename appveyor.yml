@@ -3,6 +3,7 @@ image: Visual Studio 2015
 clone_script:
 - cmd: >-
     git clone -q --recursive --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
+
     git checkout -qf %APPVEYOR_REPO_COMMIT%
 dotnet_csproj:
   patch: true
