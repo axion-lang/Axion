@@ -1,0 +1,20 @@
+version: 1.0.{build}
+image: Visual Studio 2015
+clone_script:
+- cmd: >-
+    git clone -q --recursive --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
+
+    git checkout -qf %APPVEYOR_REPO_COMMIT%
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+install:
+- ps: git submodule update --init --recursive
+build:
+  project: Axion.sln
+  verbosity: minimal
