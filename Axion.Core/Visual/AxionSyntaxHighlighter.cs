@@ -5,7 +5,7 @@ using Axion.Core.Processing;
 using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
-using ConsoleExtensions;
+using CodeConsole;
 using static System.ConsoleColor;
 using static Axion.Core.Specification.TokenType;
 

@@ -36,7 +36,6 @@ Built on .NET Standard.</Description>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ConsoleExtensions\ConsoleExtensions\ConsoleExtensions.csproj" />
+    <ProjectReference Include="..\..\CodeConsole\CodeConsole\CodeConsole.csproj" />
   </ItemGroup>
-
 </Project>

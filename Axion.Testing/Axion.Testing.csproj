@@ -25,7 +25,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Axion.Core\Axion.Core.csproj" />
   </ItemGroup>
-
-  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
-
 </Project>

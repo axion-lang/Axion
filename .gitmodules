@@ -1,0 +1,3 @@
+[submodule "CodeConsole"]
+	path = CodeConsole
+	url = git://github.com/F1uctus/CodeConsole

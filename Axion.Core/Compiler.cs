@@ -12,7 +12,7 @@ using Axion.Core.Processing.Lexical;
 using Axion.Core.Specification;
 using Axion.Core.Visual;
 using CommandLine;
-using ConsoleExtensions;
+using CodeConsole;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
