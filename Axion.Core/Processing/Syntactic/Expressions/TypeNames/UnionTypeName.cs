@@ -27,25 +27,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         /// <summary>
         ///     Constructs expression from Axion tokens.
         /// </summary>
-        public UnionTypeName(SyntaxTreeNode parent, TypeName left) {
-            Parent = parent;
-            Left   = left;
-
-            MarkStart(Left);
-
+        public UnionTypeName(AstNode parent, TypeName left) : base(parent) {
+            MarkStart(Left = left);
             Eat(OpBitOr);
-            Right = ParseTypeName(this);
-
-            MarkEnd(Token);
+            MarkEnd(Right = ParseTypeName(this));
         }
 
         /// <summary>
         ///     Constructs expression without position in source.
         /// </summary>
         public UnionTypeName(TypeName left, TypeName right) {
-            Left  = left;
-            Right = right;
-            MarkPosition(Left, Right);
+            MarkStart(Left = left);
+            MarkEnd(Right  = right);
         }
 
         internal override void ToAxionCode(CodeBuilder c) {

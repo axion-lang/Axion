@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -18,8 +17,11 @@ namespace Axion.Testing.NUnit {
         private static readonly DirectoryInfo axionTestingDir =
             new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent;
 
-        private readonly string samplesPath =
-            axionTestingDir.Parent.FullName + "\\Other\\Code Examples\\";
+        private readonly string samplesPath = Path.Combine(
+            axionTestingDir.Parent.FullName,
+            "Other",
+            "Code Examples"
+        );
 
         protected string SamplesPath {
             get {
@@ -31,7 +33,11 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        private static readonly string outPath = axionTestingDir.FullName + "\\Files\\out\\";
+        private static readonly string outPath = Path.Combine(
+            axionTestingDir.FullName,
+            "Files",
+            "out"
+        );
 
         protected static string OutPath {
             get {
@@ -43,7 +49,11 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        private static readonly string inPath = axionTestingDir.FullName + "\\Files\\in\\";
+        private static readonly string inPath = Path.Combine(
+            axionTestingDir.FullName,
+            "Files",
+            "in"
+        );
 
         protected static string InPath {
             get {
@@ -66,7 +76,7 @@ namespace Axion.Testing.NUnit {
         [OneTimeSetUp]
         public void ClearDebugDirectory() {
             // clear debugging output
-            string dbg = outPath + "debug\\";
+            string dbg = Path.Combine(outPath, "debug");
             if (Directory.Exists(dbg)) {
                 foreach (FileInfo file in new DirectoryInfo(dbg).EnumerateFiles()) {
                     file.Delete();
@@ -77,7 +87,7 @@ namespace Axion.Testing.NUnit {
             }
 
             // scan for sources
-            var patternsDir = new DirectoryInfo(SamplesPath + "design patterns\\");
+            var patternsDir = new DirectoryInfo(Path.Combine(SamplesPath, "design patterns"));
             Assert.That(patternsDir.Exists);
             ScanSources(patternsDir);
         }
@@ -96,7 +106,7 @@ namespace Axion.Testing.NUnit {
 
         internal static SourceUnit MakeSourceFromFile([CallerMemberName] string fileName = null) {
             return new SourceUnit(
-                new FileInfo(InPath + fileName + Compiler.SourceFileExtension),
+                new FileInfo(Path.Combine(InPath, fileName + Compiler.SourceFileExtension)),
                 OutPath + fileName + TestExtension
             );
         }
@@ -105,7 +115,7 @@ namespace Axion.Testing.NUnit {
             string                    code,
             [CallerMemberName] string fileName = null
         ) {
-            return new SourceUnit(code, OutPath + fileName + TestExtension);
+            return new SourceUnit(code, Path.Combine(OutPath, fileName + TestExtension));
         }
 
         /// <summary>

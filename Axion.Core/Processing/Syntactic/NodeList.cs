@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace Axion.Core.Processing.Syntactic {
-    public class NodeList<T> : IList<T> where T : SyntaxTreeNode? {
-        public readonly  SyntaxTreeNode Parent;
-        private readonly List<T>        items;
+    public class NodeList<T> : IList<T> where T : AstNode {
+        public readonly  AstNode Parent;
+        private readonly List<T> items;
 
         void IList<T>.RemoveAt(int index) {
             items.RemoveAt(index);
@@ -53,12 +53,12 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        internal NodeList(SyntaxTreeNode parent) {
+        internal NodeList(AstNode parent) {
             Parent = parent;
             items  = new List<T>();
         }
 
-        internal NodeList(SyntaxTreeNode parent, IEnumerable<T> array) {
+        internal NodeList(AstNode parent, IEnumerable<T> array) {
             Parent = parent;
             items  = new List<T>(array);
         }

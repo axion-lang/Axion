@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         internal CharacterToken(
             string   value,
-            string?  escapedValue  = null,
+            string   escapedValue  = null,
             bool     isUnclosed    = false,
             Position startPosition = default
         ) : base(TokenType.Character, value) {

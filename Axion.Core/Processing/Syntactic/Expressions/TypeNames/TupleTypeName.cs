@@ -22,26 +22,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         /// <summary>
         ///     Constructs expression from Axion tokens.
         /// </summary>
-        public TupleTypeName(SyntaxTreeNode parent) {
-            Parent = parent;
-            Types  = new NodeList<TypeName>(this);
+        public TupleTypeName(AstNode parent) : base(parent) {
+            Types = new NodeList<TypeName>(this);
 
-            EatStartMark(OpenParenthesis);
+            MarkStartAndEat(OpenParenthesis);
+
             if (!Peek.Is(CloseParenthesis)) {
                 do {
                     Types.Add(ParseTypeName(parent));
                 } while (MaybeEat(Comma));
             }
 
-            Eat(CloseParenthesis);
-            MarkEnd(Token);
+            MarkEndAndEat(CloseParenthesis);
         }
 
         /// <summary>
         ///     Constructs expression from C# syntax.
         /// </summary>
-        public TupleTypeName(SyntaxTreeNode parent, TupleTypeSyntax csNode) {
-            Parent = parent;
+        public TupleTypeName(AstNode parent, TupleTypeSyntax csNode) : base(parent) {
             // TODO: add names for tuple items
             Types = new NodeList<TypeName>(
                 this,
@@ -52,9 +50,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         /// <summary>
         ///     Constructs expression without position in source.
         /// </summary>
-        public TupleTypeName(SyntaxTreeNode parent, IEnumerable<Expression> exprs) {
-            Parent = parent;
-            Types  = new NodeList<TypeName>(this, exprs.Select(e => e.ValueType));
+        public TupleTypeName(AstNode parent, IEnumerable<Expression> exprs) : base(parent) {
+            Types = new NodeList<TypeName>(this, exprs.Select(e => e.ValueType));
         }
 
         internal override void ToAxionCode(CodeBuilder c) {

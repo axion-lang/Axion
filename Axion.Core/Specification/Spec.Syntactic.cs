@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Binary;
 using Axion.Core.Processing.Syntactic.Expressions.Multiple;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -87,8 +88,8 @@ namespace Axion.Core.Specification {
             OpBitAndAssign,
             OpBitOrAssign,
             OpBitXorAssign,
-            OpBitLeftShiftAssign,
-            OpBitRightShiftAssign,
+            OpBitLShiftAssign,
+            OpBitRShiftAssign,
             OpPowerAssign,
             OpFloorDivideAssign,
             Indent,
@@ -111,7 +112,8 @@ namespace Axion.Core.Specification {
         };
 
         internal static readonly Type[] VariableLeftExprs = {
-            typeof(SimpleNameExpression), typeof(TupleExpression)
+            typeof(SimpleNameExpression),
+            typeof(TupleExpression)
         };
 
         internal static readonly Type[] AssignableExprs =
@@ -124,36 +126,33 @@ namespace Axion.Core.Specification {
                 )
                 .ToArray();
 
-        internal static readonly Type[] PrimaryExprs =
+        internal static readonly Type[] AtomExprs =
             AssignableExprs
                 .Union(
                     new[] {
                         typeof(AwaitExpression),
                         typeof(YieldExpression),
-                        typeof(TypeInitializerExpression),
                         typeof(BraceCollectionExpression),
-                        typeof(ListInitializerExpression),
                         typeof(FunctionCallExpression),
                         typeof(ConstantExpression),
-                        typeof(ParenthesizedExpression),
-                        typeof(LambdaExpression)
+                        typeof(ParenthesizedExpression)
                     }
                 )
                 .ToArray();
 
-        internal static readonly Type[] PreGlobalExprs =
-            PrimaryExprs
+        internal static readonly Type[] InfixExprs =
+            AtomExprs
                 .Union(
                     new[] {
-                        typeof(UnaryOperationExpression),
-                        typeof(BinaryOperationExpression),
-                        typeof(ConditionalExpression)
+                        typeof(UnaryExpression),
+                        typeof(BinaryExpression),
+                        typeof(ConditionalInfixExpression)
                     }
                 )
                 .ToArray();
 
         internal static readonly Type[] GlobalExprs =
-            PreGlobalExprs
+            InfixExprs
                 .Union(
                     new[] {
                         typeof(VariableDefinitionExpression),
@@ -168,16 +167,16 @@ namespace Axion.Core.Specification {
             typeof(YieldExpression),
             typeof(FunctionCallExpression),
             typeof(VariableDefinitionExpression),
-            typeof(UnaryOperationExpression),
-            typeof(BinaryOperationExpression)
+            typeof(UnaryExpression),
+            typeof(BinaryExpression)
         };
         
         internal static readonly Dictionary<Type[], string> ExprGroupNames = new Dictionary<Type[], string> {
             { DecoratorExprs,           "decorator" },
             { VariableLeftExprs,        "variable name(s)" },
             { AssignableExprs,          "assignable" },
-            { PrimaryExprs,             "primary value" },
-            { PreGlobalExprs,           "operator" },
+            { AtomExprs,                "atomic value" },
+            { InfixExprs,               "infix expression" },
             { GlobalExprs,              "any valid expression" },
             { StatementExprs,           "statement" }
         };

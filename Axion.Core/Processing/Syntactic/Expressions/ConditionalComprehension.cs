@@ -7,7 +7,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         conditional_comprehension:
-    ///             ('if' | 'unless') operation_expr;
+    ///             ('if' | 'unless') infix_expr;
     ///     </c>
     ///     Closes comprehensions list,
     ///     cannot be continued with other comprehensions.
@@ -25,17 +25,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         /// <summary>
         ///     Constructs expression from tokens.
         /// </summary>
-        internal ConditionalComprehension(SyntaxTreeNode parent) : base(parent) {
+        internal ConditionalComprehension(AstNode parent) : base(parent) {
             if (Peek.Is(KeywordIf)) {
-                EatStartMark(KeywordIf);
-                Condition = ParseOperation(this);
+                MarkStartAndEat(KeywordIf);
+                Condition = ParseInfixExpr(this);
             }
             else {
-                EatStartMark(KeywordUnless);
-                Condition = new UnaryOperationExpression(OpNot, ParseOperation(this));
+                MarkStartAndEat(KeywordUnless);
+                Condition = new UnaryExpression(OpNot, ParseInfixExpr(this));
             }
 
-            MarkEnd(Token);
+            MarkEnd();
         }
 
         /// <summary>

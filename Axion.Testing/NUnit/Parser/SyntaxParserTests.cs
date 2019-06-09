@@ -31,22 +31,22 @@ namespace Axion.Testing.NUnit.Parser {
         }
 
         [Test]
-        public void IfStmtValid() {
+        public void ConditionalExpressionValid() {
             SourceUnit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
-        public void WhileStmtValid() {
+        public void WhileExpressionValid() {
             SourceUnit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
-        [Test]
-        public void WithStmtValid() {
-            SourceUnit source = ParseTestFile();
-            Assert.AreEqual(0, source.Blames.Count);
-        }
+//        [Test]
+//        public void WithStmtValid() {
+//            SourceUnit source = ParseTestFile();
+//            Assert.AreEqual(0, source.Blames.Count);
+//        }
 
         private static SourceUnit ParseTestFile([CallerMemberName] string testName = null) {
             SourceUnit source = MakeSourceFromFile(testName);

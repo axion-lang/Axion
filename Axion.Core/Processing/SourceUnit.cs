@@ -73,12 +73,12 @@ namespace Axion.Core.Processing {
 
         #region Constructors
 
-        public SourceUnit(string code, string? outFilePath = null) : this(
+        public SourceUnit(string code, string outFilePath = null) : this(
             code.Split(Spec.EndOfLines, StringSplitOptions.None),
             outFilePath
         ) { }
 
-        public SourceUnit(FileInfo file, string? outFilePath = null) {
+        public SourceUnit(FileInfo file, string outFilePath = null) {
             // check source file
             if (!file.Exists) {
                 throw new FileNotFoundException("Source file doesn't exists", file.FullName);
@@ -103,12 +103,14 @@ namespace Axion.Core.Processing {
         ///     Use only for interpreter and tests,
         ///     output is redirected to the compiler dir.
         /// </summary>
-        public SourceUnit(string[] sourceLines, string? outFilePath = null) {
+        public SourceUnit(string[] sourceLines, string outFilePath = null) {
             InitializeFilePaths(
-                Compiler.OutputDirectory
-                + "Temp_"
-                + DateTime.Now.ToFileName()
-                + Compiler.SourceFileExtension,
+                Path.Combine(
+                    Compiler.OutputDirectory,
+                    "Temp_",
+                    DateTime.Now.ToFileName()
+                    + Compiler.SourceFileExtension
+                ),
                 outFilePath
             );
 
@@ -121,20 +123,23 @@ namespace Axion.Core.Processing {
 
         #region File path helpers
 
-        private void InitializeFilePaths(string sourceFilePath, string? outFilePath = null) {
+        private void InitializeFilePaths(string sourceFilePath, string outFilePath = null) {
             SourceFilePath = sourceFilePath;
             SourceFileName = Path.GetFileNameWithoutExtension(SourceFilePath);
             BuildOutputPath(outFilePath);
 
-            string debugDir = new FileInfo(OutputFilePath).Directory?.FullName + "\\debug\\";
+            string debugDir = Path.Combine(
+                new FileInfo(OutputFilePath).Directory?.FullName ?? "",
+                "debug"
+            );
             if (!Directory.Exists(debugDir)) {
                 Directory.CreateDirectory(debugDir);
             }
 
-            DebugFilePath = debugDir + SourceFileName + debugExtension;
+            DebugFilePath = Path.Combine(debugDir, SourceFileName + debugExtension);
         }
 
-        private void BuildOutputPath(string? outFilePath) {
+        private void BuildOutputPath(string outFilePath) {
             if (string.IsNullOrWhiteSpace(outFilePath)) {
                 outFilePath = SourceFileName;
             }
@@ -144,7 +149,7 @@ namespace Axion.Core.Processing {
             }
 
             if (!Path.IsPathRooted(outFilePath)) {
-                outFilePath = Compiler.OutputDirectory + outFilePath;
+                outFilePath = Path.Combine(Compiler.OutputDirectory, outFilePath);
             }
 
             var outFile = new FileInfo(outFilePath);
@@ -164,7 +169,7 @@ namespace Axion.Core.Processing {
         }
 
         internal void Blame(BlameType type, SpannedRegion region) {
-            Blame(type, region.Span.StartPosition, region.Span.EndPosition);
+            Blame(type, region.Span.Start, region.Span.End);
         }
 
         internal void Blame(BlameType type, Position start, Position end) {

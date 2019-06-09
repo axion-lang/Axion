@@ -1,11 +1,12 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         member_expr:
-    ///             primary '.' ID
+    ///             atom '.' ID
     ///     </c>
     /// </summary>
     public class MemberAccessExpression : Expression {
@@ -23,13 +24,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref member, value);
         }
 
-        public MemberAccessExpression(SyntaxTreeNode parent, Expression target) : base(parent) {
-            Target = target;
-
+        public MemberAccessExpression(AstNode parent, Expression target) : base(parent) {
+            MarkStart(Target = target);
             Eat(Dot);
-            Member = new SimpleNameExpression(this);
-
-            MarkPosition(Target, Member);
+            MarkEnd(Member = new SimpleNameExpression(this));
         }
 
         internal override void ToAxionCode(CodeBuilder c) {

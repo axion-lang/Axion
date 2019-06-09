@@ -20,21 +20,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         /// <summary>
         ///     Constructs expression from Axion tokens.
         /// </summary>
-        public ArrayTypeName(SyntaxTreeNode parent, TypeName elementType) {
-            Parent      = parent;
-            ElementType = elementType;
-
-            MarkStart(ElementType);
+        public ArrayTypeName(AstNode parent, TypeName elementType) : base(parent) {
+            MarkStart(ElementType = elementType);
             Eat(OpenBracket);
-            Eat(CloseBracket);
-            MarkEnd(Token);
+            MarkEndAndEat(CloseBracket);
         }
 
         /// <summary>
         ///     Constructs expression from C# syntax.
         /// </summary>
-        public ArrayTypeName(SyntaxTreeNode parent, ArrayTypeSyntax csNode) {
-            Parent      = parent;
+        public ArrayTypeName(AstNode parent, ArrayTypeSyntax csNode) : base(parent) {
             ElementType = FromCSharp(this, csNode.ElementType);
         }
 

@@ -18,10 +18,10 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public StringToken(
             StringLiteralOptions options,
             string               value,
-            string?              escapedValue   = null,
-            List<Interpolation>? interpolations = null,
+            string               escapedValue   = null,
+            List<Interpolation>  interpolations = null,
             bool                 isUnclosed     = false,
-            string?              trailingQuotes = null,
+            string               trailingQuotes = null,
             Position             startPosition  = default
         ) : base(TokenType.String, value) {
             Options        = options;
@@ -122,29 +122,29 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             duplicated = false;
             valid      = true;
             switch (c) {
-                case 'f':
-                case 'F': {
-                    if (IsFormatted) {
-                        duplicated = true;
-                    }
-
-                    IsFormatted = true;
-                    break;
+            case 'f':
+            case 'F': {
+                if (IsFormatted) {
+                    duplicated = true;
                 }
 
-                case 'r':
-                case 'R': {
-                    if (IsRaw) {
-                        duplicated = true;
-                    }
+                IsFormatted = true;
+                break;
+            }
 
-                    IsRaw = true;
-                    break;
+            case 'r':
+            case 'R': {
+                if (IsRaw) {
+                    duplicated = true;
                 }
 
-                default:
-                    valid = false;
-                    break;
+                IsRaw = true;
+                break;
+            }
+
+            default:
+                valid = false;
+                break;
             }
         }
 

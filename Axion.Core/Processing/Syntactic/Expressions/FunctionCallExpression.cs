@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         call_expr:
-    ///             primary '(' [arg_list | (arg comprehension)] ')'
+    ///             atom '(' [arg_list | (arg comprehension)] ')'
     ///     </c>
     /// </summary>
     public class FunctionCallExpression : Expression {
@@ -29,7 +30,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         ///     Constructor for pipeline operator.
         /// </summary>
         public FunctionCallExpression(
-            SyntaxTreeNode        parent,
+            AstNode               parent,
             Expression            target,
             params CallArgument[] args
         ) : base(parent) {
@@ -38,19 +39,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public FunctionCallExpression(
-            SyntaxTreeNode parent,
-            Expression     target,
-            bool           allowGenerator = false
+            AstNode    parent,
+            Expression target,
+            bool       allowGenerator = false
         ) : base(parent) {
-            Target = target;
-            MarkStart(Target);
+            MarkStart(Target = target);
 
             Eat(OpenParenthesis);
             Args = allowGenerator
                 ? CallArgument.ParseGeneratorOrArgList(this)
                 : CallArgument.ParseArgList(this);
 
-            MarkEnd(Token);
+            MarkEnd();
         }
 
         public FunctionCallExpression(Expression target, NodeList<CallArgument> args = null) {
@@ -93,21 +93,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref val, value);
         }
 
-        internal CallArgument(SyntaxTreeNode parent, Expression value) : base(parent) {
-            Value = value;
-
-            MarkPosition(Value);
+        internal CallArgument(AstNode parent, Expression value) : base(parent) {
+            MarkPosition(Value = value);
         }
 
         internal CallArgument(
-            SyntaxTreeNode       parent,
+            AstNode              parent,
             SimpleNameExpression name,
             Expression           value
         ) : base(parent) {
-            Name  = name;
-            Value = value;
-
-            MarkPosition(Name, Value);
+            MarkStart(Name = name);
+            MarkEnd(Value  = value);
         }
 
         /// <summary>
@@ -118,12 +114,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         ///             | comprehension }
         ///     </c>
         /// </summary>
-        internal static NodeList<CallArgument> ParseGeneratorOrArgList(SyntaxTreeNode parent) {
+        internal static NodeList<CallArgument> ParseGeneratorOrArgList(AstNode parent) {
             if (parent.Peek.Is(CloseParenthesis, OpMultiply, OpPower)) {
                 return ParseArgList(parent);
             }
 
-            Expression   nameOrValue = ParsePreGlobalExpr(parent);
+            Expression   nameOrValue = ParseInfixExpr(parent);
             var          generator   = false;
             CallArgument arg;
             if (parent.MaybeEat(OpAssign)) {
@@ -142,7 +138,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 arg = new CallArgument(parent, nameOrValue);
             }
 
-            // Was this all?
+            // Was this all 
             if (!generator && parent.MaybeEat(Comma)) {
                 return ParseArgList(parent, arg);
             }
@@ -165,8 +161,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         ///     </c>
         /// </summary>
         internal static NodeList<CallArgument> ParseArgList(
-            SyntaxTreeNode parent,
-            CallArgument?  first = null
+            AstNode      parent,
+            CallArgument first = null
         ) {
             var args = new NodeList<CallArgument>(parent);
 
@@ -175,7 +171,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
 
             while (!parent.MaybeEat(CloseParenthesis)) {
-                Expression   nameOrValue = ParsePreGlobalExpr(parent);
+                Expression   nameOrValue = ParseInfixExpr(parent);
                 CallArgument arg;
 
                 if (parent.MaybeEat(OpMultiply)) {
@@ -203,9 +199,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return args;
         }
 
-        private static CallArgument FinishNamedArg(SyntaxTreeNode parent, Expression nameOrValue) {
+        private static CallArgument FinishNamedArg(AstNode parent, Expression nameOrValue) {
             if (nameOrValue is SimpleNameExpression name) {
-                Expression value = ParsePreGlobalExpr(parent);
+                Expression value = ParseInfixExpr(parent);
                 return new CallArgument(parent, name, value);
             }
 

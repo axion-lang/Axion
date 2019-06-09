@@ -93,7 +93,7 @@ namespace Axion.Core.Processing.Lexical {
                 return;
             }
 
-            Token? token = null;
+            Token token = null;
             // at first, check if we're after unclosed string
             if (unclosedStrings.Count > 0) {
                 token = ReadString(true);
@@ -125,43 +125,43 @@ namespace Axion.Core.Processing.Lexical {
             foreach (Token mismatch in mismatchingPairs) {
                 BlameType errorType;
                 switch (mismatch.Type) {
-                    case OpenParenthesis:
-                    case CloseParenthesis: {
-                        errorType = BlameType.MismatchedParenthesis;
-                        break;
-                    }
-
-                    case OpenBracket:
-                    case CloseBracket: {
-                        errorType = BlameType.MismatchedBracket;
-                        break;
-                    }
-
-                    case OpenBrace:
-                    case CloseBrace: {
-                        errorType = BlameType.MismatchedBrace;
-                        break;
-                    }
-
-                    default: {
-                        throw new Exception(
-                            "Internal error: "
-                            + nameof(mismatchingPairs)
-                            + " grabbed invalid "
-                            + nameof(TokenType)
-                            + ": "
-                            + mismatch.Type
-                        );
-                    }
+                case OpenParenthesis:
+                case CloseParenthesis: {
+                    errorType = BlameType.MismatchedParenthesis;
+                    break;
                 }
 
-                unit.Blame(errorType, mismatch.Span.StartPosition, mismatch.Span.EndPosition);
+                case OpenBracket:
+                case CloseBracket: {
+                    errorType = BlameType.MismatchedBracket;
+                    break;
+                }
+
+                case OpenBrace:
+                case CloseBrace: {
+                    errorType = BlameType.MismatchedBrace;
+                    break;
+                }
+
+                default: {
+                    throw new Exception(
+                        "Internal error: "
+                        + nameof(mismatchingPairs)
+                        + " grabbed invalid "
+                        + nameof(TokenType)
+                        + ": "
+                        + mismatch.Type
+                    );
+                }
+                }
+
+                unit.Blame(errorType, mismatch.Span.Start, mismatch.Span.End);
             }
 
             #endregion
         }
 
-        private Token? ReadNextToken() {
+        private Token ReadNextToken() {
             // reset token properties
             tokenStartPosition = Position;
             tokenValue.Clear();
@@ -172,8 +172,8 @@ namespace Axion.Core.Processing.Lexical {
                 if (last.Type != Outdent) {
                     Debug.Assert(
                         tokenStartPosition
-                        == (last.Span.EndPosition.Line,
-                            last.Span.EndPosition.Column + last.EndWhitespaces.Length)
+                        == (last.Span.End.Line,
+                            last.Span.End.Column + last.EndWhitespaces.Length)
                     );
                 }
             }
@@ -236,7 +236,7 @@ namespace Axion.Core.Processing.Lexical {
         ///     Gets a language keyword or identifier
         ///     from next piece of source.
         /// </summary>
-        private Token? ReadWord() {
+        private Token ReadWord() {
             do {
                 tokenValue.Append(c);
                 Move();
@@ -246,28 +246,7 @@ namespace Axion.Core.Processing.Lexical {
 
             string value = tokenValue.ToString();
             // for operators, written as words
-            if (Spec.Operators.TryGetValue(value, out OperatorProperties props)) {
-                if (tokens.Count > 0) {
-                    Token last = tokens[tokens.Count - 1];
-                    if (last.Is(OpIs) && props.Type == OpNot) {
-                        tokens[tokens.Count - 1] = new OperatorToken(
-                            Spec.Operators["is not"],
-                            last.Span.StartPosition,
-                            Position
-                        );
-                        return null;
-                    }
-
-                    if (last.Is(OpNot) && props.Type == OpIn) {
-                        tokens[tokens.Count - 1] = new OperatorToken(
-                            Spec.Operators["not in"],
-                            last.Span.StartPosition,
-                            Position
-                        );
-                        return null;
-                    }
-                }
-
+            if (Spec.Operators.ContainsKey(value)) {
                 return new OperatorToken(value, tokenStartPosition);
             }
 
@@ -278,7 +257,7 @@ namespace Axion.Core.Processing.Lexical {
             int    longestLength = Spec.SortedSymbolics[0].Length;
             string nextCodePiece = PeekPiece(longestLength);
             var    value         = "";
-            Token? result        = null;
+            Token  result        = null;
             for (int length = nextCodePiece.Length; length > 0; length--) {
                 value = nextCodePiece.Substring(0, length);
                 // grow sequence of characters
@@ -314,10 +293,10 @@ namespace Axion.Core.Processing.Lexical {
 
             Move(value.Length);
             if (result == null) {
-                // creating operator with 'invalid' type
-                result = new OperatorToken(value, tokenStartPosition);
+                // create unknown symbol
+                result = new Token(Unknown, value, tokenStartPosition);
                 // not found in specification
-                unit.Blame(BlameType.InvalidOperator, tokenStartPosition, Position);
+                // unit.Blame(BlameType.InvalidOperator, tokenStartPosition, Position);
             }
 
             return result;

@@ -76,17 +76,6 @@ namespace Axion.Core.Specification {
             'u', 'U', // unsigned
             'j', 'J'  // complex
         };
-        
-        internal static char[] OctalDigits { get; } = {
-            '0',
-            '1',
-            '2',
-            '3',
-            '4',
-            '5',
-            '6',
-            '7'
-        };
 
         internal static char[] HexadecimalDigits { get; } = {
             '0',

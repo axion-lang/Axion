@@ -31,33 +31,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         ///     Constructs expression from Axion tokens.
         /// </summary>
         public GenericTypeName(
-            SyntaxTreeNode parent,
-            TypeName       target
-        ) {
-            Parent        = parent;
-            Target        = target;
+            AstNode  parent,
+            TypeName target
+        ) : base(parent) {
             TypeArguments = new NodeList<TypeName>(this);
-
-            MarkStart(Target);
+            MarkStart(Target = target);
 
             Eat(OpenBracket);
             do {
                 TypeArguments.Add(ParseTypeName(parent));
             } while (MaybeEat(Comma));
 
-            Eat(CloseBracket);
-
-            MarkEnd(Token);
+            MarkEndAndEat(CloseBracket);
         }
 
         /// <summary>
         ///     Constructs expression from C# syntax.
         /// </summary>
         public GenericTypeName(
-            SyntaxTreeNode    parent,
+            AstNode           parent,
             GenericNameSyntax csNode
-        ) {
-            Parent = parent;
+        ) : base(parent) {
             Target = new SimpleTypeName(csNode.Identifier.Text);
             TypeArguments = new NodeList<TypeName>(
                 this,

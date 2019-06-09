@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Axion.Core.Specification.TokenType;
 
@@ -15,31 +16,33 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///     </c>
     /// </summary>
     public abstract class TypeName : Expression {
+        protected TypeName(AstNode parent) : base(parent) { }
+        protected TypeName() { }
         public override TypeName ValueType => this;
 
-        internal static TypeName FromCSharp(SyntaxTreeNode parent, TypeSyntax csNode) {
+        internal static TypeName FromCSharp(AstNode parent, TypeSyntax csNode) {
             switch (csNode) {
-                case ArrayTypeSyntax a: {
-                    return new ArrayTypeName(parent, a);
-                }
+            case ArrayTypeSyntax a: {
+                return new ArrayTypeName(parent, a);
+            }
 
-                case TupleTypeSyntax t: {
-                    return new TupleTypeName(parent, t);
-                }
+            case TupleTypeSyntax t: {
+                return new TupleTypeName(parent, t);
+            }
 
-                case GenericNameSyntax g: {
-                    return new GenericTypeName(parent, g);
-                }
+            case GenericNameSyntax g: {
+                return new GenericTypeName(parent, g);
+            }
 
-                case PredefinedTypeSyntax p: {
-                    return new SimpleTypeName(p.Keyword.Text);
-                }
+            case PredefinedTypeSyntax p: {
+                return new SimpleTypeName(p.Keyword.Text);
+            }
             }
 
             throw new NotSupportedException();
         }
 
-        internal static TypeName ParseTypeName(SyntaxTreeNode parent) {
+        internal static TypeName ParseTypeName(AstNode parent) {
             // leading
             TypeName leftTypeName = null;
             // tuple
@@ -87,16 +90,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         ///     </c>
         ///     for class, enum, enum item.
         /// </summary>
-        internal static List<(TypeName type, SimpleNameExpression? label)> ParseNamedTypeArgs(
-            SyntaxTreeNode parent
+        internal static List<(TypeName type, SimpleNameExpression label)> ParseNamedTypeArgs(
+            AstNode parent
         ) {
-            var   typeArgs = new List<(TypeName, SimpleNameExpression?)>();
+            var   typeArgs = new List<(TypeName, SimpleNameExpression )>();
             Token start    = parent.Peek;
 
             if (!parent.Peek.Is(CloseParenthesis)) {
                 do {
-                    SimpleNameExpression? name     = null;
-                    int                   startIdx = parent.Ast.Index;
+                    SimpleNameExpression name     = null;
+                    int                  startIdx = parent.Ast.Index;
                     if (parent.Peek.Is(Identifier)) {
                         name = new SimpleNameExpression(parent);
                         if (!parent.MaybeEat(OpAssign)) {
@@ -112,8 +115,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                 // redundant parens
                 parent.Unit.Blame(
                     BlameType.RedundantEmptyListOfTypeArguments,
-                    start.Span.StartPosition,
-                    parent.Token.Span.EndPosition
+                    start.Span.Start,
+                    parent.Token.Span.End
                 );
             }
 

@@ -112,7 +112,7 @@ namespace Axion.Testing.NUnit.Lexer {
                     new WordToken("number", (0, 0)).AppendWhitespace(" "),
                     new OperatorToken("=", (0, 7)).AppendWhitespace(" "),
                     tokens[i],
-                    new Token(TokenType.End, (0, tokens[i].Span.EndPosition.Column))
+                    new Token(TokenType.End, (0, tokens[i].Span.End.Column))
                 };
 
                 for (var k = 0; k < source.Tokens.Count; k++) {

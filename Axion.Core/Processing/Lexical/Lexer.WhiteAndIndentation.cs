@@ -34,7 +34,7 @@ namespace Axion.Core.Processing.Lexical {
 
         #endregion
 
-        private NewlineToken? ReadNewline() {
+        private NewlineToken ReadNewline() {
             // skip all newline characters
             while (c == '\n' || c == '\r') {
                 tokenValue.Append(c);
@@ -61,7 +61,7 @@ namespace Axion.Core.Processing.Lexical {
             return null;
         }
 
-        private Token? ReadWhite() {
+        private Token ReadWhite() {
             while (c.IsSpaceOrTab()) {
                 tokenValue.Append(c);
                 Move();
@@ -134,7 +134,7 @@ namespace Axion.Core.Processing.Lexical {
             return null;
         }
 
-        private Token? ReadIndentation() {
+        private Token ReadIndentation() {
             // set indent character if it is unknown
             if (indentChar == '\0') {
                 indentChar = tokenValue[0];
@@ -170,7 +170,7 @@ namespace Axion.Core.Processing.Lexical {
                 oneIndentSize = newIndentLength;
             }
 
-            Token? indentationToken;
+            Token indentationToken;
             if (newIndentLength > lastIndentLength) {
                 // indent increased
                 indentationToken = new Token(

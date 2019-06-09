@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
     ///             '}';
     ///     </c>
     /// </summary>
-    public class BraceCollectionExpression : MultipleExpression<Expression> {
+    public class BraceCollectionExpression : MultipleExpression {
         public BraceCollectionType Type { get; }
 
         public override TypeName ValueType {
@@ -26,28 +26,28 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
                 }
 
                 switch (Type) {
-                    case BraceCollectionType.Map:
-                        return Spec.MapType(Expressions[0].ValueType);
-                    case BraceCollectionType.Set:
-                        return Spec.SetType(Expressions[0].ValueType);
-                    default:
-                        return Spec.UnknownBracesCollectionType;
+                case BraceCollectionType.Map:
+                    return Spec.MapType(Expressions[0].ValueType);
+                case BraceCollectionType.Set:
+                    return Spec.SetType(Expressions[0].ValueType);
+                default:
+                    return Spec.UnknownBracesCollectionType;
                 }
             }
         }
 
         internal BraceCollectionExpression(
-            SyntaxTreeNode      parent,
+            AstNode             parent,
             BraceCollectionType type = BraceCollectionType.Unknown
         ) : base(parent) {
             Expressions = new NodeList<Expression>(this);
             Type        = type;
-            EatStartMark(OpenBrace);
+            MarkStartAndEat(OpenBrace);
 
             if (!Peek.Is(CloseBrace)) {
                 var comprehension = false;
                 while (true) {
-                    Expression item = ParsePreGlobalExpr(this);
+                    Expression item = ParseInfixExpr(this);
                     if (comprehension) {
                         Unit.Blame(
                             BlameType.CollectionInitializerCannotContainItemsAfterComprehension,
@@ -65,7 +65,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
                         item = new MapItemExpression(
                             this,
                             item,
-                            ParsePreGlobalExpr(this)
+                            ParseInfixExpr(this)
                         );
                     }
                     // set item (expr)
@@ -92,12 +92,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
                 }
             }
 
-            EatEndMark(CloseBrace);
+            MarkEndAndEat(CloseBrace);
 
             if (Expressions.Count == 0) {
                 Unit.Blame(BlameType.EmptyCollectionLiteralNotSupported, this);
             }
         }
+
+        public BraceCollectionExpression(NodeList<Expression> expressions)
+            : base(expressions) { }
 
         internal override void ToAxionCode(CodeBuilder c) {
             c.WriteLine("{");
@@ -121,9 +124,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
     ///     </c>
     /// </summary>
     public class MapItemExpression : LeftRightExpression {
-        public MapItemExpression(SyntaxTreeNode parent, Expression left, Expression right) : base(
-            parent
-        ) {
+        public MapItemExpression(AstNode parent, Expression left, Expression right) : base(parent) {
             Left  = left;
             Right = right;
         }

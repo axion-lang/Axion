@@ -17,37 +17,37 @@ namespace Axion.Core.Processing.CodeGen {
 
         public void Write(params object[] values) {
             switch (outLang) {
-                case OutLang.Axion: {
-                    for (var i = 0; i < values.Length; i++) {
-                        object val = values[i];
-                        if (val is SpannedRegion translatable) {
-                            translatable.ToAxionCode(this);
-                        }
-                        else {
-                            Writer.Write(val);
-                        }
+            case OutLang.Axion: {
+                for (var i = 0; i < values.Length; i++) {
+                    object val = values[i];
+                    if (val is SpannedRegion translatable) {
+                        translatable.ToAxionCode(this);
                     }
-
-                    break;
-                }
-
-                case OutLang.CSharp: {
-                    for (var i = 0; i < values.Length; i++) {
-                        object val = values[i];
-                        if (val is SpannedRegion translatable) {
-                            translatable.ToCSharpCode(this);
-                        }
-                        else {
-                            Writer.Write(val);
-                        }
+                    else {
+                        Writer.Write(val);
                     }
-
-                    break;
                 }
 
-                default: {
-                    throw new NotSupportedException();
+                break;
+            }
+
+            case OutLang.CSharp: {
+                for (var i = 0; i < values.Length; i++) {
+                    object val = values[i];
+                    if (val is SpannedRegion translatable) {
+                        translatable.ToCSharpCode(this);
+                    }
+                    else {
+                        Writer.Write(val);
+                    }
                 }
+
+                break;
+            }
+
+            default: {
+                throw new NotSupportedException();
+            }
             }
         }
 
@@ -71,35 +71,35 @@ namespace Axion.Core.Processing.CodeGen {
             }
 
             switch (outLang) {
-                case OutLang.Axion: {
-                    for (var i = 0; i < items.Count - 1; i++) {
-                        items[i]?.ToAxionCode(this);
-                        Write(separator);
-                        if (indent) {
-                            Writer.WriteLine();
-                        }
+            case OutLang.Axion: {
+                for (var i = 0; i < items.Count - 1; i++) {
+                    items[i]?.ToAxionCode(this);
+                    Write(separator);
+                    if (indent) {
+                        Writer.WriteLine();
                     }
-
-                    items[items.Count - 1]?.ToAxionCode(this);
-                    return;
                 }
 
-                case OutLang.CSharp: {
-                    for (var i = 0; i < items.Count - 1; i++) {
-                        items[i]?.ToCSharpCode(this);
-                        Write(separator);
-                        if (indent) {
-                            Writer.WriteLine();
-                        }
+                items[items.Count - 1]?.ToAxionCode(this);
+                return;
+            }
+
+            case OutLang.CSharp: {
+                for (var i = 0; i < items.Count - 1; i++) {
+                    items[i]?.ToCSharpCode(this);
+                    Write(separator);
+                    if (indent) {
+                        Writer.WriteLine();
                     }
-
-                    items[items.Count - 1]?.ToCSharpCode(this);
-                    return;
                 }
 
-                default: {
-                    throw new NotSupportedException();
-                }
+                items[items.Count - 1]?.ToCSharpCode(this);
+                return;
+            }
+
+            default: {
+                throw new NotSupportedException();
+            }
             }
         }
 

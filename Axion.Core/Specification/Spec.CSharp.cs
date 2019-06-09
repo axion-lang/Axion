@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Specification {
     public partial class Spec {
@@ -37,40 +38,40 @@ namespace Axion.Core.Specification {
             };
             
             public static readonly Dictionary<TokenType, string> BinaryOperators = new Dictionary<TokenType, string> {
-                { TokenType.OpPlus,                "+"  },
-                { TokenType.OpMinus,               "-"  },
-                { TokenType.OpTrueDivide,          "/"  },
-                { TokenType.OpRemainder,           "%"  },
-                { TokenType.OpMultiply,            "*"  },
+                { OpPlus,                "+"  },
+                { OpMinus,               "-"  },
+                { OpTrueDivide,          "/"  },
+                { OpRemainder,           "%"  },
+                { OpMultiply,            "*"  },
             
-                { TokenType.OpAnd,                 "&&" },
-                { TokenType.OpOr,                  "||" },
+                { OpAnd,                 "&&" },
+                { OpOr,                  "||" },
             
-                { TokenType.OpBitAnd,              "&"  },
-                { TokenType.OpBitOr,               "|"  },
-                { TokenType.OpBitXor,              "^"  },
+                { OpBitAnd,              "&"  },
+                { OpBitOr,               "|"  },
+                { OpBitXor,              "^"  },
 
-                { TokenType.OpEqualsEquals,        "==" },
-                { TokenType.OpNotEquals,           "!=" },
+                { OpEqualsEquals,        "==" },
+                { OpNotEquals,           "!=" },
             
-                { TokenType.OpAs,                  "as" },
-                { TokenType.OpIs,                  "is" },
+                { KeywordAs,                  "as" },
+                { OpIs,                  "is" },
 
             
-                { TokenType.OpLess,                "<"  },
-                { TokenType.OpGreater,             ">"  },
-                { TokenType.OpLessOrEqual,         "<=" },
-                { TokenType.OpGreaterOrEqual,      ">=" },
-                { TokenType.OpAssign,              "="  },
-                { TokenType.OpPlusAssign,          "+="  },
-                { TokenType.OpTrueDivideAssign,    "/="  },
-                { TokenType.OpRemainderAssign,     "%="  },
-                { TokenType.OpMultiplyAssign,      "*="  },
-                { TokenType.OpMinusAssign,         "-="  },
-                { TokenType.OpBitOrAssign,         "|="  },
-                { TokenType.OpBitAndAssign,        "&="  },
-                { TokenType.OpBitLeftShiftAssign,  "<<=" },
-                { TokenType.OpBitRightShiftAssign, ">>=" }
+                { OpLess,                "<"  },
+                { OpGreater,             ">"  },
+                { OpLessOrEqual,         "<=" },
+                { OpGreaterOrEqual,      ">=" },
+                { OpAssign,              "="  },
+                { OpPlusAssign,          "+="  },
+                { OpTrueDivideAssign,    "/="  },
+                { OpRemainderAssign,     "%="  },
+                { OpMultiplyAssign,      "*="  },
+                { OpMinusAssign,         "-="  },
+                { OpBitOrAssign,         "|="  },
+                { OpBitAndAssign,        "&="  },
+                { OpBitLShiftAssign,  "<<=" },
+                { OpBitRShiftAssign, ">>=" }
             };
         }
     }

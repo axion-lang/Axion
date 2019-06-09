@@ -1,5 +1,6 @@
 using System;
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
 using static Axion.Core.Specification.TokenType;
@@ -42,18 +43,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public override TypeName ValueType => Target.ValueType;
 
-        public ForComprehension(SyntaxTreeNode parent, Expression target) : base(parent) {
-            Target = target;
-
-            MarkStart(target);
+        public ForComprehension(AstNode parent, Expression target) : base(parent) {
+            MarkStart(Target = target);
             Eat(KeywordFor);
             Item = ParseMultiple(
                 this,
-                ParsePrimaryExpr,
+                ParseAtomExpr,
                 expectedTypes: typeof(SimpleNameExpression)
             );
             Eat(OpIn);
-            Iterable = ParseMultiple(parent, expectedTypes: Spec.PreGlobalExprs);
+            Iterable = ParseMultiple(parent, expectedTypes: Spec.InfixExprs);
 
             if (Peek.Is(KeywordFor)) {
                 Right = new ForComprehension(Parent, this);
@@ -62,7 +61,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 Right = new ConditionalComprehension(this);
             }
 
-            MarkEnd(Token);
+            MarkEnd();
         }
 
         public ForComprehension(

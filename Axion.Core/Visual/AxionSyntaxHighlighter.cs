@@ -58,9 +58,9 @@ namespace Axion.Core.Visual {
             foreach (Token token in tokens) {
                 bool tokenHighlightingNotNeeded =
                     !foundRenderStart
-                    && (token.Span.EndPosition.Line < renderPosition.Y
-                        || token.Span.EndPosition.Line == renderPosition.Y
-                        && token.Span.EndPosition.Column <= renderPosition.X
+                    && (token.Span.End.Line < renderPosition.Y
+                        || token.Span.End.Line == renderPosition.Y
+                        && token.Span.End.Column <= renderPosition.X
                         || token.Is(End));
                 // BUG (UI) if code has error before that token, and it's fixed with next char, it'll be highlighted improperly (e. g. type '0..10')
 
@@ -72,8 +72,8 @@ namespace Axion.Core.Visual {
                     // When we found token, closest to last render position
                     // we should re-render this token to prevent invalid highlighting.
                     renderPosition = new Point(
-                        token.Span.StartPosition.Column,
-                        token.Span.StartPosition.Line
+                        token.Span.Start.Column,
+                        token.Span.Start.Line
                     );
                     foundRenderStart = true;
                 }

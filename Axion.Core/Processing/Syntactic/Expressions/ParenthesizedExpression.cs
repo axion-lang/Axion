@@ -21,10 +21,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public override TypeName ValueType => Value.ValueType;
 
-        internal ParenthesizedExpression(Expression value) {
-            Parent = value.Parent;
-            Value  = value;
-            MarkPosition(value);
+        internal ParenthesizedExpression(Expression value) : base(value.Parent) {
+            MarkPosition(Value = value);
         }
 
         internal override void ToAxionCode(CodeBuilder c) {

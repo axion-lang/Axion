@@ -15,9 +15,9 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public override TypeName      ValueType => Spec.NumberType(Options);
 
         public NumberToken(
-            string         value,
-            NumberOptions? options,
-            Position       startPosition = default
+            string        value,
+            NumberOptions options,
+            Position      startPosition = default
         ) : base(TokenType.Number, value, startPosition) {
             Options = options ?? new NumberOptions(value);
         }

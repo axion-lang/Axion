@@ -8,6 +8,7 @@ using System.Text;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Specification;
 
 namespace Axion.Core {
@@ -88,7 +89,7 @@ namespace Axion.Core {
 
         internal static bool WriteDecorators(this CodeBuilder c, NodeList<Expression> decorators) {
             var haveAccessMod = false;
-            for (var i = 0; i < decorators.Count; i++) {
+            for (var i = 0; i < decorators?.Count; i++) {
                 Expression modifier = decorators[i];
                 if (modifier is NameExpression n && Spec.CSharp.AccessModifiers.Contains(n.Name)) {
                     haveAccessMod = true;

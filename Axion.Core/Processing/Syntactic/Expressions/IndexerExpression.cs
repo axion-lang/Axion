@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         index_expr:
-    ///             primary '[' (preglobal_expr | slice) {',' (preglobal_expr | slice)} [','] ']'
+    ///             atom '[' (preglobal_expr | slice) {',' (preglobal_expr | slice)} [','] ']'
     ///         slice:
     ///             [preglobal_expr] ':' [preglobal_expr] [':' [preglobal_expr]]
     ///     </c>
@@ -30,28 +30,28 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public override TypeName ValueType => throw new NotImplementedException();
 
-        public IndexerExpression(SyntaxTreeNode parent, Expression target) : base(parent) {
-            Target = target;
+        public IndexerExpression(AstNode parent, Expression target) : base(parent) {
+            MarkStart(Target = target);
 
             var expressions = new NodeList<Expression>(parent);
             parent.Eat(OpenBracket);
             if (!parent.Peek.Is(CloseBracket)) {
                 while (true) {
-                    Expression? start = null;
+                    Expression start = null;
                     if (!parent.Peek.Is(Colon)) {
-                        start = ParsePreGlobalExpr(parent);
+                        start = ParseInfixExpr(parent);
                     }
 
                     if (parent.MaybeEat(Colon)) {
-                        Expression? stop = null;
+                        Expression stop = null;
                         if (!parent.Peek.Is(Colon, Comma, CloseBracket)) {
-                            stop = ParsePreGlobalExpr(parent);
+                            stop = ParseInfixExpr(parent);
                         }
 
-                        Expression? step = null;
+                        Expression step = null;
                         if (parent.MaybeEat(Colon)
                             && !parent.Peek.Is(Comma, CloseBracket)) {
-                            step = ParsePreGlobalExpr(parent);
+                            step = ParseInfixExpr(parent);
                         }
 
                         expressions.Add(new SliceExpression(parent, start, stop, step));
@@ -71,9 +71,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
             }
 
-            parent.Eat(CloseBracket);
             Index = MaybeTuple(parent, expressions);
-            MarkPosition(Target, Index);
+            MarkEndAndEat(CloseBracket);
         }
 
         internal override void ToAxionCode(CodeBuilder c) {

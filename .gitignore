@@ -348,6 +348,7 @@ MigrationBackup/
 ###############################################
 /.idea
 /.sonarqube
+/.consulo
 *.sonarBuild.bat
 *.dotsettings
 

@@ -11,23 +11,23 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
     ///             '(' expr_list [','] ')';
     ///     </c>
     /// </summary>
-    public class TupleExpression : MultipleExpression<Expression> {
+    public class TupleExpression : MultipleExpression {
         public override TypeName ValueType => new TupleTypeName(this, Expressions);
 
         /// <summary>
         ///     Constructor for empty tuple.
         /// </summary>
         internal TupleExpression(
-            SyntaxTreeNode parent,
-            Token          start,
-            Token          end
+            AstNode parent,
+            Token   start,
+            Token   end
         ) : base(parent) {
             Expressions = new NodeList<Expression>(this);
             MarkPosition(start, end);
         }
 
         internal TupleExpression(
-            SyntaxTreeNode       parent,
+            AstNode              parent,
             NodeList<Expression> expressions
         ) : base(parent) {
             Expressions = expressions;
@@ -38,6 +38,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Multiple {
                 );
             }
         }
+
+        public TupleExpression(NodeList<Expression> expressions)
+            : base(expressions) { }
 
         internal override void ToAxionCode(CodeBuilder c) {
             c.Write("(");

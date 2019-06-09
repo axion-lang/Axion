@@ -17,11 +17,11 @@ namespace Axion.Core.Processing {
 
         // Region
         protected void MarkStart(SpannedRegion mark) {
-            Span = new Span(mark.Span.StartPosition, Span.EndPosition);
+            Span = new Span(mark.Span.Start, Span.End);
         }
 
         protected void MarkEnd(SpannedRegion mark) {
-            Span = new Span(Span.StartPosition, mark.Span.EndPosition);
+            Span = new Span(Span.Start, mark.Span.End);
         }
 
         protected void MarkPosition(SpannedRegion mark) {
@@ -29,7 +29,7 @@ namespace Axion.Core.Processing {
         }
 
         protected void MarkPosition(SpannedRegion start, SpannedRegion end) {
-            Span = new Span(start.Span.StartPosition, end.Span.EndPosition);
+            Span = new Span(start.Span.Start, end.Span.End);
         }
 
         [JsonIgnore]
@@ -51,13 +51,13 @@ namespace Axion.Core.Processing {
         }
 
         /// <summary>
-        ///     Converts this token/statement/expression
+        ///     Converts this code span
         ///     to it's string representation in Axion language.
         /// </summary>
-        internal abstract void ToAxionCode(CodeBuilder  c);
-        
+        internal abstract void ToAxionCode(CodeBuilder c);
+
         /// <summary>
-        ///     Converts this token/statement/expression
+        ///     Converts this code span
         ///     to it's string representation in C# language.
         /// </summary>
         internal abstract void ToCSharpCode(CodeBuilder c);

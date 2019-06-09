@@ -57,7 +57,7 @@ namespace Axion.Core.Processing.Lexical {
 
         #region String literal
 
-        private StringToken? ReadString(bool continueUnclosedString) {
+        private StringToken ReadString(bool continueUnclosedString) {
             bool isStringEmpty = ReadStringPrefixes(
                 ref continueUnclosedString,
                 out StringLiteralOptions strOptions,
@@ -325,104 +325,104 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             switch (c) {
-                // unicode character
-                // 16 bits \u n n n n
-                case 'u':
-                // 32 bits \U(n n) n n n n n n
-                case 'U': {
-                    char u             = c;
-                    int  unicodeSymLen = u == 'u' ? 4 : Spec.Unicode32BitHexLength;
-                    Move();
-                    var number = "";
-                    var error  = false;
-                    while (number.Length < unicodeSymLen) {
-                        if (CharIs(Spec.HexadecimalDigits)) {
-                            number += c;
-                            Move();
-                        }
-                        else if (number.Length < unicodeSymLen) {
-                            unit.Blame(
-                                BlameType.TruncatedEscapeSequence,
-                                escapePosition,
-                                Position
-                            );
-                            error = true;
-                            break;
-                        }
-                    }
-
-                    raw = Spec.EscapeMark + "" + u + number;
-
-                    if (!error
-                        && TryParseInt(number, 16, out int val)) {
-                        if (val < 0
-                            || val > 0x10ffff) {
-                            unit.Blame(
-                                BlameType.IllegalUnicodeCharacter,
-                                escapePosition,
-                                Position
-                            );
-                            escaped = raw;
-                        }
-                        else if (val < 0x010000) {
-                            escaped = ((char) val).ToString();
-                        }
-                        else {
-                            escaped = char.ConvertFromUtf32(val);
-                        }
-                    }
-                    else {
-                        escaped = raw;
-                    }
-
-                    break;
-                }
-
-                // TODO: Add \N{name} escape sequences
-                // TODO: Add warnings for meaningless escapes, what can be shortened (e. g. \x00)
-                // hexadecimal character \xn[n][n][n]
-                case 'x': {
-                    Move();
-                    var number = "";
-                    var error  = false;
-                    while (CharIs(Spec.HexadecimalDigits) && number.Length < 4) {
+            // unicode character
+            // 16 bits \u n n n n
+            case 'u':
+            // 32 bits \U(n n) n n n n n n
+            case 'U': {
+                char u             = c;
+                int  unicodeSymLen = u == 'u' ? 4 : Spec.Unicode32BitHexLength;
+                Move();
+                var number = "";
+                var error  = false;
+                while (number.Length < unicodeSymLen) {
+                    if (CharIs(Spec.HexadecimalDigits)) {
                         number += c;
                         Move();
                     }
-
-                    if (number.Length == 0) {
+                    else if (number.Length < unicodeSymLen) {
+                        unit.Blame(
+                            BlameType.TruncatedEscapeSequence,
+                            escapePosition,
+                            Position
+                        );
                         error = true;
-                        unit.Blame(BlameType.InvalidXEscapeFormat, escapePosition, Position);
+                        break;
                     }
+                }
 
-                    raw = Spec.EscapeMark + "x" + number;
-                    if (!error
-                        && TryParseInt(number, 16, out int val)) {
+                raw = Spec.EscapeMark + "" + u + number;
+
+                if (!error
+                    && TryParseInt(number, 16, out int val)) {
+                    if (val < 0
+                        || val > 0x10ffff) {
+                        unit.Blame(
+                            BlameType.IllegalUnicodeCharacter,
+                            escapePosition,
+                            Position
+                        );
+                        escaped = raw;
+                    }
+                    else if (val < 0x010000) {
                         escaped = ((char) val).ToString();
                     }
                     else {
-                        escaped = raw;
+                        escaped = char.ConvertFromUtf32(val);
                     }
-
-                    break;
+                }
+                else {
+                    escaped = raw;
                 }
 
-                // truncated escape & unclosed literal
-                case '\n':
-                case '\r':
-                case Spec.EndOfCode: {
-                    unit.Blame(BlameType.TruncatedEscapeSequence, escapePosition, Position);
-                    raw = escaped = Spec.EscapeMark.ToString();
-                    break;
-                }
+                break;
+            }
 
-                // not a valid escape seq.
-                default: {
-                    unit.Blame(BlameType.InvalidEscapeSequence, escapePosition, Position);
-                    raw = escaped = Spec.EscapeMark + "" + c;
+            // TODO: Add \N{name} escape sequences
+            // TODO: Add warnings for meaningless escapes, what can be shortened (e. g. \x00)
+            // hexadecimal character \xn[n][n][n]
+            case 'x': {
+                Move();
+                var number = "";
+                var error  = false;
+                while (CharIs(Spec.HexadecimalDigits) && number.Length < 4) {
+                    number += c;
                     Move();
-                    break;
                 }
+
+                if (number.Length == 0) {
+                    error = true;
+                    unit.Blame(BlameType.InvalidXEscapeFormat, escapePosition, Position);
+                }
+
+                raw = Spec.EscapeMark + "x" + number;
+                if (!error
+                    && TryParseInt(number, 16, out int val)) {
+                    escaped = ((char) val).ToString();
+                }
+                else {
+                    escaped = raw;
+                }
+
+                break;
+            }
+
+            // truncated escape & unclosed literal
+            case '\n':
+            case '\r':
+            case Spec.EndOfCode: {
+                unit.Blame(BlameType.TruncatedEscapeSequence, escapePosition, Position);
+                raw = escaped = Spec.EscapeMark.ToString();
+                break;
+            }
+
+            // not a valid escape seq.
+            default: {
+                unit.Blame(BlameType.InvalidEscapeSequence, escapePosition, Position);
+                raw = escaped = Spec.EscapeMark + "" + c;
+                Move();
+                break;
+            }
             }
 
             return (raw, escaped);
@@ -445,82 +445,82 @@ namespace Axion.Core.Processing.Lexical {
 
         private static bool HexValue(char ch, out int value) {
             switch (ch) {
-                case '0':
-                case '\x660': {
-                    value = 0;
-                    break;
+            case '0':
+            case '\x660': {
+                value = 0;
+                break;
+            }
+
+            case '1':
+            case '\x661': {
+                value = 1;
+                break;
+            }
+
+            case '2':
+            case '\x662': {
+                value = 2;
+                break;
+            }
+
+            case '3':
+            case '\x663': {
+                value = 3;
+                break;
+            }
+
+            case '4':
+            case '\x664': {
+                value = 4;
+                break;
+            }
+
+            case '5':
+            case '\x665': {
+                value = 5;
+                break;
+            }
+
+            case '6':
+            case '\x666': {
+                value = 6;
+                break;
+            }
+
+            case '7':
+            case '\x667': {
+                value = 7;
+                break;
+            }
+
+            case '8':
+            case '\x668': {
+                value = 8;
+                break;
+            }
+
+            case '9':
+            case '\x669': {
+                value = 9;
+                break;
+            }
+
+            default: {
+                if (ch >= 'a'
+                    && ch <= 'z') {
+                    value = ch - 'a' + 10;
+                }
+                else if (ch >= 'A'
+                         && ch <= 'Z') {
+                    value = ch - 'A' + 10;
+                }
+                else {
+                    value = -1;
+                    return false;
                 }
 
-                case '1':
-                case '\x661': {
-                    value = 1;
-                    break;
-                }
-
-                case '2':
-                case '\x662': {
-                    value = 2;
-                    break;
-                }
-
-                case '3':
-                case '\x663': {
-                    value = 3;
-                    break;
-                }
-
-                case '4':
-                case '\x664': {
-                    value = 4;
-                    break;
-                }
-
-                case '5':
-                case '\x665': {
-                    value = 5;
-                    break;
-                }
-
-                case '6':
-                case '\x666': {
-                    value = 6;
-                    break;
-                }
-
-                case '7':
-                case '\x667': {
-                    value = 7;
-                    break;
-                }
-
-                case '8':
-                case '\x668': {
-                    value = 8;
-                    break;
-                }
-
-                case '9':
-                case '\x669': {
-                    value = 9;
-                    break;
-                }
-
-                default: {
-                    if (ch >= 'a'
-                        && ch <= 'z') {
-                        value = ch - 'a' + 10;
-                    }
-                    else if (ch >= 'A'
-                             && ch <= 'Z') {
-                        value = ch - 'A' + 10;
-                    }
-                    else {
-                        value = -1;
-                        return false;
-                    }
-
-                    break;
-                }
+                break;
+            }
             }
 
             return true;

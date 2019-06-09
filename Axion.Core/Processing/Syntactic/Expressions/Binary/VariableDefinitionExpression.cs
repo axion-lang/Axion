@@ -1,5 +1,6 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Binary {
@@ -15,18 +16,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Binary {
         private TypeName valueType;
 
         public sealed override TypeName ValueType {
-            get => valueType /* BUG here ?? Right?.ValueType*/;
+            get => valueType /* BUG here ?? Right .ValueType*/;
             set => SetNode(ref valueType, value);
         }
 
         public bool IsImmutable { get; }
 
         public VariableDefinitionExpression(
-            SyntaxTreeNode parent,
-            Expression     assignable,
-            TypeName?      type,
-            Expression?    value,
-            bool           immutable = false
+            AstNode    parent,
+            Expression assignable,
+            TypeName   type,
+            Expression value,
+            bool       immutable = false
         ) : base(parent) {
             Left        = assignable;
             ValueType   = type;
@@ -36,7 +37,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Binary {
                 Unit.Blame(BlameType.CannotRedeclareVariableAlreadyDeclaredInThisScope, this);
             }
             else {
-                ParentBlock.Variables.Add(this);
+                ParentBlock.RegisterNamedNode(this);
             }
         }
 

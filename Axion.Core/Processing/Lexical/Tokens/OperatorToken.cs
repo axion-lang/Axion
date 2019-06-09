@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Axion.Core.Specification;
+﻿using Axion.Core.Specification;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -9,18 +8,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     /// </summary>
     public class OperatorToken : Token {
         internal OperatorProperties Properties;
-
-        /// <summary>
-        ///     Constructor for compound word operators.
-        /// </summary>
-        public OperatorToken(OperatorProperties properties, Position startPos, Position endPos)
-            : base(
-                properties.Type,
-                startPos
-            ) {
-            Properties = properties;
-            Span       = new Span(startPos, endPos);
-        }
 
         public OperatorToken(string value, Position startPosition = default)
             : base(
@@ -33,23 +20,15 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             Type = Properties.Type;
         }
 
-        public OperatorToken(TokenType type) : this(
-            type.GetValue()
-        ) { }
+        public OperatorToken(TokenType type) : this(type.GetValue()) { }
     }
 
-    [JsonObject]
     public struct OperatorProperties {
         [JsonProperty]
         internal InputSide InputSide;
 
-        [JsonProperty]
-        internal readonly bool AllowOverload;
-
-        [JsonProperty]
-        internal readonly int Precedence;
-
-        [JsonProperty]
+        public readonly bool      AllowOverload;
+        public readonly int       Precedence;
         public readonly TokenType Type;
 
         internal OperatorProperties(

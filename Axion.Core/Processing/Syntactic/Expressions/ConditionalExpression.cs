@@ -1,13 +1,13 @@
-using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Specification;
+﻿using Axion.Core.Processing.CodeGen;
 using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///         conditional_expr:
-    ///             expr_list ('if' | 'unless') operation_expr ['else' expr_list];
+    ///         cond_expr:
+    ///             'if' preglobal_expr block
+    ///             {'elif' preglobal_expr block}
+    ///             ['else' block]
     ///     </c>
     /// </summary>
     public class ConditionalExpression : Expression {
@@ -18,74 +18,70 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref condition, value);
         }
 
-        private Expression trueExpression;
+        private BlockExpression thenBlock;
 
-        public Expression TrueExpression {
-            get => trueExpression;
-            set => SetNode(ref trueExpression, value);
+        public BlockExpression ThenBlock {
+            get => thenBlock;
+            set => SetNode(ref thenBlock, value);
         }
 
-        private Expression falseExpression;
+        private BlockExpression elseBlock;
 
-        public Expression FalseExpression {
-            get => falseExpression;
-            set => SetNode(ref falseExpression, value);
+        public BlockExpression ElseBlock {
+            get => elseBlock;
+            set => SetNode(ref elseBlock, value);
         }
-
-        public override TypeName ValueType => TrueExpression.ValueType;
 
         /// <summary>
-        ///     Constructs expression from tokens.
+        ///     Constructs from tokens.
         /// </summary>
-        internal ConditionalExpression(SyntaxTreeNode parent, Expression trueExpression) : base(
-            parent
-        ) {
-            bool invert = MaybeEat(KeywordUnless);
-            if (!invert) {
-                Eat(KeywordIf);
+        internal ConditionalExpression(AstNode parent, bool elseIf = false) : base(parent) {
+            if (elseIf) {
+                MarkStart();
+            }
+            else {
+                MarkStartAndEat(KeywordIf);
             }
 
-            MarkStart(Token);
-            TrueExpression = trueExpression;
-            Condition      = ParseOperation(this);
+            Condition = ParseInfixExpr(this);
+            ThenBlock = new BlockExpression(this);
+
             if (MaybeEat(KeywordElse)) {
-                FalseExpression = ParseMultiple(this, expectedTypes: Spec.PreGlobalExprs);
+                ElseBlock = new BlockExpression(this);
             }
-
-            if (invert) {
-                (TrueExpression, FalseExpression) = (FalseExpression, TrueExpression);
+            else if (MaybeEat(KeywordElif)) {
+                ElseBlock = new BlockExpression(this, new ConditionalExpression(this, true));
             }
-
-            MarkEnd(Token);
+            else if (elseIf) {
+                BlameInvalidSyntax(KeywordElse, Peek);
+            }
+            MarkEnd();
         }
 
         /// <summary>
-        ///     Constructs expression without position in source.
+        ///     Constructs without position in source.
         /// </summary>
         public ConditionalExpression(
-            Expression condition,
-            Expression trueExpression,
-            Expression falseExpression
+            Expression      condition,
+            BlockExpression thenBlock,
+            BlockExpression elseBlock
         ) {
-            Condition       = condition;
-            TrueExpression  = trueExpression;
-            FalseExpression = falseExpression;
+            Condition = condition;
+            ThenBlock = thenBlock;
+            ElseBlock = elseBlock;
         }
 
         internal override void ToAxionCode(CodeBuilder c) {
-            c.Write(TrueExpression, " if ", Condition);
-            if (FalseExpression != null) {
-                c.Write(" else ", FalseExpression);
+            c.Write("if ", Condition, " ", ThenBlock);
+            if (ElseBlock != null) {
+                c.Write("else ", ElseBlock);
             }
         }
 
         internal override void ToCSharpCode(CodeBuilder c) {
-            c.Write(Condition, " ? ", TrueExpression, " : ");
-            if (FalseExpression == null) {
-                c.Write("default");
-            }
-            else {
-                c.Write(FalseExpression);
+            c.Write("if (", Condition, ") ", ThenBlock);
+            if (ElseBlock != null) {
+                c.Write("else ", ElseBlock);
             }
         }
     }

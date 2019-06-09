@@ -72,26 +72,26 @@ namespace Axion.Core.Processing.Errors {
 
             var lines = new List<string>();
             // limit rest of code by 5 lines
-            for (int i = Span.StartPosition.Line;
+            for (int i = Span.Start.Line;
                 i < codeLines.Length && lines.Count < 4;
                 i++) {
                 lines.Add(codeLines[i].TrimEnd('\n', Spec.EndOfCode));
             }
 
-            if (lines.Count > codeLines.Length - Span.StartPosition.Line) {
+            if (lines.Count > codeLines.Length - Span.Start.Line) {
                 lines.Add("...");
             }
 
             // first line
             // <line number>| <code line>
             int pointerTailLength =
-                ConsoleCodeEditor.LineNumberWidth + Span.StartPosition.Column;
+                ConsoleCodeEditor.LineNumberWidth + Span.Start.Column;
             int errorTokenLength;
-            if (Span.EndPosition.Line > Span.StartPosition.Line) {
-                errorTokenLength = lines[0].Length - Span.StartPosition.Column;
+            if (Span.End.Line > Span.Start.Line) {
+                errorTokenLength = lines[0].Length - Span.Start.Column;
             }
             else {
-                errorTokenLength = Span.EndPosition.Column - Span.StartPosition.Column;
+                errorTokenLength = Span.End.Column - Span.Start.Column;
             }
 
             // upside arrows (^), should be red-colored
@@ -108,17 +108,15 @@ namespace Axion.Core.Processing.Errors {
             // Drawing ==========
 
             // line with error
-            ConsoleCodeEditor.PrintLineNumber(Span.StartPosition.Line + 1);
+            ConsoleCodeEditor.PrintLineNumber(Span.Start.Line + 1);
             ConsoleUI.WriteLine(lines[0]);
             // error pointer
             ConsoleUI.WriteLine((pointer, color));
 
             // next lines
-            for (int lineIndex = Span.StartPosition.Line + 1;
-                lineIndex < lines.Count;
-                lineIndex++) {
-                ConsoleCodeEditor.PrintLineNumber(lineIndex + 1);
-                ConsoleUI.WriteLine(lines[lineIndex]);
+            for (int i = Span.Start.Line + 1; i < lines.Count; i++) {
+                ConsoleCodeEditor.PrintLineNumber(i + 1);
+                ConsoleUI.WriteLine(lines[i]);
             }
 
             Console.WriteLine();

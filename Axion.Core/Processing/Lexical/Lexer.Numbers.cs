@@ -15,37 +15,37 @@ namespace Axion.Core.Processing.Lexical {
 
                 var isOnBaseLetter = false;
                 switch (c) {
-                    // on second char (base letter, determines radix)
-                    case 'b':
-                    case 'B':
-                        tokenValue.Append(c);
+                // on second char (base letter, determines radix)
+                case 'b':
+                case 'B':
+                    tokenValue.Append(c);
+                    Move();
+                    nOptions = ReadNumberValue(2, out isOnBaseLetter);
+                    break;
+                case 'o':
+                case 'O':
+                    tokenValue.Append(c);
+                    Move();
+                    nOptions = ReadNumberValue(8, out isOnBaseLetter);
+                    break;
+                case 'x':
+                case 'X':
+                    tokenValue.Append(c);
+                    Move();
+                    nOptions = ReadNumberValue(16, out isOnBaseLetter);
+                    break;
+                default: {
+                    // regular num with 0's at beginning
+                    // skip leading zeros
+                    while (c == '0') {
+                        tokenValue.Append("0");
                         Move();
-                        nOptions = ReadNumberValue(2, out isOnBaseLetter);
-                        break;
-                    case 'o':
-                    case 'O':
-                        tokenValue.Append(c);
-                        Move();
-                        nOptions = ReadNumberValue(8, out isOnBaseLetter);
-                        break;
-                    case 'x':
-                    case 'X':
-                        tokenValue.Append(c);
-                        Move();
-                        nOptions = ReadNumberValue(16, out isOnBaseLetter);
-                        break;
-                    default: {
-                        // regular num with 0's at beginning
-                        // skip leading zeros
-                        while (c == '0') {
-                            tokenValue.Append("0");
-                            Move();
-                        }
-
-                        nOptions = ReadNumberValue(10, out bool _);
-                        nOptions.ClearNumber.Insert(0, "0");
-                        break;
                     }
+
+                    nOptions = ReadNumberValue(10, out bool _);
+                    nOptions.ClearNumber.Insert(0, "0");
+                    break;
+                }
                 }
 
                 // '0x', '0b', '0o'

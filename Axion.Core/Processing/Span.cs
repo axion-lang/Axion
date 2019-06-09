@@ -4,16 +4,16 @@ namespace Axion.Core.Processing {
     ///     of code in source.
     /// </summary>
     public struct Span {
-        public readonly Position StartPosition;
-        public readonly Position EndPosition;
+        public readonly Position Start;
+        public readonly Position End;
 
         public Span(Position start, Position end) {
-            StartPosition = start;
-            EndPosition   = end;
+            Start = start;
+            End   = end;
         }
 
         public override string ToString() {
-            return "start: " + StartPosition + ", end: " + EndPosition;
+            return "start: " + Start + ", end: " + End;
         }
 
         public override bool Equals(object obj) {
@@ -21,12 +21,12 @@ namespace Axion.Core.Processing {
         }
 
         public bool Equals(Span other) {
-            return StartPosition == other.StartPosition && EndPosition == other.EndPosition;
+            return Start == other.Start && End == other.End;
         }
 
         public override int GetHashCode() {
             unchecked {
-                return (StartPosition.GetHashCode() * 397) ^ EndPosition.GetHashCode();
+                return (Start.GetHashCode() * 397) ^ End.GetHashCode();
             }
         }
 
@@ -39,7 +39,7 @@ namespace Axion.Core.Processing {
         }
 
         public static implicit operator (Position, Position)(Span span) {
-            return (span.StartPosition, span.EndPosition);
+            return (span.Start, span.End);
         }
 
         public static implicit operator Span((Position, Position) positions) {
@@ -83,6 +83,16 @@ namespace Axion.Core.Processing {
             unchecked {
                 return (Line * 397) ^ Column;
             }
+        }
+
+        public static bool operator >(Position c1, Position c2) {
+            return c1.Line > c2.Line
+                   || c1.Line == c2.Line && c1.Column > c2.Column;
+        }
+
+        public static bool operator <(Position c1, Position c2) {
+            return c1.Line < c2.Line
+                   || c1.Line == c2.Line && c1.Column < c2.Column;
         }
 
         public static bool operator ==(Position c1, Position c2) {

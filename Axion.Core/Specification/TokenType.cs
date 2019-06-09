@@ -11,6 +11,7 @@ namespace Axion.Core.Specification {
     public enum TokenType {
         None,
         Invalid,
+        Unknown,
 
         #region GEN_operators
 
@@ -22,7 +23,7 @@ namespace Axion.Core.Specification {
         OpBitRightShift,
         OpAnd,
         OpOr,
-        OpAs,
+        KeywordAs,
         OpIs,
         OpIsNot,
         OpNot,
@@ -50,8 +51,8 @@ namespace Axion.Core.Specification {
         OpBitAndAssign,
         OpBitOrAssign,
         OpBitXorAssign,
-        OpBitLeftShiftAssign,
-        OpBitRightShiftAssign,
+        OpBitLShiftAssign,
+        OpBitRShiftAssign,
         OpPlusAssign,
         OpMinusAssign,
         OpMultiplyAssign,
@@ -59,53 +60,40 @@ namespace Axion.Core.Specification {
         OpFloorDivideAssign,
         OpTrueDivideAssign,
         OpPowerAssign,
-        OpNullCoalescingAssign,
+        OpQuestionAssign,
         OpAssign,
 
         #endregion
 
         #region GEN_keywords
 
-        KeywordAnyway,
-        KeywordAssert,
-        KeywordAsync,
         KeywordAwait,
         KeywordBreak,
-        KeywordCase,
-        KeywordCatch,
         KeywordClass,
-        KeywordConst,
         KeywordContinue,
-        KeywordDefault,
-        KeywordDelete,
         KeywordDo,
         KeywordElse,
-        KeywordElseIf,
+        KeywordElif,
         KeywordEnum,
-        KeywordExtends,
         KeywordFalse,
         KeywordFn,
         KeywordFor,
         KeywordFrom,
         KeywordIf,
-        KeywordMatch,
-        KeywordMixin,
+        KeywordMacro,
         KeywordModule,
         KeywordNew,
         KeywordNil,
         KeywordNoBreak,
+        KeywordObject,
         KeywordPass,
         KeywordRaise,
         KeywordReturn,
-        KeywordStruct,
         KeywordTrue,
-        KeywordTry,
         KeywordUnless,
-        KeywordUse,
+        KeywordUntil,
         KeywordLet,
         KeywordWhile,
-        KeywordWith,
-        KeywordWhen,
         KeywordYield,
 
         #endregion
@@ -125,9 +113,11 @@ namespace Axion.Core.Specification {
 
         // brackets
         OpenBrace,
+        DoubleOpenBrace,
         OpenBracket,
         OpenParenthesis,
         CloseBrace,
+        DoubleCloseBrace,
         CloseBracket,
         CloseParenthesis,
 
@@ -163,25 +153,25 @@ namespace Axion.Core.Specification {
 
         internal static TokenType GetMatchingBracket(this TokenType type) {
             switch (type) {
-                // open : close
-                case OpenParenthesis:
-                    return CloseParenthesis;
-                case OpenBracket:
-                    return CloseBracket;
-                case OpenBrace:
-                    return CloseBrace;
-                // close : open
-                case CloseParenthesis:
-                    return OpenParenthesis;
-                case CloseBracket:
-                    return OpenBracket;
-                case CloseBrace:
-                    return OpenBrace;
-                // should never be thrown
-                default:
-                    throw new Exception(
-                        "Internal error: Cannot return matching bracket for non-bracket token type."
-                    );
+            // open : close
+            case OpenParenthesis:
+                return CloseParenthesis;
+            case OpenBracket:
+                return CloseBracket;
+            case OpenBrace:
+                return CloseBrace;
+            // close : open
+            case CloseParenthesis:
+                return OpenParenthesis;
+            case CloseBracket:
+                return OpenBracket;
+            case CloseBrace:
+                return OpenBrace;
+            // should never be thrown
+            default:
+                throw new Exception(
+                    "Internal error: Cannot return matching bracket for non-bracket token type."
+                );
             }
         }
     }

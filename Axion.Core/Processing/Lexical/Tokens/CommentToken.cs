@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             // compute position
             int endCol;
             if (IsSingleLine) {
-                endCol = Span.EndPosition.Column + CommentStart.Length;
+                endCol = Span.End.Column + CommentStart.Length;
             }
             else {
                 string[] lines = Value.Split(
@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                     StringSplitOptions.None
                 );
                 int commentMarkLength = MultiCommentStart.Length;
-                endCol = Span.EndPosition.Column;
+                endCol = Span.End.Column;
                 if (lines.Length == 1) {
                     if (isUnclosed) {
                         endCol += commentMarkLength;
@@ -45,7 +45,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                 }
             }
 
-            Span = new Span(Span.StartPosition, (Span.EndPosition.Line, endCol));
+            Span = new Span(Span.Start, (Span.End.Line, endCol));
         }
 
         internal override void ToAxionCode(CodeBuilder c) {

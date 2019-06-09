@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Processing.Syntactic.Statements;
-using Axion.Core.Processing.Syntactic.Statements.Definitions;
+using Axion.Core.Processing.Syntactic.MacroPatterns;
 using Axion.Core.Specification;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,72 +14,120 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Axion.Core.Processing.Syntactic {
-    public class Ast : SyntaxTreeNode {
-        internal readonly SourceUnit     SourceUnit;
-        internal          bool           InLoop;
-        internal          bool           InFinally;
-        internal          bool           InFinallyLoop;
-        internal          int            Index = -1;
-        private           BlockStatement root;
+    public class Ast : BlockExpression {
+        internal readonly SourceUnit            SourceUnit;
+        internal          bool                  InLoop;
+        internal          bool                  InFinally;
+        internal          bool                  InFinallyLoop;
+        internal          int                   Index = -1;
+        internal readonly List<MacroDefinition> Macros;
+        internal readonly List<SpannedRegion>   MacroApplicationParts = new List<SpannedRegion>();
+        internal          Type                  MacroExpectationType;
 
-        public BlockStatement Root {
-            get => root;
-            private set {
-                if (value != null) {
-                    value.Parent = this;
-                }
-
-                root = value;
-            }
-        }
-
-        private readonly Stack<IFunctionNode> functions = new Stack<IFunctionNode>();
-
-        public IFunctionNode? CurrentFunction {
-            get {
-                if (functions != null
-                    && functions.Count > 0) {
-                    return functions.Peek();
-                }
-
-                return null;
-            }
-        }
-
-        public IFunctionNode? PopFunction() {
-            if (functions != null
-                && functions.Count > 0) {
-                return functions.Pop();
-            }
-
-            return null;
-        }
-
-        public void PushFunction(IFunctionNode function) {
-            functions.Push(function);
-        }
-
+        /// <summary>
+        ///     Constructor for root AST block.
+        /// </summary>
         internal Ast(SourceUnit unit) {
             SourceUnit = unit;
-            Root       = new BlockStatement(this);
+            Parent     = this;
+            Items      = new NodeList<Expression>(this);
+            Macros = new List<MacroDefinition> {
+                // do..while/until
+                new MacroDefinition(
+                    new TokenPattern("do"),
+                    new ExpressionPattern(typeof(BlockExpression)),
+                    new OrPattern(new TokenPattern("while"), new TokenPattern("until")),
+                    new ExpressionPattern(ParseInfixExpr)
+                ),
+                // until..
+                new MacroDefinition(
+                    new TokenPattern("until"),
+                    new ExpressionPattern(ParseInfixExpr),
+                    new ExpressionPattern(typeof(BlockExpression))
+                ),
+                new MacroDefinition(
+                    new TokenPattern("for"),
+                    new ExpressionPattern(ParseAtomExpr),
+                    new TokenPattern("in"),
+                    new ExpressionPattern(ParseInfixExpr),
+                    new ExpressionPattern(typeof(BlockExpression))
+                ),
+                // unless..elif..else
+                new MacroDefinition(
+                    new TokenPattern("unless"),
+                    new ExpressionPattern(ParseInfixExpr),
+                    new ExpressionPattern(typeof(BlockExpression)),
+                    new OptionalPattern(
+                        new OptionalPattern(
+                            new MultiplePattern(
+                                new TokenPattern("elif"),
+                                new ExpressionPattern(ParseInfixExpr),
+                                new ExpressionPattern(typeof(BlockExpression))
+                            )
+                        ),
+                        new CascadePattern(
+                            new TokenPattern("else"),
+                            new ExpressionPattern(typeof(BlockExpression))
+                        )
+                    )
+                ),
+                // list initializer
+                new MacroDefinition(
+                    new TokenPattern("["),
+                    new OptionalPattern(new ExpressionPattern(typeof(Expression))),
+                    new TokenPattern("]")
+                ),
+                // type_initializer_expr:
+                //     'new' type ['(' arg_list ')'] ['{' '}']
+                new MacroDefinition(
+                    new TokenPattern("new"),
+                    new ExpressionPattern(typeof(TypeName)),
+                    new OptionalPattern(
+                        new TokenPattern("("),
+                        new ExpressionPattern(typeof(Expression)),
+                        new TokenPattern(")")
+                    ),
+                    new OptionalPattern(
+                        new TokenPattern("{"),
+                        new OptionalPattern(
+                            new ExpressionPattern(typeof(Expression)),
+                            new OptionalPattern(
+                                new TokenPattern(","),
+                                new MultiplePattern(new ExpressionPattern(typeof(Expression)))
+                            ),
+                            new ExpressionPattern(typeof(Expression))
+                        ),
+                        new TokenPattern("}")
+                    )
+                ),
+                new MacroDefinition(
+                    new ExpressionPattern(typeof(Expression)),
+                    new TokenPattern("match"),
+                    new MultiplePattern(
+                        new TokenPattern("@"),
+                        new ExpressionPattern(typeof(Expression)),
+                        new TokenPattern("=>"),
+                        new ExpressionPattern(typeof(Expression))
+                    )
+                )
+            };
         }
 
         internal void Parse() {
-            Parent = this;
             while (!MaybeEat(TokenType.End)) {
-                Root.Statements.AddRange(Statement.ParseStmt(this));
+                Items.AddRange(ParseCascade(this));
             }
         }
 
         internal CSharpSyntaxNode ToCSharp() {
-            if (Root.Statements.Count == 0) {
+            if (Items.Count == 0) {
                 return CompilationUnit();
             }
 
             var b = new CodeBuilder(OutLang.CSharp);
 
             if (SourceUnit.ProcessingMode == SourceProcessingMode.Interpret) {
-                foreach (Statement stmt in Root.Statements) {
+                foreach (Expression stmt in Items) {
                     if (stmt is ModuleDefinition) {
                         Unit.Blame(BlameType.ModulesAreNotSupportedInInterpretationMode, stmt);
                     }
@@ -89,20 +139,20 @@ namespace Axion.Core.Processing.Syntactic {
                 }
             }
             else {
-                var rootStmts = new NodeList<Statement>(this);
-                foreach (Statement stmt in Root.Statements) {
+                var rootItems = new NodeList<Expression>(this);
+                foreach (Expression stmt in Items) {
                     if (stmt is ModuleDefinition) {
                         b.Write(stmt);
                     }
                     else if (stmt is ClassDefinition) {
-                        b.WriteLine("namespace _Root_ {");
+                        b.WriteLine("namespace _ {");
                         b.Writer.Indent++;
                         b.Write(stmt);
                         b.Writer.Indent--;
                         b.Write("}");
                     }
                     else if (stmt is FunctionDefinition) {
-                        b.WriteLine("namespace _Root_ {");
+                        b.WriteLine("namespace _ {");
                         b.Writer.Indent++;
                         b.WriteLine("public partial class _RootClass_ {");
                         b.Writer.Indent++;
@@ -113,7 +163,7 @@ namespace Axion.Core.Processing.Syntactic {
                         b.Write("}");
                     }
                     else {
-                        rootStmts.Add(stmt);
+                        rootItems.Add(stmt);
                     }
                 }
 
@@ -121,7 +171,7 @@ namespace Axion.Core.Processing.Syntactic {
                 b.WriteLine(
                     new FunctionDefinition(
                         new SimpleNameExpression("Main"),
-                        block: new BlockStatement(rootStmts),
+                        block: new BlockExpression(rootItems),
                         returnType: new SimpleTypeName("void")
                     )
                 );
@@ -144,14 +194,6 @@ namespace Axion.Core.Processing.Syntactic {
                    )
                    .NormalizeWhitespace();
             return unit;
-        }
-
-        internal override void ToAxionCode(CodeBuilder c) {
-            c.AddJoin("\n", Root.Statements);
-        }
-
-        internal override void ToCSharpCode(CodeBuilder c) {
-            c.Write(Root);
         }
     }
 }

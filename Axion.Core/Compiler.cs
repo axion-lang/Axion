@@ -41,7 +41,7 @@ namespace Axion.Core {
         /// <summary>
         ///     Path to directory where generated output is located.
         /// </summary>
-        public static readonly string OutputDirectory = WorkDirectory + "output\\";
+        public static readonly string OutputDirectory = Path.Combine(WorkDirectory, "output");
 
         /// <summary>
         ///     <see cref="Assembly" /> of <see cref="Core" /> namespace.
@@ -163,15 +163,15 @@ namespace Axion.Core {
                 string input    = rawInput.Trim().ToUpper();
 
                 switch (input) {
-                    case "":
-                        // skip empty commands
-                        ConsoleUI.ClearLine();
-                        continue;
-                    case "EXIT":
-                    case "QUIT":
-                        // exit from interpreter to main loop
-                        Logger.Info("\nInteractive interpreter closed.");
-                        return;
+                case "":
+                    // skip empty commands
+                    ConsoleUI.ClearLine();
+                    continue;
+                case "EXIT":
+                case "QUIT":
+                    // exit from interpreter to main loop
+                    Logger.Info("\nInteractive interpreter closed.");
+                    return;
                 }
 
                 // TODO (UI) parse "help(module)" argument
@@ -293,47 +293,45 @@ namespace Axion.Core {
             }
 
             switch (unit.ProcessingMode) {
-                case SourceProcessingMode.Interpret: {
-                    Logger.Task("Interpretation");
-                    try {
-                        string csCode = unit.Ast.ToCSharp().ToFullString();
-                        if (unit.Options.HasFlag(
-                            SourceProcessingOptions.SyntaxAnalysisDebugOutput
-                        )) {
-                            Logger.Step("Converter debug output:");
-                            Logger.Log(csCode);
-                        }
-
-                        Logger.Step("Program output:");
-                        ScriptState result = await CSharpScript.RunAsync(
-                            csCode,
-                            ScriptOptions.Default.AddReferences(Spec.CSharp.DefaultImports)
-                        );
-                        ConsoleUI.WriteLine();
-                        Logger.Step("Result: " + (result.ReturnValue ?? "<nothing>"));
-                    }
-                    catch (CompilationErrorException e) {
-                        Logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
+            case SourceProcessingMode.Interpret: {
+                Logger.Task("Interpretation");
+                try {
+                    string csCode = unit.Ast.ToCSharp().ToFullString();
+                    if (unit.Options.HasFlag(SourceProcessingOptions.SyntaxAnalysisDebugOutput)) {
+                        Logger.Step("Converter debug output:");
+                        Logger.Log(csCode);
                     }
 
-                    break;
+                    Logger.Step("Program output:");
+                    ScriptState result = await CSharpScript.RunAsync(
+                        csCode,
+                        ScriptOptions.Default.AddReferences(Spec.CSharp.DefaultImports)
+                    );
+                    ConsoleUI.WriteLine();
+                    Logger.Step("Result: " + (result.ReturnValue ?? "<nothing>"));
+                }
+                catch (CompilationErrorException e) {
+                    Logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
                 }
 
-                case SourceProcessingMode.ConvertCS: {
-                    Logger.Warn("Conversion to 'C#' is not fully implemented yet");
-                    Logger.Log(unit.Ast.ToCSharp().ToFullString());
-                    break;
-                }
+                break;
+            }
 
-                case SourceProcessingMode.ConvertC: {
-                    Logger.Error("Conversion to 'C' is not implemented yet");
-                    break;
-                }
+            case SourceProcessingMode.ConvertCS: {
+                Logger.Warn("Conversion to 'C#' is not fully implemented yet");
+                Logger.Log(unit.Ast.ToCSharp().ToFullString());
+                break;
+            }
 
-                default: {
-                    Logger.Error($"'{unit.ProcessingMode:G}' mode not implemented yet");
-                    break;
-                }
+            case SourceProcessingMode.ConvertC: {
+                Logger.Error("Conversion to 'C' is not implemented yet");
+                break;
+            }
+
+            default: {
+                Logger.Error($"'{unit.ProcessingMode:G}' mode not implemented yet");
+                break;
+            }
             }
         }
 
@@ -414,22 +412,27 @@ namespace Axion.Core {
         }
 
         private static bool IsEmptyCollection(JsonProperty property, object target) {
-            object value = property.ValueProvider.GetValue(target);
-            if (value is ICollection collection && collection.Count == 0) {
-                return true;
-            }
+            try {
+                object value = property.ValueProvider.GetValue(target);
+                if (value is ICollection collection && collection.Count == 0) {
+                    return true;
+                }
 
-            if (!typeof(IEnumerable).IsAssignableFrom(property.PropertyType)) {
+                if (!typeof(IEnumerable).IsAssignableFrom(property.PropertyType)) {
+                    return false;
+                }
+
+                PropertyInfo countProp = property.PropertyType.GetProperty("Count");
+                if (countProp == null) {
+                    return false;
+                }
+
+                var count = (int) countProp.GetValue(value, null);
+                return count == 0;
+            }
+            catch {
                 return false;
             }
-
-            PropertyInfo countProp = property.PropertyType.GetProperty("Count");
-            if (countProp == null) {
-                return false;
-            }
-
-            var count = (int) countProp.GetValue(value, null);
-            return count == 0;
         }
     }
 }

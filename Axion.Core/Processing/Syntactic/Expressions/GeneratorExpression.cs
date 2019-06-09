@@ -19,14 +19,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public override TypeName ValueType => Comprehension.ValueType;
 
-        public GeneratorExpression(SyntaxTreeNode parent, ForComprehension comprehension) : base(
-            parent
-        ) {
-            Comprehension = comprehension;
+        public GeneratorExpression(AstNode parent, ForComprehension comprehension) : base(parent) {
+            MarkPosition(Comprehension = comprehension);
         }
 
         public GeneratorExpression(ForComprehension comprehension) {
-            Comprehension = comprehension;
+            MarkPosition(Comprehension = comprehension);
         }
 
         internal override void ToAxionCode(CodeBuilder c) {
