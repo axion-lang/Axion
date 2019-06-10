@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FF1uctus%2FAxion.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FF1uctus%2FAxion?ref=badge_shield)
+
 <img align="center" src="Other/Graphics/Axion_Mini.png" />
 
 <h2 align="center">Welcome to Axion programming language toolset</h2>
@@ -38,3 +40,7 @@ in bin folder and type `-h` in console to get support
 about arguments for compiler CLI interface.
 
 ### You can take a look at syntax in [project wiki](https://github.com/F1uctus/Axion/wiki)
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FF1uctus%2FAxion.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FF1uctus%2FAxion?ref=badge_large)
