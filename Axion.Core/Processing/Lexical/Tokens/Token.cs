@@ -2,20 +2,21 @@
 using System.Diagnostics;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Source;
+using Axion.Core.Processing.Syntactic.TypeNames;
 using Axion.Core.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     [JsonObject]
     public class Token : SpannedRegion {
-        [JsonProperty(Order = 1)]
-        public TokenType Type { get; protected internal set; }
+        [JsonProperty(Order = 1)] public TokenType Type { get; set; }
 
-        [JsonProperty(Order = 2)]
-        public string Value { get; private set; }
+        [JsonProperty(Order = 2)] public string Value { get; private set; }
 
-        [JsonProperty(Order = 3)]
-        public string EndWhitespaces { get; private set; } = "";
+        [JsonProperty(Order = 3)] public string EndWhitespaces { get; private set; } = "";
+
+        public virtual TypeName ValueType { get; }
 
         /// <summary>
         ///     Constructor for token that has no length
@@ -65,7 +66,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         /// <summary>
         ///     Checks if token is of any
-        ///     of specified <paramref name="types"/>.
+        ///     of specified <paramref name="types" />.
         /// </summary>
         public bool Is(params TokenType[] types) {
             for (var i = 0; i < types.Length; i++) {
@@ -78,7 +79,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
 
         /// <summary>
-        ///     Appends specified <paramref name="value"/>
+        ///     Appends specified <paramref name="value" />
         ///     to token's value.
         /// </summary>
         internal Token AppendValue(string value) {
@@ -101,7 +102,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
 
         /// <summary>
-        ///     Appends specified <paramref name="space"/>
+        ///     Appends specified <paramref name="space" />
         ///     to token's end whitespaces.
         /// </summary>
         public Token AppendWhitespace(string space) {
@@ -145,18 +146,18 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         public override string ToString() {
             return Type
-                   + " :: "
-                   + Value.Replace("\r", "\\r")
-                          .Replace("\n", "\\n")
-                          .Replace("\t", "\\t")
-                   + " :: "
-                   + Span;
+                 + " :: "
+                 + Value.Replace("\r", "\\r")
+                        .Replace("\n", "\\n")
+                        .Replace("\t", "\\t")
+                 + " :: "
+                 + Span;
         }
 
         protected bool Equals(Token other) {
             return Type == other.Type
-                   && string.Equals(Value, other.Value)
-                   && string.Equals(EndWhitespaces, other.EndWhitespaces);
+                && string.Equals(Value,          other.Value)
+                && string.Equals(EndWhitespaces, other.EndWhitespaces);
         }
 
         public override bool Equals(object obj) {

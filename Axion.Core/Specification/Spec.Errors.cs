@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Axion.Core.Processing.Errors;
+using Axion.Core.Processing.Syntactic;
 using static Axion.Core.Processing.Errors.BlameSeverity;
 using static Axion.Core.Processing.Errors.BlameType;
 
@@ -76,23 +77,23 @@ namespace Axion.Core.Specification {
 
         internal static BlameType InvalidNumberLiteralError(int radix) {
             switch (radix) {
-                case 2:
-                    return InvalidBinaryLiteral;
-                case 8:
-                    return InvalidOctalLiteral;
-                case 10:
-                    return InvalidNumberLiteral;
-                case 16:
-                    return InvalidHexadecimalLiteral;
-                default:
-                    throw new NotSupportedException();
+            case 2:
+                return InvalidBinaryLiteral;
+            case 8:
+                return InvalidOctalLiteral;
+            case 10:
+                return InvalidNumberLiteral;
+            case 16:
+                return InvalidHexadecimalLiteral;
+            default:
+                throw new NotSupportedException();
             }
         }
 
         internal static string CannotInferTypeError(Type exprType) {
             return "Cannot infer type of "
-                   + Utilities.GetExprFriendlyName(exprType.Name)
-                   + " due to invalid context";
+                 + Expression.GetFriendlyName(exprType.Name)
+                 + " due to invalid context";
         }
     }
 }

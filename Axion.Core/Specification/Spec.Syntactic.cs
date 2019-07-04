@@ -2,19 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Processing.Syntactic.Expressions.Atomic;
-using Axion.Core.Processing.Syntactic.Expressions.Binary;
-using Axion.Core.Processing.Syntactic.Expressions.Multiple;
-using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Syntactic;
+using Axion.Core.Processing.Syntactic.Atomic;
+using Axion.Core.Processing.Syntactic.Binary;
+using Axion.Core.Processing.Syntactic.Definitions;
+using Axion.Core.Processing.Syntactic.TypeNames;
 using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Specification {
     public partial class Spec {
-        internal static TypeName CharType   => new SimpleTypeName("Char");
+        #region Types
+
+        internal static TypeName CharType => new SimpleTypeName("Char");
         internal static TypeName StringType => new SimpleTypeName("String");
         internal static TypeName UnknownBracesCollectionType => new SimpleTypeName("Map|Set?");
-        
+
         internal static TypeName UnknownListType => ListType(new SimpleTypeName("?"));
 
         internal static TypeName NumberType(NumberOptions options) {
@@ -42,7 +44,7 @@ namespace Axion.Core.Specification {
         internal static TypeName MapType(TypeName itemType) {
             return new GenericTypeName(new SimpleTypeName("Map"), itemType);
         }
-        
+
         internal static TypeName SetType(TypeName itemType) {
             return new GenericTypeName(new SimpleTypeName("Set"), itemType);
         }
@@ -58,12 +60,7 @@ namespace Axion.Core.Specification {
             );
         }
 
-        /// <summary>
-        ///     Types of token, that can start a 'block'.
-        /// </summary>
-        internal static readonly TokenType[] BlockStarters = {
-            Colon, Newline, Indent, OpenBrace
-        };
+        #endregion
 
         /// <summary>
         ///     Type of tokens, that are treated as
@@ -79,6 +76,8 @@ namespace Axion.Core.Specification {
         };
 
         internal static readonly TokenType[] NeverExprStartTypes = {
+            #region gen_never_expression_starters
+
             OpAssign,
             OpPlusAssign,
             OpMinusAssign,
@@ -92,7 +91,6 @@ namespace Axion.Core.Specification {
             OpBitRShiftAssign,
             OpPowerAssign,
             OpFloorDivideAssign,
-            Indent,
             Outdent,
             Newline,
             End,
@@ -104,7 +102,11 @@ namespace Axion.Core.Specification {
             KeywordFor,
             OpIn,
             KeywordIf
+
+            #endregion gen_never_expression_starters
         };
+
+        #region Expression groups
 
         internal static readonly Type[] DecoratorExprs = {
             typeof(NameExpression),
@@ -132,7 +134,6 @@ namespace Axion.Core.Specification {
                     new[] {
                         typeof(AwaitExpression),
                         typeof(YieldExpression),
-                        typeof(BraceCollectionExpression),
                         typeof(FunctionCallExpression),
                         typeof(ConstantExpression),
                         typeof(ParenthesizedExpression)
@@ -170,15 +171,26 @@ namespace Axion.Core.Specification {
             typeof(UnaryExpression),
             typeof(BinaryExpression)
         };
-        
-        internal static readonly Dictionary<Type[], string> ExprGroupNames = new Dictionary<Type[], string> {
-            { DecoratorExprs,           "decorator" },
-            { VariableLeftExprs,        "variable name(s)" },
-            { AssignableExprs,          "assignable" },
-            { AtomExprs,                "atomic value" },
-            { InfixExprs,               "infix expression" },
-            { GlobalExprs,              "any valid expression" },
-            { StatementExprs,           "statement" }
+
+        internal static readonly Type[] DefinitionExprs = {
+            typeof(ClassDefinition),
+            typeof(EnumDefinition),
+            typeof(FunctionDefinition),
+            typeof(MacroDefinition),
+            typeof(ModuleDefinition),
+            typeof(ObjectDefinition)
         };
+
+        internal static readonly Dictionary<Type[], string> ExprGroupNames = new Dictionary<Type[], string> {
+            { DecoratorExprs, "decorator" },
+            { VariableLeftExprs, "variable name(s)" },
+            { AssignableExprs, "assignable" },
+            { AtomExprs, "atomic value" },
+            { InfixExprs, "infix expression" },
+            { GlobalExprs, "any valid expression" },
+            { StatementExprs, "statement" }
+        };
+
+        #endregion
     }
 }

@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Syntactic.MacroPatterns {
             Right = right;
         }
 
-        public bool Match(AstNode parent) {
+        public bool Match(Expression parent) {
             return Left.Match(parent) || Right.Match(parent);
         }
     }

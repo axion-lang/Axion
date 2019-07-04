@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Axion.Core.Processing;
 using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Source;
 using Axion.Core.Specification;
 using CodeConsole;
 using static System.ConsoleColor;
@@ -50,6 +50,18 @@ namespace Axion.Core.Visual {
             return values;
         }
 
+        public List<ColoredValue> Highlight(string code) {
+            var unit  = new SourceUnit(code);
+            var lexer = new Lexer(unit);
+            lexer.Process();
+
+            var values = new List<ColoredValue>();
+
+            HighlightTokens(unit.Tokens, values, false);
+            MergeNeighbourColors(values);
+            return values;
+        }
+
         private void HighlightTokens(
             List<Token>        tokens,
             List<ColoredValue> values,
@@ -58,10 +70,10 @@ namespace Axion.Core.Visual {
             foreach (Token token in tokens) {
                 bool tokenHighlightingNotNeeded =
                     !foundRenderStart
-                    && (token.Span.End.Line < renderPosition.Y
-                        || token.Span.End.Line == renderPosition.Y
-                        && token.Span.End.Column <= renderPosition.X
-                        || token.Is(End));
+                 && (token.Span.End.Line < renderPosition.Y
+                  || token.Span.End.Line   == renderPosition.Y
+                  && token.Span.End.Column <= renderPosition.X
+                  || token.Is(End));
                 // BUG (UI) if code has error before that token, and it's fixed with next char, it'll be highlighted improperly (e. g. type '0..10')
 
                 if (tokenHighlightingNotNeeded) {
@@ -103,7 +115,7 @@ namespace Axion.Core.Visual {
                     );
                 }
                 else if (token is StringToken strToken
-                         && strToken.Interpolations.Count > 0) {
+                      && strToken.Interpolations.Count > 0) {
                     HighlightInterpolatedString(strToken, values);
                 }
                 else {
@@ -159,7 +171,7 @@ namespace Axion.Core.Visual {
             for (var i = 0; i < token.Value.Length; i++) {
                 char c = token.Value[i];
                 if (interpolationI < token.Interpolations.Count
-                    && i == token.Interpolations[interpolationI].StartIndex) {
+                 && i              == token.Interpolations[interpolationI].StartIndex) {
                     Interpolation interpolation = token.Interpolations[interpolationI];
                     values.Add(new ColoredValue("{", White));
                     HighlightTokens(interpolation.Tokens, values, true);

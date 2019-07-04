@@ -68,7 +68,7 @@ namespace Axion.Core.Processing.Lexical {
         ///     Returns string of specified [<see cref="length" />]
         ///     starting from current character.
         /// </summary>
-        private string PeekPiece(int length) {
+        private string PeekNext(int length) {
             if (charIdx + length < unit.Code.Length) {
                 return unit.Code.Substring(charIdx, length);
             }
@@ -78,17 +78,17 @@ namespace Axion.Core.Processing.Lexical {
 
         /// <summary>
         ///     Checks if next piece of string
-        ///     (from current char) is equal to <paramref name="expected"/>.
+        ///     (from current char) is equal to <paramref name="expected" />.
         /// </summary>
         private bool NextIs(string expected) {
-            return PeekPiece(expected.Length) == expected;
+            return PeekNext(expected.Length) == expected;
         }
 
         /// <summary>
         ///     Checks if next piece of string
-        ///     (from current char) is equal to <paramref name="expected"/>.
+        ///     (from current char) is equal to <paramref name="expected" />.
         /// </summary>
-        private bool CharIs(params char[] expected) {
+        private bool NextIs(params char[] expected) {
             for (var i = 0; i < expected.Length; i++) {
                 if (c == expected[i]) {
                     return true;

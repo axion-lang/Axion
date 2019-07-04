@@ -48,8 +48,8 @@ namespace Axion.Core.Processing {
     }
 
     /// <summary>
-    ///     (line, column) position
-    ///     of code in source.
+    ///     (line, column) position of code in source.
+    ///     Convertible to (int, int) 2-tuple.
     /// </summary>
     public struct Position {
         /// <summary>
@@ -68,7 +68,7 @@ namespace Axion.Core.Processing {
         }
 
         public override string ToString() {
-            return "line " + (Line + 1) + ", column " + (Column + 1);
+            return $"{Line + 1}, {Column + 1}";
         }
 
         public override bool Equals(object obj) {
@@ -87,12 +87,12 @@ namespace Axion.Core.Processing {
 
         public static bool operator >(Position c1, Position c2) {
             return c1.Line > c2.Line
-                   || c1.Line == c2.Line && c1.Column > c2.Column;
+                || c1.Line == c2.Line && c1.Column > c2.Column;
         }
 
         public static bool operator <(Position c1, Position c2) {
             return c1.Line < c2.Line
-                   || c1.Line == c2.Line && c1.Column < c2.Column;
+                || c1.Line == c2.Line && c1.Column < c2.Column;
         }
 
         public static bool operator ==(Position c1, Position c2) {

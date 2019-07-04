@@ -1,22 +1,7 @@
-## Reads next token from character stream.
-## Every time that method invoked, `CharStream.C`
-## property should be on first letter of current new reading token.
-@private
-fn NextToken() => Token
+fn NextToken => Token
     # reset token properties
     tokenStartPosition = Stream.Position
     tokenValue.Clear()
-
-    %if DEBUG
-
-    if tokens.Count != 0 and tokens[tokens.Count - 1].Type != TokenType.Outdent
-        last = tokens[tokens.Count - 1]
-        Debug.Assert (
-            tokenStartPosition ==
-            (last.Span.EndPosition.Line, last.Span.EndPosition.Column + last.Whitespaces.Length)
-        )
-
-    %endif
 
     if c == Spec.EndOfStream
         return new EndOfStreamToken (tokenStartPosition)

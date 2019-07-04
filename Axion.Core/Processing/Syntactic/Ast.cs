@@ -1,28 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Processing.Syntactic.Expressions.Atomic;
-using Axion.Core.Processing.Syntactic.Expressions.Definitions;
-using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Source;
+using Axion.Core.Processing.Syntactic.Atomic;
+using Axion.Core.Processing.Syntactic.Definitions;
 using Axion.Core.Processing.Syntactic.MacroPatterns;
+using Axion.Core.Processing.Syntactic.TypeNames;
 using Axion.Core.Specification;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Axion.Core.Specification.TokenType;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Axion.Core.Processing.Syntactic {
+    /// <summary>
+    ///     Abstract Syntax Tree of
+    ///     file with Axion source code.
+    /// </summary>
     public class Ast : BlockExpression {
         internal readonly SourceUnit            SourceUnit;
-        internal          bool                  InLoop;
-        internal          bool                  InFinally;
-        internal          bool                  InFinallyLoop;
-        internal          int                   Index = -1;
-        internal readonly List<MacroDefinition> Macros;
+        internal          int                   CurrentTokenIndex     = -1;
+        internal readonly List<MacroDefinition> Macros                = new List<MacroDefinition>();
         internal readonly List<SpannedRegion>   MacroApplicationParts = new List<SpannedRegion>();
-        internal          Type                  MacroExpectationType;
 
         /// <summary>
         ///     Constructor for root AST block.
@@ -31,90 +34,107 @@ namespace Axion.Core.Processing.Syntactic {
             SourceUnit = unit;
             Parent     = this;
             Items      = new NodeList<Expression>(this);
-            Macros = new List<MacroDefinition> {
-                // do..while/until
+        }
+
+        internal TokenPattern NewTokenPattern(string keyword) {
+            if (keyword.All(Spec.IsIdPart)) {
+                for (int i = Math.Max(0, CurrentTokenIndex); i < Unit.Tokens.Count; i++) {
+                    Token token = Unit.Tokens[i];
+                    if (token.Value == keyword
+                     && !Spec.Keywords.ContainsKey(token.Value)
+                     && !Spec.Operators.ContainsKey(token.Value)) {
+                        token.Type = CustomKeyword;
+                    }
+                }
+            }
+
+            return new TokenPattern(keyword);
+        }
+
+        internal void Parse() {
+            Macros.Add(
                 new MacroDefinition(
-                    new TokenPattern("do"),
+                    NewTokenPattern("do"),
                     new ExpressionPattern(typeof(BlockExpression)),
-                    new OrPattern(new TokenPattern("while"), new TokenPattern("until")),
+                    new OrPattern(NewTokenPattern("while"), NewTokenPattern("until")),
                     new ExpressionPattern(ParseInfixExpr)
-                ),
-                // until..
+                ));
+            Macros.Add(
                 new MacroDefinition(
-                    new TokenPattern("until"),
+                    NewTokenPattern("until"),
                     new ExpressionPattern(ParseInfixExpr),
                     new ExpressionPattern(typeof(BlockExpression))
-                ),
+                ));
+            Macros.Add(
                 new MacroDefinition(
-                    new TokenPattern("for"),
+                    NewTokenPattern("for"),
                     new ExpressionPattern(ParseAtomExpr),
-                    new TokenPattern("in"),
+                    NewTokenPattern("in"),
                     new ExpressionPattern(ParseInfixExpr),
                     new ExpressionPattern(typeof(BlockExpression))
-                ),
-                // unless..elif..else
+                ));
+            Macros.Add(
                 new MacroDefinition(
-                    new TokenPattern("unless"),
+                    NewTokenPattern("unless"),
                     new ExpressionPattern(ParseInfixExpr),
                     new ExpressionPattern(typeof(BlockExpression)),
                     new OptionalPattern(
                         new OptionalPattern(
                             new MultiplePattern(
-                                new TokenPattern("elif"),
+                                NewTokenPattern("elif"),
                                 new ExpressionPattern(ParseInfixExpr),
                                 new ExpressionPattern(typeof(BlockExpression))
                             )
                         ),
                         new CascadePattern(
-                            new TokenPattern("else"),
+                            NewTokenPattern("else"),
                             new ExpressionPattern(typeof(BlockExpression))
                         )
                     )
-                ),
-                // list initializer
+                ));
+            Macros.Add(
                 new MacroDefinition(
-                    new TokenPattern("["),
+                    NewTokenPattern("["),
                     new OptionalPattern(new ExpressionPattern(typeof(Expression))),
-                    new TokenPattern("]")
-                ),
-                // type_initializer_expr:
-                //     'new' type ['(' arg_list ')'] ['{' '}']
+                    NewTokenPattern("]")
+                ));
+            Macros.Add(
                 new MacroDefinition(
-                    new TokenPattern("new"),
+                    NewTokenPattern("new"),
                     new ExpressionPattern(typeof(TypeName)),
                     new OptionalPattern(
-                        new TokenPattern("("),
+                        NewTokenPattern("("),
                         new ExpressionPattern(typeof(Expression)),
-                        new TokenPattern(")")
+                        NewTokenPattern(")")
                     ),
                     new OptionalPattern(
-                        new TokenPattern("{"),
+                        NewTokenPattern("{"),
                         new OptionalPattern(
                             new ExpressionPattern(typeof(Expression)),
                             new OptionalPattern(
-                                new TokenPattern(","),
-                                new MultiplePattern(new ExpressionPattern(typeof(Expression)))
+                                new MultiplePattern(
+                                    NewTokenPattern(","),
+                                    new ExpressionPattern(typeof(Expression))
+                                )
                             ),
                             new ExpressionPattern(typeof(Expression))
                         ),
-                        new TokenPattern("}")
+                        NewTokenPattern("}")
                     )
-                ),
+                ));
+            Macros.Add(
                 new MacroDefinition(
                     new ExpressionPattern(typeof(Expression)),
-                    new TokenPattern("match"),
+                    NewTokenPattern("match"),
                     new MultiplePattern(
-                        new TokenPattern("@"),
+                        NewTokenPattern("|"),
                         new ExpressionPattern(typeof(Expression)),
-                        new TokenPattern("=>"),
+                        NewTokenPattern("=>"),
                         new ExpressionPattern(typeof(Expression))
                     )
-                )
-            };
-        }
+                ));
 
-        internal void Parse() {
-            while (!MaybeEat(TokenType.End)) {
+            while (!MaybeEat(End)) {
                 Items.AddRange(ParseCascade(this));
             }
         }
@@ -135,7 +155,7 @@ namespace Axion.Core.Processing.Syntactic {
                         b.Write(stmt);
                     }
 
-                    b.WriteLine();
+                    b.WriteLine(";");
                 }
             }
             else {

@@ -10,11 +10,12 @@ namespace Axion.Core.Processing.Syntactic.MacroPatterns {
             Pattern = new CascadePattern(patterns);
         }
 
-        public bool Match(AstNode parent) {
+        public bool Match(Expression parent) {
             var matchCount = 0;
             while (Pattern.Match(parent)) {
                 matchCount++;
             }
+
             return matchCount > 0;
         }
     }

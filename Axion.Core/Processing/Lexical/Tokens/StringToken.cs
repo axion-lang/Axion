@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Syntactic.TypeNames;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
@@ -8,12 +8,12 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents a 'string' literal.
     /// </summary>
     public class StringToken : Token {
-        public          string               EscapedValue   { get; }
-        public          bool                 IsUnclosed     { get; }
-        public          string               TrailingQuotes { get; }
-        public          StringLiteralOptions Options        { get; }
-        public          List<Interpolation>  Interpolations { get; }
-        public override TypeName             ValueType      => Spec.StringType;
+        public string EscapedValue { get; }
+        public bool IsUnclosed { get; }
+        public string TrailingQuotes { get; }
+        public StringLiteralOptions Options { get; }
+        public List<Interpolation> Interpolations { get; }
+        public override TypeName ValueType => Spec.StringType;
 
         public StringToken(
             StringLiteralOptions options,
@@ -26,7 +26,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         ) : base(TokenType.String, value) {
             Options        = options;
             Interpolations = interpolations ?? new List<Interpolation>();
-            EscapedValue   = escapedValue ?? value;
+            EscapedValue   = escapedValue   ?? value;
             IsUnclosed     = isUnclosed;
             TrailingQuotes = trailingQuotes ?? "";
 
@@ -35,15 +35,15 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
             int endLine =
                 startPosition.Line
-                + (lines.Length > 1
+              + (lines.Length > 1
                     ? lines.Length - 1
                     : 0);
             int endCol =
                 lines[lines.Length - 1].Length
-                + (lines.Length == 1
+              + (lines.Length == 1
                     ? startPosition.Column
-                      + Options.GetPrefixes().Length
-                      + (IsUnclosed
+                    + Options.GetPrefixes().Length
+                    + (IsUnclosed
                           ? Options.QuotesCount + TrailingQuotes.Length
                           : Options.QuotesCount * 2)
                     : IsUnclosed
@@ -98,13 +98,13 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public readonly bool IsLineEndsNormalized;
         public          bool IsMultiline;
         public          char Quote;
-        public          bool HasPrefixes => IsFormatted || IsRaw;
-        public          int  QuotesCount => IsMultiline ? 3 : 1;
+        public bool HasPrefixes => IsFormatted || IsRaw;
+        public int QuotesCount => IsMultiline ? 3 : 1;
 
         #region Prefix options
 
         public bool IsFormatted { get; private set; }
-        public bool IsRaw       { get; private set; }
+        public bool IsRaw { get; private set; }
 
         #endregion
 

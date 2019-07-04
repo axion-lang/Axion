@@ -10,7 +10,7 @@ namespace Axion.Core.Processing.Syntactic.MacroPatterns {
             Pattern = new CascadePattern(patterns);
         }
 
-        public bool Match(AstNode parent) {
+        public bool Match(Expression parent) {
             Pattern.Match(parent);
             return true;
         }

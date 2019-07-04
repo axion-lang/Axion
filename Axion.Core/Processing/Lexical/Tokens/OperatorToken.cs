@@ -24,8 +24,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     }
 
     public struct OperatorProperties {
-        [JsonProperty]
-        internal InputSide InputSide;
+        [JsonProperty] internal InputSide InputSide;
 
         public readonly bool      AllowOverload;
         public readonly int       Precedence;
@@ -52,10 +51,10 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
 
         public bool Equals(OperatorProperties other) {
-            return InputSide == other.InputSide
-                   && AllowOverload == other.AllowOverload
-                   && Precedence == other.Precedence
-                   && Type == other.Type;
+            return InputSide     == other.InputSide
+                && AllowOverload == other.AllowOverload
+                && Precedence    == other.Precedence
+                && Type          == other.Type;
         }
 
         public override int GetHashCode() {

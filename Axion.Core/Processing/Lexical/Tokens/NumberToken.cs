@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Text;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Syntactic.TypeNames;
 using Axion.Core.Specification;
 using Newtonsoft.Json;
 
@@ -11,8 +11,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents a 'number' literal.
     /// </summary>
     public class NumberToken : Token {
-        public          NumberOptions Options   { get; }
-        public override TypeName      ValueType => Spec.NumberType(Options);
+        public NumberOptions Options { get; }
+        public override TypeName ValueType => Spec.NumberType(Options);
 
         public NumberToken(
             string        value,
@@ -46,8 +46,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             return !Equals(left, right);
         }
 
-        [JsonIgnore]
-        public readonly StringBuilder ClearNumber = new StringBuilder();
+        [JsonIgnore] public readonly StringBuilder ClearNumber = new StringBuilder();
 
         private static NumberFormatInfo numFormat = new NumberFormatInfo {
             NumberDecimalSeparator = "."
@@ -128,14 +127,14 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         protected bool Equals(NumberOptions other) {
             return ClearNumber.ToString() == other.ClearNumber.ToString()
-                   && Radix == other.Radix
-                   && Bits == other.Bits
-                   && Floating == other.Floating
-                   && Imaginary == other.Imaginary
-                   && Unsigned == other.Unsigned
-                   && Unlimited == other.Unlimited
-                   && HasExponent == other.HasExponent
-                   && Exponent == other.Exponent;
+                && Radix                  == other.Radix
+                && Bits                   == other.Bits
+                && Floating               == other.Floating
+                && Imaginary              == other.Imaginary
+                && Unsigned               == other.Unsigned
+                && Unlimited              == other.Unlimited
+                && HasExponent            == other.HasExponent
+                && Exponent               == other.Exponent;
         }
 
         public override bool Equals(object obj) {
@@ -173,15 +172,15 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public override string ToString() {
             return
                 $"{nameof(ClearNumber)}: {ClearNumber}, \n"
-                + $"{nameof(Value)}: {Value},\n"
-                + $"{nameof(Radix)}: {Radix},\n"
-                + $"{nameof(Bits)}: {Bits},\n"
-                + $"{nameof(Floating)}: {Floating},\n"
-                + $"{nameof(Imaginary)}: {Imaginary},\n"
-                + $"{nameof(Unsigned)}: {Unsigned},\n"
-                + $"{nameof(Unlimited)}: {Unlimited},\n"
-                + $"{nameof(HasExponent)}: {HasExponent},\n"
-                + $"{nameof(Exponent)}: {Exponent}";
+              + $"{nameof(Value)}: {Value},\n"
+              + $"{nameof(Radix)}: {Radix},\n"
+              + $"{nameof(Bits)}: {Bits},\n"
+              + $"{nameof(Floating)}: {Floating},\n"
+              + $"{nameof(Imaginary)}: {Imaginary},\n"
+              + $"{nameof(Unsigned)}: {Unsigned},\n"
+              + $"{nameof(Unlimited)}: {Unlimited},\n"
+              + $"{nameof(HasExponent)}: {HasExponent},\n"
+              + $"{nameof(Exponent)}: {Exponent}";
         }
     }
 }

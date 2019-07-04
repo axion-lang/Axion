@@ -18,7 +18,7 @@ namespace Axion.Core.Specification {
                 "protected",
                 "public"
             };
-            
+
             public static readonly Dictionary<string, string> BuiltInNames = new Dictionary<string, string> {
                 { "Int8",        "sbyte" },
                 { "UInt8",       "byte" },
@@ -54,7 +54,7 @@ namespace Axion.Core.Specification {
                 { OpEqualsEquals,        "==" },
                 { OpNotEquals,           "!=" },
             
-                { KeywordAs,                  "as" },
+                { KeywordAs,             "as" },
                 { OpIs,                  "is" },
 
             
@@ -70,8 +70,8 @@ namespace Axion.Core.Specification {
                 { OpMinusAssign,         "-="  },
                 { OpBitOrAssign,         "|="  },
                 { OpBitAndAssign,        "&="  },
-                { OpBitLShiftAssign,  "<<=" },
-                { OpBitRShiftAssign, ">>=" }
+                { OpBitLShiftAssign,     "<<=" },
+                { OpBitRShiftAssign,     ">>=" }
             };
         }
     }

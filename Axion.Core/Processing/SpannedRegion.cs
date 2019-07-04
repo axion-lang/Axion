@@ -1,7 +1,4 @@
-using System;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Newtonsoft.Json;
 
 namespace Axion.Core.Processing {
     /// <summary>
@@ -30,24 +27,6 @@ namespace Axion.Core.Processing {
 
         protected void MarkPosition(SpannedRegion start, SpannedRegion end) {
             Span = new Span(start.Span.Start, end.Span.End);
-        }
-
-        [JsonIgnore]
-        public virtual TypeName ValueType {
-            get => throw new NotSupportedException();
-            set => throw new NotSupportedException();
-        }
-
-        [JsonProperty]
-        public string ValueTypeString {
-            get {
-                try {
-                    return ValueType.ToString();
-                }
-                catch {
-                    return null;
-                }
-            }
         }
 
         /// <summary>

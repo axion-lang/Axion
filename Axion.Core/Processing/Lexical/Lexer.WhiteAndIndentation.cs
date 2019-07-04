@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Source;
 using Axion.Core.Specification;
 using static Axion.Core.Specification.TokenType;
 
@@ -42,7 +43,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             var endOfLine = new NewlineToken(tokenValue.ToString(), tokenStartPosition);
-            if (c.IsSpaceOrTab()) {
+            if (NextIs(Spec.White)) {
                 return endOfLine;
             }
 
@@ -62,7 +63,7 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private Token ReadWhite() {
-            while (c.IsSpaceOrTab()) {
+            while (NextIs(Spec.White)) {
                 tokenValue.Append(c);
                 Move();
             }
@@ -84,19 +85,19 @@ namespace Axion.Core.Processing.Lexical {
 
             bool prevIsBinOp =
                 tokens[tokens.Count - 1] is OperatorToken op
-                && op.Properties.InputSide == InputSide.Both;
+             && op.Properties.InputSide == InputSide.Both;
 
             bool hasUnclosedComment =
                 restOfLine.StartsWith(Spec.MultiCommentStart)
                 // that continues on the next line
-                && Regex.Matches(restOfLine, Regex.Escape(Spec.MultiCommentStart)).Count
-                > Regex.Matches(restOfLine, Regex.Escape(Spec.MultiCommentEnd)).Count;
+             && Regex.Matches(restOfLine, Regex.Escape(Spec.MultiCommentStart)).Count
+              > Regex.Matches(restOfLine, Regex.Escape(Spec.MultiCommentEnd)).Count;
 
             // todo optimize
             var any = false;
             foreach (KeyValuePair<string, OperatorProperties> kvp in Spec.Operators) {
                 if (kvp.Value.InputSide == InputSide.Both
-                    && restOfLine.StartsWith(kvp.Key)) {
+                 && restOfLine.StartsWith(kvp.Key)) {
                     any = true;
                     break;
                 }
@@ -104,11 +105,11 @@ namespace Axion.Core.Processing.Lexical {
 
             bool nextCanBeIndent =
                 !prevIsBinOp
-                && !hasUnclosedComment
-                && mismatchingPairs.Count == 0
-                && restLen > 0
-                && !restOfLine.StartsWith(Spec.CommentStart)
-                && !any;
+             && !hasUnclosedComment
+             && mismatchingPairs.Count == 0
+             && restLen                > 0
+             && !restOfLine.StartsWith(Spec.CommentStart)
+             && !any;
 
             if (tokens[tokens.Count - 1].Is(Newline)) {
                 // handle empty string with whitespaces, make newline
@@ -200,7 +201,7 @@ namespace Axion.Core.Processing.Lexical {
 
             // warn about inconsistency
             if (!consistent
-                && unit.Options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
+             && unit.Options.HasFlag(SourceProcessingOptions.CheckIndentationConsistency)) {
                 unit.Blame(
                     BlameType.InconsistentIndentation,
                     inconsistentStart,

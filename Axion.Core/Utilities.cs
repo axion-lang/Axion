@@ -4,12 +4,6 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Syntactic;
-using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Processing.Syntactic.Expressions.Atomic;
-using Axion.Core.Specification;
 
 namespace Axion.Core {
     internal static class Utilities {
@@ -35,7 +29,7 @@ namespace Axion.Core {
             // 1 = (radix^0)
             var radix = 1;
             while (num > 0) {
-                // take last digit 
+                // take last digit
                 var lastDigit = (int) (num % 10);
                 num   /= 10;
                 res   += lastDigit * radix;
@@ -43,68 +37,6 @@ namespace Axion.Core {
             }
 
             return res;
-        }
-
-        internal static string GetValue(this TokenType type) {
-            string value = Spec.Keywords.FirstOrDefault(kvp => kvp.Value == type).Key;
-            if (value != null) {
-                return value;
-            }
-
-            value = Spec.Operators.FirstOrDefault(kvp => kvp.Value.Type == type).Key;
-            if (value != null) {
-                return value;
-            }
-
-            value = Spec.Symbols.FirstOrDefault(kvp => kvp.Value == type).Key;
-            if (value != null) {
-                return value;
-            }
-
-            return type.ToString("G");
-        }
-
-        /// <summary>
-        ///     In:  SampleExpression
-        ///     Out: 'sample' expression
-        /// </summary>
-        internal static string GetExprFriendlyName(string expressionTypeName) {
-            string exprOriginalName = expressionTypeName.Replace("Expression", "");
-            var    result           = new StringBuilder();
-            result.Append("'" + char.ToLower(exprOriginalName[0]));
-
-            exprOriginalName = exprOriginalName.Remove(0, 1);
-            foreach (char c in exprOriginalName) {
-                if (char.IsUpper(c)) {
-                    result.Append(" ").Append(char.ToLower(c));
-                }
-                else {
-                    result.Append(c);
-                }
-            }
-
-            result.Append("' expression");
-            return result.ToString();
-        }
-
-        internal static bool WriteDecorators(this CodeBuilder c, NodeList<Expression> decorators) {
-            var haveAccessMod = false;
-            for (var i = 0; i < decorators?.Count; i++) {
-                Expression modifier = decorators[i];
-                if (modifier is NameExpression n && Spec.CSharp.AccessModifiers.Contains(n.Name)) {
-                    haveAccessMod = true;
-                }
-
-                c.Write(modifier, " ");
-                if (i == decorators.Count - 1) {
-                    c.Write(" ");
-                }
-                else {
-                    c.Write(", ");
-                }
-            }
-
-            return haveAccessMod;
         }
 
         #region Get user input and split it into launch arguments
@@ -143,9 +75,7 @@ namespace Axion.Core {
         }
 
         public static string TrimMatchingChars(string input, char c) {
-            if (input.Length >= 2
-                && input[0] == c
-                && input[input.Length - 1] == c) {
+            if (input.Length >= 2 && input[0] == c && input[input.Length - 1] == c) {
                 return input.Substring(1, input.Length - 2);
             }
 

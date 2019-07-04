@@ -6,12 +6,13 @@ namespace Axion.Core.Processing.Syntactic.MacroPatterns {
             Patterns = patterns;
         }
 
-        public bool Match(AstNode parent) {
+        public bool Match(Expression parent) {
             foreach (IPattern pattern in Patterns) {
                 if (!pattern.Match(parent)) {
                     return false;
                 }
             }
+
             return true;
         }
     }

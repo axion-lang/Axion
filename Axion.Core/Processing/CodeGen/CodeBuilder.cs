@@ -2,6 +2,10 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Axion.Core.Processing.Syntactic;
+using Axion.Core.Processing.Syntactic.Atomic;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.CodeGen {
     public class CodeBuilder : IDisposable {
@@ -56,12 +60,24 @@ namespace Axion.Core.Processing.CodeGen {
             Writer.WriteLine();
         }
 
-        public static implicit operator string(CodeBuilder sb) {
-            return sb.ToString();
-        }
+        internal bool WriteDecorators(NodeList<Expression> decorators) {
+            var haveAccessMod = false;
+            for (var i = 0; i < decorators?.Count; i++) {
+                Expression modifier = decorators[i];
+                if (modifier is NameExpression n && Spec.CSharp.AccessModifiers.Contains(n.Name)) {
+                    haveAccessMod = true;
+                }
 
-        public override string ToString() {
-            return baseWriter.ToString();
+                Write(modifier, " ");
+                if (i == decorators.Count - 1) {
+                    Write(" ");
+                }
+                else {
+                    Write(", ");
+                }
+            }
+
+            return haveAccessMod;
         }
 
         public void AddJoin<T>(string separator, IList<T> items, bool indent = false)
@@ -103,19 +119,12 @@ namespace Axion.Core.Processing.CodeGen {
             }
         }
 
-        protected bool Equals(CodeBuilder other) {
-            return Equals(Writer.ToString(), other.Writer.ToString())
-                   && outLang == other.outLang;
+        public static implicit operator string(CodeBuilder sb) {
+            return sb.ToString();
         }
 
-        public override bool Equals(object obj) {
-            return Equals((CodeBuilder) obj);
-        }
-
-        public override int GetHashCode() {
-            unchecked {
-                return ((Writer != null ? Writer.GetHashCode() : 0) * 397) ^ (int) outLang;
-            }
+        public override string ToString() {
+            return baseWriter.ToString();
         }
 
         public void Dispose() {

@@ -1,0 +1,3 @@
+expression match
+    | Email(email, title, _) => '1'
+    | SMS(number, message)   => '2'

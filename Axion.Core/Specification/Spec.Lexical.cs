@@ -8,7 +8,7 @@ namespace Axion.Core.Specification {
         internal const string CommentStart      = "#";
         internal const string MultiCommentStart = "#|";
         internal const string MultiCommentEnd   = "|#";
-        
+
         /// <summary>
         ///     End of source stream mark.
         /// </summary>
@@ -22,13 +22,13 @@ namespace Axion.Core.Specification {
         // =============================
         // String and character literals
         // =============================
-        
+
         /// <summary>
         ///     Max. count of digits in escape
         ///     sequence for Unicode char.
         /// </summary>
         internal const int Unicode32BitHexLength = 6;
-        
+
         /// <summary>
         ///     Character used for escaping sequences in string/char literals.
         /// </summary>
@@ -55,11 +55,11 @@ namespace Axion.Core.Specification {
         internal static char[] CharQuotes { get; } = { '`' };
 
         internal static char[] StringQuotes { get; } = { '\'', '\"' };
-        
+
         // ===============
         // Number literals
         // ===============
-        
+
         internal const int MinNumberBitRate = 8;
         internal const int MaxNumberBitRate = 64;
 
@@ -102,6 +102,11 @@ namespace Axion.Core.Specification {
             'F'
         };
 
+        internal static char[] White { get; } = {
+            '\t',
+            ' '
+        };
+
         internal static bool IsLetterOrNumberPart(char c) {
             return char.IsLetterOrDigit(c) || c == '_' || c == '.';
         }
@@ -116,10 +121,6 @@ namespace Axion.Core.Specification {
 
         internal static bool IsNumberStart(char c) {
             return char.IsDigit(c);
-        }
-
-        internal static bool IsSpaceOrTab(this char c) {
-            return c == ' ' || c == '\t';
         }
     }
 }

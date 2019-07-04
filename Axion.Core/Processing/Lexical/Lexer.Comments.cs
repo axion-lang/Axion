@@ -27,7 +27,7 @@ namespace Axion.Core.Processing.Lexical {
             if (unclosedMultilineComments.Count == 0) {
                 // we're on '/*'
                 Move(Spec.MultiCommentStart.Length);
-                unclosedMultilineComments.Add(
+                unclosedMultilineComments.Push(
                     new CommentToken("", tokenStartPosition, isUnclosed: true)
                 );
             }
@@ -44,7 +44,7 @@ namespace Axion.Core.Processing.Lexical {
                     Move(Spec.MultiCommentEnd.Length);
 
                     // decrease comment level
-                    unclosedMultilineComments.RemoveAt(unclosedMultilineComments.Count - 1);
+                    unclosedMultilineComments.Pop();
                 }
                 // found nested multiline comment start
                 else if (nextPiece == Spec.MultiCommentStart) {
@@ -52,7 +52,7 @@ namespace Axion.Core.Processing.Lexical {
                     Move(Spec.MultiCommentStart.Length);
 
                     // increase comment level
-                    unclosedMultilineComments.Add(
+                    unclosedMultilineComments.Push(
                         new CommentToken(
                             tokenValue.ToString(),
                             tokenStartPosition,

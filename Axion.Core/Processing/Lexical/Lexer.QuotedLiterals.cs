@@ -3,6 +3,7 @@ using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Lexical {
     public partial class Lexer {
@@ -14,7 +15,7 @@ namespace Axion.Core.Processing.Lexical {
             Move(); // eat opening quote
             var isUnclosed = false;
             while (true) {
-                if (CharIs(Spec.CharQuotes)) {
+                if (NextIs(Spec.CharQuotes)) {
                     Move(); // eat closing quote
                     break;
                 }
@@ -87,7 +88,7 @@ namespace Axion.Core.Processing.Lexical {
 
                 // check for unclosed string
                 if ((c == '\r' || c == '\n') && delimiter.Length == 1
-                    || c == Spec.EndOfCode) {
+                 || c == Spec.EndOfCode) {
                     var result = new StringToken(
                         strOptions,
                         tokenValue.ToString(),
@@ -95,7 +96,7 @@ namespace Axion.Core.Processing.Lexical {
                         isUnclosed: true,
                         startPosition: tokenStartPosition
                     );
-                    unclosedStrings.Add(result);
+                    unclosedStrings.Push(result);
                     unit.Blame(BlameType.UnclosedString, tokenStartPosition, Position);
                     return result;
                 }
@@ -153,7 +154,7 @@ namespace Axion.Core.Processing.Lexical {
 
                 // found string format sign
                 if (c == '{'
-                    && strOptions.IsFormatted) {
+                 && strOptions.IsFormatted) {
                     string val = ReadStringInterpolation(interpolations, startIndex);
                     tokenValue.Append(val);
                     escapedValue += val;
@@ -188,8 +189,7 @@ namespace Axion.Core.Processing.Lexical {
             out string               delimiter
         ) {
             if (continueUnclosedString) {
-                StringToken stringToken = unclosedStrings.Last();
-                unclosedStrings.RemoveAt(unclosedStrings.Count - 1);
+                StringToken stringToken = unclosedStrings.Pop();
                 strOptions = stringToken.Options;
                 delimiter  = new string(stringToken.Options.Quote, strOptions.QuotesCount);
             }
@@ -223,7 +223,7 @@ namespace Axion.Core.Processing.Lexical {
                                 tempPosition,
                                 Position
                             );
-                            tokens.Add(new Token(TokenType.Identifier, c.ToString(), tempPosition));
+                            tokens.Add(new Token(Identifier, c.ToString(), tempPosition));
                             break;
                         }
                     }
@@ -288,7 +288,7 @@ namespace Axion.Core.Processing.Lexical {
                 var lexer = new Lexer(unit, charIdx, lineIdx, columnIdx, newInterpolation.Tokens);
                 lexer.processCancellers.Add("}");
                 lexer.Move(); // skip '{'
-                lexer.mismatchingPairs.Add(new SymbolToken(TokenType.OpenBrace));
+                lexer.mismatchingPairs.Push(new SymbolToken(OpenBrace));
                 lexer.Process();
 
                 // remove usefulness closing curly
@@ -336,7 +336,7 @@ namespace Axion.Core.Processing.Lexical {
                 var number = "";
                 var error  = false;
                 while (number.Length < unicodeSymLen) {
-                    if (CharIs(Spec.HexadecimalDigits)) {
+                    if (NextIs(Spec.HexadecimalDigits)) {
                         number += c;
                         Move();
                     }
@@ -354,9 +354,9 @@ namespace Axion.Core.Processing.Lexical {
                 raw = Spec.EscapeMark + "" + u + number;
 
                 if (!error
-                    && TryParseInt(number, 16, out int val)) {
+                 && TryParseInt(number, 16, out int val)) {
                     if (val < 0
-                        || val > 0x10ffff) {
+                     || val > 0x10ffff) {
                         unit.Blame(
                             BlameType.IllegalUnicodeCharacter,
                             escapePosition,
@@ -385,7 +385,7 @@ namespace Axion.Core.Processing.Lexical {
                 Move();
                 var number = "";
                 var error  = false;
-                while (CharIs(Spec.HexadecimalDigits) && number.Length < 4) {
+                while (NextIs(Spec.HexadecimalDigits) && number.Length < 4) {
                     number += c;
                     Move();
                 }
@@ -397,7 +397,7 @@ namespace Axion.Core.Processing.Lexical {
 
                 raw = Spec.EscapeMark + "x" + number;
                 if (!error
-                    && TryParseInt(number, 16, out int val)) {
+                 && TryParseInt(number, 16, out int val)) {
                     escaped = ((char) val).ToString();
                 }
                 else {
@@ -411,16 +411,16 @@ namespace Axion.Core.Processing.Lexical {
             case '\n':
             case '\r':
             case Spec.EndOfCode: {
-                unit.Blame(BlameType.TruncatedEscapeSequence, escapePosition, Position);
                 raw = escaped = Spec.EscapeMark.ToString();
+                unit.Blame(BlameType.TruncatedEscapeSequence, escapePosition, Position);
                 break;
             }
 
             // not a valid escape seq.
             default: {
-                unit.Blame(BlameType.InvalidEscapeSequence, escapePosition, Position);
                 raw = escaped = Spec.EscapeMark + "" + c;
                 Move();
+                unit.Blame(BlameType.InvalidEscapeSequence, escapePosition, Position);
                 break;
             }
             }
@@ -432,7 +432,7 @@ namespace Axion.Core.Processing.Lexical {
             value = 0;
             foreach (char с in input) {
                 if (HexValue(с, out int oneChar)
-                    && oneChar < radix) {
+                 && oneChar < radix) {
                     value = value * radix + oneChar;
                 }
                 else {
@@ -507,11 +507,11 @@ namespace Axion.Core.Processing.Lexical {
 
             default: {
                 if (ch >= 'a'
-                    && ch <= 'z') {
+                 && ch <= 'z') {
                     value = ch - 'a' + 10;
                 }
                 else if (ch >= 'A'
-                         && ch <= 'Z') {
+                      && ch <= 'Z') {
                     value = ch - 'A' + 10;
                 }
                 else {

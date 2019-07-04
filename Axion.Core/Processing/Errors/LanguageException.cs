@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using Axion.Core.Processing.Source;
 using Axion.Core.Specification;
 using CodeConsole;
+using CodeConsole.CodeEditor;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Errors {
     public class LanguageException : Exception {
-        public override string        Message    { get; }
-        public override string        StackTrace { get; }
-        public          BlameSeverity Severity   { get; }
-        public          Span          Span       { get; }
+        public override string Message { get; }
+        public override string StackTrace { get; }
+        public BlameSeverity Severity { get; }
+        public Span Span { get; }
 
-        [JsonProperty]
-        private readonly string time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+        [JsonProperty] private readonly string time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
 
         public LanguageException(
             BlameType     type,
@@ -73,8 +74,8 @@ namespace Axion.Core.Processing.Errors {
             var lines = new List<string>();
             // limit rest of code by 5 lines
             for (int i = Span.Start.Line;
-                i < codeLines.Length && lines.Count < 4;
-                i++) {
+                 i < codeLines.Length && lines.Count < 4;
+                 i++) {
                 lines.Add(codeLines[i].TrimEnd('\n', Spec.EndOfCode));
             }
 
@@ -85,7 +86,7 @@ namespace Axion.Core.Processing.Errors {
             // first line
             // <line number>| <code line>
             int pointerTailLength =
-                ConsoleCodeEditor.LineNumberWidth + Span.Start.Column;
+                CliEditorSettings.LineNumberWidth + Span.Start.Column;
             int errorTokenLength;
             if (Span.End.Line > Span.Start.Line) {
                 errorTokenLength = lines[0].Length - Span.Start.Column;
@@ -98,7 +99,7 @@ namespace Axion.Core.Processing.Errors {
             string pointer =
                 // tail of pointer
                 new string(' ', pointerTailLength)
-                +
+               +
                 // pointer arrows
                 new string(
                     '^', // TODO (UI) compute token value length: include tab lengths
@@ -108,14 +109,14 @@ namespace Axion.Core.Processing.Errors {
             // Drawing ==========
 
             // line with error
-            ConsoleCodeEditor.PrintLineNumber(Span.Start.Line + 1);
+            CliEditor.DrawLineNumber(Span.Start.Line + 1);
             ConsoleUI.WriteLine(lines[0]);
             // error pointer
             ConsoleUI.WriteLine((pointer, color));
 
             // next lines
             for (int i = Span.Start.Line + 1; i < lines.Count; i++) {
-                ConsoleCodeEditor.PrintLineNumber(i + 1);
+                CliEditor.DrawLineNumber(i + 1);
                 ConsoleUI.WriteLine(lines[i]);
             }
 
@@ -142,7 +143,7 @@ namespace Axion.Core.Processing.Errors {
         }
 
         public override string ToString() {
-            return $"{Severity}: {Message} ({Span})";
+            return $"{Severity}: {Message} ({Span.Start})";
         }
     }
 }

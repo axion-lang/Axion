@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using static Axion.Core.Specification.TokenType;
@@ -71,7 +72,6 @@ namespace Axion.Core.Specification {
         KeywordBreak,
         KeywordClass,
         KeywordContinue,
-        KeywordDo,
         KeywordElse,
         KeywordElif,
         KeywordEnum,
@@ -82,19 +82,17 @@ namespace Axion.Core.Specification {
         KeywordIf,
         KeywordMacro,
         KeywordModule,
-        KeywordNew,
         KeywordNil,
         KeywordNoBreak,
         KeywordObject,
         KeywordPass,
-        KeywordRaise,
         KeywordReturn,
         KeywordTrue,
         KeywordUnless,
-        KeywordUntil,
         KeywordLet,
         KeywordWhile,
         KeywordYield,
+        CustomKeyword,
 
         #endregion
 
@@ -141,14 +139,14 @@ namespace Axion.Core.Specification {
     public static class TokenTypeExtensions {
         internal static bool IsOpenBracket(this TokenType type) {
             return type == OpenParenthesis
-                   || type == OpenBracket
-                   || type == OpenBrace;
+                || type == OpenBracket
+                || type == OpenBrace;
         }
 
         internal static bool IsCloseBracket(this TokenType type) {
             return type == CloseParenthesis
-                   || type == CloseBracket
-                   || type == CloseBrace;
+                || type == CloseBracket
+                || type == CloseBrace;
         }
 
         internal static TokenType GetMatchingBracket(this TokenType type) {
@@ -173,6 +171,25 @@ namespace Axion.Core.Specification {
                     "Internal error: Cannot return matching bracket for non-bracket token type."
                 );
             }
+        }
+
+        internal static string GetValue(this TokenType type) {
+            string value = Spec.Keywords.FirstOrDefault(kvp => kvp.Value == type).Key;
+            if (value != null) {
+                return value;
+            }
+
+            value = Spec.Operators.FirstOrDefault(kvp => kvp.Value.Type == type).Key;
+            if (value != null) {
+                return value;
+            }
+
+            value = Spec.Symbols.FirstOrDefault(kvp => kvp.Value == type).Key;
+            if (value != null) {
+                return value;
+            }
+
+            return type.ToString("G");
         }
     }
 }

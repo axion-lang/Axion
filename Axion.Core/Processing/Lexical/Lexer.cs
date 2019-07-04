@@ -5,7 +5,9 @@ using System.Linq;
 using System.Text;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Source;
 using Axion.Core.Specification;
+using static Axion.Core.Specification.Spec;
 using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Lexical {
@@ -29,17 +31,17 @@ namespace Axion.Core.Processing.Lexical {
         /// <summary>
         ///     All unclosed multiline comments found in source.
         /// </summary>
-        private readonly List<CommentToken> unclosedMultilineComments = new List<CommentToken>();
+        private readonly Stack<CommentToken> unclosedMultilineComments = new Stack<CommentToken>();
 
         /// <summary>
         ///     All unclosed strings found in source.
         /// </summary>
-        private readonly List<StringToken> unclosedStrings = new List<StringToken>();
+        private readonly Stack<StringToken> unclosedStrings = new Stack<StringToken>();
 
         /// <summary>
         ///     All unpaired '{', '[', '(' found in source.
         /// </summary>
-        private readonly List<Token> mismatchingPairs = new List<Token>();
+        private readonly Stack<Token> mismatchingPairs = new Stack<Token>();
 
         /// <summary>
         ///     Values, from which lexer should stop working.
@@ -146,11 +148,11 @@ namespace Axion.Core.Processing.Lexical {
                 default: {
                     throw new Exception(
                         "Internal error: "
-                        + nameof(mismatchingPairs)
-                        + " grabbed invalid "
-                        + nameof(TokenType)
-                        + ": "
-                        + mismatch.Type
+                      + nameof(mismatchingPairs)
+                      + " grabbed invalid "
+                      + nameof(TokenType)
+                      + ": "
+                      + mismatch.Type
                     );
                 }
                 }
@@ -172,8 +174,8 @@ namespace Axion.Core.Processing.Lexical {
                 if (last.Type != Outdent) {
                     Debug.Assert(
                         tokenStartPosition
-                        == (last.Span.End.Line,
-                            last.Span.End.Column + last.EndWhitespaces.Length)
+                     == (last.Span.End.Line,
+                         last.Span.End.Column + last.EndWhitespaces.Length)
                     );
                 }
             }
@@ -189,39 +191,39 @@ namespace Axion.Core.Processing.Lexical {
                 return ReadNewline();
             }
 
-            if (c == Spec.EndOfCode) {
+            if (c == EndOfCode) {
                 return new Token(End, tokenStartPosition);
             }
 
-            if (c.IsSpaceOrTab()) {
+            if (NextIs(White)) {
                 return ReadWhite();
             }
 
-            if (NextIs(Spec.MultiCommentStart)) {
+            if (NextIs(MultiCommentStart)) {
                 return ReadMultilineComment();
             }
 
-            if (NextIs(Spec.CommentStart)) {
+            if (NextIs(CommentStart)) {
                 return ReadSingleLineComment();
             }
 
-            if (CharIs(Spec.CharQuotes)) {
+            if (NextIs(CharQuotes)) {
                 return ReadCharLiteral();
             }
 
-            if (CharIs(Spec.StringQuotes)) {
+            if (NextIs(StringQuotes)) {
                 return ReadString(false);
             }
 
-            if (Spec.IsNumberStart(c)) {
+            if (IsNumberStart(c)) {
                 return ReadNumberStart();
             }
 
-            if (Spec.IsIdStart(c)) {
+            if (IsIdStart(c)) {
                 return ReadWord();
             }
 
-            if (CharIs(Spec.SymbolicChars)) {
+            if (NextIs(SymbolicChars)) {
                 return ReadSymbolic();
             }
 
@@ -240,13 +242,13 @@ namespace Axion.Core.Processing.Lexical {
             do {
                 tokenValue.Append(c);
                 Move();
-            } while (Spec.IsIdPart(c)
-                     || c == '-'
-                     && Spec.IsIdPart(Peek));
+            } while (IsIdPart(c)
+                  || c == '-'
+                  && IsIdPart(Peek));
 
             string value = tokenValue.ToString();
             // for operators, written as words
-            if (Spec.Operators.ContainsKey(value)) {
+            if (Operators.ContainsKey(value)) {
                 return new OperatorToken(value, tokenStartPosition);
             }
 
@@ -254,36 +256,36 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private Token ReadSymbolic() {
-            int    longestLength = Spec.SortedSymbolics[0].Length;
-            string nextCodePiece = PeekPiece(longestLength);
+            int    longestLength = SortedSymbolics[0].Length;
+            string nextCodePiece = PeekNext(longestLength);
             var    value         = "";
             Token  result        = null;
             for (int length = nextCodePiece.Length; length > 0; length--) {
                 value = nextCodePiece.Substring(0, length);
                 // grow sequence of characters
-                if (!Spec.SortedSymbolics.Contains(value)) {
+                if (!SortedSymbolics.Contains(value)) {
                     continue;
                 }
 
-                if (Spec.Operators.ContainsKey(value)) {
+                if (Operators.ContainsKey(value)) {
                     result = new OperatorToken(value, tokenStartPosition);
                     break;
                 }
 
-                if (Spec.Symbols.ContainsKey(value)) {
+                if (Symbols.ContainsKey(value)) {
                     result = new SymbolToken(value, tokenStartPosition);
                     // yet unclosed bracket
                     if (result.Type.IsOpenBracket()) {
-                        mismatchingPairs.Add(result);
+                        mismatchingPairs.Push(result);
                     }
                     else if (result.Type.IsCloseBracket()) {
                         // unopened close bracket
                         if (mismatchingPairs.Count == 0) {
-                            mismatchingPairs.Add(result);
+                            mismatchingPairs.Push(result);
                         }
                         // matching bracket
                         else {
-                            mismatchingPairs.RemoveAt(mismatchingPairs.Count - 1);
+                            mismatchingPairs.Pop();
                         }
                     }
 

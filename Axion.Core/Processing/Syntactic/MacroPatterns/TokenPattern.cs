@@ -6,12 +6,13 @@ namespace Axion.Core.Processing.Syntactic.MacroPatterns {
             Value = value;
         }
 
-        public bool Match(AstNode parent) {
+        public bool Match(Expression parent) {
             if (parent.Peek.Value == Value) {
-                parent.GetNext();
+                parent.Eat();
                 parent.Ast.MacroApplicationParts.Add(parent.Token);
                 return true;
             }
+
             return false;
         }
     }

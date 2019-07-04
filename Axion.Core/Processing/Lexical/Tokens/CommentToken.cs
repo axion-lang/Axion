@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     /// </summary>
     public class CommentToken : Token {
         public bool IsSingleLine { get; }
-        public bool IsUnclosed   { get; }
+        public bool IsUnclosed { get; }
 
         public CommentToken(
             string   value,

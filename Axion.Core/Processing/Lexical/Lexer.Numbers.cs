@@ -69,7 +69,7 @@ namespace Axion.Core.Processing.Lexical {
             isOnBaseLetter = true;
             for (; Spec.IsLetterOrNumberPart(c); Move()) {
                 if (int.TryParse(c.ToString(), NumberStyles.HexNumber, null, out int digit)
-                    && digit < radix) {
+                 && digit < radix) {
                     nOptions.ClearNumber.Append(c);
                 }
                 else if (radix == 10 && c == '.') {
@@ -229,7 +229,7 @@ namespace Axion.Core.Processing.Lexical {
                 }
 
                 if (char.IsLetter(c)
-                    || c == '_') {
+                 || c == '_') {
                     unit.Blame(
                         BlameType.ExpectedEndOfNumberAfterPostfix,
                         postfixPosition,

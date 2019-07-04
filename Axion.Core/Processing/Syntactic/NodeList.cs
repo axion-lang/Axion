@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace Axion.Core.Processing.Syntactic {
-    public class NodeList<T> : IList<T> where T : AstNode {
-        public readonly  AstNode Parent;
-        private readonly List<T> items;
+    public class NodeList<T> : IList<T> where T : Expression {
+        public readonly  Expression Parent;
+        private readonly List<T>    items;
 
         void IList<T>.RemoveAt(int index) {
             items.RemoveAt(index);
@@ -20,7 +20,7 @@ namespace Axion.Core.Processing.Syntactic {
             return items.Remove(item);
         }
 
-        public int  Count      => items.Count;
+        public int Count => items.Count;
         public bool IsReadOnly => false;
 
         public T First {
@@ -53,12 +53,12 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        internal NodeList(AstNode parent) {
+        internal NodeList(Expression parent) {
             Parent = parent;
             items  = new List<T>();
         }
 
-        internal NodeList(AstNode parent, IEnumerable<T> array) {
+        internal NodeList(Expression parent, IEnumerable<T> array) {
             Parent = parent;
             items  = new List<T>(array);
         }

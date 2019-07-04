@@ -5,14 +5,15 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using Axion.Core.Processing;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical;
+using Axion.Core.Processing.Source;
 using Axion.Core.Specification;
 using Axion.Core.Visual;
-using CommandLine;
 using CodeConsole;
+using CodeConsole.CodeEditor;
+using CommandLine;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
@@ -27,10 +28,11 @@ namespace Axion.Core {
         ///     Main settings of JSON debug information formatting.
         /// </summary>
         public static readonly JsonSerializerSettings JsonSerializer = new JsonSerializerSettings {
-            Formatting           = Formatting.Indented,
-            TypeNameHandling     = TypeNameHandling.Auto,
-            ContractResolver     = new CompilerJsonContractResolver(),
-            DefaultValueHandling = DefaultValueHandling.Ignore
+            Formatting            = Formatting.Indented,
+            TypeNameHandling      = TypeNameHandling.Auto,
+            ContractResolver      = new CompilerJsonContractResolver(),
+            DefaultValueHandling  = DefaultValueHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         };
 
         /// <summary>
@@ -62,9 +64,9 @@ namespace Axion.Core {
             "Type '-h', or '--help' to get documentation about launch arguments.";
 
         internal static FileInfo[] InputFiles { get; private set; }
-        public const    string     SourceFileExtension = ".ax";
-        public const    string     OutputFileExtension = ".ax";
-        internal static bool       Verbose;
+        public const    string SourceFileExtension = ".ax";
+        public const    string OutputFileExtension = ".ax";
+        internal static bool   Verbose;
 
         public static void Init(string[] arguments) {
             if (!Directory.Exists(OutputDirectory)) {
@@ -155,7 +157,7 @@ namespace Axion.Core {
         private static void EnterInteractiveMode() {
             Logger.Info(
                 "Axion code editor & interpreter mode.\n"
-                + "Type 'exit' or 'quit' to exit mode, 'cls' to clear screen."
+              + "Type 'exit' or 'quit' to exit mode, 'cls' to clear screen."
             );
             while (true) {
                 // code editor header
@@ -177,13 +179,11 @@ namespace Axion.Core {
                 // TODO (UI) parse "help(module)" argument
 
                 // initialize editor
-                var editor = new ConsoleCodeEditor(
-                    false,
-                    true,
-                    firstCodeLine: rawInput,
-                    highlighter: new AxionSyntaxHighlighter()
+                var editor = new CliEditor(
+                    new CliEditorSettings(highlighter: new AxionSyntaxHighlighter()),
+                    rawInput
                 );
-                string[] codeLines = editor.RunSession();
+                string[] codeLines = editor.Run();
                 // interpret as source code and output result
                 Process(new SourceUnit(codeLines), SourceProcessingMode.Interpret);
             }
@@ -337,11 +337,11 @@ namespace Axion.Core {
 
         private static void FinishProcessing(SourceUnit unit) {
             if (unit.Options.HasFlag(SourceProcessingOptions.ShowAstJson)) {
-                Logger.Log(AstToMinifiedJson(unit));
+                ConsoleUI.WriteLine(AstToMinifiedJson(unit), new AxionSyntaxHighlighter());
             }
 
             if (unit.Options.HasFlag(SourceProcessingOptions.RewriteFromAst)) {
-                Logger.Log(AstBackToSource(unit));
+                ConsoleUI.WriteLine(AstBackToSource(unit), new AxionSyntaxHighlighter());
             }
 
             if (unit.Options.HasFlag(SourceProcessingOptions.SyntaxAnalysisDebugOutput)) {
@@ -407,7 +407,7 @@ namespace Axion.Core {
             Predicate<object> shouldSerialize = property.ShouldSerialize;
             property.ShouldSerialize = obj =>
                 (shouldSerialize == null || shouldSerialize(obj))
-                && !IsEmptyCollection(property, obj);
+             && !IsEmptyCollection(property, obj);
             return property;
         }
 

@@ -1,5 +1,5 @@
 ﻿using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Syntactic.TypeNames;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
@@ -7,9 +7,9 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     ///     Represents a 'character' literal.
     /// </summary>
     public class CharacterToken : Token {
-        public          string   EscapedValue { get; }
-        public          bool     IsUnclosed   { get; }
-        public override TypeName ValueType    => Spec.CharType;
+        public string EscapedValue { get; }
+        public bool IsUnclosed { get; }
+        public override TypeName ValueType => Spec.CharType;
 
         internal CharacterToken(
             string   value,
@@ -22,8 +22,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
             // compute position
             int endCol = startPosition.Column
-                         + Value.Length
-                         + (IsUnclosed ? 1 : 2); // quotes length
+                       + Value.Length
+                       + (IsUnclosed ? 1 : 2); // quotes length
             Span = new Span(startPosition, (startPosition.Line, endCol));
         }
 

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Axion.Core;
 using Axion.Core.Processing;
+using Axion.Core.Processing.Source;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Lexer {
