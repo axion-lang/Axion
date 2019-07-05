@@ -4,10 +4,10 @@ using static Axion.Core.Specification.TokenType;
 namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
-    ///         cond_expr:
+    ///         conditional_expr:
     ///             'if' preglobal_expr block
     ///             {'elif' preglobal_expr block}
-    ///             ['else' block]
+    ///             ['else' block];
     ///     </c>
     /// </summary>
     public class ConditionalExpression : Expression {
@@ -33,7 +33,8 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         /// <summary>
-        ///     Constructs from tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal ConditionalExpression(Expression parent, bool elseIf = false) {
             Construct(parent, () => {

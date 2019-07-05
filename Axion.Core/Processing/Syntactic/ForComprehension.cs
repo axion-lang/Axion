@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
     ///         for_comprehension:
-    ///             'for' simple_name_list 'in' preglobal_expr [comprehension]
+    ///             'for' simple_name_list 'in' preglobal_expr [comprehension];
     ///     </c>
     /// </summary>
     public class ForComprehension : Expression {
@@ -62,18 +62,6 @@ namespace Axion.Core.Processing.Syntactic {
                     Right = new ConditionalComprehension(this);
                 }
             });
-        }
-
-        public ForComprehension(
-            Expression target,
-            Expression item,
-            Expression iterable,
-            Expression rightComprehension = null
-        ) {
-            Target   = target;
-            Item     = item;
-            Iterable = iterable;
-            Right    = rightComprehension;
         }
 
         internal override void ToAxionCode(CodeBuilder c) {

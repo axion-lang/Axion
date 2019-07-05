@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
     ///         conditional_comprehension:
-    ///             ('if' | 'unless') infix_expr
+    ///             ('if' | 'unless') infix_expr;
     ///     </c>
     ///     Closes comprehensions list,
     ///     cannot be continued with other comprehensions.
@@ -24,7 +24,8 @@ namespace Axion.Core.Processing.Syntactic {
         public override TypeName ValueType => Parent.ValueType;
 
         /// <summary>
-        ///     Constructs expression from tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal ConditionalComprehension(Expression parent) {
             Construct(parent, () => {

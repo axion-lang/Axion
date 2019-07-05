@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Syntactic.Binary {
     ///         variable_definition_expr:
     ///             ['let'] simple_name_list
     ///             [':' type]
-    ///             ['=' expr_list]
+    ///             ['=' expr_list];
     ///     </c>
     /// </summary>
     public class VariableDefinitionExpression : LeftRightExpression {

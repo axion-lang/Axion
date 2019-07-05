@@ -18,25 +18,25 @@ namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
     ///         expr_list:
-    ///             expr {',' expr}
+    ///             expr {',' expr};
     ///         infix_list:
-    ///             infix_expr {',' infix_expr}
+    ///             infix_expr {',' infix_expr};
     ///         preglobal_list:
-    ///             preglobal_expr {',' preglobal_expr}
+    ///             preglobal_expr {',' preglobal_expr};
     ///         simple_name_list:
-    ///             simple_name_expr {',' simple_name_expr}
-    ///         single_stmt:
-    ///             cond_stmt | while_stmt | for_stmt    |
-    ///             try_stmt  | with_stmt  | import_stmt |
-    ///             decorated
+    ///             simple_name_expr {',' simple_name_expr};
+    ///         single_expr:
+    ///             conditional_expr | while_expr | for_expr    |
+    ///             try_expr         | with_expr  | import_expr |
+    ///             decorated;
     ///         decorated:
     ///             module_def | class_def  | enum_def |
-    ///             func_def   | small_stmt
-    ///         small_stmt:
-    ///             pass_stmt | expr_stmt | flow_stmt
-    ///         flow_stmt:
-    ///             break_stmt | continue_stmt | return_stmt |
-    ///             raise_stmt | yield_stmt
+    ///             func_def   | small_expr;
+    ///         small_expr:
+    ///             pass_expr | expr_expr | flow_expr;
+    ///         flow_expr:
+    ///             break_expr | continue_expr | return_expr |
+    ///             raise_expr | yield_expr;
     ///     </c>
     /// </summary>
     public abstract class Expression : SpannedRegion {
@@ -101,7 +101,7 @@ namespace Axion.Core.Processing.Syntactic {
         ///             | parenthesis_expr
         ///             | list_expr
         ///             | hash_collection
-        ///             | CONSTANT
+        ///             | CONSTANT;
         ///     </c>
         /// </summary>
         internal static Expression ParseAtomExpr(Expression parent) {
@@ -189,7 +189,6 @@ namespace Axion.Core.Processing.Syntactic {
 
             default: {
                 if (Spec.Constants.Contains(parent.Peek.Type)) {
-                    // TODO add pre-concatenation of literals
                     return new ConstantExpression(parent);
                 }
 
@@ -208,10 +207,9 @@ namespace Axion.Core.Processing.Syntactic {
         /// <summary>
         ///     <c>
         ///         suffix_expr:
-        ///             (pipeline | { member | call_expr | index_expr })
-        ///             ['++' | '--']
-        ///         pipeline:
-        ///             atom {'|>' atom }
+        ///             atom
+        ///             {'|>' atom }
+        ///             | ({ member | call_expr | index_expr } ['++' | '--']));
         ///     </c>
         /// </summary>
         internal static Expression ParseSuffixExpr(Expression parent) {
@@ -273,7 +271,7 @@ namespace Axion.Core.Processing.Syntactic {
         /// <summary>
         ///     <c>
         ///         prefix_expr:
-        ///             (PREFIX_OPERATOR prefix_expr) | suffix_expr
+        ///             (PREFIX_OPERATOR prefix_expr) | suffix_expr;
         ///     </c>
         /// </summary>
         internal static Expression ParsePrefixExpr(Expression parent) {
@@ -289,7 +287,7 @@ namespace Axion.Core.Processing.Syntactic {
         /// <summary>
         ///     <c>
         ///         infix_expr:
-        ///             prefix_expr (ID | SYMBOL) infix_expr
+        ///             prefix_expr (ID | SYMBOL) infix_expr;
         ///     </c>
         /// </summary>
         internal static Expression ParseInfixExpr(Expression parent) {
@@ -347,7 +345,7 @@ namespace Axion.Core.Processing.Syntactic {
         ///             : infix_list
         ///             | (['let'] assignable
         ///                [':' type]
-        ///                ['=' infix_list])
+        ///                ['=' infix_list]);
         ///     </c>
         /// </summary>
         internal static Expression ParseVarExpr(Expression parent) {
@@ -395,7 +393,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         /// <summary>
         ///     <c>
-        ///         ['('] %expr {',' %expr} [')']
+        ///         ['('] %expr {',' %expr} [')'];
         ///     </c>
         ///     Helper for parsing multiple comma-separated
         ///     expressions with optional parenthesis
@@ -447,7 +445,7 @@ namespace Axion.Core.Processing.Syntactic {
         /// <summary>
         ///     <c>
         ///         cascade:
-        ///             expr [{';' expr} ';'] [terminator | NEWLINE]
+        ///             expr [{';' expr} ';'] [terminator | NEWLINE];
         ///     </c>
         /// </summary>
         internal static NodeList<Expression> ParseCascade(
@@ -489,6 +487,29 @@ namespace Axion.Core.Processing.Syntactic {
             }
 
             return new TupleExpression(parent, expressions);
+        }
+        
+        /// <summary>
+        ///     In:  SampleExpression
+        ///     Out: 'sample' expression
+        /// </summary>
+        internal static string GetFriendlyName(string expressionTypeName) {
+            string exprOriginalName = expressionTypeName.Replace("Expression", "");
+            var    result           = new StringBuilder();
+            result.Append("'" + char.ToLower(exprOriginalName[0]));
+
+            exprOriginalName = exprOriginalName.Remove(0, 1);
+            foreach (char c in exprOriginalName) {
+                if (char.IsUpper(c)) {
+                    result.Append(" ").Append(char.ToLower(c));
+                }
+                else {
+                    result.Append(c);
+                }
+            }
+
+            result.Append("' expression");
+            return result.ToString();
         }
 
         #region Expression type checkers
@@ -548,53 +569,6 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         #endregion
-
-        /// <summary>
-        ///     In:  SampleExpression
-        ///     Out: 'sample' expression
-        /// </summary>
-        internal static string GetFriendlyName(string expressionTypeName) {
-            string exprOriginalName = expressionTypeName.Replace("Expression", "");
-            var    result           = new StringBuilder();
-            result.Append("'" + char.ToLower(exprOriginalName[0]));
-
-            exprOriginalName = exprOriginalName.Remove(0, 1);
-            foreach (char c in exprOriginalName) {
-                if (char.IsUpper(c)) {
-                    result.Append(" ").Append(char.ToLower(c));
-                }
-                else {
-                    result.Append(c);
-                }
-            }
-
-            result.Append("' expression");
-            return result.ToString();
-        }
-
-        /// <summary>
-        ///     Helper for constructing expressions that
-        ///     start with token.
-        ///     (marks start/end of expr, sets it's parent)
-        /// </summary>
-        protected void Construct(Expression parent, Action constructor) {
-            Parent = parent;
-            MarkStart(Peek);
-            constructor();
-            MarkEnd();
-        }
-
-        /// <summary>
-        ///     Helper for constructing expressions that
-        ///     start with token.
-        ///     (marks start/end of expr, sets it's parent)
-        /// </summary>
-        protected void Construct(Expression parent, Expression firstExpr, Action constructor) {
-            Parent = parent;
-            MarkStart(firstExpr);
-            constructor();
-            MarkEnd();
-        }
 
         #region AST properties short links
 
@@ -755,6 +729,30 @@ namespace Axion.Core.Processing.Syntactic {
             }
 
             field = value;
+        }
+        
+        /// <summary>
+        ///     Helper for constructing expressions that
+        ///     start with token.
+        ///     (marks start/end of expr, sets it's parent)
+        /// </summary>
+        protected void Construct(Expression parent, Action constructor) {
+            Parent = parent;
+            MarkStart(Peek);
+            constructor();
+            MarkEnd();
+        }
+
+        /// <summary>
+        ///     Helper for constructing expressions that
+        ///     start with token.
+        ///     (marks start/end of expr, sets it's parent)
+        /// </summary>
+        protected void Construct(Expression parent, Expression firstExpr, Action constructor) {
+            Parent = parent;
+            MarkStart(firstExpr);
+            constructor();
+            MarkEnd();
         }
 
         #endregion

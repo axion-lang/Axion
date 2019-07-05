@@ -6,7 +6,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
     /// <summary>
     ///     <c>
     ///         union_type:
-    ///             type ('|' type)+
+    ///             type ('|' type)+;
     ///     </c>
     /// </summary>
     public class UnionTypeName : TypeName {
@@ -25,7 +25,8 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
         }
 
         /// <summary>
-        ///     Constructs expression from Axion tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         public UnionTypeName(Expression parent, TypeName left) {
             Construct(parent, left, () => {

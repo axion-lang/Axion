@@ -8,9 +8,9 @@ namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
     ///         index_expr:
-    ///             atom '[' (preglobal_expr | slice) {',' (preglobal_expr | slice)} [','] ']'
+    ///             atom '[' (preglobal_expr | slice) {',' (preglobal_expr | slice)} [','] ']';
     ///         slice:
-    ///             [preglobal_expr] ':' [preglobal_expr] [':' [preglobal_expr]]
+    ///             [preglobal_expr] ':' [preglobal_expr] [':' [preglobal_expr]];
     ///     </c>
     /// </summary>
     public class IndexerExpression : Expression {
@@ -30,6 +30,10 @@ namespace Axion.Core.Processing.Syntactic {
 
         public override TypeName ValueType => throw new NotImplementedException();
 
+        /// <summary>
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
+        /// </summary>
         public IndexerExpression(Expression parent, Expression target) {
             Construct(parent, target, () => {
                 Target = target;

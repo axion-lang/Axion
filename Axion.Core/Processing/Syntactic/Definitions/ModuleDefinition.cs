@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
     /// <summary>
     ///     <c>
     ///         module_def:
-    ///             'module' name block
+    ///             'module' name block;
     ///     </c>
     /// </summary>
     public class ModuleDefinition : Expression, IDecorable {
@@ -34,7 +34,8 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
         }
 
         /// <summary>
-        ///     Constructs expression from Axion tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal ModuleDefinition(Expression parent) {
             Construct(parent, () => {
@@ -51,18 +52,6 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
         internal ModuleDefinition(NamespaceDeclarationSyntax csNode) {
             Name  = NameExpression.ParseName(this, csNode.Name.ToString());
             Block = new BlockExpression(this, csNode.Members);
-        }
-
-        /// <summary>
-        ///     Constructs expression without position in source.
-        /// </summary>
-        internal ModuleDefinition(
-            Expression      parent,
-            NameExpression  name,
-            BlockExpression block
-        ) : base(parent) {
-            Name  = name;
-            Block = block;
         }
 
         internal override void ToAxionCode(CodeBuilder c) {

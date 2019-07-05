@@ -6,9 +6,9 @@ namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
     ///         tuple_expr:
-    ///             tuple_paren_expr | (expr_list [','])
+    ///             tuple_paren_expr | (expr_list [',']);
     ///         tuple_paren_expr:
-    ///             '(' expr_list [','] ')'
+    ///             '(' expr_list [','] ')';
     ///     </c>
     /// </summary>
     public class TupleExpression : Expression {

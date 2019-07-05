@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
     /// <summary>
     ///     <c>
     ///         generic_type:
-    ///             type '[' type {',' type} ']'
+    ///             type '[' type {',' type} ']';
     ///     </c>
     /// </summary>
     public class GenericTypeName : TypeName {
@@ -28,7 +28,8 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
         }
 
         /// <summary>
-        ///     Constructs expression from Axion tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         public GenericTypeName(
             Expression parent,

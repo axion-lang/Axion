@@ -17,9 +17,9 @@ namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
     ///         block:
-    ///             (':' stmt)
-    ///             | ([':'] '{' stmt* '}')
-    ///             | ([':'] NEWLINE INDENT stmt+ OUTDENT)
+    ///             (':' expr)
+    ///             | ([':'] '{' expr* '}')
+    ///             | ([':'] NEWLINE INDENT expr+ OUTDENT);
     ///     </c>
     /// </summary>
     public class BlockExpression : Expression {
@@ -167,6 +167,10 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
+        /// <summary>
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
+        /// </summary>
         internal BlockExpression(Expression parent, BlockType type = BlockType.Default) :
             base(parent) {
             switch (type) {

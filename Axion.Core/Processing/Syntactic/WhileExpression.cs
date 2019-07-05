@@ -4,9 +4,9 @@ using static Axion.Core.Specification.TokenType;
 namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
-    ///         while_stmt:
+    ///         while_expr:
     ///             'while' infix_expr block
-    ///             ['nobreak' block]
+    ///             ['nobreak' block];
     ///     </c>
     /// </summary>
     public class WhileExpression : Expression {
@@ -32,7 +32,8 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         /// <summary>
-        ///     Constructs from tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal WhileExpression(Expression parent) {
             Construct(parent, () => {

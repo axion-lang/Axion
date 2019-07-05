@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
     ///         call_expr:
-    ///             atom '(' [arg_list | (arg comprehension)] ')'
+    ///             atom '(' [arg_list | (arg comprehension)] ')';
     ///     </c>
     /// </summary>
     public class FunctionCallExpression : Expression {
@@ -38,6 +38,10 @@ namespace Axion.Core.Processing.Syntactic {
             Args   = new NodeList<CallArgument>(this, args);
         }
 
+        /// <summary>
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
+        /// </summary>
         public FunctionCallExpression(
             Expression parent,
             Expression target,
@@ -105,7 +109,7 @@ namespace Axion.Core.Processing.Syntactic {
         ///         arg_list:
         ///             { expr
         ///             | expr '=' expr
-        ///             | comprehension }
+        ///             | comprehension };
         ///     </c>
         /// </summary>
         internal static NodeList<CallArgument> ParseGeneratorOrArgList(Expression parent) {
@@ -149,9 +153,9 @@ namespace Axion.Core.Processing.Syntactic {
         ///             { argument ',' }
         ///             ( argument [',']
         ///             | '*' expr [',' '**' expr]
-        ///             | '**' expr )
+        ///             | '**' expr );
         ///         argument:
-        ///             expr ['=' expr]
+        ///             expr ['=' expr];
         ///     </c>
         /// </summary>
         internal static NodeList<CallArgument> ParseArgList(

@@ -21,7 +21,8 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
         public override TypeName ValueType => Value.ValueType;
 
         /// <summary>
-        ///     Constructs expression from tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal AwaitExpression(Expression parent) {
             Construct(parent, () => {

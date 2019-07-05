@@ -14,7 +14,7 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
     /// <summary>
     ///     <c>
     ///         func_def:
-    ///             'fn' [ID '.'] ID ['(' [parameters_list] ')'] ['=>' type] block
+    ///             'fn' name ['(' [parameters_list] ')'] ['=>' type] block;
     ///     </c>
     /// </summary>
     public class FunctionDefinition : Expression, IDecorable, IFunctionNode {
@@ -57,7 +57,8 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
             Spec.FuncType(Parameters.Select(p => p.ValueType), ReturnType);
 
         /// <summary>
-        ///     Constructs from Axion tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal FunctionDefinition(Expression parent) {
             Construct(parent, () => {

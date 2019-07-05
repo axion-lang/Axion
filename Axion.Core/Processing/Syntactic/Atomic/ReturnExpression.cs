@@ -7,7 +7,7 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
     /// <summary>
     ///     <c>
     ///         return_expr:
-    ///             'return' [preglobal_list]
+    ///             'return' [preglobal_list];
     ///     </c>
     /// </summary>
     public class ReturnExpression : Expression {
@@ -19,7 +19,8 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
         }
 
         /// <summary>
-        ///     Constructs from tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal ReturnExpression(Expression parent) {
             Construct(parent, () => {

@@ -6,7 +6,7 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
     /// <summary>
     ///     <c>
     ///         continue_expr:
-    ///             'continue' [name]
+    ///             'continue' [name];
     ///     </c>
     /// </summary>
     public class ContinueExpression : Expression {
@@ -18,7 +18,8 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
         }
 
         /// <summary>
-        ///     Constructs from tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal ContinueExpression(Expression parent) {
             Construct(parent, () => {

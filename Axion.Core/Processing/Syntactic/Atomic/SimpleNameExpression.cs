@@ -6,12 +6,17 @@ using static Axion.Core.Specification.TokenType;
 namespace Axion.Core.Processing.Syntactic.Atomic {
     /// <summary>
     ///     <c>
-    ///         simple_name: ID
+    ///         simple_name:
+    ///             ID;
     ///     </c>
     /// </summary>
     public class SimpleNameExpression : NameExpression {
         public sealed override string Name { get; set; }
 
+        /// <summary>
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
+        /// </summary>
         internal SimpleNameExpression(Expression parent) {
             Construct(parent, () => {
                 Eat(Identifier);

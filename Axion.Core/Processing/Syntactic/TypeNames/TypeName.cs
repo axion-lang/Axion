@@ -12,7 +12,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
     ///         type
     ///             : simple_type  | tuple_type
     ///             | generic_type | array_type
-    ///             | union_type
+    ///             | union_type;
     ///     </c>
     /// </summary>
     public abstract class TypeName : Expression {
@@ -42,6 +42,10 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
+        /// </summary>
         internal static TypeName ParseTypeName(Expression parent) {
             // leading
             TypeName leftTypeName = null;

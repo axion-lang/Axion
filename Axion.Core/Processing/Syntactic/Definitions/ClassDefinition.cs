@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
     /// <summary>
     ///     <c>
     ///         class_def:
-    ///             'class' name ['&lt;' type_arg_list] block
+    ///             'class' simple_name ['&lt;' type_arg_list] block;
     ///     </c>
     /// </summary>
     public class ClassDefinition : Expression, IDecorable {
@@ -34,13 +34,6 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
             set => SetNode(ref keywords, value);
         }
 
-        private Expression metaClass;
-
-        public Expression MetaClass {
-            get => metaClass;
-            set => SetNode(ref metaClass, value);
-        }
-
         private BlockExpression block;
 
         public BlockExpression Block {
@@ -56,7 +49,8 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
         }
 
         /// <summary>
-        ///     Constructs from tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal ClassDefinition(Expression parent) {
             Construct(parent, () => {
@@ -74,9 +68,6 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
                         }
                         else {
                             Keywords.Add(type);
-                            if (typeLabel.Name == "metaclass") {
-                                MetaClass = type;
-                            }
                         }
                     }
                 }

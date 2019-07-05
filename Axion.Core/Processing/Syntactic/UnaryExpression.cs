@@ -2,6 +2,13 @@ using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 
 namespace Axion.Core.Processing.Syntactic {
+    /// <summary>
+    ///     <c>
+    ///         unary_expr:
+    ///             UNARY_LEFT prefix_expr
+    ///             | suffix_expr UNARY_RIGHT;
+    ///     </c>
+    /// </summary>
     public class UnaryExpression : Expression {
         public readonly OperatorToken Operator;
         private         Expression    val;

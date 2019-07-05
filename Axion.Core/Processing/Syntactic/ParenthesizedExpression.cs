@@ -4,11 +4,8 @@ using Axion.Core.Processing.Syntactic.TypeNames;
 namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
-    ///         parenthesis_expr
-    ///             : '(' ')'
-    ///             | yield_expr
-    ///             | test_list
-    ///             | generator_expr
+    ///         parenthesis_expr:
+    ///             '(' expr ')';
     ///     </c>
     /// </summary>
     public class ParenthesizedExpression : Expression {

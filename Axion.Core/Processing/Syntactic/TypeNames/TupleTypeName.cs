@@ -8,8 +8,9 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
     /// <summary>
     ///     <c>
     ///         tuple_type:
-    ///             tuple_paren_expr
+    ///             tuple_paren_expr;
     ///     </c>
+    /// TODO fix syntax for tuple type name
     /// </summary>
     public class TupleTypeName : TypeName {
         private NodeList<TypeName> types;
@@ -20,7 +21,8 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
         }
 
         /// <summary>
-        ///     Constructs expression from Axion tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         public TupleTypeName(Expression parent) {
             Construct(parent, () => {

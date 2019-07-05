@@ -2,6 +2,12 @@ using System;
 using Axion.Core.Processing.CodeGen;
 
 namespace Axion.Core.Processing.Syntactic {
+    /// <summary>
+    ///     <c>
+    ///         slice_expr:
+    ///             [preglobal_expr] ':' [preglobal_expr] [':' [preglobal_expr]];
+    ///     </c>
+    /// </summary>
     public class SliceExpression : Expression {
         private Expression start;
 

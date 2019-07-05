@@ -11,9 +11,10 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
     /// <summary>
     ///     <c>
     ///         enum_def:
-    ///             'enum' name ['(' type_arg_list ')']
-    ///             block_start enum_item {',' enum_item} block_terminator
+    ///             'enum' simple_name ['(' type_arg_list ')']
+    ///             block_start enum_item {',' enum_item} block_terminator;
     ///     </c>
+    /// TODO: fix syntax for enum definition
     /// </summary>
     public class EnumDefinition : Expression, IDecorable {
         private Expression name;
@@ -44,6 +45,10 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
             set => SetNode(ref modifiers, value);
         }
 
+        /// <summary>
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
+        /// </summary>
         internal EnumDefinition(Expression parent) {
             Construct(parent, () => {
                 Items = new NodeList<EnumItem>(this);

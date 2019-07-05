@@ -1,25 +1,24 @@
-using System.Diagnostics;
-using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.TypeNames;
-using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Atomic {
+    /// <summary>
+    ///     <c>
+    ///         const_expr:
+    ///             CONST_TOKEN | STRING+;
+    ///     </c>
+    /// </summary>
     public class ConstantExpression : Expression {
         public Token Value;
         public override TypeName ValueType => Value.ValueType;
 
         /// <summary>
-        ///     Constructor for 'word' constants
-        ///     (such as 'true', 'nil', etc.)
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
-        internal ConstantExpression(TokenType type) {
-            Debug.Assert(Spec.Constants.Contains(type));
-            Value = new WordToken(type);
-        }
-
         internal ConstantExpression(Expression parent) {
+            // TODO add concatenation of string literals
             Construct(parent, () => {
                 Value = Peek;
                 Eat();

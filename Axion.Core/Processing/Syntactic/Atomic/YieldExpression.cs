@@ -6,7 +6,7 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
     /// <summary>
     ///     <c>
     ///         yield_expr:
-    ///             'yield' ['from' test | test_list]
+    ///             'yield' ['from' infix_expr | infix_list];
     ///     </c>
     /// </summary>
     public class YieldExpression : Expression {

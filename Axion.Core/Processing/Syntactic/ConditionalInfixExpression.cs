@@ -6,8 +6,8 @@ using static Axion.Core.Specification.TokenType;
 namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
-    ///         conditional_expr:
-    ///             expr_list ('if' | 'unless') infix_expr ['else' expr_list]
+    ///         conditional_infix_expr:
+    ///             expr_list ('if' | 'unless') infix_expr ['else' expr_list];
     ///     </c>
     /// </summary>
     public class ConditionalInfixExpression : Expression {
@@ -35,7 +35,8 @@ namespace Axion.Core.Processing.Syntactic {
         public override TypeName ValueType => TrueExpression.ValueType;
 
         /// <summary>
-        ///     Constructs expression from tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal ConditionalInfixExpression(Expression parent, Expression trueExpression) {
             Construct(parent, trueExpression, () => {

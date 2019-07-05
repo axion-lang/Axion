@@ -5,6 +5,11 @@ using Axion.Core.Processing.Syntactic.Definitions;
 using Axion.Core.Processing.Syntactic.MacroPatterns;
 
 namespace Axion.Core.Processing.Syntactic {
+    /// <summary>
+    ///     Actually, it's not an exact expression,
+    ///     but some piece of code defined as expression
+    ///     by language macros.
+    /// </summary>
     public class MacroApplicationExpression : Expression {
         private MacroDefinition macroDefinition;
 

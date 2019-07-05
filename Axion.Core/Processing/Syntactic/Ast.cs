@@ -147,12 +147,12 @@ namespace Axion.Core.Processing.Syntactic {
             var b = new CodeBuilder(OutLang.CSharp);
 
             if (SourceUnit.ProcessingMode == SourceProcessingMode.Interpret) {
-                foreach (Expression stmt in Items) {
-                    if (stmt is ModuleDefinition) {
-                        Unit.Blame(BlameType.ModulesAreNotSupportedInInterpretationMode, stmt);
+                foreach (Expression e in Items) {
+                    if (e is ModuleDefinition) {
+                        Unit.Blame(BlameType.ModulesAreNotSupportedInInterpretationMode, e);
                     }
                     else {
-                        b.Write(stmt);
+                        b.Write(e);
                     }
 
                     b.WriteLine(";");
@@ -160,30 +160,30 @@ namespace Axion.Core.Processing.Syntactic {
             }
             else {
                 var rootItems = new NodeList<Expression>(this);
-                foreach (Expression stmt in Items) {
-                    if (stmt is ModuleDefinition) {
-                        b.Write(stmt);
+                foreach (Expression e in Items) {
+                    if (e is ModuleDefinition) {
+                        b.Write(e);
                     }
-                    else if (stmt is ClassDefinition) {
+                    else if (e is ClassDefinition) {
                         b.WriteLine("namespace _ {");
                         b.Writer.Indent++;
-                        b.Write(stmt);
+                        b.Write(e);
                         b.Writer.Indent--;
                         b.Write("}");
                     }
-                    else if (stmt is FunctionDefinition) {
+                    else if (e is FunctionDefinition) {
                         b.WriteLine("namespace _ {");
                         b.Writer.Indent++;
                         b.WriteLine("public partial class _RootClass_ {");
                         b.Writer.Indent++;
-                        b.Write(stmt);
+                        b.Write(e);
                         b.Writer.Indent--;
                         b.WriteLine("}");
                         b.Writer.Indent--;
                         b.Write("}");
                     }
                     else {
-                        rootItems.Add(stmt);
+                        rootItems.Add(e);
                     }
                 }
 

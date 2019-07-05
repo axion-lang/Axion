@@ -6,7 +6,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
     /// <summary>
     ///     <c>
     ///         array_type:
-    ///             type '[' ']'
+    ///             type '[' ']';
     ///     </c>
     /// </summary>
     public class ArrayTypeName : TypeName {
@@ -18,7 +18,8 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
         }
 
         /// <summary>
-        ///     Constructs expression from Axion tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         public ArrayTypeName(Expression parent, TypeName elementType) {
             Construct(parent, elementType, () => {

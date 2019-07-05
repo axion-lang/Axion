@@ -4,6 +4,12 @@ using Axion.Core.Processing.Syntactic.TypeNames;
 using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Atomic {
+    /// <summary>
+    ///     <c>
+    ///         code_quote_expr:
+    ///             '{{' expr '}}';
+    ///     </c>
+    /// </summary>
     public class CodeQuoteExpression : Expression {
         private Expression val;
 
@@ -14,6 +20,10 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
 
         public override TypeName ValueType => Value.ValueType;
 
+        /// <summary>
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
+        /// </summary>
         internal CodeQuoteExpression(Expression parent) {
             Construct(parent, () => {
                 Eat(DoubleOpenBrace);

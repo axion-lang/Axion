@@ -6,6 +6,12 @@ using Axion.Core.Processing.Syntactic.TypeNames;
 using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Definitions {
+    /// <summary>
+    ///     <c>
+    ///         object_def:
+    ///             'object' simple_name ['&lt;' type_arg_list] block;
+    ///     </c>
+    /// </summary>
     public class ObjectDefinition : Expression, IDecorable {
         private SimpleNameExpression name;
 
@@ -36,7 +42,8 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
         }
 
         /// <summary>
-        ///     Constructs from tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal ObjectDefinition(Expression parent) : base(parent) {
             Construct(parent, () => {
@@ -44,7 +51,6 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
                 Eat(KeywordObject);
 
                 Name = new SimpleNameExpression(this);
-                // TODO: add generic classes, case classes
                 if (MaybeEat(OpLess)) {
                     List<(TypeName, SimpleNameExpression)> types = TypeName.ParseNamedTypeArgs(this);
                     foreach ((TypeName type, SimpleNameExpression typeLabel) in types) {

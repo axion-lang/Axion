@@ -5,8 +5,8 @@ using static Axion.Core.Specification.TokenType;
 namespace Axion.Core.Processing.Syntactic.Atomic {
     /// <summary>
     ///     <c>
-    ///         break_stmt:
-    ///             'break' [name]
+    ///         break_expr:
+    ///             'break' [name];
     ///     </c>
     /// </summary>
     public class BreakExpression : Expression {
@@ -18,7 +18,8 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
         }
 
         /// <summary>
-        ///     Constructs from tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         internal BreakExpression(Expression parent) {
             Construct(parent, () => {

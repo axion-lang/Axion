@@ -7,7 +7,7 @@ namespace Axion.Core.Processing.Syntactic.Binary {
     /// <summary>
     ///     <c>
     ///         binary_infix_expr:
-    ///             expr OPERATOR expr
+    ///             expr OPERATOR expr;
     ///     </c>
     /// </summary>
     public class BinaryExpression : LeftRightExpression {

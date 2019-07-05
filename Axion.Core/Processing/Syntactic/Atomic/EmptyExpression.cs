@@ -3,12 +3,15 @@ using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Atomic {
     /// <summary>
-    ///     empty_expr:
-    ///         ';' | 'pass'
+    ///     <c>
+    ///         empty_expr:
+    ///             ';' | 'pass';
+    ///     </c>
     /// </summary>
     public class EmptyExpression : Expression {
         /// <summary>
-        ///     Constructs from tokens.
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
         /// </summary>
         public EmptyExpression(Expression parent) {
             Construct(parent, () => { Eat(Semicolon, KeywordPass); });

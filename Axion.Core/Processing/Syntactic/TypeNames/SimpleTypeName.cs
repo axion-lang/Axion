@@ -5,7 +5,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
     /// <summary>
     ///     <c>
     ///         simple_type:
-    ///             name
+    ///             name;
     ///     </c>
     /// </summary>
     public class SimpleTypeName : TypeName {
@@ -16,6 +16,10 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
             set => SetNode(ref name, value);
         }
 
+        /// <summary>
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
+        /// </summary>
         public SimpleTypeName(Expression parent) {
             Construct(parent, () => { Name = NameExpression.ParseName(this); });
         }

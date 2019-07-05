@@ -7,7 +7,7 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
     /// <summary>
     ///     <c>
     ///         name:
-    ///             simple_name | qualified_name
+    ///             simple_name | qualified_name;
     ///     </c>
     /// </summary>
     public abstract class NameExpression : Expression {
@@ -15,6 +15,10 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
         protected NameExpression() { }
         protected NameExpression(Expression parent) : base(parent) { }
 
+        /// <summary>
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
+        /// </summary>
         internal static NameExpression ParseName(Expression parent) {
             var qualifiers = new List<Token>();
             do {

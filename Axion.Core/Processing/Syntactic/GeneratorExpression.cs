@@ -6,7 +6,7 @@ namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
     ///         generator_expr:
-    ///             '(' comprehension ')'
+    ///             '(' comprehension ')';
     ///     </c>
     /// </summary>
     public class GeneratorExpression : Expression {

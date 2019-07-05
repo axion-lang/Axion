@@ -6,7 +6,7 @@ namespace Axion.Core.Processing.Syntactic {
     /// <summary>
     ///     <c>
     ///         member_expr:
-    ///             atom '.' ID
+    ///             atom '.' ID;
     ///     </c>
     /// </summary>
     public class MemberAccessExpression : Expression {
@@ -24,6 +24,10 @@ namespace Axion.Core.Processing.Syntactic {
             set => SetNode(ref member, value);
         }
 
+        /// <summary>
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
+        /// </summary>
         public MemberAccessExpression(Expression parent, Expression target) {
             Construct(parent, target, () => {
                 Target = target;
