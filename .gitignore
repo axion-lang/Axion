@@ -349,9 +349,10 @@ MigrationBackup/
 /.idea
 /.sonarqube
 /.consulo
+/.vscode
 *.sonarBuild.bat
 *.dotsettings
 
-
+/Generation
 # unit test results
 /Axion.Testing/Files/out
