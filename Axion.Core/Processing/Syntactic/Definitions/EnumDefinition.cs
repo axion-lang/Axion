@@ -56,12 +56,11 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
 
                 Name = new SimpleNameExpression(this);
                 // TODO: support for functions in enums.
-                if (MaybeEat(OpenParenthesis)) {
+                if (MaybeEat(OpLess)) {
                     Bases = new NodeList<TypeName>(
                         this,
                         TypeName.ParseNamedTypeArgs(this).Select(a => a.type)
                     );
-                    Eat(CloseParenthesis);
                 }
                 else {
                     Bases = new NodeList<TypeName>(this);
@@ -123,7 +122,7 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
     /// <summary>
     ///     <c>
     ///         enum_item:
-    ///         name ['(' [type {',' type}] ')'] ['=' constant_expr]
+    ///             name ['(' [type {',' type}] ')'] ['=' constant_expr];
     ///     </c>
     /// </summary>
     public class EnumItem : Expression {

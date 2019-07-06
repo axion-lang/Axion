@@ -80,49 +80,44 @@ namespace Axion.Core.Processing.Lexical {
                 );
             }
 
-            string restOfLine = GetRestOfLine();
-            int    restLen    = restOfLine.Trim().Length;
+            string lineTrimmed = GetRestOfLine();
+            int lineLen = lineTrimmed.Trim().Length;
 
             bool prevIsBinOp =
                 tokens[tokens.Count - 1] is OperatorToken op
              && op.Properties.InputSide == InputSide.Both;
 
             bool hasUnclosedComment =
-                restOfLine.StartsWith(Spec.MultiCommentStart)
+                lineTrimmed.StartsWith(Spec.MultiCommentStart)
                 // that continues on the next line
-             && Regex.Matches(restOfLine, Regex.Escape(Spec.MultiCommentStart)).Count
-              > Regex.Matches(restOfLine, Regex.Escape(Spec.MultiCommentEnd)).Count;
+             && Regex.Matches(lineTrimmed, Regex.Escape(Spec.MultiCommentStart)).Count
+              > Regex.Matches(lineTrimmed, Regex.Escape(Spec.MultiCommentEnd)).Count;
 
-            // todo optimize
-            var any = false;
-            foreach (KeyValuePair<string, OperatorProperties> kvp in Spec.Operators) {
-                if (kvp.Value.InputSide == InputSide.Both
-                 && restOfLine.StartsWith(kvp.Key)) {
-                    any = true;
-                    break;
-                }
-            }
+            var nextLineStartsWithOp = Spec.Operators.Any(
+                kv => kv.Value.InputSide == InputSide.Both 
+                   && lineTrimmed.StartsWith(kv.Key)
+            );
 
-            bool nextCanBeIndent =
-                !prevIsBinOp
-             && !hasUnclosedComment
-             && mismatchingPairs.Count == 0
-             && restLen                > 0
-             && !restOfLine.StartsWith(Spec.CommentStart)
-             && !any;
+            bool notIndent =
+                prevIsBinOp
+             || hasUnclosedComment
+             || nextLineStartsWithOp
+             || mismatchingPairs.Count > 0
+             || lineLen == 0
+             || lineTrimmed.StartsWith(Spec.CommentStart);
 
             if (tokens[tokens.Count - 1].Is(Newline)) {
                 // handle empty string with whitespaces, make newline
-                if (restLen == 0 && !Spec.EndOfLines.Contains(restOfLine)) {
-                    tokenValue.Append(restOfLine);
-                    Move(restOfLine.Length);
+                if (lineLen == 0 && !Spec.EndOfLines.Contains(lineTrimmed)) {
+                    tokenValue.Append(lineTrimmed);
+                    Move(lineTrimmed.Length);
                     tokens.Add(new NewlineToken(tokenValue.ToString(), tokenStartPosition));
                     tokenValue.Clear();
                     tokenStartPosition = Position;
                     return ReadIndentation();
                 }
 
-                if (nextCanBeIndent) {
+                if (!notIndent) {
                     return ReadIndentation();
                 }
 

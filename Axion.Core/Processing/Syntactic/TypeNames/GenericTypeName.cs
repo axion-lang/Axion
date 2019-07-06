@@ -9,7 +9,9 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
     /// <summary>
     ///     <c>
     ///         generic_type:
-    ///             type '[' type {',' type} ']';
+    ///             type type_args;
+    ///         type_args:
+    ///             '[' type {',' type} ']';
     ///     </c>
     /// </summary>
     public class GenericTypeName : TypeName {

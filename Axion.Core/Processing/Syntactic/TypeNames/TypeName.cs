@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Atomic;
+using Axion.Core.Specification;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Axion.Core.Specification.TokenType;
 
@@ -93,7 +94,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
         /// <summary>
         ///     <c>
         ///         type_list:
-        ///         [simple_name '='] type {',' [simple_name '='] type};
+        ///             [simple_name '='] type {',' [simple_name '='] type};
         ///     </c>
         ///     for class, enum, enum item.
         /// </summary>

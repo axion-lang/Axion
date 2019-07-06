@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
     /// <summary>
     ///     <c>
     ///         class_def:
-    ///             'class' simple_name ['&lt;' type_arg_list] block;
+    ///             'class' simple_name [type_args] ['&lt;' type_arg_list] block;
     ///     </c>
     /// </summary>
     public class ClassDefinition : Expression, IDecorable {
