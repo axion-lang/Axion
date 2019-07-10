@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using Axion.Core;
-using Axion.Core.Processing;
 using Axion.Core.Processing.Source;
 using NUnit.Framework;
 
@@ -17,7 +16,7 @@ namespace Axion.Testing.NUnit.Lexer {
                 );
                 Lex(source);
                 Assert.That(source.Blames.Count == 0, file.Name + ": Errors count > 0");
-                Assert.That(source.Tokens.Count > 0, file.Name + ": Tokens count == 0");
+                Assert.That(source.Tokens.Count > 0,  file.Name + ": Tokens count == 0");
             }
         }
 

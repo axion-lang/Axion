@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Source;
@@ -39,7 +40,7 @@ namespace Axion.Core.Processing.Syntactic {
     ///             raise_expr | yield_expr;
     ///     </c>
     /// </summary>
-    public abstract class Expression : SpannedRegion {
+    public class Expression : SpannedRegion {
         private Ast ast;
 
         internal Ast Ast {
@@ -87,7 +88,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         protected Expression() { }
 
-        protected Expression(Expression parent) {
+        internal Expression(Expression parent) {
             Parent = parent;
         }
 
@@ -104,95 +105,90 @@ namespace Axion.Core.Processing.Syntactic {
         ///             | CONSTANT;
         ///     </c>
         /// </summary>
-        internal static Expression ParseAtomExpr(Expression parent) {
-            switch (parent.Peek.Type) {
+        internal Expression ParseAtom() {
+            switch (Peek.Type) {
             case Identifier: {
-                return NameExpression.ParseName(parent);
+                return NameExpression.ParseName(this);
             }
 
             case KeywordIf: {
-                return new ConditionalExpression(parent);
+                return new ConditionalExpression(this);
             }
 
             case KeywordWhile: {
-                return new WhileExpression(parent);
+                return new WhileExpression(this);
             }
 
             #region Small statements
 
             case Semicolon:
             case KeywordPass: {
-                return new EmptyExpression(parent);
+                return new EmptyExpression(this);
             }
 
             case KeywordBreak: {
-                return new BreakExpression(parent);
+                return new BreakExpression(this);
             }
 
             case KeywordContinue: {
-                return new ContinueExpression(parent);
+                return new ContinueExpression(this);
             }
 
             case KeywordReturn: {
-                return new ReturnExpression(parent);
+                return new ReturnExpression(this);
             }
 
             case KeywordAwait: {
-                return new AwaitExpression(parent);
+                return new AwaitExpression(this);
             }
 
             case KeywordYield: {
-                return new YieldExpression(parent);
+                return new YieldExpression(this);
             }
 
             #endregion
 
             case KeywordModule: {
-                return new ModuleDefinition(parent);
+                return new ModuleDefinition(this);
             }
 
             case KeywordClass: {
-                return new ClassDefinition(parent);
+                return new ClassDefinition(this);
             }
 
             case KeywordEnum: {
-                return new EnumDefinition(parent);
+                return new EnumDefinition(this);
             }
 
             case KeywordFn: {
-                return new FunctionDefinition(parent);
+                return new FunctionDefinition(this);
             }
 
             case Indent:
             case OpenBrace:
             case Colon
-                when parent.MacroExpectationType == typeof(BlockExpression): {
-                return new BlockExpression(parent);
+                when MacroExpectationType == typeof(BlockExpression): {
+                return new BlockExpression(this);
             }
 
             case DoubleOpenBrace: {
-                return new CodeQuoteExpression(parent);
+                return new CodeQuoteExpression(this);
             }
 
             case OpenParenthesis: {
-                Token start = parent.Token;
-                parent.Eat(OpenParenthesis);
                 // empty tuple
-                if (parent.MaybeEat(CloseParenthesis)) {
-                    return new TupleExpression(parent, start, parent.Token);
+                if (PeekByIs(2, CloseParenthesis)) {
+                    return new TupleExpression(this);
                 }
-
-                Expression result = ParseMultiple(parent, parens: true);
-                parent.Eat(CloseParenthesis);
-                return result;
+                return ParseMultiple();
             }
 
             default: {
-                if (Spec.Constants.Contains(parent.Peek.Type)) {
-                    return new ConstantExpression(parent);
+                if (Spec.Constants.Contains(Peek.Type)) {
+                    return new ConstantExpression(this);
                 }
 
-                var macro = new MacroApplicationExpression(parent);
+                var macro = new MacroApplicationExpression(this);
                 if (macro.MacroDefinition != null) {
                     return macro;
                 }
@@ -201,7 +197,7 @@ namespace Axion.Core.Processing.Syntactic {
             }
             }
 
-            return new UnknownExpression(parent);
+            return new UnknownExpression(this);
         }
 
         /// <summary>
@@ -212,20 +208,20 @@ namespace Axion.Core.Processing.Syntactic {
         ///             | ({ member | call_expr | index_expr } ['++' | '--']));
         ///     </c>
         /// </summary>
-        internal static Expression ParseSuffixExpr(Expression parent) {
-            Expression value = ParseAtomExpr(parent);
+        internal Expression ParseSuffix() {
+            Expression value = ParseAtom();
             if (Spec.DefinitionExprs.Contains(value.GetType())) {
                 return value;
             }
 
-            if (parent.MaybeEat(RightPipeline)) {
+            if (MaybeEat(RightPipeline)) {
                 do {
                     value = new FunctionCallExpression(
-                        parent,
-                        ParseSuffix(ParseAtomExpr(parent)),
-                        new CallArgument(parent, value)
+                        this,
+                        ParseSuffix(ParseAtom()),
+                        new CallArgument(this, value)
                     );
-                } while (parent.MaybeEat(RightPipeline));
+                } while (MaybeEat(RightPipeline));
 
                 return value;
             }
@@ -233,19 +229,19 @@ namespace Axion.Core.Processing.Syntactic {
             Expression ParseSuffix(Expression result) {
                 var loop = true;
                 while (loop) {
-                    switch (parent.Peek.Type) {
+                    switch (Peek.Type) {
                     case Dot: {
-                        result = new MemberAccessExpression(parent, result);
+                        result = new MemberAccessExpression(this, result);
                         break;
                     }
 
                     case OpenParenthesis: {
-                        result = new FunctionCallExpression(parent, result, true);
+                        result = new FunctionCallExpression(this, result, true);
                         break;
                     }
 
                     case OpenBracket: {
-                        result = new IndexerExpression(parent, result);
+                        result = new IndexerExpression(this, result);
                         break;
                     }
 
@@ -256,10 +252,10 @@ namespace Axion.Core.Processing.Syntactic {
                     }
                 }
 
-                if (parent.MaybeEat(OpIncrement, OpDecrement)) {
+                if (MaybeEat(OpIncrement, OpDecrement)) {
                     var op = (OperatorToken) result.Token;
                     op.Properties.InputSide = InputSide.Right;
-                    result                  = new UnaryExpression(parent, op, result);
+                    result                  = new UnaryExpression(this, op, result);
                 }
 
                 return result;
@@ -274,14 +270,14 @@ namespace Axion.Core.Processing.Syntactic {
         ///             (PREFIX_OPERATOR prefix_expr) | suffix_expr;
         ///     </c>
         /// </summary>
-        internal static Expression ParsePrefixExpr(Expression parent) {
-            if (parent.MaybeEat(Spec.PrefixOperators)) {
-                var op = (OperatorToken) parent.Token;
+        internal Expression ParsePrefix() {
+            if (MaybeEat(Spec.PrefixOperators)) {
+                var op = (OperatorToken) Token;
                 op.Properties.InputSide = InputSide.Right;
-                return new UnaryExpression(parent, op, ParsePrefixExpr(parent));
+                return new UnaryExpression(this, op, ParsePrefix());
             }
 
-            return ParseSuffixExpr(parent);
+            return ParseSuffix();
         }
 
         /// <summary>
@@ -290,25 +286,25 @@ namespace Axion.Core.Processing.Syntactic {
         ///             prefix_expr (ID | SYMBOL) infix_expr;
         ///     </c>
         /// </summary>
-        internal static Expression ParseInfixExpr(Expression parent) {
+        internal Expression ParseInfix() {
             Expression ParseInfix(int precedence) {
-                Expression leftExpr = ParsePrefixExpr(parent);
-                if (parent.Token.Type == Newline || Spec.DefinitionExprs.Contains(leftExpr.GetType())) {
+                Expression leftExpr = ParsePrefix();
+                if (Token.Type == Newline || Spec.DefinitionExprs.Contains(leftExpr.GetType())) {
                     return leftExpr;
                 }
 
                 // expr (keyword | expr) expr?
-                var macro = new MacroApplicationExpression(parent, leftExpr);
+                var macro = new MacroApplicationExpression(this, leftExpr);
                 if (macro.MacroDefinition != null) {
                     return macro;
                 }
 
                 while (true) {
                     int newPrecedence;
-                    if (parent.Peek is OperatorToken operatorToken) {
-                        newPrecedence = operatorToken.Properties.Precedence;
+                    if (Peek is OperatorToken opToken) {
+                        newPrecedence = opToken.Properties.Precedence;
                     }
-                    else if (parent.Token.Type != Newline && parent.Peek.Is(Identifier)) {
+                    else if (Token.Type != Newline && Peek.Is(Identifier)) {
                         newPrecedence = 4;
                     }
                     else {
@@ -319,18 +315,18 @@ namespace Axion.Core.Processing.Syntactic {
                         break;
                     }
 
-                    parent.Eat();
+                    Eat();
                     leftExpr = new BinaryExpression(
-                        parent,
+                        this,
                         leftExpr,
-                        parent.Token,
+                        Token,
                         ParseInfix(newPrecedence + 1)
                     );
                 }
 
-                if (parent.Peek.Is(KeywordIf, KeywordUnless)
-                 && !parent.Token.Is(Newline, Outdent)) {
-                    return new ConditionalInfixExpression(parent, leftExpr);
+                if (Peek.Is(KeywordIf, KeywordUnless)
+                 && !Token.Is(Newline, Outdent)) {
+                    return new ConditionalInfixExpression(this, leftExpr);
                 }
 
                 return leftExpr;
@@ -348,10 +344,10 @@ namespace Axion.Core.Processing.Syntactic {
         ///                ['=' infix_list]);
         ///     </c>
         /// </summary>
-        internal static Expression ParseVarExpr(Expression parent) {
-            bool isImmutable = parent.MaybeEat(KeywordLet);
+        internal Expression ParseAny() {
+            bool isImmutable = MaybeEat(KeywordLet);
 
-            Expression expr = ParseMultiple(parent, ParseInfixExpr);
+            Expression expr = ParseMultiple(ParseInfix);
 
             // ['let'] name '=' expr
             if (expr is BinaryExpression bin
@@ -359,7 +355,7 @@ namespace Axion.Core.Processing.Syntactic {
              && bin.Operator.Is(OpAssign)
              && !bin.ParentBlock.HasVariable(name)) {
                 return new VariableDefinitionExpression(
-                    parent,
+                    this,
                     bin.Left,
                     null,
                     bin.Right,
@@ -368,27 +364,27 @@ namespace Axion.Core.Processing.Syntactic {
             }
 
             // check for ':' - starting block instead of var definition
-            if ((parent.Ast.MacroExpectationType?.IsInstanceOfType(typeof(BlockExpression))
+            if ((Ast.MacroExpectationType?.IsInstanceOfType(typeof(BlockExpression))
               ?? false)
-             || !parent.Peek.Is(Colon)) {
+             || !Peek.Is(Colon)) {
                 return expr;
             }
 
             if (!Spec.VariableLeftExprs.Contains(expr.GetType())) {
-                parent.Unit.Blame(BlameType.ThisExpressionTargetIsNotAssignable, expr);
+                Unit.Blame(BlameType.ThisExpressionTargetIsNotAssignable, expr);
             }
 
             TypeName   type  = null;
             Expression value = null;
-            if (parent.MaybeEat(Colon)) {
-                type = TypeName.ParseTypeName(parent);
+            if (MaybeEat(Colon)) {
+                type = new TypeName(this).ParseTypeName();
             }
 
-            if (parent.MaybeEat(OpAssign)) {
-                value = ParseMultiple(parent, expectedTypes: Spec.InfixExprs);
+            if (MaybeEat(OpAssign)) {
+                value = ParseMultiple(expectedTypes: Spec.InfixExprs);
             }
 
-            return new VariableDefinitionExpression(parent, expr, type, value, isImmutable);
+            return new VariableDefinitionExpression(this, expr, type, value, isImmutable);
         }
 
         /// <summary>
@@ -399,78 +395,75 @@ namespace Axion.Core.Processing.Syntactic {
         ///     expressions with optional parenthesis
         ///     (e.g. tuples)
         /// </summary>
-        internal static Expression ParseMultiple(
-            Expression                   parent,
-            Func<Expression, Expression> parserFunc = null,
-            bool                         parens     = false,
-            params Type[]                expectedTypes
+        internal Expression ParseMultiple(
+            Func<Expression> parserFunc = null,
+            params Type[]    expectedTypes
         ) {
-            parserFunc = parserFunc ?? ParseVarExpr;
-            if (expectedTypes.Length == 0 || parserFunc == ParseVarExpr) {
+            parserFunc = parserFunc ?? ParseAny;
+            if (expectedTypes.Length == 0 || parserFunc == ParseAny) {
                 expectedTypes = Spec.GlobalExprs;
             }
 
-            var list = new NodeList<Expression>(parent) {
-                parserFunc(parent)
+            var parens = MaybeEat(OpenParenthesis);
+            var list = new NodeList<Expression>(this) {
+                parserFunc()
             };
 
-            if (parens && parent.Peek.Is(CloseParenthesis)) {
+            if (parens && MaybeEat(CloseParenthesis)) {
                 return list[0];
             }
 
             // tuple
-            if (parent.MaybeEat(Comma)) {
+            if (MaybeEat(Comma)) {
                 do {
-                    list.Add(parserFunc(parent));
-                } while (parent.MaybeEat(Comma));
+                    list.Add(parserFunc());
+                } while (MaybeEat(Comma));
             }
             // generator | comprehension
             // TODO HERE 'for' can be after 'newline', but if it's inside (), {} or []
-            else if (parent.Peek.Is(KeywordFor) && parent.Token.Type != Newline) {
-                list[0] = new ForComprehension(parent, list[0]);
+            else if (Peek.Is(KeywordFor) && Token.Type != Newline) {
+                list[0] = new ForComprehension(this, list[0]);
                 if (parens) {
-                    list[0] = new GeneratorExpression(parent, (ForComprehension) list[0]);
+                    list[0] = new GeneratorExpression(this, (ForComprehension) list[0]);
                 }
             }
 
             CheckType(list, expectedTypes);
 
-            if (parens && list.Count == 1) {
-                return new ParenthesizedExpression(list[0]);
+            if (parens) {
+                Eat(CloseParenthesis);
+                if (list.Count == 1) {
+                    return new ParenthesizedExpression(list[0]);
+                }
             }
 
-            return MaybeTuple(parent, list);
+            return MaybeTuple(list);
         }
 
         /// <summary>
         ///     <c>
         ///         cascade:
-        ///             expr [{';' expr} ';'] [terminator | NEWLINE];
+        ///             (expr ((';' [NEWLINE]) | NEWLINE | terminator | END) )+;
         ///     </c>
         /// </summary>
-        internal static NodeList<Expression> ParseCascade(
-            Expression parent,
-            TokenType  terminator = None
-        ) {
-            var items = new NodeList<Expression>(parent) {
-                ParseVarExpr(parent)
+        internal List<Expression> ParseCascade(TokenType terminator = None) {
+            var items = new List<Expression> {
+                ParseAny()
             };
-            if (parent.MaybeEat(Semicolon)) {
-                while (parent.Token.Is(Semicolon)
-                    && !parent.MaybeEat(Newline)
-                    && !parent.Peek.Is(terminator, End)) {
-                    items.Add(ParseVarExpr(parent));
-                    if (parent.MaybeEat(End)) {
+            if (MaybeEat(Semicolon)) {
+                while (Token.Is(Semicolon)
+                    && !MaybeEat(Newline)
+                    && !Peek.Is(terminator, End)) {
+                    items.Add(ParseAny());
+                    if (MaybeEat(End)) {
                         if (terminator != None) {
-                            parent.Eat(terminator);
+                            Eat(terminator);
                         }
-
-                        // else EOC implies a new line
                         break;
                     }
 
-                    if (!parent.MaybeEat(Semicolon)) {
-                        parent.Eat(Newline);
+                    if (!MaybeEat(Semicolon)) {
+                        Eat(Newline);
                     }
                 }
             }
@@ -478,17 +471,14 @@ namespace Axion.Core.Processing.Syntactic {
             return items;
         }
 
-        internal static Expression MaybeTuple(
-            Expression           parent,
-            NodeList<Expression> expressions
-        ) {
+        internal Expression MaybeTuple(NodeList<Expression> expressions) {
             if (expressions.Count == 1) {
                 return expressions[0];
             }
 
-            return new TupleExpression(parent, expressions);
+            return new TupleExpression(this, expressions);
         }
-        
+
         /// <summary>
         ///     In:  SampleExpression
         ///     Out: 'sample' expression
@@ -730,7 +720,7 @@ namespace Axion.Core.Processing.Syntactic {
 
             field = value;
         }
-        
+
         /// <summary>
         ///     Helper for constructing expressions that
         ///     start with token.
@@ -771,5 +761,13 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         #endregion
+
+        internal override void ToAxionCode(CodeBuilder c) {
+            throw new NotSupportedException();
+        }
+
+        internal override void ToCSharpCode(CodeBuilder c) {
+            throw new NotSupportedException();
+        }
     }
 }

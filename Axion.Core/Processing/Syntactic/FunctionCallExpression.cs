@@ -117,7 +117,7 @@ namespace Axion.Core.Processing.Syntactic {
                 return ParseArgList(parent);
             }
 
-            Expression   nameOrValue = ParseInfixExpr(parent);
+            Expression   nameOrValue = new Expression(parent).ParseInfix();
             var          generator   = false;
             CallArgument arg;
             if (parent.MaybeEat(OpAssign)) {
@@ -169,7 +169,7 @@ namespace Axion.Core.Processing.Syntactic {
             }
 
             while (!parent.MaybeEat(CloseParenthesis)) {
-                Expression   nameOrValue = ParseInfixExpr(parent);
+                Expression   nameOrValue = new Expression(parent).ParseInfix();
                 CallArgument arg;
 
                 if (parent.MaybeEat(OpMultiply)) {
@@ -199,7 +199,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         private static CallArgument FinishNamedArg(Expression parent, Expression nameOrValue) {
             if (nameOrValue is SimpleNameExpression name) {
-                Expression value = ParseInfixExpr(parent);
+                Expression value = new Expression(parent).ParseInfix();
                 return new CallArgument(parent, name, value);
             }
 

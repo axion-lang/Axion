@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
 
                 if (!Peek.Is(CloseParenthesis)) {
                     do {
-                        Types.Add(ParseTypeName(parent));
+                        Types.Add(ParseTypeName());
                     } while (MaybeEat(Comma));
                 }
 
@@ -46,7 +46,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
             // TODO: add names for tuple items
             Types = new NodeList<TypeName>(
                 this,
-                csNode.Elements.Select(i => FromCSharp(this, i.Type))
+                csNode.Elements.Select(i => FromCSharp(i.Type))
             );
         }
 

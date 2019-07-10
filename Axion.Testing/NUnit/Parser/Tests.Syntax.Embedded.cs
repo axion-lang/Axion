@@ -1,5 +1,4 @@
 using System.Linq;
-using Axion.Core.Processing;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Source;
 using Axion.Core.Processing.Syntactic;

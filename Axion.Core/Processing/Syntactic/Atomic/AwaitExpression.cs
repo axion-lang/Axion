@@ -28,7 +28,7 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
             Construct(parent, () => {
                 // TODO: add 'in async context' check
                 Eat(KeywordAwait);
-                Value = ParseMultiple(parent, expectedTypes: Spec.InfixExprs);
+                Value = ParseMultiple(expectedTypes: Spec.InfixExprs);
             });
         }
 

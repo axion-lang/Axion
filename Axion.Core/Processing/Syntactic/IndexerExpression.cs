@@ -43,19 +43,19 @@ namespace Axion.Core.Processing.Syntactic {
                     while (true) {
                         Expression start = null;
                         if (!parent.Peek.Is(Colon)) {
-                            start = ParseInfixExpr(parent);
+                            start = ParseInfix();
                         }
 
                         if (parent.MaybeEat(Colon)) {
                             Expression stop = null;
                             if (!parent.Peek.Is(Colon, Comma, CloseBracket)) {
-                                stop = ParseInfixExpr(parent);
+                                stop = ParseInfix();
                             }
 
                             Expression step = null;
                             if (parent.MaybeEat(Colon)
                              && !parent.Peek.Is(Comma, CloseBracket)) {
-                                step = ParseInfixExpr(parent);
+                                step = ParseInfix();
                             }
 
                             expressions.Add(new SliceExpression(parent, start, stop, step));
@@ -75,7 +75,7 @@ namespace Axion.Core.Processing.Syntactic {
                     }
                 }
 
-                Index = MaybeTuple(parent, expressions);
+                Index = MaybeTuple(expressions);
                 Eat(CloseBracket);
             });
         }

@@ -118,50 +118,30 @@ namespace Axion.Core.Specification {
             typeof(TupleExpression)
         };
 
-        internal static readonly Type[] AssignableExprs =
-            VariableLeftExprs
-                .Union(
-                    new[] {
-                        typeof(MemberAccessExpression),
-                        typeof(IndexerExpression)
-                    }
-                )
-                .ToArray();
+        internal static readonly Type[] AssignableExprs = VariableLeftExprs.Union(
+            typeof(MemberAccessExpression),
+            typeof(IndexerExpression)
+        );
 
-        internal static readonly Type[] AtomExprs =
-            AssignableExprs
-                .Union(
-                    new[] {
-                        typeof(AwaitExpression),
-                        typeof(YieldExpression),
-                        typeof(FunctionCallExpression),
-                        typeof(ConstantExpression),
-                        typeof(ParenthesizedExpression)
-                    }
-                )
-                .ToArray();
+        internal static readonly Type[] AtomExprs = AssignableExprs.Union(
+            typeof(AwaitExpression),
+            typeof(YieldExpression),
+            typeof(FunctionCallExpression),
+            typeof(ConstantExpression),
+            typeof(ParenthesizedExpression)
+        );
 
-        internal static readonly Type[] InfixExprs =
-            AtomExprs
-                .Union(
-                    new[] {
-                        typeof(UnaryExpression),
-                        typeof(BinaryExpression),
-                        typeof(ConditionalInfixExpression)
-                    }
-                )
-                .ToArray();
+        internal static readonly Type[] InfixExprs = AtomExprs.Union(
+            typeof(UnaryExpression),
+            typeof(BinaryExpression),
+            typeof(ConditionalInfixExpression)
+        );
 
-        internal static readonly Type[] GlobalExprs =
-            InfixExprs
-                .Union(
-                    new[] {
-                        typeof(VariableDefinitionExpression),
-                        typeof(GeneratorExpression),
-                        typeof(ForComprehension)
-                    }
-                )
-                .ToArray();
+        internal static readonly Type[] GlobalExprs = InfixExprs.Union(
+            typeof(VariableDefinitionExpression),
+            typeof(GeneratorExpression),
+            typeof(ForComprehension)
+        );
 
         internal static readonly Type[] StatementExprs = {
             typeof(AwaitExpression),
@@ -182,13 +162,13 @@ namespace Axion.Core.Specification {
         };
 
         internal static readonly Dictionary<Type[], string> ExprGroupNames = new Dictionary<Type[], string> {
-            { DecoratorExprs, "decorator" },
-            { VariableLeftExprs, "variable name(s)" },
-            { AssignableExprs, "assignable" },
-            { AtomExprs, "atomic value" },
-            { InfixExprs, "infix expression" },
-            { GlobalExprs, "any valid expression" },
-            { StatementExprs, "statement" }
+            { DecoratorExprs,         "decorator" },
+            { VariableLeftExprs,      "variable name(s)" },
+            { AssignableExprs,        "assignable" },
+            { AtomExprs,              "atomic value" },
+            { InfixExprs,             "infix expression" },
+            { GlobalExprs,            "any valid expression" },
+            { StatementExprs,         "statement" }
         };
 
         #endregion

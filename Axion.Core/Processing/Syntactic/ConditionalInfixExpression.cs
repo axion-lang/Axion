@@ -47,9 +47,9 @@ namespace Axion.Core.Processing.Syntactic {
                 }
 
                 TrueExpression = trueExpression;
-                Condition      = ParseInfixExpr(this);
+                Condition      = ParseInfix();
                 if (MaybeEat(KeywordElse)) {
-                    FalseExpression = ParseMultiple(this, expectedTypes: Spec.InfixExprs);
+                    FalseExpression = ParseMultiple(expectedTypes: Spec.InfixExprs);
                 }
 
                 if (invert) {

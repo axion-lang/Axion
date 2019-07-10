@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Axion.Core.Processing.Errors;
@@ -81,7 +80,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             string lineTrimmed = GetRestOfLine();
-            int lineLen = lineTrimmed.Trim().Length;
+            int    lineLen     = lineTrimmed.Trim().Length;
 
             bool prevIsBinOp =
                 tokens[tokens.Count - 1] is OperatorToken op
@@ -93,8 +92,8 @@ namespace Axion.Core.Processing.Lexical {
              && Regex.Matches(lineTrimmed, Regex.Escape(Spec.MultiCommentStart)).Count
               > Regex.Matches(lineTrimmed, Regex.Escape(Spec.MultiCommentEnd)).Count;
 
-            var nextLineStartsWithOp = Spec.Operators.Any(
-                kv => kv.Value.InputSide == InputSide.Both 
+            bool nextLineStartsWithOp = Spec.Operators.Any(
+                kv => kv.Value.InputSide == InputSide.Both
                    && lineTrimmed.StartsWith(kv.Key)
             );
 
@@ -103,7 +102,7 @@ namespace Axion.Core.Processing.Lexical {
              || hasUnclosedComment
              || nextLineStartsWithOp
              || mismatchingPairs.Count > 0
-             || lineLen == 0
+             || lineLen                == 0
              || lineTrimmed.StartsWith(Spec.CommentStart);
 
             if (tokens[tokens.Count - 1].Is(Newline)) {

@@ -59,7 +59,7 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
                 if (MaybeEat(OpLess)) {
                     Bases = new NodeList<TypeName>(
                         this,
-                        TypeName.ParseNamedTypeArgs(this).Select(a => a.type)
+                        new TypeName(this).ParseNamedTypeArgs().Select(a => a.type)
                     );
                 }
                 else {
@@ -147,45 +147,31 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
             set => SetNode(ref val, value);
         }
 
-        public EnumItem(
-            Expression           parent,
-            SimpleNameExpression name,
-            NodeList<TypeName>   typeList = null,
-            ConstantExpression   value    = null
-        ) : base(parent) {
-            Name     = name;
-            TypeList = typeList ?? new NodeList<TypeName>(this);
-            Value    = value;
-            MarkStart(Name);
-            MarkEnd(
-                Value
-             ?? (TypeList.Count > 0 ? (Expression) TypeList.Last : Name)
-            );
-        }
-
-        internal EnumItem(Expression parent) : base(parent) {
-            MarkStart();
-
-            Name = new SimpleNameExpression(this);
-            if (MaybeEat(OpenParenthesis)) {
-                TypeList = new NodeList<TypeName>(
-                    this,
-                    TypeName.ParseNamedTypeArgs(this).Select(a => a.type)
-                );
-                Eat(CloseParenthesis);
-            }
-            else {
-                TypeList = new NodeList<TypeName>(this);
-            }
-
-            if (MaybeEat(OpAssign)) {
-                Value = ParseAtomExpr(this) as ConstantExpression;
-                if (Value == null) {
-                    Unit.Blame(BlameType.ConstantValueExpected, Token);
+        /// <summary>
+        ///     Expression is constructed from tokens stream
+        ///     that belongs to <see cref="parent"/>'s AST.
+        /// </summary>
+        internal EnumItem(Expression parent) {
+            Construct(parent, () => {
+                Name = new SimpleNameExpression(this);
+                if (MaybeEat(OpenParenthesis)) {
+                    TypeList = new NodeList<TypeName>(
+                        this,
+                        new TypeName(this).ParseNamedTypeArgs().Select(a => a.type)
+                    );
+                    Eat(CloseParenthesis);
                 }
-            }
+                else {
+                    TypeList = new NodeList<TypeName>(this);
+                }
 
-            MarkEnd();
+                if (MaybeEat(OpAssign)) {
+                    Value = ParseAtom() as ConstantExpression;
+                    if (Value == null) {
+                        Unit.Blame(BlameType.ConstantValueExpected, Token);
+                    }
+                }
+            });
         }
 
         internal override void ToAxionCode(CodeBuilder c) {

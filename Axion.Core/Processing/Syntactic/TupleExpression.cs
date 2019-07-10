@@ -1,6 +1,7 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.TypeNames;
+using static Axion.Core.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic {
     /// <summary>
@@ -24,13 +25,12 @@ namespace Axion.Core.Processing.Syntactic {
         /// <summary>
         ///     Constructor for empty tuple.
         /// </summary>
-        internal TupleExpression(
-            Expression parent,
-            Token      start,
-            Token      end
-        ) : base(parent) {
+        internal TupleExpression(Expression parent) {
             Expressions = new NodeList<Expression>(this);
-            MarkPosition(start, end);
+            Construct(parent, () => {
+                Eat(OpenParenthesis);
+                Eat(CloseParenthesis);
+            });
         }
 
         internal TupleExpression(

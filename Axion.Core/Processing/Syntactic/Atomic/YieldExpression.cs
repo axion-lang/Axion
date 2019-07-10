@@ -27,10 +27,10 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
                 // 1) a single expr
                 // 2) multiple expressions, in which case it's wrapped in a tuple.
                 if (MaybeEat(KeywordFrom)) {
-                    Value = ParseInfixExpr(this);
+                    Value = ParseInfix();
                 }
                 else {
-                    Value = ParseMultiple(this, expectedTypes: Spec.InfixExprs);
+                    Value = ParseMultiple(expectedTypes: Spec.InfixExprs);
                 }
             });
         }

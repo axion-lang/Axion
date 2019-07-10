@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Axion.Core.Processing;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Source;
 using Axion.Core.Specification;
@@ -104,7 +103,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
             for (var i = 0; i < numbers.Length; i++) {
                 var source = new SourceUnit(
-                    "number = " + numbers[i],
+                    "number = "                             + numbers[i],
                     OutPath + nameof(IsOK_ValidNumbers) + i + TestExtension
                 );
                 Assert.DoesNotThrow(() => Lex(source));
@@ -118,8 +117,8 @@ namespace Axion.Testing.NUnit.Lexer {
 
                 for (var k = 0; k < source.Tokens.Count; k++) {
                     if (k == 2
-                        && source.Tokens[k] is NumberToken num
-                        && expected[k] is NumberToken num2) {
+                     && source.Tokens[k] is NumberToken num
+                     && expected[k] is NumberToken num2) {
                         Assert.That(
                             num.Options == num2.Options,
                             $"{num.Options}\n{num2.Options}"

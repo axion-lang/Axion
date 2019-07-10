@@ -27,7 +27,7 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
         internal CodeQuoteExpression(Expression parent) {
             Construct(parent, () => {
                 Eat(DoubleOpenBrace);
-                Value = ParseVarExpr(this);
+                Value = ParseAny();
                 Eat(DoubleCloseBrace);
             });
         }

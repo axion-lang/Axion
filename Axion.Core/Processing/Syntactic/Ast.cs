@@ -57,32 +57,32 @@ namespace Axion.Core.Processing.Syntactic {
                     NewTokenPattern("do"),
                     new ExpressionPattern(typeof(BlockExpression)),
                     new OrPattern(NewTokenPattern("while"), NewTokenPattern("until")),
-                    new ExpressionPattern(ParseInfixExpr)
+                    new ExpressionPattern(ParseInfix)
                 ));
             Macros.Add(
                 new MacroDefinition(
                     NewTokenPattern("until"),
-                    new ExpressionPattern(ParseInfixExpr),
+                    new ExpressionPattern(ParseInfix),
                     new ExpressionPattern(typeof(BlockExpression))
                 ));
             Macros.Add(
                 new MacroDefinition(
                     NewTokenPattern("for"),
-                    new ExpressionPattern(ParseAtomExpr),
+                    new ExpressionPattern(ParseAtom),
                     NewTokenPattern("in"),
-                    new ExpressionPattern(ParseInfixExpr),
+                    new ExpressionPattern(ParseInfix),
                     new ExpressionPattern(typeof(BlockExpression))
                 ));
             Macros.Add(
                 new MacroDefinition(
                     NewTokenPattern("unless"),
-                    new ExpressionPattern(ParseInfixExpr),
+                    new ExpressionPattern(ParseInfix),
                     new ExpressionPattern(typeof(BlockExpression)),
                     new OptionalPattern(
                         new OptionalPattern(
                             new MultiplePattern(
                                 NewTokenPattern("elif"),
-                                new ExpressionPattern(ParseInfixExpr),
+                                new ExpressionPattern(ParseInfix),
                                 new ExpressionPattern(typeof(BlockExpression))
                             )
                         ),
@@ -135,7 +135,7 @@ namespace Axion.Core.Processing.Syntactic {
                 ));
 
             while (!MaybeEat(End)) {
-                Items.AddRange(ParseCascade(this));
+                Items.AddRange(ParseCascade());
             }
         }
 

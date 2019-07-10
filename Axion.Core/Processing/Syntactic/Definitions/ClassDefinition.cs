@@ -61,7 +61,7 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
                 Name = new SimpleNameExpression(this);
                 // TODO: add generic classes, case classes
                 if (MaybeEat(OpLess)) {
-                    List<(TypeName, SimpleNameExpression )> types = TypeName.ParseNamedTypeArgs(this);
+                    List<(TypeName, SimpleNameExpression )> types = new TypeName(this).ParseNamedTypeArgs();
                     foreach ((TypeName type, SimpleNameExpression typeLabel) in types) {
                         if (typeLabel == null) {
                             Bases.Add(type);

@@ -33,7 +33,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
         ///     Constructs expression from C# syntax.
         /// </summary>
         public ArrayTypeName(Expression parent, ArrayTypeSyntax csNode) : base(parent) {
-            ElementType = FromCSharp(this, csNode.ElementType);
+            ElementType = FromCSharp(csNode.ElementType);
         }
 
         /// <summary>

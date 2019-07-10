@@ -379,7 +379,6 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             // TODO: Add \N{name} escape sequences
-            // TODO: Add warnings for meaningless escapes, what can be shortened (e. g. \x00)
             // hexadecimal character \xn[n][n][n]
             case 'x': {
                 Move();

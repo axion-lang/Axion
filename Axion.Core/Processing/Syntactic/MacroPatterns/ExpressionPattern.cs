@@ -4,14 +4,14 @@ using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.MacroPatterns {
     public class ExpressionPattern : IPattern {
-        private readonly Type                         type;
-        private readonly Func<Expression, Expression> parseFunc;
+        private readonly Type             type;
+        private readonly Func<Expression> parseFunc;
 
         public ExpressionPattern(Type type) {
             this.type = type;
         }
 
-        public ExpressionPattern(Func<Expression, Expression> parseFunc) {
+        public ExpressionPattern(Func<Expression> parseFunc) {
             this.parseFunc = parseFunc;
         }
 
@@ -24,17 +24,17 @@ namespace Axion.Core.Processing.Syntactic.MacroPatterns {
 
             Expression e;
             if (parseFunc != null) {
-                e = parseFunc(parent);
+                e = parseFunc();
                 parent.Ast.MacroApplicationParts.Add(e);
                 return true;
             }
 
             parent.Ast.MacroExpectationType = type;
             if (typeof(TypeName).IsAssignableFrom(type)) {
-                e = TypeName.ParseTypeName(parent);
+                e = new TypeName(parent).ParseTypeName();
             }
             else {
-                e = Expression.ParseVarExpr(parent);
+                e = new Expression(parent).ParseAny();
             }
 
             parent.Ast.MacroExpectationType = null;

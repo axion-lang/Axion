@@ -48,12 +48,11 @@ namespace Axion.Core.Processing.Syntactic {
                 Target = target;
                 Eat(KeywordFor);
                 Item = ParseMultiple(
-                    this,
-                    ParseAtomExpr,
+                    ParseAtom,
                     expectedTypes: typeof(SimpleNameExpression)
                 );
                 Eat(OpIn);
-                Iterable = ParseMultiple(parent, expectedTypes: Spec.InfixExprs);
+                Iterable = ParseMultiple(expectedTypes: Spec.InfixExprs);
 
                 if (Peek.Is(KeywordFor)) {
                     Right = new ForComprehension(Parent, this);

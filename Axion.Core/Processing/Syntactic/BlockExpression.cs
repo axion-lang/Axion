@@ -221,11 +221,11 @@ namespace Axion.Core.Processing.Syntactic {
             }
 
             if (terminator == Newline) {
-                Items.AddRange(ParseCascade(this));
+                Items.AddRange(ParseCascade());
             }
             else if (!error && !MaybeEat(terminator)) {
                 while (true) {
-                    Items.AddRange(ParseCascade(this, terminator));
+                    Items.AddRange(ParseCascade(terminator));
                     if (MaybeEat(terminator)) {
                         break;
                     }

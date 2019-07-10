@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
             Construct(parent, left, () => {
                 Left = left;
                 Eat(OpBitOr);
-                Right = ParseTypeName(this);
+                Right = ParseTypeName();
             });
         }
 

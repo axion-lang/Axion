@@ -42,7 +42,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
                 Target        = target;
                 Eat(OpenBracket);
                 do {
-                    TypeArguments.Add(ParseTypeName(parent));
+                    TypeArguments.Add(ParseTypeName());
                 } while (MaybeEat(Comma));
 
                 Eat(CloseBracket);
@@ -59,7 +59,7 @@ namespace Axion.Core.Processing.Syntactic.TypeNames {
             Target = new SimpleTypeName(csNode.Identifier.Text);
             TypeArguments = new NodeList<TypeName>(
                 this,
-                csNode.TypeArgumentList.Arguments.Select(a => FromCSharp(this, a))
+                csNode.TypeArgumentList.Arguments.Select(FromCSharp)
             );
         }
 

@@ -42,7 +42,7 @@ namespace Axion.Core.Processing.Syntactic {
                     Eat(KeywordIf);
                 }
 
-                Condition = ParseInfixExpr(this);
+                Condition = ParseInfix();
                 ThenBlock = new BlockExpression(this);
 
                 if (MaybeEat(KeywordElse)) {

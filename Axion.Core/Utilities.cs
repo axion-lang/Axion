@@ -39,6 +39,10 @@ namespace Axion.Core {
             return res;
         }
 
+        public static T[] Union<T>(this IEnumerable<T> collection1, params T[] collection2) {
+            return Enumerable.Union(collection1, collection2).ToArray();
+        }
+
         #region Get user input and split it into launch arguments
 
         /// <summary>

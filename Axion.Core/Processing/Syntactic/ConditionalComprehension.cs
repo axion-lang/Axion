@@ -30,11 +30,11 @@ namespace Axion.Core.Processing.Syntactic {
         internal ConditionalComprehension(Expression parent) {
             Construct(parent, () => {
                 if (MaybeEat(KeywordIf)) {
-                    Condition = ParseInfixExpr(this);
+                    Condition = ParseInfix();
                 }
                 else {
                     Eat(KeywordUnless);
-                    Condition = new UnaryExpression(this, new OperatorToken(OpNot), ParseInfixExpr(this));
+                    Condition = new UnaryExpression(this, new OperatorToken(OpNot), ParseInfix());
                 }
             });
         }

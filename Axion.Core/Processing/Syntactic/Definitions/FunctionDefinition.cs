@@ -69,10 +69,13 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
                     Parameters = ParseParameterList(this, CloseParenthesis);
                     Eat(CloseParenthesis);
                 }
+                else {
+                    Parameters = new NodeList<FunctionParameter>(this);
+                }
 
                 // return type
                 if (MaybeEat(RightFatArrow)) {
-                    ReturnType = TypeName.ParseTypeName(this);
+                    ReturnType = new TypeName(this).ParseTypeName();
                 }
 
                 Block = new BlockExpression(this, BlockType.Named);
@@ -88,7 +91,7 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
                 this,
                 csNode.ParameterList.Parameters.Select(p => new FunctionParameter(this, p))
             );
-            ReturnType = TypeName.FromCSharp(this, csNode.ReturnType);
+            ReturnType = new TypeName(this).FromCSharp(csNode.ReturnType);
             Block      = new BlockExpression(this, csNode.Body);
         }
 
@@ -274,7 +277,7 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
             MarkStart();
             Name = new SimpleNameExpression(this);
             Eat(Colon);
-            ValueType = TypeName.ParseTypeName(this);
+            ValueType = new TypeName(this).ParseTypeName();
 
             if (names.Contains(Name.Name)) {
                 Unit.Blame(BlameType.DuplicatedParameterNameInFunctionDefinition, name);
@@ -283,7 +286,7 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
             names.Add(Name.Name);
 
             if (MaybeEat(OpAssign)) {
-                DefaultValue = ParseInfixExpr(this);
+                DefaultValue = ParseInfix();
             }
 
             MarkEnd();
@@ -297,7 +300,7 @@ namespace Axion.Core.Processing.Syntactic.Definitions {
             ParameterSyntax csNode
         ) : base(parent) {
             Name      = new SimpleNameExpression(this, csNode.Identifier.Text);
-            ValueType = TypeName.FromCSharp(this, csNode.Type);
+            ValueType = new TypeName(this).FromCSharp(csNode.Type);
             throw new NotImplementedException();
             //DefaultValue = Expression.FromCSharp(csNode.Default.Value);
         }

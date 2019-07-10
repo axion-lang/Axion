@@ -38,7 +38,7 @@ namespace Axion.Core.Processing.Syntactic {
         internal WhileExpression(Expression parent) {
             Construct(parent, () => {
                 Eat(KeywordWhile);
-                Condition = ParseInfixExpr(this);
+                Condition = ParseInfix();
                 Block     = new BlockExpression(this, BlockType.Loop);
                 if (MaybeEat(KeywordNoBreak)) {
                     NoBreakBlock = new BlockExpression(this);

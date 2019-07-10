@@ -1,4 +1,3 @@
-using Axion.Core.Processing;
 using Axion.Core.Processing.Source;
 using NUnit.Framework;
 
@@ -10,7 +9,7 @@ namespace Axion.Testing.NUnit.Lexer {
             SourceUnit   source = MakeSourceFromCode(id);
             Lex(source);
             // id, minus, EOC
-            Assert.AreEqual(3, source.Tokens.Count);
+            Assert.AreEqual(3,             source.Tokens.Count);
             Assert.AreEqual("ident-ifier", source.Tokens[0].Value);
         }
 

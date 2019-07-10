@@ -6,11 +6,11 @@ using static Axion.Core.Processing.Source.SourceProcessingMode;
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace Axion.Core {
-  /// <summary>
-  ///     Stores information about last
-  ///     user arguments in command line.
-  /// </summary>
-  internal class CommandLineArguments {
+    /// <summary>
+    ///     Stores information about last
+    ///     user arguments in command line.
+    /// </summary>
+    internal class CommandLineArguments {
         internal static readonly string HelpText = string.Join(
             Environment.NewLine,
             "┌─────────────────────────────┬───────────────────────────────────────────────────────────────┐",

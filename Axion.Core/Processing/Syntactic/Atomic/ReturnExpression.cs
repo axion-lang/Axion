@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Atomic {
                 }
 
                 if (!Peek.Is(Spec.NeverExprStartTypes)) {
-                    Value = ParseMultiple(parent, expectedTypes: Spec.InfixExprs);
+                    Value = ParseMultiple(expectedTypes: Spec.InfixExprs);
                 }
             });
         }
