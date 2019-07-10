@@ -154,8 +154,10 @@ namespace Axion.Core.Processing.Syntactic {
                     else {
                         b.Write(e);
                     }
-
-                    b.WriteLine(";");
+                    // Semicolon after method or accessor block is not valid
+                    if (!(e is FunctionDefinition)) {
+                        b.WriteLine(";");
+                    }
                 }
             }
             else {
