@@ -3,12 +3,6 @@
 <h2 align="center">Welcome to Axion programming language toolset</h2>
 <h3 align="center">:\:\:\:\:\:\:\:\:\: Under construction :/:/:/:/:/:/:/:/:/:</h3>
 
-### Repository consists of 3 parts:
-
-- **Language core (lexer, parser, interpreter, etc.) (.NET Standard)**
-- **A .NET Core wrapper around language core (mainly to provide unit-testing and launching)**
-- **Import of [ConsoleExtensions](https://github.com/F1uctus/ConsoleExtensions) project (to use the console code editor with syntax highlighting) (a bit unstable)**
-
 ### Objectives:
 
 - **Language union (provide inter-transpiling to other popular languages).**
@@ -33,8 +27,8 @@ also file processing with `-f "<path>.ax" -m interpret` options.
 Interpretation is performed by transpiling Axion to C# and running
 it through Roslyn (still incomplete and doesn't support some syntax).
 
-You can launch compiler with `dotnet run Axion.dll`
-in bin folder and type `-h` in console to get support
+You can launch compiler with `axion.py` file
+and type `-h` in console to get support
 about arguments for compiler CLI interface.
 
 ### You can take a look at syntax in [project wiki](https://github.com/F1uctus/Axion/wiki)
