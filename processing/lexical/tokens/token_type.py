@@ -13,6 +13,8 @@ class TokenType(AutoNumberEnum):
 
     # region gen_operators
 
+    op_of               = None
+    op_dot              = None
     op_bit_and          = None
     op_bit_not          = None
     op_bit_or           = None
@@ -96,11 +98,12 @@ class TokenType(AutoNumberEnum):
     # region gen_symbols
 
     question        = None
+    left_arrow      = None
+    right_arrow     = None
     right_fat_arrow = None
     left_pipeline   = None
     right_pipeline  = None
     at              = None
-    dot             = None
     comma           = None
     semicolon       = None
     colon           = None

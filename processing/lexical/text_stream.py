@@ -50,7 +50,6 @@ class TextStream:
 
         :param length: Length to peek by.
         """
-        assert length != 0
         if 0 <= (self.char_idx + 1 + length) < len(self.text):
             return self.text[self.char_idx + 1:self.char_idx + 1 + length]
         return spec.eoc

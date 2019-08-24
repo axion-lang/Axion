@@ -101,7 +101,6 @@ class StringToken(Token):
             c += '"'
 
 
-
 class StringInterpolation(utils.AutoRepr):
     def __init__(self, stream: TextStream):
         self.source = SourceUnit.from_interpolation(stream)

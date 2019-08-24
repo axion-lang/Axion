@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Set, Optional
-from xml.dom.minicompat import NodeList
+from typing import List, Set, Optional, Collection
 
 from errors.blame import BlameType, BlameSeverity
 from processing.codegen.code_builder import CodeBuilder
@@ -9,27 +8,16 @@ from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.atomic.name_expr import NameExpr
 from processing.syntactic.expressions.block_expr import BlockExpr, BlockType
+from processing.syntactic.expressions.definitions.name_def import NameDef
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import DefinitionExpression, AtomExpression
+from processing.syntactic.expressions.groups import DefinitionExpression, AtomExpression
 from processing.syntactic.expressions.type_names import TypeName
 
 
-class FunctionParameter(Expr):
-    """parameter:
-       ID ':' type ['=' infix_expr];
+class FuncParameter(NameDef):
+    """ func_parameter:
+        ID ':' type ['=' infix_expr];
     """
-
-    @child_property
-    def name(self) -> NameExpr:
-        pass
-
-    @child_property
-    def value_type(self) -> TypeName:
-        pass
-
-    @child_property
-    def default_value(self) -> Expr:
-        pass
 
     def __init__(
             self,
@@ -38,44 +26,36 @@ class FunctionParameter(Expr):
             colon_token: Token = None,
             value_type: TypeName = None,
             equals_token: Token = None,
-            default_value: Expr = None
+            value: Expr = None
     ):
         super().__init__(parent)
         self.name = name
         self.colon_token = colon_token
         self.value_type = value_type
         self.equals_token = equals_token
-        self.default_value = default_value
+        self.default_value = self.value = value
 
-    def parse(self, names: Set[str]) -> FunctionParameter:
-        self.name = NameExpr(self).parse(must_be_simple = True)
-        self.colon_token = self.stream.eat(TokenType.colon)
-        self.value_type = TypeName(self).parse()
-        if self.stream.maybe_eat(TokenType.op_assign):
-            self.equals_token = self.stream.token
-            self.default_value = self.parse_infix()
+    def parse(self, names: Set[str]) -> FuncParameter:
+        super().parse()
 
-        if str(self.name) in names:
-            self.source.blame(BlameType.duplicated_parameter_in_function, self)
-        names.add(str(self.name))
+        def check_uniqueness(name):
+            if str(name) in names:
+                self.source.blame(BlameType.duplicated_parameter_in_function, name)
+            names.add(str(name))
+
+        if isinstance(self.name, Collection):
+            for n in self.name:
+                check_uniqueness(n)
+        else:
+            check_uniqueness(self.name)
+        if self.value_type is None and self.default_value is None:
+            self.source.blame(BlameType.impossible_to_infer_type, self)
         return self
 
-    def to_axion(self, c: CodeBuilder):
-        c += self.name
-        if self.value_type is not None:
-            c += self.colon_token, self.value_type
-        if self.default_value is not None:
-            c += self.equals_token, self.default_value
 
-    def to_csharp(self, c: CodeBuilder):
-        c += self.value_type, ' ', self.name
-        if self.default_value is not None:
-            c += ' = ', self.default_value
-
-
-class FunctionDef(DefinitionExpression, AtomExpression):
-    """func_def:
-       'fn' name ['(' [parameters_list] ')'] ['=>' type] block;
+class FuncDef(DefinitionExpression, AtomExpression):
+    """ func_def:
+        'fn' name ['(' [parameters_list] ')'] ['=>' type] block;
     """
 
     @child_property
@@ -87,7 +67,7 @@ class FunctionDef(DefinitionExpression, AtomExpression):
         pass
 
     @child_property
-    def parameters(self) -> NodeList:
+    def parameters(self) -> List[Expr]:
         pass
 
     @child_property
@@ -95,7 +75,7 @@ class FunctionDef(DefinitionExpression, AtomExpression):
         pass
 
     @child_property
-    def modifiers(self) -> NodeList:
+    def modifiers(self) -> List[Expr]:
         pass
 
     @property
@@ -122,36 +102,37 @@ class FunctionDef(DefinitionExpression, AtomExpression):
         self.block = block
         self.modifiers = modifiers
 
-    def parse(self) -> FunctionDef:
-        self.stream.eat(TokenType.keyword_fn)
+    def parse(self) -> FuncDef:
+        self.fn_token = self.stream.eat(TokenType.keyword_fn)
         self.name = NameExpr(self).parse()
         if self.stream.maybe_eat(TokenType.open_parenthesis):
-            self.parameters = FunctionDef.parse_param_list(self, TokenType.close_parenthesis)
+            self.parameters = FuncDef.parse_param_list(self, TokenType.close_parenthesis)
             self.stream.eat(TokenType.close_parenthesis)
-        if self.stream.maybe_eat(TokenType.right_fat_arrow):
+        if self.stream.maybe_eat(TokenType.right_arrow):
+            self.arrow_token = self.stream.token
             self.return_type = TypeName(self).parse()
         self.block = BlockExpr(self).parse(BlockType.default)
         return self
 
     @staticmethod
     def parse_param_list(parent: Expr, *terminators: TokenType) -> List[Expr]:
-        """parameter_list:
-           {named_parameter ","}
-           ( "*" [parameter] ("," named_parameter)* ["," "**" parameter]
-           | "**" parameter
-           | named_parameter[","] )
+        """ parameter_list:
+            {named_parameter ","}
+            ( "*" [parameter] ("," named_parameter)* ["," "**" parameter]
+            | "**" parameter
+            | named_parameter[","] )
         TODO rewrite syntax for fn parameters"""
-        parameters: List[FunctionParameter] = []
+        parameters: List[FuncParameter] = []
         names: Set[str] = set()
-        list_parameter: Optional[FunctionParameter] = None
-        map_parameter: Optional[FunctionParameter] = None
+        list_parameter: Optional[FuncParameter] = None
+        map_parameter: Optional[FuncParameter] = None
         have_keyword_only_parameter = False
         got_star = False
         require_optionals = False
         if not parent.stream.peek.of_type(*terminators):
             while True:
                 if parent.stream.maybe_eat(TokenType.op_power):
-                    map_parameter = FunctionParameter(parent).parse(names)
+                    map_parameter = FuncParameter(parent).parse(names)
                     parent.stream.eat(*terminators)
                     break
                 elif parent.stream.maybe_eat(TokenType.op_multiply):
@@ -164,13 +145,13 @@ class FunctionDef(DefinitionExpression, AtomExpression):
                         # '*,' - end of positional params mark.
                         got_star = True
                     else:
-                        list_parameter = FunctionParameter(parent).parse(names)
+                        list_parameter = FuncParameter(parent).parse(names)
                 else:
                     if got_star:
-                        param = FunctionParameter(parent).parse(names)
+                        param = FuncParameter(parent).parse(names)
                         have_keyword_only_parameter = True
                     else:
-                        param = FunctionParameter(parent).parse(names)
+                        param = FuncParameter(parent).parse(names)
                     if param.default_value is not None:
                         require_optionals = True
                     elif require_optionals and param.default_value is None:

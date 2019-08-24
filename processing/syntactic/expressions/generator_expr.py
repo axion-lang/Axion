@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import GlobalExpression
-from processing.syntactic.expressions.for_comprehension_expr import ForComprehensionExpr
+from processing.syntactic.expressions.for_compr_expr import ForComprehensionExpr
+from processing.syntactic.expressions.groups import InfixExpression
 from processing.syntactic.expressions.type_names import TypeName
 
 
-class GeneratorExpr(GlobalExpression):
-    """generator_expr:
-       '(' comprehension ')';
+class GeneratorExpr(InfixExpression):
+    """ generator_expr:
+        '(' comprehension ')';
     """
 
     @child_property

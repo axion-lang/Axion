@@ -6,14 +6,13 @@ from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.atomic.name_expr import NameExpr
 from processing.syntactic.expressions.block_expr import BlockExpr, BlockType
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import DefinitionExpression
-from processing.syntactic.expressions.macro_patterns import CascadePattern
-from processing.syntactic.expressions.macro_patterns import MacroPattern
+from processing.syntactic.expressions.groups import DefinitionExpression
+from processing.syntactic.expressions.macro_patterns import CascadePattern, MacroPattern
 
 
 class MacroDef(DefinitionExpression):
-    """macro_def:
-       'macro' name block;
+    """ macro_def:
+        'macro' name block;
     """
 
     @child_property

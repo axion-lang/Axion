@@ -8,8 +8,8 @@ from processing.text_location import span_marker
 
 
 class CodeQuoteExpr(Expr):
-    """code_quote_expr:
-       '{{' expr '}}';
+    """ code_quote_expr:
+        '{{' expr '}}';
     """
 
     @child_property

@@ -4,12 +4,13 @@ from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr
+from processing.syntactic.expressions.groups import StatementExpression, AtomExpression
 from processing.text_location import span_marker
 
 
-class EmptyExpr(Expr):
-    """expr:
-       ';' | 'pass';
+class EmptyExpr(StatementExpression, AtomExpression):
+    """ expr:
+        ';' | 'pass';
     """
 
     def __init__(

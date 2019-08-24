@@ -13,11 +13,10 @@ from source_unit import SourceUnit
 
 
 class Token(Span):
-    """
-    Base class of all language self.tokens.
-    Represents simple self.tokens, with empty 'content'.
-    All it's inheritors have 'content' property
-    differing from 'value', or have special properties.
+    """ Base class of all language tokens.
+        Represents simple tokens, with empty 'content'.
+        All it's inheritors have 'content' property
+        differing from 'value', or have special properties.
     """
 
     def __init__(
@@ -62,8 +61,7 @@ class Token(Span):
 
     @span_marker
     def read(self) -> Token:
-        """
-        Reads any token from text self.stream.
+        """ Reads any token from text stream.
         """
         from processing.lexical.tokens.comment import CommentToken
         from processing.lexical.tokens.char import CharToken
@@ -78,23 +76,23 @@ class Token(Span):
         if self.stream.peek_is(*spec.white):
             return self.read_white()
 
-        if self.stream.peek_is(*spec.id_start):
-            return self.read_id()
-
         if self.stream.peek_is(*spec.punctuation_keys):
             return self.read_punctuation()
 
-        if self.stream.peek_is(*spec.operators_keys):
+        if self.stream.peek_is(*spec.operators_signs):
             return OperatorToken(self.source).read()
+
+        if self.stream.peek_is(*spec.id_start):
+            return self.read_id()
 
         if self.stream.peek_is(*spec.number_start):
             return NumberToken(self.source).read()
 
-        if self.stream.peek_is(spec.oneline_comment_start):
-            return CommentToken(self.source).read_oneline()
-
-        if self.stream.peek_is(spec.multiline_comment_start):
+        if self.stream.peek_is(spec.multiline_comment_mark):
             return CommentToken(self.source).read_multiline()
+
+        if self.stream.peek_is(spec.oneline_comment_mark):
+            return CommentToken(self.source).read_oneline()
 
         if self.stream.peek_is(spec.character_quote):
             return CharToken(self.source).read()
@@ -140,12 +138,11 @@ class Token(Span):
             return self
         ln = self.stream.rest_of_line
         ln_empty = len(ln.strip()) == 0
-        prev_is_bin_op = isinstance(self.tokens[-1], OperatorToken) and self.tokens[-1].operator == InputSide.both
-        next_is_bin_op = any(ln.startswith(op) for op in spec.operators_keys)
-        is_ln_commented = ln.startswith(spec.oneline_comment_start) or (
-                ln.startswith(spec.multiline_comment_start) and
-                len(re.findall(re.escape(spec.multiline_comment_start), ln)) >
-                len(re.findall(re.escape(spec.multiline_comment_end), ln)))
+        prev_is_bin_op = isinstance(self.tokens[-1], OperatorToken) and self.tokens[-1].input_side == InputSide.both
+        next_is_bin_op = any(re.match(fr'^{re.escape(op)}[^{spec.id_start}]', ln) for op in spec.operators_keys)
+        is_ln_commented = ln.startswith(spec.oneline_comment_mark) or (
+                ln.startswith(spec.multiline_comment_mark) and
+                ln.count(spec.multiline_comment_mark) % 2 != 0)
         next_is_indent = not (
                 ln_empty
                 or prev_is_bin_op
@@ -209,13 +206,16 @@ class Token(Span):
             self.append_next()
             if not self.stream.peek_is(*spec.id_part) \
                     or self.stream.peek_is(*spec.id_not_end) \
-                    and self.stream.peek(2)[1] not in spec.id_part:
+                    and self.stream.peek(2)[1] not in spec.id_after_not_end:
                 break
         if self.stream.peek_is(*spec.string_quotes):
             from processing.lexical.tokens.string import StringToken
             return StringToken(self.source, prefixes = self.value).read()
         if self.value in spec.keywords.keys():
             self.ttype = spec.keywords[self.value]
+        elif self.value in spec.operators_keys:
+            from processing.lexical.tokens.operator import OperatorToken
+            return OperatorToken(self.source, self.value)
         else:
             self.ttype = TokenType.identifier
         return self

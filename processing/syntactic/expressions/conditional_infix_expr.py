@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import InfixExpression
+from processing.syntactic.expressions.groups import InfixExpression
 from processing.syntactic.expressions.type_names import TypeName
 
 
 class ConditionalInfixExpr(InfixExpression):
-    """conditional_infix_expr:
-       expr_list ('if' | 'unless') infix_expr ['else' expr_list];
+    """ conditional_infix_expr:
+        expr_list ('if' | 'unless') infix_expr ['else' expr_list];
     """
 
     @child_property
@@ -37,3 +38,12 @@ class ConditionalInfixExpr(InfixExpression):
         self.condition = condition
         self.true_expression = true_expression
         self.false_expression = false_expression
+
+    def parse(self) -> ConditionalInfixExpr:
+        if self.true_expression is None:
+            self.true_expression = self.parse_infix()
+        self.stream.eat(TokenType.keyword_if)
+        self.condition = self.parse_infix()
+        if self.stream.maybe_eat(TokenType.keyword_else):
+            self.false_expression = self.parse_infix()
+        return self

@@ -23,25 +23,25 @@ class OperatorToken(Token):
             value = '',
             ttype = TokenType.unknown,
             precedence = -1,
-            operator = InputSide.unknown,
+            input_side = InputSide.unknown,
             start = Location(0, 0),
             end = Location(0, 0)
     ):
         super().__init__(source, ttype, value, start = start, end = end)
         if ttype != TokenType.unknown:
-            self.ttype = list(filter(lambda t: t[0] == ttype, spec.operators.keys()))[0]
+            self.value = next((k for k, v in spec.operators.items() if v[0] == ttype), value)
         elif value:
             self.ttype = spec.operators[value][0]
         else:
             self.precedence = -1
-            self.operator = InputSide.unknown
+            self.input_side = InputSide.unknown
             return
         self.precedence = spec.operators[self.value][1] if precedence == -1 else precedence
-        self.operator = spec.operators[self.value][2] if operator == InputSide.unknown else operator
+        self.input_side = spec.operators[self.value][2] if input_side == InputSide.unknown else input_side
 
     @span_marker
     def read(self) -> OperatorToken:
         self.append_next(*spec.operators_keys, content = True)
         if self.value is not None:
-            self.ttype, self.precedence, self.operator = spec.operators[self.value]
+            self.ttype, self.precedence, self.input_side = spec.operators[self.value]
         return self

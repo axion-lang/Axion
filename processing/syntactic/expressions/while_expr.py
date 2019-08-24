@@ -3,13 +3,13 @@ from __future__ import annotations
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.block_expr import BlockExpr, BlockType
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import StatementExpression
+from processing.syntactic.expressions.groups import StatementExpression
 
 
 class WhileExpr(StatementExpression):
-    """while_expr:
-       'while' infix_expr block
-       ['nobreak' block];
+    """ while_expr:
+        'while' infix_expr block
+        ['nobreak' block];
     """
 
     @child_property

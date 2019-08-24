@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from string import ascii_letters, digits, hexdigits
 from typing import Dict, List
 
@@ -10,9 +11,8 @@ eoc = '\0'
 eols = ['\r', '\n']
 white = [' ', '\t']
 
-oneline_comment_start = '#'
-multiline_comment_start = '#|'
-multiline_comment_end = '|#'
+oneline_comment_mark = '#'
+multiline_comment_mark = '###'
 
 character_quote = '`'
 string_quotes = ['\'', '\"']
@@ -43,12 +43,16 @@ number_part = digits + '_.' + ascii_letters
 number_radix_delimiter = '::'
 
 id_start = ascii_letters + '_'
-id_not_end = "-"
+id_not_end = '-'
+id_after_not_end = id_start + digits
 id_part = id_start + id_not_end + digits
-id_end = id_start + "?!" + digits
+id_end = id_start + '?!' + digits
 
 operators: Dict[str, (TokenType, int, InputSide)] = {
     # @formatter:off
+    'of':     (TokenType.op_of,                      17, InputSide.both),
+    '.':      (TokenType.op_dot,                     17, InputSide.both),
+
     '++':     (TokenType.op_increment,               16, InputSide.unknown),
     '--':     (TokenType.op_decrement,               16, InputSide.unknown),
 
@@ -117,8 +121,11 @@ operators: Dict[str, (TokenType, int, InputSide)] = {
 
 operators_keys = sorted(list(operators.keys()), reverse = True)
 
+operators_signs = [op for op in operators_keys if not op[0] in id_start]
+
 punctuation: Dict[str, TokenType] = {
-    ".":  TokenType.dot,
+    "->": TokenType.right_arrow,
+    "<-": TokenType.left_arrow,
     "|>": TokenType.right_pipeline,
     "<|": TokenType.left_pipeline,
     "=>": TokenType.right_fat_arrow,

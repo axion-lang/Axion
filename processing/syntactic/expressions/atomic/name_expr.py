@@ -7,13 +7,13 @@ from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr
-from processing.syntactic.expressions.expression_groups import AtomExpression
+from processing.syntactic.expressions.groups import AtomExpression
 from processing.text_location import span_marker
 
 
 class NameExpr(AtomExpression):
-    """name_expr:
-       ID {'.' ID};
+    """ name_expr:
+        ID {'.' ID};
     """
 
     @property
@@ -22,7 +22,7 @@ class NameExpr(AtomExpression):
 
     @property
     def qualifiers(self) -> List[Token]:
-        return list(filter(lambda t: t.ttype == TokenType.identifier, self.name_parts))
+        return [t for t in self.name_parts if t.ttype == TokenType.identifier]
 
     def __init__(
             self,
@@ -36,21 +36,20 @@ class NameExpr(AtomExpression):
             for i, q in enumerate(qs):
                 self.name_parts.append(Token(self.source, TokenType.identifier, q))
                 if i != len(qs) - 1:
-                    self.name_parts.append(Token(self.source, TokenType.dot, '.'))
+                    self.name_parts.append(Token(self.source, TokenType.op_dot, '.'))
         else:
             self.name_parts = name or []
 
     def __repr__(self):
-        return '.'.join(map(lambda t: repr(t.value), self.qualifiers))
+        return f"{self.__class__.__name__} ('{'.'.join(map(lambda t: str(t.value), self.qualifiers))}')"
 
     @span_marker
     def parse(self, must_be_simple = False) -> NameExpr:
         self.name_parts.append(self.stream.eat(TokenType.identifier))
-        while self.stream.maybe_eat(TokenType.dot):
-            self.name_parts.append(self.stream.token)
-            self.name_parts.append(self.stream.eat(TokenType.identifier))
-        if not self.is_simple and must_be_simple:
-            self.source.blame(BlameType.expected_simple_name, self)
+        if not must_be_simple:
+            while self.stream.maybe_eat(TokenType.op_dot):
+                self.name_parts.append(self.stream.token)
+                self.name_parts.append(self.stream.eat(TokenType.identifier))
         return self
 
     def to_axion(self, c: CodeBuilder):

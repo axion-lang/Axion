@@ -6,13 +6,13 @@ from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.atomic.name_expr import NameExpr
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import StatementExpression
+from processing.syntactic.expressions.groups import StatementExpression
 from processing.text_location import span_marker
 
 
 class ContinueExpr(StatementExpression):
-    """continue_expr:
-       'continue' [name];
+    """ continue_expr:
+        'continue' [name];
     """
 
     @child_property

@@ -1,4 +1,6 @@
-import processing.syntactic.expressions.block_expr as block
+from typing import Optional
+
+import processing.syntactic.expressions.block_expr as block_file
 import source_unit as src
 import specification as spec
 from errors.blame import BlameType
@@ -8,7 +10,7 @@ from processing.mode import ProcessingMode
 from processing.syntactic.expressions.macro_patterns import TokenPattern
 
 
-class Ast(block.BlockExpr):
+class Ast(block_file.BlockExpr):
     def __init__(self, source: src.SourceUnit):
         # region imports
         from processing.syntactic.expressions.definitions.macro_def import MacroDef
@@ -21,85 +23,85 @@ class Ast(block.BlockExpr):
         from processing.syntactic.expressions.type_names import TypeName
         # endregion
 
+        super().__init__(None)
         self.source = source
         self.stream = source.token_stream
         self.macros = [
             MacroDef(patterns = [
                 self.token_pattern("do"),
-                ExpressionPattern(type(block.BlockExpr)),
+                ExpressionPattern(block_file.BlockExpr),
                 OrPattern(self.token_pattern("while"), self.token_pattern("until")),
-                ExpressionPattern(parse_fn = self.parse_infix)
+                ExpressionPattern(parse_fn = 'parse_infix')
             ]),
             MacroDef(patterns = [
                 self.token_pattern("until"),
-                ExpressionPattern(parse_fn = self.parse_infix),
-                ExpressionPattern(type(block.BlockExpr))
+                ExpressionPattern(parse_fn = 'parse_infix'),
+                ExpressionPattern(block_file.BlockExpr)
             ]),
             MacroDef(patterns = [
                 self.token_pattern("for"),
-                ExpressionPattern(self.parse_atom),
+                ExpressionPattern(parse_fn = 'parse_atom'),
                 self.token_pattern("in"),
-                ExpressionPattern(parse_fn = self.parse_infix),
-                ExpressionPattern(type(block.BlockExpr))
+                ExpressionPattern(parse_fn = 'parse_infix'),
+                ExpressionPattern(block_file.BlockExpr)
             ]),
             MacroDef(patterns = [
                 self.token_pattern("unless"),
-                ExpressionPattern(parse_fn = self.parse_infix),
-                ExpressionPattern(type(block.BlockExpr)),
+                ExpressionPattern(parse_fn = 'parse_infix'),
+                ExpressionPattern(block_file.BlockExpr),
                 OptionalPattern(
                     OptionalPattern(
                         MultiplePattern(
                             self.token_pattern("elif"),
-                            ExpressionPattern(parse_fn = self.parse_infix),
-                            ExpressionPattern(type(block.BlockExpr))
+                            ExpressionPattern(parse_fn = 'parse_infix'),
+                            ExpressionPattern(block_file.BlockExpr)
                         )
                     ),
                     CascadePattern(
                         self.token_pattern("else"),
-                        ExpressionPattern(type(block.BlockExpr))
+                        ExpressionPattern(block_file.BlockExpr)
                     )
                 )
             ]),
             MacroDef(patterns = [
                 self.token_pattern("["),
-                OptionalPattern(ExpressionPattern(type(Expr))),
+                OptionalPattern(ExpressionPattern(Expr)),
                 self.token_pattern("]")
             ]),
             MacroDef(patterns = [
                 self.token_pattern("new"),
-                ExpressionPattern(type(TypeName)),
+                ExpressionPattern(TypeName),
                 OptionalPattern(
                     self.token_pattern("("),
-                    ExpressionPattern(type(Expr)),
+                    ExpressionPattern(Expr),
                     self.token_pattern(")")
                 ),
                 OptionalPattern(
                     self.token_pattern("{"),
                     OptionalPattern(
-                        ExpressionPattern(type(Expr)),
+                        ExpressionPattern(Expr),
                         OptionalPattern(
                             MultiplePattern(
                                 self.token_pattern(","),
-                                ExpressionPattern(type(Expr))
+                                ExpressionPattern(Expr)
                             )
                         ),
-                        ExpressionPattern(type(Expr))
+                        ExpressionPattern(Expr)
                     ),
                     self.token_pattern("}")
                 )
             ]),
             MacroDef(patterns = [
-                ExpressionPattern(type(Expr)),
+                ExpressionPattern(Expr),
                 self.token_pattern("match"),
                 MultiplePattern(
-                    self.token_pattern("|"),
-                    ExpressionPattern(type(Expr)),
-                    self.token_pattern("=>"),
-                    ExpressionPattern(type(Expr))
+                    ExpressionPattern(parse_fn = 'parse_infix'),
+                    self.token_pattern(":"),
+                    ExpressionPattern(Expr)
                 )
             ]),
         ]
-        self.macro_expect_type = None
+        self.macro_expect_type: Optional[Expr] = None
         self.macro_application_parts = []
 
     def parse(self):
@@ -128,7 +130,7 @@ class Ast(block.BlockExpr):
     def to_csharp(self, c: CodeBuilder):
         from processing.syntactic.expressions.definitions.module_def import ModuleDef
         from processing.syntactic.expressions.definitions.class_def import ClassDef
-        from processing.syntactic.expressions.definitions.function_def import FunctionDef
+        from processing.syntactic.expressions.definitions.func_def import FuncDef
         from processing.syntactic.expressions.type_names import SimpleTypeName
         from processing.syntactic.expressions.atomic.name_expr import NameExpr
 
@@ -152,7 +154,7 @@ class Ast(block.BlockExpr):
             elif isinstance(e, ClassDef):
                 root_classes.append(e)
             # and root-level functions in one class
-            elif isinstance(e, FunctionDef):
+            elif isinstance(e, FuncDef):
                 root_functions.append(e)
             else:
                 root_items.append(e)
@@ -161,16 +163,19 @@ class Ast(block.BlockExpr):
         c += ModuleDef(
             self,
             name = NameExpr(name = '__RootModule__'),
-            block = block.BlockExpr(items = [
-                ClassDef(
-                    name = NameExpr(name = '__RootClass__'),
-                    block = block.BlockExpr(items = [
-                        FunctionDef(
-                            name = NameExpr(name = 'Main'),
-                            block = block.BlockExpr(items = root_items),
-                            return_type = SimpleTypeName(name = 'void')
-                        )
-                    ] + root_functions)
-                )
-            ] + root_classes)
+            block = block_file.BlockExpr(items = [
+                                                ClassDef(
+                                                    name = NameExpr(name = '__RootClass__'),
+                                                    block = block_file.BlockExpr(items = [
+                                                                                        FuncDef(
+                                                                                            name = NameExpr(
+                                                                                                name = 'Main'),
+                                                                                            block = block_file.BlockExpr(
+                                                                                                items = root_items),
+                                                                                            return_type = SimpleTypeName(
+                                                                                                name = 'void')
+                                                                                        )
+                                                                                    ] + root_functions)
+                                                )
+                                            ] + root_classes)
         )

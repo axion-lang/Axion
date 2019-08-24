@@ -3,13 +3,13 @@ from __future__ import annotations
 from typing import List
 
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import DefinitionExpression
+from processing.syntactic.expressions.groups import DefinitionExpression
 
 
 class EnumDef(DefinitionExpression):
-    """enum_def:
-       'enum' simple_name ['(' type_arg_list ')']
-       block_start enum_item {',' enum_item} block_terminator;
+    """ enum_def:
+        'enum' simple_name ['(' type_arg_list ')']
+        block_start enum_item {',' enum_item} block_terminator;
     TODO: fix syntax for enum definition """
 
     @child_property

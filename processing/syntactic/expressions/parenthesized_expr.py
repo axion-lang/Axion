@@ -5,8 +5,8 @@ from processing.syntactic.expressions.type_names import TypeName
 
 
 class ParenthesizedExpr(Expr):
-    """parenthesis_expr:
-       '(' expr ')';
+    """ parenthesis_expr:
+        '(' expr ')';
     """
 
     @child_property
@@ -17,6 +17,6 @@ class ParenthesizedExpr(Expr):
     def value_type(self) -> TypeName:
         return self.value.value_type
 
-    def __init__(self, value: Expr):
-        super().__init__(value.parent)
+    def __init__(self, parent: Expr, value: Expr):
+        super().__init__(parent)
         self.value = value

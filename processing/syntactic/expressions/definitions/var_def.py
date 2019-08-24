@@ -1,42 +1,47 @@
 from __future__ import annotations
 
 from processing.codegen.code_builder import CodeBuilder
-from processing.syntactic.expressions.left_right_expr import LeftRightExpr
-from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import StatementExpression
+from processing.lexical.tokens.token import Token
+from processing.lexical.tokens.token_type import TokenType
+from processing.syntactic.expressions.definitions.name_def import NameDef
+from processing.syntactic.expressions.expr import Expr
+from processing.syntactic.expressions.groups import StatementExpression
 from processing.syntactic.expressions.type_names import TypeName
 
 
-class VarDefExpr(LeftRightExpr, StatementExpression):
-    """variable_definition_expr:
-       ['let'] simple_name_list
-       [':' type]
-       ['=' expr_list];
+class VarDefExpr(NameDef, StatementExpression):
+    """ variable_definition_expr:
+        ['let'] simple_name_list
+        [':' type]
+        ['=' expr_list];
     """
-
-    @child_property
-    def left(self) -> Expr: pass
-
-    @child_property
-    def right(self) -> Expr: pass
-
-    @child_property
-    def value_type(self) -> TypeName:
-        pass
 
     def __init__(
             self,
-            parent: Expr = None,
-            left: Expr = None,
+            parent: Expr,
+            let_token: Token = None,
+            name: Expr = None,
+            colon_token: Token = None,
             value_type: TypeName = None,
-            right: Expr = None,
-            is_immutable: bool = False
+            equals_token: Token = None,
+            value: Expr = None
     ):
         super().__init__(parent)
-        self.left = left
-        self.right = right
+        self.let_token = let_token
+        self.name = name
+        self.colon_token = colon_token
         self.value_type = value_type
-        self.is_immutable = is_immutable
+        self.equals_token = equals_token
+        self.value = value
+
+    def is_immutable(self):
+        return self.let_token is not None
+
+    def parse(self) -> VarDefExpr:
+        if self.stream.maybe_eat(TokenType.keyword_let):
+            self.let_token = self.stream.token
+        super().parse()
+        return self
 
     def to_axion(self, c: CodeBuilder):
         if self.is_immutable:

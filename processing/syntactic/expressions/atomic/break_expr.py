@@ -6,13 +6,13 @@ from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.atomic.name_expr import NameExpr
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import StatementExpression
+from processing.syntactic.expressions.groups import StatementExpression
 from processing.text_location import span_marker
 
 
 class BreakExpr(StatementExpression):
-    """break_expr:
-       'break' [name];
+    """ break_expr:
+        'break' [name];
     """
 
     @child_property
@@ -28,7 +28,7 @@ class BreakExpr(StatementExpression):
         super().__init__(parent)
         self.break_token = break_token
         self.loop_name = loop_name
-        if not loop_name.is_simple:
+        if isinstance(loop_name, NameExpr) and not loop_name.is_simple:
             self.source.blame(BlameType.expected_simple_name, self)
 
     @span_marker

@@ -1,5 +1,5 @@
+from collections import Collection
 from io import StringIO
-from typing import List
 
 from aenum import AutoNumberEnum
 
@@ -19,7 +19,7 @@ class CodeBuilder:
 
     @property
     def code(self) -> str:
-        return self.writer.getvalue()
+        return str(self.writer.getvalue())
 
     def indent(self):
         self.indent_level += 1
@@ -42,7 +42,7 @@ class CodeBuilder:
             else:
                 self.writer.write(v)
 
-    def write_joined(self, separator: str, values: List):
+    def write_joined(self, separator: str, values: Collection):
         for i, v in enumerate(values):
             self.__iadd__(v)
             if i != len(values) - 1:
@@ -67,8 +67,8 @@ class CodeBuilder:
         try:
             if isinstance(other, str):
                 raise TypeError()
-            vals = [e for e in other]
-            for v in vals:
+            values = [e for e in other]
+            for v in values:
                 self.write(v)
         except TypeError:
             self.write(other)

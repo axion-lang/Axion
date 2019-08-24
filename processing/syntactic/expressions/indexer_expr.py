@@ -9,8 +9,8 @@ from processing.syntactic.expressions.slice_expr import SliceExpr
 
 
 class IndexerExpr(Expr):
-    """expr:
-       ;
+    """ indexer_expr:
+        ;
     """
 
     @child_property
@@ -31,8 +31,9 @@ class IndexerExpr(Expr):
         self.target = target
         self.index = index
 
-    def parse(self, target: Expr = None) -> IndexerExpr:
-        self.target = self.parse_atom() if target is None else target
+    def parse(self) -> IndexerExpr:
+        if self.target is None:
+            self.target = self.parse_atom()
         exprs = []
         self.stream.eat(TokenType.open_bracket)
         while True:

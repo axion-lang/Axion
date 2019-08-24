@@ -7,12 +7,12 @@ from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.atomic.name_expr import NameExpr
 from processing.syntactic.expressions.block_expr import BlockExpr, BlockType
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import DefinitionExpression
+from processing.syntactic.expressions.groups import DefinitionExpression
 
 
 class ModuleDef(DefinitionExpression):
-    """module_def:
-       'module' name block;
+    """ module_def:
+        'module' name block;
     """
 
     @child_property

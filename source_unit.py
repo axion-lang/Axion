@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from builtins import FileNotFoundError
 from pathlib import Path
 from typing import List, Optional, Union
 
@@ -11,14 +12,13 @@ from utils import resolve_path
 
 
 class SourceUnit:
-    """Container of Axion source code.
-    Different kinds of code processing
-    are performed with that class.
+    """ Container of Axion source code.
+        Different kinds of code processing
+        are performed with that class.
     """
 
     def __init__(self, source_path: Path = None, output_path: Path = None, debug_path: Path = None):
-        """
-        Should not be used to instantiate class.
+        """ Should not be used to instantiate class.
         """
 
         from processing.syntactic.expressions.ast import Ast
@@ -117,12 +117,17 @@ class SourceUnit:
     # endregion
 
     def __repr__(self):
-        return f"Source in '{self.source_path.name}' -> '{self.output_path.name}' [{self.debug_path.name}]"
+        return f"Source in '{self.source_path.name}'"
 
-    def blame(self, message: Union[str, BlameType], span: processing.text_location.Span,
-              severity: BlameSeverity = None):
+    def blame(
+            self,
+            message: Union[str, BlameType],
+            span: processing.text_location.Span = None,
+            severity: BlameSeverity = None
+    ):
         from errors.language_error import LanguageError
-
+        if span is None or span.is_zero:
+            span = self.token_stream.peek
         if isinstance(message, BlameType):
             if severity is None:
                 severity = message.severity

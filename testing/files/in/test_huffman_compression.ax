@@ -1,0 +1,65 @@
+class Letter (letter: Str, freq: Num, bitstring = '')
+    # @property
+    fn repr()
+        return f'{my.letter}:{my.freq}'
+
+
+class Tree-node (freq: Num, left: Str, right: Str): pass
+
+
+fn parse-file (file_path: Str) -> List[Letter]
+    ### Read the file and build a dict of all letters and their
+        frequences, then convert the dict into a list of Letters.
+    ###
+    chars = map()
+    for c in File.open(file_path).text
+        chars[c] = (chars[c] + 1) if c in chars.keys else 1
+    return [Letter(c, f) for c, f in chars].sort(key = fn l: l.freq)
+
+
+fn build-tree (letters: List) -> Tree-Node
+    ### Run through the list of Letters and build the min heap
+        for the Huffman Tree.
+    ###
+    while letters.len > 1
+        left = letters.pop(0)
+        right = letters.pop(0)
+        total-freq = left.freq + right.freq
+        node = Tree-Node(total-freq, left, right)
+        letters.append(node)
+        letters.sort(key = fn l: l.freq)
+    return letters[0]
+
+
+fn traverse-tree (root: Tree-Node, bitstring: Str)
+    ### Recursively traverse the Huffman Tree to set each
+        Letter's bitstring, and return the list of Letters.
+    ###
+    if type of root is Letter
+        root.bitstring = bitstring
+        return [root]
+    letters = []
+    letters += traverse-tree(root.left, bitstring + '0')
+    letters += traverse-tree(root.right, bitstring + '1')
+    return letters
+
+
+fn huffman (file_path: Str)
+    ### Parse the file, build the tree, then run through the file
+        again, using the list of Letters to find and print out the
+        bitstring for each letter.
+    ###
+    letters_list = parse-file(file_path)
+    root         = build-tree(letters_list)
+    letters      = traverse-tree(root, '')
+
+    println(f'Huffman Coding of {file_path}: ')
+
+    for c in File.open(file_path).text
+        le = [l for l in letters if l.letter == c][0]
+        print(le.bitstring + ' ')
+    println()
+
+
+fn main (args: str)
+    huffman(args[1])

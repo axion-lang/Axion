@@ -4,9 +4,10 @@ from typing import Type
 import specification as spec
 from processing.syntactic.expressions.expr import Expr
 from processing.syntactic.expressions.type_names import TypeName
+from utils import AutoRepr
 
 
-class MacroPattern(metaclass = abc.ABCMeta):
+class MacroPattern(AutoRepr, metaclass = abc.ABCMeta):
     @abc.abstractmethod
     def match(self, parent: Expr) -> bool:
         pass
@@ -20,8 +21,10 @@ class CascadePattern(MacroPattern):
         self.patterns = list(patterns)
 
     def match(self, parent: Expr) -> bool:
+        idx = parent.stream.token_idx
         for pattern in self.patterns:
             if not pattern.match(parent):
+                parent.stream.move_abs(idx)
                 return False
         return True
 
@@ -36,20 +39,20 @@ class ExpressionPattern(MacroPattern):
         self.parse_fn = parse_fn
 
     def match(self, parent: Expr) -> bool:
-        if parent.stream.peek.of_type(spec.never_expr_start_types):
+        if parent.stream.peek.of_type(*spec.never_expr_start_types):
             return True
         idx = parent.stream.token_idx
         if self.parse_fn is not None:
-            e = self.parse_fn()
+            e = getattr(parent, self.parse_fn)()
             parent.ast.macro_application_parts.append(e)
             return True
         parent.ast.macro_expect_type = self.typ
-        if isinstance(self.typ, type(TypeName)):
+        if isinstance(self.typ, TypeName):
             e = TypeName(parent).parse()
         else:
             e = Expr(parent).parse_any()
         parent.ast.macro_expect_type = None
-        if isinstance(self.typ, type(e)):
+        if isinstance(e, self.typ):
             parent.ast.macro_application_parts.append(e)
             return True
         parent.stream.move_abs(idx)

@@ -26,7 +26,7 @@ class CommentToken(Token):
     @span_marker
     def read_oneline(self) -> CommentToken:
         self.multiline = False
-        self.append_next(spec.oneline_comment_start, error_source = self.source)
+        self.append_next(spec.oneline_comment_mark, error_source = self.source)
         while not self.stream.at_eol:
             self.append_next(content = True)
         return self
@@ -34,14 +34,14 @@ class CommentToken(Token):
     @span_marker
     def read_multiline(self) -> CommentToken:
         self.multiline = True
-        self.append_next(spec.multiline_comment_start, error_source = self.source)
-        while not self.stream.peek_is(spec.multiline_comment_end):
+        self.append_next(spec.multiline_comment_mark, error_source = self.source)
+        while not self.stream.peek_is(spec.multiline_comment_mark):
             if self.stream.peek_is(spec.eoc):
                 self.source.blame(BlameType.unclosed_multiline_comment, self)
                 self.unclosed = True
                 return self
             self.append_next(content = True)
-        self.append_next(spec.multiline_comment_end, error_source = self.source)
+        self.append_next(spec.multiline_comment_mark, error_source = self.source)
         return self
 
     def to_csharp(self, c: CodeBuilder):

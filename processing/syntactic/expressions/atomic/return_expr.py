@@ -5,13 +5,13 @@ from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import StatementExpression, AtomExpression
+from processing.syntactic.expressions.groups import StatementExpression, AtomExpression
 from processing.text_location import span_marker
 
 
 class ReturnExpr(AtomExpression, StatementExpression):
-    """return_expr:
-       'return' [preglobal_list];
+    """ return_expr:
+        'return' [preglobal_list];
     """
 
     @child_property
@@ -31,7 +31,7 @@ class ReturnExpr(AtomExpression, StatementExpression):
     def parse(self) -> ReturnExpr:
         self.return_token = self.stream.eat(TokenType.keyword_return)
         if not self.stream.peek.of_type(*spec.never_expr_start_types):
-            self.value = self.parse_any_list()
+            self.value = self.parse_multiple()
         # TODO: check for current fn
         return self
 

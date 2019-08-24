@@ -1,19 +1,18 @@
-import functools
 from pathlib import Path
 from typing import Optional
 
 
-class StaticLazyProperty:
-    def __get__(self, owner):
-        return functools.lru_cache(staticmethod(self.fget).__get__(owner)())
-
-
-def static_lazy_property(f):
-    return property(staticmethod(functools.lru_cache()(f)))
+def rmdir(directory: Path):
+    for item in directory.iterdir():
+        if item.is_dir():
+            rmdir(item)
+        else:
+            item.unlink()
+    directory.rmdir()
 
 
 def resolve_path(p: Path) -> Path:
-    """Makes path absolute and creates it, if it's not exists.
+    """ Makes path absolute and creates it, if it's not exists.
     """
     if not p.is_absolute():
         p = p.absolute()
@@ -55,26 +54,26 @@ def ignore_in_repr(fn):
 
 class AutoRepr:
     def __repr__(self):
-        from source_unit import SourceUnit
         from processing.lexical.text_stream import TextStream
+        from processing.lexical.tokens.token import Token
         from processing.syntactic.token_stream import TokenStream
         from processing.text_location import Location
-        from processing.lexical.tokens.token import Token
+        from source_unit import SourceUnit
 
-        attributes = dict()
-        for k, v in self.__dict__.items():
+        attributes = [
+            f"{k} = {repr(v)}"
+            for k, v in self.__dict__.items()
             # exclude private, '@ignore_in_repr'-ed and attributes with '<object >' - formatted reprs.
-            if v \
-                    and not isinstance(v, (SourceUnit, TextStream, TokenStream, Location)) \
-                    and not (isinstance(self, Token) and k == 'tokens') \
-                    and not k.startswith('_') \
-                    and (not hasattr(v, '__dict__')
-                         or ('__ignore_in_repr' not in v.__dict__)) \
-                    and not str(v).startswith('<'):
-                attributes[k] = repr(v)
-
-        items = (f"{k} = {v}" for k, v in attributes.items())
+            # @formatter:off
+            if v and not (
+                k.startswith('_')
+                or isinstance(v, (SourceUnit, TextStream, TokenStream, Location))
+                or (isinstance(self, Token) and (k in ['tokens', 'content', 'ending_white']))
+            ) \
+            and (not hasattr(v, '__dict__') or ('__ignore_in_repr' not in v.__dict__))
+            # @formatter:on
+        ]
         result = self.__class__.__name__
         if len(attributes) > 0:
-            result += " (" + ', '.join(items) + ")"
+            result += " (" + ', '.join(attributes) + ")"
         return result

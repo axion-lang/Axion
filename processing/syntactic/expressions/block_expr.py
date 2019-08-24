@@ -8,7 +8,7 @@ from errors.blame import BlameType, BlameSeverity
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.expression_groups import DefinitionExpression
+from processing.syntactic.expressions.groups import DefinitionExpression
 
 
 class BlockType(Flag):
@@ -19,10 +19,10 @@ class BlockType(Flag):
 
 
 class BlockExpr(Expr):
-    """block:
-       (':' expr)
-       | ([':'] '{' expr* '}')
-       | ([':'] NEWLINE INDENT expr+ OUTDENT);
+    """ block:
+        (':' expr)
+        | ([':'] '{' expr* '}')
+        | ([':'] NEWLINE INDENT expr+ OUTDENT);
     """
 
     @child_property
@@ -36,55 +36,6 @@ class BlockExpr(Expr):
     # region _
     def has_variable(self, var_target: Expr):
         pass
-
-    @property
-    def current_function(self):
-        pass
-
-    @current_function.setter
-    def current_function(self, value):
-        pass
-
-    def pop_function(self):
-        pass
-
-    @property
-    def current_class(self):
-        pass
-
-    @current_class.setter
-    def current_class(self, value):
-        pass
-
-    def pop_class(self):
-        pass
-
-    @property
-    def current_enum(self):
-        pass
-
-    @current_enum.setter
-    def current_enum(self, value):
-        pass
-
-    def pop_enum(self):
-        pass
-
-    @property
-    def current_module(self):
-        pass
-
-    @current_module.setter
-    def current_module(self, value):
-        pass
-
-    def pop_module(self):
-        pass
-
-    def register_named_node(self, node: Expr, parser = None):
-        pass
-
-    # endregion
 
     def parse(self, block_type: BlockType) -> BlockExpr:
         terminator, error = self.parse_start()
@@ -103,6 +54,19 @@ class BlockExpr(Expr):
                     break
         return self
 
+    def parse_cascade(self, terminator = TokenType.empty) -> List[Expr]:
+        items = [self.parse_any()]
+        if self.stream.maybe_eat(TokenType.semicolon):
+            while self.stream.token.of_type(TokenType.semicolon) \
+                    and not self.stream.maybe_eat(TokenType.newline) \
+                    and not self.stream.peek.of_type(terminator, TokenType.end):
+                items.append(self.parse_any())
+                if self.stream.maybe_eat(terminator, TokenType.end):
+                    break
+                if not self.stream.maybe_eat(TokenType.semicolon):
+                    self.stream.eat(TokenType.newline)
+        return items
+
     def parse_start(self) -> (TokenType, bool):
         has_colon = self.stream.maybe_eat(TokenType.colon)
         block_start = self.stream.token
@@ -111,7 +75,7 @@ class BlockExpr(Expr):
         if self.stream.maybe_eat(TokenType.open_brace):
             if has_colon:
                 self.source.blame(BlameType.redundant_colon_with_braces, self.stream.peek)
-                return TokenType.close_brace, False
+            return TokenType.close_brace, False
         if self.stream.maybe_eat(TokenType.indent):
             return TokenType.outdent, False
         if has_newline:

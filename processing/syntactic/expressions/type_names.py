@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Collection
 from typing import Union, List
 
 from errors.blame import BlameType
@@ -11,10 +12,10 @@ from processing.syntactic.expressions.expr import Expr, child_property
 
 
 class TypeName(Expr):
-    """type
-       : simple_type  | tuple_type
-       | generic_type | array_type
-       | union_type;
+    """ type
+        : simple_type  | tuple_type
+        | generic_type | array_type
+        | union_type   | func_type;
     """
 
     @property
@@ -23,6 +24,7 @@ class TypeName(Expr):
 
     def __init__(self, parent: Expr):
         super().__init__(parent)
+        self.parent = None
 
     def parse(self) -> TypeName:
         if self.stream.peek.of_type(TokenType.open_parenthesis):
@@ -31,15 +33,17 @@ class TypeName(Expr):
         elif self.stream.peek.of_type(TokenType.identifier):
             left = SimpleTypeName(self).parse()
         else:
-            self.source.blame(BlameType.x, self.stream.peek)
+            self.source.blame(BlameType.invalid_type_annotation, self.stream.peek)
             return SimpleTypeName(self, "Unknown type")
         if self.stream.peek.of_type(TokenType.open_bracket) \
                 and not self.stream.peek_by_is(2, TokenType.close_bracket):
-            left = GenericTypeName(self, target = left)
+            left = GenericTypeName(self, target = left).parse()
         if self.stream.peek.of_type(TokenType.open_bracket):
-            left = ArrayTypeName(self, target = left)
+            left = ArrayTypeName(self, target = left).parse()
         if self.stream.peek.of_type(TokenType.op_bit_or):
-            left = UnionTypeName(self, left)
+            left = UnionTypeName(self, left).parse()
+        if self.stream.peek.of_type(TokenType.right_arrow):
+            left = FuncTypeName(self, left).parse()
         return left
 
     def parse_named_type_args(self) -> List[(TypeName, NameExpr)]:
@@ -72,7 +76,7 @@ class SimpleTypeName(TypeName):
         c += self.name
 
 
-class TupleTypeName(TypeName):
+class TupleTypeName(TypeName, Collection):
     @child_property
     def types(self) -> List[TypeName]:
         pass
@@ -88,6 +92,28 @@ class TupleTypeName(TypeName):
         self.open_paren = open_paren
         self.types = types
         self.close_paren = close_paren
+
+        self.__current_idx = 0
+
+    def __contains__(self, x: object) -> bool:
+        return x in self.types
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return len(self.types)
+
+    @property
+    def __current(self):
+        return self.types[self.__current_idx] if len(self.types) < self.__current_idx else None
+
+    def __next__(self):
+        self.__current_idx += 1
+        if self.__current is None:
+            raise StopIteration
+        else:
+            return self.__current
 
     def parse(self) -> TupleTypeName:
         self.open_paren = self.stream.eat(TokenType.open_parenthesis)
@@ -126,7 +152,7 @@ class GenericTypeName(TypeName):
         super().__init__(parent)
         self.target = target
         self.open_bracket = open_bracket
-        self.type_args = type_args
+        self.type_args = type_args or []
         self.close_bracket = close_bracket
 
     def parse(self) -> GenericTypeName:
@@ -208,3 +234,43 @@ class UnionTypeName(TypeName):
 
     def to_axion(self, c: CodeBuilder):
         c += self.left_type, self.or_token, self.right_type
+
+
+class FuncTypeName(TypeName):
+    @child_property
+    def args_type(self) -> TypeName:
+        pass
+
+    @child_property
+    def return_type(self) -> TypeName:
+        pass
+
+    def __init__(
+            self,
+            parent: Expr = None,
+            args_type: TypeName = None,
+            arrow_token: Token = None,
+            return_type: TypeName = None
+    ):
+        super().__init__(parent)
+        self.args_type = args_type
+        self.arrow_token = arrow_token
+        self.return_type = return_type
+
+    def parse(self) -> FuncTypeName:
+        if self.args_type is None:
+            self.args_type = super().parse()
+        self.arrow_token = self.stream.eat(TokenType.right_arrow)
+        self.return_type = super().parse()
+        return self
+
+    def to_axion(self, c: CodeBuilder):
+        c += self.args_type, self.arrow_token, self.return_type
+
+    def to_csharp(self, c: CodeBuilder):
+        c += 'Func<'
+        if isinstance(self.args_type, TupleTypeName):
+            c.write_joined(', ', self.args_type)
+        else:
+            c += self.args_type
+        c += ', ', self.return_type, '>'

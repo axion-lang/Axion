@@ -4,8 +4,8 @@ from processing.syntactic.expressions.expr import Expr, child_property
 
 
 class SliceExpr(Expr):
-    """slice_expr:
-       [preglobal_expr] ':' [preglobal_expr] [':' [preglobal_expr]];
+    """ slice_expr:
+        [preglobal_expr] ':' [preglobal_expr] [':' [preglobal_expr]];
     """
 
     @child_property

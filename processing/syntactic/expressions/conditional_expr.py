@@ -4,13 +4,14 @@ from errors.blame import BlameSeverity
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.block_expr import BlockExpr, BlockType
 from processing.syntactic.expressions.expr import Expr, child_property
+from processing.syntactic.expressions.groups import StatementExpression
 
 
-class ConditionalExpr(Expr):
-    """conditional_expr:
-       'if' preglobal_expr block
-       {'elif' preglobal_expr block}
-       ['else' block];
+class ConditionalExpr(StatementExpression):
+    """ conditional_expr:
+        'if' preglobal_expr block
+        {'elif' preglobal_expr block}
+        ['else' block];
     """
 
     @child_property
@@ -45,7 +46,8 @@ class ConditionalExpr(Expr):
         if self.stream.maybe_eat(TokenType.keyword_else):
             self.else_block = BlockExpr(self).parse(BlockType.default)
         elif self.stream.maybe_eat(TokenType.keyword_elif):
-            self.else_block = BlockExpr(self).parse(BlockType.default)
+            self.else_block = BlockExpr(self)
+            self.else_block.items.append(ConditionalExpr(self.else_block).parse(True))
         elif else_if:
-            self.source.blame("'else' expected.", self.stream.peek, BlameSeverity.error)
+            self.source.blame("'else' expected", self.stream.peek, BlameSeverity.error)
         return self
