@@ -6,64 +6,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e4594945-2045-43cb-bbcd-00b3e0d704eb" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/testing/common.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/testing/files/in/test_decision_tree.ax" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/testing/files/in/test_fast_fibonacci.ax" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/testing/syntax.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/axion.py" beforeDir="false" afterPath="$PROJECT_DIR$/axion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compiler.py" beforeDir="false" afterPath="$PROJECT_DIR$/compiler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/errors/language_error.py" beforeDir="false" afterPath="$PROJECT_DIR$/errors/language_error.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/codegen/code_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/codegen/code_builder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/lexical/text_stream.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/lexical/text_stream.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/lexical/tokens/char.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/lexical/tokens/char.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/lexical/tokens/comment.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/lexical/tokens/comment.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/lexical/tokens/number.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/lexical/tokens/number.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/lexical/tokens/operator.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/lexical/tokens/operator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/lexical/tokens/string.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/lexical/tokens/string.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/lexical/tokens/token.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/lexical/tokens/token.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/ast.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/ast.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/await_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/await_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/break_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/break_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/code_quote.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/code_quote.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/constant_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/constant_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/continue_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/continue_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/empty_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/empty_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/name_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/name_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/return_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/return_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/yield_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/atomic/yield_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/binary_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/binary_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/block_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/block_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/conditional_compr_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/conditional_compr_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/conditional_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/conditional_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/conditional_infix_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/conditional_infix_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/definitions/class_def.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/definitions/class_def.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/definitions/func_def.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/definitions/func_def.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/definitions/module_def.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/definitions/module_def.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/definitions/name_def.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/definitions/name_def.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/definitions/var_def.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/definitions/var_def.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/for_compr_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/for_compr_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/func_call_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/func_call_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/generator_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/generator_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/indexer_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/indexer_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/member_access_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/member_access_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/parenthesized_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/parenthesized_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/slice_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/slice_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/tuple_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/tuple_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/type_names.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/type_names.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/unary_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/unary_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/unknown_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/unknown_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/expressions/while_expr.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/expressions/while_expr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/syntactic/token_stream.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/syntactic/token_stream.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/text_location.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/location.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source_unit.py" beforeDir="false" afterPath="$PROJECT_DIR$/source.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/specification.py" beforeDir="false" afterPath="$PROJECT_DIR$/specification.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testing/common_tests.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/testing/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testing/syntax_tests.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -217,7 +161,8 @@
       <workItem from="1564698064872" duration="70012000" />
       <workItem from="1565305936357" duration="46694000" />
       <workItem from="1566678833189" duration="16646000" />
-      <workItem from="1566846341281" duration="11821000" />
+      <workItem from="1566846341281" duration="12286000" />
+      <workItem from="1567010439424" duration="1423000" />
     </task>
     <servers />
   </component>
@@ -307,6 +252,7 @@
     <SUITE FILE_PATH="coverage/python$Unittests_in_syntax_tests_py.coverage" NAME="Unittests in syntax_tests.py Coverage Results" MODIFIED="1566859554559" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/Axion$axion.coverage" NAME="axion Coverage Results" MODIFIED="1565393483599" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$Unittests_for_syntax_tests_SyntaxTests.coverage" NAME="Unittests for syntax_tests.SyntaxTests Coverage Results" MODIFIED="1567000029441" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/testing" />
+    <SUITE FILE_PATH="coverage/python$pytest_in_syntax_py.coverage" NAME="pytest in syntax.py Coverage Results" MODIFIED="1567011227392" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/python$axion.coverage" NAME="axion Coverage Results" MODIFIED="1566859413578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
