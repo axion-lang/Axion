@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from builtins import FileNotFoundError
 from pathlib import Path
 from typing import List, Optional, Union
 
-import processing.text_location
+import processing.location
 from errors.blame import BlameType, BlameSeverity
 from processing.mode import ProcessingMode
 from processing.options import ProcessingOptions
@@ -122,7 +121,7 @@ class SourceUnit:
     def blame(
             self,
             message: Union[str, BlameType],
-            span: processing.text_location.Span = None,
+            span: processing.location.Span = None,
             severity: BlameSeverity = None
     ):
         from errors.language_error import LanguageError

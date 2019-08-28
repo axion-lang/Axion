@@ -91,10 +91,19 @@ class FuncCallArg(Expr):
         return FuncCallArg(parent, value = name_or_value)
 
     def to_axion(self, c: CodeBuilder):
-        c += self.name, ': ', self.value
+        if self.name:
+            c += self.name, ' = '
+        c += self.value
 
     def to_csharp(self, c: CodeBuilder):
-        c += self.value, self.name
+        if self.name:
+            c += self.name, ': '
+        c += self.value
+
+    def to_python(self, c: CodeBuilder):
+        if self.name:
+            c += self.name, '='
+        c += self.value
 
 
 class FuncCallExpr(InfixExpression, StatementExpression):
@@ -133,9 +142,16 @@ class FuncCallExpr(InfixExpression, StatementExpression):
         return self
 
     def to_axion(self, c: CodeBuilder):
-        c += self.target, self.open_paren, self.args, self.close_paren
+        c += self.target, self.open_paren
+        c.write_joined(', ', self.args)
+        c += self.close_paren
 
     def to_csharp(self, c: CodeBuilder):
+        c += self.target, '('
+        c.write_joined(', ', self.args)
+        c += ')'
+
+    def to_python(self, c: CodeBuilder):
         c += self.target, '('
         c.write_joined(', ', self.args)
         c += ')'

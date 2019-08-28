@@ -87,31 +87,29 @@ class BlockExpr(Expr):
         return TokenType.newline, False
 
     def to_axion(self, c: CodeBuilder):
-        from processing.syntactic.expressions.ast import Ast
-
-        if isinstance(self, Ast):
-            c.write_line()
-            c += self.items
-        else:
-            c.indent()
-            c += self.items
-            c.outdent()
-        c.write_line()
+        c.indent()
+        c += self.items
+        c.outdent()
 
     def to_csharp(self, c: CodeBuilder):
-        from processing.syntactic.expressions.ast import Ast
-
         c.write_line()
-        if not isinstance(self, Ast):
-            c.write_line('{')
-            c.indent()
+        c.write_line('{')
+        c.indent()
         for item in self.items:
             c += item
             if isinstance(item, DefinitionExpression):
                 c.write_line()
             else:
                 c.write_line(';')
-        if not isinstance(self, Ast):
-            c.outdent()
-            c += '}'
+        c.outdent()
+        c += '}'
         c.write_line()
+
+    def to_python(self, c: CodeBuilder):
+        c += ':'
+        c.indent()
+        c.write_line()
+        for item in self.items:
+            c += item
+            c.write_line()
+        c.outdent()

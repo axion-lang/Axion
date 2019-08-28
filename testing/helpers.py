@@ -6,7 +6,7 @@ from typing import Generator
 
 from compiler import Compiler
 from processing.mode import ProcessingMode
-from source_unit import SourceUnit
+from source import SourceUnit
 from utils import resolve_path, rmdir
 
 tests_ext = '.unit'
@@ -29,7 +29,7 @@ def clear_output_dir():
 
 
 def find_source_files(directory: Path) -> Generator[Path, None, None]:
-    return (Path(f) for f in glob.glob(str(directory) + "\**/*" + Compiler.source_file_ext, recursive = True))
+    return (Path(f) for f in glob.glob(str(directory) + "\\**/*" + Compiler.source_file_ext, recursive = True))
 
 
 def parse_test_file(test_name: str) -> SourceUnit:

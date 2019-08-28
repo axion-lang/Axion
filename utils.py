@@ -57,8 +57,8 @@ class AutoRepr:
         from processing.lexical.text_stream import TextStream
         from processing.lexical.tokens.token import Token
         from processing.syntactic.token_stream import TokenStream
-        from processing.text_location import Location
-        from source_unit import SourceUnit
+        from processing.location import Location
+        from source import SourceUnit
 
         attributes = [
             f"{k} = {repr(v)}"

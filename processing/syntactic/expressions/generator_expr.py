@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from processing.codegen.code_builder import CodeBuilder
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.for_compr_expr import ForComprehensionExpr
 from processing.syntactic.expressions.groups import InfixExpression
@@ -26,3 +27,9 @@ class GeneratorExpr(InfixExpression):
     ):
         super().__init__(parent)
         self.comprehension = comprehension
+
+    def to_axion(self, c: CodeBuilder):
+        c += '(', self.comprehension, ')'
+
+    def to_python(self, c: CodeBuilder):
+        c += '(', self.comprehension, ')'

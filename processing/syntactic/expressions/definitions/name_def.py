@@ -42,7 +42,7 @@ class NameDef(Expr):
         self.value = value
 
     def parse(self) -> NameDef:
-        self.name = self.parse_multiple(NameExpr(self).parse)
+        self.name = NameExpr(self).parse()
         if self.stream.maybe_eat(TokenType.colon):
             self.colon_token = self.stream.token
             self.value_type = TypeName(self).parse()
@@ -62,7 +62,14 @@ class NameDef(Expr):
         if self.value_type is None:
             c += 'var '
         else:
-            c += self.value_type
+            c += self.value_type, ' '
         c += self.name
+        if self.value is not None:
+            c += ' = ', self.value
+
+    def to_python(self, c: CodeBuilder):
+        c += self.name
+        if self.value_type is not None:
+            c += ': ', self.value_type
         if self.value is not None:
             c += ' = ', self.value

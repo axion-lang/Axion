@@ -4,7 +4,7 @@ import abc
 from dataclasses import dataclass
 from typing import Optional
 
-import source_unit as src
+import source as src
 import utils
 from processing.codegen.code_builder import CodeBuilder
 
@@ -57,4 +57,8 @@ class Span(utils.AutoRepr, metaclass = abc.ABCMeta):
 
     @abc.abstractmethod
     def to_csharp(self, c: CodeBuilder):
+        pass
+
+    @abc.abstractmethod
+    def to_python(self, c: CodeBuilder):
         pass

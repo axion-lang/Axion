@@ -23,7 +23,7 @@ handler = colorlog.StreamHandler(sys.stdout)
 handler.setFormatter(formatter)
 
 logger = colorlog.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
 
@@ -31,7 +31,7 @@ logger.addHandler(handler)
 
 def main():
     from compiler import Compiler
-    from source_unit import SourceUnit
+    from source import SourceUnit
 
     interactive_mode: bool = False
     if len(sys.argv) < 2:

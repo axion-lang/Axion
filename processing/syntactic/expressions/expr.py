@@ -10,7 +10,7 @@ from errors.blame import BlameSeverity
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.operator import InputSide, OperatorToken
 from processing.lexical.tokens.token_type import TokenType
-from processing.text_location import Span
+from processing.location import Span
 import processing.syntactic.expressions.ast as ast_file
 import processing.syntactic.expressions.block_expr as block_file
 
@@ -70,7 +70,7 @@ class child_property:
                 value = []
             else:
                 value = None
-        else:
+        elif isinstance(value, Expr):
             value.parent = obj
         obj.__dict__.update({self.attr_name: value})
 
@@ -339,6 +339,8 @@ class Expr(Span, NodeMixin):
             return BlockExpr(self).parse(BlockType.default)
         elif self.stream.peek.ttype in spec.constants:
             return ConstantExpr(self).parse()
+        elif self.stream.exact_peek.of_type(TokenType.newline):
+            return UnknownExpr(self)
         else:
             macro = MacroApplication(self).parse_macro()
             if macro.macro_definition is not None:
@@ -379,4 +381,7 @@ class Expr(Span, NodeMixin):
         pass
 
     def to_csharp(self, c: CodeBuilder):
+        pass
+
+    def to_python(self, c: CodeBuilder):
         pass

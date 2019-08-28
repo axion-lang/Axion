@@ -5,7 +5,7 @@ from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import StatementExpression, AtomExpression
-from processing.text_location import span_marker
+from processing.location import span_marker
 
 
 class AwaitExpr(AtomExpression, StatementExpression):
@@ -29,11 +29,14 @@ class AwaitExpr(AtomExpression, StatementExpression):
     @span_marker
     def parse(self) -> AwaitExpr:
         self.await_token = self.stream.eat(TokenType.keyword_await)
-        self.value = self.parse_any_list()
+        self.value = self.parse_multiple(self.parse_any)
         return self
 
     def to_axion(self, c: CodeBuilder):
         c += self.await_token, self.value
 
     def to_csharp(self, c: CodeBuilder):
-        c += self.await_token, self.value
+        c += 'await (', self.value, ')'
+
+    def to_python(self, c: CodeBuilder):
+        c += 'await ', self.value

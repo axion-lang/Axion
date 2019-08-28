@@ -46,14 +46,14 @@ class VarDefExpr(NameDef, StatementExpression):
     def to_axion(self, c: CodeBuilder):
         if self.is_immutable:
             c += 'let '
-        c += self.left
+        c += self.name
         if self.value_type is not None:
             c += ': ', self.value_type
-        c += ' = ', self.right
+        c += ' = ', self.value
 
     def to_csharp(self, c: CodeBuilder):
         if self.value_type is None:
             c += 'var '
         else:
             c += self.value_type
-        c += self.left, ' = ', self.right
+        c += self.name, ' = ', self.value

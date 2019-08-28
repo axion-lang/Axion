@@ -8,7 +8,7 @@ from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr
 from processing.syntactic.expressions.groups import AtomExpression
-from processing.text_location import span_marker
+from processing.location import span_marker
 
 
 class NameExpr(AtomExpression):
@@ -59,4 +59,7 @@ class NameExpr(AtomExpression):
         if self.is_simple and self.name_parts[0].value == 'self':
             c += 'this'
             return
+        c += self.name_parts
+
+    def to_python(self, c: CodeBuilder):
         c += self.name_parts

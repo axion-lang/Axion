@@ -42,3 +42,6 @@ class MemberAccessExpr(Expr):
 
     def to_csharp(self, c: CodeBuilder):
         c += self.target, self.dot_token, self.member
+
+    def to_python(self, c: CodeBuilder):
+        c += self.target, '.', self.member

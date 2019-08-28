@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.conditional_compr_expr import ConditionalComprehensionExpr
 from processing.syntactic.expressions.expr import Expr, child_property
@@ -50,3 +51,9 @@ class ForComprehensionExpr(InfixExpression):
         elif self.stream.peek.of_type(TokenType.keyword_if, TokenType.keyword_unless):
             self.right = ConditionalComprehensionExpr(self.parent).parse()
         return self
+
+    def to_axion(self, c: CodeBuilder):
+        c += ' for ', self.item, ' in ', self.iterable, self.right
+
+    def to_python(self, c: CodeBuilder):
+        c += ' for ', self.item, ' in ', self.iterable, self.right

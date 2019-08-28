@@ -6,7 +6,7 @@ from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import StatementExpression, AtomExpression
-from processing.text_location import span_marker
+from processing.location import span_marker
 
 
 class ReturnExpr(AtomExpression, StatementExpression):
@@ -39,4 +39,7 @@ class ReturnExpr(AtomExpression, StatementExpression):
         c += self.return_token, self.value
 
     def to_csharp(self, c: CodeBuilder):
-        c += self.return_token, ' ', self.value
+        c += 'return ', self.value
+
+    def to_python(self, c: CodeBuilder):
+        c += 'return ', self.value

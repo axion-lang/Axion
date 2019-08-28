@@ -86,3 +86,9 @@ class ClassDef(DefinitionExpression, AtomExpression):
         if len(self.bases) > 0:
             c += ' : ', self.bases
         c += self.block
+
+    def to_python(self, c: CodeBuilder):
+        c += 'class ', self.name
+        if len(self.bases) + len(self.keywords) > 0:
+            c += '(', self.bases, self.keywords, ')'
+        c += self.block

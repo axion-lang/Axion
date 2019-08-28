@@ -44,6 +44,7 @@ class FuncParameter(NameDef):
             names.add(str(name))
 
         if isinstance(self.name, Collection):
+            print()
             for n in self.name:
                 check_uniqueness(n)
         else:
@@ -181,8 +182,20 @@ class FuncDef(DefinitionExpression, AtomExpression):
     def to_axion(self, c: CodeBuilder):
         c += self.fn_token, self.name
         if len(self.parameters) > 0:
-            c += '(', self.parameters, ')'
+            c += ' ('
+            c.write_joined(', ', self.parameters)
+            c += ')'
         c += self.arrow_token, self.return_type, self.block
 
     def to_csharp(self, c: CodeBuilder):
-        c += 'public ', self.return_type, ' ', self.name, '(', self.parameters, ')', self.block
+        c += 'public ', self.return_type, ' ', self.name, '('
+        c.write_joined(', ', self.parameters)
+        c += ')', self.block
+
+    def to_python(self, c: CodeBuilder):
+        c += 'def ', self.name, '('
+        c.write_joined(', ', self.parameters)
+        c += ')'
+        if self.return_type:
+            c += ' -> ', self.return_type
+        c += self.block

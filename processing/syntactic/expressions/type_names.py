@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections import Collection
+from collections.abc import Collection
 from typing import Union, List
 
 from errors.blame import BlameType
@@ -75,6 +75,9 @@ class SimpleTypeName(TypeName):
     def to_csharp(self, c: CodeBuilder):
         c += self.name
 
+    def to_python(self, c: CodeBuilder):
+        c += self.name
+
 
 class TupleTypeName(TypeName, Collection):
     @child_property
@@ -99,7 +102,7 @@ class TupleTypeName(TypeName, Collection):
         return x in self.types
 
     def __iter__(self):
-        return self
+        return self.types[self.__current_idx]
 
     def __len__(self):
         return len(self.types)
@@ -172,6 +175,9 @@ class GenericTypeName(TypeName):
     def to_csharp(self, c: CodeBuilder):
         c += self.target, '<', self.type_args, '>'
 
+    def to_python(self, c: CodeBuilder):
+        c += self.target, '[', self.type_args, ']'
+
 
 class ArrayTypeName(TypeName):
     @child_property
@@ -202,6 +208,9 @@ class ArrayTypeName(TypeName):
 
     def to_csharp(self, c: CodeBuilder):
         c += self.target, '[]'
+
+    def to_python(self, c: CodeBuilder):
+        c += 'List[', self.target, ']'
 
 
 class UnionTypeName(TypeName):
@@ -234,6 +243,9 @@ class UnionTypeName(TypeName):
 
     def to_axion(self, c: CodeBuilder):
         c += self.left_type, self.or_token, self.right_type
+
+    def to_python(self, c: CodeBuilder):
+        c += 'Union[', self.left_type, ', ', self.right_type, ']'
 
 
 class FuncTypeName(TypeName):
@@ -274,3 +286,6 @@ class FuncTypeName(TypeName):
         else:
             c += self.args_type
         c += ', ', self.return_type, '>'
+
+    def to_python(self, c: CodeBuilder):
+        c += 'Callable[[', self.args_type, '], ', self.return_type, ']'

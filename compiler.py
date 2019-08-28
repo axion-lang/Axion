@@ -11,7 +11,7 @@ from axion import logger
 from processing.codegen.code_builder import OutputLang, CodeBuilder
 from processing.mode import ProcessingMode
 from processing.options import ProcessingOptions
-from source_unit import SourceUnit
+from source import SourceUnit
 from utils import resolve_path
 
 
@@ -55,7 +55,7 @@ class Compiler:
             if mode == ProcessingMode.parsing:
                 return
 
-            transpiled = Compiler.transpile(source, OutputLang.csharp)
+            transpiled = Compiler.transpile(source, OutputLang.python)
             logger.debug(f"-- Generated code")
             print(transpiled)
 
@@ -106,18 +106,4 @@ class Compiler:
         logger.debug(f"-- Code generation for '{out_lang.name}' target")
         builder = CodeBuilder(out_lang)
         builder += source.ast
-        default_imports = [
-            'System',
-            'System.IO',
-            'System.Linq',
-            'System.Text',
-            'System.Numerics',
-            'System.Threading',
-            'System.Diagnostics',
-            'System.Collections',
-            'System.Collections.Generic'
-        ]
-        using_str = ''
-        for using in default_imports:
-            using_str += f'using {using};\n'
-        return using_str + '\n' + builder.code
+        return builder.code

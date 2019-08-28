@@ -4,7 +4,7 @@ from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.syntactic.expressions.expr import Expr
 from processing.syntactic.expressions.groups import AtomExpression
-from processing.text_location import span_marker
+from processing.location import span_marker
 
 
 class ConstantExpr(AtomExpression):
@@ -29,4 +29,7 @@ class ConstantExpr(AtomExpression):
         c += self.literal
 
     def to_csharp(self, c: CodeBuilder):
+        c += self.literal
+
+    def to_python(self, c: CodeBuilder):
         c += self.literal

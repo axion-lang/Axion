@@ -1,7 +1,7 @@
 from typing import Optional
 
 import processing.syntactic.expressions.block_expr as block_file
-import source_unit as src
+import source as src
 import specification as spec
 from errors.blame import BlameType
 from processing.codegen.code_builder import CodeBuilder
@@ -144,6 +144,20 @@ class Ast(block_file.BlockExpr):
             c += self
             return
 
+        default_imports = [
+            'System',
+            'System.IO',
+            'System.Linq',
+            'System.Text',
+            'System.Numerics',
+            'System.Threading',
+            'System.Diagnostics',
+            'System.Collections',
+            'System.Collections.Generic'
+        ]
+        for using in default_imports:
+            c.write_line(f'using {using};')
+
         root_items = []
         root_classes = []
         root_functions = []
@@ -179,3 +193,7 @@ class Ast(block_file.BlockExpr):
                                                 )
                                             ] + root_classes)
         )
+
+    def to_python(self, c: CodeBuilder):
+        for item in self.items:
+            c += item, '\n'

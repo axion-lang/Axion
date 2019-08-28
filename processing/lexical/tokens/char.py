@@ -5,8 +5,8 @@ from errors.blame import BlameType
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
-from processing.text_location import Location, span_marker
-from source_unit import SourceUnit
+from processing.location import Location, span_marker
+from source import SourceUnit
 
 
 class CharToken(Token):
@@ -39,7 +39,13 @@ class CharToken(Token):
             self.source.blame(BlameType.character_literal_too_long, self)
         return self
 
-    def to_csharp(self, c: CodeBuilder):
+    def to_axion(self, c: CodeBuilder):
         c += spec.character_quote, self.value
         if not self.unclosed:
             c += spec.character_quote
+
+    def to_csharp(self, c: CodeBuilder):
+        self.to_axion(c)
+
+    def to_python(self, c: CodeBuilder):
+        self.to_axion(c)

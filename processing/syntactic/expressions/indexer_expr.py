@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from errors.blame import BlameType
+from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.slice_expr import SliceExpr
@@ -65,3 +66,12 @@ class IndexerExpr(Expr):
             break
         self.index = self.maybe_tuple(exprs)
         return self
+
+    def to_axion(self, c: CodeBuilder):
+        c += self.target, '[', self.index, ']'
+
+    def to_csharp(self, c: CodeBuilder):
+        c += self.target, '[', self.index, ']'
+
+    def to_python(self, c: CodeBuilder):
+        c += self.target, '[', self.index, ']'

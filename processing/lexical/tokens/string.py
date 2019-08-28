@@ -9,8 +9,8 @@ from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.text_stream import TextStream
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
-from processing.text_location import Span, Location, span_marker
-from source_unit import SourceUnit
+from processing.location import Span, Location, span_marker
+from source import SourceUnit
 
 
 class StringToken(Token):

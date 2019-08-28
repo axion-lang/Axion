@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import InfixExpression
@@ -47,3 +48,15 @@ class ConditionalInfixExpr(InfixExpression):
         if self.stream.maybe_eat(TokenType.keyword_else):
             self.false_expression = self.parse_infix()
         return self
+
+    def to_axion(self, c: CodeBuilder):
+        c += self.true_expression, ' if ', self.condition
+        if self.false_expression:
+            c += ' else ', self.false_expression
+
+    def to_csharp(self, c: CodeBuilder):
+        c += (
+            self.true_expression,
+            ' if ', self.condition,
+            ' else ', self.false_expression
+        )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.block_expr import BlockExpr, BlockType
 from processing.syntactic.expressions.expr import Expr, child_property
@@ -43,3 +44,18 @@ class WhileExpr(StatementExpression):
         if self.stream.maybe_eat(TokenType.keyword_nobreak):
             self.no_break_block = BlockExpr(self).parse(BlockType.default)
         return self
+
+    def to_axion(self, c: CodeBuilder):
+        c += 'while ', self.condition, self.block
+        if self.no_break_block:
+            c += 'nobreak', self.no_break_block
+
+    def to_csharp(self, c: CodeBuilder):
+        c += 'while ', self.condition, self.block
+        if self.no_break_block:
+            raise NotImplementedError
+
+    def to_python(self, c: CodeBuilder):
+        c += 'while ', self.condition, self.block
+        if self.no_break_block:
+            c += 'else', self.no_break_block

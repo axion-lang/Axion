@@ -30,7 +30,19 @@ class BinaryExpr(StatementExpression, InfixExpression):
         self.right = right
 
     def to_axion(self, c: CodeBuilder):
-        c += self.left, self.operator, self.right
+        from processing.syntactic.expressions.unary_expr import UnaryExpr
+        if isinstance(self.left, (BinaryExpr, UnaryExpr)):
+            c += '(', self.left, ')'
+        else:
+            c += self.left
+        c += ' ', self.operator, ' '
+        if isinstance(self.right, (BinaryExpr, UnaryExpr)):
+            c += '(', self.right, ')'
+        else:
+            c += self.right
 
     def to_csharp(self, c: CodeBuilder):
-        c += '(', self.left, ') ', self.operator, ' (', self.right, ')'
+        self.to_axion(c)
+
+    def to_python(self, c: CodeBuilder):
+        self.to_axion(c)

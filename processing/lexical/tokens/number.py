@@ -5,8 +5,8 @@ from errors.blame import BlameType
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
-from processing.text_location import Location, Span, span_marker
-from source_unit import SourceUnit
+from processing.location import Location, Span, span_marker
+from source import SourceUnit
 
 
 class NumberToken(Token):

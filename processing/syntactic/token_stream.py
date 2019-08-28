@@ -3,7 +3,7 @@ from typing import List, Optional
 from errors.blame import BlameType, BlameSeverity
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
-from source_unit import SourceUnit
+from source import SourceUnit
 
 
 class TokenStream:

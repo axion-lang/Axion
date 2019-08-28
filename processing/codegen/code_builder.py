@@ -1,4 +1,4 @@
-from collections import Collection
+from collections.abc import Collection
 from io import StringIO
 
 from aenum import AutoNumberEnum
@@ -7,6 +7,7 @@ from aenum import AutoNumberEnum
 class OutputLang(AutoNumberEnum):
     axion = None
     csharp = None
+    python = None
 
 
 class CodeBuilder:
@@ -28,7 +29,7 @@ class CodeBuilder:
         self.indent_level -= 1
 
     def write(self, *values):
-        from processing.text_location import Span
+        from processing.location import Span
         from processing.lexical.tokens.token import Token
 
         if self.pending_indents:
@@ -67,7 +68,7 @@ class CodeBuilder:
         try:
             if isinstance(other, str):
                 raise TypeError()
-            values = [e for e in other]
+            values = list(other)
             for v in values:
                 self.write(v)
         except TypeError:

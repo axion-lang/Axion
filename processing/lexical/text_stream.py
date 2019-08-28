@@ -2,8 +2,8 @@ import re
 from typing import Optional
 
 import specification as spec
-from processing.text_location import Span, Location
-from source_unit import SourceUnit
+from processing.location import Span, Location
+from source import SourceUnit
 
 
 class TextStream:

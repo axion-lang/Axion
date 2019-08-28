@@ -8,8 +8,8 @@ import utils
 from errors.blame import BlameType
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token_type import TokenType
-from processing.text_location import Span, Location, span_marker
-from source_unit import SourceUnit
+from processing.location import Span, Location, span_marker
+from source import SourceUnit
 
 
 class Token(Span):
@@ -299,4 +299,7 @@ class Token(Span):
         c += self.value
 
     def to_csharp(self, c: CodeBuilder):
+        c += self.value
+
+    def to_python(self, c: CodeBuilder):
         c += self.value

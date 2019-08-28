@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.operator import OperatorToken
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
@@ -39,3 +40,9 @@ class ConditionalComprehensionExpr(InfixExpression):
                 self.parse_infix()
             )
         return self
+
+    def to_axion(self, c: CodeBuilder):
+        c += 'if ', self.condition
+
+    def to_python(self, c: CodeBuilder):
+        c += 'if ', self.condition

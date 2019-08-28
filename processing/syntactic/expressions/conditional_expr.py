@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from errors.blame import BlameSeverity
+from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.block_expr import BlockExpr, BlockType
 from processing.syntactic.expressions.expr import Expr, child_property
@@ -51,3 +52,18 @@ class ConditionalExpr(StatementExpression):
         elif else_if:
             self.source.blame("'else' expected", self.stream.peek, BlameSeverity.error)
         return self
+
+    def to_axion(self, c: CodeBuilder):
+        c += 'if ', self.condition, self.then_block
+        if self.else_block:
+            c += 'else', self.else_block
+
+    def to_csharp(self, c: CodeBuilder):
+        c += 'if (', self.condition, ')', self.then_block
+        if self.else_block:
+            c += 'else', self.else_block
+
+    def to_python(self, c: CodeBuilder):
+        c += 'if ', self.condition, self.then_block
+        if self.else_block:
+            c += 'else', self.else_block

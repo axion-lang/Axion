@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from processing.lexical.tokens.operator import OperatorToken
+from processing.codegen.code_builder import CodeBuilder
+from processing.lexical.tokens.operator import OperatorToken, InputSide
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import InfixExpression, StatementExpression
 
@@ -24,3 +25,17 @@ class UnaryExpr(InfixExpression, StatementExpression):
         self.operator = operator
         self.value = value
         # TODO: mark span depending on input side
+
+    def to_axion(self, c: CodeBuilder):
+        if self.operator.input_side == InputSide.left:
+            c += self.value, ' ', self.operator
+        elif self.operator.input_side == InputSide.right:
+            c += self.operator, ' ', self.value
+        else:
+            raise NotImplementedError
+
+    def to_csharp(self, c: CodeBuilder):
+        self.to_axion(c)
+
+    def to_python(self, c: CodeBuilder):
+        self.to_axion(c)

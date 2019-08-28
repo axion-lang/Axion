@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from processing.codegen.code_builder import CodeBuilder
 from processing.syntactic.expressions.expr import Expr, child_property
 
 
@@ -31,3 +32,9 @@ class SliceExpr(Expr):
         self.start = start
         self.stop = stop
         self.step = step
+
+    def to_axion(self, c: CodeBuilder):
+        c += self.start, ':', self.stop, ':', self.step
+
+    def to_python(self, c: CodeBuilder):
+        c += self.start, ':', self.stop, ':', self.step

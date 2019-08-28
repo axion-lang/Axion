@@ -5,7 +5,7 @@ from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import StatementExpression
-from processing.text_location import span_marker
+from processing.location import span_marker
 
 
 class YieldExpr(StatementExpression):
@@ -40,7 +40,7 @@ class YieldExpr(StatementExpression):
             self.from_token = self.stream.token
             self.value = self.parse_infix()
         else:
-            self.value = self.parse_any_list()
+            self.value = self.parse_multiple(self.parse_infix)
         return self
 
     def to_axion(self, c: CodeBuilder):
@@ -50,7 +50,13 @@ class YieldExpr(StatementExpression):
         c += self.value
 
     def to_csharp(self, c: CodeBuilder):
-        c += self.yield_token
+        c += 'yield '
         if self.is_yield_from:
-            c += self.from_token
-        c += ' ', self.value
+            raise NotImplementedError
+        c += self.value
+
+    def to_python(self, c: CodeBuilder):
+        c += 'yield '
+        if self.is_yield_from:
+            c += 'from '
+        c += self.value

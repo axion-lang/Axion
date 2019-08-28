@@ -7,7 +7,7 @@ from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.atomic.name_expr import NameExpr
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import StatementExpression
-from processing.text_location import span_marker
+from processing.location import span_marker
 
 
 class BreakExpr(StatementExpression):
@@ -35,11 +35,14 @@ class BreakExpr(StatementExpression):
     def parse(self) -> BreakExpr:
         self.break_token = self.stream.eat(TokenType.keyword_break)
         if self.stream.peek.of_type(TokenType.identifier):
-            self.loop_name = self.parse_any_list()
+            self.loop_name = self.parse_atom()
         return self
 
     def to_axion(self, c: CodeBuilder):
         c += self.break_token, self.loop_name
 
     def to_csharp(self, c: CodeBuilder):
-        c += self.break_token
+        c += 'break'
+
+    def to_python(self, c: CodeBuilder):
+        c += 'break'

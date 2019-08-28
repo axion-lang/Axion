@@ -50,3 +50,6 @@ class ModuleDef(DefinitionExpression):
 
     def to_csharp(self, c: CodeBuilder):
         c += 'namespace ', self.name, self.block
+
+    def to_python(self, c: CodeBuilder):
+        c += self.block

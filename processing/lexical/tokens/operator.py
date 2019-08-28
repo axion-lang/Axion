@@ -5,8 +5,8 @@ from aenum import AutoNumberEnum
 import specification as spec
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
-from processing.text_location import Location, span_marker
-from source_unit import SourceUnit
+from processing.location import Location, span_marker
+from source import SourceUnit
 
 
 class InputSide(AutoNumberEnum):
