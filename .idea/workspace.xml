@@ -8,8 +8,6 @@
     <list default="true" id="e4594945-2045-43cb-bbcd-00b3e0d704eb" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.github/workflows/pythonpackage.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/pythonpackage.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testing/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testing/syntax.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_syntax.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -164,7 +162,7 @@
       <workItem from="1565305936357" duration="46694000" />
       <workItem from="1566678833189" duration="16646000" />
       <workItem from="1566846341281" duration="12286000" />
-      <workItem from="1567010439424" duration="4889000" />
+      <workItem from="1567010439424" duration="5204000" />
     </task>
     <servers />
   </component>
