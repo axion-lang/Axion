@@ -6,8 +6,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e4594945-2045-43cb-bbcd-00b3e0d704eb" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/pythonpackage.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/pythonpackage.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testing/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_common.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testing/syntax.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_syntax.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -76,7 +78,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python tests.pytest in syntax.py">
+  <component name="RunManager" selected="Python tests.pytest in test_syntax.py">
     <configuration name="axion" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="Axion" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -99,7 +101,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for testing.syntax" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for testing.test_syntax" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="Axion" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -110,11 +112,11 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;testing.syntax&quot;" />
+      <option name="_new_target" value="&quot;testing.test_syntax&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in syntax.py" type="tests" factoryName="py.test" nameIsGenerated="true">
+    <configuration name="pytest in test_syntax.py" type="tests" factoryName="py.test" nameIsGenerated="true">
       <module name="Axion" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -126,18 +128,18 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/testing/syntax.py&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/testing/test_syntax.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Python.axion" />
-      <item itemvalue="Python tests.pytest in syntax.py" />
-      <item itemvalue="Python tests.Unittests for testing.syntax" />
+      <item itemvalue="Python tests.pytest in test_syntax.py" />
+      <item itemvalue="Python tests.Unittests for testing.test_syntax" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.Unittests for testing.syntax" />
+        <item itemvalue="Python tests.Unittests for testing.test_syntax" />
       </list>
     </recent_temporary>
   </component>
@@ -162,7 +164,7 @@
       <workItem from="1565305936357" duration="46694000" />
       <workItem from="1566678833189" duration="16646000" />
       <workItem from="1566846341281" duration="12286000" />
-      <workItem from="1567010439424" duration="1423000" />
+      <workItem from="1567010439424" duration="4889000" />
     </task>
     <servers />
   </component>
@@ -252,7 +254,7 @@
     <SUITE FILE_PATH="coverage/python$Unittests_in_syntax_tests_py.coverage" NAME="Unittests in syntax_tests.py Coverage Results" MODIFIED="1566859554559" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/Axion$axion.coverage" NAME="axion Coverage Results" MODIFIED="1565393483599" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$Unittests_for_syntax_tests_SyntaxTests.coverage" NAME="Unittests for syntax_tests.SyntaxTests Coverage Results" MODIFIED="1567000029441" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/testing" />
-    <SUITE FILE_PATH="coverage/python$pytest_in_syntax_py.coverage" NAME="pytest in syntax.py Coverage Results" MODIFIED="1567011227392" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/python$pytest_in_syntax_py.coverage" NAME="pytest in syntax.py Coverage Results" MODIFIED="1567017063759" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/python$axion.coverage" NAME="axion Coverage Results" MODIFIED="1566859413578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
