@@ -6,6 +6,7 @@ from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.atomic.name_expr import NameExpr
 from processing.syntactic.expressions.expr import child_property, Expr
 from processing.syntactic.expressions.type_names import TypeName
+from processing.syntactic.parsing import parse_infix
 
 
 class NameDef(Expr):
@@ -48,7 +49,7 @@ class NameDef(Expr):
             self.value_type = TypeName(self).parse()
         if self.stream.maybe_eat(TokenType.op_assign):
             self.equals_token = self.stream.token
-            self.value = self.parse_infix()
+            self.value = parse_infix(self)
         return self
 
     def to_axion(self, c: CodeBuilder):

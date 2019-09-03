@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
+from processing.location import span_marker
 from processing.syntactic.expressions.expr import Expr
 from processing.syntactic.expressions.groups import AtomExpression
-from processing.location import span_marker
 
 
 class ConstantExpr(AtomExpression):

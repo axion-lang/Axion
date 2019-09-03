@@ -1,6 +1,7 @@
 import abc
 from typing import Type
 
+import processing.syntactic.parsing as parser
 import specification as spec
 from processing.syntactic.expressions.expr import Expr
 from processing.syntactic.expressions.type_names import TypeName
@@ -43,14 +44,14 @@ class ExpressionPattern(MacroPattern):
             return True
         idx = parent.stream.token_idx
         if self.parse_fn is not None:
-            e = getattr(parent, self.parse_fn)()
+            e = getattr(parser, self.parse_fn)(parent)
             parent.ast.macro_application_parts.append(e)
             return True
         parent.ast.macro_expect_type = self.typ
-        if isinstance(self.typ, TypeName):
+        if issubclass(self.typ, TypeName):
             e = TypeName(parent).parse()
         else:
-            e = Expr(parent).parse_any()
+            e = parser.parse_any(parent)
         parent.ast.macro_expect_type = None
         if isinstance(e, self.typ):
             parent.ast.macro_application_parts.append(e)

@@ -1,8 +1,6 @@
-import logging
 from datetime import datetime
 from os.path import dirname, realpath
 from pathlib import Path
-from pprint import pprint
 
 from anytree import RenderTree
 from anytree.render import ContStyle
@@ -37,19 +35,21 @@ class Compiler:
             source: SourceUnit,
             mode: ProcessingMode = ProcessingMode.compile,
             options: ProcessingOptions = ProcessingOptions.default
+                                         | ProcessingOptions.debug_tokens
+                                         | ProcessingOptions.debug_ast
     ):
         logger.info(f"Processing '{source.source_path.name}'")
 
         def process():
             Compiler.lexical_analysis(source)
-            if logger.isEnabledFor(logging.DEBUG) and False:
+            if ProcessingOptions.debug_tokens in options:
                 Compiler.lexical_debug_output(source)
 
             if mode == ProcessingMode.lex:
                 return
 
             Compiler.syntax_parsing(source)
-            if logger.isEnabledFor(logging.DEBUG):
+            if ProcessingOptions.debug_ast in options:
                 Compiler.syntax_debug_output(source)
 
             if mode == ProcessingMode.parsing:
@@ -61,7 +61,12 @@ class Compiler:
 
         process()
         logger.info('-- Errors')
-        pprint(source.blames)
+        if len(source.blames) == 0:
+            print('No errors found ;)')
+        else:
+            for e in source.blames:
+                e.print()
+                print()
 
     @staticmethod
     def lexical_analysis(source: SourceUnit):
@@ -94,7 +99,7 @@ class Compiler:
     @staticmethod
     def syntax_parsing(source: SourceUnit):
         logger.debug('-- Syntax parsing')
-        source.ast.parse()
+        source.ast.parse_ast()
 
     @staticmethod
     def syntax_debug_output(source: SourceUnit):

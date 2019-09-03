@@ -12,10 +12,12 @@ class BinaryExpr(StatementExpression, InfixExpression):
     """
 
     @child_property
-    def left(self) -> Expr: pass
+    def left(self) -> Expr:
+        pass
 
     @child_property
-    def right(self) -> Expr: pass
+    def right(self) -> Expr:
+        pass
 
     def __init__(
             self,

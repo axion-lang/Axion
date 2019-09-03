@@ -25,4 +25,4 @@ fn bisection (func: num -> num, a: num, b: num)
 
 
 fn f (x: num)
-    return math.pow(x, 3) - 2*x - 5
+    return x**3 - 2*x - 5

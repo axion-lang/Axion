@@ -13,7 +13,8 @@ class UnaryExpr(InfixExpression, StatementExpression):
     """
 
     @child_property
-    def value(self) -> Expr: pass
+    def value(self) -> Expr:
+        pass
 
     def __init__(
             self,

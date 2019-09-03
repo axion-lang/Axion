@@ -3,9 +3,10 @@ from __future__ import annotations
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
+from processing.location import span_marker
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import StatementExpression, AtomExpression
-from processing.location import span_marker
+from processing.syntactic.parsing import parse_multiple, parse_any
 
 
 class AwaitExpr(AtomExpression, StatementExpression):
@@ -14,7 +15,8 @@ class AwaitExpr(AtomExpression, StatementExpression):
     """
 
     @child_property
-    def value(self) -> Expr: pass
+    def value(self) -> Expr:
+        pass
 
     def __init__(
             self,
@@ -29,7 +31,7 @@ class AwaitExpr(AtomExpression, StatementExpression):
     @span_marker
     def parse(self) -> AwaitExpr:
         self.await_token = self.stream.eat(TokenType.keyword_await)
-        self.value = self.parse_multiple(self.parse_any)
+        self.value = parse_multiple(self, parse_any)
         return self
 
     def to_axion(self, c: CodeBuilder):

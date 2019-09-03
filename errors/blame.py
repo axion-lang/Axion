@@ -10,7 +10,7 @@ class BlameSeverity(AutoNumberEnum):
 class BlameType(Enum):
     # @formatter:off
 
-    invalid_character                        = "unknown character",                                                   BlameSeverity.error
+    invalid_character                        = "unknown character",                                                  BlameSeverity.error
     # mismatches
     mismatched_parenthesis                   = "'(' has no matching ''",                                             BlameSeverity.error
     mismatched_bracket                       = "'[' has no matching ']'",                                            BlameSeverity.error
@@ -37,18 +37,18 @@ class BlameType(Enum):
     duplicated_named_argument                = "duplicated named argument",                                          BlameSeverity.error
     expected_default_parameter_value         = "expected a default parameter value",                                 BlameSeverity.error
     expected_block_declaration               = "block expected",                                                     BlameSeverity.error
-    impossible_to_infer_type                 = "impossible to infer type in this context",                          BlameSeverity.error
+    impossible_to_infer_type                 = "impossible to infer type in this context",                           BlameSeverity.error
     invalid_type_annotation                  = "invalid type annotation",                                            BlameSeverity.error
     invalid_syntax                           = "invalid syntax",                                                     BlameSeverity.error
+    invalid_indexer_expression               = "invalid indexer format",                                             BlameSeverity.error
+    lambda_cannot_have_indented_body         = "'lambda' cannot have block specified by indentation",                BlameSeverity.error
+    cannot_have_more_than_1_list_parameter   = "only 1 list parameter is allowed",                                   BlameSeverity.error
 
     redundant_10_radix                          = "redundant specifier, number radix is 10 by default",           BlameSeverity.warning
     inconsistent_indentation                    = "mixed indentation (spaces and tabs)",                          BlameSeverity.warning
     redundant_string_format                     = "string has format prefix but does not have any interpolation", BlameSeverity.warning
     redundant_prefixes_for_empty_string         = "prefixes are redundant for empty string",                      BlameSeverity.warning
     module_not_supported_in_interpretation_mode = "'module' is not supported in interpretation mode",             BlameSeverity.warning
-    lambda_cannot_have_indented_body            = "'lambda' cannot have block specified by indentation",          BlameSeverity.warning
-    cannot_have_more_than_1_list_parameter      = "only 1 list parameter is allowed",                             BlameSeverity.warning
-    invalid_indexer_expression                  = "invalid indexer format",                                       BlameSeverity.warning
     redundant_colon_with_braces                 = "':' is not needed when block is specified by braces",          BlameSeverity.warning
 
     # @formatter:on

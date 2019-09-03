@@ -116,7 +116,7 @@ class SourceUnit:
     # endregion
 
     def __repr__(self):
-        return f"Source in '{self.source_path.name}'"
+        return f"SourceUnit in '{self.source_path.name}'"
 
     def blame(
             self,

@@ -5,7 +5,7 @@ from errors.blame import BlameType
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
-from processing.location import Location, Span, span_marker
+from processing.location import Location, span_marker, FreeSpan
 from source import SourceUnit
 
 
@@ -42,13 +42,13 @@ class NumberToken(Token):
             except ValueError:
                 self.source.blame(
                     BlameType.invalid_number_radix,
-                    Span(self.source, self.start, self.stream.location)
+                    FreeSpan(self.source, self.start, self.stream.location)
                 )
             else:
                 if self.radix == 10:
                     self.source.blame(
                         BlameType.redundant_10_radix,
-                        Span(self.source, self.start, self.stream.location)
+                        FreeSpan(self.source, self.start, self.stream.location)
                     )
             # endregion
             if not self.stream.peek_is(*spec.number_part):
@@ -58,8 +58,16 @@ class NumberToken(Token):
                 )
                 return self
             while self.append_next(*spec.number_part):
-                if self.stream.c.isalnum() and int(self.stream.c, self.radix) >= self.radix:
-                    self.source.blame(BlameType.digit_value_is_above_number_radix, self)
+                if self.stream.c.isalnum() and int(self.stream.c, 36) >= self.radix:
+                    # TODO: fix blame position for 1 digit only.
+                    self.source.blame(
+                        BlameType.digit_value_is_above_number_radix,
+                        FreeSpan(
+                            self.source,
+                            self.stream.location,
+                            Location(self.stream.location.line, self.stream.location.column + 1)
+                        )
+                    )
         else:
             # if found no radix delimiter, then
             # radix_specifier is the decimal number.

@@ -3,9 +3,10 @@ from __future__ import annotations
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
+from processing.location import span_marker
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import StatementExpression
-from processing.location import span_marker
+from processing.syntactic.parsing import parse_multiple, parse_infix
 
 
 class YieldExpr(StatementExpression):
@@ -38,9 +39,9 @@ class YieldExpr(StatementExpression):
         self.yield_token = self.stream.eat(TokenType.keyword_yield)
         if self.stream.maybe_eat(TokenType.keyword_from):
             self.from_token = self.stream.token
-            self.value = self.parse_infix()
+            self.value = parse_infix(self)
         else:
-            self.value = self.parse_multiple(self.parse_infix)
+            self.value = parse_multiple(self, parse_infix)
         return self
 
     def to_axion(self, c: CodeBuilder):

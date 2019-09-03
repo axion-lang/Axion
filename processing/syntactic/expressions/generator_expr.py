@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from processing.codegen.code_builder import CodeBuilder
 from processing.syntactic.expressions.expr import Expr, child_property
-from processing.syntactic.expressions.for_compr_expr import ForComprehensionExpr
 from processing.syntactic.expressions.groups import InfixExpression
 from processing.syntactic.expressions.type_names import TypeName
 
@@ -13,7 +12,7 @@ class GeneratorExpr(InfixExpression):
     """
 
     @child_property
-    def comprehension(self) -> ForComprehensionExpr:
+    def comprehension(self) -> Expr:
         pass
 
     @property
@@ -23,7 +22,7 @@ class GeneratorExpr(InfixExpression):
     def __init__(
             self,
             parent: Expr,
-            comprehension: ForComprehensionExpr
+            comprehension: Expr
     ):
         super().__init__(parent)
         self.comprehension = comprehension

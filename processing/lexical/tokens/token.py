@@ -8,7 +8,7 @@ import utils
 from errors.blame import BlameType
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token_type import TokenType
-from processing.location import Span, Location, span_marker
+from processing.location import Span, Location, span_marker, FreeSpan
 from source import SourceUnit
 
 
@@ -108,7 +108,7 @@ class Token(Span):
 
         # invalid character token
         self.ttype = TokenType.invalid
-        self.value = self.append_next()
+        self.append_next()
         self.source.blame(BlameType.invalid_character, self)
         return self
 
@@ -142,7 +142,8 @@ class Token(Span):
         next_is_bin_op = any(re.match(fr'^{re.escape(op)}[^{spec.id_start}]', ln) for op in spec.operators_keys)
         is_ln_commented = ln.startswith(spec.oneline_comment_mark) or (
                 ln.startswith(spec.multiline_comment_mark) and
-                ln.count(spec.multiline_comment_mark) % 2 != 0)
+                ln.count(spec.multiline_comment_mark) % 2 != 0
+        )
         next_is_indent = not (
                 ln_empty
                 or prev_is_bin_op
@@ -173,7 +174,7 @@ class Token(Span):
             else:  # TODO elif unit.Options.HasFlag(CheckIndentConsistency)
                 self.source.blame(
                     BlameType.inconsistent_indentation,
-                    Span(self.source, inconsistency_start, self.end)
+                    FreeSpan(self.source, inconsistency_start, self.end)
                 )
 
             if new_indent_len > self.source.last_indent_len:

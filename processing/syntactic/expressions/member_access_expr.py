@@ -3,8 +3,8 @@ from __future__ import annotations
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
-from processing.syntactic.expressions.atomic.name_expr import NameExpr
 from processing.syntactic.expressions.expr import Expr, child_property
+from processing.syntactic.parsing import parse_postfix, parse_atom
 
 
 class MemberAccessExpr(Expr):
@@ -13,10 +13,12 @@ class MemberAccessExpr(Expr):
     """
 
     @child_property
-    def target(self) -> Expr: pass
+    def target(self) -> Expr:
+        pass
 
     @child_property
-    def member(self) -> Expr: pass
+    def member(self) -> Expr:
+        pass
 
     def __init__(
             self,
@@ -32,9 +34,9 @@ class MemberAccessExpr(Expr):
 
     def parse(self) -> MemberAccessExpr:
         if self.target is None:
-            self.target = self.parse_atom()
+            self.target = parse_atom(self)
         self.dot_token = self.stream.eat(TokenType.op_dot)
-        self.member = self.parse_suffix()
+        self.member = parse_postfix(self)
         return self
 
     def to_axion(self, c: CodeBuilder):

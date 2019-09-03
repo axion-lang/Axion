@@ -9,7 +9,7 @@ from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.text_stream import TextStream
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
-from processing.location import Span, Location, span_marker
+from processing.location import Location, span_marker, FreeSpan
 from source import SourceUnit
 
 
@@ -80,7 +80,7 @@ class StringToken(Token):
                     self.ending_quotes += closing_quote
                 self.source.blame(
                     BlameType.unescaped_quote_in_string_literal,
-                    Span(self.source, closing_loc, self.stream.location)
+                    FreeSpan(self.source, closing_loc, self.stream.location)
                 )
                 break
             elif self.has_prefix('f') and self.stream.peek_is('{'):

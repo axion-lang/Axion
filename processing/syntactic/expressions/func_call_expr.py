@@ -11,6 +11,7 @@ from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.for_compr_expr import ForComprehensionExpr
 from processing.syntactic.expressions.generator_expr import GeneratorExpr
 from processing.syntactic.expressions.groups import StatementExpression, InfixExpression
+from processing.syntactic.parsing import parse_atom, parse_infix
 
 
 class FuncCallArg(Expr):
@@ -40,7 +41,7 @@ class FuncCallArg(Expr):
         if parent.stream.peek.of_type(TokenType.close_parenthesis):
             return args
         while True:
-            name_or_value = Expr(parent).parse_infix()
+            name_or_value = parse_infix(parent)
             if parent.stream.maybe_eat(TokenType.op_assign):
                 arg = FuncCallArg.finish_named(parent, name_or_value)
                 if not FuncCallArg.is_unique_kwarg(args, arg):
@@ -62,7 +63,7 @@ class FuncCallArg(Expr):
                 TokenType.op_power
         ):
             return FuncCallArg.parse_list(parent)
-        name_or_value = Expr(parent).parse_infix()
+        name_or_value = parse_infix(parent)
         is_generator = False
         if parent.stream.maybe_eat(TokenType.op_assign):
             arg = FuncCallArg.finish_named(parent, name_or_value)
@@ -84,7 +85,7 @@ class FuncCallArg(Expr):
     @staticmethod
     def finish_named(parent: Expr, name_or_value: Expr) -> FuncCallArg:
         if isinstance(name_or_value, NameExpr):
-            value = Expr(parent).parse_infix()
+            value = parse_infix(parent)
             return FuncCallArg(parent, name_or_value, value)
         else:
             parent.source.blame(BlameType.expected_simple_name, name_or_value)
@@ -112,10 +113,12 @@ class FuncCallExpr(InfixExpression, StatementExpression):
     """
 
     @child_property
-    def target(self) -> Expr: pass
+    def target(self) -> Expr:
+        pass
 
     @child_property
-    def args(self) -> List[FuncCallArg]: pass
+    def args(self) -> List[FuncCallArg]:
+        pass
 
     def __init__(
             self,
@@ -133,7 +136,7 @@ class FuncCallExpr(InfixExpression, StatementExpression):
 
     def parse(self, allow_generator = False) -> FuncCallExpr:
         if self.target is None:
-            self.target = self.parse_atom()
+            self.target = parse_atom(self)
         self.open_paren = self.stream.eat(TokenType.open_parenthesis)
         self.args = FuncCallArg.parse_generator(self) \
             if allow_generator \

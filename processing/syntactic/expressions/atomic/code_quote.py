@@ -3,8 +3,9 @@ from __future__ import annotations
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
-from processing.syntactic.expressions.expr import Expr, child_property
 from processing.location import span_marker
+from processing.syntactic.expressions.expr import Expr, child_property
+from processing.syntactic.parsing import parse_any
 
 
 class CodeQuoteExpr(Expr):
@@ -13,7 +14,8 @@ class CodeQuoteExpr(Expr):
     """
 
     @child_property
-    def value(self) -> Expr: pass
+    def value(self) -> Expr:
+        pass
 
     def __init__(
             self,
@@ -30,7 +32,7 @@ class CodeQuoteExpr(Expr):
     @span_marker
     def parse(self) -> CodeQuoteExpr:
         self.open_quote = self.stream.eat(TokenType.open_double_brace)
-        self.value = self.parse_any()
+        self.value = parse_any(self)
         self.close_quote = self.stream.eat(TokenType.close_double_brace)
         return self
 

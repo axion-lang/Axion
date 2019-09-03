@@ -7,6 +7,7 @@ from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import InfixExpression
 from processing.syntactic.expressions.type_names import TypeName
 from processing.syntactic.expressions.unary_expr import UnaryExpr
+from processing.syntactic.parsing import parse_infix
 
 
 class ConditionalComprehensionExpr(InfixExpression):
@@ -25,19 +26,19 @@ class ConditionalComprehensionExpr(InfixExpression):
     def __init__(
             self,
             parent: Expr = None,
-            condition: Expr = None,
+            condition: Expr = None
     ):
         super().__init__(parent)
         self.condition = condition
 
     def parse(self) -> ConditionalComprehensionExpr:
         if self.stream.maybe_eat(TokenType.keyword_if):
-            self.condition = self.parse_infix()
+            self.condition = parse_infix(self)
         elif self.stream.eat(TokenType.keyword_unless):
             self.condition = UnaryExpr(
                 self,
                 OperatorToken(self.source, ttype = TokenType.op_not),
-                self.parse_infix()
+                parse_infix(self)
             )
         return self
 

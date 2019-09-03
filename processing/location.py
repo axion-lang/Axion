@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 from dataclasses import dataclass
+from functools import wraps
 from typing import Optional
 
 import source as src
@@ -16,6 +17,8 @@ def span_marker(fn):
     :param fn: Function that reads whole(!)
     span (from it's start to it's end)
     """
+
+    @wraps(fn)
     def wrapper(*args, **kwargs):
         if args[0].start == Location(0, 0):
             args[0].mark_start()
@@ -23,16 +26,18 @@ def span_marker(fn):
         if args[0].end == Location(0, 0):
             args[0].mark_end()
         return span
+
     return wrapper
 
 
-@dataclass(frozen = True)
+@dataclass
 class Location:
-    line: int
-    column: int
+    def __init__(self, line: int, column: int):
+        self.line = line + 1
+        self.column = column + 1
 
     def __repr__(self):
-        return f"{self.line + 1}:{self.column + 1}"
+        return f"{self.line}:{self.column}"
 
 
 class Span(utils.AutoRepr, metaclass = abc.ABCMeta):
@@ -60,5 +65,16 @@ class Span(utils.AutoRepr, metaclass = abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def to_python(self, c: CodeBuilder):
+        pass
+
+
+class FreeSpan(Span):
+    def to_axion(self, c: CodeBuilder):
+        pass
+
+    def to_csharp(self, c: CodeBuilder):
+        pass
+
     def to_python(self, c: CodeBuilder):
         pass

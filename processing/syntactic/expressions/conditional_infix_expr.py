@@ -5,6 +5,7 @@ from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import InfixExpression
 from processing.syntactic.expressions.type_names import TypeName
+from processing.syntactic.parsing import parse_infix
 
 
 class ConditionalInfixExpr(InfixExpression):
@@ -42,11 +43,11 @@ class ConditionalInfixExpr(InfixExpression):
 
     def parse(self) -> ConditionalInfixExpr:
         if self.true_expression is None:
-            self.true_expression = self.parse_infix()
+            self.true_expression = parse_infix(self)
         self.stream.eat(TokenType.keyword_if)
-        self.condition = self.parse_infix()
+        self.condition = parse_infix(self)
         if self.stream.maybe_eat(TokenType.keyword_else):
-            self.false_expression = self.parse_infix()
+            self.false_expression = parse_infix(self)
         return self
 
     def to_axion(self, c: CodeBuilder):

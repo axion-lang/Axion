@@ -9,6 +9,7 @@ from processing.syntactic.expressions.block_expr import BlockExpr, BlockType
 from processing.syntactic.expressions.definitions.name_def import NameDef
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import DefinitionExpression, AtomExpression
+from processing.syntactic.parsing import parse_multiple
 
 
 class ClassDef(DefinitionExpression, AtomExpression):
@@ -62,7 +63,7 @@ class ClassDef(DefinitionExpression, AtomExpression):
         self.name = NameExpr(self).parse(must_be_simple = True)
         # data class members
         if self.stream.peek.of_type(TokenType.open_parenthesis):
-            self.data_members = self.parse_multiple(NameDef)
+            self.data_members = parse_multiple(self, NameDef)
         # inheritance
         if self.stream.maybe_eat(TokenType.op_less):
             types = self.parse_named_type_args()

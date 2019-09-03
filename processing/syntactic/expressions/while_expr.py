@@ -5,6 +5,7 @@ from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.block_expr import BlockExpr, BlockType
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import StatementExpression
+from processing.syntactic.parsing import parse_infix
 
 
 class WhileExpr(StatementExpression):
@@ -39,7 +40,7 @@ class WhileExpr(StatementExpression):
 
     def parse(self) -> WhileExpr:
         self.stream.eat(TokenType.keyword_while)
-        self.condition = self.parse_infix()
+        self.condition = parse_infix(self)
         self.block = BlockExpr(self).parse(BlockType.default)
         if self.stream.maybe_eat(TokenType.keyword_nobreak):
             self.no_break_block = BlockExpr(self).parse(BlockType.default)

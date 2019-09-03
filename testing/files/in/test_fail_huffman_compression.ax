@@ -1,4 +1,4 @@
-# import sys
+import sys
 
 class Letter:
     def __init__(self, letter, freq):

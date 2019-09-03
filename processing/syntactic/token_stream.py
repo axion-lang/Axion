@@ -42,12 +42,13 @@ class TokenStream:
         return self.token
 
     def eat(self, *ttypes: TokenType, on_error: BlameType = None) -> Optional[Token]:
+        self.skip_trivial(*ttypes)
         if self.exact_peek.of_type(*ttypes):
             self.eat_any()
             return self.token
         elif on_error is None:
             self.source.blame(
-                f"Expected '{' | '.join(tt.name for tt in ttypes)}', but got '{self.token.ttype.name}'",
+                f"expected a {' | '.join(tt.name for tt in ttypes)}, but got {repr(self.peek.ttype.name)}",
                 self.peek,
                 BlameSeverity.error
             )
@@ -56,11 +57,13 @@ class TokenStream:
         return None
 
     def maybe_eat(self, *ttypes: TokenType, exact = False) -> bool:
+        start_idx = self.token_idx
         if not exact:
             self.skip_trivial(*ttypes)
         if self.exact_peek.of_type(*ttypes):
             self.eat_any()
             return True
+        self.move_abs(start_idx)
         return False
 
     def move_abs(self, idx: int):

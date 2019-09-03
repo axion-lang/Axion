@@ -14,7 +14,7 @@ fn parse-file (file_path: Str) -> List[Letter]
     chars = map()
     for c in File.open(file_path).text
         chars[c] = (chars[c] + 1) if c in chars.keys else 1
-    return [Letter(c, f) for c, f in chars].sort(key = fn l: l.freq)
+    #return [Letter(c, f) for c, f in chars].sort(key = fn l: l.freq)
 
 
 fn build-tree (letters: List) -> Tree-Node
@@ -27,7 +27,7 @@ fn build-tree (letters: List) -> Tree-Node
         total-freq = left.freq + right.freq
         node = Tree-Node(total-freq, left, right)
         letters.append(node)
-        letters.sort(key = fn l: l.freq)
+        #letters.sort(key = fn l: l.freq)
     return letters[0]
 
 

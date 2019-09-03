@@ -44,7 +44,6 @@ class FuncParameter(NameDef):
             names.add(str(name))
 
         if isinstance(self.name, Collection):
-            print()
             for n in self.name:
                 check_uniqueness(n)
         else:

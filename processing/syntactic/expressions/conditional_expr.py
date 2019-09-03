@@ -6,6 +6,7 @@ from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.block_expr import BlockExpr, BlockType
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import StatementExpression
+from processing.syntactic.parsing import parse_infix
 
 
 class ConditionalExpr(StatementExpression):
@@ -42,7 +43,7 @@ class ConditionalExpr(StatementExpression):
     def parse(self, else_if: bool = False) -> ConditionalExpr:
         if not else_if:
             self.stream.eat(TokenType.keyword_if)
-        self.condition = self.parse_infix()
+        self.condition = parse_infix(self)
         self.then_block = BlockExpr(self).parse(BlockType.default)
         if self.stream.maybe_eat(TokenType.keyword_else):
             self.else_block = BlockExpr(self).parse(BlockType.default)

@@ -4,10 +4,11 @@ from errors.blame import BlameType
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
+from processing.location import span_marker
 from processing.syntactic.expressions.atomic.name_expr import NameExpr
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import StatementExpression
-from processing.location import span_marker
+from processing.syntactic.parsing import parse_atom
 
 
 class BreakExpr(StatementExpression):
@@ -35,7 +36,7 @@ class BreakExpr(StatementExpression):
     def parse(self) -> BreakExpr:
         self.break_token = self.stream.eat(TokenType.keyword_break)
         if self.stream.peek.of_type(TokenType.identifier):
-            self.loop_name = self.parse_atom()
+            self.loop_name = parse_atom(self)
         return self
 
     def to_axion(self, c: CodeBuilder):

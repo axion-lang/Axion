@@ -7,6 +7,7 @@ from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.slice_expr import SliceExpr
+from processing.syntactic.parsing import parse_infix, parse_atom, maybe_tuple
 
 
 class IndexerExpr(Expr):
@@ -34,13 +35,13 @@ class IndexerExpr(Expr):
 
     def parse(self) -> IndexerExpr:
         if self.target is None:
-            self.target = self.parse_atom()
+            self.target = parse_atom(self)
         exprs = []
         self.stream.eat(TokenType.open_bracket)
         while True:
             start: Optional[Expr] = None
             if not self.stream.peek.of_type(TokenType.colon):
-                start = self.parse_infix()
+                start = parse_infix(self)
             if self.stream.maybe_eat(TokenType.colon):
                 stop: Optional[Expr] = None
                 if not self.stream.peek.of_type(
@@ -48,23 +49,24 @@ class IndexerExpr(Expr):
                         TokenType.comma,
                         TokenType.close_bracket
                 ):
-                    stop = self.parse_infix()
+                    stop = parse_infix(self)
                 step: Optional[Expr] = None
                 if self.stream.maybe_eat(TokenType.colon) \
                         and not self.stream.peek.of_type(
                     TokenType.comma,
                     TokenType.close_bracket
                 ):
-                    step = self.parse_infix()
+                    step = parse_infix(self)
                 exprs.append(SliceExpr(self, start, stop, step))
-            if start is None:
-                self.source.blame(BlameType.invalid_indexer_expression, self.stream.token)
-            exprs.append(start)
+            else:
+                if start is None:
+                    self.source.blame(BlameType.invalid_indexer_expression, self.stream.token)
+                exprs.append(start)
             if self.stream.maybe_eat(TokenType.comma):
                 continue
             self.stream.eat(TokenType.close_bracket)
             break
-        self.index = self.maybe_tuple(exprs)
+        self.index = maybe_tuple(self, exprs)
         return self
 
     def to_axion(self, c: CodeBuilder):

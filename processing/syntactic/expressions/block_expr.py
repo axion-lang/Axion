@@ -9,10 +9,12 @@ from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import DefinitionExpression
+from processing.syntactic.parsing import parse_any
 
 
 class BlockType(Flag):
     default = auto()
+    ast = auto()
     named = auto()
     loop = auto()
     fn = auto()
@@ -33,38 +35,38 @@ class BlockExpr(Expr):
         super().__init__(parent)
         self.items = items
 
-    # region _
     def has_variable(self, var_target: Expr):
         pass
 
     def parse(self, block_type: BlockType) -> BlockExpr:
-        terminator, error = self.parse_start()
+        if block_type == BlockType.ast:
+            terminator, error = TokenType.end, False
+        else:
+            terminator, error = self.parse_start()
         if terminator == TokenType.outdent and BlockType.fn in block_type:
             self.source.blame(BlameType.lambda_cannot_have_indented_body, self)
-        if terminator == TokenType.newline:
-            self.items.extend(self.parse_cascade())
         elif not error and not self.stream.maybe_eat(terminator):
             while True:
                 self.items.extend(self.parse_cascade(terminator))
-                if self.stream.maybe_eat(terminator):
+                if self.stream.maybe_eat(terminator) or terminator == TokenType.newline:
                     break
                 if self.stream.peek.of_type(TokenType.end):
                     if terminator != TokenType.outdent:
                         self.source.blame(BlameType.unexpected_end_of_code, self.stream.token)
                     break
+                if not self.stream.token.of_type(TokenType.outdent, TokenType.newline):
+                    self.source.blame(f'newline expected, got {self.stream.token.ttype.name}', self.stream.token)
         return self
 
     def parse_cascade(self, terminator = TokenType.empty) -> List[Expr]:
-        items = [self.parse_any()]
-        if self.stream.maybe_eat(TokenType.semicolon):
-            while self.stream.token.of_type(TokenType.semicolon) \
-                    and not self.stream.maybe_eat(TokenType.newline) \
-                    and not self.stream.peek.of_type(terminator, TokenType.end):
-                items.append(self.parse_any())
-                if self.stream.maybe_eat(terminator, TokenType.end):
-                    break
-                if not self.stream.maybe_eat(TokenType.semicolon):
-                    self.stream.eat(TokenType.newline)
+        """ expr {';' expr} [';'] (NEWLINE | END | terminator)
+        """
+        items = []
+        while True:
+            items.append(parse_any(self))
+            self.stream.maybe_eat(TokenType.semicolon)
+            if self.stream.peek.of_type(TokenType.newline, TokenType.end, terminator):
+                break
         return items
 
     def parse_start(self) -> (TokenType, bool):
@@ -82,7 +84,7 @@ class BlockExpr(Expr):
             self.source.blame(BlameType.expected_block_declaration, self.stream.peek)
             return TokenType.newline, True
         if not has_colon:
-            self.source.blame("Expected ':'", self.stream.peek, BlameSeverity.error)
+            self.source.blame("expected ':'", self.stream.peek, BlameSeverity.error)
             return TokenType.newline, True
         return TokenType.newline, False
 

@@ -2,9 +2,9 @@ c = Console
 
 # @static
 class Program
-    grid = new int[4, 4]
+    grid = array[int](4, 4)
+    undo-grid = array[int](4, 4)
     score = 0
-    undo-grid = new int[4, 4]
     undo-score = 0
     has-undone = true
     max-int = 2048

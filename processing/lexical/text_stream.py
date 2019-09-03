@@ -2,7 +2,7 @@ import re
 from typing import Optional
 
 import specification as spec
-from processing.location import Span, Location
+from processing.location import Location, FreeSpan
 from source import SourceUnit
 
 
@@ -15,9 +15,9 @@ class TextStream:
 
         self.prev_line_len = 0
 
+        if not text.endswith(spec.eoc):
+            text += spec.eoc
         self.text = text
-        if not self.text.endswith(spec.eoc):
-            self.text += spec.eoc
 
     @property
     def location(self) -> Location:
@@ -50,13 +50,14 @@ class TextStream:
 
         :param length: Length to peek by.
         """
-        if 0 <= (self.char_idx + 1 + length) < len(self.text):
-            return self.text[self.char_idx + 1:self.char_idx + 1 + length]
-        return spec.eoc
+        p_start = self.char_idx + 1
+        return self.text[p_start:p_start + length]
 
     def peek_is(self, *expected: str) -> bool:
         assert len(expected) > 0
-        return any(value == self.peek(len(value)) for value in expected)
+
+        pk = self.peek(len(max(expected, key = len)))
+        return any(pk.startswith(value) for value in expected)
 
     # noinspection PyUnresolvedReferences
     def peek_match(self, regex: str) -> re.Match:
@@ -74,15 +75,15 @@ class TextStream:
             self._move()
             return self.c
 
+        pk = self.peek(len(max(expected, key = len)))
         for value in expected:
-            nxt = self.peek(len(value))
-            if nxt == value:
-                self._move(len(nxt))
-                return nxt
+            if pk.startswith(value):
+                self._move(len(value))
+                return value
         if error_source is not None:
             error_source.blame(
                 f'Expected {expected}',
-                Span(
+                FreeSpan(
                     error_source,
                     self.location,
                     Location(self.location.line, self.location.column + 1)
