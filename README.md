@@ -16,6 +16,7 @@
 - **Console interactive interpreter (based on C# transpiling) and code editor**
 - **Lexical analyzer**
 - **Syntax parser**
+- **Transpiling to C#, Python is in progress**
 - **Transpiling to C/C++ or Rust is planned**
 
 ### Launching:
