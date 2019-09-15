@@ -43,15 +43,6 @@ def hex_value(c: str) -> Optional[int]:
         return None
 
 
-def ignore_in_repr(fn):
-    def wrapper(*args, **kwargs):
-        obj = fn(*args, **kwargs)
-        setattr(obj, '__ignore_in_repr', True)
-        return obj
-
-    return wrapper
-
-
 class AutoRepr:
     def __repr__(self):
         from processing.lexical.text_stream import TextStream
@@ -69,8 +60,7 @@ class AutoRepr:
                 k.startswith('_')
                 or isinstance(v, (SourceUnit, TextStream, TokenStream, Location))
                 or (isinstance(self, Token) and (k in ['tokens', 'content', 'ending_white']))
-            ) \
-            and (not hasattr(v, '__dict__') or ('__ignore_in_repr' not in v.__dict__))
+            )
             # @formatter:on
         ]
         result = self.__class__.__name__

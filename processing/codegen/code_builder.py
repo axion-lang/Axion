@@ -69,7 +69,6 @@ class CodeBuilder:
             if isinstance(other, str):
                 raise TypeError()
             values = list(other)
-            for v in values:
-                self.write(v)
+            self.write_joined(', ', values)
         except TypeError:
             self.write(other)

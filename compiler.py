@@ -5,6 +5,7 @@ from pathlib import Path
 from anytree import RenderTree
 from anytree.render import ContStyle
 
+import specification as spec
 from axion import logger
 from processing.codegen.code_builder import OutputLang, CodeBuilder
 from processing.mode import ProcessingMode
@@ -41,6 +42,10 @@ class Compiler:
         logger.info(f"Processing '{source.source_path.name}'")
 
         def process():
+            if (source.text_stream.text[:-1] + ' ').isspace():
+                logger.info("No actions performed to empty file.")
+                return
+
             Compiler.lexical_analysis(source)
             if ProcessingOptions.debug_tokens in options:
                 Compiler.lexical_debug_output(source)
@@ -48,11 +53,15 @@ class Compiler:
             if mode == ProcessingMode.lex:
                 return
 
+            if all(t.ttype in spec.trivial for t in source.token_stream.tokens):
+                logger.info("No actions performed to file without meaningful code.")
+                return
+
             Compiler.syntax_parsing(source)
             if ProcessingOptions.debug_ast in options:
                 Compiler.syntax_debug_output(source)
 
-            if mode == ProcessingMode.parsing:
+            if mode == ProcessingMode.parse:
                 return
 
             transpiled = Compiler.transpile(source, OutputLang.python)
@@ -99,7 +108,7 @@ class Compiler:
     @staticmethod
     def syntax_parsing(source: SourceUnit):
         logger.debug('-- Syntax parsing')
-        source.ast.parse_ast()
+        source.ast.parse()
 
     @staticmethod
     def syntax_debug_output(source: SourceUnit):

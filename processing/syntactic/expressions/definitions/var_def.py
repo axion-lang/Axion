@@ -9,7 +9,7 @@ from processing.syntactic.expressions.groups import StatementExpression
 from processing.syntactic.expressions.type_names import TypeName
 
 
-class VarDefExpr(NameDef, StatementExpression):
+class VarDef(NameDef, StatementExpression):
     """ variable_definition_expr:
         ['let'] simple_name_list
         [':' type]
@@ -37,7 +37,7 @@ class VarDefExpr(NameDef, StatementExpression):
     def is_immutable(self):
         return self.let_token is not None
 
-    def parse(self) -> VarDefExpr:
+    def parse(self) -> VarDef:
         if self.stream.maybe_eat(TokenType.keyword_let):
             self.let_token = self.stream.token
         super().parse()
@@ -46,14 +46,4 @@ class VarDefExpr(NameDef, StatementExpression):
     def to_axion(self, c: CodeBuilder):
         if self.is_immutable:
             c += 'let '
-        c += self.name
-        if self.value_type is not None:
-            c += ': ', self.value_type
-        c += ' = ', self.value
-
-    def to_csharp(self, c: CodeBuilder):
-        if self.value_type is None:
-            c += 'var '
-        else:
-            c += self.value_type
-        c += self.name, ' = ', self.value
+        super().to_axion(c)

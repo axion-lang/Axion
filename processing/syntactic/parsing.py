@@ -65,7 +65,7 @@ def parse_multiple(
 def parse_any(parent: e.Expr) -> e.Expr:
     # region imports
     from processing.syntactic.expressions.binary_expr import BinaryExpr
-    from processing.syntactic.expressions.definitions.var_def import VarDefExpr
+    from processing.syntactic.expressions.definitions.var_def import VarDef
     from processing.syntactic.expressions.type_names import TypeName
     from processing.syntactic.expressions.groups import VarTargetExpression
     from processing.syntactic.expressions.atomic.empty_expr import EmptyExpr
@@ -83,45 +83,43 @@ def parse_any(parent: e.Expr) -> e.Expr:
     # endregion
     s = parent.stream
 
-    immutable = s.maybe_eat(TokenType.keyword_let)
-    if s.peek.of_type(TokenType.semicolon, TokenType.keyword_pass):
+    if s.peek_is(TokenType.semicolon, TokenType.keyword_pass):
         return EmptyExpr(parent).parse()
-    elif s.peek.of_type(TokenType.keyword_break):
+    elif s.peek_is(TokenType.keyword_break):
         return BreakExpr(parent).parse()
-    elif s.peek.of_type(TokenType.keyword_continue):
+    elif s.peek_is(TokenType.keyword_continue):
         return ContinueExpr(parent).parse()
-    elif s.peek.of_type(TokenType.keyword_return):
+    elif s.peek_is(TokenType.keyword_return):
         return ReturnExpr(parent).parse()
-    elif s.peek.of_type(TokenType.keyword_yield):
+    elif s.peek_is(TokenType.keyword_yield):
         return YieldExpr(parent).parse()
-    elif s.peek.of_type(TokenType.keyword_if):
+    elif s.peek_is(TokenType.keyword_if):
         return ConditionalExpr(parent).parse()
-    elif s.peek.of_type(TokenType.keyword_while):
+    elif s.peek_is(TokenType.keyword_while):
         return WhileExpr(parent).parse()
-    elif s.peek.of_type(TokenType.keyword_module):
+    elif s.peek_is(TokenType.keyword_module):
         return ModuleDef(parent).parse()
-    elif s.peek.of_type(TokenType.keyword_class):
+    elif s.peek_is(TokenType.keyword_class):
         return ClassDef(parent).parse()
-    elif s.peek.of_type(TokenType.keyword_enum):
+    elif s.peek_is(TokenType.keyword_enum):
         return EnumDef(parent).parse()
-    elif s.peek.of_type(TokenType.keyword_fn):
+    elif s.peek_is(TokenType.keyword_fn):
         return FuncDef(parent).parse()
-    elif s.peek.of_type(TokenType.indent, TokenType.open_brace, TokenType.colon) \
+    elif s.peek_is(TokenType.indent, TokenType.open_brace, TokenType.colon) \
             and parent.ast.macro_expect_type is not None \
             and issubclass(BlockExpr, parent.ast.macro_expect_type):
         return BlockExpr(parent).parse(BlockType.default)
 
-    let_token = None
-    if immutable:
-        let_token = s.token
+    immutable = s.maybe_eat(TokenType.keyword_let)
+    let_token = s.token if immutable else None
 
     exp = parse_infix(parent)
     if isinstance(exp, BinaryExpr) \
             and exp.operator.of_type(TokenType.op_assign) \
             and exp.left.of_type(VarTargetExpression):
-        if exp.parent_block.has_variable(exp.left):
+        if exp.get_parent_of_type(BlockExpr).is_defined(exp.left):
             return exp
-        return VarDefExpr(
+        return VarDef(
             parent,
             let_token = let_token,
             name = exp.left,
@@ -141,8 +139,8 @@ def parse_any(parent: e.Expr) -> e.Expr:
     var_value = None
     if s.maybe_eat(TokenType.op_assign):
         assign_token = s.token
-        var_value = parse_multiple(parent)
-    return VarDefExpr(
+        var_value = parse_infix(parent)
+    return VarDef(
         parent,
         let_token = let_token,
         name = exp,
@@ -164,7 +162,7 @@ def parse_infix(parent: e.Expr, precedence = 0) -> e.Expr:
     s = parent.stream
 
     left_e = parse_prefix(parent)
-    if s.token.of_type(TokenType.newline) or isinstance(left_e, DefinitionExpression):
+    if isinstance(left_e, DefinitionExpression):
         return left_e
 
     macro = MacroApplication(parent).parse_infix_macro(left_e)
@@ -175,8 +173,9 @@ def parse_infix(parent: e.Expr, precedence = 0) -> e.Expr:
         from processing.lexical.tokens.operator import OperatorToken
         if isinstance(s.peek, OperatorToken):
             new_precedence = s.peek.precedence
+            s.peek.input_side = InputSide.both
         elif not s.token.of_type(TokenType.newline, TokenType.outdent) \
-                and s.peek.of_type(TokenType.identifier):
+                and s.peek_is(TokenType.identifier):
             new_precedence = 4
         else:
             break
@@ -190,9 +189,9 @@ def parse_infix(parent: e.Expr, precedence = 0) -> e.Expr:
             parse_infix(parent, new_precedence + 1)
         )
     if not s.token.of_type(TokenType.newline, TokenType.outdent):
-        if s.peek.of_type(TokenType.keyword_for):
+        if s.peek_is(TokenType.keyword_for):
             left_e = ForComprehensionExpr(parent, left_e).parse()
-        if s.peek.of_type(TokenType.keyword_if, TokenType.keyword_unless):
+        if s.peek_is(TokenType.keyword_if, TokenType.keyword_unless):
             left_e = ConditionalInfixExpr(parent, true_expression = left_e).parse()
     return left_e
 
@@ -217,16 +216,17 @@ def parse_postfix(parent: e.Expr) -> e.Expr:
     from processing.syntactic.expressions.unary_expr import UnaryExpr
     from processing.syntactic.expressions.indexer_expr import IndexerExpr
     from processing.syntactic.expressions.groups import DefinitionExpression
+    from processing.syntactic.expressions.atomic.constant_expr import ConstantExpr
     # endregion
     s = parent.stream
 
     def parse_tight_postfix(result: e.Expr) -> e.Expr:
         while True:
-            if s.peek.of_type(TokenType.op_dot):
+            if s.peek_is(TokenType.op_dot):
                 result = MemberAccessExpr(parent, target = result).parse()
-            elif s.peek.of_type(TokenType.open_parenthesis):
+            elif s.peek_is(TokenType.open_parenthesis) and not isinstance(result, ConstantExpr):
                 result = FuncCallExpr(parent, target = result).parse(allow_generator = True)
-            elif s.peek.of_type(TokenType.open_bracket):
+            elif s.peek_is(TokenType.open_bracket):
                 result = IndexerExpr(parent, target = result).parse()
             else:
                 break
@@ -260,21 +260,24 @@ def parse_atom(parent: e.Expr) -> e.Expr:
     from processing.syntactic.expressions.atomic.constant_expr import ConstantExpr
     from processing.syntactic.expressions.atomic.name_expr import NameExpr
     from processing.syntactic.expressions.tuple_expr import TupleExpr
+    from processing.syntactic.expressions.definitions.func_def import FuncDef
     # endregion
     s = parent.stream
 
-    if s.peek.of_type(TokenType.identifier):
+    if s.peek_is(TokenType.identifier):
         return NameExpr(parent).parse(must_be_simple = True)
-    elif s.peek.of_type(*spec.constants):
+    elif s.peek_is(*spec.constants):
         return ConstantExpr(parent).parse()
-    elif s.peek.of_type(TokenType.keyword_await):
+    elif s.peek_is(TokenType.keyword_await):
         return AwaitExpr(parent).parse()
-    elif s.peek.of_type(TokenType.open_double_brace):
+    elif s.peek_is(TokenType.open_double_brace):
         return CodeQuoteExpr(parent).parse()
-    elif s.peek.of_type(TokenType.open_parenthesis):
+    elif s.peek_is(TokenType.open_parenthesis):
         if s.peek_by_is(2, TokenType.close_parenthesis):
             return TupleExpr(parent).parse_empty()
         return parse_multiple(parent)
+    elif s.peek_is(TokenType.keyword_fn):
+        return FuncDef(parent).parse(is_anonymous = True)
     else:
         from processing.syntactic.expressions.macro_application import MacroApplication
         macro = MacroApplication(parent).parse_macro()

@@ -56,6 +56,9 @@ class ConditionalInfixExpr(InfixExpression):
             c += ' else ', self.false_expression
 
     def to_csharp(self, c: CodeBuilder):
+        c += self.condition, ' ? (', self.true_expression, ') : (', self.false_expression, ')'
+
+    def to_python(self, c: CodeBuilder):
         c += (
             self.true_expression,
             ' if ', self.condition,

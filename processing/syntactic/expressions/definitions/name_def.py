@@ -5,11 +5,12 @@ from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.atomic.name_expr import NameExpr
 from processing.syntactic.expressions.expr import child_property, Expr
-from processing.syntactic.expressions.type_names import TypeName
+from processing.syntactic.expressions.groups import DefinitionExpression
+from processing.syntactic.expressions.type_names import TypeName, SimpleTypeName
 from processing.syntactic.parsing import parse_infix
 
 
-class NameDef(Expr):
+class NameDef(DefinitionExpression):
     """ name_def:
         name_list ((':' type) | ('=' infix_expr) | (':' type '=' infix_expr));
     """
@@ -60,10 +61,20 @@ class NameDef(Expr):
             c += self.equals_token, self.value
 
     def to_csharp(self, c: CodeBuilder):
-        if self.value_type is None:
-            c += 'var '
-        else:
-            c += self.value_type, ' '
+        from processing.syntactic.expressions.definitions.func_def import FuncParameter
+        from processing.syntactic.expressions.definitions.func_def import FuncDef
+
+        # skip parameters typing for anonymous functions
+        parent_fn = self.get_parent_of_type(FuncDef)
+        if not (isinstance(self, FuncParameter) and parent_fn is not None and parent_fn.name is None):
+            if self.value_type is None:
+                if hasattr(self.value, 'value_type'):
+                    typ = self.value.value_type or SimpleTypeName(self, 'Unknown')
+                    c += typ, ' '
+                else:
+                    c += 'Unknown '
+            else:
+                c += self.value_type, ' '
         c += self.name
         if self.value is not None:
             c += ' = ', self.value

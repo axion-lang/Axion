@@ -36,8 +36,9 @@ class OperatorToken(Token):
             self.precedence = -1
             self.input_side = InputSide.unknown
             return
-        self.precedence = spec.operators[self.value][1] if precedence == -1 else precedence
-        self.input_side = spec.operators[self.value][2] if input_side == InputSide.unknown else input_side
+        props = spec.operators[self.value]
+        self.precedence = props[1] if precedence == -1 else precedence
+        self.input_side = props[2] if input_side == InputSide.unknown else input_side
 
     @span_marker
     def read(self) -> OperatorToken:

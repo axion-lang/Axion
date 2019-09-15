@@ -34,6 +34,11 @@ class StringToken(Token):
         self.interpolations: List[StringInterpolation] = []
 
     @property
+    def value_type(self):
+        from processing.syntactic.expressions.type_names import SimpleTypeName
+        return SimpleTypeName(self.source.ast, spec.string_type_name)
+
+    @property
     def is_multiline(self) -> bool:
         return len(self.quote) == 3
 

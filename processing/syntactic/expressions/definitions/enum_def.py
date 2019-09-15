@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import List
 
+from processing.syntactic.expressions.atomic.name_expr import NameExpr
 from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import DefinitionExpression
 
@@ -13,7 +14,7 @@ class EnumDef(DefinitionExpression):
     TODO: fix syntax for enum definition """
 
     @child_property
-    def name(self) -> Expr:
+    def name(self) -> NameExpr:
         pass
 
     @child_property
@@ -31,7 +32,7 @@ class EnumDef(DefinitionExpression):
     def __init__(
             self,
             parent: Expr = None,
-            name: Expr = None,
+            name: NameExpr = None,
             bases: List[Expr] = None,
             items: List[Expr] = None,
             modifiers: List[Expr] = None,

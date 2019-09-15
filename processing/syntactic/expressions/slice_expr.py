@@ -6,7 +6,7 @@ from processing.syntactic.expressions.expr import Expr, child_property
 
 class SliceExpr(Expr):
     """ slice_expr:
-        [preglobal_expr] ':' [preglobal_expr] [':' [preglobal_expr]];
+        [infix] ':' [infix] [':' [infix]];
     """
 
     @child_property
@@ -34,7 +34,9 @@ class SliceExpr(Expr):
         self.step = step
 
     def to_axion(self, c: CodeBuilder):
-        c += self.start, ':', self.stop, ':', self.step
+        c += self.start, ':', self.stop
+        if self.step is not None:
+            c += ':', self.step
 
     def to_python(self, c: CodeBuilder):
         c += self.start, ':', self.stop, ':', self.step

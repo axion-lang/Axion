@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from typing import List, Set, Optional, Collection
 
+import specification as spec
 from errors.blame import BlameType, BlameSeverity
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
 from processing.lexical.tokens.token_type import TokenType
 from processing.syntactic.expressions.atomic.name_expr import NameExpr
+from processing.syntactic.expressions.atomic.return_expr import ReturnExpr
 from processing.syntactic.expressions.block_expr import BlockExpr, BlockType
 from processing.syntactic.expressions.definitions.name_def import NameDef
 from processing.syntactic.expressions.expr import Expr, child_property
@@ -22,7 +24,7 @@ class FuncParameter(NameDef):
     def __init__(
             self,
             parent: Expr,
-            name: Expr = None,
+            name: NameExpr = None,
             colon_token: Token = None,
             value_type: TypeName = None,
             equals_token: Token = None,
@@ -35,6 +37,10 @@ class FuncParameter(NameDef):
         self.equals_token = equals_token
         self.default_value = self.value = value
 
+    def __str__(self):
+        return str(self.name)
+
+    # noinspection PyMethodOverriding
     def parse(self, names: Set[str]) -> FuncParameter:
         super().parse()
 
@@ -79,17 +85,23 @@ class FuncDef(DefinitionExpression, AtomExpression):
         pass
 
     @property
-    def value_type(self) -> TypeName:
-        raise NotImplementedError()
+    def value_type(self) -> Optional[TypeName]:
+        if self.return_type is not None:
+            return self.return_type
+        returns = self.block.find_items_of_type(ReturnExpr)
+        if len(returns) > 0:
+            return returns[0].value_type
+        else:
+            return None
 
     def __init__(
             self,
             parent: Expr = None,
             fn_token: Token = None,
-            name: Expr = None,
+            name: NameExpr = None,
             parameters: List[Expr] = None,
             arrow_token: Token = None,
-            return_type: Expr = None,
+            return_type: TypeName = None,
             block: BlockExpr = None,
             modifiers: List[Expr] = None
     ):
@@ -102,16 +114,19 @@ class FuncDef(DefinitionExpression, AtomExpression):
         self.block = block
         self.modifiers = modifiers
 
-    def parse(self) -> FuncDef:
+    def parse(self, is_anonymous = False) -> FuncDef:
         self.fn_token = self.stream.eat(TokenType.keyword_fn)
-        self.name = NameExpr(self).parse()
+        if not is_anonymous and self.stream.peek.of_type(TokenType.identifier):
+            self.name = NameExpr(self).parse()
         if self.stream.maybe_eat(TokenType.open_parenthesis):
             self.parameters = FuncDef.parse_param_list(self, TokenType.close_parenthesis)
             self.stream.eat(TokenType.close_parenthesis)
+        else:
+            self.parameters = FuncDef.parse_param_list(self, *(spec.block_start_types + [TokenType.right_arrow]))
         if self.stream.maybe_eat(TokenType.right_arrow):
             self.arrow_token = self.stream.token
             self.return_type = TypeName(self).parse()
-        self.block = BlockExpr(self).parse(BlockType.default)
+        self.block = BlockExpr(self).parse(BlockType.anon_fn if is_anonymous else BlockType.default)
         return self
 
     @staticmethod
@@ -121,48 +136,50 @@ class FuncDef(DefinitionExpression, AtomExpression):
             ( "*" [parameter] ("," named_parameter)* ["," "**" parameter]
             | "**" parameter
             | named_parameter[","] )
-        TODO rewrite syntax for fn parameters"""
+        """
+        # TODO rewrite syntax for fn parameters
+        s = parent.stream
         parameters: List[FuncParameter] = []
+        if s.peek_is(*terminators):
+            return parameters
         names: Set[str] = set()
         list_parameter: Optional[FuncParameter] = None
         map_parameter: Optional[FuncParameter] = None
         have_keyword_only_parameter = False
         got_star = False
         require_optionals = False
-        if not parent.stream.peek.of_type(*terminators):
-            while True:
-                if parent.stream.maybe_eat(TokenType.op_power):
-                    map_parameter = FuncParameter(parent).parse(names)
-                    parent.stream.eat(*terminators)
-                    break
-                elif parent.stream.maybe_eat(TokenType.op_multiply):
-                    if list_parameter is not None:
-                        parent.source.blame(
-                            BlameType.cannot_have_more_than_1_list_parameter,
-                            parent.stream.peek
-                        )
-                    if parent.stream.peek.of_type(TokenType.comma):
-                        # '*,' - end of positional params mark.
-                        got_star = True
-                    else:
-                        list_parameter = FuncParameter(parent).parse(names)
+        while True:
+            if s.maybe_eat(TokenType.op_power):
+                map_parameter = FuncParameter(parent).parse(names)
+                s.eat(*terminators)
+                break
+            elif s.maybe_eat(TokenType.op_multiply):
+                if list_parameter is not None:
+                    parent.source.blame(
+                        BlameType.cannot_have_more_than_1_list_parameter,
+                        s.peek
+                    )
+                if s.peek_is(TokenType.comma):
+                    # '*,' - end of positional params mark.
+                    got_star = True
                 else:
-                    if got_star:
-                        param = FuncParameter(parent).parse(names)
-                        have_keyword_only_parameter = True
-                    else:
-                        param = FuncParameter(parent).parse(names)
-                    if param.default_value is not None:
-                        require_optionals = True
-                    elif require_optionals and param.default_value is None:
-                        param.source.blame(
-                            BlameType.expected_default_parameter_value,
-                            param
-                        )
-                    parameters.append(param)
-                if parent.stream.peek.of_type(*terminators):
-                    break
-                parent.stream.eat(TokenType.comma)
+                    list_parameter = FuncParameter(parent).parse(names)
+            else:
+                if got_star:
+                    param = FuncParameter(parent).parse(names)
+                    have_keyword_only_parameter = True
+                else:
+                    param = FuncParameter(parent).parse(names)
+                if param.default_value is not None:
+                    require_optionals = True
+                elif require_optionals and param.default_value is None:
+                    param.source.blame(
+                        BlameType.expected_default_parameter_value,
+                        param
+                    )
+                parameters.append(param)
+            if s.peek_is(*terminators) or not s.eat(TokenType.comma):
+                break
         if got_star \
                 and list_parameter is None \
                 and map_parameter is not None \
@@ -181,20 +198,17 @@ class FuncDef(DefinitionExpression, AtomExpression):
     def to_axion(self, c: CodeBuilder):
         c += self.fn_token, self.name
         if len(self.parameters) > 0:
-            c += ' ('
-            c.write_joined(', ', self.parameters)
-            c += ')'
+            c += ' (', self.parameters, ')'
         c += self.arrow_token, self.return_type, self.block
 
     def to_csharp(self, c: CodeBuilder):
-        c += 'public ', self.return_type, ' ', self.name, '('
-        c.write_joined(', ', self.parameters)
-        c += ')', self.block
+        if self.name is None:
+            c += '(', self.parameters, ') => ', self.block
+        else:
+            c += 'public ', self.value_type, ' ', self.name, '(', self.parameters, ')', self.block
 
     def to_python(self, c: CodeBuilder):
-        c += 'def ', self.name, '('
-        c.write_joined(', ', self.parameters)
-        c += ')'
+        c += 'def ', self.name, '(', self.parameters, ')'
         if self.return_type:
             c += ' -> ', self.return_type
         c += self.block

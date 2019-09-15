@@ -35,7 +35,7 @@ class BreakExpr(StatementExpression):
     @span_marker
     def parse(self) -> BreakExpr:
         self.break_token = self.stream.eat(TokenType.keyword_break)
-        if self.stream.peek.of_type(TokenType.identifier):
+        if self.stream.peek_is(TokenType.identifier):
             self.loop_name = parse_atom(self)
         return self
 

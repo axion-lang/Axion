@@ -11,7 +11,7 @@ from processing.syntactic.parsing import parse_infix
 
 class ConditionalExpr(StatementExpression):
     """ conditional_expr:
-        'if' preglobal_expr block
+        ('if' | 'unless') preglobal_expr block
         {'elif' preglobal_expr block}
         ['else' block];
     """
@@ -62,6 +62,7 @@ class ConditionalExpr(StatementExpression):
     def to_csharp(self, c: CodeBuilder):
         c += 'if (', self.condition, ')', self.then_block
         if self.else_block:
+            c.write_line()
             c += 'else', self.else_block
 
     def to_python(self, c: CodeBuilder):

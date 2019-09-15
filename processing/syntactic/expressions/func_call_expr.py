@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, cast
 
 from errors.blame import BlameType
 from processing.codegen.code_builder import CodeBuilder
@@ -11,6 +11,7 @@ from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.for_compr_expr import ForComprehensionExpr
 from processing.syntactic.expressions.generator_expr import GeneratorExpr
 from processing.syntactic.expressions.groups import StatementExpression, InfixExpression
+from processing.syntactic.expressions.type_names import TypeName
 from processing.syntactic.parsing import parse_atom, parse_infix
 
 
@@ -38,7 +39,7 @@ class FuncCallArg(Expr):
         args: List[FuncCallArg] = []
         if first is not None:
             args.append(first)
-        if parent.stream.peek.of_type(TokenType.close_parenthesis):
+        if parent.stream.peek_is(TokenType.close_parenthesis):
             return args
         while True:
             name_or_value = parse_infix(parent)
@@ -57,7 +58,7 @@ class FuncCallArg(Expr):
 
     @staticmethod
     def parse_generator(parent: Expr) -> List[FuncCallArg]:
-        if parent.stream.peek.of_type(
+        if parent.stream.peek_is(
                 TokenType.close_parenthesis,
                 TokenType.op_multiply,
                 TokenType.op_power
@@ -67,7 +68,7 @@ class FuncCallArg(Expr):
         is_generator = False
         if parent.stream.maybe_eat(TokenType.op_assign):
             arg = FuncCallArg.finish_named(parent, name_or_value)
-        elif parent.stream.peek.of_type(TokenType.keyword_for):
+        elif parent.stream.peek_is(TokenType.keyword_for):
             arg = FuncCallArg(
                 parent,
                 value = GeneratorExpr(parent, ForComprehensionExpr(parent).parse())
@@ -109,7 +110,7 @@ class FuncCallArg(Expr):
 
 class FuncCallExpr(InfixExpression, StatementExpression):
     """ call_expr:
-        atom '(' [arg_list | (arg comprehension)] ')';
+        '(' [arg_list | (arg comprehension)] ')';
     """
 
     @child_property
@@ -119,6 +120,19 @@ class FuncCallExpr(InfixExpression, StatementExpression):
     @child_property
     def args(self) -> List[FuncCallArg]:
         pass
+
+    @property
+    def value_type(self) -> TypeName:
+        from processing.syntactic.expressions.block_expr import BlockExpr
+        from processing.syntactic.expressions.definitions.func_def import FuncDef
+
+        fn_def = self.get_parent_of_type(BlockExpr).get_def_by_name(self.target)
+        if fn_def is not None:
+            return cast(FuncDef, fn_def).value_type
+        else:
+            # self.source.blame(BlameType.function_is_not_defined, self.target)
+            from processing.syntactic.expressions.type_names import SimpleTypeName
+            return SimpleTypeName(self, 'Unknown')
 
     def __init__(
             self,
@@ -145,16 +159,10 @@ class FuncCallExpr(InfixExpression, StatementExpression):
         return self
 
     def to_axion(self, c: CodeBuilder):
-        c += self.target, self.open_paren
-        c.write_joined(', ', self.args)
-        c += self.close_paren
+        c += self.target, self.open_paren, self.args, self.close_paren
 
     def to_csharp(self, c: CodeBuilder):
-        c += self.target, '('
-        c.write_joined(', ', self.args)
-        c += ')'
+        c += self.target, '(', self.args, ')'
 
     def to_python(self, c: CodeBuilder):
-        c += self.target, '('
-        c.write_joined(', ', self.args)
-        c += ')'
+        self.to_csharp(c)

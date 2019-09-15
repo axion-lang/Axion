@@ -22,6 +22,13 @@ class NumberToken(Token):
         self.radix = radix
 
     @property
+    def value_type(self):
+        from processing.syntactic.expressions.type_names import SimpleTypeName
+        if self.is_floating:
+            return SimpleTypeName(self.source.ast, spec.float_type_prefix)
+        return SimpleTypeName(self.source.ast, spec.int_type_prefix)
+
+    @property
     def is_floating(self) -> bool:
         return '.' in self.value
 

@@ -24,11 +24,13 @@ class Ast(block_file.BlockExpr):
         self.macros: List[MacroDef] = []
         self.macro_expect_type: Optional[Expr] = None
         self.macro_application_parts = []
+        self.generated_exprs = []
 
     def __repr__(self):
         return f"AST of {repr(self.source)}"
 
-    def parse_ast(self):
+    # noinspection PyMethodOverriding
+    def parse(self):
         # region imports
         from processing.syntactic.expressions.macro_patterns import CascadePattern
         from processing.syntactic.expressions.macro_patterns import ExpressionPattern
@@ -38,23 +40,27 @@ class Ast(block_file.BlockExpr):
         from processing.syntactic.expressions.type_names import TypeName
         from processing.syntactic.expressions.definitions.macro_def import MacroDef
         from processing.syntactic.expressions.expr import Expr
+        from processing.syntactic.expressions.block_expr import BlockType, BlockExpr
         # endregion
+
         self.macros = [
             MacroDef(
                 name = NameExpr(name = 'do-while'),
                 patterns = [
                     self.token_pattern("do"),
-                    ExpressionPattern(block_file.BlockExpr),
+                    ExpressionPattern(BlockExpr),
                     OrPattern(self.token_pattern("while"), self.token_pattern("until")),
                     ExpressionPattern(parse_fn = 'parse_infix')
-                ]),
+                ]
+            ),
             MacroDef(
                 name = NameExpr(name = 'until'),
                 patterns = [
                     self.token_pattern("until"),
                     ExpressionPattern(parse_fn = 'parse_infix'),
-                    ExpressionPattern(block_file.BlockExpr)
-                ]),
+                    ExpressionPattern(BlockExpr)
+                ]
+            ),
             MacroDef(
                 name = NameExpr(name = 'for-in'),
                 patterns = [
@@ -62,44 +68,96 @@ class Ast(block_file.BlockExpr):
                     ExpressionPattern(parse_fn = 'parse_atom'),
                     self.token_pattern("in"),
                     ExpressionPattern(parse_fn = 'parse_infix'),
-                    ExpressionPattern(block_file.BlockExpr)
-                ]),
+                    ExpressionPattern(BlockExpr)
+                ]
+            ),
             MacroDef(
                 name = NameExpr(name = 'unless-condition'),
                 patterns = [
                     self.token_pattern("unless"),
                     ExpressionPattern(parse_fn = 'parse_infix'),
-                    ExpressionPattern(block_file.BlockExpr),
+                    ExpressionPattern(BlockExpr),
                     OptionalPattern(
                         OptionalPattern(
                             MultiplePattern(
                                 self.token_pattern("elif"),
                                 ExpressionPattern(parse_fn = 'parse_infix'),
-                                ExpressionPattern(block_file.BlockExpr)
+                                ExpressionPattern(BlockExpr)
                             )
                         ),
                         CascadePattern(
                             self.token_pattern("else"),
-                            ExpressionPattern(block_file.BlockExpr)
+                            ExpressionPattern(BlockExpr)
                         )
                     )
-                ]),
+                ]
+            ),
             MacroDef(
                 name = NameExpr(name = 'list-initializer'),
                 patterns = [
                     self.token_pattern("["),
-                    ExpressionPattern(Expr),
-                    OptionalPattern(MultiplePattern(self.token_pattern(','), ExpressionPattern(Expr))),
+                    OptionalPattern(
+                        ExpressionPattern(Expr),
+                        OptionalPattern(MultiplePattern(self.token_pattern(','), ExpressionPattern(Expr)))
+                    ),
                     self.token_pattern("]")
-                ]),
+                ]
+            ),
+            MacroDef(
+                name = NameExpr(name = 'map initializer'),
+                patterns = [
+                    self.token_pattern("{"),
+                    OptionalPattern(
+                        ExpressionPattern(parse_fn = 'parse_infix'),
+                        self.token_pattern(":"),
+                        ExpressionPattern(Expr),
+                        OptionalPattern(
+                            MultiplePattern(
+                                self.token_pattern(','),
+                                ExpressionPattern(parse_fn = 'parse_infix'),
+                                self.token_pattern(":"),
+                                ExpressionPattern(Expr)
+                            )
+                        )
+                    ),
+                    self.token_pattern("}")
+                ]
+            ),
+            MacroDef(
+                name = NameExpr(name = 'set initializer'),
+                patterns = [
+                    self.token_pattern("{"),
+                    OptionalPattern(
+                        ExpressionPattern(parse_fn = 'parse_infix'),
+                        OptionalPattern(
+                            MultiplePattern(
+                                self.token_pattern(','),
+                                ExpressionPattern(parse_fn = 'parse_infix')
+                            )
+                        )
+                    ),
+                    self.token_pattern("}")
+                ]
+            ),
             MacroDef(
                 name = NameExpr(name = 'new'),
                 patterns = [
                     self.token_pattern("new"),
-                    ExpressionPattern(TypeName),
+                    OptionalPattern(
+                        ExpressionPattern(TypeName)
+                    ),
                     OptionalPattern(
                         self.token_pattern("("),
-                        ExpressionPattern(Expr),
+                        OptionalPattern(
+                            ExpressionPattern(Expr),
+                            OptionalPattern(
+                                MultiplePattern(
+                                    self.token_pattern(","),
+                                    ExpressionPattern(Expr)
+                                )
+                            ),
+                            ExpressionPattern(Expr)
+                        ),
                         self.token_pattern(")")
                     ),
                     OptionalPattern(
@@ -116,7 +174,8 @@ class Ast(block_file.BlockExpr):
                         ),
                         self.token_pattern("}")
                     )
-                ]),
+                ]
+            ),
             MacroDef(
                 name = NameExpr(name = 'match'),
                 patterns = [
@@ -127,9 +186,10 @@ class Ast(block_file.BlockExpr):
                         self.token_pattern(":"),
                         ExpressionPattern(Expr)
                     )
-                ]),
+                ]
+            )
         ]
-        self.parse(block_file.BlockType.ast)
+        super(Ast, self).parse(BlockType.ast)
 
     def token_pattern(self, keyword: str) -> TokenPattern:
         from processing.lexical.tokens.operator import OperatorToken
@@ -157,6 +217,7 @@ class Ast(block_file.BlockExpr):
         from processing.syntactic.expressions.definitions.func_def import FuncDef
         from processing.syntactic.expressions.type_names import SimpleTypeName
         from processing.syntactic.expressions.atomic.name_expr import NameExpr
+        from processing.syntactic.expressions.block_expr import BlockExpr
 
         if len(self.items) == 0:
             return
@@ -181,6 +242,8 @@ class Ast(block_file.BlockExpr):
         ]
         for using in default_imports:
             c.write_line(f'using {using};')
+        else:
+            c.write_line()
 
         root_items = []
         root_classes = []
@@ -201,17 +264,17 @@ class Ast(block_file.BlockExpr):
         c += ModuleDef(
             self,
             name = NameExpr(name = '__RootModule__'),
-            block = block_file.BlockExpr(
+            block = BlockExpr(
                 items =
                 [
                     ClassDef(
                         name = NameExpr(name = '__RootClass__'),
-                        block = block_file.BlockExpr(
+                        block = BlockExpr(
                             items =
                             [
                                 FuncDef(
                                     name = NameExpr(name = 'Main'),
-                                    block = block_file.BlockExpr(items = root_items),
+                                    block = BlockExpr(items = root_items),
                                     return_type = SimpleTypeName(name = 'void')
                                 )
                             ] + root_functions

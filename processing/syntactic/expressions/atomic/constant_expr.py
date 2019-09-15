@@ -20,6 +20,10 @@ class ConstantExpr(AtomExpression):
         super().__init__(parent)
         self.literal = literal
 
+    @property
+    def value_type(self):
+        return self.literal.value_type
+
     @span_marker
     def parse(self) -> ConstantExpr:
         self.literal = self.stream.eat_any()

@@ -41,8 +41,9 @@ class BlameType(Enum):
     invalid_type_annotation                  = "invalid type annotation",                                            BlameSeverity.error
     invalid_syntax                           = "invalid syntax",                                                     BlameSeverity.error
     invalid_indexer_expression               = "invalid indexer format",                                             BlameSeverity.error
-    lambda_cannot_have_indented_body         = "'lambda' cannot have block specified by indentation",                BlameSeverity.error
+    indentation_based_block_not_allowed      = "block based on indentation is not allowed in this context",          BlameSeverity.error
     cannot_have_more_than_1_list_parameter   = "only 1 list parameter is allowed",                                   BlameSeverity.error
+    function_is_not_defined                  = "function with specified name is not defined in this scope",          BlameSeverity.error
 
     redundant_10_radix                          = "redundant specifier, number radix is 10 by default",           BlameSeverity.warning
     inconsistent_indentation                    = "mixed indentation (spaces and tabs)",                          BlameSeverity.warning

@@ -59,4 +59,8 @@ def source_from_code(code: str):
 
 
 def parse(source: SourceUnit):
-    Compiler.process_source(source, ProcessingMode.parsing, ProcessingOptions.debug_ast)
+    Compiler.process_source(
+        source,
+        ProcessingMode.convert_py,
+        ProcessingOptions.default
+    )

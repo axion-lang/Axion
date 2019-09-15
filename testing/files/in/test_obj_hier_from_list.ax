@@ -1,0 +1,10 @@
+let xs = "a.b.c.d".split(".")
+let root = {}
+
+let reducer = fn (parentObj, arrayItem) {
+    parentObj[arrayItem] = {}
+    return parentObj[arrayItem]
+}
+
+xs.reduce(reducer, root)
+console.log(root)

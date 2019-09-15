@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Collection
 from typing import Union, List
 
 from errors.blame import BlameType
@@ -27,26 +26,27 @@ class TypeName(Expr):
         self.parent = None
 
     def parse(self) -> TypeName:
-        if self.stream.peek.of_type(TokenType.open_parenthesis):
+        if self.stream.peek_is(TokenType.open_parenthesis):
             tpl = TupleTypeName(self).parse()
             left = tpl.types[0] if len(tpl.types) == 1 else tpl
-        elif self.stream.peek.of_type(TokenType.identifier):
+        elif self.stream.peek_is(TokenType.identifier):
             left = SimpleTypeName(self).parse()
         else:
             self.source.blame(BlameType.invalid_type_annotation, self.stream.peek)
             return SimpleTypeName(self, "Unknown type")
-        if self.stream.peek.of_type(TokenType.open_bracket) \
+        if self.stream.peek_is(TokenType.open_bracket) \
                 and not self.stream.peek_by_is(2, TokenType.close_bracket):
             left = GenericTypeName(self, target = left).parse()
-        if self.stream.peek.of_type(TokenType.open_bracket):
+        if self.stream.peek_is(TokenType.open_bracket):
             left = ArrayTypeName(self, target = left).parse()
-        if self.stream.peek.of_type(TokenType.op_bit_or):
+        if self.stream.peek_is(TokenType.op_bit_or):
             left = UnionTypeName(self, left).parse()
-        if self.stream.peek.of_type(TokenType.right_arrow):
+        if self.stream.peek_is(TokenType.right_arrow):
             left = FuncTypeName(self, left).parse()
         return left
 
-    def parse_named_type_args(self) -> List[(TypeName, NameExpr)]:
+    @staticmethod
+    def parse_named_type_args() -> List[(TypeName, NameExpr)]:
         return []
 
 
@@ -79,7 +79,7 @@ class SimpleTypeName(TypeName):
         c += self.name
 
 
-class TupleTypeName(TypeName, Collection):
+class TupleTypeName(TypeName):
     @child_property
     def types(self) -> List[TypeName]:
         pass
@@ -93,7 +93,7 @@ class TupleTypeName(TypeName, Collection):
     ):
         super().__init__(parent)
         self.open_paren = open_paren
-        self.types = types
+        self.types = types or []
         self.close_paren = close_paren
 
         self.__current_idx = 0
@@ -101,26 +101,17 @@ class TupleTypeName(TypeName, Collection):
     def __contains__(self, x: object) -> bool:
         return x in self.types
 
-    def __iter__(self):
-        return self.types[self.__current_idx]
-
     def __len__(self):
         return len(self.types)
 
-    @property
-    def __current(self):
-        return self.types[self.__current_idx] if len(self.types) < self.__current_idx else None
-
-    def __next__(self):
-        self.__current_idx += 1
-        if self.__current is None:
-            raise StopIteration
-        else:
-            return self.__current
+    def __iter__(self):
+        while self.__current_idx < len(self.types):
+            yield self.types[self.__current_idx]
+            self.__current_idx += 1
 
     def parse(self) -> TupleTypeName:
         self.open_paren = self.stream.eat(TokenType.open_parenthesis)
-        if not self.stream.peek.of_type(TokenType.close_parenthesis):
+        if not self.stream.peek_is(TokenType.close_parenthesis):
             while True:
                 self.types.append(super().parse())
                 if not self.stream.maybe_eat(TokenType.comma):
@@ -132,6 +123,9 @@ class TupleTypeName(TypeName, Collection):
         c += self.open_paren, self.types, self.close_paren
 
     def to_csharp(self, c: CodeBuilder):
+        c += self.open_paren, self.types, self.close_paren
+
+    def to_python(self, c: CodeBuilder):
         c += self.open_paren, self.types, self.close_paren
 
 
@@ -280,12 +274,7 @@ class FuncTypeName(TypeName):
         c += self.args_type, self.arrow_token, self.return_type
 
     def to_csharp(self, c: CodeBuilder):
-        c += 'Func<'
-        if isinstance(self.args_type, TupleTypeName):
-            c.write_joined(', ', self.args_type)
-        else:
-            c += self.args_type
-        c += ', ', self.return_type, '>'
+        c += 'Func<', self.args_type, ', ', self.return_type, '>'
 
     def to_python(self, c: CodeBuilder):
         c += 'Callable[[', self.args_type, '], ', self.return_type, ']'

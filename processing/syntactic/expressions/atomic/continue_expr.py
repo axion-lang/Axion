@@ -35,7 +35,7 @@ class ContinueExpr(StatementExpression):
     @span_marker
     def parse(self) -> ContinueExpr:
         self.continue_token = self.stream.eat(TokenType.keyword_continue)
-        if self.stream.peek.of_type(TokenType.identifier):
+        if self.stream.peek_is(TokenType.identifier):
             self.loop_name = parse_atom(self)
         return self
 

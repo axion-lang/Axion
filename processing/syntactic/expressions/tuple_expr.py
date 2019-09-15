@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Collection
+from typing import List
 
 from processing.codegen.code_builder import CodeBuilder
 from processing.lexical.tokens.token import Token
@@ -10,7 +10,7 @@ from processing.syntactic.expressions.expr import Expr, child_property
 from processing.syntactic.expressions.groups import VarTargetExpression
 
 
-class TupleExpr(VarTargetExpression, Collection):
+class TupleExpr(VarTargetExpression):
     @child_property
     def expressions(self) -> List[Expr]:
         pass
@@ -31,22 +31,13 @@ class TupleExpr(VarTargetExpression, Collection):
     def __contains__(self, x: object) -> bool:
         return x in self.expressions
 
-    def __iter__(self):
-        return self.expressions[self.__current_idx]
-
     def __len__(self):
         return len(self.expressions)
 
-    @property
-    def __current(self):
-        return self.expressions[self.__current_idx] if len(self.expressions) < self.__current_idx else None
-
-    def __next__(self):
-        self.__current_idx += 1
-        if self.__current is None:
-            raise StopIteration
-        else:
-            return self.__current
+    def __iter__(self):
+        while self.__current_idx < len(self.expressions):
+            yield self.expressions[self.__current_idx]
+            self.__current_idx += 1
 
     @span_marker
     def parse_empty(self) -> TupleExpr:
@@ -55,16 +46,10 @@ class TupleExpr(VarTargetExpression, Collection):
         return self
 
     def to_axion(self, c: CodeBuilder):
-        c += '('
-        c.write_joined(', ', self.expressions)
-        c += ')'
+        c += '(', self.expressions, ')'
 
     def to_csharp(self, c: CodeBuilder):
-        c += '('
-        c.write_joined(', ', self.expressions)
-        c += ')'
+        c += '(', self.expressions, ')'
 
     def to_python(self, c: CodeBuilder):
-        c += '('
-        c.write_joined(', ', self.expressions)
-        c += ')'
+        c += '(', self.expressions, ')'

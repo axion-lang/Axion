@@ -21,6 +21,11 @@ class CharToken(Token):
         super().__init__(source, TokenType.character, value, start = start, end = end)
         self.unclosed = unclosed
 
+    @property
+    def value_type(self):
+        from processing.syntactic.expressions.type_names import SimpleTypeName
+        return SimpleTypeName(self.source.ast, spec.char_type_name)
+
     @span_marker
     def read(self) -> CharToken:
         self.append_next(spec.character_quote, error_source = self.source)

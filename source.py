@@ -19,29 +19,15 @@ class SourceUnit:
     def __init__(self, source_path: Path = None, output_path: Path = None, debug_path: Path = None):
         """ Should not be used to instantiate class.
         """
-
         from processing.syntactic.expressions.ast import Ast
         from compiler import Compiler
         from errors.language_error import LanguageError
         from processing.syntactic.token_stream import TokenStream
         from processing.lexical.text_stream import TextStream
+        from processing.lexical.tokens.token import Token, TokenType
 
         self.options = ProcessingOptions.default
         self.mode = ProcessingMode.default
-
-        self.text_stream: Optional[TextStream] = None
-
-        from processing.lexical.tokens.token import Token, TokenType
-        self.token_stream = TokenStream(self)
-        self.mismatching_pairs: List[Token] = []
-        self.process_terminators: List[TokenType] = [TokenType.end]
-
-        self.indent_size = 0
-        self.indent_char = '\0'
-        self.last_indent_len = 0
-        self.indent_level = 0
-
-        self.blames: List[LanguageError] = []
 
         if source_path is None:
             source_path = Compiler.temp_source_path()
@@ -50,15 +36,34 @@ class SourceUnit:
         if source_path.suffix != Compiler.source_file_ext:
             raise ValueError(f"Expected a '{Compiler.source_file_ext}' extension of '{source_path}' file.")
 
-        if output_path is None:
-            output_path = self.source_path.parent / "out" / (self.source_path.stem + Compiler.output_file_ext)
-        self.output_path = resolve_path(output_path)
+        self.output_path = output_path
+        self.debug_path = debug_path
 
-        if debug_path is None:
-            debug_path = self.source_path.parent / "debug" / (self.source_path.stem + Compiler.debug_file_ext)
-        self.debug_path = resolve_path(debug_path)
-
+        self.blames: List[LanguageError] = []
+        # lexical analysis stuff
+        self.text_stream: Optional[TextStream] = None
+        self.token_stream = TokenStream(self)
+        self.mismatching_pairs: List[Token] = []
+        self.process_terminators: List[TokenType] = [TokenType.end]
+        # indentation stuff
+        self.indent_size = 0
+        self.indent_char = '\0'
+        self.last_indent_len = 0
+        self.indent_level = 0
+        # syntax analysis stuff
         self.ast = Ast(self)
+
+    def resolve_debug_path(self):
+        from compiler import Compiler
+        if self.debug_path is None:
+            self.debug_path = self.source_path.parent / "debug" / (self.source_path.stem + Compiler.debug_file_ext)
+        self.debug_path = resolve_path(self.debug_path)
+
+    def resolve_output_path(self):
+        from compiler import Compiler
+        if self.output_path is None:
+            self.output_path = self.source_path.parent / "out" / (self.source_path.stem + Compiler.output_file_ext)
+        self.output_path = resolve_path(self.output_path)
 
     # region Constructors
 

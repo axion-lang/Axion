@@ -52,7 +52,7 @@ class WhileExpr(StatementExpression):
             c += 'nobreak', self.no_break_block
 
     def to_csharp(self, c: CodeBuilder):
-        c += 'while ', self.condition, self.block
+        c += 'while (', self.condition, ')', self.block
         if self.no_break_block:
             raise NotImplementedError
 

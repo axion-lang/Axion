@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, List
 
+from processing.codegen.code_builder import CodeBuilder
 from processing.syntactic.expressions.definitions.macro_def import MacroDef
 from processing.syntactic.expressions.expr import Expr
 from processing.syntactic.expressions.macro_patterns import CascadePattern, TokenPattern
@@ -59,3 +60,12 @@ class MacroApplication(Expr):
             self.macro_definition = None
             self.parent = None
         return self
+
+    def to_axion(self, c: CodeBuilder):
+        c += "<macro>"
+
+    def to_python(self, c: CodeBuilder):
+        c += "<macro>"
+
+    def to_csharp(self, c: CodeBuilder):
+        c += "<macro>"

@@ -37,6 +37,15 @@ class Token(Span):
         self.content = content
         self.ending_white = ''
 
+    @property
+    def value_type(self):
+        from processing.syntactic.expressions.type_names import SimpleTypeName
+        if self.ttype in [TokenType.keyword_true, TokenType.keyword_false]:
+            return SimpleTypeName(self.source.ast, spec.bool_type_name)
+        if self.ttype == TokenType.keyword_nil:
+            return SimpleTypeName(self.source.ast, spec.nil_type_name)
+        return
+
     def of_type(self, *ttypes: TokenType) -> bool:
         """
         Checks if token's type equal to
@@ -137,21 +146,23 @@ class Token(Span):
             self.ttype = TokenType.whitespace
             return self
         ln = self.stream.rest_of_line
-        ln_empty = len(ln.strip()) == 0
-        prev_is_bin_op = isinstance(self.tokens[-1], OperatorToken) and self.tokens[-1].input_side == InputSide.both
-        next_is_bin_op = any(re.match(fr'^{re.escape(op)}[^{spec.id_start}]', ln) for op in spec.operators_keys)
-        is_ln_commented = ln.startswith(spec.oneline_comment_mark) or (
-                ln.startswith(spec.multiline_comment_mark) and
-                ln.count(spec.multiline_comment_mark) % 2 != 0
-        )
-        next_is_indent = not (
-                ln_empty
-                or prev_is_bin_op
-                or next_is_bin_op
-                or is_ln_commented
+
+        # check for indentation beginning
+        if self.tokens[-1].of_type(TokenType.newline) \
+                and not (
+                # line empty
+                len(ln.strip()) == 0
+                # prev token is bin operator
+                or isinstance(self.tokens[-1], OperatorToken) and self.tokens[-1].input_side == InputSide.both
+                # line commented
+                or ln.startswith(spec.oneline_comment_mark) or (
+                        ln.startswith(spec.multiline_comment_mark) and
+                        spec.multiline_comment_mark in ln
+                )
+                # next token is bin operator
+                or any(re.match(fr'^{re.escape(op)}[^{spec.id_start}]', ln) for op in spec.operators_keys)
                 or len(self.source.mismatching_pairs) > 0
-        )
-        if self.tokens[-1].of_type(TokenType.newline) and next_is_indent:
+        ):
             if self.source.indent_char == '\0':
                 self.source.indent_char = self.value[0]
             consistent = True
@@ -216,7 +227,7 @@ class Token(Span):
             self.ttype = spec.keywords[self.value]
         elif self.value in spec.operators_keys:
             from processing.lexical.tokens.operator import OperatorToken
-            return OperatorToken(self.source, self.value)
+            return OperatorToken(self.source, self.value, start = self.start, end = self.end)
         else:
             self.ttype = TokenType.identifier
         return self
@@ -226,10 +237,10 @@ class Token(Span):
         self.append_next(*spec.punctuation_keys)
         self.ttype = spec.punctuation[self.value]
         mismatches = self.source.mismatching_pairs
-        if self.ttype.is_open_bracket:
+        if self.ttype in spec.open_brackets:
             mismatches.append(self)
-        elif self.ttype.is_close_bracket:
-            if len(mismatches) > 0 and mismatches[-1].ttype.matching_bracket == self.ttype:
+        elif self.ttype in spec.close_brackets:
+            if len(mismatches) > 0 and spec.matching_bracket(mismatches[-1].ttype) == self.ttype:
                 mismatches.pop()
             else:
                 mismatches.append(self)

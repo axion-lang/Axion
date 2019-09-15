@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from typing import List, Union, Type
+from typing import List, Union, Type, TypeVar
 
 from anytree import NodeMixin
 
-import processing.syntactic.expressions.ast as ast_file
-import processing.syntactic.expressions.block_expr as block_file
 from errors.blame import BlameSeverity
 from processing.codegen.code_builder import CodeBuilder
 from processing.location import Span
@@ -68,20 +66,34 @@ class Expr(Span, NodeMixin):
             super().__init__(None)
 
     @property
-    def ast(self) -> ast_file.Ast:
-        e = self
-        while not isinstance(e, ast_file.Ast):
+    def ast(self):
+        from processing.syntactic.expressions.ast import Ast
+        # noinspection PyTypeChecker
+        e: Ast = self
+        while not isinstance(e, Ast):
             e = e.parent
         return e
 
     @property
-    def parent_block(self) -> block_file.BlockExpr:
+    def value_type(self):
+        return None
+
+    T = TypeVar('T')
+
+    def get_parent_of_type(self, typ: Type[T]) -> T:
+        from processing.syntactic.expressions.ast import Ast
+        from processing.syntactic.expressions.block_expr import BlockExpr
+
         e = self
+        if isinstance(e, Ast):
+            if issubclass(typ, BlockExpr):
+                return e
+            else:
+                return None
         while True:
             e = e.parent
-            if isinstance(e, block_file.BlockExpr):
-                break
-        return e
+            if e is None or isinstance(e, typ):
+                return e
 
     def of_type(self, *type_names: Type) -> bool:
         """
@@ -106,6 +118,9 @@ class Expr(Span, NodeMixin):
                 check(expression)
         else:
             check(expr)
+
+    def reduce(self):
+        pass
 
     def to_axion(self, c: CodeBuilder):
         pass

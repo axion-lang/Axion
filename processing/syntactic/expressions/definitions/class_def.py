@@ -59,14 +59,16 @@ class ClassDef(DefinitionExpression, AtomExpression):
         self.data_members = None
 
     def parse(self) -> ClassDef:
+        from processing.syntactic.expressions.type_names import TypeName
+
         self.stream.eat(TokenType.keyword_class)
         self.name = NameExpr(self).parse(must_be_simple = True)
         # data class members
-        if self.stream.peek.of_type(TokenType.open_parenthesis):
+        if self.stream.peek_is(TokenType.open_parenthesis):
             self.data_members = parse_multiple(self, NameDef)
         # inheritance
-        if self.stream.maybe_eat(TokenType.op_less):
-            types = self.parse_named_type_args()
+        if self.stream.maybe_eat(TokenType.left_arrow):
+            types = TypeName.parse_named_type_args()
             for typ, typ_label in types:
                 if typ_label is None:
                     self.bases.append(typ)

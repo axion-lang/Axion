@@ -122,6 +122,17 @@ operators_keys = sorted(list(operators.keys()), reverse = True)
 
 operators_signs = [op for op in operators_keys if not op[0] in id_start]
 
+basic_compare_ops = [
+    TokenType.op_less,
+    TokenType.op_less_or_equal,
+    TokenType.op_greater,
+    TokenType.op_greater_or_equal
+]
+
+boolean_ops = [
+    
+]
+
 punctuation: Dict[str, TokenType] = {
     "->": TokenType.right_arrow,
     "<-": TokenType.left_arrow,
@@ -184,7 +195,6 @@ never_expr_start_types: List[TokenType] = [
     TokenType.op_power_assign,
     TokenType.op_floor_divide_assign,
     TokenType.outdent,
-    TokenType.newline,
     TokenType.end,
     TokenType.semicolon,
     TokenType.close_brace,
@@ -195,3 +205,53 @@ never_expr_start_types: List[TokenType] = [
     TokenType.op_in,
     TokenType.keyword_if,
 ]
+
+block_start_types: List[TokenType] = [
+    TokenType.colon,
+    TokenType.open_brace,
+    TokenType.indent
+]
+
+open_brackets: List[TokenType] = [
+    TokenType.open_brace,
+    TokenType.open_double_brace,
+    TokenType.open_bracket,
+    TokenType.open_parenthesis
+]
+
+close_brackets: List[TokenType] = [
+    TokenType.close_brace,
+    TokenType.close_double_brace,
+    TokenType.close_bracket,
+    TokenType.close_parenthesis
+]
+
+trivial: List[TokenType] = [
+    TokenType.newline,
+    TokenType.whitespace,
+    TokenType.comment,
+    TokenType.end
+]
+
+nil_type_name = 'Nil'
+char_type_name = 'Char'
+string_type_name = 'Str'
+bool_type_name = 'Bool'
+number_type_prefix = 'Num'
+int_type_prefix = 'Int'
+float_type_prefix = 'Float'
+
+
+def matching_bracket(ttype: TokenType) -> TokenType:
+    return {
+        # open:                       close
+        TokenType.open_brace:         TokenType.close_brace,
+        TokenType.open_double_brace:  TokenType.close_double_brace,
+        TokenType.open_bracket:       TokenType.close_bracket,
+        TokenType.open_parenthesis:   TokenType.close_parenthesis,
+        # close:                      open
+        TokenType.close_brace:        TokenType.open_brace,
+        TokenType.close_double_brace: TokenType.open_double_brace,
+        TokenType.close_bracket:      TokenType.open_bracket,
+        TokenType.close_parenthesis:  TokenType.open_parenthesis
+    }.get(ttype)

@@ -12,7 +12,7 @@ from processing.syntactic.parsing import parse_infix, parse_atom, maybe_tuple
 
 class IndexerExpr(Expr):
     """ indexer_expr:
-        ;
+        '[' (infix | slice_expr) ']';
     """
 
     @child_property
@@ -40,11 +40,11 @@ class IndexerExpr(Expr):
         self.stream.eat(TokenType.open_bracket)
         while True:
             start: Optional[Expr] = None
-            if not self.stream.peek.of_type(TokenType.colon):
+            if not self.stream.peek_is(TokenType.colon):
                 start = parse_infix(self)
             if self.stream.maybe_eat(TokenType.colon):
                 stop: Optional[Expr] = None
-                if not self.stream.peek.of_type(
+                if not self.stream.peek_is(
                         TokenType.colon,
                         TokenType.comma,
                         TokenType.close_bracket
@@ -52,7 +52,7 @@ class IndexerExpr(Expr):
                     stop = parse_infix(self)
                 step: Optional[Expr] = None
                 if self.stream.maybe_eat(TokenType.colon) \
-                        and not self.stream.peek.of_type(
+                        and not self.stream.peek_is(
                     TokenType.comma,
                     TokenType.close_bracket
                 ):

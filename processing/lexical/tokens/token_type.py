@@ -67,29 +67,29 @@ class TokenType(AutoNumberEnum):
 
     # region gen_keywords
 
-    keyword_await    = None
-    keyword_break    = None
     keyword_class    = None
-    keyword_continue = None
-    keyword_else     = None
-    keyword_elif     = None
-    keyword_enum     = None
-    keyword_false    = None
-    keyword_fn       = None
-    keyword_for      = None
-    keyword_from     = None
-    keyword_if       = None
     keyword_macro    = None
     keyword_module   = None
-    keyword_nil      = None
-    keyword_nobreak  = None
     keyword_object   = None
+    keyword_enum     = None
+    keyword_fn       = None
+    keyword_let      = None
+    keyword_nobreak  = None
+    keyword_break    = None
+    keyword_continue = None
+    keyword_unless   = None
+    keyword_if       = None
+    keyword_elif     = None
+    keyword_else     = None
+    keyword_for      = None
+    keyword_from     = None
+    keyword_nil      = None
+    keyword_true     = None
+    keyword_false    = None
     keyword_pass     = None
     keyword_return   = None
-    keyword_true     = None
-    keyword_unless   = None
-    keyword_let      = None
     keyword_while    = None
+    keyword_await    = None
     keyword_yield    = None
     custom_keyword   = None
 
@@ -136,36 +136,3 @@ class TokenType(AutoNumberEnum):
     end        = None
 
     # @formatter:on
-
-    @property
-    def is_open_bracket(self) -> bool:
-        return self in [
-            TokenType.open_brace,
-            TokenType.open_double_brace,
-            TokenType.open_bracket,
-            TokenType.open_parenthesis
-        ]
-
-    @property
-    def is_close_bracket(self) -> bool:
-        return self in [
-            TokenType.close_brace,
-            TokenType.close_double_brace,
-            TokenType.close_bracket,
-            TokenType.close_parenthesis
-        ]
-
-    @property
-    def matching_bracket(self) -> TokenType:
-        return {
-            # open:                       close
-            TokenType.open_brace:         TokenType.close_brace,
-            TokenType.open_double_brace:  TokenType.close_double_brace,
-            TokenType.open_bracket:       TokenType.close_bracket,
-            TokenType.open_parenthesis:   TokenType.close_parenthesis,
-            # close:                      open
-            TokenType.close_brace:        TokenType.open_brace,
-            TokenType.close_double_brace: TokenType.open_double_brace,
-            TokenType.close_bracket:      TokenType.open_bracket,
-            TokenType.close_parenthesis:  TokenType.open_parenthesis
-        }.get(self)

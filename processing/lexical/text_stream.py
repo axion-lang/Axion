@@ -1,4 +1,3 @@
-import re
 from typing import Optional
 
 import specification as spec
@@ -57,12 +56,7 @@ class TextStream:
         assert len(expected) > 0
 
         pk = self.peek(len(max(expected, key = len)))
-        return any(pk.startswith(value) for value in expected)
-
-    # noinspection PyUnresolvedReferences
-    def peek_match(self, regex: str) -> re.Match:
-        txt = self.text[self.char_idx:]
-        return re.match(regex, txt)
+        return pk.startswith(expected)
 
     def eat(self, *expected: str, error_source: SourceUnit = None) -> Optional[str]:
         """

@@ -29,11 +29,16 @@ class TokenStream:
         self.skip_trivial()
         return self.exact_peek
 
+    def peek_is(self, *ttypes: TokenType) -> bool:
+        return self.peek_by_is(1, *ttypes)
+
     def peek_by_is(self, by_idx: int, *ttypes: TokenType) -> bool:
+        start_idx = self.token_idx
         self.skip_trivial(*ttypes)
         if self.token_idx + by_idx < len(self.tokens):
             peek_n = self.tokens[self.token_idx + by_idx]
             return peek_n.of_type(*ttypes)
+        self.move_abs(start_idx)
         return False
 
     def eat_any(self, by: int = 1) -> Token:
@@ -43,8 +48,8 @@ class TokenStream:
 
     def eat(self, *ttypes: TokenType, on_error: BlameType = None) -> Optional[Token]:
         self.skip_trivial(*ttypes)
-        if self.exact_peek.of_type(*ttypes):
-            self.eat_any()
+        self.eat_any()
+        if self.token.of_type(*ttypes):
             return self.token
         elif on_error is None:
             self.source.blame(

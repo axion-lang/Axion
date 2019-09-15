@@ -1,0 +1,159 @@
+#use static Console
+
+#module Snake
+    #[static]
+let rnd = new Random()
+
+# class Position(row: int, col: int)
+#     #[static]
+#     fn Rnd {
+#         return new Position (
+#             rnd.Next(0, WindowHeight),
+#             rnd.Next(0, WindowWidth)
+#         )
+#     }
+
+class Program
+    #[static]
+    fn Main (args : string[])
+        let right = 0
+        let left  = 1
+        let down  = 2
+        let up    = 3
+        lastFoodTime = 0
+        foodDissapearTime = 8000
+        negativePoints = 0
+
+        let directions = new Position[] {
+            new x(0, 1),  # right
+            new x(0, -1), # left
+            new x(1, 0),  # down
+            new x(-1, 0)  # up
+        }
+        sleepTime = 100.0
+        direction = right
+        # add check for static import
+        # parses as vardef.
+        BufferHeight = WindowHeight
+        lastFoodTime = Environment.TickCount
+
+        let obstacles = new List[Position] {
+            new x(12, 12),
+            new x(14, 20),
+            new x(7,  7),
+            new x(19, 19),
+            new x(6,  9)
+        }
+
+        for obstacle in obstacles
+            ForegroundColor = ConsoleColor.Cyan
+            SetCursorPosition(obstacle.col, obstacle.row)
+            Write("=")
+
+        let snakeElements = new Queue[Position]
+        # 'i' should be in 'for' block scope
+        for i in range(6)
+            snakeElements.Enqueue(new x(0, i))
+
+        food : Position
+        do
+            food = Position.Rnd()
+        while food in (obstacles or snakeElements)
+
+        SetCursorPosition(food.col, food.row)
+        ForegroundColor = ConsoleColor.Yellow
+        Write("@")
+
+        for position in snakeElements
+            SetCursorPosition(position.col, position.row)
+            ForegroundColor = ConsoleColor.DarkGray
+            Write("*")
+
+        while true
+            negativePoints++
+
+            if KeyAvailable
+                userInput : ConsoleKeyInfo = ReadKey()
+                if userInput.Key == ConsoleKey.LeftArrow  and direction != right: direction = left
+                if userInput.Key == ConsoleKey.RightArrow and direction != left:  direction = right
+                if userInput.Key == ConsoleKey.UpArrow    and direction != down:  direction = up
+                if userInput.Key == ConsoleKey.DownArrow  and direction != up:    direction = down
+
+            snakeHead     : Position = snakeElements.Last()
+            nextDirection : Position = directions[direction]
+
+            snakeNewHead = new Position(
+                snakeHead.row + nextDirection.row,
+                snakeHead.col + nextDirection.col
+            )
+
+            if snakeNewHead.col < 0: snakeNewHead.col = WindowWidth - 1
+            if snakeNewHead.row < 0: snakeNewHead.row = WindowHeight - 1
+            if snakeNewHead.row >= WindowHeight: snakeNewHead.row = 0
+            if snakeNewHead.col >= WindowWidth: snakeNewHead.col = 0
+
+            if snakeNewHead in (obstacles or snakeElements)
+                SetCursorPosition(0, 0)
+                ForegroundColor = ConsoleColor.Red
+                WriteLine("Game over!")
+                userPoints: int = (snakeElements.Count - 6) * 100 - negativePoints
+                userPoints = Math.Max(userPoints, 0)
+                WriteLine("Your points are: {0}", userPoints)
+                return
+
+            SetCursorPosition(snakeHead.col, snakeHead.row)
+            ForegroundColor = ConsoleColor.DarkGray
+            Write("*")
+
+            snakeElements.Enqueue(snakeNewHead)
+            SetCursorPosition(snakeNewHead.col, snakeNewHead.row)
+            ForegroundColor = ConsoleColor.Gray
+            if direction == right: Write(">")
+            if direction == left:  Write("<")
+            if direction == up:    Write("^")
+            if direction == down:  Write("v")
+
+
+            if snakeNewHead.col == food.col and snakeNewHead.row == food.row
+                # feeding the snake
+                do
+                    food = Position.Rnd()
+                while food in (obstacles or snakeElements)
+
+                lastFoodTime = Environment.TickCount
+                SetCursorPosition(food.col, food.row)
+                ForegroundColor = ConsoleColor.Yellow
+                Write("@")
+                sleepTime--
+
+                obstacle : Position
+                do
+                    obstacle = Position.Rnd()
+                while obstacle in (obstacles or snakeElements)
+                   or (food.row != obstacle.row and food.col != obstacle.col)
+                obstacles.Add(obstacle)
+                SetCursorPosition(obstacle.col, obstacle.row)
+                ForegroundColor = ConsoleColor.Cyan
+                Write("=")
+            else
+                # moving...
+                last : Position = snakeElements.Dequeue()
+                SetCursorPosition(last.col, last.row)
+                Write(" ")
+
+            if Environment.TickCount - lastFoodTime >= foodDissapearTime
+                negativePoints = negativePoints + 50
+                SetCursorPosition(food.col, food.row)
+                Write(" ")
+                do
+                    food = Position.Rnd()
+                while food in (obstacles or snakeElements)
+                lastFoodTime = Environment.TickCount
+
+            SetCursorPosition(food.col, food.row)
+            ForegroundColor = ConsoleColor.Yellow
+            Write("@")
+
+            sleepTime -= 0.01
+
+            Thread.Sleep(Convert.ToInt32(sleepTime))

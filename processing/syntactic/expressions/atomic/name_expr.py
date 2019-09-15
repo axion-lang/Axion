@@ -23,6 +23,14 @@ class NameExpr(VarTargetExpression):
     def qualifiers(self) -> List[Token]:
         return [t for t in self.name_parts if t.ttype == TokenType.identifier]
 
+    @property
+    def value_type(self):
+        from processing.syntactic.expressions.block_expr import BlockExpr
+
+        x = self.get_parent_of_type(BlockExpr).get_def_by_name(self)
+        if x is not None:
+            return x.value_type
+
     def __init__(
             self,
             parent: Expr = None,
@@ -39,16 +47,21 @@ class NameExpr(VarTargetExpression):
         else:
             self.name_parts = name or []
 
+    def __str__(self):
+        return '.'.join(t.value for t in self.qualifiers)
+
     def __repr__(self):
-        return f"{self.__class__.__name__} ('{'.'.join(map(lambda t: str(t.value), self.qualifiers))}')"
+        return f"{self.__class__.__name__} ('{'.'.join(t.value for t in self.qualifiers)}')"
 
     @span_marker
     def parse(self, must_be_simple = False) -> NameExpr:
-        self.name_parts.append(self.stream.eat(TokenType.identifier))
+        self.stream.eat(TokenType.identifier)
+        self.name_parts.append(self.stream.token)
         if not must_be_simple:
             while self.stream.maybe_eat(TokenType.op_dot):
                 self.name_parts.append(self.stream.token)
-                self.name_parts.append(self.stream.eat(TokenType.identifier))
+                if self.stream.eat(TokenType.identifier):
+                    self.name_parts.append(self.stream.token)
         return self
 
     def to_axion(self, c: CodeBuilder):

@@ -51,7 +51,7 @@ class YieldExpr(StatementExpression):
         c += self.value
 
     def to_csharp(self, c: CodeBuilder):
-        c += 'yield '
+        c += 'yield return '
         if self.is_yield_from:
             raise NotImplementedError
         c += self.value

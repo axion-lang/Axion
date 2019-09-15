@@ -40,7 +40,7 @@ class ExpressionPattern(MacroPattern):
         self.parse_fn = parse_fn
 
     def match(self, parent: Expr) -> bool:
-        if parent.stream.peek.of_type(*spec.never_expr_start_types):
+        if parent.stream.peek_is(*spec.never_expr_start_types):
             return True
         idx = parent.stream.token_idx
         if self.parse_fn is not None:

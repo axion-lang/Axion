@@ -5,14 +5,14 @@
     <option name="GROUP_BY_SEVERITY" value="true" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e4594945-2045-43cb-bbcd-00b3e0d704eb" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <list default="true" id="e4594945-2045-43cb-bbcd-00b3e0d704eb" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CoverageViewManager">
+    <option name="myElementSize" value="503" />
   </component>
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
@@ -42,6 +42,12 @@
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
+  <component name="ProjectViewState">
+    <option name="autoscrollToSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -50,7 +56,7 @@
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="run.code.analysis.last.selected.profile" value="aDefault" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -75,7 +81,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python tests.pytest in test_syntax.py">
+  <component name="RunManager" selected="Python tests.pytest in test_syntax_examples.py">
     <configuration name="axion" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="Axion" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -98,22 +104,93 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for testing.test_syntax" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="specification" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Axion" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/testing" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/specification.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for test_syntax_examples.test_bisect_algorithm" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="Axion" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="E:\Code\Axion\python\.venv\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;test_bisect_algorithm&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;testing.test_syntax&quot;" />
+      <option name="_new_target" value="&quot;test_syntax_examples.test_bisect_algorithm&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in test_syntax.py" type="tests" factoryName="py.test" nameIsGenerated="true">
+    <configuration name="pytest for test_syntax_examples.test_console_snake" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="Axion" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="E:\Code\Axion\python\.venv\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;test_console_snake&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_syntax_examples.test_console_snake&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for test_syntax_examples.test_misc" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="Axion" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="E:\Code\Axion\python\.venv\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;test_misc&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_syntax_examples.test_misc&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for testing.test_syntax_examples.test_fast_fibonacci" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="Axion" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="E:\Code\Axion\python\.venv\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;test_fast_fibonacci&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;testing.test_syntax_examples.test_fast_fibonacci&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest in test_syntax_examples.py" type="tests" factoryName="py.test" nameIsGenerated="true">
       <module name="Axion" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -125,18 +202,26 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/testing/test_syntax.py&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/testing/test_syntax_examples.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Python.axion" />
-      <item itemvalue="Python tests.pytest in test_syntax.py" />
-      <item itemvalue="Python tests.Unittests for testing.test_syntax" />
+      <item itemvalue="Python.specification" />
+      <item itemvalue="Python tests.pytest in test_syntax_examples.py" />
+      <item itemvalue="Python tests.pytest for testing.test_syntax_examples.test_fast_fibonacci" />
+      <item itemvalue="Python tests.pytest for test_syntax_examples.test_bisect_algorithm" />
+      <item itemvalue="Python tests.pytest for test_syntax_examples.test_misc" />
+      <item itemvalue="Python tests.pytest for test_syntax_examples.test_console_snake" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.Unittests for testing.test_syntax" />
+        <item itemvalue="Python.specification" />
+        <item itemvalue="Python tests.pytest for testing.test_syntax_examples.test_fast_fibonacci" />
+        <item itemvalue="Python tests.pytest for test_syntax_examples.test_console_snake" />
+        <item itemvalue="Python tests.pytest for test_syntax_examples.test_misc" />
+        <item itemvalue="Python tests.pytest for test_syntax_examples.test_bisect_algorithm" />
       </list>
     </recent_temporary>
   </component>
@@ -162,6 +247,14 @@
       <workItem from="1566678833189" duration="16646000" />
       <workItem from="1566846341281" duration="12286000" />
       <workItem from="1567010439424" duration="5810000" />
+      <workItem from="1567529931412" duration="566000" />
+      <workItem from="1567600800846" duration="7847000" />
+      <workItem from="1567709589985" duration="36541000" />
+      <workItem from="1568015524230" duration="18033000" />
+      <workItem from="1568139763713" duration="41754000" />
+      <workItem from="1568445651021" duration="14000" />
+      <workItem from="1568445864577" duration="15015000" />
+      <workItem from="1568491947131" duration="5199000" />
     </task>
     <servers />
   </component>
@@ -190,22 +283,22 @@
     <state x="633" y="380" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/1921.1080" />
     <state width="1467" height="475" key="DebuggerActiveHint" />
     <state width="1467" height="475" key="DebuggerActiveHint/1921.1080" />
-    <state width="1696" height="538" key="GridCell.Tab.0.bottom" />
-    <state width="1696" height="538" key="GridCell.Tab.0.bottom/1921.1080" />
-    <state width="1696" height="538" key="GridCell.Tab.0.center" />
-    <state width="1696" height="538" key="GridCell.Tab.0.center/1921.1080" />
-    <state width="1696" height="538" key="GridCell.Tab.0.left" />
-    <state width="1696" height="538" key="GridCell.Tab.0.left/1921.1080" />
-    <state width="1696" height="538" key="GridCell.Tab.0.right" />
-    <state width="1696" height="538" key="GridCell.Tab.0.right/1921.1080" />
-    <state width="1696" height="457" key="GridCell.Tab.1.bottom" />
-    <state width="1696" height="457" key="GridCell.Tab.1.bottom/1921.1080" />
-    <state width="1696" height="457" key="GridCell.Tab.1.center" />
-    <state width="1696" height="457" key="GridCell.Tab.1.center/1921.1080" />
-    <state width="1696" height="457" key="GridCell.Tab.1.left" />
-    <state width="1696" height="457" key="GridCell.Tab.1.left/1921.1080" />
-    <state width="1696" height="457" key="GridCell.Tab.1.right" />
-    <state width="1696" height="457" key="GridCell.Tab.1.right/1921.1080" />
+    <state width="1696" height="520" key="GridCell.Tab.0.bottom" />
+    <state width="1696" height="520" key="GridCell.Tab.0.bottom/1921.1080" />
+    <state width="1696" height="520" key="GridCell.Tab.0.center" />
+    <state width="1696" height="520" key="GridCell.Tab.0.center/1921.1080" />
+    <state width="1696" height="520" key="GridCell.Tab.0.left" />
+    <state width="1696" height="520" key="GridCell.Tab.0.left/1921.1080" />
+    <state width="1696" height="520" key="GridCell.Tab.0.right" />
+    <state width="1696" height="520" key="GridCell.Tab.0.right/1921.1080" />
+    <state width="1696" height="492" key="GridCell.Tab.1.bottom" />
+    <state width="1696" height="492" key="GridCell.Tab.1.bottom/1921.1080" />
+    <state width="1696" height="492" key="GridCell.Tab.1.center" />
+    <state width="1696" height="492" key="GridCell.Tab.1.center/1921.1080" />
+    <state width="1696" height="492" key="GridCell.Tab.1.left" />
+    <state width="1696" height="492" key="GridCell.Tab.1.left/1921.1080" />
+    <state width="1696" height="492" key="GridCell.Tab.1.right" />
+    <state width="1696" height="492" key="GridCell.Tab.1.right/1921.1080" />
     <state x="244" y="123" key="SettingsEditor" />
     <state x="244" y="123" key="SettingsEditor/1921.1080" />
     <state x="517" y="126" width="624" height="672" key="find.popup" />
@@ -219,40 +312,38 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$USER_HOME$/AppData/Local/Programs/Python/Python38/Lib/ntpath.py</url>
+          <url>file://$PROJECT_DIR$/processing/syntactic/expressions/expr.py</url>
+          <line>60</line>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/processing/syntactic/expressions/expr.py</url>
+          <line>62</line>
+          <option name="timeStamp" value="20" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/processing/syntactic/expressions/expr.py</url>
           <line>63</line>
-          <option name="timeStamp" value="76" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$USER_HOME$/AppData/Local/Programs/Python/Python38/Lib/ntpath.py</url>
-          <line>64</line>
-          <option name="timeStamp" value="77" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/processing/syntactic/expressions/tuple_expr.py</url>
-          <line>68</line>
-          <option name="timeStamp" value="134" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/processing/syntactic/expressions/tuple_expr.py</url>
-          <line>67</line>
-          <option name="timeStamp" value="136" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/processing/syntactic/expressions/definitions/func_def.py</url>
-          <line>46</line>
-          <option name="timeStamp" value="139" />
+          <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/python$pytest_in_syntax_tests_py.coverage" NAME="pytest in syntax.py Coverage Results" MODIFIED="1567001193865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/python$Unittests_in_syntax_tests_py.coverage" NAME="Unittests in syntax_tests.py Coverage Results" MODIFIED="1566859554559" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/Axion$axion.coverage" NAME="axion Coverage Results" MODIFIED="1565393483599" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$Unittests_for_syntax_tests_SyntaxTests.coverage" NAME="Unittests for syntax_tests.SyntaxTests Coverage Results" MODIFIED="1567000029441" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/testing" />
+    <SUITE FILE_PATH="coverage/python$pytest_for_test_syntax_test_fast_fibonacci.coverage" NAME="pytest for testing.test_syntax_examples.test_fast_fibonacci Coverage Results" MODIFIED="1568011753375" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/python$specification.coverage" NAME="specification Coverage Results" MODIFIED="1568461495622" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/python$pytest_for_test_syntax_examples_test_misc.coverage" NAME="pytest for test_syntax_examples.test_misc Coverage Results" MODIFIED="1568405082116" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/python$pytest_in_test_syntax_py.coverage" NAME="pytest in test_syntax_examples.py Coverage Results" MODIFIED="1567974245015" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/Axion$axion.coverage" NAME="axion Coverage Results" MODIFIED="1565393483599" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/python$axion.coverage" NAME="axion Coverage Results" MODIFIED="1567953823698" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/python$pytest_for_test_syntax_examples_test_console_snake.coverage" NAME="pytest for test_syntax_examples.test_console_snake Coverage Results" MODIFIED="1568446076660" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/python$Unittests_in_syntax_tests_py.coverage" NAME="Unittests in syntax_tests.py Coverage Results" MODIFIED="1566859554559" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/python$pytest_for_testing_test_syntax_examples_test_fast_fibonacci.coverage" NAME="pytest for testing.test_syntax_examples.test_fast_fibonacci Coverage Results" MODIFIED="1568460261680" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/python$pytest_in_syntax_py.coverage" NAME="pytest in syntax.py Coverage Results" MODIFIED="1567017063759" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/python$pytest_in_test_syntax_py.coverage" NAME="pytest in test_syntax.py Coverage Results" MODIFIED="1567529934086" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/python$axion.coverage" NAME="axion Coverage Results" MODIFIED="1566859413578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/python$pytest_for_test_syntax_examples_test_bisect_algorithm.coverage" NAME="pytest for test_syntax_examples.test_bisect_algorithm Coverage Results" MODIFIED="1568140305315" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/python$pytest_for_test_syntax_examples_test_huffman_compression.coverage" NAME="pytest for test_syntax_examples.test_huffman_compression Coverage Results" MODIFIED="1568054952488" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/python$pytest_in_test_syntax_examples_py.coverage" NAME="pytest in test_syntax_examples.py Coverage Results" MODIFIED="1568567621746" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/python$pytest_in_syntax_tests_py.coverage" NAME="pytest in syntax.py Coverage Results" MODIFIED="1567001193865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
 </project>

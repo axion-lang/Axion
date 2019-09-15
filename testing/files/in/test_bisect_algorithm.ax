@@ -13,7 +13,7 @@ fn bisection (func: num -> num, a: num, b: num)
         raise ("couldn't find root in [a,b]")
     else
         mid = start + (end - start) / 2
-        while abs(start - mid) > 10**-7  # until we achieve precise equals to 10^-7
+        while Math.Abs(start - mid) > 10**-7  # until we achieve precise equals to 10^-7
             if func(mid) == 0
                 return mid
             elif func(mid) * func(start) < 0
