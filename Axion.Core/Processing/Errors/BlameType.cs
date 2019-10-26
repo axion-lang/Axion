@@ -1,220 +1,58 @@
 ﻿namespace Axion.Core.Processing.Errors {
-    /// <summary>
-    ///     Contains all error IDs that can
-    ///     happen while processing source.
-    /// </summary>
-    public enum BlameType {
-        #region ERRORS BY DEFAULT
+    public class BlameType {
+        // @formatter:off
+        public static readonly BlameType InvalidCharacter                      = new BlameType("unknown character",                                                  BlameSeverity.Error);
 
-        /// <summary>
-        ///     Indicates an operator that isn't
-        ///     declared in language specification.
-        /// </summary>
-        InvalidOperator,
+        public static readonly BlameType MismatchedParenthesis                 = new BlameType("'(' has no matching ''",                                             BlameSeverity.Error);
+        public static readonly BlameType MismatchedBracket                     = new BlameType("'[' has no matching ']'",                                            BlameSeverity.Error);
+        public static readonly BlameType MismatchedBrace                       = new BlameType("'{' has no matching '}'",                                            BlameSeverity.Error);
+        public static readonly BlameType MismatchedDoubleBrace                 = new BlameType("'{{' has no matching '}}'",                                          BlameSeverity.Error);
 
-        /// <summary>
-        ///     Indicates a char that isn't
-        ///     declared in language specification.
-        /// </summary>
-        InvalidCharacter,
+        public static readonly BlameType UnclosedMultilineComment              = new BlameType("multiline comment has no closing block",                             BlameSeverity.Error);
+        public static readonly BlameType UnclosedString                        = new BlameType("string has no matching ending quote",                                BlameSeverity.Error);
+        public static readonly BlameType UnescapedQuoteInStringLiteral         = new BlameType("string has unescaped quote character",                               BlameSeverity.Error);
+        public static readonly BlameType UnclosedCharacterLiteral              = new BlameType("character literal has no matching ending quote",                     BlameSeverity.Error);
+        public static readonly BlameType CharacterLiteralTooLong               = new BlameType("character literal exceeds max allowed length",                       BlameSeverity.Error);
+        public static readonly BlameType EmptyCharacterLiteral                 = new BlameType("character literal cannot be empty",                                  BlameSeverity.Error);
+        public static readonly BlameType InvalidEscapeSequence                 = new BlameType("invalid character escaped by '\\'",                                  BlameSeverity.Error);
+        public static readonly BlameType IllegalUnicodeCharacter               = new BlameType("literal has illegal unicode character",                              BlameSeverity.Error);
+        public static readonly BlameType InvalidXEscapeFormat                  = new BlameType("invalid '\\x'-escape format",                                        BlameSeverity.Error);
+        public static readonly BlameType TruncatedEscapeSequence               = new BlameType("truncated escape sequence",                                          BlameSeverity.Error);
+        public static readonly BlameType InvalidNumberRadix                    = new BlameType("number's base must be a number in range from 1 to 36 inclusive",     BlameSeverity.Error);
+        public static readonly BlameType InvalidDigit                          = new BlameType("expected a decimal digit",                                           BlameSeverity.Error);
+        public static readonly BlameType ExpectedNumberValueAfterNumberBase    = new BlameType("expected number value after base specifier",                         BlameSeverity.Error);
+        public static readonly BlameType DigitValueIsAboveNumberRadix          = new BlameType("this digit is above number base",                                    BlameSeverity.Error);
+        public static readonly BlameType ExpectedSimpleName                    = new BlameType("expected a simple name, but got qualified",                          BlameSeverity.Error);
+        public static readonly BlameType DuplicatedParameterInFunction         = new BlameType("duplicated parameter in function definition",                        BlameSeverity.Error);
+        public static readonly BlameType UnexpectedEndOfCode                   = new BlameType("unexpected end of code",                                             BlameSeverity.Error);
+        public static readonly BlameType DuplicatedNamedArgument               = new BlameType("duplicated named argument",                                          BlameSeverity.Error);
+        public static readonly BlameType ExpectedDefaultParameterValue         = new BlameType("expected a default parameter value",                                 BlameSeverity.Error);
+        public static readonly BlameType ExpectedBlockDeclaration              = new BlameType("block expected",                                                     BlameSeverity.Error);
+        public static readonly BlameType ImpossibleToInferType                 = new BlameType("impossible to infer type in this context",                           BlameSeverity.Error);
+        public static readonly BlameType InvalidTypeAnnotation                 = new BlameType("invalid type annotation",                                            BlameSeverity.Error);
+        public static readonly BlameType InvalidSyntax                         = new BlameType("invalid syntax",                                                     BlameSeverity.Error);
+        public static readonly BlameType InvalidIndexerExpression              = new BlameType("invalid indexer format",                                             BlameSeverity.Error);
+        public static readonly BlameType IndentationBasedBlockNotAllowed       = new BlameType("block based on indentation is not allowed in this context",          BlameSeverity.Error);
+        public static readonly BlameType CannotHaveMoreThan1ListParameter      = new BlameType("only 1 list parameter is allowed",                                   BlameSeverity.Error);
+        public static readonly BlameType FunctionIsNotDefined                  = new BlameType("function with specified name is not defined in this scope",          BlameSeverity.Error);
+        public static readonly BlameType NamedArgsMustFollowBareStar           = new BlameType("named arguments must follow bare *",                                 BlameSeverity.Error);
 
-        #region Mismatched pairs
+        public static readonly BlameType Redundant10Radix                         = new BlameType("redundant specifier, number radix is 10 by default",           BlameSeverity.Warning);
+        public static readonly BlameType InconsistentIndentation                  = new BlameType("mixed indentation (spaces and tabs)",                          BlameSeverity.Warning);
+        public static readonly BlameType RedundantStringFormat                    = new BlameType("string has format prefix but does not have any interpolation", BlameSeverity.Warning);
+        public static readonly BlameType RedundantPrefixesForEmptyString          = new BlameType("prefixes are redundant for empty string",                      BlameSeverity.Warning);
+        public static readonly BlameType ModuleNotSupportedInInterpretationMode   = new BlameType("'module' is not supported in interpretation mode",             BlameSeverity.Warning);
+        public static readonly BlameType RedundantColonWithBraces                 = new BlameType("':' is not needed when block is specified by braces",          BlameSeverity.Warning);
+        public static readonly BlameType RedundantEmptyListOfTypeArguments        = new BlameType("empty list of type arguments is redundant",                    BlameSeverity.Warning);
+        public static readonly BlameType ExpressionIsNotAssignable                = new BlameType("cannot assign to this expression",                             BlameSeverity.Warning);
+        // @formatter:on
 
-        /// <summary>
-        ///     Indicates a '(' in code
-        ///     without matching ')'.
-        /// </summary>
-        MismatchedParenthesis,
+        public readonly string        Description;
+        public readonly BlameSeverity Severity;
 
-        /// <summary>
-        ///     Indicates a '[' in code
-        ///     without matching ']'.
-        /// </summary>
-        MismatchedBracket,
-
-        /// <summary>
-        ///     Indicates a '{' in code
-        ///     without matching '}'.
-        /// </summary>
-        MismatchedBrace,
-
-        #endregion
-
-        /// <summary>
-        ///     Indicates a multiline comment
-        ///     without closing block.
-        /// </summary>
-        UnclosedMultilineComment,
-
-        /// <summary>
-        ///     Indicates that string or character
-        ///     literal uses invalid character escaped by '\'.
-        /// </summary>
-        InvalidEscapeSequence,
-
-        /// <summary>
-        ///     Indicates a string/char with unrecognized
-        ///     Unicode character.
-        /// </summary>
-        IllegalUnicodeCharacter,
-        InvalidXEscapeFormat,
-        TruncatedEscapeSequence,
-
-        #region String literal errors
-
-        /// <summary>
-        ///     Indicates a string with
-        ///     missing ending quote.
-        /// </summary>
-        UnclosedString,
-        InvalidPrefixInStringLiteral,
-        UnescapedQuoteInStringLiteral,
-
-        #endregion
-
-        #region Character literal errors
-
-        /// <summary>
-        ///     Indicates the character literal with
-        ///     missing ending quote.
-        /// </summary>
-        UnclosedCharacterLiteral,
-
-        /// <summary>
-        ///     Indicates a character literal that
-        ///     exceeds maximal allowed character literal length.
-        /// </summary>
-        CharacterLiteralTooLong,
-
-        /// <summary>
-        ///     Indicates that character literal
-        ///     length is 0, that is prohibited.
-        /// </summary>
-        EmptyCharacterLiteral,
-
-        #endregion
-
-        #region Number literal errors
-
-        // Invalid number literals
-        InvalidNumberLiteral,
-        InvalidBinaryLiteral,
-        InvalidOctalLiteral,
-        InvalidHexadecimalLiteral,
-        InvalidPostfixInNumberLiteral,
-
-        /// <summary>
-        ///     Indicates a number with more than one point.
-        /// </summary>
-        RepeatedDotInNumberLiteral,
-
-        /// <summary>
-        ///     Indicates a number without value
-        ///     after '0radix' postfix.
-        /// </summary>
-        ExpectedNumberValueAfterNumberBaseSpecifier,
-
-        /// <summary>
-        ///     Indicates a number without value
-        ///     after exponent, like '0.3e'.
-        /// </summary>
-        ExpectedNumberAfterExponentSign,
-
-        /// <summary>
-        ///     Indicates a number with postfix,
-        ///     followed by some value.
-        /// </summary>
-        ExpectedEndOfNumberAfterPostfix,
-
-        /// <summary>
-        ///     Indicates a number with 'i' postfix,
-        ///     but isn't followed with bit rate number (but it should be).
-        /// </summary>
-        ExpectedABitRateAfterNumberPostfix,
-
-        /// <summary>
-        ///     Indicates an integer number with invalid bit rate.
-        /// </summary>
-        InvalidIntegerNumberBitRate,
-
-        /// <summary>
-        ///     Indicates a floating point number with invalid bit rate.
-        /// </summary>
-        InvalidFloatNumberBitRate,
-        InvalidComplexNumberLiteral,
-
-        #region High-level syntax errors
-
-        BreakIsOutsideLoop,
-        ContinueIsOutsideLoop,
-        ContinueNotSupportedInsideFinally,
-        MisplacedReturn,
-        MisplacedYield,
-        InvalidExpressionToDelete,
-        DuplicatedParameterNameInFunctionDefinition,
-        DefaultCatchMustBeLast,
-        UnexpectedEndOfCode,
-        DuplicatedNamedArgument,
-        ExpectedDefaultParameterValue,
-        ExpectedBlockDeclaration,
-        ConstantValueExpected,
-
-        #endregion
-
-        #endregion
-
-        #endregion
-
-        #region WARNINGS BY DEFAULT
-
-        /// <summary>
-        ///     Indicates that input script uses
-        ///     mixed indentation (spaces mixed with tabs).
-        /// </summary>
-        InconsistentIndentation,
-
-        /// <summary>
-        ///     Indicates that string literal has
-        ///     prefix that repeated more than 1 time.
-        /// </summary>
-        DuplicatedStringPrefix,
-
-        /// <summary>
-        ///     Indicates that string has format prefix (f),
-        ///     but does not have any interpolated piece inside.
-        /// </summary>
-        RedundantStringFormatPrefix,
-
-        /// <summary>
-        ///     Indicates that string is empty,
-        ///     and has prefixes, whose are useless
-        /// </summary>
-        RedundantPrefixesForEmptyString,
-
-        /// <summary>
-        ///     Indicates that 0 number is followed
-        ///     by exponent, that's meaningless.
-        /// </summary>
-        RedundantExponentForZeroNumber,
-        ModulesAreNotSupportedInInterpretationMode,
-        InvalidDecoratorPlacement,
-        ThisExpressionTargetIsNotAssignable,
-        LambdaCannotHaveIndentedBody,
-        CannotRedeclareVariableAlreadyDeclaredInThisScope,
-        EmptyCollectionLiteralNotSupported,
-        CannotHaveMoreThan1ListParameter,
-        InvalidIndexerExpression,
-        CollectionInitializerCannotContainItemsAfterComprehension,
-
-        #region High-level syntax warnings
-
-        RedundantEmptyUseStatement,
-        DoubleNegationIsMeaningless,
-        RedundantColonWithBraces,
-        RedundantEmptyListOfTypeArguments,
-
-        #endregion
-
-        #endregion
+        internal BlameType(string description, BlameSeverity severity) {
+            Description = description;
+            Severity    = severity;
+        }
     }
 }

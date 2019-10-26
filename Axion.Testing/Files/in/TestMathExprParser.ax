@@ -1,0 +1,230 @@
+# import math
+
+_CONSTANTS = {
+    'pi' : math.pi,
+    'e' : math.e,
+    'phi': (1 + 5 ** 0.5) / 2
+}
+
+_FUNCTIONS = {
+    'abs': abs,
+    'acos': math.acos,
+    'asin': math.asin,
+    'atan': math.atan,
+    'atan2': math.atan2,
+    'ceil': math.ceil,
+    'cos': math.cos,
+    'cosh': math.cosh,
+    'degrees': math.degrees,
+    'exp': math.exp,
+    'fabs': math.fabs,
+    'floor': math.floor,
+    'fmod': math.fmod,
+    'frexp': math.frexp,
+    'hypot': math.hypot,
+    'ldexp': math.ldexp,
+    'log': math.log,
+    'log10': math.log10,
+    'modf': math.modf,
+    'pow': math.pow,
+    'radians': math.radians,
+    'sin': math.sin,
+    'sinh': math.sinh,
+    'sqrt': math.sqrt,
+    'tan': math.tan,
+    'tanh': math.tanh
+}
+
+class Parser
+    fn init (string, vars = none)
+        self.string = string
+        self.index = 0
+        self.vars = {} if vars is none else vars.copy()
+        for constant in _CONSTANTS.keys()
+            if self.vars.get(constant) is not none
+                raise Exception(f"Cannot redefine the value of {var}")
+
+    fn get-value
+        value = parse-expression()
+        skip-whitespace()
+        
+        if has-next
+            raise ValueError(f"Unexpected character '{self.peek}' at index {self.index}")
+        return value
+
+    #@property
+    fn peek
+        return self.string[self.index:self.index + 1]
+
+    #@property
+    fn has-next
+        return self.index < self.string.length
+
+    fn next-is(value)
+        return self.string[self.index:self.index + value.length] == value
+
+    fn pop-if-next (value)
+        if next-is(value)
+            self.index += value.length
+            return true
+        return false
+
+    fn pop-expected (value)
+        if not pop-if-next(value)
+            raise ValueError(f"Expected '{value}' at index {self.index}")
+
+
+    fn skip-whitespace
+        while has-next
+            if self.peek in ' \t\n\r'
+                self.index += 1
+            else
+                return
+
+    fn parse-expression
+        return parse-addition()
+    
+    fn parse-addition
+        values = [parse-multiplication()]
+        
+        while true
+            skip-whitespace()
+            char = self.peek
+            
+            if char == '+'
+                self.index += 1
+                values.append(parse-multiplication())
+            elif char == '-'
+                self.index += 1
+                values.append(-1 * parse-multiplication())
+            else
+                break
+        
+        return sum(values)
+
+    fn parse-multiplication
+        values = [parse-parenthesis()]
+
+        while true
+            skip-whitespace()
+            char = self.peek
+                
+            if char == '*'
+                self.index += 1
+                values.append(parse-parenthesis())
+            elif char == '/'
+                div_index = self.index
+                self.index += 1
+                denominator = parse-parenthesis()
+                     
+                if denominator == 0
+                    raise ValueError(f"Division by 0 at index {div_index}")
+                values.append(1.0 / denominator)
+            else
+                break
+                     
+        value = 1.0
+        
+        for factor in values
+            value *= factor
+        return value
+
+    fn parse-parenthesis
+        skip-whitespace()
+        char = self.peek
+        
+        if char == '('
+            self.index += 1
+            value = parse-expression()
+            skip-whitespace()
+            
+            if self.peek != ')'
+                raise ValueError(f"No closing parenthesis at index {self.index}")
+            self.index += 1
+            return value
+        else
+            return parse-negative()
+
+    fn parse-negative
+        skip-whitespace()
+        char = self.peek
+        
+        if char == '-'
+            self.index += 1
+            return -1 * parse-parenthesis()
+        else
+            return parse-value()
+
+    fn parse-value
+        skip-whitespace()
+        char = self.peek
+        
+        if char in '0123456789.'
+            return parse-number()
+        else
+            return parse-variable()
+ 
+    fn parse-variable
+        skip-whitespace()
+        var = []
+        while has-next
+            char = self.peek
+            
+            if char.lower() in '_abcdefghijklmnopqrstuvwxyz0123456789'
+                var.append(char)
+                self.index += 1
+            else
+                break
+        var = ''.join(var)
+        
+        function = _FUNCTIONS.get(var.lower())
+        if function is not none
+            args = []
+            skip-whitespace()
+            pop-expected('(')
+            while not pop-if-next(')')
+                skip-whitespace()
+                if args.length > 0
+                    pop-expected(',')
+                    skip-whitespace()
+                args.append(parse-expression())
+                skip-whitespace()
+            return float(function(args))
+        
+        constant = _CONSTANTS.get(var.lower())
+        if constant != none
+            return constant
+
+        value = self.vars.get(var, none)
+        if value != none
+            return float(value)
+            
+        raise ValueError(f"Unrecognized variable '{var}'")
+
+    fn parse-number
+        skip-whitespace()
+        str-val = ''
+        decimal_found = false
+        char = ''
+
+        while has-next
+            char = self.peek            
+            
+            if char == '.'
+                if decimal_found
+                    raise ValueError(f"Found an extra period in a number at {self.index}")
+                decimal_found = true
+                str-val += '.'
+            elif char in '0123456789'
+                str-val += char
+            else
+                break
+            self.index += 1
+
+        if str-val.length == 0
+            if char == ''
+                raise ValueError("Unexpected end")
+            else
+                raise ValueError(f"Expecting a number at {self.index} but got a '{char}'")
+
+        return float(str-val)

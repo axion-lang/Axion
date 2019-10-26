@@ -1,68 +1,98 @@
+using System;
+using Axion.Core.Processing.CodeGen;
+using Axion.Core.Source;
+using Newtonsoft.Json;
+
 namespace Axion.Core.Processing {
     /// <summary>
-    ///     (start, end) span
-    ///     of code in source.
+    ///     (start, end) span of code in source.
     /// </summary>
-    public struct Span {
-        public readonly Position Start;
-        public readonly Position End;
+    public class Span {
+        [JsonIgnore]
+        public SourceUnit Source;
 
-        public Span(Position start, Position end) {
+        public Location Start { get; private set; }
+        public Location End { get; private set; }
+
+        public Span(SourceUnit source, Location start = default, Location end = default) {
+            Source = source;
+            Start  = start;
+            End    = end;
+        }
+
+        // Region
+        protected void MarkStart(Location start) {
             Start = start;
-            End   = end;
+        }
+
+        protected void MarkEnd(Location end) {
+            End = end;
+        }
+
+        protected void MarkStart(Span mark) {
+            Start = mark.Start;
+        }
+
+        protected void MarkEnd(Span mark) {
+            End = mark.End;
+        }
+
+        protected void MarkPosition(Span mark) {
+            Start = mark.Start;
+            End   = mark.End;
+        }
+
+        protected void MarkPosition(Span start, Span end) {
+            Start = start.Start;
+            End   = end.End;
+        }
+
+        /// <summary>
+        ///     Converts this code span
+        ///     to it's string representation in Axion language.
+        /// </summary>
+        public virtual void ToAxion(CodeWriter c) {
+            throw new NotSupportedException($"{GetType().FullName}");
+        }
+
+        /// <summary>
+        ///     Converts this code span
+        ///     to it's string representation in C# language.
+        /// </summary>
+        public virtual void ToCSharp(CodeWriter c) {
+            throw new NotSupportedException($"{GetType().FullName}");
+        }
+
+        /// <summary>
+        ///     Converts this code span
+        ///     to it's string representation in Python language.
+        /// </summary>
+        public virtual void ToPython(CodeWriter c) {
+            throw new NotSupportedException($"{GetType().FullName}");
+        }
+
+        /// <summary>
+        ///     Converts this code span
+        ///     to it's string representation in Pascal language.
+        /// </summary>
+        public virtual void ToPascal(CodeWriter c) {
+            throw new NotSupportedException($"{GetType().FullName}");
         }
 
         public override string ToString() {
-            return "start: " + Start + ", end: " + End;
-        }
-
-        public override bool Equals(object obj) {
-            return base.Equals(obj);
-        }
-
-        public bool Equals(Span other) {
-            return Start == other.Start && End == other.End;
-        }
-
-        public override int GetHashCode() {
-            unchecked {
-                return (Start.GetHashCode() * 397) ^ End.GetHashCode();
-            }
-        }
-
-        public static bool operator ==(Span c1, Span c2) {
-            return c1.Equals(c2);
-        }
-
-        public static bool operator !=(Span c1, Span c2) {
-            return !c1.Equals(c2);
-        }
-
-        public static implicit operator (Position, Position)(Span span) {
-            return (span.Start, span.End);
-        }
-
-        public static implicit operator Span((Position, Position) positions) {
-            return new Span(positions.Item1, positions.Item2);
+            return "from " + Start + " to " + End;
         }
     }
 
     /// <summary>
-    ///     (line, column) position of code in source.
+    ///     (line, column) position of code in source (0-based).
     ///     Convertible to (int, int) 2-tuple.
     /// </summary>
-    public struct Position {
-        /// <summary>
-        ///     0-based.
-        /// </summary>
+    public struct Location {
         public readonly int Line;
-
-        /// <summary>
-        ///     0-based.
-        /// </summary>
         public readonly int Column;
 
-        internal Position(int line, int column) {
+        internal Location(int line, int column) {
             Line   = line;
             Column = column;
         }
@@ -71,52 +101,9 @@ namespace Axion.Core.Processing {
             return $"{Line + 1}, {Column + 1}";
         }
 
-        public override bool Equals(object obj) {
-            return base.Equals(obj);
-        }
-
-        public bool Equals(Position other) {
-            return Line == other.Line && Column == other.Column;
-        }
-
-        public override int GetHashCode() {
-            unchecked {
-                return (Line * 397) ^ Column;
-            }
-        }
-
-        public static bool operator >(Position c1, Position c2) {
-            return c1.Line > c2.Line
-                || c1.Line == c2.Line && c1.Column > c2.Column;
-        }
-
-        public static bool operator <(Position c1, Position c2) {
-            return c1.Line < c2.Line
-                || c1.Line == c2.Line && c1.Column < c2.Column;
-        }
-
-        public static bool operator ==(Position c1, Position c2) {
-            return c1.Equals(c2);
-        }
-
-        public static bool operator !=(Position c1, Position c2) {
-            return !c1.Equals(c2);
-        }
-
-        public static implicit operator (int, int)(Position position) {
-            return (position.Line, position.Column);
-        }
-
-        public static implicit operator Position((int, int) position) {
-            return new Position(position.Item1, position.Item2);
-        }
-
-        public static Position operator +(Position a, Position b) {
-            return new Position(a.Line + b.Line, a.Column + b.Column);
-        }
-
-        public static Position operator -(Position a, Position b) {
-            return new Position(a.Line - b.Line, a.Column - b.Column);
+        public static implicit operator Location((int, int) position) {
+            (int line, int column) = position;
+            return new Location(line, column);
         }
     }
 }

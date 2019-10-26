@@ -1,0 +1,67 @@
+using System.Linq;
+using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+
+namespace Axion.Core.Processing.Syntactic.Expressions {
+    /// <summary>
+    ///     <c>
+    ///         tuple_expr:
+    ///             tuple_paren_expr | (expr_list [',']);
+    ///         tuple_paren_expr:
+    ///             '(' expr_list [','] ')';
+    ///     </c>
+    /// </summary>
+    public class TupleExpr : Expr {
+        private NodeList<Expr> expressions;
+
+        public NodeList<Expr> Expressions {
+            get => expressions;
+            set => SetNode(ref expressions, value);
+        }
+
+        public override TypeName ValueType => new TupleTypeName(
+            this, new NodeList<TypeName>(
+                this,
+                Expressions.Select(e => e.ValueType)
+            )
+        );
+
+        internal TupleExpr(
+            Expr           parent      = null,
+            NodeList<Expr> expressions = null
+        ) : base(parent) {
+            Expressions = expressions ?? new NodeList<Expr>(this);
+            if (Expressions.Count > 0) {
+                MarkPosition(
+                    Expressions[0],
+                    Expressions[Expressions.Count - 1]
+                );
+            }
+        }
+
+        public TupleExpr ParseEmpty() {
+            Stream.Eat(OpenParenthesis);
+            Stream.Eat(CloseParenthesis);
+            return this;
+        }
+
+        public override void ToAxion(CodeWriter c) {
+            c.Write("(");
+            c.AddJoin(", ", Expressions);
+            c.Write(")");
+        }
+
+        public override void ToCSharp(CodeWriter c) {
+            c.Write("(");
+            c.AddJoin(", ", Expressions);
+            c.Write(")");
+        }
+
+        public override void ToPython(CodeWriter c) {
+            c.Write("(");
+            c.AddJoin(", ", Expressions);
+            c.Write(")");
+        }
+    }
+}

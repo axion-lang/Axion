@@ -1,0 +1,56 @@
+using Axion.Core.Processing.CodeGen;
+using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+
+namespace Axion.Core.Processing.Syntactic.Expressions {
+    public class DecoratedExpr : Expr, IDecoratedExpr {
+        private NodeList<Expr> decorators;
+
+        public NodeList<Expr> Decorators {
+            get => decorators;
+            set => SetNode(ref decorators, value);
+        }
+
+        private Expr target;
+
+        public Expr Target {
+            get => target;
+            set => SetNode(ref target, value);
+        }
+
+        internal DecoratedExpr(
+            Expr           parent     = null,
+            NodeList<Expr> decorators = null,
+            Expr           target     = null
+        ) : base(parent) {
+            Decorators = decorators ?? new NodeList<Expr>(this);
+            Target     = target;
+        }
+
+        public DecoratedExpr Parse() {
+            SetSpan(() => {
+                Stream.Eat(At);
+                if (Stream.MaybeEat(OpenBracket)) {
+                    do {
+                        Decorators.Add(Parsing.ParseInfix(this));
+                    } while (Stream.MaybeEat(Comma));
+
+                    Stream.Eat(CloseBracket);
+                }
+                else {
+                    Decorators.Add(Parsing.ParseInfix(this));
+                }
+
+                Target = Parsing.ParseAny(this);
+            });
+            return this;
+        }
+
+        public override void ToAxion(CodeWriter c) { }
+
+        public override void ToCSharp(CodeWriter c) { }
+
+        public override void ToPython(CodeWriter c) { }
+
+        public override void ToPascal(CodeWriter c) { }
+    }
+}

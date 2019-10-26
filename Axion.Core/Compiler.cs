@@ -1,314 +1,129 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Lexical;
-using Axion.Core.Processing.Source;
+using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Traversal;
+using Axion.Core.Source;
 using Axion.Core.Specification;
-using Axion.Core.Visual;
 using CodeConsole;
-using CodeConsole.CodeEditor;
-using CommandLine;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Axion.Core {
-    /// <summary>
-    ///     Main class to work with Axion source code.
-    /// </summary>
     public static class Compiler {
-        /// <summary>
-        ///     Main settings of JSON debug information formatting.
-        /// </summary>
-        public static readonly JsonSerializerSettings JsonSerializer = new JsonSerializerSettings {
-            Formatting            = Formatting.Indented,
-            TypeNameHandling      = TypeNameHandling.Auto,
-            ContractResolver      = new CompilerJsonContractResolver(),
-            DefaultValueHandling  = DefaultValueHandling.Ignore,
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-        };
+        private static readonly Assembly coreAsm = Assembly.GetExecutingAssembly();
+        public static readonly  string   Version = coreAsm.GetName().Version.ToString();
 
         /// <summary>
         ///     Path to directory where compiler executable is located.
         /// </summary>
-        public static readonly string WorkDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        public static readonly string WorkDir = AppDomain.CurrentDomain.BaseDirectory;
 
         /// <summary>
         ///     Path to directory where generated output is located.
         /// </summary>
-        public static readonly string OutputDirectory = Path.Combine(WorkDirectory, "output");
+        public static readonly string OutDir = Path.Combine(WorkDir, "output");
 
-        /// <summary>
-        ///     <see cref="Assembly" /> of <see cref="Core" /> namespace.
-        /// </summary>
-        private static readonly Assembly assembly = Assembly.GetExecutingAssembly();
+        public const string SourceFileExt = ".ax";
+        public const string OutputFileExt = ".out";
+        public const string DebugFileExt  = ".dbg.json";
 
-        public static readonly string Version = assembly.GetName().Version.ToString();
-
-        private static readonly Parser cliParser = new Parser(
-            settings => {
-                settings.EnableDashDash = true;
-                settings.CaseSensitive  = false;
-                settings.HelpWriter     = null;
-            }
-        );
-
-        private const string helpHint =
-            "Type '-h', or '--help' to get documentation about launch arguments.";
-
-        internal static FileInfo[] InputFiles { get; private set; }
-        public const    string SourceFileExtension = ".ax";
-        public const    string OutputFileExtension = ".ax";
-        internal static bool   Verbose;
-
-        public static void Init(string[] arguments) {
-            if (!Directory.Exists(OutputDirectory)) {
-                Directory.CreateDirectory(OutputDirectory);
-            }
-
-            PrintIntro();
-
-            // main processing loop
-            while (true) {
-                if (arguments.Length > 0) {
-                    cliParser
-                        .ParseArguments<CommandLineArguments>(arguments)
-                        .MapResult(
-                            options => {
-                                Verbose = options.Verbose;
-
-                                if (options.Exit) {
-                                    Environment.Exit(0);
-                                }
-
-                                if (options.ClearScreen) {
-                                    Console.Clear();
-                                    PrintIntro();
-                                    return 0;
-                                }
-
-                                if (options.Version) {
-                                    ConsoleUI.WriteLine(Version);
-                                    return 0;
-                                }
-
-                                if (options.Help) {
-                                    ConsoleUI.WriteLine(CommandLineArguments.HelpText);
-                                    return 0;
-                                }
-
-                                if (options.Interactive) {
-                                    EnterInteractiveMode();
-                                    return 0;
-                                }
-
-                                ProcessSources(options);
-                                return 0;
-                            },
-                            errors => {
-                                foreach (Error e in errors) {
-                                    Logger.Error(e.ToString());
-                                }
-
-                                return 0;
-                            }
-                        );
-                }
-
-                // wait for next command
-                // TODO (UI) add console commands history (up-down)
-                string command = ConsoleUI.Read(">>> ");
-                while (command.Length == 0) {
-                    ConsoleUI.ClearLine();
-                    command = ConsoleUI.Read(">>> ");
-                }
-
-                ConsoleUI.WriteLine();
-                arguments = Utilities.SplitLaunchArguments(command).ToArray();
-            }
-
-            // It is infinite loop, breaks only by 'exit' command.
-            // ReSharper disable once FunctionNeverReturns
+        public static FileInfo CreateTempSourcePath() {
+            var path = new FileInfo(
+                Path.Combine(
+                    WorkDir,
+                    "temp",
+                    "tmp-" + DateTime.Now.ToFileName() + SourceFileExt
+                ));
+            Utilities.ResolvePath(path.Directory.FullName);
+            return path;
         }
-
-        private static void PrintIntro() {
-            Console.InputEncoding   = Console.OutputEncoding = Encoding.UTF8;
-            Console.ForegroundColor = ConsoleColor.White;
-            const string header = "Axion programming language compiler toolset";
-            Console.Title = header; // set title
-            ConsoleUI.WriteLine(
-                (header + " v. ", ConsoleColor.White),
-                (Version, ConsoleColor.DarkYellow)
-            ); // print version
-            ConsoleUI.WriteLine(
-                ("Working in ", ConsoleColor.White),
-                (WorkDirectory, ConsoleColor.DarkYellow)
-            ); // print directory
-            ConsoleUI.WriteLine(helpHint + "\n");
-        }
-
-        private static void EnterInteractiveMode() {
-            Logger.Info(
-                "Axion code editor & interpreter mode.\n"
-              + "Type 'exit' or 'quit' to exit mode, 'cls' to clear screen."
-            );
-            while (true) {
-                // code editor header
-                string rawInput = ConsoleUI.Read("i>> ");
-                string input    = rawInput.Trim().ToUpper();
-
-                switch (input) {
-                case "":
-                    // skip empty commands
-                    ConsoleUI.ClearLine();
-                    continue;
-                case "EXIT":
-                case "QUIT":
-                    // exit from interpreter to main loop
-                    Logger.Info("\nInteractive interpreter closed.");
-                    return;
-                }
-
-                // TODO (UI) parse "help(module)" argument
-
-                // initialize editor
-                var editor = new CliEditor(
-                    new CliEditorSettings(highlighter: new AxionSyntaxHighlighter()),
-                    rawInput
-                );
-                string[] codeLines = editor.Run();
-                // interpret as source code and output result
-                Process(new SourceUnit(codeLines), SourceProcessingMode.Interpret);
-            }
-        }
-
-        private static void ProcessSources(CommandLineArguments options) {
-            SourceUnit source;
-            // get source code
-            if (options.Files.Any()) {
-                int filesCount = options.Files.Count();
-                if (filesCount > 1) {
-                    Logger.Error("Compiler doesn't support multiple files processing yet.");
-                    return;
-                }
-
-                InputFiles = new FileInfo[filesCount];
-                for (var i = 0; i < filesCount; i++) {
-                    InputFiles[i] = new FileInfo(
-                        Utilities.TrimMatchingChars(options.Files.ElementAt(i), '"')
-                    );
-                }
-
-                source = new SourceUnit(InputFiles[0]);
-            }
-            else if (!string.IsNullOrWhiteSpace(options.Code)) {
-                source = new SourceUnit(Utilities.TrimMatchingChars(options.Code, '"'));
-            }
-            else {
-                Logger.Error("Neither code nor path to source file not specified.\n" + helpHint);
-                return;
-            }
-
-            if (!Enum.TryParse(options.Mode, true, out SourceProcessingMode processingMode)) {
-                processingMode = SourceProcessingMode.Compile;
-            }
-
-            var processingOptions = SourceProcessingOptions.CheckIndentationConsistency;
-            if (options.Debug) {
-                processingOptions |= SourceProcessingOptions.SyntaxAnalysisDebugOutput;
-            }
-
-            if (options.AstJson) {
-                processingOptions |= SourceProcessingOptions.ShowAstJson;
-            }
-
-            if (options.Rewrite) {
-                processingOptions |= SourceProcessingOptions.RewriteFromAst;
-            }
-
-            // process source
-            Process(source, processingMode, processingOptions);
-        }
-
-        public static SourceProcessingOptions Options { get; private set; }
 
         public static void Process(
-            SourceUnit              unit,
-            SourceProcessingMode    mode,
-            SourceProcessingOptions options = SourceProcessingOptions.None
+            SourceUnit        src,
+            ProcessingMode    mode,
+            ProcessingOptions options = ProcessingOptions.None
         ) {
-            unit.ProcessingMode = mode;
-            unit.Options        = Options = options;
-            Process(unit);
-            unit.ProcessingMode = SourceProcessingMode.None;
-            unit.Options        = Options = SourceProcessingOptions.None;
+            src.ProcessingMode = mode;
+            src.Options        = options;
+            Process(src);
+            src.ProcessingMode = ProcessingMode.None;
+            src.Options        = ProcessingOptions.None;
         }
 
-        private static void Process(SourceUnit unit) {
-            Logger.Task($"Processing '{unit.SourceFileName}'");
+        private static void Process(SourceUnit src) {
+            Logger.Task($"Processing '{src.SourceFilePath.Name}'");
 
-            if (string.IsNullOrWhiteSpace(unit.Code)) {
+            if (string.IsNullOrWhiteSpace(src.TextStream.Text)) {
                 Logger.Error("Source is empty. Processing aborted.");
-                FinishProcessing(unit);
+                FinishProcessing(src);
                 return;
             }
 
-            // [1] Lexical analysis
-            if (Verbose) {
-                Logger.Step("Tokens list generation");
-            }
-
-            new Lexer(unit).Process();
-            if (unit.ProcessingMode == SourceProcessingMode.Lex) {
-                FinishProcessing(unit);
+            Logger.Step("Tokens list generation");
+            LexicalAnalysis(src);
+            if (src.ProcessingMode == ProcessingMode.Lex) {
+                FinishProcessing(src);
                 return;
             }
 
-            // [2] Parsing
-            if (Verbose) {
-                Logger.Step("Abstract Syntax Tree generation");
-            }
-
-            unit.Ast.Parse();
-            if (unit.ProcessingMode == SourceProcessingMode.Parsing) {
-                FinishProcessing(unit);
+            Logger.Step("Abstract Syntax Tree generation");
+            src.Ast.Parse();
+            if (src.ProcessingMode == ProcessingMode.Parsing) {
+                FinishProcessing(src);
                 return;
             }
 
-            // [n] Code generation
-            GenerateCode(unit);
-            FinishProcessing(unit);
+            Logger.Step("Syntax tree reducing");
+            Traversing.Traverse(src.Ast, Traversing.Walker);
+            if (src.ProcessingMode == ProcessingMode.Traversing) {
+                FinishProcessing(src);
+                return;
+            }
+
+            GenerateCode(src);
+            FinishProcessing(src);
         }
 
-        private static async void GenerateCode(SourceUnit unit) {
-            if (unit.Blames.Any(e => e.Severity == BlameSeverity.Error)) {
-                return;
+        public static void LexicalAnalysis(SourceUnit src) {
+            while (true) {
+                Token token = new Token(src).Read();
+                if (token != null) {
+                    src.TokenStream.Tokens.Add(token);
+                    if (src.ProcessTerminators.Contains(token.Type)) {
+                        break;
+                    }
+                }
             }
 
-            switch (unit.ProcessingMode) {
-            case SourceProcessingMode.Interpret: {
-                Logger.Task("Interpretation");
+            foreach (Token mismatch in src.MismatchingPairs) {
+                LangException.Report(BlameType.MismatchedBracket, mismatch);
+            }
+        }
+
+        private static async void GenerateCode(SourceUnit src) {
+            switch (src.ProcessingMode) {
+            case ProcessingMode.Interpret: {
                 try {
-                    string csCode = unit.Ast.ToCSharp().ToFullString();
-                    if (unit.Options.HasFlag(SourceProcessingOptions.SyntaxAnalysisDebugOutput)) {
-                        Logger.Step("Converter debug output:");
+                    var cb = new CodeWriter(ProcessingMode.ConvertCS);
+                    src.Ast.ToCSharp(cb);
+                    string csCode = cb.ToString();
+                    if (src.Options.HasFlag(ProcessingOptions.SyntaxAnalysisDebugOutput)) {
+                        Logger.Step("Transpiler output:");
                         Logger.Log(csCode);
                     }
 
+                    Logger.Task("Interpretation");
                     Logger.Step("Program output:");
                     ScriptState result = await CSharpScript.RunAsync(
                         csCode,
                         ScriptOptions.Default.AddReferences(Spec.CSharp.DefaultImports)
                     );
-                    ConsoleUI.WriteLine();
-                    Logger.Step("Result: " + (result.ReturnValue ?? "<nothing>"));
+                    Logger.Step("\nResult: " + (result.ReturnValue ?? "<nothing>"));
                 }
                 catch (CompilationErrorException e) {
                     Logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
@@ -317,42 +132,63 @@ namespace Axion.Core {
                 break;
             }
 
-            case SourceProcessingMode.ConvertCS: {
-                Logger.Warn("Conversion to 'C#' is not fully implemented yet");
-                Logger.Log(unit.Ast.ToCSharp().ToFullString());
+            case ProcessingMode.ConvertCS: {
+                Logger.Warn("Conversion to C# is not fully implemented yet");
+                var cb = new CodeWriter(ProcessingMode.ConvertCS);
+                cb.Write(src.Ast);
+                string code = cb.ToString();
+                Logger.Step("Transpiler output");
+                Logger.Log(code);
+                try {
+                    Logger.Step("Program output:");
+                    ScriptState result = await CSharpScript.RunAsync(
+                        code,
+                        ScriptOptions.Default.AddReferences(Spec.CSharp.DefaultImports)
+                    );
+                    Logger.Step("\nResult: " + (result.ReturnValue ?? "<nothing>"));
+                }
+                catch (CompilationErrorException e) {
+                    Logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
+                }
+
                 break;
             }
-
-            case SourceProcessingMode.ConvertC: {
-                Logger.Error("Conversion to 'C' is not implemented yet");
-                break;
-            }
-
             default: {
-                Logger.Error($"'{unit.ProcessingMode:G}' mode not implemented yet");
+                try {
+                    Logger.Warn($"'{src.ProcessingMode:G}' mode is not fully implemented yet");
+                    var cb = new CodeWriter(src.ProcessingMode);
+                    cb.Write(src.Ast);
+                    string code = cb.ToString();
+                    Logger.Step("Transpiler output");
+                    Logger.Log(code);
+                }
+                catch (Exception ex) {
+                    Logger.Error($"'{src.ProcessingMode:G}' failed:");
+                    Logger.Log(ex.ToString());
+                }
+
                 break;
             }
             }
         }
 
-        private static void FinishProcessing(SourceUnit unit) {
-            if (unit.Options.HasFlag(SourceProcessingOptions.ShowAstJson)) {
-                ConsoleUI.WriteLine(AstToMinifiedJson(unit), new AxionSyntaxHighlighter());
-            }
+        private static void FinishProcessing(SourceUnit src) {
+            if (src.Options.HasFlag(ProcessingOptions.SyntaxAnalysisDebugOutput)) {
+                string astJson = AstToMinifiedJson(src);
+                Logger.Info(astJson);
+                Logger.Step($"Saving debug info --> {src.DebugFilePath}");
+                if (!src.DebugFilePath.Exists) {
+                    Utilities.ResolvePath(src.DebugFilePath.Directory.FullName);
+                    using (src.DebugFilePath.Create()) { }
+                }
 
-            if (unit.Options.HasFlag(SourceProcessingOptions.RewriteFromAst)) {
-                ConsoleUI.WriteLine(AstBackToSource(unit), new AxionSyntaxHighlighter());
-            }
-
-            if (unit.Options.HasFlag(SourceProcessingOptions.SyntaxAnalysisDebugOutput)) {
-                Logger.Step($"Saving debugging information to '{unit.DebugFilePath}'");
-                SaveDebugInfoToFile(unit);
+                File.WriteAllText(src.DebugFilePath.FullName, astJson);
             }
 
 
             var errCount = 0;
-            foreach (LanguageException e in unit.Blames) {
-                e.Print(unit);
+            foreach (LangException e in src.Blames) {
+                e.Print();
                 if (e.Severity == BlameSeverity.Error) {
                     errCount++;
                 }
@@ -365,74 +201,14 @@ namespace Axion.Core {
             );
         }
 
-        #region Debug information
-
         /// <summary>
-        ///     Saves processed source debug
-        ///     information in JSON format.
+        ///     Serializes generated AST to minified-JSON format.
         /// </summary>
-        public static void SaveDebugInfoToFile(SourceUnit unit) {
-            File.WriteAllText(
-                unit.DebugFilePath,
-                JsonConvert.SerializeObject(unit, JsonSerializer)
-            );
-        }
-
-        /// <summary>
-        ///     Prints generated AST in JSON format to console.
-        /// </summary>
-        public static string AstToMinifiedJson(SourceUnit unit) {
-            string json = JsonConvert.SerializeObject(unit.Ast, JsonSerializer);
+        public static string AstToMinifiedJson(SourceUnit src) {
+            string json = JsonConvert.SerializeObject(src.Ast, JsonHelpers.Settings);
             json = Regex.Replace(json, @"\$type.+?(\w+?),.*\""", "$type\": \"$1\"");
             json = json.Replace("  ", "   ");
             return json;
-        }
-
-        private static string AstBackToSource(SourceUnit unit) {
-            var code = new CodeBuilder(OutLang.Axion);
-            code.Write(unit.Ast);
-            return code.ToString();
-        }
-
-        #endregion
-    }
-
-    public class CompilerJsonContractResolver : DefaultContractResolver {
-        protected override JsonProperty CreateProperty(
-            MemberInfo          member,
-            MemberSerialization memberSerialization
-        ) {
-            JsonProperty property = base.CreateProperty(member, memberSerialization);
-
-            Predicate<object> shouldSerialize = property.ShouldSerialize;
-            property.ShouldSerialize = obj =>
-                (shouldSerialize == null || shouldSerialize(obj))
-             && !IsEmptyCollection(property, obj);
-            return property;
-        }
-
-        private static bool IsEmptyCollection(JsonProperty property, object target) {
-            try {
-                object value = property.ValueProvider.GetValue(target);
-                if (value is ICollection collection && collection.Count == 0) {
-                    return true;
-                }
-
-                if (!typeof(IEnumerable).IsAssignableFrom(property.PropertyType)) {
-                    return false;
-                }
-
-                PropertyInfo countProp = property.PropertyType.GetProperty("Count");
-                if (countProp == null) {
-                    return false;
-                }
-
-                var count = (int) countProp.GetValue(value, null);
-                return count == 0;
-            }
-            catch {
-                return false;
-            }
         }
     }
 }

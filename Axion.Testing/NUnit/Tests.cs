@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Axion.Core;
-using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Source;
+using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Source;
 using Axion.Core.Specification;
 using NUnit.Framework;
 
@@ -94,7 +94,7 @@ namespace Axion.Testing.NUnit {
 
         private void ScanSources(DirectoryInfo dir) {
             foreach (FileInfo file in dir.EnumerateFiles()) {
-                if (file.Extension == Compiler.SourceFileExtension) {
+                if (file.Extension == Compiler.SourceFileExt) {
                     SourceFiles.Add(file);
                 }
             }
@@ -104,18 +104,23 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        internal static SourceUnit MakeSourceFromFile([CallerMemberName] string fileName = null) {
-            return new SourceUnit(
-                new FileInfo(Path.Combine(InPath, fileName + Compiler.SourceFileExtension)),
-                OutPath + fileName + TestExtension
+        internal static SourceUnit MakeSourceFromFile([CallerMemberName]
+                                                      string fileName = null) {
+            return SourceUnit.FromFile(
+                new FileInfo(Path.Combine(InPath, fileName + Compiler.SourceFileExt)),
+                new FileInfo(OutPath + fileName + TestExtension)
             );
         }
 
         internal static SourceUnit MakeSourceFromCode(
-            string                    code,
-            [CallerMemberName] string fileName = null
+            string code,
+            [CallerMemberName]
+            string fileName = null
         ) {
-            return new SourceUnit(code, Path.Combine(OutPath, fileName + TestExtension));
+            return SourceUnit.FromCode(
+                code,
+                new FileInfo(Path.Combine(OutPath, fileName + TestExtension))
+            );
         }
 
         /// <summary>
@@ -136,15 +141,6 @@ namespace Axion.Testing.NUnit {
                 Assert.That(
                     Spec.Keywords.ContainsValue(type),
                     "Keyword '" + kw + "' is not defined in specification."
-                );
-            }
-
-            // check blames completeness
-            foreach (string blame in Enum.GetNames(typeof(BlameType))) {
-                Enum.TryParse(blame, out BlameType type);
-                Assert.That(
-                    Spec.Blames.ContainsKey(type),
-                    "Blame '" + blame + "' is not defined in specification."
                 );
             }
         }

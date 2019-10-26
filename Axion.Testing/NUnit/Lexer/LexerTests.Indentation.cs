@@ -1,13 +1,13 @@
 using System;
 using Axion.Core;
-using Axion.Core.Processing.Source;
+using Axion.Core.Source;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Lexer {
     public partial class LexerTests {
         [Test]
-        public void IsOK_TabsIndentation() {
-            SourceUnit unit = MakeSourceFromCode(
+        public void TestTabsIndentation() {
+            SourceUnit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "i = 0",
@@ -20,13 +20,13 @@ namespace Axion.Testing.NUnit.Lexer {
                     "\ti++"
                 )
             );
-            LexIndent(unit);
-            Assert.AreEqual(0, unit.Blames.Count);
+            LexIndent(src);
+            Assert.AreEqual(0, src.Blames.Count);
         }
 
         [Test]
-        public void IsOK_SpacesIndentation() {
-            SourceUnit unit = MakeSourceFromCode(
+        public void TestSpacesIndentation() {
+            SourceUnit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "i = 0",
@@ -39,13 +39,13 @@ namespace Axion.Testing.NUnit.Lexer {
                     "    i++"
                 )
             );
-            LexIndent(unit);
-            Assert.AreEqual(0, unit.Blames.Count);
+            LexIndent(src);
+            Assert.AreEqual(0, src.Blames.Count);
         }
 
         [Test]
-        public void IsWarns_MixedIndentation() {
-            SourceUnit unit = MakeSourceFromCode(
+        public void TestWarnMixedIndentation() {
+            SourceUnit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "i = 0",
@@ -58,17 +58,17 @@ namespace Axion.Testing.NUnit.Lexer {
                     "\ti++"
                 )
             );
-            LexIndent(unit);
+            LexIndent(src);
             // 2 blames for mixed indentation
-            Assert.AreEqual(2, unit.Blames.Count);
+            Assert.AreEqual(2, src.Blames.Count);
         }
 
         private static void LexIndent(SourceUnit source) {
             Compiler.Process(
                 source,
-                SourceProcessingMode.Lex,
-                SourceProcessingOptions.SyntaxAnalysisDebugOutput
-              | SourceProcessingOptions.CheckIndentationConsistency
+                ProcessingMode.Lex,
+                ProcessingOptions.SyntaxAnalysisDebugOutput
+              | ProcessingOptions.CheckIndentationConsistency
             );
         }
     }

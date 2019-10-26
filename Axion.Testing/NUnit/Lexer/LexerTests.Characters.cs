@@ -1,31 +1,31 @@
-using Axion.Core.Processing.Source;
+using Axion.Core.Source;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Lexer {
     public partial class LexerTests {
         [Test]
-        public void IsOK_ValidCharacterLiteral() {
+        public void TestValidCharacterLiteral() {
             SourceUnit source = MakeSourceFromCode("x = `q`");
             Lex(source);
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
-        public void IsOK_EscapedCharacterLiteral() {
+        public void TestEscapedCharacterLiteral() {
             SourceUnit source = MakeSourceFromCode("tab = `\\t`");
             Lex(source);
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
-        public void IsOK_SmileCharacterLiteral() {
+        public void TestSmileCharacterLiteral() {
             SourceUnit source = MakeSourceFromCode("x = `✌`");
             Lex(source);
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
-        public void IsFail_EmptyCharacterLiteral() {
+        public void TestFailEmptyCharacterLiteral() {
             SourceUnit source = MakeSourceFromCode("x = ``");
             Lex(source);
             // 1) empty
@@ -33,7 +33,7 @@ namespace Axion.Testing.NUnit.Lexer {
         }
 
         [Test]
-        public void IsFail_LongCharacterLiteral() {
+        public void TestFailLongCharacterLiteral() {
             SourceUnit source = MakeSourceFromCode("x = `abc`");
             Lex(source);
             // 1) too long
@@ -41,12 +41,10 @@ namespace Axion.Testing.NUnit.Lexer {
         }
 
         [Test]
-        public void IsFail_UnclosedCharacterLiteral() {
+        public void TestFailUnclosedCharacterLiteral() {
             SourceUnit source = MakeSourceFromCode("x = `abcdef\n");
             Lex(source);
-            // 1) too long
-            // 2) unclosed
-            Assert.AreEqual(2, source.Blames.Count);
+            Assert.AreEqual(1, source.Blames.Count);
         }
     }
 }

@@ -1,74 +1,57 @@
-﻿using Axion.Core.Specification;
+﻿using System.Linq;
+using Axion.Core.Source;
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
-    /// <summary>
-    ///     Represents an 'operator' literal.
-    /// </summary>
     public class OperatorToken : Token {
-        internal OperatorProperties Properties;
+        public int Precedence { get; private set; }
 
-        public OperatorToken(string value, Position startPosition = default)
-            : base(
-                TokenType.Invalid,
-                value,
-                startPosition
-            ) {
-            Spec.Operators.TryGetValue(Value, out Properties);
-            // overrides 'Invalid'
-            Type = Properties.Type;
-        }
+        public InputSide Side { get; set; }
 
-        public OperatorToken(TokenType type) : this(type.GetValue()) { }
-    }
-
-    public struct OperatorProperties {
-        [JsonProperty] internal InputSide InputSide;
-
-        public readonly bool      AllowOverload;
-        public readonly int       Precedence;
-        public readonly TokenType Type;
-
-        internal OperatorProperties(
-            TokenType type,
-            int       precedence,
-            InputSide inputSide     = InputSide.Both,
-            bool      allowOverload = false
-        ) {
-            Type          = type;
-            Precedence    = precedence;
-            InputSide     = inputSide;
-            AllowOverload = allowOverload;
-        }
-
-        public override bool Equals(object obj) {
-            if (obj is OperatorProperties properties) {
-                return Equals(properties);
+        public OperatorToken(
+            SourceUnit source,
+            string     value       = "",
+            string     endingWhite = "",
+            TokenType  tokenType   = TokenType.Unknown,
+            int        precedence  = -1,
+            InputSide  side        = InputSide.Unknown,
+            Location   start       = default,
+            Location   end         = default
+        ) : base(source, tokenType, value, endingWhite: endingWhite, start: start, end: end) {
+            if (tokenType != TokenType.Unknown) {
+                Value = Content = Spec.Operators.First(kvp => kvp.Value.Item1 == tokenType).Key;
+            }
+            else if (!string.IsNullOrWhiteSpace(Value)) {
+                Type = Spec.Operators[Value].Item1;
+            }
+            else {
+                Precedence = -1;
+                Side       = InputSide.Unknown;
+                return;
             }
 
-            return false;
+            Precedence = precedence == -1
+                ? Spec.Operators[Value].Item2
+                : precedence;
+            Side = side == InputSide.Unknown
+                ? Spec.Operators[Value].Item3
+                : side;
         }
 
-        public bool Equals(OperatorProperties other) {
-            return InputSide     == other.InputSide
-                && AllowOverload == other.AllowOverload
-                && Precedence    == other.Precedence
-                && Type          == other.Type;
-        }
-
-        public override int GetHashCode() {
-            unchecked {
-                int hashCode = AllowOverload.GetHashCode();
-                hashCode = (hashCode * 397) ^ Precedence;
-                hashCode = (hashCode * 397) ^ (int) Type;
-                return hashCode;
+        public override Token Read() {
+            AppendNext(true, Spec.OperatorsKeys);
+            if (Value != null) {
+                (Type, Precedence, Side) = Spec.Operators[Value];
             }
+
+            return this;
         }
     }
 
     [JsonConverter(typeof(StringEnumConverter))]
-    internal enum InputSide {
+    public enum InputSide {
         Unknown,
         Both,
         Right,

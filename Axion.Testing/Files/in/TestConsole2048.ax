@@ -1,0 +1,211 @@
+c = Console
+
+# @static
+class Program
+    grid = array[int](4, 4)
+    undo-grid = array[int](4, 4)
+    score = 0
+    undo-score = 0
+    has-undone = true
+    max-int = 2048
+    grid-size = 4
+    max-undo = 1
+
+    fn intro
+        c.println("""
+            #################################
+                       Console2048           
+            #################################
+            Use the arrow keys to move around
+            Type 'H' for help
+            Combine numbers to get to 2048!
+            #################################
+            Press any key to start...""".trim-indent()
+        )
+        c.read-key()
+        c.clear()
+
+    fn main (args: str[])
+        background-before = c.background-color
+        foreground-before = c.foreground-color
+
+        c.background-color = ConsoleColor.white
+        c.foreground-color = ConsoleColor.black
+        c.clear()
+
+        intro()
+
+        input = ConsoleKey.a
+        do-add = true
+        do-write = true
+
+        add-number()
+
+        while true
+            # try
+            if do-add
+                add-number()
+            else
+                do-add = true
+
+            if do-write
+                c.clear()
+                c.println(f"score: {score} | Undos: {max-undo}")
+                write-grid()
+            else
+                do-write = true
+
+            c.println()
+            c.write(">: ")
+            
+            c.read-key().key match
+            ConsoleKey.left-arrow:
+                do-add = do-write = move-grid(0, 0)
+            ConsoleKey.right-arrow:
+                do-add = do-write = move-grid(2, 2)
+            ConsoleKey.down-arrow:
+                do-add = do-write = move-grid(1, 3)
+            ConsoleKey.up-arrow:
+                do-add = do-write = move-grid(3, 1)
+            ConsoleKey.u:
+                c.println()
+                if max-undo != 0
+                    if not has-undone
+                        grid = undo-grid
+                        score = undo-score
+                        has-undone = true
+                        max-undo--
+                        do-add = false
+                    else
+                        c.println("You may only undo once at a time.")
+                else
+                    c.println("You can't undo.")
+                    do-add = do-write = false
+            ConsoleKey.h:
+                c.println("""
+                    Console 2048
+                    Use arrows to move""".trim-indent()
+                )
+                do-add = do-write = false
+            _:
+                c.println("""
+                    That is not an acceptable input.
+                    Use the arrow keys to move around.""".trim-indent()
+                )
+                do-add = do-write = false
+            #except ex
+            #    c.clear()
+            #    c.println(ex.message)
+            #    c.println("Your score was " + score)
+            #    break
+
+
+        c.println("Press any key to continue.")
+        c.read-key()
+
+        c.background-color = background-before
+        c.foreground-color = foreground-before
+        c.clear()
+
+    fn move-grid (r1: int, r2: int) -> bool
+        has-undone = false
+        undo-grid = grid
+        undo-score = score
+
+        rotate-grid(r1)
+        for row in 0...grid-size
+            shift-grid(row)
+            for col in 0...grid-size - 1
+                if grid[row, col] == grid[row, col + 1]
+                    n = grid[row, col + 1] * 2
+                    grid[row, col] = n
+                    grid[row, col + 1] = 0
+
+                    score += n
+                    if n == max-int
+                        raise (Exception("You won!"))
+
+            shift-grid(row)
+        rotate-grid(r2)
+
+        return are-grids-unequal()
+
+    fn are-grids-unequal -> bool
+        toReturn = false
+
+        for i in 0...grid-size
+            for ii in 0...grid-size
+                if grid[i, ii] != undo-grid[i, ii]
+                    toReturn = true
+
+        return toReturn
+
+    fn rotate-grid (n: int)
+        for repeat in 0...n
+            newGrid = int [grid-size, grid-size]
+
+            for i in grid-size - 1...0
+                for ii in 0...grid-size
+                    newGrid[ii, grid-size - (1 + i)] = grid[i, ii]
+
+            grid = newGrid
+
+    fn shift-grid (i: int)
+        for n in 0...grid-size
+            for col in n...0
+                if grid[i, col - 1] == 0
+                    grid[i, col - 1] = grid[i, col]
+                    grid[i, col] = 0
+                    if grid[i, col - 1] != 0
+                        col++
+
+    fn add-number
+        isOpen = false
+        for i in 0...grid-size
+            for ii in 0...grid-size
+                if grid[i, ii] == 0
+                    isOpen = true
+
+        if isOpen
+            rnd = Random()
+            place = (rnd.next(0, grid-size), rnd.next(0, grid-size))
+
+            while grid[place[0], place[1]] != 0
+                place = (rnd.next(0, grid-size), rnd.next(0, grid-size))
+
+            array = [2, 2, 2, 4]
+            grid[place[0], place[1]] = array[rnd.next(0, array.length)]
+        else
+            raise (Error("Game over."))
+
+    fn write-grid
+        c.println()
+        total-spaces = max-int.to-str().length
+
+        for i in 0...grid-size
+            for ii in 0...grid-size
+                c.write(" | ")
+                if grid[i, ii] != 0
+                    write-char(' ', total-spaces - grid[i, ii].to-str().length)
+                    write-color(grid[i, ii], grid[i, ii].to-str().length)
+                else
+                    write-char(' ', total-spaces)
+            c.println()
+            write-char('-', (3 + total-spaces) * grid-size)
+            c.println()
+
+
+    fn write-char (c: char, n: int)
+        for i in 0...n
+            c.write(c)
+
+    fn write-color (value: int, length: int)
+        c.foreground-color = length match
+        1: ConsoleColor.dark-gray
+        2: ConsoleColor.dark-red
+        3: ConsoleColor.red
+        4: ConsoleColor.dark-magenta
+        _: ConsoleColor.magenta
+
+        c.write(value)
+        c.foreground-color = ConsoleColor.black

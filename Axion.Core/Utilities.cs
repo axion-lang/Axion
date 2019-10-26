@@ -2,24 +2,36 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Text;
 
 namespace Axion.Core {
-    internal static class Utilities {
+    public static class Utilities {
         private static readonly DateTimeFormatInfo dateTimeFormat =
             new CultureInfo("en-US").DateTimeFormat;
 
-        private const string timedFileNameFormat = "MMM_dd__HH_mm_ss";
+        private const string timedFileNameFormat = "MMM-dd_HH-mm-ss";
 
         /// <summary>
         ///     Creates a file name from current date and time
-        ///     in format: 'yyyy-MMM-dd_HH-mm-ss'.
+        ///     in format: 'yyyy-MMM-dd_HH-mm-ss'.W
         /// </summary>
         /// <param name="dt"></param>
         /// <returns>file name without extension.</returns>
         internal static string ToFileName(this DateTime dt) {
             return dt.ToString(timedFileNameFormat, dateTimeFormat);
+        }
+
+        public static void ResolvePath(string path) {
+            if (!Path.IsPathRooted(path)) {
+                path = Path.GetFullPath(path);
+            }
+
+            if (!Directory.Exists(path)) {
+                Directory.CreateDirectory(path);
+            }
         }
 
         public static BigInteger RadixLess10ToBigInt(string value, int toRadix) {
@@ -39,6 +51,38 @@ namespace Axion.Core {
             return res;
         }
 
+        public static int? ParseInt(string value, int radix) {
+            var result = 0;
+            foreach (char c in value) {
+                int? oneChar = HexValue(c);
+                if (oneChar != null && oneChar < radix) {
+                    result = result * radix + (int) oneChar;
+                }
+                else {
+                    return null;
+                }
+            }
+
+            return result;
+        }
+
+        public static int? HexValue(char from) {
+            if (char.IsDigit(from)) {
+                int.TryParse(from.ToString(), out int x);
+                return x;
+            }
+
+            if ('a' <= from && from <= 'z') {
+                return from - 'a' + 10;
+            }
+
+            if ('A' <= from && from <= 'Z') {
+                return from - 'A' + 10;
+            }
+
+            return null;
+        }
+
         public static T[] Union<T>(this IEnumerable<T> collection1, params T[] collection2) {
             return Enumerable.Union(collection1, collection2).ToArray();
         }
@@ -49,7 +93,7 @@ namespace Axion.Core {
         ///     Splits user command line input to arguments.
         /// </summary>
         /// <returns>Collection of arguments passed into command line.</returns>
-        internal static IEnumerable<string> SplitLaunchArguments(string input) {
+        public static IEnumerable<string> SplitLaunchArguments(string input) {
             var inQuotes = false;
             return Split(
                        input,
@@ -84,6 +128,15 @@ namespace Axion.Core {
             }
 
             return input;
+        }
+
+        public static string Multiply(this string source, int multiplier) {
+            var sb = new StringBuilder(multiplier * source.Length);
+            for (var i = 0; i < multiplier; i++) {
+                sb.Append(source);
+            }
+
+            return sb.ToString();
         }
 
         #endregion

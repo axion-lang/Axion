@@ -1,80 +1,73 @@
-﻿using System;
-using Axion.Core.Processing.CodeGen;
-using Axion.Core.Specification;
+﻿using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Errors;
+using Axion.Core.Source;
 using static Axion.Core.Specification.Spec;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
-    /// <summary>
-    ///     Represents a 'comment' literal placed on multiple lines.
-    /// </summary>
     public class CommentToken : Token {
-        public bool IsSingleLine { get; }
-        public bool IsUnclosed { get; }
+        public bool IsMultiline { get; private set; }
+        public bool IsUnclosed { get; private set; }
 
         public CommentToken(
-            string   value,
-            Position startPosition = default,
-            bool     isSingleLine  = false,
-            bool     isUnclosed    = false
-        ) : base(TokenType.Comment, value, startPosition) {
-            IsUnclosed   = isUnclosed;
-            IsSingleLine = isSingleLine;
-
-            // compute position
-            int endCol;
-            if (IsSingleLine) {
-                endCol = Span.End.Column + CommentStart.Length;
-            }
-            else {
-                string[] lines = Value.Split(
-                    EndOfLines,
-                    StringSplitOptions.None
-                );
-                int commentMarkLength = MultiCommentStart.Length;
-                endCol = Span.End.Column;
-                if (lines.Length == 1) {
-                    if (isUnclosed) {
-                        endCol += commentMarkLength;
-                    }
-                    else {
-                        endCol += commentMarkLength * 2;
-                    }
-                }
-                else if (!isUnclosed) {
-                    endCol += commentMarkLength;
-                }
-            }
-
-            Span = new Span(Span.Start, (Span.End.Line, endCol));
+            SourceUnit source,
+            string     value       = "",
+            bool       isMultiline = false,
+            bool       isUnclosed  = false,
+            Location   start       = default,
+            Location   end         = default
+        ) : base(source, TokenType.Comment, value, start: start, end: end) {
+            IsUnclosed  = isUnclosed;
+            IsMultiline = isMultiline;
         }
 
-        internal override void ToAxionCode(CodeBuilder c) {
-            if (IsSingleLine) {
-                c.Write(CommentStart + Value + EndWhitespaces);
+        public CommentToken ReadOneLine() {
+            IsMultiline = false;
+            AppendNext(expected: OneLineCommentMark);
+            while (!Stream.AtEndOfLine) {
+                AppendNext(true);
             }
 
+            return this;
+        }
+
+        public CommentToken ReadMultiLine() {
+            IsMultiline = true;
+            AppendNext(expected: MultiLineCommentMark);
+            while (!Stream.PeekIs(MultiLineCommentMark)) {
+                if (Stream.PeekIs(Eoc)) {
+                    LangException.Report(BlameType.UnclosedMultilineComment, this);
+                    IsUnclosed = true;
+                    return this;
+                }
+
+                AppendNext(true);
+            }
+
+            AppendNext(expected: MultiLineCommentMark);
+            return this;
+        }
+
+        public override void ToAxion(CodeWriter c) {
+            if (IsMultiline) {
+                c.Write(MultiLineCommentMark + Content);
+                if (!IsUnclosed) {
+                    c.Write(MultiLineCommentMark);
+                }
+            }
             else {
-                c.Write(
-                    IsUnclosed
-                        ? MultiCommentStart + Value
-                        // closed
-                        : MultiCommentStart + Value + MultiCommentEnd
-                );
+                c.Write(OneLineCommentMark + Content);
             }
         }
 
-        internal override void ToCSharpCode(CodeBuilder c) {
-            if (IsSingleLine) {
-                c.Write("//" + Value);
+        public override void ToCSharp(CodeWriter c) {
+            if (IsMultiline) {
+                c.Write("/*" + Content);
+                if (!IsUnclosed) {
+                    c.Write("*/");
+                }
             }
-
             else {
-                c.Write(
-                    IsUnclosed
-                        ? "/*" + Value
-                        // closed
-                        : "/*" + Value + "*/"
-                );
+                c.Write("//" + Content);
             }
         }
     }

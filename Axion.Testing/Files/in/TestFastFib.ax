@@ -1,0 +1,10 @@
+x = false
+while x
+    y()
+    break
+    if a
+        break
+        if b
+            break
+nobreak
+    z()

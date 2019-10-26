@@ -1,0 +1,29 @@
+class Program
+    fn Root1 -> int
+        Console.WriteLine("Hello from One.Program.Root1(): " + self)
+        return 1
+
+    #[private, static]
+    fn Root2(x: int) -> int
+        #in:  x > 0
+        #out: x < 0
+        Console.WriteLine("Hello from Program.Root2(): " + self)
+        return x
+    
+    #invariant:
+    #	x != 99
+
+fn Root3 -> int
+    Console.WriteLine("Hello from Root3()")
+    return 3
+
+File.WriteAllText(
+    "E:\\Desktop\\test.txt",
+    "Hello from Axion!"
+)
+Console.ForegroundColor = ConsoleColor.Yellow
+"Hello from Main()" |> Console.WriteLine
+p = new Program()
+x = Root3()
++ p.Root2(100)
+x |> Console.WriteLine

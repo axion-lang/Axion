@@ -12,4 +12,8 @@
     <ProjectReference Include="..\Axion.Core\Axion.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.6.0" />
+  </ItemGroup>
+
 </Project>

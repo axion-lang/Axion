@@ -1,0 +1,108 @@
+@[macro]
+fn do-while (block: Block, condition)
+    syntax = bnf ("'do' block ('while' | 'until') condition")
+    if syntax[2] == 'while'
+        condition = {{ not $condition }}
+    return {{
+        while true {
+            $block.items
+            if $condition {
+                break
+            }
+        }
+    }}
+
+
+
+@[macro]
+fn _until (condition, block: Block)
+    syntax = bnf ("'until' condition block")
+    return {{
+        while not $condition {
+            $block.items
+        }
+    }}
+
+
+@[macro]
+fn _for-index (init, condition, step, block: Block)
+    syntax = bnf ("'for' init ',' condition ',' step block")
+    return {{
+        $init
+        while $condition {
+            $block.items
+            $step
+        }
+    }}
+
+
+@[macro]
+fn _unless (condition, block: Block)
+    syntax = bnf ("'unless' condition block")
+    return {{
+        if not $condition {
+            $block.items
+        }
+    }}
+
+
+@[macro]
+fn init-list (items: Seq[Expr])
+    # <- [ 1, 2, 3, 4, 5 ]
+    # -> Set(1, 2, 3, 4, 5)
+    #
+    syntax = bnf ("'[' [items {',' items} {',']}] ']'")
+    args = List()
+    i = 0
+
+    while true
+        args.append(items[i])
+        if i != items.len - 1
+            args.append(Token(','))
+        else
+            break
+        i++
+    return {{ List($items) }}
+
+
+@[macro]
+fn init-set (items: Seq[Expr])
+    # <- { 1, 2, 3, 4, 5 }
+    # -> Set(1, 2, 3, 4, 5)
+    #
+    syntax = bnf ("'{' items {',' items} {',']} '}'")
+    args = List()
+    i = 0
+    while true
+        args.append(items[i])
+        if i != items.len - 1
+            args.append(Token(','))
+        else
+            break
+        i++
+    return {{ Set($items) }}
+
+
+@[macro]
+fn init-map (keys: Seq[Expr], values: Seq[Expr])
+    # <- { 'a': 1, 'b': 2, 'c': 3, ... }
+    # -> Map(('a', 1), ('b', 2), ('c', 3), ...)
+    #
+    syntax = bnf ("'{' [keys ':' values {',' keys ':' values} {',']}] '}'")
+    args = List()
+    i = 0
+    while true
+        args.append(TupleExpr(keys[i], values[i]))
+        if i != items.len - 1
+            args.append(Token(','))
+        else
+            break
+        i++
+    return {{ Map($args) }}
+
+
+@[macro]
+fn _match (value, checks: Seq[Expr], branches: Seq[Expr])
+    syntax = bnf ("value 'match' (checks ':' branches)+")
+    # TODO: implementation
+    return {{ }}

@@ -1,0 +1,91 @@
+# compound comparison
+x <= y <= z
+
+# interpolation
+x = f'Hello, {name}!'
+
+# 1-36 based number
+#x = 36::h87zw29::i32
+
+# unpacking
+() = Object.(a, b, c)
+
+Seq.each (["one", "two", "three"], fn (s): Console.print(s))
+
+for x in range(0, 10): Console.println(x)
+
+"this is a long text" |> capitalize |> shortenText
+
+person |> parseData |> getAge |> validateAge
+
+# branches
+if true { } else { 'Fail' |> Console.println }
+
+unless 0 == 0 { 'OK' |> Console.println } else { 'Fail' |> Console.println }
+
+if true { } else { 'Fail' |> Console.println }
+
+Console.println('true') if true else { Console.println('false') }
+
+x: int = 42 if Math.Max(0, 1) == 1
+
+Console.print(1 if 1 == (2 if 3 == 4 else 2) else 3)
+
+x = (1, 2) if 1 == 4 else (3, 4)
+
+x = a if a > b else b
+
+# loops
+for (x, y) in zip(1..9, 9..1): Console.print(x, y)
+
+for x in 1..9: Console.print(x)
+
+x = 0
+until x >= 10 { Console.println(x) }
+
+# 'with'
+# with A() as a, B() as b: suite
+# with f = file.open(r"C:\a.txt")
+#     f.write(0b1)
+
+# generators
+g = (yield i for i in 1..5)
+g = ((yield i) for i in 1..5)
+
+# async/await
+await (GetStringAsync(), GetGuidAsync())
+
+# multiple assignment
+x = y = z = 3
+
+# match
+x match
+Email (email, title, _):
+	'1'
+SMS (number, message):
+	'2'
+
+# obj initializer
+new Email[Address, Title]() { A = 2, B = 4 }
+
+let l = new List[Str]()
+
+# function as object
+x = fn (arg1: int, arg2: bool) { print(arg1, arg2) }
+
+x: Action = fn { Console.println('Hello, world!') }
+
+cube: Func[int] = fn (x: int) { x * x * x }
+
+cube: Func[BigInteger, BigInteger] = fn (x: BigInteger) { x * x * x }
+Console.Write(cube(9999999999999999999))
+
+# TODO: make test
+x = true
+y = false
+z = true
+a = x or y and z
+Console.println(x)
+Console.println(y)
+Console.println(z)
+Console.println(a)

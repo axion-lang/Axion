@@ -1,12 +1,12 @@
 using System;
-using Axion.Core.Processing.Source;
+using Axion.Core.Source;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Lexer {
     public partial class LexerTests {
         [Test]
-        public void IsOK_VariousStrings() {
-            SourceUnit unit = MakeSourceFromCode(
+        public void TestVariousStrings() {
+            SourceUnit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1 = \"regular literal\"",
@@ -61,47 +61,47 @@ namespace Axion.Testing.NUnit.Lexer {
                     "'''"
                 )
             );
-            Lex(unit);
+            Lex(src);
             // 2 warns for redundant prefixes for empty strings
-            Assert.AreEqual(2, unit.Blames.Count);
+            Assert.AreEqual(2, src.Blames.Count);
         }
 
         [Test]
-        public void IsFail_StringInvalidEscape() {
-            SourceUnit unit = MakeSourceFromCode(
+        public void TestFailStringInvalidEscape() {
+            SourceUnit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "'invalid -> \\m <- escape!'"
                 )
             );
-            Lex(unit);
-            Assert.AreEqual(1, unit.Blames.Count);
+            Lex(src);
+            Assert.AreEqual(1, src.Blames.Count);
         }
 
         [Test]
-        public void IsFail_StringTruncatedUEscape() {
-            SourceUnit unit = MakeSourceFromCode(
+        public void TestFailStringTruncatedUEscape() {
+            SourceUnit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "'invalid -> \\U5 <- escape!'",
                     "'invalid -> \\u2 <- escape!'"
                 )
             );
-            Lex(unit);
-            Assert.AreEqual(2, unit.Blames.Count);
+            Lex(src);
+            Assert.AreEqual(2, src.Blames.Count);
         }
 
         [Test]
-        public void IsOK_StringEscSequences() {
-            SourceUnit unit = MakeSourceFromCode(
+        public void TestStringEscSequences() {
+            SourceUnit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1e = \"esc: \\r\\n\\f\\t\\v\"",
-                    "str2e = 'esc: \\u2323\\U00123456\\x24'"
+                    "str2e = 'esc: \\u2323\\U0010ffff\\x24'"
                 )
             );
-            Lex(unit);
-            Assert.AreEqual(0, unit.Blames.Count);
+            Lex(src);
+            Assert.AreEqual(0, src.Blames.Count);
         }
     }
 }
