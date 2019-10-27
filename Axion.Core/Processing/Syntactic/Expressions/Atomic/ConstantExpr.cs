@@ -1,6 +1,7 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Traversal;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     /// <summary>
@@ -12,6 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     public class ConstantExpr : Expr, IAtomExpr {
         public Token Literal { get; set; }
 
+        [NoTraversePath]
         public override TypeName ValueType => Literal.ValueType;
 
         public ConstantExpr(

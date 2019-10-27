@@ -3,6 +3,7 @@ using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Traversal;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
@@ -19,6 +20,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public bool IsSimple => Qualifiers.Count == 1;
 
+        [NoTraversePath]
         public override TypeName ValueType => ((Expr) GetParentOfType<BlockExpr>().GetDefByName(ToString()))?.ValueType;
 
         public NameExpr(string name) {

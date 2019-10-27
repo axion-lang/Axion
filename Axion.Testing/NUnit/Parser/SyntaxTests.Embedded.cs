@@ -33,13 +33,6 @@ namespace Axion.Testing.NUnit.Parser {
                    .Select(s => ((VarDef) s).ValueType)
                    .ToArray();
             Assert.That(stmts.Length == 10);
-            Assert.DoesNotThrow(
-                () => {
-                    var type1   = (UnionTypeName) stmts[1];
-                    var union1R = (TupleTypeName) type1.Right;
-                    Assert.That(union1R.Types.Count == 0);
-                }
-            );
         }
 
         [Test]
@@ -61,11 +54,12 @@ namespace Axion.Testing.NUnit.Parser {
             Assert.That(stmts.Length == 4);
             Assert.DoesNotThrow(
                 () => {
-                    // // map
+                    // map
                     // var map = (BraceCollectionExpression) stmts[0].Right;
                     // Assert.That(map.Type == BraceCollectionType.Map);
                     // Assert.That(map.Expressions.Cast<MapItemExpression>().Count() == 3);
-                    // // set
+                    
+                    // set
                     // var set = (BraceCollectionExpression) stmts[1].Right;
                     // Assert.That(set.Type == BraceCollectionType.Set);
                     // var setValues = new[] {
@@ -78,17 +72,17 @@ namespace Axion.Testing.NUnit.Parser {
                     // }
 
                     // list
-                    //                    var lst = (ListInitializerExpression) stmts[2].Right;
-                    //                    var lstValues = new[] {
-                    //                        "1", "2", "3", "4", "5"
-                    //                    };
-                    //                    Assert.That(lst.Expressions.Count == lstValues.Length);
-                    //                    for (var i = 0; i < lst.Expressions.Count; i++) {
-                    //                        var constant = (ConstantExpression) lst.Expressions[i];
-                    //                        Assert.That(constant.Value.Value == lstValues[i]);
-                    //                    }
+                    // var lst = (ListInitializerExpression) stmts[2].Right;
+                    // var lstValues = new[] {
+                    //     "1", "2", "3", "4", "5"
+                    // };
+                    // Assert.That(lst.Expressions.Count == lstValues.Length);
+                    // for (var i = 0; i < lst.Expressions.Count; i++) {
+                    //     var constant = (ConstantExpression) lst.Expressions[i];
+                    //     Assert.That(constant.Value.Value == lstValues[i]);
+                    // }
 
-                    //tuple
+                    // tuple
                     var tup = (TupleExpr) stmts[3].Value;
                     var tupValues = new[] {
                         "1", "2", "three", "true"
@@ -115,7 +109,7 @@ namespace Axion.Testing.NUnit.Parser {
             a.Write(src2.Ast);
             var b = new CodeWriter(ProcessingMode.ConvertAxion);
             b.Write(src1.Ast);
-            //Assert.AreEqual(a.ToString(), b.ToString());
+            Assert.AreEqual(a.ToString(), b.ToString());
         }
     }
 }

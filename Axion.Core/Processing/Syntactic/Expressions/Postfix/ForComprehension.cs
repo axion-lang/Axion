@@ -52,6 +52,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public bool IsGenerator;
         public bool IsNested;
 
+        [NoTraversePath]
         public override TypeName ValueType => Target.ValueType;
 
         public ForComprehension(

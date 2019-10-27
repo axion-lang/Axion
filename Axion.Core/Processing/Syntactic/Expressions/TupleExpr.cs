@@ -1,6 +1,7 @@
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Traversal;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
@@ -20,6 +21,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref expressions, value);
         }
 
+        [NoTraversePath]
         public override TypeName ValueType => new TupleTypeName(
             this, new NodeList<TypeName>(
                 this,

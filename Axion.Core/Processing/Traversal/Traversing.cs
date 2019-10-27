@@ -25,7 +25,7 @@ namespace Axion.Core.Processing.Traversal {
             PropertyInfo[] exprProps = node.GetType().GetProperties();
             IEnumerable<PropertyInfo> childProps = exprProps.Where(
                 p => typeof(Expr).IsAssignableFrom(p.PropertyType)
-                  && !Attribute.IsDefined(p, typeof(NoTraversePathAttribute))
+                  && !Attribute.IsDefined(p, typeof(NoTraversePathAttribute), false)
                   || p.PropertyType.IsGenericType
                   && p.PropertyType
                       .GetInterfaces()
@@ -45,6 +45,9 @@ namespace Axion.Core.Processing.Traversal {
                 else {
                     try {
                         List<Span> list = ((IEnumerable) obj).OfType<Span>().ToList();
+                        // for loop required, expressions collection
+                        // can be modified.
+                        // ReSharper disable once ForCanBeConvertedToForeach
                         for (var i = 0; i < list.Count; i++) {
                             Traverse((Expr) list[i], walker);
                         }
@@ -58,6 +61,7 @@ namespace Axion.Core.Processing.Traversal {
 
         public static void Walker(ITreePath path) {
             if (path.Node is UnionTypeName unionTypeName) {
+                // LeftType | RightType -> Union[LeftType, RightType]
                 path.Node = new GenericTypeName(
                     path.Node.Parent,
                     new SimpleTypeName("Union"),
@@ -107,30 +111,27 @@ namespace Axion.Core.Processing.Traversal {
                 //         break
                 // nobreak
                 //     do3()
-                // <=========================>
-                // bool loop_X_nobreak = true;
-                // while (x)
-                // {
-                //     do();
-                //     if (a)
-                //     {
-                //         do2();
-                //         loop_X_nobreak = false;
-                //         break;
-                //     }
-                // }
-                // if (loop_X_nobreak)
-                // {
+                // <============================>
+                // loop_X_nobreak = true
+                // while x
+                //     do()
+                //     if a
+                //         do2()
+                //         loop_X_nobreak = false
+                //         break
+                // if loop_X_nobreak
                 //     do3()
-                // }
                 var block = path.Node.GetParentOfType<BlockExpr>();
                 (BlockExpr whileParentBlock, int whileIndex) = block.IndexOf(whileExpr);
                 var flagName = new NameExpr(block.CreateUniqueId("loop_{0}_nobreak"));
-                whileParentBlock.Items.Insert(whileIndex, new VarDef(
-                                                  path.Node,
-                                                  flagName,
-                                                  value: new ConstantExpr(path.Node, "true")
-                                              ));
+                whileParentBlock.Items.Insert(
+                    whileIndex,
+                    new VarDef(
+                        path.Node,
+                        flagName,
+                        value: new ConstantExpr(path.Node, "true")
+                    )
+                );
                 // index of while == whileIdx + 1
                 List<(BreakExpr item, BlockExpr itemParentBlock, int itemIndex)> breaks =
                     whileExpr.Block.FindItemsOfType<BreakExpr>();

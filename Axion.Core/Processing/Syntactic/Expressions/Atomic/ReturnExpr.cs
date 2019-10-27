@@ -1,5 +1,6 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Traversal;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -18,6 +19,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             set => SetNode(ref val, value);
         }
 
+        [NoTraversePath]
         public override TypeName ValueType => Value.ValueType;
 
         public ReturnExpr(

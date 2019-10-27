@@ -45,11 +45,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) { }
+        public override void ToAxion(CodeWriter c) {
+            if (Decorators.Count == 1) {
+                c.Write("@", Decorators[0], Target);
+            }
+            else {
+                c.Write("@[");
+                c.AddJoin(", ", Decorators);
+                c.WriteLine("]");
+                c.Write(Target);
+            }
+        }
 
         public override void ToCSharp(CodeWriter c) { }
 
-        public override void ToPython(CodeWriter c) { }
+        public override void ToPython(CodeWriter c) {
+            foreach (Expr decorator in Decorators) {
+                c.WriteLine("@", decorator);
+            }
+            c.Write(Target);
+        }
 
         public override void ToPascal(CodeWriter c) { }
     }

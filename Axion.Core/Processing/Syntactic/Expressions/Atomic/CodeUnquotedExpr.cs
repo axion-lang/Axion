@@ -1,6 +1,7 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Traversal;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     /// <summary>
@@ -17,6 +18,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             set => SetNode(ref val, value);
         }
 
+        [NoTraversePath]
         public override TypeName ValueType => Value.ValueType;
 
         public CodeUnquotedExpr(

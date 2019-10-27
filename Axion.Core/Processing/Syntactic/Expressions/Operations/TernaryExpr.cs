@@ -1,5 +1,6 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Traversal;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
@@ -31,6 +32,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             set => SetNode(ref falseExpr, value);
         }
 
+        [NoTraversePath]
         public override TypeName ValueType => TrueExpr.ValueType;
 
         internal TernaryExpr(

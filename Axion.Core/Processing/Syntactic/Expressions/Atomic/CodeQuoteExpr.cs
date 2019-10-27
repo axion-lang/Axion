@@ -1,6 +1,7 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Traversal;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
@@ -18,6 +19,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             set => SetNode(ref block, value);
         }
 
+        [NoTraversePath]
         public override TypeName ValueType => Block.ValueType;
 
         public CodeQuoteExpr(

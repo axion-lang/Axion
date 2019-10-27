@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.Core.Processing.Traversal;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
@@ -16,6 +17,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     public class TypeName : Expr {
         internal TypeName(Expr parent) : base(parent) { }
         protected TypeName() { }
+        
+        [NoTraversePath]
         public override TypeName ValueType => this;
 
         internal TypeName ParseTypeName() {
