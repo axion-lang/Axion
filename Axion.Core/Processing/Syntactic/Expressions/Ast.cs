@@ -48,6 +48,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         internal void Parse() {
             Macros.Add(
+                // 'do' block ('while'|'until') infix_expr
                 new MacroDef(
                     NewTokenPattern("do"),
                     new ExpressionPattern(typeof(BlockExpr)),
@@ -56,6 +57,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 )
             );
             Macros.Add(
+                // 'raise' type_name ['(' [infix_list] ')']
+                new MacroDef(
+                    NewTokenPattern("raise"),
+                    new ExpressionPattern(typeof(TypeName)),
+                    new OptionalPattern(
+                        NewTokenPattern("("),
+                        new OptionalPattern(new ExpressionPattern(Parsing.ParseInfixList)),
+                        NewTokenPattern(")")
+                    )
+                )
+            );
+            Macros.Add(
+                // 'until' infix_expr block
                 new MacroDef(
                     NewTokenPattern("until"),
                     new ExpressionPattern(Parsing.ParseInfix),
@@ -63,6 +77,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 )
             );
             Macros.Add(
+                // 'for' atom_expr 'in' infix_expr block
                 new MacroDef(
                     NewTokenPattern("for"),
                     new ExpressionPattern(Parsing.ParseAtom),
@@ -72,6 +87,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 )
             );
             Macros.Add(
+                // 'unless' infix_expr block [{'elif' infix_expr block} 'else' block]
                 new MacroDef(
                     NewTokenPattern("unless"),
                     new ExpressionPattern(Parsing.ParseInfix),
@@ -92,22 +108,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 )
             );
             Macros.Add(
+                // '[' [infix_list [',']] ']'
                 new MacroDef(
                     NewTokenPattern("["),
                     new OptionalPattern(
-                        new ExpressionPattern(Parsing.ParseInfix),
-                        new OptionalPattern(
-                            new MultiplePattern(
-                                NewTokenPattern(","),
-                                new ExpressionPattern(Parsing.ParseInfix)
-                            )
-                        ),
+                        new ExpressionPattern(Parsing.ParseInfixList),
                         new OptionalPattern(NewTokenPattern(","))
                     ),
                     NewTokenPattern("]")
                 )
             );
             Macros.Add(
+                // '{' [infix_expr ':' infix_expr {',' infix_expr ':' infix_expr}] '}'
                 new MacroDef(
                     NewTokenPattern("{"),
                     new OptionalPattern(
@@ -128,55 +140,66 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 )
             );
             Macros.Add(
+                // '{' [infix_list [',']] '}'
                 new MacroDef(
                     NewTokenPattern("{"),
                     new OptionalPattern(
-                        new ExpressionPattern(Parsing.ParseInfix),
-                        new OptionalPattern(
-                            new MultiplePattern(
-                                NewTokenPattern(","),
-                                new ExpressionPattern(Parsing.ParseInfix)
-                            )
-                        ),
+                        new ExpressionPattern(Parsing.ParseInfixList),
                         new OptionalPattern(NewTokenPattern(","))
                     ),
                     NewTokenPattern("}")
                 )
             );
             Macros.Add(
+                // 'new' (('(' infix_list ')') | (type_name ['(' infix_list ')'] ['{' infix_list '}']))
                 new MacroDef(
                     NewTokenPattern("new"),
-                    new ExpressionPattern(typeof(TypeName)),
-                    new OptionalPattern(
-                        NewTokenPattern("("),
-                        new OptionalPattern(
-                            new ExpressionPattern(Parsing.ParseInfix),
-                            new OptionalPattern(
-                                new MultiplePattern(
-                                    NewTokenPattern(","),
-                                    new ExpressionPattern(Parsing.ParseInfix)
-                                )
-                            )
+                    new OrPattern(
+                        new CascadePattern(
+                            NewTokenPattern("("),
+                            new OptionalPattern(new ExpressionPattern(Parsing.ParseInfixList)),
+                            NewTokenPattern(")")
                         ),
-                        NewTokenPattern(")")
-                    ),
-                    new OptionalPattern(
-                        NewTokenPattern("{"),
-                        new OptionalPattern(
-                            new ExpressionPattern(Parsing.ParseInfix),
+                        new CascadePattern(
+                            new ExpressionPattern(typeof(TypeName)),
                             new OptionalPattern(
-                                new MultiplePattern(
-                                    NewTokenPattern(","),
-                                    new ExpressionPattern(Parsing.ParseInfix)
-                                )
+                                NewTokenPattern("("),
+                                new OptionalPattern(new ExpressionPattern(Parsing.ParseInfixList)),
+                                NewTokenPattern(")")
                             ),
-                            new ExpressionPattern(Parsing.ParseInfix)
-                        ),
-                        NewTokenPattern("}")
+                            new OptionalPattern(
+                                NewTokenPattern("{"),
+                                new OptionalPattern(new ExpressionPattern(Parsing.ParseInfixList)),
+                                NewTokenPattern("}")
+                            ))
                     )
                 )
             );
+            // Macros.Add(
+            //     // slice: ':' [infix_expr] [':' [infix_expr]]
+            //     new MacroDef(
+            //         NewTokenPattern(":"),
+            //         new OptionalPattern(new ExpressionPattern(Parsing.ParseInfix)),
+            //         new OptionalPattern(
+            //             NewTokenPattern(":"),
+            //             new OptionalPattern(new ExpressionPattern(Parsing.ParseInfix))
+            //         )
+            //     )
+            // );
+            // Macros.Add(
+            //     // slice: infix_expr ':' [infix_expr] [':' [infix_expr]]
+            //     new MacroDef(
+            //         new ExpressionPattern(Parsing.ParseInfix),
+            //         NewTokenPattern(":"),
+            //         new OptionalPattern(new ExpressionPattern(Parsing.ParseInfix)),
+            //         new OptionalPattern(
+            //             NewTokenPattern(":"),
+            //             new OptionalPattern(new ExpressionPattern(Parsing.ParseInfix))
+            //         )
+            //     )
+            // );
             Macros.Add(
+                // expr 'match' (infix_expr ':' expr)+
                 new MacroDef(
                     new ExpressionPattern(typeof(Expr)),
                     NewTokenPattern("match"),

@@ -1,53 +1,54 @@
 # Класс пультов имеет ссылку на устройство, которым управляет.
 # Методы этого класса делегируют работу методам связанного
 # устройства.
-class Remote:
-    protected Device device
+class Remote
+    @protected
+    device: Device
 
-    initialize(Device self.device): pass
+    fn initialize (self.device)
 
-    togglePower():
-        if device.isEnabled():
+    fn togglePower
+        if device.isEnabled()
             device.disable()
         else:
             device.enable()
 
-    volumeDown():
+    fn volumeDown
         device.setVolume(device.getVolume() - 10)
 
-    volumeUp():
+    fn volumeUp
         device.setVolume(device.getVolume() + 10)
 
-    channelDown():
+    fn channelDown
         device.setChannel(device.getChannel() - 1)
 
-    channelUp():
+    fn channelUp
         device.setChannel(device.getChannel() + 1)
 
 
 # Вы можете расширять класс пультов, не трогая код устройств.
-class AdvancedRemote <- Remote:
-    mute():
+class AdvancedRemote <- Remote
+    fn mute
         device.setVolume(0)
 
 
 # Все устройства имеют общий интерфейс. Поэтому с ними может
 # работать любой пульт.
-interface Device:
-    bool Enabled
-    enable()
-    disable()
-    getVolume()
-    setVolume(percent)
-    getChannel()
-    setChannel(channel)
+@interface class Device
+    Enabled: bool
+    fn enable
+    fn disable
+    fn getVolume
+    fn setVolume (percent)
+    fn getChannel
+    fn setChannel (channel)
 
 
 # Но каждое устройство имеет особую реализацию.
-class Tv <- Device:
+class Tv <- Device
     # ...
 
-class Radio <- Device:
+class Radio <- Device
     # ...
 
 

@@ -28,9 +28,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             c.Write(Mark);
         }
 
-        public override void ToCSharp(CodeWriter c) {
-            c.Write(";");
-        }
+        public override void ToCSharp(CodeWriter c) { }
 
         public override void ToPython(CodeWriter c) {
             c.Write("pass");

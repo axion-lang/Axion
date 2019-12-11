@@ -1,7 +1,5 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Processing.Traversal;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     public class NameDef : Expr, IDefinitionExpr, IDecoratedExpr {

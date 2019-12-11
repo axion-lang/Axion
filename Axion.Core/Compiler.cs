@@ -155,7 +155,6 @@ namespace Axion.Core {
             }
             default: {
                 try {
-                    Logger.Warn($"'{src.ProcessingMode:G}' mode is not fully implemented yet");
                     var cb = new CodeWriter(src.ProcessingMode);
                     cb.Write(src.Ast);
                     string code = cb.ToString();
@@ -164,7 +163,7 @@ namespace Axion.Core {
                 }
                 catch (Exception ex) {
                     Logger.Error($"'{src.ProcessingMode:G}' failed:");
-                    Logger.Log(ex.ToString());
+                    Logger.Log(ex.Message);
                 }
 
                 break;

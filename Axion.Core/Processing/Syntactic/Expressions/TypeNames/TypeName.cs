@@ -25,7 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             // leading
             TypeName leftTypeName;
             // tuple
-            if (Stream.Peek.Is(OpenParenthesis)) {
+            if (Stream.PeekIs(OpenParenthesis)) {
                 TupleTypeName tuple = new TupleTypeName(this).Parse();
                 leftTypeName = tuple.Types.Count == 1
                     ? tuple.Types[0]
@@ -78,7 +78,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             do {
                 NameExpr name     = null;
                 int      startIdx = Stream.TokenIdx;
-                if (Stream.Peek.Is(Identifier)) {
+                if (Stream.PeekIs(Identifier)) {
                     name = new NameExpr(this).Parse();
                     if (!Stream.MaybeEat(OpAssign)) {
                         Stream.MoveAbsolute(startIdx);

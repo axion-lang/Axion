@@ -123,7 +123,7 @@ namespace Axion.Core {
         }
 
         public static string TrimMatchingChars(string input, char c) {
-            if (input.Length >= 2 && input[0] == c && input[input.Length - 1] == c) {
+            if (input.Length >= 2 && input[0] == c && input[^1] == c) {
                 return input.Substring(1, input.Length - 2);
             }
 

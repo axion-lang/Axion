@@ -37,7 +37,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             if (Expressions.Count > 0) {
                 MarkPosition(
                     Expressions[0],
-                    Expressions[Expressions.Count - 1]
+                    Expressions[^1]
                 );
             }
         }

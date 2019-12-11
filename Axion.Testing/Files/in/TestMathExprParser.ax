@@ -52,12 +52,10 @@ class Parser
             raise ValueError(f"Unexpected character '{self.peek}' at index {self.index}")
         return value
 
-    #@property
-    fn peek
+    fn peek.get
         return self.string[self.index:self.index + 1]
 
-    #@property
-    fn has-next
+    fn has-next.get
         return self.index < self.string.length
 
     fn next-is(value)

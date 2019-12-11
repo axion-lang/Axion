@@ -6,7 +6,7 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     /// <summary>
     ///     <c>
-    ///         binary_infix_expr:
+    ///         binary_expr:
     ///             expr OPERATOR expr;
     ///     </c>
     /// </summary>

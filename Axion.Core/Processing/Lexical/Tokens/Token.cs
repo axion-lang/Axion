@@ -29,7 +29,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         public Token(
             SourceUnit source,
-            TokenType  type        = Unknown,
+            TokenType  type        = None,
             string     value       = "",
             string     content     = "",
             string     endingWhite = "",
@@ -169,7 +169,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                     string.IsNullOrWhiteSpace(ln)
                  || ln.StartsWith(Spec.OneLineCommentMark)
                  || Source.MismatchingPairs.Count > 0
-                 || Source.TokenStream.Tokens[Source.TokenStream.Tokens.Count - 2] is OperatorToken op &&
+                 || Source.TokenStream.Tokens[^2] is OperatorToken op &&
                     op.Side == InputSide.Both
                  || Spec.NotIndentRegex.IsMatch(ln))
             ) {
@@ -226,7 +226,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                 return result;
             }
 
-            Source.TokenStream.Tokens[Source.TokenStream.Tokens.Count - 1].EndingWhite += Value;
+            Source.TokenStream.Tokens[^1].EndingWhite += Value;
             return null;
         }
 

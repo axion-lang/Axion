@@ -20,7 +20,6 @@ namespace Axion.Core.Processing {
             End    = end;
         }
 
-        // Region
         protected void MarkStart(Location start) {
             Start = start;
         }

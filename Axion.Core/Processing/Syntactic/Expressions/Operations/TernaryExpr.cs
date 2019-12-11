@@ -6,7 +6,7 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     /// <summary>
     ///     <c>
-    ///         conditional_infix_expr:
+    ///         ternary_expr:
     ///             expr_list ('if' | 'unless') infix_expr ['else' expr_list];
     ///     </c>
     /// </summary>

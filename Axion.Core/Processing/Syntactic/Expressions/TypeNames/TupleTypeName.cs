@@ -25,7 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             SetSpan(() => {
                 Stream.Eat(OpenParenthesis);
 
-                if (!Stream.Peek.Is(CloseParenthesis)) {
+                if (!Stream.PeekIs(CloseParenthesis)) {
                     do {
                         Types.Add(ParseTypeName());
                     } while (Stream.MaybeEat(Comma));

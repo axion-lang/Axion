@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Processing.Syntactic.Expressions;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic {
@@ -14,12 +13,12 @@ namespace Axion.Core.Processing.Syntactic {
         public Token Token =>
             TokenIdx > -1 && TokenIdx < Tokens.Count
                 ? Tokens[TokenIdx]
-                : Tokens[Tokens.Count - 1];
+                : Tokens[^1];
 
         private Token exactPeek =>
             TokenIdx + 1 < Tokens.Count
                 ? Tokens[TokenIdx     + 1]
-                : Tokens[Tokens.Count - 1];
+                : Tokens[^1];
 
         public Token Peek {
             get {
@@ -46,10 +45,6 @@ namespace Axion.Core.Processing.Syntactic {
             return false;
         }
 
-        /// <summary>
-        ///     Adjusts [<see cref="Ast" />.Index] by [<paramref name="pos" />]
-        ///     and returns token by current index.
-        /// </summary>
         public Token EatAny(int pos = 1) {
             if (TokenIdx + pos >= 0
              && TokenIdx + pos < Tokens.Count) {

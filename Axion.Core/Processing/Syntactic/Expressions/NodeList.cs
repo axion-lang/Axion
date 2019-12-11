@@ -45,11 +45,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         public T Last {
             get =>
                 items.Count > 0
-                    ? items[items.Count - 1]
+                    ? items[^1]
                     : throw new IndexOutOfRangeException();
             set {
                 if (items.Count > 0) {
-                    items[items.Count - 1] = value;
+                    items[^1] = value;
                 }
                 else {
                     throw new IndexOutOfRangeException();

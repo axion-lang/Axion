@@ -1,5 +1,8 @@
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Axion.Core;
+using Axion.Core.Processing.Errors;
 using Axion.Core.Source;
 using NUnit.Framework;
 
@@ -66,6 +69,23 @@ namespace Axion.Testing.NUnit.Parser {
         //     SourceUnit source = ParseTestFile();
         //     Assert.AreEqual(0, source.Blames.Count);
         // }
+        
+        [Test]
+        public void TestDesignPatterns() {
+            for (var i = 0; i < SourceFiles.Count; i++) {
+                FileInfo file = SourceFiles[i];
+                SourceUnit source = SourceUnit.FromFile(
+                    file,
+                    new FileInfo(OutPath + nameof(TestDesignPatterns) + i + TestExtension)
+                );
+                Compiler.Process(
+                    source,
+                    ProcessingMode.Parsing
+                );
+                Assert.That(source.Blames.All(b => b.Severity != BlameSeverity.Error), file.Name + ": Errors count > 0");
+                Assert.That(source.TokenStream.Tokens.Count > 0,                       file.Name + ": Tokens count == 0");
+            }
+        }
 
         [Test]
         public void TestFastFib() {

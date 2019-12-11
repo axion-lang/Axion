@@ -14,13 +14,13 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             SourceUnit source,
             string     value       = "",
             string     endingWhite = "",
-            TokenType  tokenType   = TokenType.Unknown,
+            TokenType  tokenType   = TokenType.None,
             int        precedence  = -1,
             InputSide  side        = InputSide.Unknown,
             Location   start       = default,
             Location   end         = default
         ) : base(source, tokenType, value, endingWhite: endingWhite, start: start, end: end) {
-            if (tokenType != TokenType.Unknown) {
+            if (tokenType != TokenType.None) {
                 Value = Content = Spec.Operators.First(kvp => kvp.Value.Item1 == tokenType).Key;
             }
             else if (!string.IsNullOrWhiteSpace(Value)) {

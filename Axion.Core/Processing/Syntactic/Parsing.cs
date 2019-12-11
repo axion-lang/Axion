@@ -13,6 +13,10 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic {
     public static class Parsing {
+        internal static Expr ParseInfixList(Expr parent) {
+            return ParseMultiple(parent, ParseInfix);
+        }
+        
         /// <summary>
         ///     <c>
         ///         ['('] %expr {',' %expr} [')'];

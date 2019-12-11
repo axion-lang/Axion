@@ -56,7 +56,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public override void ToCSharp(CodeWriter c) {
-            c.Write("namespace ", Name, Block);
+            c.Write("namespace ", Name);
+            c.WriteLine();
+            c.Write(Block);
         }
 
         public override void ToPython(CodeWriter c) {

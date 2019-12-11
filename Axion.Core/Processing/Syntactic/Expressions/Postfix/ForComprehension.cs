@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
     ///         for_comprehension:
-    ///             'for' simple_name_list 'in' preglobal_expr [comprehension];
+    ///             'for' name_list 'in' infix_list (('if'|'unless') condition)* [for_comprehension];
     ///     </c>
     /// </summary>
     public class ForComprehension : Expr {
@@ -50,7 +50,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         }
 
         public bool IsGenerator;
-        public bool IsNested;
+        public readonly bool IsNested;
 
         [NoTraversePath]
         public override TypeName ValueType => Target.ValueType;
@@ -80,7 +80,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 Stream.Eat(OpIn);
                 Iterable = Parsing.ParseMultiple(this, expectedTypes: typeof(IInfixExpr));
 
-                while (Stream.Peek.Is(KeywordIf, KeywordUnless)) {
+                while (Stream.PeekIs(KeywordIf, KeywordUnless)) {
                     if (Stream.MaybeEat(KeywordIf)) {
                         Conditions.Add(Parsing.ParseInfix(this));
                     }
@@ -95,7 +95,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     }
                 }
 
-                if (Stream.Peek.Is(KeywordFor)) {
+                if (Stream.PeekIs(KeywordFor)) {
                     Right = new ForComprehension(Parent, this, true).Parse();
                 }
             });

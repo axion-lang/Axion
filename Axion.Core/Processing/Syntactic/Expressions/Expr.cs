@@ -11,8 +11,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///             expr {',' expr};
     ///         infix_list:
     ///             infix_expr {',' infix_expr};
-    ///         preglobal_list:
-    ///             preglobal_expr {',' preglobal_expr};
     ///         simple_name_list:
     ///             simple_name_expr {',' simple_name_expr};
     ///         single_expr:

@@ -113,7 +113,7 @@ namespace Axion.Core.Processing.CodeGen {
                 }
             }
 
-            Write(items[items.Count - 1]);
+            Write(items[^1]);
         }
 
         public override string ToString() {

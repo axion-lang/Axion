@@ -29,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
 
         public UnaryExpr(
             Expr      parent = null,
-            TokenType opType = TokenType.Unknown,
+            TokenType opType = TokenType.None,
             Expr      expr   = null
         ) : base(parent) {
             MarkStart(Operator = new OperatorToken(Source, tokenType: opType));

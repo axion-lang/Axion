@@ -62,7 +62,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public override void ToCSharp(CodeWriter c) {
-            c.Write("while (", Condition, ") ", Block);
+            c.Write("while (", Condition);
+            c.WriteLine(")");
+            c.Write(Block);
         }
 
         public override void ToPython(CodeWriter c) {

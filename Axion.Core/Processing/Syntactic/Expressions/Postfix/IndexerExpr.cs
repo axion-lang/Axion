@@ -6,9 +6,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
     ///         index_expr:
-    ///             atom '[' (preglobal_expr | slice) {',' (preglobal_expr | slice)} [','] ']';
+    ///             atom '[' (infix_expr | slice) {',' (infix_expr | slice)} [','] ']';
     ///         slice:
-    ///             [preglobal_expr] ':' [preglobal_expr] [':' [preglobal_expr]];
+    ///             [infix_expr] ':' [infix_expr] [':' [infix_expr]];
     ///     </c>
     /// </summary>
     public class IndexerExpr : Expr {
@@ -38,22 +38,22 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             SetSpan(() => {
                 var expressions = new NodeList<Expr>(this);
                 Stream.Eat(OpenBracket);
-                if (!Stream.Peek.Is(CloseBracket)) {
+                if (!Stream.PeekIs(CloseBracket)) {
                     while (true) {
                         Expr start = null;
-                        if (!Stream.Peek.Is(Colon)) {
+                        if (!Stream.PeekIs(Colon)) {
                             start = Parsing.ParseInfix(this);
                         }
 
                         if (Stream.MaybeEat(Colon)) {
                             Expr stop = null;
-                            if (!Stream.Peek.Is(Colon, Comma, CloseBracket)) {
+                            if (!Stream.PeekIs(Colon, Comma, CloseBracket)) {
                                 stop = Parsing.ParseInfix(this);
                             }
 
                             Expr step = null;
                             if (Stream.MaybeEat(Colon)
-                             && !Stream.Peek.Is(Comma, CloseBracket)) {
+                             && !Stream.PeekIs(Comma, CloseBracket)) {
                                 step = Parsing.ParseInfix(this);
                             }
 
@@ -66,7 +66,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                         }
 
                         expressions.Add(start);
-                        if (Stream.Peek.Is(CloseBracket)) {
+                        if (Stream.PeekIs(CloseBracket)) {
                             break;
                         }
 

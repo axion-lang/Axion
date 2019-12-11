@@ -123,7 +123,7 @@ class Program
 
                     score += n
                     if n == max-int
-                        raise (Exception("You won!"))
+                        raise Exception("You won!")
 
             shift-grid(row)
         rotate-grid(r2)
@@ -176,7 +176,7 @@ class Program
             array = [2, 2, 2, 4]
             grid[place[0], place[1]] = array[rnd.next(0, array.length)]
         else
-            raise (Error("Game over."))
+            raise Error("Game over.")
 
     fn write-grid
         c.println()

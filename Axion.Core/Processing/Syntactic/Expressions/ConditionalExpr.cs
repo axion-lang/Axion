@@ -5,8 +5,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         conditional_expr:
-    ///             'if' preglobal_expr block
-    ///             {'elif' preglobal_expr block}
+    ///             'if' infix_expr block
+    ///             {'elif' infix_expr block}
     ///             ['else' block];
     ///     </c>
     /// </summary>
@@ -70,9 +70,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public override void ToCSharp(CodeWriter c) {
-            c.Write("if (", Condition, ")", ThenBlock);
+            c.Write("if (", Condition);
+            c.WriteLine(")");
+            c.Write(ThenBlock);
             if (ElseBlock != null) {
-                c.Write("else", ElseBlock);
+                c.WriteLine("else");
+                c.Write(ElseBlock);
             }
         }
 

@@ -59,21 +59,33 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public override void ToAxion(CodeWriter c) {
-            c.Write(Name, ": ", ValueType);
+            c.Write(Name);
+            if (ValueType != null) {
+                c.Write(": ", ValueType);
+            }
+
             if (DefaultValue != null) {
                 c.Write(" = ", DefaultValue);
             }
         }
 
         public override void ToCSharp(CodeWriter c) {
-            c.Write(ValueType, " ", Name);
+            if (!(Parent is FunctionDef f && f.Name == null)) {
+                c.Write(ValueType, " ");
+            }
+
+            c.Write(Name);
             if (DefaultValue != null) {
                 c.Write(" = ", DefaultValue);
             }
         }
 
         public override void ToPython(CodeWriter c) {
-            c.Write(Name, ": ", ValueType);
+            c.Write(Name);
+            if (ValueType != null) {
+                c.Write(": ", ValueType);
+            }
+
             if (DefaultValue != null) {
                 c.Write(" = ", DefaultValue);
             }
@@ -83,7 +95,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
     ///     <c>
     ///         func_def:
-    ///             'fn' name ['(' [parameters_list] ')'] ['->' type] block;
+    ///             'fn' [name] ['(' [parameters_list] ')'] ['->' type] block;
     ///     </c>
     /// </summary>
     public class FunctionDef : Expr, IDefinitionExpr {
@@ -176,10 +188,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     Stream.Eat(CloseParenthesis);
                 }
                 else {
-                    Parameters = ParseParameterList(
-                        this,
-                        Spec.BlockStartMarks.Union(RightArrow)
-                    );
+                    Parameters = new NodeList<FunctionParameter>(this);
                 }
 
                 // return type
@@ -187,11 +196,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     ReturnType = new TypeName(this).ParseTypeName();
                 }
 
-                Block = new BlockExpr(this).Parse(
-                    anonymous
-                        ? BlockType.Lambda
-                        : BlockType.Default
-                );
+                if (Stream.PeekIs(Spec.BlockStartMarks)) {
+                    Block = new BlockExpr(this).Parse(
+                        anonymous
+                            ? BlockType.Lambda
+                            : BlockType.Default
+                    );
+                }
+                else {
+                    Block = new BlockExpr(this);
+                }
             });
             return this;
         }
@@ -210,7 +224,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             params TokenType[] terminators
         ) {
             var parameters = new NodeList<FunctionParameter>(parent);
-            if (parent.Stream.Peek.Is(terminators)) {
+            if (parent.Stream.PeekIs(terminators)) {
                 return parameters;
             }
 
@@ -237,10 +251,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                         return new NodeList<FunctionParameter>(parent);
                     }
 
-                    if (!parent.Stream.Peek.Is(Comma)) {
+                    if (!parent.Stream.PeekIs(Comma)) {
                         listParameter = new FunctionParameter(parent).Parse(names);
                     }
-                    // else got "*,"
+                    // else got ", *,"
 
                     haveMultiply = true;
                 }
@@ -267,7 +281,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     parameters.Add(param);
                 }
 
-                if (parent.Stream.Peek.Is(terminators) || !parent.Stream.MaybeEat(Comma)) {
+                if (parent.Stream.PeekIs(terminators) || !parent.Stream.MaybeEat(Comma)) {
                     break;
                 }
             }
@@ -291,27 +305,45 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public override void ToAxion(CodeWriter c) {
-            c.Write("fn ", Name);
-            if (Parameters.Count > 0) {
-                c.Write(" (");
-                c.AddJoin(", ", Parameters);
-                c.Write(")");
+            c.Write("fn ");
+            if (Name != null) {
+                c.Write(Name, " ");
             }
 
-            c.Write(" -> ", ValueType);
+            if (Parameters.Count > 0) {
+                c.Write("(");
+                c.AddJoin(", ", Parameters);
+                c.Write(") ");
+            }
+
+            if (ValueType != null) {
+                c.Write("-> ", ValueType);
+            }
+
             c.Write(Block);
         }
 
         public override void ToCSharp(CodeWriter c) {
-            c.Write("public ", ValueType, " ", Name, "(");
-            c.AddJoin(", ", Parameters);
-            c.Write(")", Block);
+            if (Name == null) {
+                c.Write("(");
+                c.AddJoin(", ", Parameters);
+                c.Write(") => ", Block);
+            }
+            else {
+                c.Write("public ", ValueType, " ", Name, "(");
+                c.AddJoin(", ", Parameters);
+                c.WriteLine(")");
+                c.Write(Block);
+            }
         }
 
         public override void ToPython(CodeWriter c) {
             c.Write("def ", Name, "(");
             c.AddJoin(", ", Parameters);
-            c.Write(") -> ", ValueType);
+            c.Write(")");
+            if (ValueType != null) {
+                c.Write(" -> ", ValueType);
+            }
 
             c.Write(Block);
         }

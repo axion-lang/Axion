@@ -60,6 +60,10 @@ namespace Axion.Core.Processing.Traversal {
         }
 
         public static void Walker(ITreePath path) {
+            if (path.Node is TupleTypeName t && t.Types.Count == 0) {
+                path.Node = new SimpleTypeName("UnitType");
+                path.Traversed = true;
+            }
             if (path.Node is UnionTypeName unionTypeName) {
                 // LeftType | RightType -> Union[LeftType, RightType]
                 path.Node = new GenericTypeName(

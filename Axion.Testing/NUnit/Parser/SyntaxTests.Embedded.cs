@@ -1,8 +1,6 @@
 using System;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Source;
@@ -33,67 +31,6 @@ namespace Axion.Testing.NUnit.Parser {
                    .Select(s => ((VarDef) s).ValueType)
                    .ToArray();
             Assert.That(stmts.Length == 10);
-        }
-
-        [Test]
-        public void TestConstantCollections() {
-            SourceUnit src = MakeSourceFromCode(
-                string.Join(
-                    Environment.NewLine,
-                    "let _map = map (1 to \"one\", 2 to \"two\", 3 to \"three\" )",
-                    "let _set = set ( \"one\", \"two\", \"three\" )",
-                    "let _lst = [1, 2, 3, 4, 5]",
-                    "let _tup = (1, 2, \"three\", true)"
-                )
-            );
-            Parse(src);
-            Assert.That(src.Blames.Count == 0, $"Blames.Count == {src.Blames.Count}");
-            VarDef[] stmts =
-                src.Ast.Items.Cast<VarDef>()
-                   .ToArray();
-            Assert.That(stmts.Length == 4);
-            Assert.DoesNotThrow(
-                () => {
-                    // map
-                    // var map = (BraceCollectionExpression) stmts[0].Right;
-                    // Assert.That(map.Type == BraceCollectionType.Map);
-                    // Assert.That(map.Expressions.Cast<MapItemExpression>().Count() == 3);
-                    
-                    // set
-                    // var set = (BraceCollectionExpression) stmts[1].Right;
-                    // Assert.That(set.Type == BraceCollectionType.Set);
-                    // var setValues = new[] {
-                    //     "one", "two", "three"
-                    // };
-                    // Assert.That(set.Expressions.Count == setValues.Length);
-                    // for (var i = 0; i < set.Expressions.Count; i++) {
-                    //     var constant = (ConstantExpression) set.Expressions[i];
-                    //     Assert.That(constant.Value.Value == setValues[i]);
-                    // }
-
-                    // list
-                    // var lst = (ListInitializerExpression) stmts[2].Right;
-                    // var lstValues = new[] {
-                    //     "1", "2", "3", "4", "5"
-                    // };
-                    // Assert.That(lst.Expressions.Count == lstValues.Length);
-                    // for (var i = 0; i < lst.Expressions.Count; i++) {
-                    //     var constant = (ConstantExpression) lst.Expressions[i];
-                    //     Assert.That(constant.Value.Value == lstValues[i]);
-                    // }
-
-                    // tuple
-                    var tup = (TupleExpr) stmts[3].Value;
-                    var tupValues = new[] {
-                        "1", "2", "three", "true"
-                    };
-                    Assert.That(tup.Expressions.Count == tupValues.Length);
-                    for (var i = 0; i < tup.Expressions.Count; i++) {
-                        var constant = (ConstantExpr) tup.Expressions[i];
-                        Assert.That(constant.Literal.Content == tupValues[i]);
-                    }
-                }
-            );
         }
 
         [Test]

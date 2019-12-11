@@ -14,7 +14,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     public enum TokenType {
         None,
         Invalid,
-        Unknown,
 
         #region GEN_operators
 
@@ -88,7 +87,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         KeywordModule,
         KeywordNil,
         KeywordNoBreak,
-        KeywordObject,
         KeywordPass,
         KeywordReturn,
         KeywordTrue,
@@ -105,7 +103,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         Question,
         LeftArrow,
         RightArrow,
-        LeftPipeline,
         RightPipeline,
         At,
         Comma,

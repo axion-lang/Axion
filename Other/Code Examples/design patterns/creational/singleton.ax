@@ -1,46 +1,46 @@
 # user-side implementation:
-module Patterns.Creational.Singleton.User:
+# module Patterns.Creational.Singleton.User:
 
-singleton class Database:
-    query(sql):
+@singleton class Database
+    fn query (sql)
         # Все запросы к базе данных будут проходить через этот
         # метод. Поэтому имеет смысл поместить сюда какую-то
         # логику кеширования.
-        raise NotImplementedError
+        raise (NotImplementedError)
 
-    private:
-        new():
+    @private
+        fn init
             # Здесь может жить код инициализации подключения к
             # серверу баз данных.
-            raise NotImplementedError
+            raise (NotImplementedError)
 
 
 # internal/system implementation:
-module Patterns.Creational.Singleton.Internal:
+# module Patterns.Creational.Singleton.Internal:
 
-class Database:
-    static get instance:
-        if self.instance == null:
+class Database
+    @static fn instance.get
+        if self.instance == null
             acquireThreadLock()
-            if self.instance == null:
+            if self.instance == null
                 self.instance = new Database()
         return self.instance
 
-    query(sql):
-        raise NotImplementedError
+    fn query (sql)
+        raise (NotImplementedError)
 
-    private:
+    @private
         static Database instance
 
-        new():
-            raise NotImplementedError
+        fn init
+            raise (NotImplementedError)
 
 
 # client code:
-module Patterns.Creational.Singleton.Program:
+# module Patterns.Creational.Singleton.Program:
 
-class Program:
-    main():
+class Program
+    fn main
         foo = Database.instance
         foo.query("SELECT ...")
         # ...

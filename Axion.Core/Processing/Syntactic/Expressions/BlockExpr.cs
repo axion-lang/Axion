@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public NodeList<Expr> Items {
             get => items;
-            protected set => SetNode(ref items, value);
+            set => SetNode(ref items, value);
         }
 
         internal BlockExpr(
@@ -203,21 +203,22 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             c.AddJoin("", Items, true);
             c.MaybeWriteLine();
             c.Indent--;
-            
+
             if (inAnonFn) {
                 c.Write("}");
             }
         }
 
         public override void ToCSharp(CodeWriter c) {
-            c.WriteLine();
             c.WriteLine("{");
             c.Indent++;
             foreach (Expr item in Items) {
                 c.Write(item);
-                if (!(item is IDefinitionExpr
+                if (!(Parent is ClassDef || Parent is ModuleDef)
+                 && !(item is IDefinitionExpr
                    || item is ConditionalExpr
-                   || item is WhileExpr) || item is VarDef) {
+                   || item is WhileExpr 
+                   || item is MacroApplicationExpr) || item is VarDef) {
                     c.Write(";");
                 }
 
@@ -225,7 +226,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
 
             c.Indent--;
-            c.WriteLine("}");
+            c.Write("}");
+            c.MaybeWriteLine();
         }
 
         public override void ToPython(CodeWriter c) {
@@ -241,8 +243,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     [Flags]
     public enum BlockType {
         Default,
-        Named,
-        Loop,
         Lambda
     }
 }

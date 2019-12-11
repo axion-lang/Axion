@@ -1,23 +1,23 @@
 # Абстрактная фабрика знает обо всех абстрактных типах
 # продуктов.
 @abstract
-class GUI:
+class GUI
     # Этот паттерн предполагает, что у вас есть несколько семейств
     # продуктов, находящихся в отдельных иерархиях классов
     # (Button/Checkbox). Продукты одного семейства должны иметь
     # общий интерфейс.
-    class Element:
+    class Element
         # Отрисовать элемент.
-        fn render(): pass
+        fn render
 
         # Навесить на элемент обработчик событий.
-        fn on-mouse-over(function: func): pass
+        fn on-mouse-over (function: func)
 
-    class Button(Element): pass
+    class Button <- Element
 
-    class Checkbox(Element): pass
+    class Checkbox <- Element
 
-    class Dialog(Element): pass
+    class Dialog <- Element
 
 ######################################
 # EXAMPLE #1: DEFAULT TYPE OF FACTORY.
@@ -25,33 +25,27 @@ class GUI:
 
 # Каждая конкретная фабрика знает и создаёт только продукты
 # своей вариации.
-class Windows-GUI(GUI):
-    class Button:
-        fn render():
-            # Отрисовать кнопку в стиле Windows.
-            pass
+class Windows-GUI <- GUI
+    class Button
+        # Отрисовать кнопку в стиле Windows.
+        fn render
 
-        fn on-mouse-over():
-            # Навесить на кнопку обработчик событий Windows.
-            pass
+        # Навесить на кнопку обработчик событий Windows.
+        fn on-mouse-over
 
-    class Checkbox:
-        fn render():
-            # Отрисовать чекбокс в стиле Windows.
-            pass
+    class Checkbox
+        # Отрисовать чекбокс в стиле Windows.
+        fn render
 
-        fn on-mouse-over():
-            # Навесить на чекбокс обработчик событий Windows.
-            pass
+        # Навесить на чекбокс обработчик событий Windows.
+        fn on-mouse-over
 
-    class Dialog:
-        fn render():
-            # Отрисовать окно в браузере.
-            pass
+    class Dialog
+        # Отрисовать окно в Windows.
+        fn render
 
-        fn on-mouse-over():
-            # Навесить на окно обработчик событий.
-            pass
+        # Навесить на окно обработчик событий.
+        fn on-mouse-over
 
 #####################################################################
 # EXAMPLE #2: SPLIT FACTORY TO PARTS TO MOVE THEM TO DIFFERENT FILES.
@@ -62,70 +56,59 @@ class Windows-GUI(GUI):
 # этому фабрики можно взаимозаменять, не изменяя клиентский
 # код.
 @partial
-class Mac-GUI(GUI):
-    class Button:
-        fn render():
-            # Отрисовать кнопку в стиле macOS.
-            pass
+class Mac-GUI <- GUI
+    class Button
+        # Отрисовать кнопку в стиле macOS.
+        fn render
 
-        fn on-mouse-over():
-            # Навесить на чекбокс обработчик событий.
-            pass
+        # Навесить на чекбокс обработчик событий.
+        fn on-mouse-over
 
 @partial
-class Mac-GUI(GUI):
-    class Checkbox:
-        fn render():
-            # Отрисовать чекбокс в стиле macOS.
-            pass
+class Mac-GUI <- GUI
+    class Checkbox
+        # Отрисовать чекбокс в стиле macOS.
+        fn render
 
-        fn on-mouse-over():
-            # Навесить на чекбокс обработчик событий.
-            pass
+        # Навесить на чекбокс обработчик событий.
+        fn on-mouse-over
 
 @partial
-class Mac-GUI(GUI):
-    class Dialog:
-        fn fn render():
-            # Отрисовать окно в браузере.
-            pass
+class Mac-GUI <- GUI
+    class Dialog
+        # Отрисовать окно в macOS.
+        fn render
 
-        fn on-mouse-over():
-            # Навесить на окно обработчик событий.
-            pass
+        # Навесить на окно обработчик событий.
+        fn on-mouse-over
 
 #####################################################################
 # EXAMPLE #3: SPLIT FACTORY TO PARTS TO MOVE THEM TO DIFFERENT FILES.
 #####################################################################
 
-class Web-GUI(GUI): pass
+class Web-GUI <- GUI
 
-class Web-GUI.Button:
-    fn render():
-        # Отрисовать кнопку в браузере.
-        pass
+# TODO: class-name.subclass-name
+class Web-GUI-Button
+    # Отрисовать кнопку в браузере.
+    fn render
 
-    fn on-mouse-over():
-        # Навесить на чекбокс обработчик событий.
-        pass
+    # Навесить на чекбокс обработчик событий.
+    fn on-mouse-over
 
-class Web-GUI.Checkbox:
-    fn render():
-        # Отрисовать чекбокс в браузере.
-        pass
+class Web-GUI-Checkbox
+    # Отрисовать чекбокс в браузере.
+    fn render
 
-    fn on-mouse-over():
-        # Навесить на чекбокс обработчик событий.
-        pass
+    # Навесить на чекбокс обработчик событий.
+    fn on-mouse-over
 
-class Web-GUI.Dialog:
-    fn render():
-        # Отрисовать окно в браузере.
-        pass
+class Web-GUI-Dialog
+    # Отрисовать окно в браузере.
+    fn render
 
-    fn on-mouse-over():
-        # Навесить на окно обработчик событий.
-        pass
+    # Навесить на окно обработчик событий.
+    fn on-mouse-over
 
 ######################################
 # Client code.
@@ -134,35 +117,34 @@ class Web-GUI.Dialog:
 # Для кода, использующего фабрику, не важно, с какой конкретно
 # фабрикой он работает. Все получатели продуктов работают с
 # ними через общие интерфейсы.
-class Application:
-    #private:
-    GUI    factory
-    Button button
+class Application
+    @private
+        factory: GUI
+        button:  Button
 
-    fn new(factory: GUI):
+    fn init (factory: GUI)
         self.factory = factory
 
-    fn create-UI()
+    fn create-UI
         button = factory.Dialog()
 
-    fn render()
+    fn render
         dialog.render()
 
 
 # Приложение выбирает тип конкретной фабрики и создаёт её
 # динамически, исходя из конфигурации или окружения.
-class ApplicationConfigurator:
-    fn start():
+class ApplicationConfigurator
+    fn start
         config = read-application-config-file()
 
-        if config.Platform == Platform.Windows:
+        if config.Platform == Platform.Windows
             factory = Windows-GUI
-        elif config.Platform == Platform.Mac:
+        elif config.Platform == Platform.Mac
             factory = Mac-GUI
-        elif config.Platform == Platform.Web:
+        elif config.Platform == Platform.Web
             factory = Web-GUI
-        else:
-            pass
-            #throw new Exception("Error! Unknown operating system.")
+        else
+            raise Exception("Error! Unknown operating system.")
 
         app = Application(factory)

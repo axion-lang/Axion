@@ -1,88 +1,88 @@
 # Builder can create different products
 # using the same building process.
-module Patterns.Creational.Builder.User
+# module Patterns.Creational.Builder.User
 
 # Can have GPS, trip computer and various numbers of seats.
 # Can be a city car, a sports car, or a cabriolet.
-class Car: pass
+class Car
 
 # Textual user's manual that corresponds to a particular
 # car configuration.
-class Manual: pass
+class Manual
 
 # Builder interface defines all possible ways to configure a
 # product.
-interface Builder:
-    result: object# { get; private set; }
-    fn reset() => Builder: pass
-    fn setSeats() => Builder: pass
-    fn setEngine() => Builder: pass
-    fn setTripComputer() => Builder: pass
-    fn setGPS() => Builder: pass
+@interface class Builder
+    result: Object
+    fn reset -> Builder
+    fn setSeats -> Builder
+    fn setEngine -> Builder
+    fn setTripComputer -> Builder
+    fn setGPS -> Builder
 
 # Concrete builders implement that interface differently.
-class CarBuilder(Builder):
-    result: Car #{ get; private set; }
+class CarBuilder <- Builder
+    result: Car
 
     # Put a Car instance into the "car" field.
-    fn reset(): pass
+    fn reset
 
     # Set the number of seats in car.
-    fn setSeats(): pass
+    fn setSeats
 
     # Install a given engine.
-    fn setEngine(): pass
+    fn setEngine
 
     # Install a trip computer.
-    fn setTripComputer(): pass
+    fn setTripComputer
 
     # Install a global positioning system.
-    fn setGPS(): pass
+    fn setGPS
 
 # Unlike with other creational patterns, with Builder you can
 # construct unrelated products, which do not follow the common
 # interface.
-class CarManualBuilder(Builder):
-    result: Manual #{ get; private set; }
+class CarManualBuilder <- Builder
+    result: Manual
 
     # Put a Manual instance into the "manual" field.
-    fn reset(): pass
+    fn reset
 
     # Document car seats features.
-    fn setSeats(): pass
+    fn setSeats
 
     # Add an engine instruction.
-    fn setEngine(): pass
+    fn setEngine
 
     # Add a trip computer instruction.
-    fn setTripComputer(): pass
+    fn setTripComputer
 
     # Add GPS instruction.
-    fn setGPS(): pass
+    fn setGPS
 
 
 # Director defines the order of building steps. It works with a
 # builder object through the common builder interface.
 # Therefore it may not know what product is being built.
-class Director:
-    fn constructSportsCar(builder: Builder):
+class Director
+    fn constructSportsCar (builder: Builder)
         builder.reset()
-            .setSeats(2)
-            .setEngine(SportEngine())
-            .setTripComputer(true)
-            .setGPS(true)
+        .setSeats(2)
+        .setEngine(SportEngine())
+        .setTripComputer(true)
+        .setGPS(true)
 
 
 
 
 
-module Patterns.Creational.Builder.Program
+# module Patterns.Creational.Builder.Program
 
 # Director gets the concrete builder object from the client
 # (application code). That is because application knows better
 # which builder it has to use to get a specific product.
 class Application:
-    fn makeCar() => (Car, Manual):
+    fn makeCar -> (Car, Manual):
         director = Director()
 
         builder = CarBuilder()

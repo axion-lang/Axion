@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
@@ -91,7 +92,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     }
                 }
 
-                Block = new BlockExpr(this).Parse();
+                if (Stream.PeekIs(Spec.BlockStartMarks)) {
+                    Block = new BlockExpr(this).Parse();
+                }
+                else {
+                    Block = new BlockExpr(this);
+                }
             });
             return this;
         }
@@ -111,6 +117,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 c.Write(" <- ", Bases);
             }
 
+            c.WriteLine();
             c.Write(Block);
         }
 

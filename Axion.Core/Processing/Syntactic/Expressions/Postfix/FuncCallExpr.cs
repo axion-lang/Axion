@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
@@ -7,8 +7,8 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
-    ///         call_expr:
-    ///             atom '(' [arg_list | (arg comprehension)] ')';
+    ///         func_call_expr:
+    ///             atom '(' [arg_list | (arg for_comprehension)] ')';
     ///     </c>
     /// </summary>
     public class FuncCallExpr : Expr {
@@ -38,9 +38,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public FuncCallExpr Parse(bool allowGenerator = false) {
             SetSpan(() => {
                 Stream.Eat(OpenParenthesis);
-                Args = allowGenerator
-                    ? FuncCallArg.ParseGeneratorOrArgList(this)
-                    : FuncCallArg.ParseArgList(this);
+                Args = FuncCallArg.ParseArgList(this, allowGenerator: allowGenerator);
                 Stream.Eat(CloseParenthesis);
             });
             return this;
@@ -96,61 +94,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         /// <summary>
         ///     <c>
         ///         arg_list:
-        ///             { expr
-        ///             | expr '=' expr
-        ///             | comprehension };
-        ///     </c>
-        /// </summary>
-        internal static NodeList<FuncCallArg> ParseGeneratorOrArgList(Expr parent) {
-            if (parent.Stream.Peek.Is(CloseParenthesis, OpMultiply, OpPower)) {
-                return ParseArgList(parent);
-            }
-
-            Expr        nameOrValue = Parsing.ParseInfix(parent);
-            var         generator   = false;
-            FuncCallArg arg;
-            if (parent.Stream.MaybeEat(OpAssign)) {
-                // Keyword argument
-                arg = FinishNamedArg(parent, nameOrValue);
-            }
-            else if (parent.Stream.Peek.Is(KeywordFor)) {
-                // Generator expr
-                arg = new FuncCallArg(
-                    parent,
-                    new ForComprehension(parent, nameOrValue) {
-                        IsGenerator = true
-                    }.Parse()
-                );
-                generator = true;
-            }
-            else {
-                arg = new FuncCallArg(parent, nameOrValue);
-            }
-
-            // Was this all 
-            if (!generator && parent.Stream.MaybeEat(Comma)) {
-                return ParseArgList(parent, arg);
-            }
-
-            return new NodeList<FuncCallArg>(parent) {
-                arg
-            };
-        }
-
-        /// <summary>
-        ///     <c>
-        ///         arg_list:
-        ///             { argument ',' }
-        ///             ( argument [',']
-        ///             | '*' expr [',' '**' expr]
-        ///             | '**' expr );
+        ///             comprehension
+        ///             | ({ argument ',' }
+        ///                (argument [',']
+        ///                | '*' expr [',' '**' expr]
+        ///                | '**' expr ));
         ///         argument:
         ///             expr ['=' expr];
         ///     </c>
         /// </summary>
         internal static NodeList<FuncCallArg> ParseArgList(
-            Expr        parent = null,
-            FuncCallArg first  = null
+            Expr        parent         = null,
+            FuncCallArg first          = null,
+            bool        allowGenerator = false
         ) {
             var args = new NodeList<FuncCallArg>(parent);
 
@@ -163,20 +119,33 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             }
 
             while (true) {
-                Expr        nameOrValue = Parsing.ParseInfix(parent);
                 FuncCallArg arg;
-
-                if (parent.Stream.MaybeEat(OpMultiply)) {
-                    arg = new FuncCallArg(parent, nameOrValue);
-                }
-                else if (parent.Stream.MaybeEat(OpAssign)) {
-                    arg = FinishNamedArg(parent, nameOrValue);
-                    if (!IsUniqueNamedArg(args, arg)) {
+                // named arg
+                if (parent.Stream.PeekIs(Identifier) && parent.Stream.PeekByIs(2, OpAssign)) {
+                    var name = (NameExpr) Parsing.ParseAtom(parent);
+                    parent.Stream.Eat(OpAssign);
+                    Expr value = Parsing.ParseInfix(parent);
+                    arg = new FuncCallArg(parent, name, value);
+                    if (args.Any(a => a.Name.ToString() == name.ToString())) {
                         LangException.Report(BlameType.DuplicatedNamedArgument, arg);
                     }
                 }
                 else {
-                    arg = new FuncCallArg(parent, nameOrValue);
+                    Expr value = Parsing.ParseInfix(parent);
+                    // generator arg
+                    if (parent.Stream.PeekIs(KeywordFor)) {
+                        arg = new FuncCallArg(
+                            parent,
+                            new ForComprehension(parent, value) {
+                                IsGenerator = true
+                            }.Parse()
+                        );
+                    }
+                    else {
+                        // TODO: star args
+                        parent.Stream.MaybeEat(OpMultiply);
+                        arg = new FuncCallArg(parent, value);
+                    }
                 }
 
                 args.Add(arg);
@@ -186,26 +155,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             }
 
             return args;
-        }
-
-        private static FuncCallArg FinishNamedArg(Expr parent = null, Expr nameOrValue = null) {
-            if (nameOrValue is NameExpr name) {
-                Expr value = Parsing.ParseInfix(parent);
-                return new FuncCallArg(parent, name, value);
-            }
-
-            LangException.ReportUnexpectedSyntax(Identifier, nameOrValue);
-            return new FuncCallArg(parent, nameOrValue);
-        }
-
-        private static bool IsUniqueNamedArg(IEnumerable<FuncCallArg> args, FuncCallArg arg) {
-            foreach (FuncCallArg a in args) {
-                if (a.Name.ToString() == arg.Name.ToString()) {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         public override void ToAxion(CodeWriter c) {

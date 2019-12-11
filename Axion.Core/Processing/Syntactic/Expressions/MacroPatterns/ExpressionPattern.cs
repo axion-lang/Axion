@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
 
         public bool Match(Expr parent) {
             // leave expression non-starters to next token pattern.
-            if (parent.Stream.Peek.Is(Spec.NeverExprStartTypes)) {
+            if (parent.Stream.PeekIs(Spec.NeverExprStartTypes)) {
                 return true;
             }
 

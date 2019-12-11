@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public UnknownExpr Parse() {
             SetSpan(() => {
-                while (!Stream.Peek.Is(Newline, TokenType.End)) {
+                while (!Stream.PeekIs(Newline, TokenType.End)) {
                     Stream.Eat();
                 }
             });
