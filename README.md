@@ -28,7 +28,7 @@
 
 Now compiler supports interpretation of Axion source
 with `-i` option (through embedded code editor) and
-also file processing with `-f "<path>.ax" -m interpret` options.
+also file processing with `-f "<path>.ax" -m <output_lang>` options.
 
 Interpretation is performed by transpiling Axion to C# and running
 it through Roslyn (still incomplete and doesn't support some syntax).
