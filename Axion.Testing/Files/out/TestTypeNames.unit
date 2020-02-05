@@ -1,0 +1,28 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Numerics;
+using System.Threading;
+using System.Diagnostics;
+using System.Collections;
+using System.Collections.Generic;
+namespace __RootModule__
+{
+    public class __RootClass__
+    {
+        public void Main()
+        {
+            A.Qualified.Name type0;
+            Union<JustAName,UnitType> type1;
+            A<Generic> type2;
+            A<Qualified.Generic> type3;
+            A.Name1<Qualified.Generic1,And.Generic.Number2> type3;
+            Union<A<Generic>,List<Map<T1,T2>>[]> type4;
+            (A.Name1, A.Name2) type5;
+            (Name1, Name2)[] type6;
+            (Type1<Int>[], Union<Array[],AnotherType>[]) type7;
+            Union<List<Map<T1,T2>>,(Type1<Int,Type2[]>[], Union<Array[],AnotherType>[])> type8;
+        }
+    }
+}

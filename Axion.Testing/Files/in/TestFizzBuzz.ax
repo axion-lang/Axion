@@ -1,14 +1,16 @@
 # FizzBuzz
 
-fizz-buzz(1, 20)
+fizz-buzz(1, 100)
 
-fn fizz-buzz (start: Int, end: Int)
-    for i in start...end
+fn fizz-buzz (start: int, end: int)
+    i = start
+    while i < end
+        s = i.ToString()
         if i % 3 == 0 and i % 5 == 0
-            print("FizzBuzz")
+            s = "FizzBuzz"
         elif i % 3 == 0
-            print("Fizz")
+            s = "Fizz"
         elif i % 5 == 0
-            print("Buzz")
-        else
-            print(i)
+            s = "Buzz"
+        i++
+        Console.WriteLine(s)

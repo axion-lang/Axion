@@ -49,7 +49,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     Stream.Eat(KeywordIf);
                 }
 
-                Condition = Parsing.ParseInfix(this);
+                Condition = InfixExpr.Parse(this);
                 ThenBlock = new BlockExpr(this).Parse();
 
                 if (Stream.MaybeEat(KeywordElse)) {

@@ -81,7 +81,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         public List<(T item, BlockExpr itemParentBlock, int itemIndex)> FindItemsOfType<T>(
             List<(T item, BlockExpr itemParentBlock, int itemIndex)> _outs = null
         ) where T : Expr {
-            _outs = _outs ?? new List<(T item, BlockExpr itemParentBlock, int itemIndex)>();
+            _outs ??= new List<(T item, BlockExpr itemParentBlock, int itemIndex)>();
             for (var i = 0; i < Items.Count; i++) {
                 Expr item = Items[i];
                 if (item is T expr) {
@@ -138,13 +138,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
 
                 if (terminator == Newline) {
-                    Items.Add(Parsing.ParseAny(this));
+                    Items.Add(AnyExpr.Parse(this));
                 }
                 else {
                     while (!Stream.MaybeEat(terminator)
                         && !Stream.PeekIs(TokenType.End)
                         && !(terminator == Newline && Stream.Token.Is(Newline))) {
-                        Items.Add(Parsing.ParseAny(this));
+                        Items.Add(AnyExpr.Parse(this));
                     }
                 }
             });
@@ -217,7 +217,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 if (!(Parent is ClassDef || Parent is ModuleDef)
                  && !(item is IDefinitionExpr
                    || item is ConditionalExpr
-                   || item is WhileExpr 
+                   || item is WhileExpr
                    || item is MacroApplicationExpr) || item is VarDef) {
                     c.Write(";");
                 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
@@ -14,16 +13,12 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
-    ///     Abstract Syntax Tree of
-    ///     file with Axion source code.
+    ///     Abstract Syntax Tree built from source code.
     /// </summary>
     public class Ast : BlockExpr {
         internal readonly List<MacroDef>              Macros                = new List<MacroDef>();
         internal readonly Stack<MacroApplicationExpr> MacroApplicationParts = new Stack<MacroApplicationExpr>();
 
-        /// <summary>
-        ///     Constructor for root AST block.
-        /// </summary>
         internal Ast(SourceUnit src) {
             Source = src;
             Parent = this;
@@ -31,8 +26,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Items  = new NodeList<Expr>(this);
         }
 
-        internal TokenPattern NewTokenPattern(string keyword) {
-            if (keyword.All(c => Spec.IdPart.Contains(c.ToString()))) {
+        private TokenPattern NewTokenPattern(string keyword) {
+            if (keyword.All(c => Spec.IdPart.Contains(c))) {
                 for (int i = Math.Max(0, Stream.TokenIdx); i < Source.TokenStream.Tokens.Count; i++) {
                     Token token = Source.TokenStream.Tokens[i];
                     if (token.Value == keyword
@@ -53,7 +48,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     NewTokenPattern("do"),
                     new ExpressionPattern(typeof(BlockExpr)),
                     new OrPattern(NewTokenPattern("while"), NewTokenPattern("until")),
-                    new ExpressionPattern(Parsing.ParseInfix)
+                    new ExpressionPattern(InfixExpr.Parse)
                 )
             );
             Macros.Add(
@@ -63,7 +58,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     new ExpressionPattern(typeof(TypeName)),
                     new OptionalPattern(
                         NewTokenPattern("("),
-                        new OptionalPattern(new ExpressionPattern(Parsing.ParseInfixList)),
+                        new OptionalPattern(new ExpressionPattern(InfixExpr.ParseList)),
                         NewTokenPattern(")")
                     )
                 )
@@ -72,7 +67,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 // 'until' infix_expr block
                 new MacroDef(
                     NewTokenPattern("until"),
-                    new ExpressionPattern(Parsing.ParseInfix),
+                    new ExpressionPattern(InfixExpr.Parse),
                     new ExpressionPattern(typeof(BlockExpr))
                 )
             );
@@ -80,9 +75,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 // 'for' atom_expr 'in' infix_expr block
                 new MacroDef(
                     NewTokenPattern("for"),
-                    new ExpressionPattern(Parsing.ParseAtom),
+                    new ExpressionPattern(AtomExpr.Parse),
                     NewTokenPattern("in"),
-                    new ExpressionPattern(Parsing.ParseInfix),
+                    new ExpressionPattern(InfixExpr.Parse),
                     new ExpressionPattern(typeof(BlockExpr))
                 )
             );
@@ -90,13 +85,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 // 'unless' infix_expr block [{'elif' infix_expr block} 'else' block]
                 new MacroDef(
                     NewTokenPattern("unless"),
-                    new ExpressionPattern(Parsing.ParseInfix),
+                    new ExpressionPattern(InfixExpr.Parse),
                     new ExpressionPattern(typeof(BlockExpr)),
                     new OptionalPattern(
                         new OptionalPattern(
                             new MultiplePattern(
                                 NewTokenPattern("elif"),
-                                new ExpressionPattern(Parsing.ParseInfix),
+                                new ExpressionPattern(InfixExpr.Parse),
                                 new ExpressionPattern(typeof(BlockExpr))
                             )
                         ),
@@ -112,7 +107,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 new MacroDef(
                     NewTokenPattern("["),
                     new OptionalPattern(
-                        new ExpressionPattern(Parsing.ParseInfixList),
+                        new ExpressionPattern(InfixExpr.ParseList),
                         new OptionalPattern(NewTokenPattern(","))
                     ),
                     NewTokenPattern("]")
@@ -123,15 +118,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 new MacroDef(
                     NewTokenPattern("{"),
                     new OptionalPattern(
-                        new ExpressionPattern(Parsing.ParseInfix),
+                        new ExpressionPattern(InfixExpr.Parse),
                         NewTokenPattern(":"),
-                        new ExpressionPattern(Parsing.ParseInfix),
+                        new ExpressionPattern(InfixExpr.Parse),
                         new OptionalPattern(
                             new MultiplePattern(
                                 NewTokenPattern(","),
-                                new ExpressionPattern(Parsing.ParseInfix),
+                                new ExpressionPattern(InfixExpr.Parse),
                                 NewTokenPattern(":"),
-                                new ExpressionPattern(Parsing.ParseInfix)
+                                new ExpressionPattern(InfixExpr.Parse)
                             )
                         ),
                         new OptionalPattern(NewTokenPattern(","))
@@ -144,7 +139,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 new MacroDef(
                     NewTokenPattern("{"),
                     new OptionalPattern(
-                        new ExpressionPattern(Parsing.ParseInfixList),
+                        new ExpressionPattern(InfixExpr.ParseList),
                         new OptionalPattern(NewTokenPattern(","))
                     ),
                     NewTokenPattern("}")
@@ -157,54 +152,32 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     new OrPattern(
                         new CascadePattern(
                             NewTokenPattern("("),
-                            new OptionalPattern(new ExpressionPattern(Parsing.ParseInfixList)),
+                            new OptionalPattern(new ExpressionPattern(InfixExpr.ParseList)),
                             NewTokenPattern(")")
                         ),
                         new CascadePattern(
                             new ExpressionPattern(typeof(TypeName)),
                             new OptionalPattern(
                                 NewTokenPattern("("),
-                                new OptionalPattern(new ExpressionPattern(Parsing.ParseInfixList)),
+                                new OptionalPattern(new ExpressionPattern(InfixExpr.ParseList)),
                                 NewTokenPattern(")")
                             ),
                             new OptionalPattern(
                                 NewTokenPattern("{"),
-                                new OptionalPattern(new ExpressionPattern(Parsing.ParseInfixList)),
+                                new OptionalPattern(new ExpressionPattern(InfixExpr.ParseList)),
                                 NewTokenPattern("}")
-                            ))
+                            )
+                        )
                     )
                 )
             );
-            // Macros.Add(
-            //     // slice: ':' [infix_expr] [':' [infix_expr]]
-            //     new MacroDef(
-            //         NewTokenPattern(":"),
-            //         new OptionalPattern(new ExpressionPattern(Parsing.ParseInfix)),
-            //         new OptionalPattern(
-            //             NewTokenPattern(":"),
-            //             new OptionalPattern(new ExpressionPattern(Parsing.ParseInfix))
-            //         )
-            //     )
-            // );
-            // Macros.Add(
-            //     // slice: infix_expr ':' [infix_expr] [':' [infix_expr]]
-            //     new MacroDef(
-            //         new ExpressionPattern(Parsing.ParseInfix),
-            //         NewTokenPattern(":"),
-            //         new OptionalPattern(new ExpressionPattern(Parsing.ParseInfix)),
-            //         new OptionalPattern(
-            //             NewTokenPattern(":"),
-            //             new OptionalPattern(new ExpressionPattern(Parsing.ParseInfix))
-            //         )
-            //     )
-            // );
             Macros.Add(
                 // expr 'match' (infix_expr ':' expr)+
                 new MacroDef(
                     new ExpressionPattern(typeof(Expr)),
                     NewTokenPattern("match"),
                     new MultiplePattern(
-                        new ExpressionPattern(Parsing.ParseInfix),
+                        new ExpressionPattern(InfixExpr.Parse),
                         NewTokenPattern(":"),
                         new ExpressionPattern(typeof(Expr))
                     )
@@ -212,7 +185,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             );
             SetSpan(() => {
                 while (!Stream.MaybeEat(TokenType.End) && !Stream.PeekIs(TokenType.End)) {
-                    Items.Add(Parsing.ParseAny(this));
+                    Items.Add(AnyExpr.Parse(this));
                 }
             });
         }
@@ -239,24 +212,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             };
             foreach (string directive in defaultDirectives) {
                 c.WriteLine($"using {directive};");
-            }
-
-            if (Source.ProcessingMode == ProcessingMode.Interpret) {
-                foreach (Expr e in Items) {
-                    if (e is ModuleDef) {
-                        LangException.Report(BlameType.ModuleNotSupportedInInterpretationMode, e);
-                    }
-                    else {
-                        c.Write(e);
-                    }
-
-                    // Semicolon after method or accessor block is not valid
-                    if (!(e is FunctionDef)) {
-                        c.WriteLine(";");
-                    }
-                }
-
-                return;
             }
 
             var rootItems   = new List<Expr>();

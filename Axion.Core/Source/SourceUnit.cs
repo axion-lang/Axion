@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Newtonsoft.Json;
@@ -16,29 +16,44 @@ namespace Axion.Core.Source {
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public sealed class SourceUnit {
-        public ProcessingOptions Options        = ProcessingOptions.None;
-        public ProcessingMode    ProcessingMode = ProcessingMode.None;
+        public const string SourceFileExt = ".ax";
+        public const string DebugFileExt  = ".dbg.json";
+
+        public string OutputFileExt {
+            get {
+                if (Options.HasFlag(ProcessingOptions.ToAxion)) {
+                    return ".ax";
+                }
+
+                if (Options.HasFlag(ProcessingOptions.ToCSharp)) {
+                    return ".cs";
+                }
+
+                if (Options.HasFlag(ProcessingOptions.ToPython)) {
+                    return ".py";
+                }
+
+                if (Options.HasFlag(ProcessingOptions.ToPascal)) {
+                    return ".pas";
+                }
+
+                return ".out";
+            }
+        }
+
+        internal ProcessingOptions Options        = ProcessingOptions.None;
+        internal ProcessingMode    ProcessingMode = ProcessingMode.None;
 
         public List<LangException> Blames { get; } = new List<LangException>();
 
         public TextStream TextStream { get; private set; }
 
-        [JsonProperty]
         public TokenStream TokenStream { get; }
-
-        public Stack<Token> MismatchingPairs { get; } = new Stack<Token>();
-
-        public List<TokenType> ProcessTerminators { get; } = new List<TokenType> {
-            TokenType.End
-        };
 
         [JsonProperty]
         public Ast Ast { get; set; }
 
-        public char IndentChar = '\0';
-        public int  IndentSize;
-        public int  LastIndentLen;
-        public int  IndentLevel;
+        public CodeWriter CodeWriter { get; set; }
 
         #region File paths
 
@@ -49,17 +64,55 @@ namespace Axion.Core.Source {
         /// </summary>
         public FileInfo SourceFilePath { get; }
 
+        private FileInfo outputFilePath;
+
         /// <summary>
         ///     Path to file where generated result is located.
         ///     When not specified in constructor,
         ///     then file name assigned to date and time of instance creation.
         /// </summary>
-        public FileInfo OutputFilePath { get; }
+        public FileInfo OutputFilePath {
+            get {
+                FileInfo path = outputFilePath;
+                if (path != null) {
+                    return path;
+                }
+
+                var f = new FileInfo(
+                    Path.Combine(
+                        SourceFilePath.Directory.FullName,
+                        "out",
+                        Path.GetFileNameWithoutExtension(SourceFilePath.FullName) + OutputFileExt
+                    )
+                );
+                Utilities.ResolvePath(f.Directory.FullName);
+                return f;
+            }
+        }
+
+        private FileInfo debugFilePath;
 
         /// <summary>
         ///     Path to file where processing debug output is located.
         /// </summary>
-        public FileInfo DebugFilePath { get; }
+        public FileInfo DebugFilePath {
+            get {
+                FileInfo path = debugFilePath;
+                if (path != null) {
+                    return path;
+                }
+
+                var f = new FileInfo(
+                    Path.Combine(
+                        SourceFilePath.Directory.FullName,
+                        "debug",
+                        Path.GetFileNameWithoutExtension(SourceFilePath.FullName) + DebugFileExt
+                    )
+                );
+                Utilities.ResolvePath(f.Directory.FullName);
+                return f;
+            }
+        }
 
         #endregion
 
@@ -70,41 +123,31 @@ namespace Axion.Core.Source {
             FileInfo debugPath  = null
         ) {
             if (sourcePath == null) {
-                sourcePath = Compiler.CreateTempSourcePath();
+                sourcePath = new FileInfo(
+                    Path.Combine(
+                        Compiler.WorkDir,
+                        "temp",
+                        "tmp-" + DateTime.Now.ToFileName() + SourceFileExt
+                    )
+                );
                 Utilities.ResolvePath(sourcePath.Directory?.FullName);
             }
 
             SourceFilePath = sourcePath;
-            if (SourceFilePath.Extension != Compiler.SourceFileExt) {
+            if (SourceFilePath.Extension != SourceFileExt) {
                 throw new ArgumentException(
-                    $"Source file must have {Compiler.SourceFileExt} extension.",
+                    $"Source file must have {SourceFileExt} extension.",
                     nameof(sourcePath)
                 );
             }
 
-            if (outputPath == null) {
-                outputPath = new FileInfo(
-                    Path.Combine(
-                        SourceFilePath.Directory.FullName,
-                        "out",
-                        SourceFilePath.Name + Compiler.OutputFileExt
-                    )
-                );
+            if (outputPath != null) {
+                outputFilePath = outputPath;
             }
 
-            OutputFilePath = outputPath;
-
-            if (debugPath == null) {
-                debugPath = new FileInfo(
-                    Path.Combine(
-                        SourceFilePath.Directory.FullName,
-                        "debug",
-                        SourceFilePath.Name + Compiler.DebugFileExt
-                    )
-                );
+            if (debugPath != null) {
+                debugFilePath = debugPath;
             }
-
-            DebugFilePath = debugPath;
 
             TextStream  = new TextStream(code);
             TokenStream = new TokenStream();

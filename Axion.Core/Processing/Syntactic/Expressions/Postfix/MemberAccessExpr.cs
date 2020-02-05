@@ -30,11 +30,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public MemberAccessExpr Parse() {
             SetSpan(() => {
                 if (Target == null) {
-                    Target = Parsing.ParseAtom(this);
+                    Target = AtomExpr.Parse(this);
                 }
 
                 Stream.Eat(OpDot);
-                Member = Parsing.ParseAtom(this);
+                Member = AtomExpr.Parse(this);
             });
             return this;
         }

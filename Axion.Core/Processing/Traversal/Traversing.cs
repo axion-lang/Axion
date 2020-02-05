@@ -16,7 +16,8 @@ namespace Axion.Core.Processing.Traversal {
     public class NoTraversePathAttribute : Attribute { }
 
     public static class Traversing {
-        public static void Traverse(Expr node, Action<ITreePath> walker) {
+        public static void Traverse(Expr node) {
+            Action<ITreePath> walker = Walker;
             if (!node.Path.Traversed) {
                 walker(node.Path);
             }
@@ -40,7 +41,7 @@ namespace Axion.Core.Processing.Traversal {
                 }
 
                 if (obj is Expr expr) {
-                    Traverse(expr, walker);
+                    Traverse(expr);
                 }
                 else {
                     try {
@@ -49,7 +50,7 @@ namespace Axion.Core.Processing.Traversal {
                         // can be modified.
                         // ReSharper disable once ForCanBeConvertedToForeach
                         for (var i = 0; i < list.Count; i++) {
-                            Traverse((Expr) list[i], walker);
+                            Traverse((Expr) list[i]);
                         }
                     }
                     catch (InvalidCastException) {
@@ -60,11 +61,13 @@ namespace Axion.Core.Processing.Traversal {
         }
 
         public static void Walker(ITreePath path) {
-            if (path.Node is TupleTypeName t && t.Types.Count == 0) {
-                path.Node = new SimpleTypeName("UnitType");
+            switch (path.Node) {
+            case TupleTypeName t when t.Types.Count == 0:
+                path.Node      = new SimpleTypeName("UnitType");
                 path.Traversed = true;
-            }
-            if (path.Node is UnionTypeName unionTypeName) {
+                break;
+
+            case UnionTypeName unionTypeName:
                 // LeftType | RightType -> Union[LeftType, RightType]
                 path.Node = new GenericTypeName(
                     path.Node.Parent,
@@ -75,25 +78,27 @@ namespace Axion.Core.Processing.Traversal {
                     }
                 );
                 path.Traversed = true;
-            }
-            if (path.Node is BinaryExpr bin) {
-                if (bin.Operator.Is(TokenType.OpIs)
-                 && bin.Right is UnaryExpr un
-                 && un.Operator.Is(TokenType.OpNot)) {
-                    // x is (not (y)) -> not (x is y)
-                    path.Node = new UnaryExpr(
-                        path.Node.Parent,
-                        TokenType.OpNot,
-                        new BinaryExpr(
-                            path.Node,
-                            bin.Left,
-                            new OperatorToken(path.Node.Source, tokenType: TokenType.OpIs),
-                            un.Value
-                        )
-                    );
-                    path.Traversed = true;
-                }
-                else if (bin.Operator.Is(TokenType.RightPipeline)) {
+                break;
+
+            case BinaryExpr bin when bin.Operator.Is(TokenType.OpIs)
+                                  && bin.Right is UnaryExpr un
+                                  && un.Operator.Is(TokenType.OpNot):
+                // x is (not (y)) -> not (x is y)
+                path.Node = new UnaryExpr(
+                    path.Node.Parent,
+                    TokenType.OpNot,
+                    new BinaryExpr(
+                        path.Node,
+                        bin.Left,
+                        new OperatorToken(path.Node.Source, tokenType: TokenType.OpIs),
+                        un.Value
+                    )
+                );
+                path.Traversed = true;
+                break;
+
+            case BinaryExpr bin:
+                if (bin.Operator.Is(TokenType.RightPipeline)) {
                     // arg |> func -> func(arg)
                     path.Node = new FuncCallExpr(
                         path.Node.Parent,
@@ -102,8 +107,10 @@ namespace Axion.Core.Processing.Traversal {
                     );
                     path.Traversed = true;
                 }
-            }
-            else if (path.Node is WhileExpr whileExpr && whileExpr.NoBreakBlock != null) {
+
+                break;
+
+            case WhileExpr whileExpr when whileExpr.NoBreakBlock != null:
                 // Add bool before loop, that indicates, was break reached or not.
                 // Find all 'break's in child blocks and set this
                 // bool to 'true' before exiting the loop.
@@ -145,8 +152,8 @@ namespace Axion.Core.Processing.Traversal {
                     new OperatorToken(path.Node.Source, tokenType: TokenType.OpAssign),
                     new ConstantExpr(path.Node, "false")
                 );
-                foreach ((BreakExpr item, BlockExpr itemParentBlock, int itemIndex) brk in breaks) {
-                    brk.itemParentBlock.Items.Insert(brk.itemIndex, boolSetter);
+                foreach ((_, BlockExpr itemParentBlock, int itemIndex) in breaks) {
+                    itemParentBlock.Items.Insert(itemIndex, boolSetter);
                 }
 
                 whileParentBlock.Items.Insert(
@@ -155,6 +162,7 @@ namespace Axion.Core.Processing.Traversal {
                 );
                 whileExpr.NoBreakBlock = null;
                 path.Traversed         = true;
+                break;
             }
         }
     }

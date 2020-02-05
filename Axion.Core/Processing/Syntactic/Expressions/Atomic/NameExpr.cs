@@ -39,11 +39,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             Tokens = tokens?.ToList() ?? new List<Token>();
         }
 
-        public NameExpr Parse(bool mustBeSimple = false) {
+        public NameExpr Parse(bool simple = false) {
             SetSpan(() => {
                 Stream.Eat(Identifier);
                 Tokens.Add(Stream.Token);
-                if (!mustBeSimple) {
+                if (!simple) {
                     while (Stream.MaybeEat(OpDot)) {
                         Tokens.Add(Stream.Token);
                         if (Stream.Eat(Identifier) != null) {
@@ -64,7 +64,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         }
 
         public override void ToCSharp(CodeWriter c) {
-            if (Tokens.Count == 1 && Tokens[0].Content == "self") {
+            if (IsSimple && Qualifiers[0].Content == "self") {
                 c.Write("this");
                 return;
             }

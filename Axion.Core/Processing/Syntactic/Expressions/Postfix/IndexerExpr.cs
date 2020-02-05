@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public IndexerExpr Parse() {
             if (Target == null) {
-                Target = Parsing.ParseAtom(this);
+                Target = AtomExpr.Parse(this);
             }
 
             SetSpan(() => {
@@ -42,19 +42,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     while (true) {
                         Expr start = null;
                         if (!Stream.PeekIs(Colon)) {
-                            start = Parsing.ParseInfix(this);
+                            start = InfixExpr.Parse(this);
                         }
 
                         if (Stream.MaybeEat(Colon)) {
                             Expr stop = null;
                             if (!Stream.PeekIs(Colon, Comma, CloseBracket)) {
-                                stop = Parsing.ParseInfix(this);
+                                stop = InfixExpr.Parse(this);
                             }
 
                             Expr step = null;
                             if (Stream.MaybeEat(Colon)
                              && !Stream.PeekIs(Comma, CloseBracket)) {
-                                step = Parsing.ParseInfix(this);
+                                step = InfixExpr.Parse(this);
                             }
 
                             expressions.Add(new SliceExpr(this, start, stop, step));

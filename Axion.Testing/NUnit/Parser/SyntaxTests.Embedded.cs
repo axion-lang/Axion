@@ -42,9 +42,9 @@ namespace Axion.Testing.NUnit.Parser {
             SourceUnit src2 = MakeSourceFromCode("validateAge(getAge(parseData(person)))");
             Parse(src2);
             Assert.That(src2.Blames.Count == 0, $"unit2.Blames.Count == {src2.Blames.Count}");
-            var a = new CodeWriter(ProcessingMode.ConvertAxion);
+            var a = new CodeWriter(ProcessingOptions.ToAxion);
             a.Write(src2.Ast);
-            var b = new CodeWriter(ProcessingMode.ConvertAxion);
+            var b = new CodeWriter(ProcessingOptions.ToAxion);
             b.Write(src1.Ast);
             Assert.AreEqual(a.ToString(), b.ToString());
         }

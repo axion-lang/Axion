@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Axion.Core;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Source;
 using Axion.Core.Specification;
@@ -94,7 +93,7 @@ namespace Axion.Testing.NUnit {
 
         private void ScanSources(DirectoryInfo dir) {
             foreach (FileInfo file in dir.EnumerateFiles()) {
-                if (file.Extension == Compiler.SourceFileExt) {
+                if (file.Extension == SourceUnit.SourceFileExt) {
                     SourceFiles.Add(file);
                 }
             }
@@ -107,8 +106,7 @@ namespace Axion.Testing.NUnit {
         internal static SourceUnit MakeSourceFromFile([CallerMemberName]
                                                       string fileName = null) {
             return SourceUnit.FromFile(
-                new FileInfo(Path.Combine(InPath, fileName + Compiler.SourceFileExt)),
-                new FileInfo(OutPath + fileName + TestExtension)
+                new FileInfo(Path.Combine(InPath, fileName + SourceUnit.SourceFileExt))
             );
         }
 

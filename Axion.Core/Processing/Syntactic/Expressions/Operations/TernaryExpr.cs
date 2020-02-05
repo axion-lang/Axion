@@ -54,12 +54,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
                 }
 
                 if (TrueExpr == null) {
-                    TrueExpr = Parsing.ParseAny(this);
+                    TrueExpr = AnyExpr.Parse(this);
                 }
 
-                Condition = Parsing.ParseInfix(this);
+                Condition = InfixExpr.Parse(this);
                 if (Stream.MaybeEat(KeywordElse)) {
-                    FalseExpr = Parsing.ParseMultiple(this, expectedTypes: typeof(IInfixExpr));
+                    FalseExpr = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
                 }
 
                 if (invert) {

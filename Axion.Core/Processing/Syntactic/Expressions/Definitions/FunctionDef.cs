@@ -52,7 +52,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 names.Add(Name.ToString());
 
                 if (Stream.MaybeEat(OpAssign)) {
-                    DefaultValue = Parsing.ParseInfix(this);
+                    DefaultValue = InfixExpr.Parse(this);
                 }
             });
             return this;
@@ -144,7 +144,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 try {
                     List<(ReturnExpr item, BlockExpr itemParentBlock, int itemIndex)> returns =
                         Block.FindItemsOfType<ReturnExpr>();
-                    // TODO: handle all possible returns
+                    // TODO: handle all possible returns (type unions)
                     if (returns.Count > 0) {
                         return returns[0].item.ValueType;
                     }

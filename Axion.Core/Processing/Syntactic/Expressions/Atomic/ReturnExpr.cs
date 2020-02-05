@@ -33,7 +33,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             SetSpan(() => {
                 Stream.Eat(KeywordReturn);
                 if (!Stream.PeekIs(Spec.NeverExprStartTypes)) {
-                    Value = Parsing.ParseMultiple(this);
+                    Value = Parsing.MultipleExprs(this);
                 }
             });
             return this;

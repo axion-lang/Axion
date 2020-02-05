@@ -122,16 +122,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 FuncCallArg arg;
                 // named arg
                 if (parent.Stream.PeekIs(Identifier) && parent.Stream.PeekByIs(2, OpAssign)) {
-                    var name = (NameExpr) Parsing.ParseAtom(parent);
+                    var name = (NameExpr) AtomExpr.Parse(parent);
                     parent.Stream.Eat(OpAssign);
-                    Expr value = Parsing.ParseInfix(parent);
+                    Expr value = InfixExpr.Parse(parent);
                     arg = new FuncCallArg(parent, name, value);
                     if (args.Any(a => a.Name.ToString() == name.ToString())) {
                         LangException.Report(BlameType.DuplicatedNamedArgument, arg);
                     }
                 }
                 else {
-                    Expr value = Parsing.ParseInfix(parent);
+                    Expr value = InfixExpr.Parse(parent);
                     // generator arg
                     if (parent.Stream.PeekIs(KeywordFor)) {
                         arg = new FuncCallArg(

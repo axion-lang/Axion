@@ -1,40 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <Version>0.3.4.6</Version>
-    <Authors>Nikitin Ilya</Authors>
-    <Company>Fluctus Technologies</Company>
-    <Description>Core of Axion programming language toolset.
-Built on .NET Standard.</Description>
-    <Product>Axion</Product>
-    <PackageId>Axion.Core</PackageId>
-    <AssemblyName>Axion.Core</AssemblyName>
-    <RootNamespace>Axion.Core</RootNamespace>
-    <LangVersion>8</LangVersion>
-    <AssemblyVersion>0.4.0.2</AssemblyVersion>
-    <FileVersion>0.4.0.2</FileVersion>
-    <ProjectGuid>{B38A9261-F73C-40E4-83B6-46B8A2B1CDE5}</ProjectGuid>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Title>Axion programming language toolset</Title>
-    <PackageVersion>0.4.0.2</PackageVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Version>0.3.4.6</Version>
+        <Authors>Nikitin Ilya</Authors>
+        <Company>Fluctus Technologies</Company>
+        <Description>Core of Axion programming language toolset.
+            Built on .NET Standard.
+        </Description>
+        <Product>Axion</Product>
+        <PackageId>Axion.Core</PackageId>
+        <AssemblyName>Axion.Core</AssemblyName>
+        <RootNamespace>Axion.Core</RootNamespace>
+        <LangVersion>8</LangVersion>
+        <AssemblyVersion>0.4.0.5</AssemblyVersion>
+        <FileVersion>0.4.0.5</FileVersion>
+        <ProjectGuid>{B38A9261-F73C-40E4-83B6-46B8A2B1CDE5}</ProjectGuid>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Title>Axion programming language toolset</Title>
+        <PackageVersion>0.4.0.5</PackageVersion>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>TRACE</DefineConstants>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DefineConstants>TRACE</DefineConstants>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CodeConsole\CodeConsole\CodeConsole.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\CodeConsole\CodeConsole\CodeConsole.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.3.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.3.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+        <PackageReference Include="NLog" Version="4.6.8" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="NLog.config">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>

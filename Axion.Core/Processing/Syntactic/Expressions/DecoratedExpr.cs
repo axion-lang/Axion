@@ -31,16 +31,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 Stream.Eat(At);
                 if (Stream.MaybeEat(OpenBracket)) {
                     do {
-                        Decorators.Add(Parsing.ParseInfix(this));
+                        Decorators.Add(InfixExpr.Parse(this));
                     } while (Stream.MaybeEat(Comma));
 
                     Stream.Eat(CloseBracket);
                 }
                 else {
-                    Decorators.Add(Parsing.ParseInfix(this));
+                    Decorators.Add(InfixExpr.Parse(this));
                 }
 
-                Target = Parsing.ParseAny(this);
+                Target = AnyExpr.Parse(this);
             });
             return this;
         }
@@ -63,6 +63,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             foreach (Expr decorator in Decorators) {
                 c.WriteLine("@", decorator);
             }
+
             c.Write(Target);
         }
 

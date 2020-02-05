@@ -33,7 +33,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
                 e = new TypeName(parent).ParseTypeName();
             }
             else {
-                e = Parsing.ParseAny(parent);
+                e = AnyExpr.Parse(parent);
             }
 
             parent.Ast.MacroExpectationType = null;

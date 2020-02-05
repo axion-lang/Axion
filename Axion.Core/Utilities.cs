@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 
 namespace Axion.Core {
@@ -16,10 +14,8 @@ namespace Axion.Core {
 
         /// <summary>
         ///     Creates a file name from current date and time
-        ///     in format: 'yyyy-MMM-dd_HH-mm-ss'.W
+        ///     in format: 'yyyy-MMM-dd_HH-mm-ss'.
         /// </summary>
-        /// <param name="dt"></param>
-        /// <returns>file name without extension.</returns>
         internal static string ToFileName(this DateTime dt) {
             return dt.ToString(timedFileNameFormat, dateTimeFormat);
         }
@@ -32,23 +28,6 @@ namespace Axion.Core {
             if (!Directory.Exists(path)) {
                 Directory.CreateDirectory(path);
             }
-        }
-
-        public static BigInteger RadixLess10ToBigInt(string value, int toRadix) {
-            Contract.Assert(toRadix <= 10);
-            BigInteger res = 0;
-            BigInteger num = BigInteger.Parse(value, NumberStyles.AllowExponent);
-            // 1 = (radix^0)
-            var radix = 1;
-            while (num > 0) {
-                // take last digit
-                var lastDigit = (int) (num % 10);
-                num   /= 10;
-                res   += lastDigit * radix;
-                radix *= toRadix;
-            }
-
-            return res;
         }
 
         public static int? ParseInt(string value, int radix) {

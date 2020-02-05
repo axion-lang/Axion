@@ -11,16 +11,36 @@ namespace Axion.Core.Source {
         /// </summary>
         None = 0,
 
+        Default = CheckIndentationConsistency,
+
         /// <summary>
         ///     Check code against inconsistent
         ///     indentation (mixed spaced and tabs).
         /// </summary>
-        CheckIndentationConsistency = 1,
+        CheckIndentationConsistency = 1 << 2,
 
         /// <summary>
-        ///     Save debugging information to files
-        ///     when performing code syntax analysis.
+        ///     Conversion Axion source back into
+        ///     Axion source (debugging mode).
         /// </summary>
-        SyntaxAnalysisDebugOutput = 1 << 1
+        ToAxion,
+
+        /// <summary>
+        ///     Conversion Axion source into
+        ///     C# programming language source.
+        /// </summary>
+        ToCSharp,
+
+        /// <summary>
+        ///     Conversion Axion source into
+        ///     Python programming language source.
+        /// </summary>
+        ToPython,
+
+        /// <summary>
+        ///     Conversion Axion source into
+        ///     Pascal programming language source.
+        /// </summary>
+        ToPascal
     }
 }

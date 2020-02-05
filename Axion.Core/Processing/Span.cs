@@ -20,28 +20,28 @@ namespace Axion.Core.Processing {
             End    = end;
         }
 
-        protected void MarkStart(Location start) {
+        internal void MarkStart(Location start) {
             Start = start;
         }
 
-        protected void MarkEnd(Location end) {
+        internal void MarkEnd(Location end) {
             End = end;
         }
 
-        protected void MarkStart(Span mark) {
+        internal void MarkStart(Span mark) {
             Start = mark.Start;
         }
 
-        protected void MarkEnd(Span mark) {
+        internal void MarkEnd(Span mark) {
             End = mark.End;
         }
 
-        protected void MarkPosition(Span mark) {
+        internal void MarkPosition(Span mark) {
             Start = mark.Start;
             End   = mark.End;
         }
 
-        protected void MarkPosition(Span start, Span end) {
+        internal void MarkPosition(Span start, Span end) {
             Start = start.Start;
             End   = end.End;
         }
@@ -94,6 +94,10 @@ namespace Axion.Core.Processing {
         internal Location(int line, int column) {
             Line   = line;
             Column = column;
+        }
+
+        public Location Add(int line, int column) {
+            return new Location(Line + line, Column + column);
         }
 
         public override string ToString() {

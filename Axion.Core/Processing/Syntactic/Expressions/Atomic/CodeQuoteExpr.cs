@@ -33,7 +33,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             SetSpan(() => {
                 Stream.Eat(DoubleOpenBrace);
                 while (!Stream.PeekIs(DoubleCloseBrace, TokenType.End)) {
-                    Block.Items.Add(Parsing.ParseAny(this));
+                    Block.Items.Add(AnyExpr.Parse(this));
                 }
 
                 Stream.Eat(DoubleCloseBrace);

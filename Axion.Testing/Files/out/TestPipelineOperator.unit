@@ -1,0 +1,19 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Numerics;
+using System.Threading;
+using System.Diagnostics;
+using System.Collections;
+using System.Collections.Generic;
+namespace __RootModule__
+{
+    public class __RootClass__
+    {
+        public void Main()
+        {
+            validateAge(getAge(parseData(person)));
+        }
+    }
+}

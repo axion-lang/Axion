@@ -8,73 +8,76 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Specification {
     /// <summary>
-    ///     Static class, contains all language's syntax definitions (allowed operators, keywords, etc.)
+    ///     Static class with language's grammar definitions
+    ///     (allowed operators, keywords, etc.)
     /// </summary>
-    public partial class Spec {
-        public const string Eoc                  = "\0";
-        public const string EscapeMark           = "\\";
-        public const string MultiLineCommentMark = "###";
+    public static partial class Spec {
+        public const char   Eoc                  = '\0';
         public const string OneLineCommentMark   = "#";
+        public const string MultiLineCommentMark = "###";
         public const string CharacterQuote       = "`";
-        public const string NumRadixDelimiter    = "::";
 
-        public static readonly string[] Eols = {
-            "\r", "\n"
+        public static readonly char[] Eols = {
+            '\r', '\n'
         };
 
-        public static readonly string[] StringQuotes = {
-            "'", "\""
+        public static readonly char[] StringQuotes = {
+            '"', '\''
         };
 
-        public static readonly string[] White = {
-            " ", "\t"
+        public static readonly char[] StringPrefixes = {
+            'r', 'f'
         };
 
-        public static readonly string[] NumbersDec = {
-            "0", "1", "2", "3", "4",
-            "5", "6", "7", "8", "9"
+        public static readonly char[] White = {
+            ' ', '\t'
         };
 
-        public static readonly string[] NumbersHex = NumbersDec.Union(
-            "a", "b", "c", "d", "e", "f",
-            "A", "B", "C", "D", "E", "F"
+        public static readonly char[] NumbersDec = {
+            '0', '1', '2', '3', '4',
+            '5', '6', '7', '8', '9'
+        };
+
+        public static readonly char[] NumbersHex = NumbersDec.Union(
+            'a', 'b', 'c', 'd', 'e', 'f',
+            'A', 'B', 'C', 'D', 'E', 'F'
         );
 
-        public static readonly string[] IdStart = {
-            "a", "b",
-            "c", "d",
-            "e", "f",
-            "g", "h",
-            "i", "j",
-            "k", "l",
-            "m", "n",
-            "o", "p",
-            "q", "r",
-            "s", "t",
-            "u", "v",
-            "w", "x",
-            "y", "z",
-            "A", "B",
-            "C", "D",
-            "E", "F",
-            "G", "H",
-            "I", "J",
-            "K", "L",
-            "M", "N",
-            "O", "P",
-            "Q", "R",
-            "S", "T",
-            "U", "V",
-            "W", "X",
-            "Y", "Z",
-            "_"
+        public static readonly char[] IdStart = {
+            'a', 'b',
+            'c', 'd',
+            'e', 'f',
+            'g', 'h',
+            'i', 'j',
+            'k', 'l',
+            'm', 'n',
+            'o', 'p',
+            'q', 'r',
+            's', 't',
+            'u', 'v',
+            'w', 'x',
+            'y', 'z',
+            'A', 'B',
+            'C', 'D',
+            'E', 'F',
+            'G', 'H',
+            'I', 'J',
+            'K', 'L',
+            'M', 'N',
+            'O', 'P',
+            'Q', 'R',
+            'S', 'T',
+            'U', 'V',
+            'W', 'X',
+            'Y', 'Z',
+            '_'
         };
 
-        public static readonly string[] IdNotEnd = { "-" };
+        public static readonly char[] IdNotEnd = { '-' };
 
-        public static readonly string[] IdPart = IdStart.Union(IdNotEnd).Union(NumbersDec);
+        public static readonly char[] IdPart = IdStart.Union(IdNotEnd).Union(NumbersDec);
 
-        public static readonly string[] IdAfterNotEnd = IdStart.Union(NumbersDec);
+        public static readonly char[] IdAfterNotEnd = IdStart.Union(NumbersDec);
 
         public static readonly Dictionary<string, string> EscapeSequences = new Dictionary<string, string> {
             { "0", "\u0000" },
@@ -87,8 +90,7 @@ namespace Axion.Core.Specification {
             { "v", "\u000b" },
             { "\\", "\\" },
             { "\"", "\"" },
-            { "\'", "\'" },
-            { "`", "`" }
+            { "\'", "\'" }
         };
 
         public static readonly Dictionary<string, TokenType> Punctuation = new Dictionary<string, TokenType> {
@@ -218,13 +220,6 @@ namespace Axion.Core.Specification {
             OpBitNot
         };
 
-        public static readonly TokenType[] ComparisonOperators = {
-            OpLess,
-            OpLessOrEqual,
-            OpGreater,
-            OpGreaterOrEqual
-        };
-
         /// <summary>
         ///     Token types that can start a block expression.
         /// </summary>
@@ -272,7 +267,7 @@ namespace Axion.Core.Specification {
             KeywordIf
         };
 
-        internal static TypeName CharType => new SimpleTypeName("Char");
-        internal static TypeName StringType => new SimpleTypeName("String");
+        internal static readonly TypeName CharType   = new SimpleTypeName("Char");
+        internal static readonly TypeName StringType = new SimpleTypeName("String");
     }
 }

@@ -59,7 +59,7 @@ namespace Axion.Core.Processing.Errors {
             var lines = new List<string>();
             // limit code piece by 5 lines
             for (int i = errorSpan.Start.Line; i < codeLines.Length && lines.Count < 4; i++) {
-                lines.Add(codeLines[i].TrimEnd('\n', '\r', Spec.Eoc[0]));
+                lines.Add(codeLines[i].TrimEnd('\n', '\r', Spec.Eoc));
             }
 
             if (lines.Count > codeLines.Length - errorSpan.Start.Line) {
@@ -68,7 +68,7 @@ namespace Axion.Core.Processing.Errors {
 
             // first line
             // <line number>| <code line>
-            int pointerTailLength = CliEditorSettings.LineNumberWidth + errorSpan.Start.Column + 1;
+            int pointerTailLength = CliEditorSettings.LineNumberWidth + errorSpan.Start.Column;
             int errorTokenLength;
             if (errorSpan.End.Line > errorSpan.Start.Line) {
                 errorTokenLength = lines[0].Length - errorSpan.Start.Column;

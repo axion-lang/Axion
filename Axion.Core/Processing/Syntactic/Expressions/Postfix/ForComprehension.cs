@@ -49,7 +49,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => SetNode(ref right, value);
         }
 
-        public bool IsGenerator;
+        public          bool IsGenerator;
         public readonly bool IsNested;
 
         [NoTraversePath]
@@ -68,28 +68,28 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public ForComprehension Parse() {
             SetSpan(() => {
                 if (Target == null && !IsNested) {
-                    Target = Parsing.ParseInfix(this);
+                    Target = InfixExpr.Parse(this);
                 }
 
                 Stream.Eat(KeywordFor);
-                Item = Parsing.ParseMultiple(
+                Item = Parsing.MultipleExprs(
                     this,
-                    Parsing.ParseAtom,
+                    AtomExpr.Parse,
                     typeof(NameExpr)
                 );
                 Stream.Eat(OpIn);
-                Iterable = Parsing.ParseMultiple(this, expectedTypes: typeof(IInfixExpr));
+                Iterable = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
 
                 while (Stream.PeekIs(KeywordIf, KeywordUnless)) {
                     if (Stream.MaybeEat(KeywordIf)) {
-                        Conditions.Add(Parsing.ParseInfix(this));
+                        Conditions.Add(InfixExpr.Parse(this));
                     }
                     else if (Stream.MaybeEat(KeywordUnless)) {
                         Conditions.Add(
                             new UnaryExpr(
                                 this,
                                 OpNot,
-                                Parsing.ParseInfix(this)
+                                InfixExpr.Parse(this)
                             )
                         );
                     }

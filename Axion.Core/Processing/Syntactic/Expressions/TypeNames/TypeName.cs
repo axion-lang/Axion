@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     public class TypeName : Expr {
         internal TypeName(Expr parent) : base(parent) { }
         protected TypeName() { }
-        
+
         [NoTraversePath]
         public override TypeName ValueType => this;
 

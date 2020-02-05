@@ -11,7 +11,7 @@ namespace Axion.Core.Processing.CodeGen {
     ///     for multiple target languages.
     /// </summary>
     public class CodeWriter : IDisposable {
-        private readonly ProcessingMode     processingMode;
+        private readonly ProcessingOptions  options;
         private readonly StringWriter       baseWriter;
         private readonly IndentedTextWriter writer;
         private          bool               lastLineEmpty;
@@ -21,16 +21,15 @@ namespace Axion.Core.Processing.CodeGen {
             set => writer.Indent = value;
         }
 
-        public CodeWriter(ProcessingMode mode) {
-            processingMode = mode;
-            baseWriter     = new StringWriter();
-            writer         = new IndentedTextWriter(baseWriter);
+        public CodeWriter(ProcessingOptions options) {
+            this.options = options;
+            baseWriter   = new StringWriter();
+            writer       = new IndentedTextWriter(baseWriter);
         }
 
         public void Write(params object[] values) {
             lastLineEmpty = false;
-            switch (processingMode) {
-            case ProcessingMode.ConvertAxion: {
+            if (options.HasFlag(ProcessingOptions.ToAxion)) {
                 foreach (object val in values) {
                     if (val is Span translatable) {
                         translatable.ToAxion(this);
@@ -39,11 +38,8 @@ namespace Axion.Core.Processing.CodeGen {
                         writer.Write(val);
                     }
                 }
-
-                break;
             }
-
-            case ProcessingMode.ConvertCS: {
+            else if (options.HasFlag(ProcessingOptions.ToCSharp)) {
                 foreach (object val in values) {
                     if (val is Span translatable) {
                         translatable.ToCSharp(this);
@@ -52,11 +48,8 @@ namespace Axion.Core.Processing.CodeGen {
                         writer.Write(val);
                     }
                 }
-
-                break;
             }
-
-            case ProcessingMode.ConvertPy: {
+            else if (options.HasFlag(ProcessingOptions.ToPython)) {
                 foreach (object val in values) {
                     if (val is Span translatable) {
                         translatable.ToPython(this);
@@ -65,11 +58,8 @@ namespace Axion.Core.Processing.CodeGen {
                         writer.Write(val);
                     }
                 }
-
-                break;
             }
-
-            case ProcessingMode.ConvertPas: {
+            else if (options.HasFlag(ProcessingOptions.ToPascal)) {
                 foreach (object val in values) {
                     if (val is Span translatable) {
                         translatable.ToPascal(this);
@@ -78,13 +68,9 @@ namespace Axion.Core.Processing.CodeGen {
                         writer.Write(val);
                     }
                 }
-
-                break;
             }
-
-            default: {
-                throw new NotSupportedException($"Code building for '{processingMode:G}' mode is not supported.");
-            }
+            else {
+                throw new NotSupportedException($"Code building for '{options:G}' mode is not supported.");
             }
         }
 

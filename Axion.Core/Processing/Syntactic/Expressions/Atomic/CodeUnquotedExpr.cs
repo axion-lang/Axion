@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public CodeUnquotedExpr Parse() {
             SetSpan(() => {
                 Stream.Eat(TokenType.Dollar);
-                Value = Parsing.ParsePostfix(this);
+                Value = PostfixExpr.Parse(this);
             });
             return this;
         }

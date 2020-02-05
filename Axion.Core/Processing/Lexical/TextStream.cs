@@ -12,7 +12,6 @@ namespace Axion.Core.Processing.Lexical {
         private int charIdx = -1;
         private int lineIdx;
         private int columnIdx;
-        private int prevLineLen;
 
         public string Text { get; }
 
@@ -41,15 +40,7 @@ namespace Axion.Core.Processing.Lexical {
         /// <summary>
         ///     Current (eaten) character.
         /// </summary>
-        public string C {
-            get {
-                if (charIdx < 0) {
-                    return Spec.Eoc;
-                }
-
-                return Text[charIdx].ToString();
-            }
-        }
+        public string C => charIdx < 0 ? Spec.Eoc.ToString() : Text[charIdx].ToString();
 
         public TextStream(string text) {
             if (!text.EndsWith(Spec.Eoc)) {
@@ -60,16 +51,28 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         /// <summary>
+        ///     Returns next character from stream,
+        ///     not eating it.
+        /// </summary>
+        public char Peek() {
+            if (charIdx + 2 >= 0 && charIdx + 2 < Text.Length) {
+                return Text.Substring(charIdx + 1, 1)[0];
+            }
+
+            return Spec.Eoc;
+        }
+
+        /// <summary>
         ///     Returns next N characters from stream,
         ///     not eating them.
         /// </summary>
-        public string Peek(int length = 1) {
+        public string Peek(int length) {
             Debug.Assert(length > 0);
             if (charIdx + 1 + length >= 0 && charIdx + 1 + length < Text.Length) {
                 return Text.Substring(charIdx + 1, length);
             }
 
-            return Spec.Eoc.PadRight(length, Spec.Eoc[0]);
+            return new string(Spec.Eoc, length);
         }
 
         /// <summary>
@@ -77,8 +80,11 @@ namespace Axion.Core.Processing.Lexical {
         ///     with expected strings.
         /// </summary>
         public bool PeekIs(params string[] expected) {
-            Debug.Assert(expected.Length > 0);
             return expected.Any(s => s == Peek(s.Length));
+        }
+
+        public bool PeekIs(params char[] expected) {
+            return expected.Any(s => s == Peek());
         }
 
         /// <summary>
@@ -102,36 +108,40 @@ namespace Axion.Core.Processing.Lexical {
             return null;
         }
 
-        private void Move(int by = 1) {
-            Debug.Assert(by != 0);
-            if (by > 0) {
-                while (by > 0 && Peek() != Spec.Eoc) {
-                    if (C == "\n") {
-                        lineIdx++;
-                        prevLineLen = columnIdx;
-                        columnIdx   = 0;
-                    }
-                    else {
-                        columnIdx++;
-                    }
+        /// <summary>
+        ///     Consumes next char from stream,
+        ///     checking that it's equal to expected.
+        /// </summary>
+        public string Eat(params char[] expected) {
+            if (expected.Length == 0) {
+                Move();
+                return C;
+            }
 
-                    charIdx++;
-                    by--;
+            foreach (char value in expected) {
+                char nxt = Peek();
+                if (nxt == value) {
+                    Move();
+                    return nxt.ToString();
                 }
             }
-            else {
-                while (by < 0) {
-                    charIdx--;
-                    if (C == "\n") {
-                        lineIdx--;
-                        columnIdx = prevLineLen;
-                    }
-                    else {
-                        columnIdx--;
-                    }
 
-                    by++;
+            return null;
+        }
+
+        private void Move(int by = 1) {
+            Debug.Assert(by > 0);
+            while (by > 0 && Peek() != Spec.Eoc) {
+                if (Peek() == '\n') {
+                    lineIdx++;
+                    columnIdx = 0;
                 }
+                else {
+                    columnIdx++;
+                }
+
+                charIdx++;
+                by--;
             }
         }
     }

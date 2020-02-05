@@ -69,7 +69,7 @@ namespace Axion.Testing.NUnit.Parser {
         //     SourceUnit source = ParseTestFile();
         //     Assert.AreEqual(0, source.Blames.Count);
         // }
-        
+
         [Test]
         public void TestDesignPatterns() {
             for (var i = 0; i < SourceFiles.Count; i++) {
@@ -82,8 +82,9 @@ namespace Axion.Testing.NUnit.Parser {
                     source,
                     ProcessingMode.Parsing
                 );
-                Assert.That(source.Blames.All(b => b.Severity != BlameSeverity.Error), file.Name + ": Errors count > 0");
-                Assert.That(source.TokenStream.Tokens.Count > 0,                       file.Name + ": Tokens count == 0");
+                Assert.That(source.Blames.All(b => b.Severity != BlameSeverity.Error),
+                            file.Name + ": Errors count > 0");
+                Assert.That(source.TokenStream.Tokens.Count > 0, file.Name + ": Tokens count == 0");
             }
         }
 
@@ -180,18 +181,21 @@ namespace Axion.Testing.NUnit.Parser {
         }
 
         private static void Parse(SourceUnit source) {
+            // Compiler.Process(
+            //     source,
+            //     ProcessingMode.Transpilation,
+            //     ProcessingOptions.ToAxion
+            // );
             Compiler.Process(
                 source,
-                ProcessingMode.ConvertAxion
+                ProcessingMode.Transpilation,
+                ProcessingOptions.ToCSharp
             );
-            Compiler.Process(
-                source,
-                ProcessingMode.ConvertCS
-            );
-            Compiler.Process(
-                source,
-                ProcessingMode.ConvertPy
-            );
+            // Compiler.Process(
+            //     source,
+            //     ProcessingMode.Transpilation,
+            //     ProcessingOptions.ToPython
+            // );
         }
     }
 }

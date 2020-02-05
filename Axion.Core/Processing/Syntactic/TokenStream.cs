@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         private Token exactPeek =>
             TokenIdx + 1 < Tokens.Count
-                ? Tokens[TokenIdx     + 1]
+                ? Tokens[TokenIdx + 1]
                 : Tokens[^1];
 
         public Token Peek {

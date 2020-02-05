@@ -69,7 +69,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
                 }
             }
             else {
-                c.Write(Left, " ", Operator.Value, " ", Right);
+                if (!Spec.CSharp.BinaryOperators.TryGetValue(Operator.Type, out string op)) {
+                    op = Operator.Value;
+                }
+                c.Write(Left, " ", op, " ", Right);
             }
         }
 

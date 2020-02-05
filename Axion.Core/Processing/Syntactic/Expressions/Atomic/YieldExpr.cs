@@ -31,10 +31,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             SetSpan(() => {
                 Stream.Eat(KeywordYield);
                 if (Stream.MaybeEat(KeywordFrom)) {
-                    Value = Parsing.ParseInfix(this);
+                    Value = InfixExpr.Parse(this);
                 }
                 else {
-                    Value = Parsing.ParseMultiple(this, expectedTypes: typeof(IInfixExpr));
+                    Value = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
                 }
             });
             return this;

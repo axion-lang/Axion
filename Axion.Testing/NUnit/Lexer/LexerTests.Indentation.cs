@@ -1,5 +1,4 @@
 using System;
-using Axion.Core;
 using Axion.Core.Source;
 using NUnit.Framework;
 
@@ -20,7 +19,7 @@ namespace Axion.Testing.NUnit.Lexer {
                     "\ti++"
                 )
             );
-            LexIndent(src);
+            Lex(src);
             Assert.AreEqual(0, src.Blames.Count);
         }
 
@@ -39,7 +38,7 @@ namespace Axion.Testing.NUnit.Lexer {
                     "    i++"
                 )
             );
-            LexIndent(src);
+            Lex(src);
             Assert.AreEqual(0, src.Blames.Count);
         }
 
@@ -58,18 +57,9 @@ namespace Axion.Testing.NUnit.Lexer {
                     "\ti++"
                 )
             );
-            LexIndent(src);
+            Lex(src);
             // 2 blames for mixed indentation
             Assert.AreEqual(2, src.Blames.Count);
-        }
-
-        private static void LexIndent(SourceUnit source) {
-            Compiler.Process(
-                source,
-                ProcessingMode.Lex,
-                ProcessingOptions.SyntaxAnalysisDebugOutput
-              | ProcessingOptions.CheckIndentationConsistency
-            );
         }
     }
 }

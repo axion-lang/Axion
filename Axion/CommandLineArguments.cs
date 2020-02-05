@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using CommandLine;
 using static Axion.Core.Source.ProcessingMode;
+using static Axion.Core.Source.ProcessingOptions;
 
 namespace Axion {
     /// <summary>
@@ -23,14 +24,11 @@ namespace Axion {
             "│  -f   │ --" + nameof(Files) + " \"<path>\"    │ Input files to process.                                       │",
             "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤",
             "│  -m   │ --" + nameof(Mode) + " <value>      │ Source code processing mode (Default: compile). Available:    │",
-            "│       │ " + nameof(Lex) + "                 │     Create tokens (lexemes) list from source.                 │",
-            "│       │ " + nameof(Parsing) + "             │     Create tokens list and Abstract Syntax Tree from source.  │",
-            "│       │ " + nameof(Interpret) + "           │     Interpret source code.                                    │",
-            "│       │ " + nameof(ConvertCS) + "           │     Convert source to 'C#' language.                          │",
-            "│       │ " + nameof(ConvertPy) + "           │     Convert source to 'Python' language.                      │",
-            "│       │ " + nameof(Compile) + "             │     Compile source into machine code.                         ├──┬── not available yet",
-            "│       │ " + nameof(ConvertCpp) + "          │     Convert source to 'C++' language.                         │  │",
-            "│       │ " + nameof(ConvertJS) + "           │     Convert source to 'JavaScript' language.                  ├──┘",
+            "│       │ " + nameof(Lexing) + "              │     Generate tokens (lexemes) list.                           │",
+            "│       │ " + nameof(Parsing) + "             │     Generate syntax tree.                                     │",
+            "│       │ " + nameof(Reduction) + "           │     Generate syntax tree and reduce it.                       │",
+            "│       │ " + nameof(ToCSharp) + "            │     Convert source to 'C#' language.                          │",
+            "│       │ " + nameof(ToPython) + "            │     Convert source to 'Python' language.                      │",
             "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤",
             "│  -d   │ --" + nameof(Debug) + "             │ Save debug information to '<compilerDir>\\output' directory.   │",
             "│  -h   │ --" + nameof(Help) + "              │ Display this help screen.                                     │",
@@ -51,7 +49,7 @@ namespace Axion {
         [Option('f', "files", Separator = ';')]
         public IEnumerable<string> Files { get; set; }
 
-        [Option('m', "mode")]
+        [Option('m', "mode", Default = "")]
         public string Mode { get; set; }
 
         [Option('d', "debug")]

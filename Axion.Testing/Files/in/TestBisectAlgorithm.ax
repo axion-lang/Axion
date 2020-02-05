@@ -1,20 +1,16 @@
-# finds where the function becomes 0 in [a,b] using bolzano
-fn bisection (func: double -> double, a: double, b: double) -> double
-    start = a
-    end = b
-    if func(a) == 0
-        # one of the a or b is a root for the function
-        return a
-    elif func(b) == 0
-        return b
-    elif func(a) * func(b) > 0
-        # if none of these are root and they are both positive or negative,
-        # then his algorithm can't find the root
-        new Exception("couldn't find root in [a,b]") |> throw
+# finds where the function becomes 0 in range using bolzano
+fn bisection (func: double -> double, start: double, end: double) -> double
+    if func(start) == 0
+        return start
+    elif func(end) == 0
+        return end
+    # if none of range start/end are root and they are both positive or negative.
+    elif func(start) * func(end) > 0
+        new Exception("couldn't find root in specified range.") |> throw
     else
         mid = start + (end - start) / 2
+        # until we achieve precise equals to 10^-7
         while Math.Abs(start - mid) > 10 ** -7
-            # until we achieve precise equals to 10^-7
             if func(mid) == 0
                 return mid
             elif func(mid) * func(start) < 0

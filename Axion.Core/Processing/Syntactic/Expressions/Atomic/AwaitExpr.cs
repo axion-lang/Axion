@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public AwaitExpr Parse() {
             SetSpan(() => {
                 Stream.Eat(KeywordAwait);
-                Value = Parsing.ParseMultiple(this);
+                Value = Parsing.MultipleExprs(this);
             });
             return this;
         }

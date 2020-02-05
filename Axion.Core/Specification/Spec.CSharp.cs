@@ -6,7 +6,7 @@ using Axion.Core.Processing.Lexical.Tokens;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Specification {
-    public partial class Spec {
+    public static partial class Spec {
         public class CSharp {
             public static readonly Assembly[] DefaultImports = {
                 typeof(Enumerable).Assembly,
@@ -41,40 +41,8 @@ namespace Axion.Core.Specification {
             };
 
             public static readonly Dictionary<TokenType, string> BinaryOperators = new Dictionary<TokenType, string> {
-                { OpPlus,               "+" },
-                { OpMinus,              "-" },
-                { OpTrueDivide,         "/" },
-                { OpRemainder,          "%" },
-                { OpMultiply,           "*" },
-
                 { OpAnd,                "&&" },
                 { OpOr,                 "||" },
-
-                { OpBitAnd,             "&" },
-                { OpBitOr,              "|" },
-                { OpBitXor,             "^" },
-
-                { OpEqualsEquals,       "==" },
-                { OpNotEquals,          "!=" },
-
-                { KeywordAs,            "as" },
-                { OpIs,                 "is" },
-
-
-                { OpLess,               "<" },
-                { OpGreater,            ">" },
-                { OpLessOrEqual,        "<=" },
-                { OpGreaterOrEqual,     ">=" },
-                { OpAssign,             "=" },
-                { OpPlusAssign,         "+=" },
-                { OpTrueDivideAssign,   "/=" },
-                { OpRemainderAssign,    "%=" },
-                { OpMultiplyAssign,     "*=" },
-                { OpMinusAssign,        "-=" },
-                { OpBitOrAssign,        "|=" },
-                { OpBitAndAssign,       "&=" },
-                { OpBitLShiftAssign,    "<<=" },
-                { OpBitRShiftAssign,    ">>=" }
             };
             
             // @formatter:on

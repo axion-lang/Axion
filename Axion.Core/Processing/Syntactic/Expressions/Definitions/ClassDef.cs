@@ -76,7 +76,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 Name = new NameExpr(this).Parse(true);
 
                 if (Stream.PeekIs(OpenParenthesis)) {
-                    DataMembers = Parsing.ParseMultiple(this, expectedTypes: typeof(NameDef));
+                    DataMembers = Parsing.MultipleExprs(this, expectedTypes: typeof(NameDef));
                 }
 
                 // TODO: add generic classes

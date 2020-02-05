@@ -1,15 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Axion.Core;
 using Axion.Core.Source;
+using Axion.Core.Specification;
 using CodeConsole;
 using CodeConsole.CodeEditor;
 using CommandLine;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
+using Microsoft.CodeAnalysis.Scripting;
+using NLog;
 
 namespace Axion {
     public static class Program {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         public static void Main(string[] arguments) {
             var cliParser = new Parser(
                 settings => {
@@ -30,38 +40,38 @@ namespace Axion {
                     cliParser
                         .ParseArguments<CommandLineArguments>(arguments)
                         .MapResult(
-                            options => {
-                                if (options.Exit) {
+                            args => {
+                                if (args.Exit) {
                                     Environment.Exit(0);
                                 }
 
-                                if (options.Cls) {
+                                if (args.Cls) {
                                     Console.Clear();
                                     PrintIntro();
                                     return 0;
                                 }
 
-                                if (options.Version) {
+                                if (args.Version) {
                                     ConsoleUI.WriteLine(Compiler.Version);
                                     return 0;
                                 }
 
-                                if (options.Help) {
+                                if (args.Help) {
                                     ConsoleUI.WriteLine(CommandLineArguments.HelpText);
                                     return 0;
                                 }
 
-                                if (options.Interactive) {
+                                if (args.Interactive) {
                                     EnterInteractiveMode();
                                     return 0;
                                 }
 
-                                ProcessSources(options);
+                                ProcessSources(args);
                                 return 0;
                             },
                             errors => {
                                 foreach (Error e in errors) {
-                                    Logger.Error(e.ToString());
+                                    logger.Error(e.ToString());
                                 }
 
                                 return 0;
@@ -100,7 +110,7 @@ namespace Axion {
         }
 
         private static void EnterInteractiveMode() {
-            Logger.Info(
+            logger.Info(
                 "Axion code editor & interpreter mode.\n"
               + "Type 'exit' or 'quit' to exit mode, 'cls' to clear screen."
             );
@@ -117,53 +127,126 @@ namespace Axion {
                 case "EXIT":
                 case "QUIT":
                     // exit from interpreter to main loop
-                    Logger.Info("\nInteractive interpreter closed.");
+                    logger.Info("\nInteractive interpreter closed.");
                     return;
                 }
+
                 // initialize editor
-                var      editor    = new CliEditor(firstCodeLine: rawInput);
+                var editor = new CliEditor(
+                    new CliEditorSettings(highlighter: new AxionSyntaxHighlighter()),
+                    rawInput
+                );
                 string[] codeLines = editor.Run();
+
                 // interpret as source code and output result
-                Compiler.Process(SourceUnit.FromLines(codeLines), ProcessingMode.Interpret);
+                SourceUnit src = SourceUnit.FromLines(codeLines);
+                Compiler.Process(src, ProcessingMode.Transpilation, ProcessingOptions.ToCSharp);
+
+                try {
+                    logger.Info("Interpretation:");
+                    ExecuteCSharp(src.CodeWriter.ToString(), Spec.CSharp.DefaultImports);
+                }
+                catch (CompilationErrorException e) {
+                    logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
+                }
             }
         }
 
-        private static void ProcessSources(CommandLineArguments options) {
+        private static void ProcessSources(CommandLineArguments args) {
             SourceUnit src;
-            if (options.Files.Any()) {
-                int filesCount = options.Files.Count();
+            if (args.Files.Any()) {
+                int filesCount = args.Files.Count();
                 if (filesCount > 1) {
-                    Logger.Error("Compiler doesn't support multiple files processing yet.");
+                    logger.Error("Compiler doesn't support multiple files processing yet.");
                     return;
                 }
 
                 var inputFiles = new FileInfo[filesCount];
                 for (var i = 0; i < filesCount; i++) {
                     inputFiles[i] = new FileInfo(
-                        Utilities.TrimMatchingChars(options.Files.ElementAt(i), '"')
+                        Utilities.TrimMatchingChars(args.Files.ElementAt(i), '"')
                     );
                 }
 
                 src = SourceUnit.FromFile(inputFiles[0]);
             }
-            else if (!string.IsNullOrWhiteSpace(options.Code)) {
-                src = SourceUnit.FromCode(Utilities.TrimMatchingChars(options.Code, '"'));
+            else if (!string.IsNullOrWhiteSpace(args.Code)) {
+                src = SourceUnit.FromCode(Utilities.TrimMatchingChars(args.Code, '"'));
             }
             else {
-                Logger.Error("Neither code nor path to source file not specified.");
+                logger.Error("Neither code nor path to source file not specified.");
                 return;
             }
 
-            if (!Enum.TryParse(options.Mode, true, out ProcessingMode processingMode)) {
-                processingMode = ProcessingMode.Compile;
+            var pMode = ProcessingMode.Reduction;
+            var pOptions = ProcessingOptions.Default;
+            if (args.Mode.ToLower().StartsWith("to") && Enum.TryParse(args.Mode, true, out pOptions)) {
+                pMode = ProcessingMode.Transpilation;
+            }
+            Compiler.Process(src, pMode, pOptions);
+        }
+
+        private static void ExecuteCSharp(string csCode, Assembly[] defaultReferences) {
+            if (string.IsNullOrWhiteSpace(csCode)) {
+                return;
             }
 
-            var processingOptions = ProcessingOptions.CheckIndentationConsistency;
-            if (options.Debug) {
-                processingOptions |= ProcessingOptions.SyntaxAnalysisDebugOutput;
-            }
+            var refs = new List<MetadataReference>(
+                defaultReferences.Select(
+                    asm => MetadataReference.CreateFromFile(asm.Location)
+                )
+            );
 
-            Compiler.Process(src, processingMode, processingOptions);
+            // Location of the .NET assemblies
+            string assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+
+            // Adding some necessary .NET assemblies
+            // These assemblies couldn't be loaded correctly via the same construction as above.
+            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "mscorlib.dll")));
+            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")));
+            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")));
+            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")));
+            refs.Add(MetadataReference.CreateFromFile(typeof(Console).Assembly.Location));
+            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Private.CoreLib.dll")));
+
+            string     assemblyName = Path.GetRandomFileName();
+            SyntaxTree syntaxTree   = CSharpSyntaxTree.ParseText(csCode);
+
+            var compilation = CSharpCompilation.Create(
+                assemblyName,
+                new[] { syntaxTree },
+                refs,
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+            using var  ms     = new MemoryStream();
+            EmitResult result = compilation.Emit(ms);
+
+            if (result.Success) {
+                ms.Seek(0, SeekOrigin.Begin);
+                Assembly assembly = Assembly.Load(ms.ToArray());
+
+                Type   type = assembly.GetType("__RootModule__.__RootClass__");
+                object obj  = Activator.CreateInstance(type);
+                type.InvokeMember(
+                    "Main",
+                    BindingFlags.Default | BindingFlags.InvokeMethod,
+                    null,
+                    obj,
+                    null
+                );
+            }
+            else {
+                IEnumerable<Diagnostic> failures = result.Diagnostics.Where(
+                    diagnostic =>
+                        diagnostic.IsWarningAsError ||
+                        diagnostic.Severity ==
+                        DiagnosticSeverity.Error
+                );
+
+                foreach (Diagnostic diagnostic in failures) {
+                    logger.Error($"{diagnostic.Id}: {diagnostic.GetMessage()}");
+                }
+            }
         }
     }
 }
