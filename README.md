@@ -1,4 +1,4 @@
-<img align="center" src="Other/Graphics/Axion_Mini.png" />
+<img align="center" src="Axion_Mini.png" />
 
 <h2 align="center">Welcome to Axion programming language toolset</h2>
 <h3 align="center">:\:\:\:\:\:\:\:\:\: Under construction :/:/:/:/:/:/:/:/:/:</h3>
