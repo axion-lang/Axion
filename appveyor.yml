@@ -16,7 +16,3 @@ build_script:
   - dotnet build .\Axion.sln
 test_script:
   - dotnet test .\Axion.Testing\
-
-build:
-  project: Axion.sln
-  verbosity: minimal
