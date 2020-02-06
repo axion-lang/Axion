@@ -1,7 +1,15 @@
-<img align="center" src="Axion_Mini.png" />
+<img align="center" src="Other/Graphics/Axion_Mini.png" />
 
 <h2 align="center">Welcome to Axion programming language toolset</h2>
 <h3 align="center">:\:\:\:\:\:\:\:\:\: Under construction :/:/:/:/:/:/:/:/:/:</h3>
+
+[![Build status](https://ci.appveyor.com/api/projects/status/ij2j74injuejodf2?svg=true)](https://ci.appveyor.com/project/F1uctus/axion)
+
+### Repository consists of 3 parts:
+
+- **Language core (lexer, parser, interpreter, etc.) (.NET Standard)**
+- **A .NET Core wrapper around language core (mainly to provide unit-testing and launching)**
+- **Import of [CodeConsole](https://github.com/F1uctus/CodeConsole) project (to use the console code editor with syntax highlighting) (a bit unstable)**
 
 ### Objectives:
 
@@ -22,13 +30,13 @@
 
 Now compiler supports interpretation of Axion source
 with `-i` option (through embedded code editor) and
-also file processing with `-f "<path>.ax" -m interpret` options.
+also file processing with `-f "<path>.ax" -m <output_lang>` options.
 
 Interpretation is performed by transpiling Axion to C# and running
 it through Roslyn (still incomplete and doesn't support some syntax).
 
-You can launch compiler with `axion.py` file
-and type `-h` in console to get support
+You can launch compiler with `dotnet run Axion.dll`
+in bin folder and type `-h` in console to get support
 about arguments for compiler CLI interface.
 
 ### You can take a look at syntax in [project wiki](https://github.com/F1uctus/Axion/wiki)
