@@ -3,6 +3,8 @@
 <h2 align="center">Welcome to Axion programming language toolset</h2>
 <h3 align="center">:\:\:\:\:\:\:\:\:\: Under construction :/:/:/:/:/:/:/:/:/:</h3>
 
+[![Build status](https://ci.appveyor.com/api/projects/status/ij2j74injuejodf2?svg=true)](https://ci.appveyor.com/project/F1uctus/axion)
+
 ### Repository consists of 3 parts:
 
 - **Language core (lexer, parser, interpreter, etc.) (.NET Standard)**
