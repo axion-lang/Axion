@@ -9,7 +9,7 @@
 
 - **Language core (lexer, parser, interpreter, etc.) (.NET Standard)**
 - **A .NET Core wrapper around language core (mainly to provide unit-testing and launching)**
-- **Import of [ConsoleExtensions](https://github.com/F1uctus/ConsoleExtensions) project (to use the console code editor with syntax highlighting) (a bit unstable)**
+- **Import of [CodeConsole](https://github.com/F1uctus/CodeConsole) project (to use the console code editor with syntax highlighting) (a bit unstable)**
 
 ### Objectives:
 
