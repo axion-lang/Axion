@@ -5,7 +5,6 @@
         public static readonly BlameType MismatchedBracket                     = new BlameType("'[' has no matching ']'",                                            BlameSeverity.Error);
         public static readonly BlameType UnclosedMultilineComment              = new BlameType("multiline comment has no closing block",                             BlameSeverity.Error);
         public static readonly BlameType UnclosedString                        = new BlameType("string has no matching ending quote",                                BlameSeverity.Error);
-        public static readonly BlameType UnescapedQuoteInStringLiteral         = new BlameType("string has unescaped quote character",                               BlameSeverity.Error);
         public static readonly BlameType UnclosedCharacterLiteral              = new BlameType("character literal has no matching ending quote",                     BlameSeverity.Error);
         public static readonly BlameType CharacterLiteralTooLong               = new BlameType("character literal exceeds max allowed length",                       BlameSeverity.Error);
         public static readonly BlameType EmptyCharacterLiteral                 = new BlameType("character literal cannot be empty",                                  BlameSeverity.Error);
@@ -21,19 +20,18 @@
         public static readonly BlameType DuplicatedNamedArgument               = new BlameType("duplicated named argument",                                          BlameSeverity.Error);
         public static readonly BlameType ExpectedDefaultParameterValue         = new BlameType("expected a default parameter value",                                 BlameSeverity.Error);
         public static readonly BlameType ExpectedBlockDeclaration              = new BlameType("block expected",                                                     BlameSeverity.Error);
-        public static readonly BlameType InvalidTypeAnnotation                 = new BlameType("invalid type annotation",                                            BlameSeverity.Error);
         public static readonly BlameType InvalidSyntax                         = new BlameType("invalid syntax",                                                     BlameSeverity.Error);
         public static readonly BlameType InvalidIndexerExpression              = new BlameType("invalid indexer format",                                             BlameSeverity.Error);
         public static readonly BlameType IndentationBasedBlockNotAllowed       = new BlameType("block based on indentation is not allowed in this context",          BlameSeverity.Error);
         public static readonly BlameType CannotHaveMoreThan1ListParameter      = new BlameType("only 1 list parameter is allowed",                                   BlameSeverity.Error);
         public static readonly BlameType NamedArgsMustFollowBareStar           = new BlameType("named arguments must follow bare *",                                 BlameSeverity.Error);
         public static readonly BlameType InvalidStringPrefix                   = new BlameType("invalid string prefix",                                              BlameSeverity.Error);
+        public static readonly BlameType ExpectedVarName                       = new BlameType("variable name expected",                                             BlameSeverity.Error);
 
         public static readonly BlameType Redundant10Radix                         = new BlameType("redundant specifier, number radix is 10 by default",           BlameSeverity.Warning);
         public static readonly BlameType InconsistentIndentation                  = new BlameType("mixed indentation (spaces and tabs)",                          BlameSeverity.Warning);
         public static readonly BlameType RedundantStringFormat                    = new BlameType("string has format prefix but does not have any interpolation", BlameSeverity.Warning);
         public static readonly BlameType RedundantPrefixesForEmptyString          = new BlameType("prefixes are redundant for empty string",                      BlameSeverity.Warning);
-        public static readonly BlameType ModuleNotSupportedInInterpretationMode   = new BlameType("'module' is not supported in interpretation mode",             BlameSeverity.Warning);
         public static readonly BlameType RedundantColonWithBraces                 = new BlameType("':' is not needed when block is specified by braces",          BlameSeverity.Warning);
         public static readonly BlameType RedundantEmptyListOfTypeArguments        = new BlameType("empty list of type arguments is redundant",                    BlameSeverity.Warning);
         public static readonly BlameType ImpossibleToInferType                    = new BlameType("impossible to infer type in this context",                     BlameSeverity.Warning);

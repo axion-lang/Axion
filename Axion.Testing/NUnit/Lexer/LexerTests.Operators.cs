@@ -9,7 +9,7 @@ namespace Axion.Testing.NUnit.Lexer {
             SourceUnit   source = MakeSourceFromCode(id);
             Lex(source);
             // id, minus, EOC
-            Assert.AreEqual(3,             source.TokenStream.Tokens.Count);
+            Assert.AreEqual(3, source.TokenStream.Tokens.Count);
             Assert.AreEqual("ident_ifier", source.TokenStream.Tokens[0].Value);
         }
 

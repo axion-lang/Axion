@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -17,8 +18,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => SetNode(ref types, value);
         }
 
-        public TupleTypeName(Expr parent, NodeList<TypeName> types = null) : base(parent) {
-            Types = types ?? new NodeList<TypeName>(this);
+        public TupleTypeName(Expr parent, IEnumerable<TypeName> types = null) : base(parent) {
+            Types = NodeList<TypeName>.From(this, types);
         }
 
         public TupleTypeName Parse() {

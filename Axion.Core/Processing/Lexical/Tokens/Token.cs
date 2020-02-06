@@ -26,14 +26,14 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             SourceUnit source,
             TokenType  type        = None,
             string     value       = "",
-            string     content     = "",
+            string     content     = null,
             string     endingWhite = "",
             Location   start       = default,
             Location   end         = default
         ) : base(source, start, end) {
             Type        = type;
             Value       = value;
-            Content     = string.IsNullOrEmpty(content) ? value : content;
+            Content     = content ?? value;
             EndingWhite = endingWhite;
         }
 

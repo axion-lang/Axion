@@ -8,14 +8,14 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic {
     public class TokenStream {
         public readonly List<Token> Tokens = new List<Token>();
-        public int TokenIdx { get; private set; } = -1;
+        public          int         TokenIdx { get; private set; } = -1;
 
         public Token Token =>
             TokenIdx > -1 && TokenIdx < Tokens.Count
                 ? Tokens[TokenIdx]
                 : Tokens[^1];
 
-        private Token exactPeek =>
+        public Token ExactPeek =>
             TokenIdx + 1 < Tokens.Count
                 ? Tokens[TokenIdx + 1]
                 : Tokens[^1];
@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Syntactic {
         public Token Peek {
             get {
                 SkipTrivial();
-                return exactPeek;
+                return ExactPeek;
             }
         }
 
@@ -77,7 +77,7 @@ namespace Axion.Core.Processing.Syntactic {
         public bool MaybeEat(params TokenType[] types) {
             SkipTrivial(types);
             for (var i = 0; i < types.Length; i++) {
-                if (exactPeek.Is(types[i])) {
+                if (ExactPeek.Is(types[i])) {
                     EatAny();
                     return true;
                 }
@@ -93,12 +93,12 @@ namespace Axion.Core.Processing.Syntactic {
 
         private void SkipTrivial(params TokenType[] wantedTypes) {
             while (true) {
-                if (exactPeek.Is(Comment)) {
+                if (ExactPeek.Is(Comment)) {
                     EatAny();
                 }
                 // if we got newline before wanted type, just skip it
                 // (except we WANT to get newline)
-                else if (exactPeek.Is(Newline)
+                else if (ExactPeek.Is(Newline)
                       && !wantedTypes.Contains(Newline)) {
                     EatAny();
                 }

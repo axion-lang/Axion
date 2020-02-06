@@ -12,7 +12,7 @@ namespace Axion.Core.Processing {
         public SourceUnit Source;
 
         public Location Start { get; private set; }
-        public Location End { get; private set; }
+        public Location End   { get; private set; }
 
         public Span(SourceUnit source, Location start = default, Location end = default) {
             Source = source;

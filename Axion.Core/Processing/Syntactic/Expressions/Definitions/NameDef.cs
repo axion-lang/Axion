@@ -1,11 +1,12 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     public class NameDef : Expr, IDefinitionExpr, IDecoratedExpr {
-        private Expr name;
+        private NameExpr name;
 
-        public Expr Name {
+        public NameExpr Name {
             get => name;
             set => SetNode(ref name, value);
         }
@@ -26,7 +27,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public NameDef(
             Expr     parent = null,
-            Expr     name   = null,
+            NameExpr name   = null,
             TypeName type   = null,
             Expr     value  = null
         ) : base(parent) {

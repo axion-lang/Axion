@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -26,12 +27,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         public GenericTypeName(
-            Expr               parent,
-            TypeName           target   = null,
-            NodeList<TypeName> typeArgs = null
+            Expr                  parent,
+            TypeName              target   = null,
+            IEnumerable<TypeName> typeArgs = null
         ) : base(parent) {
             Target        = target;
-            TypeArguments = typeArgs ?? new NodeList<TypeName>(this);
+            TypeArguments = NodeList<TypeName>.From(this, typeArgs);
         }
 
         public GenericTypeName Parse() {

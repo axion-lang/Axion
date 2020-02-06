@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -23,17 +24,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         [NoTraversePath]
         public override TypeName ValueType => new TupleTypeName(
-            this, new NodeList<TypeName>(
+            this, NodeList<TypeName>.From(
                 this,
                 Expressions.Select(e => e.ValueType)
             )
         );
 
         internal TupleExpr(
-            Expr           parent      = null,
-            NodeList<Expr> expressions = null
+            Expr              parent      = null,
+            IEnumerable<Expr> expressions = null
         ) : base(parent) {
-            Expressions = expressions ?? new NodeList<Expr>(this);
+            Expressions = NodeList<Expr>.From(this, expressions);
             if (Expressions.Count > 0) {
                 MarkPosition(
                     Expressions[0],

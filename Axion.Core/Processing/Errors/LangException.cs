@@ -15,9 +15,9 @@ namespace Axion.Core.Processing.Errors {
     ///     Axion code processing.
     /// </summary>
     public class LangException : Exception {
-        public override string Message { get; }
-        public override string StackTrace { get; }
-        public BlameSeverity Severity { get; }
+        public override string        Message    { get; }
+        public override string        StackTrace { get; }
+        public          BlameSeverity Severity   { get; }
 
         [JsonProperty]
         private readonly Span errorSpan;
@@ -50,11 +50,9 @@ namespace Axion.Core.Processing.Errors {
             ex.targetSource.Blames.Add(ex);
         }
 
-        /// <summary>
-        ///     Creates visual representation of occurred error in console.
-        /// </summary>
-        internal void Print() {
-            string[] codeLines = targetSource.TextStream.Text.Split(new[] { "\n" }, StringSplitOptions.None);
+        internal void PrintToConsole() {
+            string[] codeLines =
+                targetSource.TextStream.Text.Split(new[] { "\n" }, StringSplitOptions.None);
 
             var lines = new List<string>();
             // limit code piece by 5 lines
@@ -77,10 +75,10 @@ namespace Axion.Core.Processing.Errors {
                 errorTokenLength = errorSpan.End.Column - errorSpan.Start.Column;
             }
 
-            // underline '~', red-colored
-            string pointer = new string(' ', pointerTailLength) + new string('~', Math.Abs(errorTokenLength));
+            // underline, red-colored
+            string pointer = new string(' ', pointerTailLength)
+                           + new string('~', Math.Abs(errorTokenLength));
 
-            // Drawing.
             //=========Error template=========
             //
             // Error: mismatching parenthesis.

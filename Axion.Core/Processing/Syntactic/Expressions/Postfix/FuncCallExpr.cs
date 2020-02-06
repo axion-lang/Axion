@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             params FuncCallArg[] args
         ) : base(parent) {
             Target = target;
-            Args   = new NodeList<FuncCallArg>(this, args);
+            Args   = NodeList<FuncCallArg>.From(this, args);
         }
 
         public FuncCallExpr Parse(bool allowGenerator = false) {

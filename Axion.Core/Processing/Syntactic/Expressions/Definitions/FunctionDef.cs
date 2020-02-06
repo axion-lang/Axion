@@ -17,9 +17,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public sealed class FunctionParameter : Expr, IDefinitionExpr, IDecoratedExpr {
-        private Expr name;
+        private NameExpr name;
 
-        public Expr Name {
+        public NameExpr Name {
             get => name;
             set => SetNode(ref name, value);
         }
@@ -32,8 +32,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public FunctionParameter(
-            Expr parent
-        ) : base(parent) { }
+            Expr     parent,
+            NameExpr name         = null,
+            TypeName valueType    = null,
+            Expr     defaultValue = null
+        ) : base(parent) {
+            Name         = name;
+            ValueType    = valueType;
+            DefaultValue = defaultValue;
+        }
 
         public FunctionParameter Parse(HashSet<string> names) {
             SetSpan(() => {
@@ -99,9 +106,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public class FunctionDef : Expr, IDefinitionExpr {
-        private Expr name;
+        private NameExpr name;
 
-        public Expr Name {
+        public NameExpr Name {
             get => name;
             set => SetNode(ref name, value);
         }
@@ -125,13 +132,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         public BlockExpr Block {
             get => block;
             set => SetNode(ref block, value);
-        }
-
-        private NodeList<Expr> modifiers;
-
-        public NodeList<Expr> Modifiers {
-            get => modifiers;
-            set => SetNode(ref modifiers, value);
         }
 
         [NoTraversePath]
@@ -158,18 +158,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public FunctionDef(
-            Expr                        parent     = null,
-            NameExpr                    name       = null,
-            NodeList<FunctionParameter> parameters = null,
-            TypeName                    returnType = null,
-            BlockExpr                   block      = null,
-            NodeList<Expr>              modifiers  = null
+            Expr                           parent     = null,
+            NameExpr                       name       = null,
+            IEnumerable<FunctionParameter> parameters = null,
+            TypeName                       returnType = null,
+            BlockExpr                      block      = null
         ) : base(parent) {
             Name       = name;
-            Parameters = parameters ?? new NodeList<FunctionParameter>(this);
+            Parameters = NodeList<FunctionParameter>.From(this, parameters);
             ReturnType = returnType;
             Block      = block;
-            Modifiers  = modifiers ?? new NodeList<Expr>(this);
         }
 
         public FunctionDef Parse(bool anonymous = false) {

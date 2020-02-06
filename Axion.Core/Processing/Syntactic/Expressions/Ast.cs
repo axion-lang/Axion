@@ -16,8 +16,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     Abstract Syntax Tree built from source code.
     /// </summary>
     public class Ast : BlockExpr {
-        internal readonly List<MacroDef>              Macros                = new List<MacroDef>();
-        internal readonly Stack<MacroApplicationExpr> MacroApplicationParts = new Stack<MacroApplicationExpr>();
+        internal readonly List<MacroDef> Macros = new List<MacroDef>();
+
+        internal readonly Stack<MacroApplicationExpr> MacroApplicationParts =
+            new Stack<MacroApplicationExpr>();
 
         internal Ast(SourceUnit src) {
             Source = src;
@@ -28,7 +30,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         private TokenPattern NewTokenPattern(string keyword) {
             if (keyword.All(c => Spec.IdPart.Contains(c))) {
-                for (int i = Math.Max(0, Stream.TokenIdx); i < Source.TokenStream.Tokens.Count; i++) {
+                for (int i = Math.Max(0, Stream.TokenIdx);
+                     i < Source.TokenStream.Tokens.Count;
+                     i++) {
                     Token token = Source.TokenStream.Tokens[i];
                     if (token.Value == keyword
                      && !Spec.Keywords.ContainsKey(token.Value)
@@ -214,9 +218,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 c.WriteLine($"using {directive};");
             }
 
-            var rootItems   = new List<Expr>();
-            var rootClasses = new List<Expr>();
-            var rootFuncs   = new List<Expr>();
+            var rootItems     = new List<Expr>();
+            var rootClasses   = new List<Expr>();
+            var rootFunctions = new List<Expr>();
             foreach (Expr e in Items) {
                 if (e is ModuleDef) {
                     c.Write(e);
@@ -225,7 +229,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     rootClasses.Add(e);
                 }
                 else if (e is FunctionDef) {
-                    rootFuncs.Add(e);
+                    rootFunctions.Add(e);
                 }
                 else {
                     rootItems.Add(e);
@@ -245,19 +249,35 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                                 block: new BlockExpr(
                                     this,
                                     new[] {
-                                        new FunctionDef(
+                                        new DecoratedExpr(
                                             this,
-                                            new NameExpr("Main"),
-                                            block: new BlockExpr(
+                                            new[] {
+                                                new NameExpr("static")
+                                            },
+                                            new FunctionDef(
                                                 this,
-                                                rootItems.ToArray()
-                                            ),
-                                            returnType: new SimpleTypeName("void")
+                                                new NameExpr("Main"),
+                                                new[] {
+                                                    new FunctionParameter(
+                                                        this,
+                                                        new NameExpr("args"),
+                                                        new ArrayTypeName(
+                                                            this,
+                                                            new SimpleTypeName("string")
+                                                        )
+                                                    )
+                                                },
+                                                block: new BlockExpr(
+                                                    this,
+                                                    rootItems.ToArray()
+                                                ),
+                                                returnType: new SimpleTypeName("void")
+                                            )
                                         )
-                                    }.Union(rootFuncs).ToArray()
+                                    }.Union(rootFunctions)
                                 )
                             )
-                        }.Union(rootClasses).ToArray()
+                        }.Union(rootClasses)
                     )
                 )
             );

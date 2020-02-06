@@ -17,8 +17,24 @@ namespace Axion.Core.Specification {
                 "private",
                 "internal",
                 "protected",
-                "public"
+                "public",
+                "private-protected",
+                "protected-internal"
             };
+
+            public static readonly string[] AllowedModifiers = AccessModifiers.Union(
+                "abstract",
+                "const",
+                "extern",
+                "override",
+                "partial",
+                "readonly",
+                "sealed",
+                "unsafe",
+                "virtual",
+                "volatile",
+                "static"
+            );
 
             // @formatter:off
 
@@ -42,7 +58,7 @@ namespace Axion.Core.Specification {
 
             public static readonly Dictionary<TokenType, string> BinaryOperators = new Dictionary<TokenType, string> {
                 { OpAnd,                "&&" },
-                { OpOr,                 "||" },
+                { OpOr,                 "||" }
             };
             
             // @formatter:on

@@ -14,14 +14,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class NameExpr : Expr, IVarTargetExpr {
-        public List<Token> Tokens { get; }
-
+        public List<Token> Tokens     { get; }
         public List<Token> Qualifiers => Tokens.Where(t => t.Type == Identifier).ToList();
-
-        public bool IsSimple => Qualifiers.Count == 1;
+        public bool        IsSimple   => Qualifiers.Count == 1;
 
         [NoTraversePath]
-        public override TypeName ValueType => ((Expr) GetParentOfType<BlockExpr>().GetDefByName(ToString()))?.ValueType;
+        public override TypeName ValueType =>
+            ((Expr) GetParentOfType<BlockExpr>().GetDefByName(ToString()))?.ValueType;
 
         public NameExpr(string name) {
             Tokens = new List<Token>();

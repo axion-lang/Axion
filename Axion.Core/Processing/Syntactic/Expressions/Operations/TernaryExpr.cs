@@ -39,7 +39,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             Expr parent    = null,
             Expr condition = null,
             Expr trueExpr  = null,
-            Expr falseExpr = null) : base(parent) {
+            Expr falseExpr = null
+        ) : base(parent) {
             Condition = condition;
             TrueExpr  = trueExpr;
             FalseExpr = falseExpr;

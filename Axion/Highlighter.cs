@@ -54,7 +54,7 @@ namespace Axion {
                   || token.End.Line   == renderPosition.Y
                   && token.End.Column <= renderPosition.X
                   && !token.Is(Newline)
-                  );
+                    );
 
                 if (tokenHighlightingNotNeeded) {
                     continue;

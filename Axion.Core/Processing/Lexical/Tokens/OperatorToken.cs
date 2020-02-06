@@ -6,9 +6,8 @@ using Newtonsoft.Json.Converters;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class OperatorToken : Token {
-        public int Precedence { get; }
-
-        public InputSide Side { get; set; }
+        public int       Precedence { get; }
+        public InputSide Side       { get; set; }
 
         internal OperatorToken(
             SourceUnit source,

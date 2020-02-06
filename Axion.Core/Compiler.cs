@@ -55,7 +55,7 @@ namespace Axion.Core {
 
             var errCount = 0;
             foreach (LangException e in src.Blames) {
-                e.Print();
+                e.PrintToConsole();
                 if (e.Severity == BlameSeverity.Error) {
                     errCount++;
                 }
@@ -113,7 +113,8 @@ namespace Axion.Core {
                 var code = src.CodeWriter.ToString();
                 logger.Debug("Transpiler output");
                 logger.Debug(code);
-                if (!(File.Exists(src.OutputFilePath.FullName) && src.OutputFilePath.Extension == ".ax")) {
+                if (!(File.Exists(src.OutputFilePath.FullName)
+                   && src.OutputFilePath.Extension == ".ax")) {
                     File.WriteAllText(src.OutputFilePath.FullName, code);
                 }
             }

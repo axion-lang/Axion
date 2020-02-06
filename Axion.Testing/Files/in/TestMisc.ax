@@ -9,6 +9,7 @@ x = f'Hello, {name}!'
 
 # unpacking
 () = Object.(a, b, c)
+(x, y) = GetCoordinates()
 
 Seq.each (["one", "two", "three"], fn (s): Console.print(s))
 

@@ -27,10 +27,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         internal BlockExpr(
+            Expr              parent = null,
+            IEnumerable<Expr> items  = null
+        ) : base(parent) {
+            Items = NodeList<Expr>.From(this, items);
+
+            if (Items.Count != 0) {
+                MarkPosition(Items.First, Items.Last);
+            }
+        }
+
+        internal BlockExpr(
             Expr          parent = null,
             params Expr[] items
         ) : base(parent) {
-            Items = new NodeList<Expr>(this, items);
+            Items = NodeList<Expr>.From(this, items);
 
             if (Items.Count != 0) {
                 MarkPosition(Items.First, Items.Last);
@@ -88,10 +99,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     _outs.Add((expr, this, i));
                 }
                 else {
-                    IEnumerable<PropertyInfo> childBlockProps = item.GetType().GetProperties().Where(
-                        p => p.PropertyType == typeof(BlockExpr)
-                          && p.Name         != nameof(Parent)
-                    );
+                    IEnumerable<PropertyInfo> childBlockProps =
+                        item.GetType().GetProperties().Where(
+                            p => p.PropertyType
+                              == typeof(BlockExpr)
+                              && p.Name != nameof(Parent)
+                        );
                     foreach (PropertyInfo blockProp in childBlockProps) {
                         var b = (BlockExpr) blockProp.GetValue(item);
                         b?.FindItemsOfType(_outs);
@@ -110,11 +123,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
 
                 IEnumerable<PropertyInfo> childBlockProps = item.GetType().GetProperties().Where(
-                    p => p.PropertyType == typeof(BlockExpr)
-                      && p.Name         != nameof(Parent)
+                    p => p.PropertyType
+                      == typeof(BlockExpr)
+                      && p.Name != nameof(Parent)
                 );
                 foreach (PropertyInfo blockProp in childBlockProps) {
-                    var                                         b   = (BlockExpr) blockProp.GetValue(item);
+                    var b =
+                        (BlockExpr) blockProp.GetValue(item);
                     (BlockExpr itemParentBlock, int itemIndex)? idx = b?.IndexOf(expression);
                     if (idx != null && idx != (null, -1)) {
                         return ((BlockExpr itemParentBlock, int itemIndex)) idx;
@@ -218,7 +233,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                  && !(item is IDefinitionExpr
                    || item is ConditionalExpr
                    || item is WhileExpr
-                   || item is MacroApplicationExpr) || item is VarDef) {
+                   || item is MacroApplicationExpr)
+                 || item is VarDef) {
                     c.Write(";");
                 }
 

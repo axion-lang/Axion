@@ -15,7 +15,6 @@ namespace Axion.Testing.NUnit.Parser {
             Assert.AreEqual(0, source.Blames.Count);
         }
 
-
         [Test]
         public void TestClassDef() {
             SourceUnit source = ParseTestFile();
@@ -120,11 +119,7 @@ namespace Axion.Testing.NUnit.Parser {
 
         [Test]
         public void TestMacros() {
-            SourceUnit source = MakeSourceFromFile(nameof(TestMacros));
-            Compiler.Process(
-                source,
-                ProcessingMode.Parsing
-            );
+            SourceUnit source = ParseTestFile();
             Assert.AreEqual(7, source.Blames.Count);
         }
 
@@ -171,10 +166,7 @@ namespace Axion.Testing.NUnit.Parser {
             Assert.That(unit1.Blames.Count == 0, $"unit1.Blames.Count == {unit1.Blames.Count}");
         }
 
-        private static SourceUnit ParseTestFile(
-            [CallerMemberName]
-            string testName = null
-        ) {
+        private static SourceUnit ParseTestFile([CallerMemberName] string testName = null) {
             SourceUnit source = MakeSourceFromFile(testName);
             Parse(source);
             return source;

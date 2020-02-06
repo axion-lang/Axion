@@ -1,13 +1,13 @@
-﻿using Axion.Core.Processing.CodeGen;
+﻿using System.Web;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Source;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class CharToken : Token {
-        public override TypeName ValueType => Spec.CharType;
-
-        public bool IsUnclosed { get; }
+        public override TypeName ValueType  => Spec.CharType;
+        public          bool     IsUnclosed { get; }
 
         internal CharToken(
             SourceUnit source,
@@ -26,14 +26,14 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
 
         public override void ToCSharp(CodeWriter c) {
-            c.Write("'", Value);
+            c.Write("'", HttpUtility.JavaScriptStringEncode(Content));
             if (!IsUnclosed) {
                 c.Write("'");
             }
         }
 
         public override void ToPython(CodeWriter c) {
-            c.Write("'", Value);
+            c.Write("'", HttpUtility.JavaScriptStringEncode(Content));
             if (!IsUnclosed) {
                 c.Write("'");
             }

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Source;
 using Axion.Core.Specification;
+using NLog;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit {
@@ -35,6 +36,7 @@ namespace Axion.Testing.NUnit {
         private static readonly string outPath = Path.Combine(
             axionTestingDir.FullName,
             "Files",
+            "in",
             "out"
         );
 
@@ -74,6 +76,9 @@ namespace Axion.Testing.NUnit {
         /// </summary>
         [OneTimeSetUp]
         public void ClearDebugDirectory() {
+            LogManager.Configuration.Variables["consoleLogLevel"] = "Fatal";
+            LogManager.Configuration.Variables["fileLogLevel"]    = "Fatal";
+            LogManager.ReconfigExistingLoggers();
             // clear debugging output
             string dbg = Path.Combine(outPath, "debug");
             if (Directory.Exists(dbg)) {
@@ -103,17 +108,15 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        internal static SourceUnit MakeSourceFromFile([CallerMemberName]
-                                                      string fileName = null) {
+        internal static SourceUnit MakeSourceFromFile([CallerMemberName] string fileName = null) {
             return SourceUnit.FromFile(
                 new FileInfo(Path.Combine(InPath, fileName + SourceUnit.SourceFileExt))
             );
         }
 
         internal static SourceUnit MakeSourceFromCode(
-            string code,
-            [CallerMemberName]
-            string fileName = null
+            string                    code,
+            [CallerMemberName] string fileName = null
         ) {
             return SourceUnit.FromCode(
                 code,

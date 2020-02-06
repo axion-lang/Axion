@@ -1,4 +1,5 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
@@ -15,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public VarDef(
             Expr     parent    = null,
-            Expr     name      = null,
+            NameExpr name      = null,
             TypeName type      = null,
             Expr     value     = null,
             bool     immutable = false

@@ -12,9 +12,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// TODO fix macro def syntax
     /// </summary>
     public class MacroDef : Expr, IDefinitionExpr {
-        private Expr name;
+        private NameExpr name;
 
-        public Expr Name {
+        public NameExpr Name {
             get => name;
             set => SetNode(ref name, value);
         }
@@ -27,7 +27,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public CascadePattern Syntax { get; }
-
         internal MacroDef(Expr parent) : base(parent) { }
 
         public MacroDef Parse() {

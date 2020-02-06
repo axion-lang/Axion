@@ -9,11 +9,10 @@ namespace Axion.Core.Processing.Lexical {
     ///     and moving backwards.
     /// </summary>
     public class TextStream {
-        private int charIdx = -1;
-        private int lineIdx;
-        private int columnIdx;
-
-        public string Text { get; }
+        private int    charIdx = -1;
+        private int    lineIdx;
+        private int    columnIdx;
+        public  string Text { get; }
 
         /// <summary>
         ///     0-based (Line, Column) position of character in source code.

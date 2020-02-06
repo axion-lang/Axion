@@ -10,9 +10,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public class ModuleDef : Expr, IDefinitionExpr, IDecoratedExpr {
-        private Expr name;
+        private NameExpr name;
 
-        public Expr Name {
+        public NameExpr Name {
             get => name;
             set => SetNode(ref name, value);
         }
@@ -24,22 +24,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => SetNode(ref block, value);
         }
 
-        private NodeList<Expr> modifiers;
-
-        public NodeList<Expr> Modifiers {
-            get => modifiers;
-            set => SetNode(ref modifiers, value);
-        }
-
         internal ModuleDef(
-            Expr           parent    = null,
-            NameExpr       name      = null,
-            BlockExpr      block     = null,
-            NodeList<Expr> modifiers = null
+            Expr      parent,
+            NameExpr  name  = null,
+            BlockExpr block = null
         ) : base(parent) {
-            Name      = name;
-            Block     = block;
-            Modifiers = modifiers;
+            Name  = name;
+            Block = block;
         }
 
         public ModuleDef Parse() {

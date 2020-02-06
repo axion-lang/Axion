@@ -80,18 +80,15 @@ namespace Axion {
                 }
 
                 // wait for next command
-                // TODO (UI) add console commands history (up-down)
-                string command = ConsoleUI.Read(">>> ");
-                while (command.Length == 0) {
+                string command;
+                do {
                     ConsoleUI.ClearLine();
-                    command = ConsoleUI.Read(">>> ");
-                }
-
-                ConsoleUI.WriteLine();
+                    command = ConsoleUI.ReadSimple(">>> ");
+                } while (string.IsNullOrWhiteSpace(command));
                 arguments = Utilities.SplitLaunchArguments(command).ToArray();
             }
 
-            // It is infinite loop, breaks only by 'exit' command.
+            // This loop breaks only by 'exit' command.
             // ReSharper disable once FunctionNeverReturns
         }
 
@@ -106,7 +103,9 @@ namespace Axion {
                 ("Working in ", ConsoleColor.White),
                 (Compiler.WorkDir, ConsoleColor.DarkYellow)
             );
-            ConsoleUI.WriteLine("Type '-h', or '--help' to get documentation about launch arguments.\n");
+            ConsoleUI.WriteLine(
+                "Type '-h', or '--help' to get documentation about launch arguments.\n"
+            );
         }
 
         private static void EnterInteractiveMode() {
@@ -122,7 +121,6 @@ namespace Axion {
                 switch (input) {
                 case "":
                     // skip empty commands
-                    ConsoleUI.ClearLine();
                     continue;
                 case "EXIT":
                 case "QUIT":
@@ -144,7 +142,7 @@ namespace Axion {
 
                 try {
                     logger.Info("Interpretation:");
-                    ExecuteCSharp(src.CodeWriter.ToString(), Spec.CSharp.DefaultImports);
+                    ExecuteCSharp(src.CodeWriter.ToString());
                 }
                 catch (CompilationErrorException e) {
                     logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
@@ -178,36 +176,41 @@ namespace Axion {
                 return;
             }
 
-            var pMode = ProcessingMode.Reduction;
+            var pMode    = ProcessingMode.Reduction;
             var pOptions = ProcessingOptions.Default;
-            if (args.Mode.ToLower().StartsWith("to") && Enum.TryParse(args.Mode, true, out pOptions)) {
+            if (args.Mode.ToLower().StartsWith("to")
+             && Enum.TryParse(args.Mode, true, out pOptions)) {
                 pMode = ProcessingMode.Transpilation;
             }
+
             Compiler.Process(src, pMode, pOptions);
         }
 
-        private static void ExecuteCSharp(string csCode, Assembly[] defaultReferences) {
+        private static void ExecuteCSharp(string csCode) {
             if (string.IsNullOrWhiteSpace(csCode)) {
                 return;
             }
 
             var refs = new List<MetadataReference>(
-                defaultReferences.Select(
+                Spec.CSharp.DefaultImports.Select(
                     asm => MetadataReference.CreateFromFile(asm.Location)
                 )
             );
 
             // Location of the .NET assemblies
-            string assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+            string? assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
 
             // Adding some necessary .NET assemblies
             // These assemblies couldn't be loaded correctly via the same construction as above.
             refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "mscorlib.dll")));
             refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")));
-            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")));
-            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")));
+            refs.Add(
+                MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")));
+            refs.Add(MetadataReference.CreateFromFile(
+                         Path.Combine(assemblyPath, "System.Runtime.dll")));
             refs.Add(MetadataReference.CreateFromFile(typeof(Console).Assembly.Location));
-            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Private.CoreLib.dll")));
+            refs.Add(MetadataReference.CreateFromFile(
+                         Path.Combine(assemblyPath, "System.Private.CoreLib.dll")));
 
             string     assemblyName = Path.GetRandomFileName();
             SyntaxTree syntaxTree   = CSharpSyntaxTree.ParseText(csCode);
@@ -225,22 +228,19 @@ namespace Axion {
                 ms.Seek(0, SeekOrigin.Begin);
                 Assembly assembly = Assembly.Load(ms.ToArray());
 
-                Type   type = assembly.GetType("__RootModule__.__RootClass__");
-                object obj  = Activator.CreateInstance(type);
-                type.InvokeMember(
-                    "Main",
-                    BindingFlags.Default | BindingFlags.InvokeMethod,
-                    null,
-                    obj,
-                    null
-                );
+                Type?       type = assembly.GetType("__RootModule__.__RootClass__");
+                MethodInfo? main = type.GetMethod("Main");
+
+                // Let's assume that compiler anyway 'd create Main method for us :)
+                // ReSharper disable once PossibleNullReferenceException
+                main.Invoke(null, new object[] { new string[0] });
             }
             else {
                 IEnumerable<Diagnostic> failures = result.Diagnostics.Where(
                     diagnostic =>
-                        diagnostic.IsWarningAsError ||
-                        diagnostic.Severity ==
-                        DiagnosticSeverity.Error
+                        diagnostic.IsWarningAsError
+                     || diagnostic.Severity
+                     == DiagnosticSeverity.Error
                 );
 
                 foreach (Diagnostic diagnostic in failures) {

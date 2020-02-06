@@ -7,13 +7,15 @@ using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class StringToken : Token {
-        public bool IsUnclosed { get; }
-        public string Prefixes { get; }
-        public string Quote { get; }
+        public bool   IsUnclosed   { get; }
+        public string Prefixes     { get; }
+        public string Quote        { get; }
         public string EndingQuotes { get; }
+
         public List<StringInterpolation> Interpolations { get; }
-        public bool IsMultiline => Quote.Length == 3;
-        public override TypeName ValueType => Spec.StringType;
+
+        public          bool     IsMultiline => Quote.Length == 3;
+        public override TypeName ValueType   => Spec.StringType;
 
         internal StringToken(
             SourceUnit                source,

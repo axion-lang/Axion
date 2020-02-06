@@ -78,17 +78,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Expr expr = InfixExpr.Parse(parent);
 
             // ['let'] name '=' expr
-            if (expr is BinaryExpr bin
-             && bin.Left is NameExpr name
-             && bin.Operator.Is(OpAssign)
-             && !bin.GetParentOfType<BlockExpr>().IsDefined(name.ToString())) {
-                return new VarDef(
-                    parent,
-                    name,
-                    null,
-                    bin.Right,
-                    isImmutable
-                );
+            if (expr is BinaryExpr bin && bin.Operator.Is(OpAssign)) {
+                if (bin.Left is NameExpr name
+                 && !bin.GetParentOfType<BlockExpr>().IsDefined(name.ToString())) {
+                    return new VarDef(
+                        parent,
+                        name,
+                        null,
+                        bin.Right,
+                        isImmutable
+                    );
+                }
+
+                if (bin.Left is TupleExpr) {
+                    return bin;
+                }
             }
 
             // check for ':' - starting block instead of var definition
@@ -96,8 +100,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 return expr;
             }
 
-            if (!(expr is IVarTargetExpr)) {
-                LangException.Report(BlameType.RedundantEmptyListOfTypeArguments, expr);
+            if (!(expr is NameExpr varName)) {
+                LangException.Report(BlameType.ExpectedVarName, expr);
+                varName = null;
             }
 
             TypeName type  = new TypeName(parent).ParseTypeName();
@@ -106,7 +111,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 value = InfixExpr.Parse(parent);
             }
 
-            return new VarDef(parent, expr, type, value, isImmutable);
+            return new VarDef(parent, varName, type, value, isImmutable);
         }
     }
 }

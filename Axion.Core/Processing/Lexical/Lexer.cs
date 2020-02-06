@@ -19,11 +19,10 @@ namespace Axion.Core.Processing.Lexical {
         private          Location      startLoc;
 
         // Variables for indentation analysis
-        private char indentChar = '\0';
-        private int  indentSize;
-        private int  lastIndentLen;
-        private int  indentLevel;
-
+        private         char             indentChar = '\0';
+        private         int              indentSize;
+        private         int              lastIndentLen;
+        private         int              indentLevel;
         public readonly Stack<Token>     MismatchingPairs   = new Stack<Token>();
         public readonly Stack<TokenType> ProcessTerminators = new Stack<TokenType>();
 
@@ -138,10 +137,12 @@ namespace Axion.Core.Processing.Lexical {
 
             string ln = stream.RestOfLine;
             // check that whitespace is not meaningful here
-            if (!src.TokenStream.Tokens.Last().Is(Newline) || string.IsNullOrWhiteSpace(ln) ||
-                ln.StartsWith(OneLineCommentMark)          || MismatchingPairs.Count > 0    ||
-                src.TokenStream.Tokens[^2] is OperatorToken op &&
-                op.Side == InputSide.Both || NotIndentRegex.IsMatch(ln)) {
+            if (!src.TokenStream.Tokens.Last().Is(Newline)
+             || string.IsNullOrWhiteSpace(ln)
+             || ln.StartsWith(OneLineCommentMark)
+             || MismatchingPairs.Count > 0
+             || src.TokenStream.Tokens[^2] is OperatorToken op && op.Side == InputSide.Both
+             || NotIndentRegex.IsMatch(ln)) {
                 src.TokenStream.Tokens[^1].EndingWhite += value;
                 return null;
             }
@@ -350,8 +351,8 @@ namespace Axion.Core.Processing.Lexical {
             if (!string.IsNullOrWhiteSpace(value.ToString())) {
                 // if string has prefixes, then
                 // ReadString was called from ReadId,
-                // and value == string prefixes.
-                prefixes = value.ToString().ToLower();
+                // and content == string prefixes.
+                prefixes = content.ToString().ToLower();
                 value.Clear();
                 content.Clear();
                 for (var i = 0; i < prefixes.Length; i++) {
@@ -373,7 +374,14 @@ namespace Axion.Core.Processing.Lexical {
                 quote = quote.Multiply(3);
             }
             else if (AddNext(false, quote)) {
-                var se = new StringToken(src, value.ToString(), content.ToString(), false, prefixes, quote);
+                var se = new StringToken(
+                    src,
+                    value.ToString(),
+                    content.ToString(),
+                    false,
+                    prefixes,
+                    quote
+                );
                 if (prefixes.Length > 0) {
                     LangException.Report(BlameType.RedundantPrefixesForEmptyString, se);
                 }
@@ -466,7 +474,7 @@ namespace Axion.Core.Processing.Lexical {
                 raw     += stream.C;
                 escaped += EscapeSequences[stream.C];
             }
-            // \u h{4} of \U h{8}
+            // \u h{4} or \U h{8}
             else if (stream.Eat("u", "U") != null) {
                 string u = stream.C;
                 raw += u;

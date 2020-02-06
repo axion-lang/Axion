@@ -1,4 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
@@ -18,11 +22,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         internal DecoratedExpr(
-            Expr           parent     = null,
-            NodeList<Expr> decorators = null,
-            Expr           target     = null
+            Expr              parent     = null,
+            IEnumerable<Expr> decorators = null,
+            Expr              target     = null
         ) : base(parent) {
-            Decorators = decorators ?? new NodeList<Expr>(this);
+            Decorators = NodeList<Expr>.From(this, decorators);
             Target     = target;
         }
 
@@ -57,7 +61,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
 
-        public override void ToCSharp(CodeWriter c) { }
+        public override void ToCSharp(CodeWriter c) {
+            foreach (Expr decorator in Decorators) {
+                if (decorator is NameExpr n
+                 && Spec.CSharp.AllowedModifiers.Contains(n.ToString())) {
+                    c.Write(n, " ");
+                }
+            }
+
+            c.Write(Target);
+        }
 
         public override void ToPython(CodeWriter c) {
             foreach (Expr decorator in Decorators) {

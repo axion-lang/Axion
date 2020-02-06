@@ -73,44 +73,44 @@ namespace Axion.Core.Specification {
             '_'
         };
 
-        public static readonly char[] IdNotEnd = { '-' };
-
-        public static readonly char[] IdPart = IdStart.Union(IdNotEnd).Union(NumbersDec);
-
+        public static readonly char[] IdNotEnd      = { '-' };
+        public static readonly char[] IdPart        = IdStart.Union(IdNotEnd).Union(NumbersDec);
         public static readonly char[] IdAfterNotEnd = IdStart.Union(NumbersDec);
 
-        public static readonly Dictionary<string, string> EscapeSequences = new Dictionary<string, string> {
-            { "0", "\u0000" },
-            { "a", "\u0007" },
-            { "b", "\u0008" },
-            { "f", "\u000c" },
-            { "n", "\u000a" },
-            { "r", "\u000d" },
-            { "t", "\u0009" },
-            { "v", "\u000b" },
-            { "\\", "\\" },
-            { "\"", "\"" },
-            { "\'", "\'" }
-        };
+        public static readonly Dictionary<string, string> EscapeSequences =
+            new Dictionary<string, string> {
+                { "0", "\u0000" },
+                { "a", "\u0007" },
+                { "b", "\u0008" },
+                { "f", "\u000c" },
+                { "n", "\u000a" },
+                { "r", "\u000d" },
+                { "t", "\u0009" },
+                { "v", "\u000b" },
+                { "\\", "\\" },
+                { "\"", "\"" },
+                { "\'", "\'" }
+            };
 
-        public static readonly Dictionary<string, TokenType> Punctuation = new Dictionary<string, TokenType> {
-            { "->", RightArrow },
-            { "<-", LeftArrow },
-            { "@", At },
-            { "?", Question },
-            { "$", Dollar },
-            { "(", OpenParenthesis },
-            { ")", CloseParenthesis },
-            { "[", OpenBracket },
-            { "]", CloseBracket },
-            { "{", OpenBrace },
-            { "}", CloseBrace },
-            { "{{", DoubleOpenBrace },
-            { "}}", DoubleCloseBrace },
-            { ",", Comma },
-            { ":", Colon },
-            { ";", Semicolon }
-        };
+        public static readonly Dictionary<string, TokenType> Punctuation =
+            new Dictionary<string, TokenType> {
+                { "->", RightArrow },
+                { "<-", LeftArrow },
+                { "@", At },
+                { "?", Question },
+                { "$", Dollar },
+                { "(", OpenParenthesis },
+                { ")", CloseParenthesis },
+                { "[", OpenBracket },
+                { "]", CloseBracket },
+                { "{", OpenBrace },
+                { "}", CloseBrace },
+                { "{{", DoubleOpenBrace },
+                { "}}", DoubleCloseBrace },
+                { ",", Comma },
+                { ":", Colon },
+                { ";", Semicolon }
+            };
 
         public static readonly string[] PunctuationKeys = Punctuation.Keys.ToArray();
 
@@ -188,7 +188,8 @@ namespace Axion.Core.Specification {
         
         // @formatter:on
 
-        public static readonly string[] OperatorsKeys = Operators.Keys.OrderByDescending(k => k.Length).ToArray();
+        public static readonly string[] OperatorsKeys =
+            Operators.Keys.OrderByDescending(k => k.Length).ToArray();
 
         public static readonly Regex NotIndentRegex = new Regex(
             $@"^(?:{string.Join("|", OperatorsKeys.Select(Regex.Escape))})[^\w\d]",

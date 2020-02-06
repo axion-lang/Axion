@@ -1,11 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     public class NodeList<T> : IList<T> where T : Expr {
-        public Expr Parent { get; }
-        private readonly List<T> items;
+        public           Expr     Parent { get; }
+        private readonly IList<T> items;
 
         void IList<T>.RemoveAt(int index) {
             items.RemoveAt(index);
@@ -24,7 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return items.Remove(item);
         }
 
-        public int Count => items.Count;
+        public int  Count      => items.Count;
         public bool IsReadOnly => false;
 
         public T First {
@@ -57,14 +58,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
 
+        internal static NodeList<T> From(Expr parent, IEnumerable<T> collection) {
+            if (collection == null) {
+                return new NodeList<T>(parent);
+            }
+            if (collection is List<T> list) {
+                return new NodeList<T>(parent, list);
+            }
+            return new NodeList<T>(parent, collection.ToList());
+        }
+
         internal NodeList(Expr parent) {
             Parent = parent;
             items  = new List<T>();
         }
 
-        internal NodeList(Expr parent, IEnumerable<T> array) {
+        private NodeList(Expr parent, IList<T> collection) {
             Parent = parent;
-            items  = new List<T>(array);
+            items  = collection;
         }
 
         public void Insert(int index, T item) {
@@ -120,7 +131,25 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         [Obsolete]
         public void CopyTo(T[] array, int arrayIndex) {
-            throw new NotSupportedException();
+            if (array == null) {
+                throw new ArgumentNullException(nameof(array));
+            }
+            if (arrayIndex < 0) {
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+            }
+            if (array.Rank > 1) {
+                throw new ArgumentException(
+                    "Only single dimensional arrays are supported for the requested action.",
+                    nameof(array));
+            }
+            if (array.Length - arrayIndex < Count) {
+                throw new ArgumentException(
+                    "Not enough elements after index in the destination array.");
+            }
+
+            for (var i = 0; i < Count; i++) {
+                array.SetValue(this[i], i + arrayIndex);
+            }
         }
     }
 }

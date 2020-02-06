@@ -10,7 +10,6 @@ namespace Axion.Core.Source {
         ///     Source is processed by default.
         /// </summary>
         None = 0,
-
         Default = CheckIndentationConsistency,
 
         /// <summary>

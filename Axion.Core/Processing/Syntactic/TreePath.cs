@@ -4,14 +4,13 @@ using Axion.Core.Processing.Syntactic.Expressions;
 namespace Axion.Core.Processing.Syntactic {
     public interface ITreePath {
         bool Traversed { get; set; }
-        Expr Node { get; set; }
+        Expr Node      { get; set; }
     }
 
     public class NodeTreePath : ITreePath {
         private readonly PropertyInfo refToNodeInParent;
         private readonly Expr         node;
-
-        public bool Traversed { get; set; } = false;
+        public           bool         Traversed { get; set; } = false;
 
         public Expr Node {
             get => node;
@@ -27,8 +26,7 @@ namespace Axion.Core.Processing.Syntactic {
     public class NodeListTreePath<T> : ITreePath where T : Expr {
         private readonly NodeList<T> list;
         internal         int         IndexInList;
-
-        public bool Traversed { get; set; } = false;
+        public           bool        Traversed { get; set; } = false;
 
         public Expr Node {
             get => list[IndexInList];

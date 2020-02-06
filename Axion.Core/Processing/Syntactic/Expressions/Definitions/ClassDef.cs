@@ -13,9 +13,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public class ClassDef : Expr, IDefinitionExpr, IDecoratedExpr {
-        private Expr name;
+        private NameExpr name;
 
-        public Expr Name {
+        public NameExpr Name {
             get => name;
             set => SetNode(ref name, value);
         }
@@ -41,13 +41,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => SetNode(ref block, value);
         }
 
-        private NodeList<Expr> modifiers;
-
-        public NodeList<Expr> Modifiers {
-            get => modifiers;
-            set => SetNode(ref modifiers, value);
-        }
-
         private Expr dataMembers;
 
         public Expr DataMembers {
@@ -56,18 +49,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public ClassDef(
-            Expr               parent    = null,
-            NameExpr           name      = null,
-            NodeList<TypeName> bases     = null,
-            NodeList<Expr>     keywords  = null,
-            BlockExpr          block     = null,
-            NodeList<Expr>     modifiers = null
+            Expr                  parent   = null,
+            NameExpr              name     = null,
+            IEnumerable<TypeName> bases    = null,
+            IEnumerable<Expr>     keywords = null,
+            BlockExpr             block    = null
         ) : base(parent) {
-            Name      = name;
-            Bases     = bases    ?? new NodeList<TypeName>(this);
-            Keywords  = keywords ?? new NodeList<Expr>(this);
-            Block     = block;
-            Modifiers = modifiers;
+            Name     = name;
+            Bases    = NodeList<TypeName>.From(this, bases);
+            Keywords = NodeList<Expr>.From(this, keywords);
+            Block    = block;
         }
 
         public ClassDef Parse() {
@@ -81,7 +72,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
                 // TODO: add generic classes
                 if (Stream.MaybeEat(LeftArrow)) {
-                    List<(TypeName type, NameExpr label)> types = new TypeName(this).ParseNamedTypeArgs();
+                    List<(TypeName type, NameExpr label)> types =
+                        new TypeName(this).ParseNamedTypeArgs();
                     foreach ((TypeName type, NameExpr typeLabel) in types) {
                         if (typeLabel == null) {
                             Bases.Add(type);

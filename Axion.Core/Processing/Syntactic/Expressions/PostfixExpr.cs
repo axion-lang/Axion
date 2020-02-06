@@ -8,9 +8,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         suffix_expr:
-    ///             atom
-    ///             {'|>' atom }
-    ///             | ({ member | call_expr | index_expr } ['++' | '--']));
+    ///         atom
+    ///         {'|>' atom }
+    ///         | ({ member | call_expr | index_expr } ['++' | '--']));
     ///     </c>
     /// </summary>
     public static class PostfixExpr {
@@ -25,12 +25,23 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
             var loop = true;
             while (loop) {
+                Token exactPeek = s.ExactPeek;
                 switch (s.Peek.Type) {
                 case OpDot:
                     value = new MemberAccessExpr(parent, value).Parse();
                     break;
 
-                case OpenParenthesis when !(value is ConstantExpr):
+                /* NOTICE:
+                condition makes _impossible_ newline
+                placement of function invocation braces
+                e.g:
+                x = func
+                ()
+                but this resolves conflicts when stmts that
+                start with open paren are treated as
+                continuation of previous stmt.
+                */
+                case OpenParenthesis when s.Peek == exactPeek:
                     value = new FuncCallExpr(parent, value).Parse(true);
                     break;
 

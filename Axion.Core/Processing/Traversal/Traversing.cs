@@ -62,12 +62,13 @@ namespace Axion.Core.Processing.Traversal {
 
         public static void Walker(ITreePath path) {
             switch (path.Node) {
-            case TupleTypeName t when t.Types.Count == 0:
+            case TupleTypeName t when t.Types.Count == 0: {
                 path.Node      = new SimpleTypeName("UnitType");
                 path.Traversed = true;
                 break;
+            }
 
-            case UnionTypeName unionTypeName:
+            case UnionTypeName unionTypeName: {
                 // LeftType | RightType -> Union[LeftType, RightType]
                 path.Node = new GenericTypeName(
                     path.Node.Parent,
@@ -79,10 +80,11 @@ namespace Axion.Core.Processing.Traversal {
                 );
                 path.Traversed = true;
                 break;
+            }
 
             case BinaryExpr bin when bin.Operator.Is(TokenType.OpIs)
                                   && bin.Right is UnaryExpr un
-                                  && un.Operator.Is(TokenType.OpNot):
+                                  && un.Operator.Is(TokenType.OpNot): {
                 // x is (not (y)) -> not (x is y)
                 path.Node = new UnaryExpr(
                     path.Node.Parent,
@@ -96,23 +98,57 @@ namespace Axion.Core.Processing.Traversal {
                 );
                 path.Traversed = true;
                 break;
+            }
 
-            case BinaryExpr bin:
-                if (bin.Operator.Is(TokenType.RightPipeline)) {
-                    // arg |> func -> func(arg)
-                    path.Node = new FuncCallExpr(
-                        path.Node.Parent,
-                        bin.Right,
-                        new FuncCallArg(path.Node.Parent, bin.Left)
+            case BinaryExpr bin when bin.Operator.Is(TokenType.RightPipeline): {
+                // arg |> func -> func(arg)
+                path.Node = new FuncCallExpr(
+                    path.Node.Parent,
+                    bin.Right,
+                    new FuncCallArg(path.Node.Parent, bin.Left)
+                );
+                path.Traversed = true;
+                break;
+            }
+
+            case BinaryExpr bin when bin.Operator.Is(TokenType.OpAssign)
+                                  && bin.Left is TupleExpr tpl: {
+                // (x, y) = GetCoordinates()
+                // <=======================>
+                // unwrappedX = GetCoordinates()
+                // x = unwrappedX.x
+                // y = unwrappedX.y
+                var block = bin.GetParentOfType<BlockExpr>();
+                (_, int deconstructionIdx) = block.IndexOf(bin);
+                var deconstructionVar = new VarDef(
+                    block,
+                    new NameExpr(block.CreateUniqueId("unwrapped{0}")),
+                    value: bin.Right,
+                    immutable: true
+                );
+                block.Items[deconstructionIdx] = deconstructionVar;
+                for (var i = 0; i < tpl.Expressions.Count; i++) {
+                    block.Items.Insert(
+                        deconstructionIdx + i + 1,
+                        new BinaryExpr(
+                            block,
+                            tpl.Expressions[i],
+                            new OperatorToken(path.Node.Source,
+                                              tokenType: TokenType.OpAssign),
+                            new MemberAccessExpr(block, deconstructionVar.Name) {
+                                Member = tpl.Expressions[i]
+                            }
+                        )
                     );
-                    path.Traversed = true;
                 }
 
+                path.Traversed = true;
                 break;
+            }
 
-            case WhileExpr whileExpr when whileExpr.NoBreakBlock != null:
+            case WhileExpr whileExpr when whileExpr.NoBreakBlock != null: {
                 // Add bool before loop, that indicates, was break reached or not.
-                // Find all 'break's in child blocks and set this
+                // Find all 'break'-s in child blocks and set this
                 // bool to 'true' before exiting the loop.
                 // Example:
                 // while x
@@ -133,9 +169,9 @@ namespace Axion.Core.Processing.Traversal {
                 // if loop_X_nobreak
                 //     do3()
                 var block = path.Node.GetParentOfType<BlockExpr>();
-                (BlockExpr whileParentBlock, int whileIndex) = block.IndexOf(whileExpr);
+                (_, int whileIndex) = block.IndexOf(whileExpr);
                 var flagName = new NameExpr(block.CreateUniqueId("loop_{0}_nobreak"));
-                whileParentBlock.Items.Insert(
+                block.Items.Insert(
                     whileIndex,
                     new VarDef(
                         path.Node,
@@ -156,13 +192,14 @@ namespace Axion.Core.Processing.Traversal {
                     itemParentBlock.Items.Insert(itemIndex, boolSetter);
                 }
 
-                whileParentBlock.Items.Insert(
+                block.Items.Insert(
                     whileIndex + 2,
                     new ConditionalExpr(path.Node, flagName, whileExpr.NoBreakBlock)
                 );
                 whileExpr.NoBreakBlock = null;
                 path.Traversed         = true;
                 break;
+            }
             }
         }
     }

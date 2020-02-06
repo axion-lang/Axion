@@ -41,14 +41,11 @@ namespace Axion.Core.Source {
             }
         }
 
-        internal ProcessingOptions Options        = ProcessingOptions.None;
-        internal ProcessingMode    ProcessingMode = ProcessingMode.None;
-
-        public List<LangException> Blames { get; } = new List<LangException>();
-
-        public TextStream TextStream { get; private set; }
-
-        public TokenStream TokenStream { get; }
+        internal ProcessingOptions   Options        = ProcessingOptions.None;
+        internal ProcessingMode      ProcessingMode = ProcessingMode.None;
+        public   List<LangException> Blames      { get; } = new List<LangException>();
+        public   TextStream          TextStream  { get; private set; }
+        public   TokenStream         TokenStream { get; }
 
         [JsonProperty]
         public Ast Ast { get; set; }

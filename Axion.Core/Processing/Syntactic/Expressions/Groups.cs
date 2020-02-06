@@ -1,10 +1,12 @@
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+
 namespace Axion.Core.Processing.Syntactic.Expressions {
     public interface IDecoratedExpr { }
 
     public interface IStatementExpr { }
 
     public interface IDefinitionExpr {
-        Expr Name { get; set; }
+        NameExpr Name { get; set; }
     }
 
     public interface IGlobalExpr { }

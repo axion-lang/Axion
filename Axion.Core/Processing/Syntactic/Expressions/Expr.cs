@@ -75,17 +75,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         private TypeName valueType;
 
-        [JsonIgnore]
-        [NoTraversePath]
+        [JsonIgnore, NoTraversePath]
         public virtual TypeName ValueType {
             get => valueType;
             set => SetNode(ref valueType, value);
         }
 
-        internal Type MacroExpectationType;
-
+        internal Type        MacroExpectationType;
         internal TokenStream Stream => Source.TokenStream;
-
         protected Expr() : base(null) { }
 
         internal Expr(Expr parent) : base(parent.Source, parent.Start, parent.End) {
@@ -93,10 +90,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         protected void SetNode<T>(
-            ref T field,
-            T     value,
-            [CallerMemberName]
-            string callerName = ""
+            ref T                     field,
+            T                         value,
+            [CallerMemberName] string callerName = ""
         ) where T : Expr {
             if (field == value) {
                 return;

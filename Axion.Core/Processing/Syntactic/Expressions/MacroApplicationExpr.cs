@@ -19,7 +19,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public List<Span> Expressions { get; } = new List<Span>();
-
         public MacroApplicationExpr(Expr parent) : base(parent) { }
 
         public MacroApplicationExpr Parse() {
