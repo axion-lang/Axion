@@ -5,6 +5,18 @@ clone_script:
     git clone -q --recursive --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
 
     git checkout -qf %APPVEYOR_REPO_COMMIT%
+# build Configuration, i.e. Debug, Release, etc.
+configuration: Release
+
+# scripts to run before build
+before_build:
+  - dotnet restore
+
+build_script:
+  - dotnet build .\Axion.sln
+test_script:
+  - dotnet test .\Axion.Testing\
+
 build:
   project: Axion.sln
   verbosity: minimal
