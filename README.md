@@ -7,9 +7,9 @@
 
 ### Repository consists of 3 parts:
 
-- **Language core (lexer, parser, interpreter, etc.) (.NET Standard)**
+- **Language core (lexer, parser, transpiler, etc.) (.NET Standard)**
 - **A .NET Core wrapper around language core (mainly to provide unit-testing and launching)**
-- **Import of [CodeConsole](https://github.com/F1uctus/CodeConsole) project (to use the console code editor with syntax highlighting) (a bit unstable)**
+- **[CodeConsole](https://github.com/F1uctus/CodeConsole) project (console code editor with syntax highlighting) (a bit unstable)**
 
 ### Objectives:
 
@@ -24,6 +24,7 @@
 - **Console interactive interpreter (based on C# transpiling) and code editor**
 - **Lexical analyzer**
 - **Syntax parser**
+- **C#, Python transpilers**
 - **Transpiling to C/C++ or Rust is planned**
 
 ### Launching:
