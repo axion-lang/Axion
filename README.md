@@ -28,15 +28,15 @@
 
 ### Launching:
 
+You can launch compiler with `dotnet run -vq`
+in `Axion.csproj` folder and type `-h` in console to get support
+about arguments for compiler CLI interface.
+
 Now compiler supports interpretation of Axion source
 with `-i` option (through embedded code editor) and
 also file processing with `-f "<path>.ax" -m <output_lang>` options.
 
 Interpretation is performed by transpiling Axion to C# and running
 it through Roslyn (still incomplete and doesn't support some syntax).
-
-You can launch compiler with `dotnet run Axion.dll`
-in bin folder and type `-h` in console to get support
-about arguments for compiler CLI interface.
 
 ### You can take a look at syntax in [project wiki](https://github.com/F1uctus/Axion/wiki)
