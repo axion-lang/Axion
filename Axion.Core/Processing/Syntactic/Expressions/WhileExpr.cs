@@ -43,14 +43,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public Expr Parse() {
-            SetSpan(() => {
-                Stream.Eat(KeywordWhile);
-                Condition = InfixExpr.Parse(this);
-                Block     = new BlockExpr(this).Parse();
-                if (Stream.MaybeEat(KeywordNoBreak)) {
-                    NoBreakBlock = new BlockExpr(this).Parse();
+            SetSpan(
+                () => {
+                    Stream.Eat(KeywordWhile);
+                    Condition = InfixExpr.Parse(this);
+                    Block     = new BlockExpr(this).Parse();
+                    if (Stream.MaybeEat(KeywordNoBreak)) {
+                        NoBreakBlock = new BlockExpr(this).Parse();
+                    }
                 }
-            });
+            );
             return this;
         }
 

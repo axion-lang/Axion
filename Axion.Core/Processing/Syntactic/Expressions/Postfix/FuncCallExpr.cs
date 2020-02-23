@@ -36,11 +36,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         }
 
         public FuncCallExpr Parse(bool allowGenerator = false) {
-            SetSpan(() => {
-                Stream.Eat(OpenParenthesis);
-                Args = FuncCallArg.ParseArgList(this, allowGenerator: allowGenerator);
-                Stream.Eat(CloseParenthesis);
-            });
+            SetSpan(
+                () => {
+                    Stream.Eat(OpenParenthesis);
+                    Args = FuncCallArg.ParseArgList(this, allowGenerator: allowGenerator);
+                    Stream.Eat(CloseParenthesis);
+                }
+            );
             return this;
         }
 
@@ -136,9 +138,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     if (parent.Stream.PeekIs(KeywordFor)) {
                         arg = new FuncCallArg(
                             parent,
-                            new ForComprehension(parent, value) {
-                                IsGenerator = true
-                            }.Parse()
+                            new ForComprehension(parent, value) { IsGenerator = true }.Parse()
                         );
                     }
                     else {

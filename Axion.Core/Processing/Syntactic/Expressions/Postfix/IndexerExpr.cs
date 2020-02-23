@@ -35,48 +35,50 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 Target = AtomExpr.Parse(this);
             }
 
-            SetSpan(() => {
-                var expressions = new NodeList<Expr>(this);
-                Stream.Eat(OpenBracket);
-                if (!Stream.PeekIs(CloseBracket)) {
-                    while (true) {
-                        Expr start = null;
-                        if (!Stream.PeekIs(Colon)) {
-                            start = InfixExpr.Parse(this);
-                        }
-
-                        if (Stream.MaybeEat(Colon)) {
-                            Expr stop = null;
-                            if (!Stream.PeekIs(Colon, Comma, CloseBracket)) {
-                                stop = InfixExpr.Parse(this);
+            SetSpan(
+                () => {
+                    var expressions = new NodeList<Expr>(this);
+                    Stream.Eat(OpenBracket);
+                    if (!Stream.PeekIs(CloseBracket)) {
+                        while (true) {
+                            Expr start = null;
+                            if (!Stream.PeekIs(Colon)) {
+                                start = InfixExpr.Parse(this);
                             }
 
-                            Expr step = null;
-                            if (Stream.MaybeEat(Colon)
-                             && !Stream.PeekIs(Comma, CloseBracket)) {
-                                step = InfixExpr.Parse(this);
+                            if (Stream.MaybeEat(Colon)) {
+                                Expr stop = null;
+                                if (!Stream.PeekIs(Colon, Comma, CloseBracket)) {
+                                    stop = InfixExpr.Parse(this);
+                                }
+
+                                Expr step = null;
+                                if (Stream.MaybeEat(Colon)
+                                 && !Stream.PeekIs(Comma, CloseBracket)) {
+                                    step = InfixExpr.Parse(this);
+                                }
+
+                                expressions.Add(new SliceExpr(this, start, stop, step));
+                                break;
                             }
 
-                            expressions.Add(new SliceExpr(this, start, stop, step));
-                            break;
-                        }
+                            if (start == null) {
+                                LangException.Report(BlameType.InvalidIndexerExpression, Stream.Token);
+                            }
 
-                        if (start == null) {
-                            LangException.Report(BlameType.InvalidIndexerExpression, Stream.Token);
-                        }
+                            expressions.Add(start);
+                            if (Stream.PeekIs(CloseBracket)) {
+                                break;
+                            }
 
-                        expressions.Add(start);
-                        if (Stream.PeekIs(CloseBracket)) {
-                            break;
+                            Stream.Eat(Comma);
                         }
-
-                        Stream.Eat(Comma);
                     }
-                }
 
-                Index = Parsing.MaybeTuple(expressions);
-                Stream.Eat(CloseBracket);
-            });
+                    Index = Parsing.MaybeTuple(expressions);
+                    Stream.Eat(CloseBracket);
+                }
+            );
             return this;
         }
 

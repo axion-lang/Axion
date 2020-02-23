@@ -46,7 +46,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
 
-        internal T GetParentOfType<T>() where T : Expr {
+        internal T? GetParentOfType<T>() where T : Expr {
             Expr p = this;
             if (p is Ast) {
                 if (typeof(T).IsSubclassOf(typeof(BlockExpr))) {
@@ -71,11 +71,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         internal ITreePath Path;
 
         [NoTraversePath]
-        protected internal Expr Parent { get; set; }
+        protected internal Expr? Parent { get; set; }
 
         private TypeName valueType;
 
-        [JsonIgnore, NoTraversePath]
+        [JsonIgnore]
+        [NoTraversePath]
         public virtual TypeName ValueType {
             get => valueType;
             set => SetNode(ref valueType, value);

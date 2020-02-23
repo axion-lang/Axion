@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -17,21 +18,15 @@ namespace Axion.Core.Specification {
         public const string MultiLineCommentMark = "###";
         public const string CharacterQuote       = "`";
 
-        public static readonly char[] Eols = {
-            '\r', '\n'
-        };
+        public static readonly char[] Eols = { '\r', '\n' };
 
-        public static readonly char[] StringQuotes = {
-            '"', '\''
-        };
+        public static readonly char[] StringQuotes = { '"', '\'' };
 
-        public static readonly char[] StringPrefixes = {
-            'r', 'f'
-        };
+        public static readonly char[] StringPrefixes = { 'r', 'f' };
 
-        public static readonly char[] White = {
-            ' ', '\t'
-        };
+        public static readonly char[] White = { ' ', '\t' };
+
+        // @formatter:off
 
         public static readonly char[] NumbersDec = {
             '0', '1', '2', '3', '4',
@@ -72,6 +67,8 @@ namespace Axion.Core.Specification {
             'Y', 'Z',
             '_'
         };
+        
+        // @formatter:on
 
         public static readonly char[] IdNotEnd      = { '-' };
         public static readonly char[] IdPart        = IdStart.Union(IdNotEnd).Union(NumbersDec);
@@ -91,28 +88,6 @@ namespace Axion.Core.Specification {
                 { "\"", "\"" },
                 { "\'", "\'" }
             };
-
-        public static readonly Dictionary<string, TokenType> Punctuation =
-            new Dictionary<string, TokenType> {
-                { "->", RightArrow },
-                { "<-", LeftArrow },
-                { "@", At },
-                { "?", Question },
-                { "$", Dollar },
-                { "(", OpenParenthesis },
-                { ")", CloseParenthesis },
-                { "[", OpenBracket },
-                { "]", CloseBracket },
-                { "{", OpenBrace },
-                { "}", CloseBrace },
-                { "{{", DoubleOpenBrace },
-                { "}}", DoubleCloseBrace },
-                { ",", Comma },
-                { ":", Colon },
-                { ";", Semicolon }
-            };
-
-        public static readonly string[] PunctuationKeys = Punctuation.Keys.ToArray();
 
         // @formatter:off
 
@@ -202,7 +177,8 @@ namespace Axion.Core.Specification {
         public static readonly Dictionary<string, TokenType> Keywords =
             Enum.GetNames(typeof(TokenType))
                 .Where(n => n.StartsWith("Keyword"))
-                .Select(n => {
+                .Select(
+                    n => {
                         Enum.TryParse(n, out TokenType type);
                         return (n.Remove(0, 7).ToLower(), type);
                     }
@@ -224,11 +200,7 @@ namespace Axion.Core.Specification {
         /// <summary>
         ///     Token types that can start a block expression.
         /// </summary>
-        public static readonly TokenType[] BlockStartMarks = {
-            Colon,
-            OpenBrace,
-            Indent
-        };
+        public static readonly TokenType[] BlockStartMarks = { Colon, OpenBrace, Indent };
 
         internal static readonly TokenType[] Constants = {
             TokenType.String,
@@ -260,6 +232,7 @@ namespace Axion.Core.Specification {
             End,
             Semicolon,
             CloseBrace,
+            DoubleCloseBrace,
             CloseBracket,
             CloseParenthesis,
             Comma,
@@ -270,5 +243,55 @@ namespace Axion.Core.Specification {
 
         internal static readonly TypeName CharType   = new SimpleTypeName("Char");
         internal static readonly TypeName StringType = new SimpleTypeName("String");
+
+        // @formatter:off
+
+        public static readonly Dictionary<string, TokenType> Punctuation =
+            new Dictionary<string, TokenType> {
+                // Order of keys makes sense here.
+                // Longer tokens must be above shorter ones.
+                // (Lexer's character stream functions
+                //  work correctly only with Dict-s sorted by length.)
+                { "->", RightArrow },
+                { "<-", LeftArrow },
+                { "{{", DoubleOpenBrace },
+                { "}}", DoubleCloseBrace },
+                { "@",  At },
+                { "?",  Question },
+                { "$",  Dollar },
+                { "(",  OpenParenthesis },
+                { ")",  CloseParenthesis },
+                { "[",  OpenBracket },
+                { "]",  CloseBracket },
+                { "{",  OpenBrace },
+                { "}",  CloseBrace },
+                { ",",  Comma },
+                { ":",  Colon },
+                { ";",  Semicolon }
+            };
+        
+        // @formatter:on
+
+        public static readonly string[] PunctuationKeys = Punctuation.Keys.ToArray();
+
+        // @formatter:off
+
+        internal static readonly Dictionary<string, Func<Expr, Expr>> ParsingFunctions =
+            new Dictionary<string, Func<Expr, Expr>> {
+                { "AnyExpr",       AnyExpr.Parse },
+                { "InfixExpr",     InfixExpr.Parse },
+                { "PrefixExpr",    PrefixExpr.Parse },
+                { "PostfixExpr",   PostfixExpr.Parse },
+                { "AtomExpr",      AtomExpr.Parse },
+                { "InfixListExpr", InfixExpr.ParseList }
+            };
+        
+        internal static readonly Dictionary<string, Type> ParsingTypes =
+            new Dictionary<string, Type> {
+                { "BlockExpr", typeof(BlockExpr) },
+                { "TypeName",  typeof(TypeName) }
+            };
+        
+        // @formatter:on
     }
 }

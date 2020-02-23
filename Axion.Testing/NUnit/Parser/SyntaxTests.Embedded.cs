@@ -9,31 +9,6 @@ using NUnit.Framework;
 namespace Axion.Testing.NUnit.Parser {
     public partial class SyntaxParserTests {
         [Test]
-        public void TestTypeNames() {
-            SourceUnit src = MakeSourceFromCode(
-                string.Join(
-                    Environment.NewLine,
-                    "type0: A.Qualified.Name",
-                    "type1: JustAName | ()",
-                    "type2: A[Generic]type3: A[Qualified.Generic]",
-                    "type3: A.Name1[Qualified.Generic1, And.Generic.Number2]",
-                    "type4: A[Generic]| List[Map[T1, T2]][]",
-                    "type5: (A.Name1, A.Name2)",
-                    "type6: (Name1, Name2)[]",
-                    "type7: (Type1[Int][], (Array[] | AnotherType)[])",
-                    "type8: List[Map[T1, T2]]| (Type1[Int, Type2[]][], (Array[] | AnotherType)[])"
-                )
-            );
-            Parse(src);
-            Assert.That(src.Blames.Count == 0, $"Blames.Count == {src.Blames.Count}");
-            TypeName[] stmts =
-                src.Ast.Items
-                   .Select(s => ((VarDef) s).ValueType)
-                   .ToArray();
-            Assert.That(stmts.Length == 10);
-        }
-
-        [Test]
         public void TestPipelineOperator() {
             SourceUnit src1 = MakeSourceFromCode("person |> parseData |> getAge |> validateAge");
             Parse(src1);
@@ -47,6 +22,32 @@ namespace Axion.Testing.NUnit.Parser {
             var b = new CodeWriter(ProcessingOptions.ToAxion);
             b.Write(src1.Ast);
             Assert.AreEqual(a.ToString(), b.ToString());
+        }
+
+        [Test]
+        public void TestTypeNames() {
+            SourceUnit src = MakeSourceFromCode(
+                string.Join(
+                    Environment.NewLine,
+                    "type0: A.Qualified.Name",
+                    "type1: JustAName | ()",
+                    "type2: A[Generic]",
+                    "type3: A[Qualified.Generic]",
+                    "type4: A.Name1[Qualified.Generic1, And.Generic.Number2]",
+                    "type5: A[Generic]| List[Map[T1, T2]][]",
+                    "type6: (A.Name1, A.Name2)",
+                    "type7: (Name1, Name2)[]",
+                    "type8: (Type1[Int][], (Array[] | AnotherType)[])",
+                    "type9: List[Map[T1, T2]]| (Type1[Int, Type2[]][], (Array[] | AnotherType)[])"
+                )
+            );
+            Parse(src);
+            Assert.That(src.Blames.Count == 0, $"Blames.Count == {src.Blames.Count}");
+            TypeName[] stmts =
+                src.Ast.Items
+                   .Select(s => ((VarDef) s).ValueType)
+                   .ToArray();
+            Assert.That(stmts.Length == 10);
         }
     }
 }

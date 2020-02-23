@@ -28,14 +28,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         }
 
         public MemberAccessExpr Parse() {
-            SetSpan(() => {
-                if (Target == null) {
-                    Target = AtomExpr.Parse(this);
-                }
+            SetSpan(
+                () => {
+                    if (Target == null) {
+                        Target = AtomExpr.Parse(this);
+                    }
 
-                Stream.Eat(OpDot);
-                Member = AtomExpr.Parse(this);
-            });
+                    Stream.Eat(OpDot);
+                    Member = AtomExpr.Parse(this);
+                }
+            );
             return this;
         }
 

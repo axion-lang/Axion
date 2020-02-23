@@ -52,7 +52,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 c.Write(ValueType, " ", Name);
             }
             else {
-                c.Write((object) ValueType ?? "var", " ", Name, " = ", Value);
+                c.Write(
+                    (object) ValueType ?? "var", " ", Name, " = ",
+                    Value
+                );
             }
         }
 

@@ -4,22 +4,8 @@ using NUnit.Framework;
 namespace Axion.Testing.NUnit.Lexer {
     public partial class LexerTests {
         [Test]
-        public void TestValidCharacterLiteral() {
-            SourceUnit source = MakeSourceFromCode("x = `q`");
-            Lex(source);
-            Assert.AreEqual(0, source.Blames.Count);
-        }
-
-        [Test]
         public void TestEscapedCharacterLiteral() {
             SourceUnit source = MakeSourceFromCode("tab = `\\t`");
-            Lex(source);
-            Assert.AreEqual(0, source.Blames.Count);
-        }
-
-        [Test]
-        public void TestSmileCharacterLiteral() {
-            SourceUnit source = MakeSourceFromCode("x = `✌`");
             Lex(source);
             Assert.AreEqual(0, source.Blames.Count);
         }
@@ -45,6 +31,20 @@ namespace Axion.Testing.NUnit.Lexer {
             SourceUnit source = MakeSourceFromCode("x = `abcdef\n");
             Lex(source);
             Assert.AreEqual(1, source.Blames.Count);
+        }
+
+        [Test]
+        public void TestSmileCharacterLiteral() {
+            SourceUnit source = MakeSourceFromCode("x = `✌`");
+            Lex(source);
+            Assert.AreEqual(0, source.Blames.Count);
+        }
+
+        [Test]
+        public void TestValidCharacterLiteral() {
+            SourceUnit source = MakeSourceFromCode("x = `q`");
+            Lex(source);
+            Assert.AreEqual(0, source.Blames.Count);
         }
     }
 }

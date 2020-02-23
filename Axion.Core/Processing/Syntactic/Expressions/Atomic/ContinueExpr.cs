@@ -24,12 +24,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         }
 
         public ContinueExpr Parse() {
-            SetSpan(() => {
-                Stream.Eat(KeywordContinue);
-                if (Stream.PeekIs(Identifier)) {
-                    LoopName = new NameExpr(this).Parse();
+            SetSpan(
+                () => {
+                    Stream.Eat(KeywordContinue);
+                    if (Stream.PeekIs(Identifier)) {
+                        LoopName = new NameExpr(this).Parse();
+                    }
                 }
-            });
+            );
             return this;
         }
 

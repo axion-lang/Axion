@@ -4,8 +4,8 @@ using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
     public class ExpressionPattern : IPattern {
-        private readonly Type             type;
         private readonly Func<Expr, Expr> parseFunc;
+        private readonly Type             type;
 
         public ExpressionPattern(Type type) {
             this.type = type;

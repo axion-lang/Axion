@@ -15,11 +15,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public UnknownExpr Parse() {
-            SetSpan(() => {
-                while (!Stream.PeekIs(Newline, TokenType.End)) {
-                    Stream.Eat();
+            SetSpan(
+                () => {
+                    while (!Stream.PeekIs(Newline, TokenType.End)) {
+                        Stream.Eat();
+                    }
                 }
-            });
+            );
             return this;
         }
     }

@@ -36,16 +36,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         public GenericTypeName Parse() {
-            SetSpan(() => {
-                if (Target == null) { }
+            SetSpan(
+                () => {
+                    if (Target == null) { }
 
-                Stream.Eat(OpenBracket);
-                do {
-                    TypeArguments.Add(ParseTypeName());
-                } while (Stream.MaybeEat(Comma));
+                    Stream.Eat(OpenBracket);
+                    do {
+                        TypeArguments.Add(ParseTypeName());
+                    } while (Stream.MaybeEat(Comma));
 
-                Stream.Eat(CloseBracket);
-            });
+                    Stream.Eat(CloseBracket);
+                }
+            );
             return this;
         }
 

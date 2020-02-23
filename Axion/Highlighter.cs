@@ -114,6 +114,9 @@ namespace Axion {
             else if (token.Is(Number)) {
                 tokenColor = Yellow;
             }
+            else if (token.Is(CustomKeyword)) {
+                tokenColor = Magenta;
+            }
             else if (token is OperatorToken) {
                 tokenColor = Red;
             }

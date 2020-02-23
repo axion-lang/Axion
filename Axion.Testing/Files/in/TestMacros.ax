@@ -1,11 +1,15 @@
-@[macro]
-fn do-while (block: Block, condition)
-    syntax = bnf ("'do' block ('while' | 'until') condition")
+macro do-while-statement (
+    block:     Syntax.Block,
+    condition: Syntax.Infix
+)
+    syntax = $('do', block, ('while' | 'until'), condition)
+    
     if syntax[2] == 'while'
         condition = {{ not $condition }}
+    
     return {{
         while true {
-            $block.items
+            $block
             if $condition {
                 break
             }
@@ -13,96 +17,71 @@ fn do-while (block: Block, condition)
     }}
 
 
+macro for-in-statement (
+    item:     Syntax.Atom,
+    iterable: Syntax.Infix,
+    block:    Syntax.Block
+)
+    syntax = $('for', item, 'in', iterable, block)
+    
+    return {{ }}
 
-@[macro]
-fn _until (condition, block: Block)
-    syntax = bnf ("'until' condition block")
+
+macro raise-statement (
+    type-name: Syntax.TypeName,
+    args-lst:  Syntax.InfixList
+)
+    syntax = $('raise', type-name, ['(', [args-lst], ')'])
+    
+    return {{ }}
+
+
+macro until-statement (
+    block:     Syntax.Block,
+    condition: Syntax.Infix
+)
+    syntax = $('until', condition, block)
+    
     return {{
         while not $condition {
-            $block.items
+            $block
         }
     }}
 
 
-@[macro]
-fn _for-index (init, condition, step, block: Block)
-    syntax = bnf ("'for' init ',' condition ',' step block")
+macro for-index-statement (
+    init:      Syntax.Any,
+    condition: Syntax.Infix,
+    step:      Syntax.Infix,
+    block:     Syntax.Block
+)
+    syntax = $('for', init, ',', condition, ',', step, block)
+    
     return {{
         $init
         while $condition {
-            $block.items
+            $block
             $step
         }
     }}
 
 
-@[macro]
-fn _unless (condition, block: Block)
-    syntax = bnf ("'unless' condition block")
+macro unless-statement (
+    condition: Syntax.Infix,
+    block:     Syntax.Block
+)
+    syntax = $('unless', condition, block)
+    
     return {{
         if not $condition {
-            $block.items
+            $block
         }
     }}
 
 
-@[macro]
-fn init-list (items: Seq[Expr])
-    # <- [ 1, 2, 3, 4, 5 ]
-    # -> Set(1, 2, 3, 4, 5)
-    #
-    syntax = bnf ("'[' [items {',' items} {',']}] ']'")
-    args = List()
-    i = 0
-
-    while true
-        args.append(items[i])
-        if i != items.len - 1
-            args.append(Token(','))
-        else
-            break
-        i++
-    return {{ List($items) }}
-
-
-@[macro]
-fn init-set (items: Seq[Expr])
-    # <- { 1, 2, 3, 4, 5 }
-    # -> Set(1, 2, 3, 4, 5)
-    #
-    syntax = bnf ("'{' items {',' items} {',']} '}'")
-    args = List()
-    i = 0
-    while true
-        args.append(items[i])
-        if i != items.len - 1
-            args.append(Token(','))
-        else
-            break
-        i++
-    return {{ Set($items) }}
-
-
-@[macro]
-fn init-map (keys: Seq[Expr], values: Seq[Expr])
-    # <- { 'a': 1, 'b': 2, 'c': 3, ... }
-    # -> Map(('a', 1), ('b', 2), ('c', 3), ...)
-    #
-    syntax = bnf ("'{' [keys ':' values {',' keys ':' values} {',']}] '}'")
-    args = List()
-    i = 0
-    while true
-        args.append(TupleExpr(keys[i], values[i]))
-        if i != items.len - 1
-            args.append(Token(','))
-        else
-            break
-        i++
-    return {{ Map($args) }}
-
-
-@[macro]
-fn _match (value, checks: Seq[Expr], branches: Seq[Expr])
-    syntax = bnf ("value 'match' (checks ':' branches)+")
-    # TODO: implementation
+macro list-init-statement (
+    items: Syntax.InfixExpr[]
+)
+    syntax = $('[', [items, {',', items}, [',']], ']')
+    
     return {{ }}

@@ -32,6 +32,7 @@ namespace Axion {
             "├───────┼─────────────────────┼───────────────────────────────────────────────────────────────┤",
             "│  -d   │ --" + nameof(Debug) + "             │ Save debug information to '<compilerDir>\\output' directory.   │",
             "│  -h   │ --" + nameof(Help) + "              │ Display this help screen.                                     │",
+            "│  -h   │ --" + nameof(EditorHelp) + "        │ Display interactive code editor's help screen.                │",
             "│       │ --" + nameof(Cls) + "               │ Clear program screen.                                         │",
             "│  -v   │ --" + nameof(Version) + "           │ Display information about compiler version.                   │",
             "│  -x   │ --" + nameof(Exit) + "              │ Exit the compiler.                                            │",
@@ -60,6 +61,9 @@ namespace Axion {
 
         [Option('h', "help")]
         public bool Help { get; set; }
+
+        [Option("editorhelp")]
+        public bool EditorHelp { get; set; }
 
         [Option('v', "version")]
         public bool Version { get; set; }

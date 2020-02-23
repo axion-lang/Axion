@@ -62,35 +62,37 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public ClassDef Parse() {
-            SetSpan(() => {
-                Stream.Eat(KeywordClass);
-                Name = new NameExpr(this).Parse(true);
+            SetSpan(
+                () => {
+                    Stream.Eat(KeywordClass);
+                    Name = new NameExpr(this).Parse(true);
 
-                if (Stream.PeekIs(OpenParenthesis)) {
-                    DataMembers = Parsing.MultipleExprs(this, expectedTypes: typeof(NameDef));
-                }
+                    if (Stream.PeekIs(OpenParenthesis)) {
+                        DataMembers = Parsing.MultipleExprs(this, expectedTypes: typeof(NameDef));
+                    }
 
-                // TODO: add generic classes
-                if (Stream.MaybeEat(LeftArrow)) {
-                    List<(TypeName type, NameExpr label)> types =
-                        new TypeName(this).ParseNamedTypeArgs();
-                    foreach ((TypeName type, NameExpr typeLabel) in types) {
-                        if (typeLabel == null) {
-                            Bases.Add(type);
-                        }
-                        else {
-                            Keywords.Add(type);
+                    // TODO: add generic classes
+                    if (Stream.MaybeEat(LeftArrow)) {
+                        List<(TypeName type, NameExpr label)> types =
+                            new TypeName(this).ParseNamedTypeArgs();
+                        foreach ((TypeName type, NameExpr typeLabel) in types) {
+                            if (typeLabel == null) {
+                                Bases.Add(type);
+                            }
+                            else {
+                                Keywords.Add(type);
+                            }
                         }
                     }
-                }
 
-                if (Stream.PeekIs(Spec.BlockStartMarks)) {
-                    Block = new BlockExpr(this).Parse();
+                    if (Stream.PeekIs(Spec.BlockStartMarks)) {
+                        Block = new BlockExpr(this).Parse();
+                    }
+                    else {
+                        Block = new BlockExpr(this);
+                    }
                 }
-                else {
-                    Block = new BlockExpr(this);
-                }
-            });
+            );
             return this;
         }
 

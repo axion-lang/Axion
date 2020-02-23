@@ -9,8 +9,7 @@ namespace Axion.Core.Specification {
     public static partial class Spec {
         public class CSharp {
             public static readonly Assembly[] DefaultImports = {
-                typeof(Enumerable).Assembly,
-                typeof(BigInteger).Assembly
+                typeof(Enumerable).Assembly, typeof(BigInteger).Assembly
             };
 
             public static readonly string[] AccessModifiers = {

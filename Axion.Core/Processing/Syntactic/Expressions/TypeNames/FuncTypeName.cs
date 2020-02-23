@@ -31,14 +31,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         public FuncTypeName Parse() {
-            SetSpan(() => {
-                if (ArgsType == null) {
-                    ArgsType = ParseTypeName();
-                }
+            SetSpan(
+                () => {
+                    if (ArgsType == null) {
+                        ArgsType = ParseTypeName();
+                    }
 
-                Stream.Eat(RightArrow);
-                ReturnType = ParseTypeName();
-            });
+                    Stream.Eat(RightArrow);
+                    ReturnType = ParseTypeName();
+                }
+            );
             return this;
         }
 
@@ -47,11 +49,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         public override void ToCSharp(CodeWriter c) {
-            c.Write("Func<", ArgsType, ", ", ReturnType, ">");
+            c.Write(
+                "Func<", ArgsType, ", ", ReturnType,
+                ">"
+            );
         }
 
         public override void ToPython(CodeWriter c) {
-            c.Write("Callable[[", ArgsType, "], ", ReturnType, "]");
+            c.Write(
+                "Callable[[", ArgsType, "], ", ReturnType,
+                "]"
+            );
         }
     }
 }

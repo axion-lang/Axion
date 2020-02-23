@@ -70,8 +70,7 @@ namespace Axion.Core.Processing.CodeGen {
                 }
             }
             else {
-                throw new NotSupportedException(
-                    $"Code building for '{options:G}' mode is not supported.");
+                throw new NotSupportedException($"Code building for '{options:G}' mode is not supported.");
             }
         }
 

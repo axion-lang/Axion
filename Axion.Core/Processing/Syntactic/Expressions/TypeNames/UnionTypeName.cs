@@ -28,14 +28,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         public UnionTypeName Parse() {
-            SetSpan(() => {
-                if (Left == null) {
-                    Left = ParseTypeName();
-                }
+            SetSpan(
+                () => {
+                    if (Left == null) {
+                        Left = ParseTypeName();
+                    }
 
-                Stream.Eat(OpBitOr);
-                Right = ParseTypeName();
-            });
+                    Stream.Eat(OpBitOr);
+                    Right = ParseTypeName();
+                }
+            );
             return this;
         }
 

@@ -23,17 +23,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         public TupleTypeName Parse() {
-            SetSpan(() => {
-                Stream.Eat(OpenParenthesis);
+            SetSpan(
+                () => {
+                    Stream.Eat(OpenParenthesis);
 
-                if (!Stream.PeekIs(CloseParenthesis)) {
-                    do {
-                        Types.Add(ParseTypeName());
-                    } while (Stream.MaybeEat(Comma));
+                    if (!Stream.PeekIs(CloseParenthesis)) {
+                        do {
+                            Types.Add(ParseTypeName());
+                        } while (Stream.MaybeEat(Comma));
+                    }
+
+                    Stream.Eat(CloseParenthesis);
                 }
-
-                Stream.Eat(CloseParenthesis);
-            });
+            );
             return this;
         }
 

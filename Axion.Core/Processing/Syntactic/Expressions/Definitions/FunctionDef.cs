@@ -43,25 +43,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public FunctionParameter Parse(HashSet<string> names) {
-            SetSpan(() => {
-                Name = new NameExpr(this).Parse();
-                if (Stream.MaybeEat(Colon)) {
-                    ValueType = new TypeName(this).ParseTypeName();
-                }
-                else {
-                    LangException.Report(BlameType.ImpossibleToInferType, Name);
-                }
+            SetSpan(
+                () => {
+                    Name = new NameExpr(this).Parse();
+                    if (Stream.MaybeEat(Colon)) {
+                        ValueType = new TypeName(this).ParseTypeName();
+                    }
+                    else {
+                        LangException.Report(BlameType.ImpossibleToInferType, Name);
+                    }
 
-                if (names.Contains(Name.ToString())) {
-                    LangException.Report(BlameType.DuplicatedParameterInFunction, Name);
-                }
+                    if (names.Contains(Name.ToString())) {
+                        LangException.Report(BlameType.DuplicatedParameterInFunction, Name);
+                    }
 
-                names.Add(Name.ToString());
+                    names.Add(Name.ToString());
 
-                if (Stream.MaybeEat(OpAssign)) {
-                    DefaultValue = InfixExpr.Parse(this);
+                    if (Stream.MaybeEat(OpAssign)) {
+                        DefaultValue = InfixExpr.Parse(this);
+                    }
                 }
-            });
+            );
             return this;
         }
 
@@ -106,9 +108,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public class FunctionDef : Expr, IDefinitionExpr {
-        private NameExpr name;
+        private NameExpr? name;
 
-        public NameExpr Name {
+        public NameExpr? Name {
             get => name;
             set => SetNode(ref name, value);
         }
@@ -171,40 +173,42 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public FunctionDef Parse(bool anonymous = false) {
-            SetSpan(() => {
-                Stream.Eat(KeywordFn);
-                if (!anonymous) {
-                    Name = new NameExpr(this).Parse();
-                }
+            SetSpan(
+                () => {
+                    Stream.Eat(KeywordFn);
+                    if (!anonymous) {
+                        Name = new NameExpr(this).Parse();
+                    }
 
-                // parameters
-                if (Stream.MaybeEat(OpenParenthesis)) {
-                    Parameters = ParseParameterList(
-                        this,
-                        CloseParenthesis
-                    );
-                    Stream.Eat(CloseParenthesis);
-                }
-                else {
-                    Parameters = new NodeList<FunctionParameter>(this);
-                }
+                    // parameters
+                    if (Stream.MaybeEat(OpenParenthesis)) {
+                        Parameters = ParseParameterList(
+                            this,
+                            CloseParenthesis
+                        );
+                        Stream.Eat(CloseParenthesis);
+                    }
+                    else {
+                        Parameters = new NodeList<FunctionParameter>(this);
+                    }
 
-                // return type
-                if (Stream.MaybeEat(RightArrow)) {
-                    ReturnType = new TypeName(this).ParseTypeName();
-                }
+                    // return type
+                    if (Stream.MaybeEat(RightArrow)) {
+                        ReturnType = new TypeName(this).ParseTypeName();
+                    }
 
-                if (Stream.PeekIs(Spec.BlockStartMarks)) {
-                    Block = new BlockExpr(this).Parse(
-                        anonymous
-                            ? BlockType.Lambda
-                            : BlockType.Default
-                    );
+                    if (Stream.PeekIs(Spec.BlockStartMarks)) {
+                        Block = new BlockExpr(this).Parse(
+                            anonymous
+                                ? BlockType.Lambda
+                                : BlockType.Default
+                        );
+                    }
+                    else {
+                        Block = new BlockExpr(this);
+                    }
                 }
-                else {
-                    Block = new BlockExpr(this);
-                }
-            });
+            );
             return this;
         }
 
@@ -221,11 +225,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             Expr               parent,
             params TokenType[] terminators
         ) {
-            var parameters = new NodeList<FunctionParameter>(parent);
-            if (parent.Stream.PeekIs(terminators)) {
-                return parameters;
-            }
-
+            var parameters               = new NodeList<FunctionParameter>(parent);
             var names                    = new HashSet<string>(StringComparer.Ordinal);
             var haveMultiply             = false;
             var haveKeywordOnlyParameter = false;
@@ -233,7 +233,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             FunctionParameter listParameter = null;
             FunctionParameter mapParameter  = null;
             var               needDefault   = false;
-            while (true) {
+            while (!parent.Stream.PeekIs(terminators)) {
                 if (parent.Stream.MaybeEat(OpPower)) {
                     mapParameter = new FunctionParameter(parent).Parse(names);
                     parent.Stream.Eat(terminators);
@@ -328,7 +328,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 c.Write(") => ", Block);
             }
             else {
-                c.Write("public ", ValueType, " ", Name, "(");
+                c.Write(
+                    "public ", ValueType, " ", Name,
+                    "("
+                );
                 c.AddJoin(", ", Parameters);
                 c.WriteLine(")");
                 c.Write(Block);

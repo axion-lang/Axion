@@ -34,11 +34,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public ModuleDef Parse() {
-            SetSpan(() => {
-                Stream.Eat(KeywordModule);
-                Name  = new NameExpr(this).Parse();
-                Block = new BlockExpr(this).Parse();
-            });
+            SetSpan(
+                () => {
+                    Stream.Eat(KeywordModule);
+                    Name  = new NameExpr(this).Parse();
+                    Block = new BlockExpr(this).Parse();
+                }
+            );
             return this;
         }
 

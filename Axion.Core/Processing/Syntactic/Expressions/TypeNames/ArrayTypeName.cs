@@ -21,14 +21,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         public ArrayTypeName Parse() {
-            SetSpan(() => {
-                if (ElementType == null) {
-                    ElementType = ParseTypeName();
-                }
+            SetSpan(
+                () => {
+                    if (ElementType == null) {
+                        ElementType = ParseTypeName();
+                    }
 
-                Stream.Eat(OpenBracket);
-                Stream.Eat(CloseBracket);
-            });
+                    Stream.Eat(OpenBracket);
+                    Stream.Eat(CloseBracket);
+                }
+            );
             return this;
         }
 

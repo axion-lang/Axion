@@ -1,0 +1,77 @@
+h = 10
+x = 2
+y = 2
+
+decorations = "@*+0O"
+rnd = new Random()
+
+Console.WriteLine("".PadRight(y, `\n`))
+
+# Level 1:
+# Tree head - a star.
+treeSpaces = h
+Console.ForegroundColor = ConsoleColor.Red
+Console.WriteLine("".PadRight(x + treeSpaces, ` `) + "*")
+levelWidth = 1
+treeSpaces--
+lastWasDecor = false
+
+# Levels 2 to n-1:
+# Tree layers
+while levelWidth < h
+    treeLevelHeight = 1 if levelWidth == 1 or levelWidth == h - 1 else 2
+    k = 0
+    while k < treeLevelHeight
+        # Leading whitespaces (X position + tree alignment)
+        Console.Write("".PadRight(x + treeSpaces, ` `))
+        # Left side /////
+        r = 0
+        while r < levelWidth
+            if rnd.Next(5) == 0 and not lastWasDecor
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write(decorations[rnd.Next(decorations.Length)])
+                lastWasDecor = true
+            else
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.Write("/")
+                lastWasDecor = false
+            r++
+
+        Console.ForegroundColor = ConsoleColor.DarkGreen;
+        # Thin stem
+        Console.Write("|")
+        # Right side \\\\\
+        r = 0
+        while r < levelWidth
+            if rnd.Next(5) == 0 and not lastWasDecor
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write(decorations[rnd.Next(decorations.Length)])
+                lastWasDecor = true
+            else
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.Write("\\")
+                lastWasDecor = false
+            r++
+
+        Console.WriteLine()
+        k++
+
+    levelWidth++
+    treeSpaces--
+
+Console.ForegroundColor = ConsoleColor.DarkYellow;
+
+# Stem below the tree
+stemWidth: int = h / 3
+if stemWidth % 2 == 0
+    stemWidth++
+
+stemHeight: int = 1 + h / 8
+stemSpaces: int = levelWidth - stemWidth / 2
+
+l = 0
+while l < stemHeight
+    Console.Write("".PadRight(x + stemSpaces, ` `))
+    Console.Write("".PadRight(stemWidth, `|`))
+    Console.WriteLine()
+    l++

@@ -6,6 +6,7 @@ using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
+using Axion.Core.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Source {
@@ -41,16 +42,23 @@ namespace Axion.Core.Source {
             }
         }
 
-        internal ProcessingOptions   Options        = ProcessingOptions.None;
-        internal ProcessingMode      ProcessingMode = ProcessingMode.None;
-        public   List<LangException> Blames      { get; } = new List<LangException>();
-        public   TextStream          TextStream  { get; private set; }
-        public   TokenStream         TokenStream { get; }
+        internal ProcessingOptions Options        = ProcessingOptions.None;
+        internal ProcessingMode    ProcessingMode = ProcessingMode.None;
+
+        public List<LangException> Blames      { get; } = new List<LangException>();
+        public TextStream          TextStream  { get; private set; }
+        public TokenStream         TokenStream { get; }
 
         [JsonProperty]
         public Ast Ast { get; set; }
 
+        private HashSet<string> CustomKeywords { get; } = new HashSet<string>();
+
         public CodeWriter CodeWriter { get; set; }
+
+        private Dictionary<string, SourceUnit> Dependencies { get; } = new Dictionary<string, SourceUnit>();
+
+        private Dictionary<string, IDefinitionExpr> Definitions { get; } = new Dictionary<string, IDefinitionExpr>();
 
         #region File paths
 
@@ -61,53 +69,51 @@ namespace Axion.Core.Source {
         /// </summary>
         public FileInfo SourceFilePath { get; }
 
-        private FileInfo outputFilePath;
+        private FileInfo? outputFilePath;
 
         /// <summary>
         ///     Path to file where generated result is located.
         ///     When not specified in constructor,
         ///     then file name assigned to date and time of instance creation.
         /// </summary>
-        public FileInfo OutputFilePath {
+        public FileInfo? OutputFilePath {
             get {
-                FileInfo path = outputFilePath;
-                if (path != null) {
-                    return path;
+                if (outputFilePath != null) {
+                    return outputFilePath;
                 }
 
-                var f = new FileInfo(
+                outputFilePath = new FileInfo(
                     Path.Combine(
                         SourceFilePath.Directory.FullName,
                         "out",
                         Path.GetFileNameWithoutExtension(SourceFilePath.FullName) + OutputFileExt
                     )
                 );
-                Utilities.ResolvePath(f.Directory.FullName);
-                return f;
+                Utilities.ResolvePath(outputFilePath.Directory.FullName);
+                return outputFilePath;
             }
         }
 
-        private FileInfo debugFilePath;
+        private FileInfo? debugFilePath;
 
         /// <summary>
         ///     Path to file where processing debug output is located.
         /// </summary>
         public FileInfo DebugFilePath {
             get {
-                FileInfo path = debugFilePath;
-                if (path != null) {
-                    return path;
+                if (debugFilePath != null) {
+                    return debugFilePath;
                 }
 
-                var f = new FileInfo(
+                debugFilePath = new FileInfo(
                     Path.Combine(
                         SourceFilePath.Directory.FullName,
                         "debug",
                         Path.GetFileNameWithoutExtension(SourceFilePath.FullName) + DebugFileExt
                     )
                 );
-                Utilities.ResolvePath(f.Directory.FullName);
-                return f;
+                Utilities.ResolvePath(debugFilePath.Directory.FullName);
+                return debugFilePath;
             }
         }
 
@@ -149,6 +155,55 @@ namespace Axion.Core.Source {
             TextStream  = new TextStream(code);
             TokenStream = new TokenStream();
             Ast         = new Ast(this);
+
+            var macrosFile = new FileInfo(Path.Combine(Compiler.WorkDir, "modules", "macros.ax"));
+            if (SourceFilePath.FullName != macrosFile.FullName) {
+                AddDependency(FromFile(macrosFile));
+            }
+        }
+
+        public void AddDependency(SourceUnit src) {
+            Dependencies.Add(src.SourceFilePath.ToString(), src);
+            Compiler.Process(src, ProcessingMode.Reduction);
+        }
+
+        public Dictionary<string, IDefinitionExpr> GetAllDefinitions() {
+            foreach (SourceUnit dep in Dependencies.Values) {
+                foreach (IDefinitionExpr def in dep.Ast.GetScopedDefs()) {
+                    if (!Definitions.ContainsKey(def.Name.ToString())) {
+                        Definitions.Add(def.Name.ToString(), def);
+                    }
+                }
+            }
+            return Definitions;
+        }
+
+        public void AddDefinition(IDefinitionExpr def) {
+            if (def.Name != null) {
+                if (Definitions.ContainsKey(def.Name.ToString())) {
+                    LangException.Report(BlameType.NameIsAlreadyDefined, def.Name);
+                }
+                else {
+                    Definitions.Add(def.Name.ToString(), def);
+                }
+            }
+        }
+
+        public HashSet<string> GetAllCustomKeywords() {
+            foreach (SourceUnit dep in Dependencies.Values) {
+                foreach (string kw in dep.CustomKeywords) {
+                    CustomKeywords.Add(kw);
+                }
+            }
+            return CustomKeywords;
+        }
+
+        public void RegisterCustomKeyword(string keyword) {
+            if (!Spec.Keywords.ContainsKey(keyword)
+             && !Spec.Operators.ContainsKey(keyword)
+             && !Spec.Punctuation.ContainsKey(keyword)) {
+                CustomKeywords.Add(keyword);
+            }
         }
 
         public static SourceUnit FromCode(string code, FileInfo outFilePath = null) {
@@ -178,9 +233,7 @@ namespace Axion.Core.Source {
         }
 
         public static SourceUnit FromInterpolation(TextStream stream) {
-            return new SourceUnit {
-                TextStream = stream
-            };
+            return new SourceUnit { TextStream = stream };
         }
     }
 }

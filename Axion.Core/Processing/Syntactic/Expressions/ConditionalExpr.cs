@@ -44,21 +44,23 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public ConditionalExpr Parse(bool elseIf = false) {
-            SetSpan(() => {
-                if (!elseIf) {
-                    Stream.Eat(KeywordIf);
-                }
+            SetSpan(
+                () => {
+                    if (!elseIf) {
+                        Stream.Eat(KeywordIf);
+                    }
 
-                Condition = InfixExpr.Parse(this);
-                ThenBlock = new BlockExpr(this).Parse();
+                    Condition = InfixExpr.Parse(this);
+                    ThenBlock = new BlockExpr(this).Parse();
 
-                if (Stream.MaybeEat(KeywordElse)) {
-                    ElseBlock = new BlockExpr(this).Parse();
+                    if (Stream.MaybeEat(KeywordElse)) {
+                        ElseBlock = new BlockExpr(this).Parse();
+                    }
+                    else if (Stream.MaybeEat(KeywordElif)) {
+                        ElseBlock = new BlockExpr(this, new ConditionalExpr(this).Parse(true));
+                    }
                 }
-                else if (Stream.MaybeEat(KeywordElif)) {
-                    ElseBlock = new BlockExpr(this, new ConditionalExpr(this).Parse(true));
-                }
-            });
+            );
             return this;
         }
 

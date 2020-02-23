@@ -65,7 +65,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return GetDefByName(name) != null;
         }
 
-        public IDefinitionExpr GetDefByName(string name) {
+        public IDefinitionExpr? GetDefByName(string name) {
             if (!(this is Ast)) {
                 IDefinitionExpr e = GetParentOfType<BlockExpr>().GetDefByName(name);
                 if (e != null) {
@@ -73,11 +73,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
             }
 
-            IDefinitionExpr[] defs = GetAllDefs();
-            return defs.FirstOrDefault(def => def.Name.ToString() == name);
+            IDefinitionExpr[] defs = GetScopedDefs();
+            return defs.FirstOrDefault(def => def.Name?.ToString() == name);
         }
 
-        public IDefinitionExpr[] GetAllDefs() {
+        public IDefinitionExpr[] GetScopedDefs() {
             List<IDefinitionExpr> defs = Items.OfType<IDefinitionExpr>().ToList();
 
             // Add parameters of function if inside it.
@@ -86,12 +86,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 defs.AddRange(parentFn.Parameters);
             }
 
+            var parentMacro = GetParentOfType<MacroDef>();
+            if (parentMacro != null) {
+                defs.AddRange(parentMacro.Parameters);
+            }
+
             return defs.ToArray();
         }
 
         public List<(T item, BlockExpr itemParentBlock, int itemIndex)> FindItemsOfType<T>(
             List<(T item, BlockExpr itemParentBlock, int itemIndex)> _outs = null
-        ) where T : Expr {
+        ) {
             _outs ??= new List<(T item, BlockExpr itemParentBlock, int itemIndex)>();
             for (var i = 0; i < Items.Count; i++) {
                 Expr item = Items[i];
@@ -145,24 +150,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 return this;
             }
 
-            SetSpan(() => {
-                TokenType terminator = ParseStart(this);
+            SetSpan(
+                () => {
+                    TokenType terminator = ParseStart(this);
 
-                if (terminator == Outdent && blockType.HasFlag(BlockType.Lambda)) {
-                    LangException.Report(BlameType.IndentationBasedBlockNotAllowed, this);
-                }
+                    if (terminator == Outdent && blockType.HasFlag(BlockType.Lambda)) {
+                        LangException.Report(BlameType.IndentationBasedBlockNotAllowed, this);
+                    }
 
-                if (terminator == Newline) {
-                    Items.Add(AnyExpr.Parse(this));
-                }
-                else {
-                    while (!Stream.MaybeEat(terminator)
-                        && !Stream.PeekIs(TokenType.End)
-                        && !(terminator == Newline && Stream.Token.Is(Newline))) {
+                    if (terminator == Newline) {
                         Items.Add(AnyExpr.Parse(this));
                     }
+                    else {
+                        while (!Stream.MaybeEat(terminator)
+                            && !Stream.PeekIs(TokenType.End)
+                            && !(terminator == Newline && Stream.Token.Is(Newline))) {
+                            Items.Add(AnyExpr.Parse(this));
+                        }
+                    }
                 }
-            });
+            );
             return this;
         }
 
@@ -182,7 +189,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
             // '{'
             if (parent.Stream.MaybeEat(OpenBrace)) {
-                if (hasColon) { // ':' '{'
+                if (hasColon) {
+                    // ':' '{'
                     LangException.Report(BlameType.RedundantColonWithBraces, blockStart);
                 }
 

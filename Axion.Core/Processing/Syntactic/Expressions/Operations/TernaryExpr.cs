@@ -47,26 +47,28 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
         }
 
         public TernaryExpr Parse() {
-            SetSpan(() => {
-                var invert = false;
-                if (!Stream.MaybeEat(KeywordIf)) {
-                    Stream.Eat(KeywordUnless);
-                    invert = true;
-                }
+            SetSpan(
+                () => {
+                    var invert = false;
+                    if (!Stream.MaybeEat(KeywordIf)) {
+                        Stream.Eat(KeywordUnless);
+                        invert = true;
+                    }
 
-                if (TrueExpr == null) {
-                    TrueExpr = AnyExpr.Parse(this);
-                }
+                    if (TrueExpr == null) {
+                        TrueExpr = AnyExpr.Parse(this);
+                    }
 
-                Condition = InfixExpr.Parse(this);
-                if (Stream.MaybeEat(KeywordElse)) {
-                    FalseExpr = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
-                }
+                    Condition = InfixExpr.Parse(this);
+                    if (Stream.MaybeEat(KeywordElse)) {
+                        FalseExpr = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
+                    }
 
-                if (invert) {
-                    (TrueExpr, FalseExpr) = (FalseExpr, TrueExpr);
+                    if (invert) {
+                        (TrueExpr, FalseExpr) = (FalseExpr, TrueExpr);
+                    }
                 }
-            });
+            );
             return this;
         }
 

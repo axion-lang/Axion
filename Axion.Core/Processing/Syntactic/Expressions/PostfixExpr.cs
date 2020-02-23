@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         internal static Expr Parse(Expr parent) {
             TokenStream s = parent.Source.TokenStream;
 
-            bool unquoted = s.MaybeEat(Dollar);
+            bool unquoted = !s.PeekByIs(2, OpenParenthesis) && s.MaybeEat(Dollar);
             Expr value    = AtomExpr.Parse(parent);
             if (value is IDefinitionExpr) {
                 return value;

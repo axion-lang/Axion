@@ -39,18 +39,20 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         }
 
         public NameExpr Parse(bool simple = false) {
-            SetSpan(() => {
-                Stream.Eat(Identifier);
-                Tokens.Add(Stream.Token);
-                if (!simple) {
-                    while (Stream.MaybeEat(OpDot)) {
-                        Tokens.Add(Stream.Token);
-                        if (Stream.Eat(Identifier) != null) {
+            SetSpan(
+                () => {
+                    Stream.Eat(Identifier);
+                    Tokens.Add(Stream.Token);
+                    if (!simple) {
+                        while (Stream.MaybeEat(OpDot)) {
                             Tokens.Add(Stream.Token);
+                            if (Stream.Eat(Identifier) != null) {
+                                Tokens.Add(Stream.Token);
+                            }
                         }
                     }
                 }
-            });
+            );
             return this;
         }
 

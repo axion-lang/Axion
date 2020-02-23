@@ -140,11 +140,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             if (array.Rank > 1) {
                 throw new ArgumentException(
                     "Only single dimensional arrays are supported for the requested action.",
-                    nameof(array));
+                    nameof(array)
+                );
             }
             if (array.Length - arrayIndex < Count) {
-                throw new ArgumentException(
-                    "Not enough elements after index in the destination array.");
+                throw new ArgumentException("Not enough elements after index in the destination array.");
             }
 
             for (var i = 0; i < Count; i++) {

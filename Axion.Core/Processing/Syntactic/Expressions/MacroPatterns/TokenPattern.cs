@@ -7,7 +7,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
         }
 
         public bool Match(Expr parent) {
-            if (parent.Stream.Peek.Value == Value) {
+            if (parent.Stream.Peek.Content == Value) {
                 parent.Stream.Eat();
                 parent.Ast.MacroApplicationParts.Peek().Expressions.Add(parent.Stream.Token);
                 return true;

@@ -32,6 +32,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 return new FunctionDef(parent).Parse();
             }
 
+            case KeywordMacro: {
+                return new MacroDef(parent).Parse();
+            }
+
             case KeywordIf: {
                 return new ConditionalExpr(parent).Parse();
             }
@@ -77,8 +81,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
             Expr expr = InfixExpr.Parse(parent);
 
-            // ['let'] name '=' expr
             if (expr is BinaryExpr bin && bin.Operator.Is(OpAssign)) {
+                // ['let'] name '=' expr
+                // --------------------^
                 if (bin.Left is NameExpr name
                  && !bin.GetParentOfType<BlockExpr>().IsDefined(name.ToString())) {
                     return new VarDef(
@@ -95,11 +100,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
             }
 
-            // check for ':' - starting block instead of var definition
+            // ['let'] name [':' type_name ['=' infix_expr]]
+            // -----------^
             if (!isImmutable && !s.MaybeEat(Colon)) {
                 return expr;
             }
 
+            // ['let'] name ':' type_name ['=' infix_expr]
+            // -----------------^
             if (!(expr is NameExpr varName)) {
                 LangException.Report(BlameType.ExpectedVarName, expr);
                 varName = null;
@@ -108,10 +116,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             TypeName type  = new TypeName(parent).ParseTypeName();
             Expr     value = null;
             if (s.MaybeEat(OpAssign)) {
+                // ['let'] name ':' type_name '=' infix_expr
+                // -------------------------------^
                 value = InfixExpr.Parse(parent);
             }
 
-            return new VarDef(parent, varName, type, value, isImmutable);
+            return new VarDef(
+                parent, varName, type, value,
+                isImmutable
+            );
         }
     }
 }

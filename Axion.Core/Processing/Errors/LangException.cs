@@ -6,7 +6,7 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Source;
 using Axion.Core.Specification;
 using CodeConsole;
-using CodeConsole.CodeEditor;
+using CodeConsole.ScriptBench;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Errors {
@@ -66,7 +66,7 @@ namespace Axion.Core.Processing.Errors {
 
             // first line
             // <line number>| <code line>
-            int pointerTailLength = CliEditorSettings.LineNumberWidth + errorSpan.Start.Column;
+            int pointerTailLength = 8 + errorSpan.Start.Column;
             int errorTokenLength;
             if (errorSpan.End.Line > errorSpan.Start.Line) {
                 errorTokenLength = lines[0].Length - errorSpan.Start.Column;
@@ -84,10 +84,10 @@ namespace Axion.Core.Processing.Errors {
             // Error: mismatching parenthesis.
             // --> C:\path\to\file.ax
             //
-            // │   1 │ func("string",
+            //     1 │ func("string",
             //             ~
-            // │   2 │      'c',
-            // │   3 │      123
+            //     2 │      'c',
+            //     3 │      123
             // ...
             //
             ConsoleColor color = Severity == BlameSeverity.Error
@@ -95,20 +95,21 @@ namespace Axion.Core.Processing.Errors {
                 : ConsoleColor.DarkYellow;
 
             // <severity>: <message>.
-            ConsoleUI.WriteLine((Severity.ToString("G") + ": " + Message, color));
+            ConsoleUtils.WriteLine((Severity.ToString("G") + ": " + Message, color));
             // file name
-            ConsoleUI.WriteLine(
-                $"--> {targetSource.SourceFilePath}:{errorSpan.Start.Line + 1},{errorSpan.Start.Column + 1}");
+            ConsoleUtils.WriteLine(
+                $"--> {targetSource.SourceFilePath}:{errorSpan.Start.Line + 1},{errorSpan.Start.Column + 1}"
+            );
             Console.WriteLine();
             // line with error
-            CliEditor.DrawLineNumber(errorSpan.Start.Line + 1);
-            ConsoleUI.WriteLine(lines[0]);
+            ScriptBench.DrawLineNumber(errorSpan.Start.Line + 1);
+            ConsoleUtils.WriteLine(lines[0]);
             // error pointer
-            ConsoleUI.WriteLine((pointer, color));
+            ConsoleUtils.WriteLine((pointer, color));
             // next lines
             for (int i = errorSpan.Start.Line + 1; i < lines.Count; i++) {
-                CliEditor.DrawLineNumber(i + 1);
-                ConsoleUI.WriteLine(lines[i]);
+                ScriptBench.DrawLineNumber(i + 1);
+                ConsoleUtils.WriteLine(lines[i]);
             }
 
             Console.WriteLine();

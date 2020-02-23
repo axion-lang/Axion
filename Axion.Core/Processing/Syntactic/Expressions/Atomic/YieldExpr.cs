@@ -28,15 +28,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         }
 
         public YieldExpr Parse() {
-            SetSpan(() => {
-                Stream.Eat(KeywordYield);
-                if (Stream.MaybeEat(KeywordFrom)) {
-                    Value = InfixExpr.Parse(this);
+            SetSpan(
+                () => {
+                    Stream.Eat(KeywordYield);
+                    if (Stream.MaybeEat(KeywordFrom)) {
+                        Value = InfixExpr.Parse(this);
+                    }
+                    else {
+                        Value = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
+                    }
                 }
-                else {
-                    Value = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
-                }
-            });
+            );
             return this;
         }
 

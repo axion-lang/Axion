@@ -30,14 +30,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         }
 
         public CodeQuoteExpr Parse() {
-            SetSpan(() => {
-                Stream.Eat(DoubleOpenBrace);
-                while (!Stream.PeekIs(DoubleCloseBrace, TokenType.End)) {
-                    Block.Items.Add(AnyExpr.Parse(this));
-                }
+            SetSpan(
+                () => {
+                    Stream.Eat(DoubleOpenBrace);
+                    while (!Stream.PeekIs(DoubleCloseBrace, TokenType.End)) {
+                        Block.Items.Add(AnyExpr.Parse(this));
+                    }
 
-                Stream.Eat(DoubleCloseBrace);
-            });
+                    Stream.Eat(DoubleCloseBrace);
+                }
+            );
             return this;
         }
 

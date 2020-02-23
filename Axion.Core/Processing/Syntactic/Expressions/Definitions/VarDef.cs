@@ -20,10 +20,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             TypeName type      = null,
             Expr     value     = null,
             bool     immutable = false
-        ) : base(parent) {
-            Name        = name;
-            ValueType   = type;
-            Value       = value;
+        ) : base(parent, name, type, value) {
             IsImmutable = immutable;
         }
 
@@ -47,7 +44,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 c.Write(ValueType, " ", Name);
             }
             else {
-                c.Write((object) ValueType ?? "var", " ", Name, " = ", Value);
+                c.Write(
+                    (object) ValueType ?? "var", " ", Name, " = ",
+                    Value
+                );
             }
         }
     }

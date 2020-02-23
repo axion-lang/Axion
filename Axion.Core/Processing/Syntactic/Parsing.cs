@@ -21,9 +21,7 @@ namespace Axion.Core.Processing.Syntactic {
             TokenStream s = parent.Source.TokenStream;
             parserFunc ??= AnyExpr.Parse;
             bool parens = s.MaybeEat(OpenParenthesis);
-            var list = new NodeList<Expr>(parent) {
-                parserFunc(parent)
-            };
+            var  list   = new NodeList<Expr>(parent) { parserFunc(parent) };
 
             // tuple
             if (s.MaybeEat(Comma)) {

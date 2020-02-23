@@ -35,6 +35,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 return new CodeQuoteExpr(parent).Parse();
             }
 
+            case Dollar: {
+                return new EBNFSyntaxExpr(parent).Parse();
+            }
+
             case OpenParenthesis: {
                 // empty tuple
                 if (s.PeekByIs(2, CloseParenthesis)) {

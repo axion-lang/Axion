@@ -43,11 +43,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public override void ToAxion(CodeWriter c) {
-            c.Write("[", From, ":", To, ":", Step, "]");
+            c.Write(
+                "[", From, ":", To,
+                ":", Step, "]"
+            );
         }
 
         public override void ToCSharp(CodeWriter c) {
-            c.Write(".Slice(", From, ", ", To, ", ", Step, ")");
+            c.Write(
+                ".Slice(", From, ", ", To,
+                ", ", Step, ")"
+            );
         }
 
         public override void ToPython(CodeWriter c) {

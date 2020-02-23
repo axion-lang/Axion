@@ -39,12 +39,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
         }
 
         public override void ToAxion(CodeWriter c) {
-            c.Write(Left, " ", Operator.Value, " ", Right);
+            c.Write(
+                Left, " ", Operator.Value, " ",
+                Right
+            );
         }
 
         public override void ToCSharp(CodeWriter c) {
             if (Operator.Is(OpPower)) {
-                c.Write("Math.Pow(", Left, ", ", Right, ")");
+                c.Write(
+                    "Math.Pow(", Left, ", ", Right,
+                    ")"
+                );
             }
             else if (Operator.Is(OpIn)) {
                 // in (list1 or|and list2)
@@ -72,12 +78,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
                 if (!Spec.CSharp.BinaryOperators.TryGetValue(Operator.Type, out string op)) {
                     op = Operator.Value;
                 }
-                c.Write(Left, " ", op, " ", Right);
+                c.Write(
+                    Left, " ", op, " ",
+                    Right
+                );
             }
         }
 
         public override void ToPython(CodeWriter c) {
-            c.Write(Left, " ", Operator.Value, " ", Right);
+            c.Write(
+                Left, " ", Operator.Value, " ",
+                Right
+            );
         }
     }
 }

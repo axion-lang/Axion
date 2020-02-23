@@ -30,12 +30,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         }
 
         public ReturnExpr Parse() {
-            SetSpan(() => {
-                Stream.Eat(KeywordReturn);
-                if (!Stream.PeekIs(Spec.NeverExprStartTypes)) {
-                    Value = Parsing.MultipleExprs(this);
+            SetSpan(
+                () => {
+                    Stream.Eat(KeywordReturn);
+                    if (!Stream.PeekIs(Spec.NeverExprStartTypes)) {
+                        Value = Parsing.MultipleExprs(this);
+                    }
                 }
-            });
+            );
             return this;
         }
 

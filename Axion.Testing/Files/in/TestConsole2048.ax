@@ -1,6 +1,9 @@
+use('System.Console')
+use('Macros')
+
 c = Console
 
-# @static
+@static
 class Program
     grid = array[int](4, 4)
     undo-grid = array[int](4, 4)
@@ -11,10 +14,17 @@ class Program
     grid-size = 4
     max-undo = 1
 
-    fn intro
-        c.println("""
+    fn main (args: string[])
+        background-before = c.background-color
+        foreground-before = c.foreground-color
+
+        c.background-color = ConsoleColor.white
+        c.foreground-color = ConsoleColor.black
+        c.clear()
+
+        c.write-line("""
             #################################
-                       Console2048           
+                       Console2048
             #################################
             Use the arrow keys to move around
             Type 'H' for help
@@ -24,16 +34,6 @@ class Program
         )
         c.read-key()
         c.clear()
-
-    fn main (args: str[])
-        background-before = c.background-color
-        foreground-before = c.foreground-color
-
-        c.background-color = ConsoleColor.white
-        c.foreground-color = ConsoleColor.black
-        c.clear()
-
-        intro()
 
         input = ConsoleKey.a
         do-add = true
@@ -50,12 +50,12 @@ class Program
 
             if do-write
                 c.clear()
-                c.println(f"score: {score} | Undos: {max-undo}")
+                c.write-line(f"score: {score} | Undos: {max-undo}")
                 write-grid()
             else
                 do-write = true
 
-            c.println()
+            c.write-line()
             c.write(">: ")
             
             c.read-key().key match
@@ -68,7 +68,7 @@ class Program
             ConsoleKey.up-arrow:
                 do-add = do-write = move-grid(3, 1)
             ConsoleKey.u:
-                c.println()
+                c.write-line()
                 if max-undo != 0
                     if not has-undone
                         grid = undo-grid
@@ -77,30 +77,30 @@ class Program
                         max-undo--
                         do-add = false
                     else
-                        c.println("You may only undo once at a time.")
+                        c.write-line("You may only undo once at a time.")
                 else
-                    c.println("You can't undo.")
+                    c.write-line("You can't undo.")
                     do-add = do-write = false
             ConsoleKey.h:
-                c.println("""
+                c.write-line("""
                     Console 2048
                     Use arrows to move""".trim-indent()
                 )
                 do-add = do-write = false
             _:
-                c.println("""
+                c.write-line("""
                     That is not an acceptable input.
                     Use the arrow keys to move around.""".trim-indent()
                 )
                 do-add = do-write = false
             #except ex
             #    c.clear()
-            #    c.println(ex.message)
-            #    c.println("Your score was " + score)
+            #    c.write-line(ex.message)
+            #    c.write-line("Your score was " + score)
             #    break
 
 
-        c.println("Press any key to continue.")
+        c.write-line("Press any key to continue.")
         c.read-key()
 
         c.background-color = background-before
@@ -144,7 +144,7 @@ class Program
         for repeat in 0...n
             newGrid = int [grid-size, grid-size]
 
-            for i in grid-size - 1...0
+            for i in (grid-size - 1)...0
                 for ii in 0...grid-size
                     newGrid[ii, grid-size - (1 + i)] = grid[i, ii]
 
@@ -179,20 +179,20 @@ class Program
             raise Error("Game over.")
 
     fn write-grid
-        c.println()
-        total-spaces = max-int.to-str().length
+        c.write-line()
+        total-spaces = max-int.to-string().length
 
         for i in 0...grid-size
             for ii in 0...grid-size
                 c.write(" | ")
                 if grid[i, ii] != 0
-                    write-char(' ', total-spaces - grid[i, ii].to-str().length)
-                    write-color(grid[i, ii], grid[i, ii].to-str().length)
+                    write-char(' ', total-spaces - grid[i, ii].to-string().length)
+                    write-color(grid[i, ii], grid[i, ii].to-string().length)
                 else
                     write-char(' ', total-spaces)
-            c.println()
+            c.write-line()
             write-char('-', (3 + total-spaces) * grid-size)
-            c.println()
+            c.write-line()
 
 
     fn write-char (c: char, n: int)

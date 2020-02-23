@@ -90,7 +90,7 @@ namespace Axion.Core.Processing.Lexical {
         ///     Consumes next substring from stream,
         ///     checking that it's equal to expected.
         /// </summary>
-        public string Eat(params string[] expected) {
+        public string? Eat(params string[] expected) {
             if (expected.Length == 0) {
                 Move();
                 return C;
@@ -111,7 +111,7 @@ namespace Axion.Core.Processing.Lexical {
         ///     Consumes next char from stream,
         ///     checking that it's equal to expected.
         /// </summary>
-        public string Eat(params char[] expected) {
+        public string? Eat(params char[] expected) {
             if (expected.Length == 0) {
                 Move();
                 return C;

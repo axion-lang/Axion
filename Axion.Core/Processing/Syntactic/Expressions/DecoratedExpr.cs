@@ -31,21 +31,23 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public DecoratedExpr Parse() {
-            SetSpan(() => {
-                Stream.Eat(At);
-                if (Stream.MaybeEat(OpenBracket)) {
-                    do {
+            SetSpan(
+                () => {
+                    Stream.Eat(At);
+                    if (Stream.MaybeEat(OpenBracket)) {
+                        do {
+                            Decorators.Add(InfixExpr.Parse(this));
+                        } while (Stream.MaybeEat(Comma));
+
+                        Stream.Eat(CloseBracket);
+                    }
+                    else {
                         Decorators.Add(InfixExpr.Parse(this));
-                    } while (Stream.MaybeEat(Comma));
+                    }
 
-                    Stream.Eat(CloseBracket);
+                    Target = AnyExpr.Parse(this);
                 }
-                else {
-                    Decorators.Add(InfixExpr.Parse(this));
-                }
-
-                Target = AnyExpr.Parse(this);
-            });
+            );
             return this;
         }
 

@@ -33,7 +33,8 @@ namespace Axion.Core.Processing.Traversal {
                       .Where(i => i.IsGenericType)
                       .Select(i => i.GetGenericTypeDefinition())
                       .Contains(typeof(IList<>))
-                  && typeof(Span).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0]));
+                  && typeof(Span).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0])
+            );
             foreach (PropertyInfo prop in childProps) {
                 object obj = prop.GetValue(node);
                 if (obj == null) {
@@ -73,10 +74,7 @@ namespace Axion.Core.Processing.Traversal {
                 path.Node = new GenericTypeName(
                     path.Node.Parent,
                     new SimpleTypeName("Union"),
-                    new NodeList<TypeName>(path.Node) {
-                        unionTypeName.Left,
-                        unionTypeName.Right
-                    }
+                    new NodeList<TypeName>(path.Node) { unionTypeName.Left, unionTypeName.Right }
                 );
                 path.Traversed = true;
                 break;
@@ -133,11 +131,11 @@ namespace Axion.Core.Processing.Traversal {
                         new BinaryExpr(
                             block,
                             tpl.Expressions[i],
-                            new OperatorToken(path.Node.Source,
-                                              tokenType: TokenType.OpAssign),
-                            new MemberAccessExpr(block, deconstructionVar.Name) {
-                                Member = tpl.Expressions[i]
-                            }
+                            new OperatorToken(
+                                path.Node.Source,
+                                tokenType: TokenType.OpAssign
+                            ),
+                            new MemberAccessExpr(block, deconstructionVar.Name) { Member = tpl.Expressions[i] }
                         )
                     );
                 }

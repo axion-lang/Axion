@@ -8,7 +8,7 @@ using Axion.Core;
 using Axion.Core.Source;
 using Axion.Core.Specification;
 using CodeConsole;
-using CodeConsole.CodeEditor;
+using CodeConsole.ScriptBench;
 using CommandLine;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -52,12 +52,17 @@ namespace Axion {
                                 }
 
                                 if (args.Version) {
-                                    ConsoleUI.WriteLine(Compiler.Version);
+                                    ConsoleUtils.WriteLine(Compiler.Version);
                                     return 0;
                                 }
 
                                 if (args.Help) {
-                                    ConsoleUI.WriteLine(CommandLineArguments.HelpText);
+                                    ConsoleUtils.WriteLine(CommandLineArguments.HelpText);
+                                    return 0;
+                                }
+
+                                if (args.EditorHelp) {
+                                    var dummy = new ScriptBench(showFullHelp: true);
                                     return 0;
                                 }
 
@@ -82,8 +87,8 @@ namespace Axion {
                 // wait for next command
                 string command;
                 do {
-                    ConsoleUI.ClearLine();
-                    command = ConsoleUI.ReadSimple(">>> ");
+                    ConsoleUtils.ClearLine();
+                    command = ConsoleUtils.ReadSimple(">>> ");
                 } while (string.IsNullOrWhiteSpace(command));
                 arguments = Utilities.SplitLaunchArguments(command).ToArray();
             }
@@ -95,17 +100,15 @@ namespace Axion {
         private static void PrintIntro() {
             const string header = "Axion programming language compiler toolset";
             Console.Title = header;
-            ConsoleUI.WriteLine(
+            ConsoleUtils.WriteLine(
                 (header + " v. ", ConsoleColor.White),
                 (Compiler.Version, ConsoleColor.DarkYellow)
             );
-            ConsoleUI.WriteLine(
+            ConsoleUtils.WriteLine(
                 ("Working in ", ConsoleColor.White),
                 (Compiler.WorkDir, ConsoleColor.DarkYellow)
             );
-            ConsoleUI.WriteLine(
-                "Type '-h', or '--help' to get documentation about launch arguments.\n"
-            );
+            ConsoleUtils.WriteLine("Type '-h', or '--help' to get documentation about launch arguments.\n");
         }
 
         private static void EnterInteractiveMode() {
@@ -115,7 +118,7 @@ namespace Axion {
             );
             while (true) {
                 // code editor header
-                string rawInput = ConsoleUI.Read("i>> ");
+                string rawInput = ConsoleUtils.Read("i>> ");
                 string input    = rawInput.Trim().ToUpper();
 
                 switch (input) {
@@ -129,12 +132,22 @@ namespace Axion {
                     return;
                 }
 
+                // Disable logging while editing
+                LogManager.Configuration.Variables["consoleLogLevel"] = "Fatal";
+                LogManager.Configuration.Variables["fileLogLevel"]    = "Fatal";
+                LogManager.ReconfigExistingLoggers();
+
                 // initialize editor
-                var editor = new CliEditor(
-                    new CliEditorSettings(highlighter: new AxionSyntaxHighlighter()),
+                var editor = new ScriptBench(
+                    new ScriptBenchSettings(highlighter: new AxionSyntaxHighlighter()),
                     rawInput
                 );
                 string[] codeLines = editor.Run();
+
+                // Re-enable logging
+                LogManager.Configuration.Variables["consoleLogLevel"] = "Info";
+                LogManager.Configuration.Variables["fileLogLevel"]    = "Info";
+                LogManager.ReconfigExistingLoggers();
 
                 // interpret as source code and output result
                 SourceUnit src = SourceUnit.FromLines(codeLines);
@@ -161,9 +174,7 @@ namespace Axion {
 
                 var inputFiles = new FileInfo[filesCount];
                 for (var i = 0; i < filesCount; i++) {
-                    inputFiles[i] = new FileInfo(
-                        Utilities.TrimMatchingChars(args.Files.ElementAt(i), '"')
-                    );
+                    inputFiles[i] = new FileInfo(Utilities.TrimMatchingChars(args.Files.ElementAt(i), '"'));
                 }
 
                 src = SourceUnit.FromFile(inputFiles[0]);
@@ -192,9 +203,7 @@ namespace Axion {
             }
 
             var refs = new List<MetadataReference>(
-                Spec.CSharp.DefaultImports.Select(
-                    asm => MetadataReference.CreateFromFile(asm.Location)
-                )
+                Spec.CSharp.DefaultImports.Select(asm => MetadataReference.CreateFromFile(asm.Location))
             );
 
             // Location of the .NET assemblies
@@ -204,13 +213,10 @@ namespace Axion {
             // These assemblies couldn't be loaded correctly via the same construction as above.
             refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "mscorlib.dll")));
             refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")));
-            refs.Add(
-                MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")));
-            refs.Add(MetadataReference.CreateFromFile(
-                         Path.Combine(assemblyPath, "System.Runtime.dll")));
+            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")));
+            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")));
             refs.Add(MetadataReference.CreateFromFile(typeof(Console).Assembly.Location));
-            refs.Add(MetadataReference.CreateFromFile(
-                         Path.Combine(assemblyPath, "System.Private.CoreLib.dll")));
+            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Private.CoreLib.dll")));
 
             string     assemblyName = Path.GetRandomFileName();
             SyntaxTree syntaxTree   = CSharpSyntaxTree.ParseText(csCode);
@@ -219,7 +225,8 @@ namespace Axion {
                 assemblyName,
                 new[] { syntaxTree },
                 refs,
-                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+            );
 
             using var  ms     = new MemoryStream();
             EmitResult result = compilation.Emit(ms);

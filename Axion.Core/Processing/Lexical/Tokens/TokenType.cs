@@ -84,6 +84,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         KeywordFor,
         KeywordFrom,
         KeywordIf,
+        KeywordMacro,
         KeywordModule,
         KeywordNil,
         KeywordNoBreak,
@@ -153,41 +154,38 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         internal static TokenType GetMatchingBracket(this TokenType type) {
             switch (type) {
             // open : close
-            case OpenParenthesis:
-                return CloseParenthesis;
-            case OpenBracket:
-                return CloseBracket;
-            case OpenBrace:
-                return CloseBrace;
+            case OpenParenthesis: return CloseParenthesis;
+            case OpenBracket:     return CloseBracket;
+            case OpenBrace:       return CloseBrace;
             // close : open
-            case CloseParenthesis:
-                return OpenParenthesis;
-            case CloseBracket:
-                return OpenBracket;
-            case CloseBrace:
-                return OpenBrace;
+            case CloseParenthesis: return OpenParenthesis;
+            case CloseBracket:     return OpenBracket;
+            case CloseBrace:       return OpenBrace;
             // should never be thrown
-            default:
-                throw new Exception(
-                    "Internal error: Cannot return matching bracket for non-bracket token type."
-                );
+            default: throw new Exception("Internal error: Cannot return matching bracket for non-bracket token type.");
             }
         }
 
         internal static string GetValue(this TokenType type) {
-            string value = Spec.Keywords.FirstOrDefault(kvp => kvp.Value == type).Key;
-            if (value != null) {
-                return value;
+            try {
+                return Spec.Keywords.First(kvp => kvp.Value == type).Key;
+            }
+            catch {
+                // ignored
             }
 
-            value = Spec.Operators.FirstOrDefault(kvp => kvp.Value.Item1 == type).Key;
-            if (value != null) {
-                return value;
+            try {
+                return Spec.Operators.First(kvp => kvp.Value.Item1 == type).Key;
+            }
+            catch {
+                // ignored
             }
 
-            value = Spec.Punctuation.FirstOrDefault(kvp => kvp.Value == type).Key;
-            if (value != null) {
-                return value;
+            try {
+                return Spec.Punctuation.First(kvp => kvp.Value == type).Key;
+            }
+            catch {
+                // ignored
             }
 
             return type.ToString("G");

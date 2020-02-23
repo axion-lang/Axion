@@ -29,10 +29,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         }
 
         public CodeUnquotedExpr Parse() {
-            SetSpan(() => {
-                Stream.Eat(TokenType.Dollar);
-                Value = PostfixExpr.Parse(this);
-            });
+            SetSpan(
+                () => {
+                    Stream.Eat(TokenType.Dollar);
+                    Value = PostfixExpr.Parse(this);
+                }
+            );
             return this;
         }
 

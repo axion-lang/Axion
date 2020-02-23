@@ -66,39 +66,41 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         }
 
         public ForComprehension Parse() {
-            SetSpan(() => {
-                if (Target == null && !IsNested) {
-                    Target = InfixExpr.Parse(this);
-                }
-
-                Stream.Eat(KeywordFor);
-                Item = Parsing.MultipleExprs(
-                    this,
-                    AtomExpr.Parse,
-                    typeof(NameExpr)
-                );
-                Stream.Eat(OpIn);
-                Iterable = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
-
-                while (Stream.PeekIs(KeywordIf, KeywordUnless)) {
-                    if (Stream.MaybeEat(KeywordIf)) {
-                        Conditions.Add(InfixExpr.Parse(this));
+            SetSpan(
+                () => {
+                    if (Target == null && !IsNested) {
+                        Target = InfixExpr.Parse(this);
                     }
-                    else if (Stream.MaybeEat(KeywordUnless)) {
-                        Conditions.Add(
-                            new UnaryExpr(
-                                this,
-                                OpNot,
-                                InfixExpr.Parse(this)
-                            )
-                        );
+
+                    Stream.Eat(KeywordFor);
+                    Item = Parsing.MultipleExprs(
+                        this,
+                        AtomExpr.Parse,
+                        typeof(NameExpr)
+                    );
+                    Stream.Eat(OpIn);
+                    Iterable = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
+
+                    while (Stream.PeekIs(KeywordIf, KeywordUnless)) {
+                        if (Stream.MaybeEat(KeywordIf)) {
+                            Conditions.Add(InfixExpr.Parse(this));
+                        }
+                        else if (Stream.MaybeEat(KeywordUnless)) {
+                            Conditions.Add(
+                                new UnaryExpr(
+                                    this,
+                                    OpNot,
+                                    InfixExpr.Parse(this)
+                                )
+                            );
+                        }
+                    }
+
+                    if (Stream.PeekIs(KeywordFor)) {
+                        Right = new ForComprehension(Parent, this, true).Parse();
                     }
                 }
-
-                if (Stream.PeekIs(KeywordFor)) {
-                    Right = new ForComprehension(Parent, this, true).Parse();
-                }
-            });
+            );
             return this;
         }
 
