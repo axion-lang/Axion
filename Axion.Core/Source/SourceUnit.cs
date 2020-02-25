@@ -156,7 +156,13 @@ namespace Axion.Core.Source {
             TokenStream = new TokenStream();
             Ast         = new Ast(this);
 
-            var macrosFile = new FileInfo(Path.Combine(Compiler.WorkDir, "modules", "macros.ax"));
+            var macrosFile = new FileInfo(
+                Path.Combine(
+                    new DirectoryInfo(Compiler.WorkDir).Parent.Parent.Parent.Parent.FullName,
+                    "Axion.Modules",
+                    "macros.ax"
+                )
+            );
             if (SourceFilePath.FullName != macrosFile.FullName) {
                 AddDependency(FromFile(macrosFile));
             }
