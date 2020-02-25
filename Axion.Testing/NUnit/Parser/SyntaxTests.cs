@@ -88,7 +88,10 @@ namespace Axion.Testing.NUnit.Parser {
                     ProcessingMode.Parsing
                 );
                 Assert.That(
-                    source.Blames.All(b => b.Severity != BlameSeverity.Error),
+                    source.Blames.All(
+                        b => b.Severity != BlameSeverity.Error
+                          || b.Message  == BlameType.ImpossibleToInferType.Description
+                    ),
                     file.Name + ": Errors count > 0"
                 );
                 Assert.That(source.TokenStream.Tokens.Count > 0, file.Name + ": Tokens count == 0");

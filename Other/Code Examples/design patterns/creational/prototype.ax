@@ -1,122 +1,119 @@
 # user-side implementation:
-# module Patterns.Creational.Prototype.User:
-
-# Base prototype.
-# Uses reduced 'record' class.
-# The Cloneable base class specifies, that
-# all class and any it's inheritor can be copied
-# (with all fields values, without slow reflection,
-# but with built-in compiler code generator.)
-# through 'clone()' function.
-class Shape (x: int, y: int, color: Color) <- Cloneable
-
-# Concrete prototype. Cloning method creates a new object and
-# passes itself to the constructor. Until constructor is
-# finished, has a reference to a fresh clone. Therefore, nobody
-# has access to a partly built clone. This helps to make the
-# cloning result consistent.
-class Rectangle (base, width: int, height: int) <- Shape, Cloneable
-
-class Circle (base, radius: int) <- Shape, Cloneable
+module Patterns.Creational.Prototype.User
+    # Base prototype.
+    # Uses reduced 'record' class.
+    # The Cloneable base class specifies, that
+    # all class and any it's inheritor can be copied
+    # (with all fields values, without slow reflection,
+    # but with built-in compiler code generator.)
+    # through 'clone()' function.
+    class Shape (x: int, y: int, color: Color) <- Cloneable
+    
+    # Concrete prototype. Cloning method creates a new object and
+    # passes itself to the constructor. Until constructor is
+    # finished, has a reference to a fresh clone. Therefore, nobody
+    # has access to a partly built clone. This helps to make the
+    # cloning result consistent.
+    class Rectangle (base, width: int, height: int) <- Shape, Cloneable
+    
+    class Circle (base, radius: int) <- Shape, Cloneable
 
 
 
 
 # internal/system implementation:
-# module Patterns.Creational.Prototype.Internal:
-
-# Base prototype.
-@abstract class Shape
-    x: int
-    y: int
-    color: Color
-
-    # A regular constructor.
-    fn init (self.x, self.y, self.color)
-
-    # The prototype constructor. A fresh object: initialized
-    # with values from the old object in the constructor.
-    fn init (source: Shape)
-        if source != null
-            x = source.x
-            y = source.y
-            color = source.color
-
-    # Clone operation always returns one of the Shape
-    # subclasses.
-    @abstract fn clone -> Shape 
-
-
-# Concrete prototype. Cloning method creates a new object and
-# passes itself to the constructor. Until constructor
-# finished, has a reference to a fresh clone. Therefore, nobody
-# has access to a partly built clone. This helps to make the
-# cloning result consistent.
-class Rectangle <- Shape
-    width:  int
-    height: int
-
-    fn init (source: Rectangle)
-        # Parent constructor call: mandatory in order to copy
-        # private fields defined in parent class.
-        super(source)
-        if source != null
-            width = source.width
-            height = source.height
-
-    fn clone -> Shape
-        return new Rectangle(self)
-
-
-class Circle <- Shape
-    radius: int
-
-    fn init (source: Circle)
-        super(source)
-        if source != null
-            radius = source.radius
-
-    fn clone -> Shape
-        return new Circle(self)
+module Patterns.Creational.Prototype.Internal
+    # Base prototype.
+    @abstract class Shape
+        x: int
+        y: int
+        color: Color
+    
+        # A regular constructor.
+        fn init (self.x, self.y, self.color)
+    
+        # The prototype constructor. A fresh object: initialized
+        # with values from the old object in the constructor.
+        fn init (source: Shape)
+            if source != null
+                x = source.x
+                y = source.y
+                color = source.color
+    
+        # Clone operation always returns one of the Shape
+        # subclasses.
+        @abstract fn clone -> Shape 
+    
+    
+    # Concrete prototype. Cloning method creates a new object and
+    # passes itself to the constructor. Until constructor
+    # finished, has a reference to a fresh clone. Therefore, nobody
+    # has access to a partly built clone. This helps to make the
+    # cloning result consistent.
+    class Rectangle <- Shape
+        width:  int
+        height: int
+    
+        fn init (source: Rectangle)
+            # Parent constructor call: mandatory in order to copy
+            # private fields defined in parent class.
+            super(source)
+            if source != null
+                width = source.width
+                height = source.height
+    
+        fn clone -> Shape
+            return new Rectangle(self)
+    
+    
+    class Circle <- Shape
+        radius: int
+    
+        fn init (source: Circle)
+            super(source)
+            if source != null
+                radius = source.radius
+    
+        fn clone -> Shape
+            return new Circle(self)
 
 
 
 
 
 # client code:
-# module Patterns.Creational.Prototype.Program:
-
-class Application
-    shapes: Shape[]
-
-    fn init
-        circle = new Circle(10, 20, 15)
-        shapes.add(circle)
-
-        another-circle = circle.clone()
-        shapes.add(another-circle)
-        # anotherCircle is the exact copy of circle.
-
-        rectangle = new Rectangle {
-            width  = 10,
-            height = 20
-        }
-        shapes.add(rectangle)
-
-    fn business-logic
-        # Prototype rocks because it allows producing a copy of
-        # an object without knowing anything about its type.
-        shapes-copy = new Shape[shapes.count]
-
-        # For instance, we do not know exact types of elements
-        # in shapes array. All we know is that all of them are
-        # Shapes. But thanks to the polymorphism, when we call
-        # the `clone` method on a shape, the program checks its
-        # real class and runs the appropriate clone method,
-        # defined in that class. That is why we get proper
-        # clones instead of a set of simple Shape objects.
-        for s in shapes
-            shapes-copy.add(s.clone())
-
-        # The variable `shapesCopy` will contain exact copies
-        # of the `shape` array's children.
+module Patterns.Creational.Prototype.Program
+    class Application
+        shapes: Shape[]
+    
+        fn init
+            circle = new Circle(10, 20, 15)
+            shapes.add(circle)
+    
+            another-circle = circle.clone()
+            shapes.add(another-circle)
+            # anotherCircle is the exact copy of circle.
+    
+            rectangle = new Rectangle {
+                width  = 10,
+                height = 20
+            }
+            shapes.add(rectangle)
+    
+        fn business-logic
+            # Prototype rocks because it allows producing a copy of
+            # an object without knowing anything about its type.
+            shapes-copy = new Shape[shapes.count]
+    
+            # For instance, we do not know exact types of elements
+            # in shapes array. All we know is that all of them are
+            # Shapes. But thanks to the polymorphism, when we call
+            # the `clone` method on a shape, the program checks its
+            # real class and runs the appropriate clone method,
+            # defined in that class. That is why we get proper
+            # clones instead of a set of simple Shape objects.
+            for s in shapes
+                shapes-copy.add(s.clone())
+    
+            # The variable `shapesCopy` will contain exact copies
+            # of the `shape` array's children.
