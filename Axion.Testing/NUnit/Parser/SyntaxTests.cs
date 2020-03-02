@@ -161,7 +161,7 @@ namespace Axion.Testing.NUnit.Parser {
         [Test]
         public void TestMisc() {
             SourceUnit source = ParseTestFile();
-            Assert.AreEqual(5, source.Blames.Count);
+            Assert.AreEqual(4, source.Blames.Count);
         }
 
         [Test]

@@ -55,7 +55,7 @@ namespace Axion.Core.Processing.Lexical {
         /// </summary>
         public char Peek() {
             if (charIdx + 2 >= 0 && charIdx + 2 < Text.Length) {
-                return Text.Substring(charIdx + 1, 1)[0];
+                return Text[charIdx + 1];
             }
 
             return Spec.Eoc;
@@ -66,7 +66,6 @@ namespace Axion.Core.Processing.Lexical {
         ///     not eating them.
         /// </summary>
         public string Peek(int length) {
-            Debug.Assert(length > 0);
             if (charIdx + 1 + length >= 0 && charIdx + 1 + length < Text.Length) {
                 return Text.Substring(charIdx + 1, length);
             }
@@ -83,7 +82,7 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         public bool PeekIs(params char[] expected) {
-            return expected.Any(s => s == Peek());
+            return expected.Contains(Peek());
         }
 
         /// <summary>

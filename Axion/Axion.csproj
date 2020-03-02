@@ -6,6 +6,7 @@
         <LangVersion>8</LangVersion>
         <ProjectGuid>{7EF6B56D-A078-40F1-9BEB-906DE8B0D658}</ProjectGuid>
         <Authors>F1uctus</Authors>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
@@ -15,6 +16,11 @@
 
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.6.0" />
+        <PackageReference Include="Costura.Fody" Version="4.1.0" />
+        <PackageReference Include="Fody" Version="6.1.1">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.5.0-beta1-final" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.5.0-beta1-final" />
         <PackageReference Include="NLog" Version="4.6.8" />

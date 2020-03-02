@@ -64,7 +64,7 @@ macro unless-statement (
     condition: Syntax.Infix,
     block:     Syntax.Block
 )
-    syntax = $('unless', condition, block)
+    syntax = $('unless', condition, block, ['else', block])
     
     return {{
         if not $condition {
