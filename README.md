@@ -3,6 +3,8 @@
 <h2 align="center">Welcome to Axion programming language toolset</h2>
 <h3 align="center">:\:\:\:\:\:\:\:\:\: Under construction :/:/:/:/:/:/:/:/:/:</h3>
 
+<h3>Experimental port of Axion core source to Python language. Deprecated, use `csharp` branch for latest releases.</h3>
+
 ### Objectives:
 
 - **Language union (provide inter-transpiling to other popular languages).**
