@@ -1,7 +1,7 @@
 <img align="center" src="Other/Graphics/Axion_Mini.png" />
 
 <h2 align="center">Welcome to Axion programming language toolset</h2>
-<h3 align="center">:\:\:\:\:\:\:\:\:\: Under construction :/:/:/:/:/:/:/:/:/:</h3>
+<h3 align="center">:construction: Under construction :construction:</h3>
 
 [![Build status](https://ci.appveyor.com/api/projects/status/ij2j74injuejodf2?svg=true)](https://ci.appveyor.com/project/F1uctus/axion)
 
