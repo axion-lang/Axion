@@ -5,29 +5,29 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/ij2j74injuejodf2?svg=true)](https://ci.appveyor.com/project/F1uctus/axion)
 
-### :open_file_folder: Repository consists of 3 parts:
+### :open_file_folder: Repository consists of 3 parts
 
-- **Language core (lexer, parser, transpiler, etc.) (.NET Standard)**
-- **A .NET Core wrapper around language core (mainly to provide unit-testing and launching)**
-- **[CodeConsole](https://github.com/F1uctus/CodeConsole) project (console code editor with syntax highlighting) (a bit unstable)**
+-  **Language core (lexer, parser, transpiler, etc.) (.NET Standard)**
+-  **A .NET Core wrapper around language core (mainly to provide unit-testing and launching)**
+-  **[CodeConsole](https://github.com/F1uctus/CodeConsole) project (console code editor with syntax highlighting) (a bit unstable)**
 
-### :dart: Objectives:
+### :dart: Objectives
 
-- **Language union (provide inter-transpiling to other popular languages).**
-- **Implementation of common design patterns quickly and simply.**
-- **Convenient, simple and easy to read**
+-  **Language union (provide inter-transpiling to other popular languages).**
+-  **Implementation of common design patterns quickly and simply.**
+-  **Convenient, simple and easy to read**
 -  **Static typed with less annotations**
-- **High-performance**
+-  **High-performance**
 
-### :chart: Progress:
+### :chart: Progress
 
-- **Console interactive interpreter (based on C# transpiling) and code editor**
-- **Lexical analyzer**
-- **Syntax parser**
-- **C#, Python transpilers**
-- **Transpiling to C/C++ or Rust is planned**
+-  **Console interactive interpreter (based on C# transpiling) and code editor**
+-  **Lexical analyzer**
+-  **Syntax parser**
+-  **C#, Python transpilers**
+-  **Transpiling to C/C++ or Rust is planned**
 
-### :rocket: Launching:
+### :rocket: Launching
 
 You can launch compiler with `dotnet run -vq`
 in `Axion.csproj` folder and type `-h` in console to get support
