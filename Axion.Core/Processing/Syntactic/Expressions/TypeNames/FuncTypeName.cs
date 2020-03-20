@@ -37,11 +37,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             SetSpan(
                 () => {
                     if (ArgsType == null) {
-                        ArgsType = ParseTypeName();
+                        ArgsType = TypeName.Parse(this);
                     }
 
                     Stream.Eat(RightArrow);
-                    ReturnType = ParseTypeName();
+                    ReturnType = TypeName.Parse(this);
                 }
             );
             return this;

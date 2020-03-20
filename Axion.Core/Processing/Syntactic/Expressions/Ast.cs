@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
@@ -25,11 +25,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Parent = this;
             Path   = new NodeTreePath(this, typeof(SourceUnit).GetProperty(nameof(SourceUnit.Ast)));
             Items  = new NodeList<Expr>(this);
-        }
-
-        internal TokenPattern NewTokenPattern(string keyword) {
-            Source.RegisterCustomKeyword(keyword);
-            return new TokenPattern(keyword);
         }
 
         internal void Parse() {

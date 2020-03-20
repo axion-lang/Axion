@@ -45,7 +45,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
                     Stream.Eat(OpenBracket);
                     do {
-                        TypeArguments.Add(ParseTypeName());
+                        TypeArguments.Add(TypeName.Parse(this));
                     } while (Stream.MaybeEat(Comma));
 
                     Stream.Eat(CloseBracket);

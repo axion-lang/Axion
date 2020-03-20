@@ -55,7 +55,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 () => {
                     Name = new NameExpr(this).Parse();
                     if (Stream.MaybeEat(Colon)) {
-                        ValueType = new TypeName(this).ParseTypeName();
+                        ValueType = TypeName.Parse(this);
                     }
                     else {
                         LangException.Report(BlameType.ImpossibleToInferType, Name);

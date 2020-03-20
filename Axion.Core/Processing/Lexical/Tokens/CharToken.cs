@@ -18,13 +18,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             IsUnclosed = isUnclosed;
         }
 
-        public override void ToAxion(CodeWriter c) {
-            c.Write(Spec.CharacterQuote, Value);
-            if (!IsUnclosed) {
-                c.Write(Spec.CharacterQuote);
-            }
-        }
-
         public override void ToCSharp(CodeWriter c) {
             c.Write("'", HttpUtility.JavaScriptStringEncode(Content));
             if (!IsUnclosed) {

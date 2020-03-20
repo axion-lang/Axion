@@ -30,7 +30,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             SetSpan(
                 () => {
                     if (ElementType == null) {
-                        ElementType = ParseTypeName();
+                        ElementType = TypeName.Parse(this);
                     }
 
                     Stream.Eat(OpenBracket);

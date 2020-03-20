@@ -1,12 +1,16 @@
 # This file is a part of Axion built-ins.
 # It contains all standard macro definitions.
 
-macro do-while-statement (
-    scope:     Scope,
-    condition: Infix
-)
-    syntax = $('do', scope, ('while' | 'until'), condition)
-    
+
+macro until-statement ('until', condition: Infix, scope: Scope)
+    return {{
+        while not $condition {
+            $scope
+        }
+    }}
+
+
+macro post-condition-loop ('do', scope: Scope, ('while' | 'until'), condition: Infix)
     if syntax[2] == 'while'
         condition = {{ not $condition }}
     
@@ -20,53 +24,7 @@ macro do-while-statement (
     }}
 
 
-macro until-statement (
-    scope:     Scope,
-    condition: Infix
-)
-    syntax = $('until', condition, scope)
-    
-    return {{
-        while not $condition {
-            $scope
-        }
-    }}
-
-
-macro for-in-statement (
-    item:     Atom,
-    iterable: Infix,
-    scope:    Scope
-)
-    syntax = $('for', item, 'in', iterable, scope)
-    
-    return {{ }}
-
-
-macro for-index-statement (
-    init:      Any,
-    condition: Infix,
-    step:      Infix,
-    scope:     Scope
-)
-    syntax = $('for', init, ',', condition, ',', step, scope)
-    
-    return {{
-        $init
-        while $condition {
-            $scope
-            $step
-        }
-    }}
-
-
-macro unless-statement (
-    condition:  Infix,
-    then-scope: Scope,
-    else-scope: Scope
-)
-    syntax = $('unless', condition, then-scope, ['else', else-scope])
-    
+macro unless-statement ('unless', condition: Infix, then-scope: Scope, ['else', else-scope: Scope])
     return {{
         if not $condition {
             $scope
@@ -75,87 +33,6 @@ macro unless-statement (
             $else-scope
         }
     }}
-
-
-macro raise-statement (
-    type-name: TypeName,
-    args-lst:  Infix
-)
-    syntax = $('raise', type-name, ['(', [arg, [{',', arg}]], ')'])
-    
-    return {{ }}
-
-
-macro match-expression (
-    target:  Any,
-    pattern: Infix,
-    value:   Any
-)
-    syntax = $(
-        target, 'match', {pattern, ':', value}
-    )
-
-    return {{ }}
-
-
-macro object-initializer-expression (
-    type-name:   TypeName,
-    arg:         Infix,
-    initializer: Infix,
-)
-    syntax = $(
-        'new',
-        (
-            ('(', arg, [{',', arg}], [','], ')')
-          | (
-                type-name,
-                ['(', [arg, [{',', arg}], [',']], ')'],
-                ['{', [initializer, [{',', initializer}], [',']], '}']
-            )
-        )
-    )
-
-    return {{ }}
-
-
-macro list-init-expression (
-    item: Infix
-)
-    syntax = $('[', [item, [{',', item}], [',']], ']')
-
-    return {{ }}
-
-
-
-macro map-init-expression (
-    key:   Infix,
-    value: Infix,
-)
-    syntax = $(
-        '{',
-        [
-            key, ':', value,
-            [{',', key, ':', value}],
-            [',']
-        ],
-        '}'
-    )
-
-    return {{ }}
-
-
-macro set-init-expression (
-    value: Infix,
-)
-    syntax = $(
-        '{',
-        value,
-        [{',', value}],
-        [','],
-        '}'
-    )
-
-    return {{ }}
 
 
 #====================
@@ -167,14 +44,8 @@ macro set-init-expression (
 #     do-smth()
 #     uniq-name++
 #====================
-macro times-statement (
-    counter-end:  Infix,
-    scope:        Scope,
+macro times-statement (counter-end: Infix, 'times', scope: Scope)
     counter-name: Name
-)
-    syntax = $(counter-end, 'times', scope)
-    
-    # counter-name = new Name()
     
     return {{
         $counter-name = 0
@@ -185,19 +56,67 @@ macro times-statement (
     }}
 
 
-macro with-statement (
-    expr:  Any,
-    value: Name,
-    init:  Expression,
-    scope: Scope
-)
-    syntax = $('with', expr, scope)
+macro for-in-statement ('for', item: Atom, 'in', iterable: Infix, scope: Scope)
 
-    if value is Name
+
+macro for-index-statement ('for', init: Any, ',', condition: Infix, ',', step: Infix, scope: Scope)
+    return {{
+        $init
+        while $condition {
+            $scope
+            $step
+        }
+    }}
+
+
+macro raise-statement ('raise', type-name: TypeName, ['(', [args: Infix, [{',', args}]], ')'])
+
+
+macro match-expression (target: Any, 'match', { patterns: Infix, ':', values: Any })
+
+
+macro object-initializer-expression (
+    'new',
+    (
+        ('(', args: Any, [{',', args}], [','], ')')
+      | (
+            type-name: TypeName,
+            ['(', [args, [{',', args}], [',']], ')'],
+            ['{', [initializers: Any, [{',', initializers}], [',']], '}']
+        )
+    )
+)
+
+
+macro list-init-expression ('[', [items: Infix, [{',', items}], [',']], ']')
+
+
+macro map-init-expression (
+    '{',
+    [
+        keys: Infix, ':', values: Infix,
+        [{ ',', keys, ':', values }],
+        [',']
+    ],
+    '}'
+)
+
+
+macro set-init-expression (
+    '{',
+    value: Infix,
+    [{ ',', value }],
+    [','],
+    '}'
+)
+
+
+macro with-statement ('with', expr: Any, scope: Scope)
+    if expr is Name
         name = value
     else # l = r
-        init = value
-        name = value.Left
+        init = expr
+        name = expr.Left
 
     return {{
         $init

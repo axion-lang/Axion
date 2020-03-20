@@ -98,11 +98,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 defs.AddRange(parentFn.Parameters);
             }
 
-            var parentMacro = GetParentOfType<MacroDef>();
-            if (parentMacro != null) {
-                defs.AddRange(parentMacro.Parameters);
-            }
-
             return defs.ToArray();
         }
 

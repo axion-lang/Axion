@@ -94,7 +94,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 varName = null;
             }
 
-            TypeName type  = new TypeName(parent).ParseTypeName();
+            TypeName type  = TypeName.Parse(parent);
             Expr     value = null;
             if (s.MaybeEat(OpAssign)) {
                 // ['let'] name ':' type-name '=' infix-expr

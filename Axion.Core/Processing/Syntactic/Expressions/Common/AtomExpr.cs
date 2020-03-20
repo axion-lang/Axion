@@ -38,9 +38,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             if (s.PeekIs(DoubleOpenBrace)) {
                 return new CodeQuoteExpr(parent).Parse();
             }
-            if (s.PeekIs(Dollar)) {
-                return new EBNFSyntaxExpr(parent).Parse();
-            }
             if (s.PeekIs(OpenParenthesis)) {
                 // empty tuple
                 if (s.PeekByIs(2, CloseParenthesis)) {

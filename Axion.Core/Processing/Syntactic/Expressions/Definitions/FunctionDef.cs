@@ -115,7 +115,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
                     // return type
                     if (Stream.MaybeEat(RightArrow)) {
-                        ReturnType = new TypeName(this).ParseTypeName();
+                        ReturnType = TypeName.Parse(this);
                     }
 
                     if (Stream.PeekIs(Spec.ScopeStartMarks)) {

@@ -21,44 +21,45 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         [NoTraversePath]
         public override TypeName ValueType => this;
 
-        internal TypeName ParseTypeName() {
+        internal static TypeName Parse(Expr parent) {
+            TokenStream s = parent.Stream;
             // leading
             TypeName leftTypeName;
             // tuple
-            if (Stream.PeekIs(OpenParenthesis)) {
-                TupleTypeName tuple = new TupleTypeName(this).Parse();
+            if (s.PeekIs(OpenParenthesis)) {
+                TupleTypeName tuple = new TupleTypeName(parent).Parse();
                 leftTypeName = tuple.Types.Count == 1
                     ? tuple.Types[0]
                     : tuple;
             }
             // simple
-            else if (Stream.PeekIs(Identifier)) {
-                leftTypeName = new SimpleTypeName(this).Parse();
+            else if (s.PeekIs(Identifier)) {
+                leftTypeName = new SimpleTypeName(parent).Parse();
             }
             else {
-                LangException.ReportUnexpectedSyntax(Identifier, Stream.Peek);
+                LangException.ReportUnexpectedSyntax(Identifier, s.Peek);
                 return new SimpleTypeName("UnknownType");
             }
 
             // middle
             // generic ('[' followed by not ']')
-            if (Stream.PeekIs(OpenBracket) && !Stream.PeekByIs(2, CloseBracket)) {
-                leftTypeName = new GenericTypeName(this, leftTypeName).Parse();
+            if (s.PeekIs(OpenBracket) && !s.PeekByIs(2, CloseBracket)) {
+                leftTypeName = new GenericTypeName(parent, leftTypeName).Parse();
             }
 
             // array
-            if (Stream.PeekIs(OpenBracket)) {
-                leftTypeName = new ArrayTypeName(this, leftTypeName).Parse();
+            if (s.PeekIs(OpenBracket)) {
+                leftTypeName = new ArrayTypeName(parent, leftTypeName).Parse();
             }
 
             // trailing
             // union
-            if (Stream.PeekIs(OpBitOr)) {
-                leftTypeName = new UnionTypeName(this, leftTypeName).Parse();
+            if (s.PeekIs(OpBitOr)) {
+                leftTypeName = new UnionTypeName(parent, leftTypeName).Parse();
             }
 
-            if (Stream.PeekIs(RightArrow)) {
-                leftTypeName = new FuncTypeName(this, leftTypeName).Parse();
+            if (s.PeekIs(RightArrow)) {
+                leftTypeName = new FuncTypeName(parent, leftTypeName).Parse();
             }
 
             return leftTypeName;
@@ -71,31 +72,32 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         ///     </c>
         ///     for class, enum, enum item.
         /// </summary>
-        internal List<(TypeName type, NameExpr label)> ParseNamedTypeArgs() {
+        internal static List<(TypeName type, NameExpr label)> ParseNamedTypeArgs(Expr parent) {
+            TokenStream s = parent.Stream;
             var   typeArgs = new List<(TypeName, NameExpr)>();
-            Token start    = Stream.Peek;
+            Token start    = s.Peek;
 
             do {
                 NameExpr name     = null;
-                int      startIdx = Stream.TokenIdx;
-                if (Stream.PeekIs(Identifier)) {
-                    NameExpr typeLabel = new NameExpr(this).Parse();
-                    if (Stream.MaybeEat(OpAssign)) {
+                int      startIdx = s.TokenIdx;
+                if (s.PeekIs(Identifier)) {
+                    NameExpr typeLabel = new NameExpr(parent).Parse();
+                    if (s.MaybeEat(OpAssign)) {
                         name = typeLabel;
                     }
                     else {
-                        Stream.MoveAbsolute(startIdx);
+                        s.MoveAbsolute(startIdx);
                     }
                 }
 
-                typeArgs.Add((ParseTypeName(), name));
-            } while (Stream.MaybeEat(Comma));
+                typeArgs.Add((Parse(parent), name));
+            } while (s.MaybeEat(Comma));
 
             if (typeArgs.Count == 0) {
                 // redundant parens
                 LangException.Report(
                     BlameType.RedundantEmptyListOfTypeArguments,
-                    new Span(Source, start.Start, Stream.Token.End)
+                    new Span(parent.Source, start.Start, s.Token.End)
                 );
             }
 

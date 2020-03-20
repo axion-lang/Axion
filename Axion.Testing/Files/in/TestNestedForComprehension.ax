@@ -1,7 +1,7 @@
 (float(f) for a in l
-	      	for b in a
-	    	  for c in b
-	    		for d in c
-	    		  for e in d
-	    		    for f in e
-	    			  unless e.length == 0)
+              for b in a
+                  for c in b
+                      for d in c
+                          for e in d
+                              for f in e
+                                  unless e.length == 0)

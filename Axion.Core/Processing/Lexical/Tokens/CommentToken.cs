@@ -18,18 +18,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             IsMultiline = isMultiline;
         }
 
-        public override void ToAxion(CodeWriter c) {
-            if (IsMultiline) {
-                c.Write(MultiLineCommentMark + Content);
-                if (!IsUnclosed) {
-                    c.Write(MultiLineCommentMark);
-                }
-            }
-            else {
-                c.Write(OneLineCommentMark + Content);
-            }
-        }
-
         public override void ToCSharp(CodeWriter c) {
             if (IsMultiline) {
                 c.Write("/*" + Content);
@@ -40,6 +28,10 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             else {
                 c.Write("//" + Content);
             }
+        }
+
+        public override void ToPython(CodeWriter c) {
+            c.Write("#", Content);
         }
     }
 }

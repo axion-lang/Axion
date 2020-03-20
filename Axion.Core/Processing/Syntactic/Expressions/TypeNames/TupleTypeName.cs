@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
                     if (!Stream.PeekIs(CloseParenthesis)) {
                         do {
-                            Types.Add(ParseTypeName());
+                            Types.Add(TypeName.Parse(this));
                         } while (Stream.MaybeEat(Comma));
                     }
 

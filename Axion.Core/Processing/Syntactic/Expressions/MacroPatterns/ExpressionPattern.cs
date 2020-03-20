@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
 
             parent.Ast.MacroExpectType = type;
             if (typeof(TypeName).IsAssignableFrom(type)) {
-                e = new TypeName(parent).ParseTypeName();
+                e = TypeName.Parse(parent);
             }
             else {
                 e = AnyExpr.Parse(parent);

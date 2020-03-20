@@ -39,11 +39,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             SetSpan(
                 () => {
                     if (Left == null) {
-                        Left = ParseTypeName();
+                        Left = TypeName.Parse(this);
                     }
 
                     Stream.Eat(OpBitOr);
-                    Right = ParseTypeName();
+                    Right = TypeName.Parse(this);
                 }
             );
             return this;

@@ -1,27 +1,25 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Errors;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.MacroPatterns;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
     ///     <c>
     ///         macro-def:
-    ///         'macro' simple-name scope;
+    ///             'macro' simple-name syntax-description scope;
     ///     </c>
     ///     TODO fix macro def syntax
     /// </summary>
     public class MacroDef : Expr, IDefinitionExpr {
         public CascadePattern Syntax { get; private set; }
-
-        private NodeList<FunctionParameter> parameters;
-
-        public NodeList<FunctionParameter> Parameters {
-            get => parameters;
-            set => SetNode(ref parameters, value);
-        }
 
         private ScopeExpr scope;
 
@@ -37,9 +35,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => SetNode(ref name, value);
         }
 
+        public Dictionary<string, string> NamedSyntaxParts = new Dictionary<string, string>();
+
         internal MacroDef(Expr parent) : base(parent) {
-            Syntax     = new CascadePattern();
-            Parameters = NodeList<FunctionParameter>.From(this, parameters);
+            Syntax = new CascadePattern();
         }
 
         public MacroDef Parse() {
@@ -48,15 +47,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     // TODO: find code, that can be replaced with macro by patterns
                     // Example:
                     // ========
-                    // macro post-condition-loop (
-                    //     scope:     Syntax.Scope,
-                    //     condition: Syntax.Infix,
-                    // )
-                    //     syntax = $('do', scope, ('while' | 'until'), condition)
-                    //
+                    // macro post-condition-loop ('do', scope: Scope, ('while' | 'until'), condition: Infix)
                     //     if syntax[2] == 'while'
                     //         condition = {{ not $condition }}
-                    //
+                    // 
                     //     return {{
                     //         while true {
                     //             $scope
@@ -67,40 +61,128 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     //     }}
                     Stream.Eat(KeywordMacro);
                     Name = new NameExpr(this).Parse(true);
-                    // parameters
-                    if (Stream.MaybeEat(OpenParenthesis)) {
-                        Parameters = FunctionParameter.ParseList(
-                            this,
-                            CloseParenthesis
-                        );
+                    // EBNF-based syntax definition
+                    if (Stream.Eat(OpenParenthesis) != null) {
+                        Syntax = ParseSyntaxDescription();
                         Stream.Eat(CloseParenthesis);
                     }
-                    else {
-                        Parameters = new NodeList<FunctionParameter>(this);
-                    }
-                    Scope                    = new ScopeExpr(this).Parse();
-                    (VarDef syntaxDef, _, _) = Scope.FindItemsOfType<VarDef>().FirstOrDefault();
-                    if (syntaxDef                 != null
-                     && syntaxDef.Name.ToString() == "syntax"
-                     && syntaxDef.Value is EBNFSyntaxExpr syntaxExpr) {
-                        Syntax = syntaxExpr.Syntax;
-                    }
+                    Scope = new ScopeExpr(this).Parse();
                 }
             );
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
-            c.Write("macro ", Name);
-            if (Parameters.Count > 0) {
-                c.Write("(");
-                c.AddJoin(", ", Parameters);
-                c.Write(") ");
+        /// <summary>
+        ///     syntax-description:
+        ///         '$(', {syntax-rule-expr}, ')';
+        ///     syntax-rule-expr:
+        ///         ID, ':', syntax-description-expr, ';';
+        ///     syntax-description-expr:
+        ///         ID
+        ///         | STRING
+        ///         | '[', rhs, ']'
+        ///         | '{', rhs, '}'
+        ///         | '(', rhs, ')'
+        ///         | rhs, '|', rhs
+        ///         | rhs, ',', rhs;
+        /// </summary>
+        private CascadePattern ParseSyntaxDescription() {
+            var patterns = new List<IPattern>();
+            do {
+                IPattern pattern = null;
+                // syntax group: (x, y)
+                if (Stream.MaybeEat(OpenParenthesis)) {
+                    pattern = ParseSyntaxDescription();
+                    Stream.Eat(CloseParenthesis);
+                }
+                // optional pattern: [x]
+                else if (Stream.MaybeEat(OpenBracket)) {
+                    pattern = new OptionalPattern(ParseSyntaxDescription());
+                    Stream.Eat(CloseBracket);
+                }
+                // multiple pattern: {x}
+                else if (Stream.MaybeEat(OpenBrace)) {
+                    pattern = new MultiplePattern(ParseSyntaxDescription());
+                    Stream.Eat(CloseBrace);
+                }
+                else {
+                    // custom keyword
+                    if (Stream.MaybeEat(TokenType.String)) {
+                        Source.RegisterCustomKeyword(Stream.Token.Content);
+                        pattern = new TokenPattern(Stream.Token.Content);
+                    }
+                    // expr-name: TypeName 
+                    else if (Stream.MaybeEat(Identifier)) {
+                        Token id          = Stream.Token;
+                        bool  typeDefined = NamedSyntaxParts.ContainsKey(id.Content);
+                        if (typeDefined) {
+                            pattern = PatternFromTypeName(NamedSyntaxParts[id.Content]);
+                        }
+                        if (Stream.MaybeEat(Colon)) {
+                            TypeName type = TypeName.Parse(this);
+                            if (!typeDefined
+                             && type is SimpleTypeName exprTypeName
+                             && exprTypeName.Name.Qualifiers.Count == 1) {
+                                string typeName = exprTypeName.Name.Qualifiers[0].Content;
+                                pattern = PatternFromTypeName(typeName);
+                                NamedSyntaxParts.Add(id.Content, typeName);
+                            }
+                            else if (typeDefined) {
+                                LangException.Report(BlameType.NameIsAlreadyDefined, id);
+                            }
+                            else {
+                                LangException.Report(BlameType.InvalidMacroParameter, id);
+                            }
+                        }
+                        if (pattern == null) {
+                            LangException.Report(BlameType.ImpossibleToInferType, id);
+                        }
+                    }
+                }
+                if (pattern == null) {
+                    // TODO error
+                    continue;
+                }
+                // or pattern: x | y
+                if (Stream.MaybeEat(OpBitOr)) {
+                    patterns.Add(new OrPattern(pattern, ParseSyntaxDescription()));
+                }
+                else {
+                    patterns.Add(pattern);
+                }
+            } while (Stream.MaybeEat(Comma));
+
+            if (patterns.Count == 1 && !(patterns[0] is CascadePattern)) {
+                return new CascadePattern(patterns[0]);
             }
-            c.Write(Scope);
+            return new CascadePattern(patterns.ToArray());
         }
 
-        public override void ToCSharp(CodeWriter c) {
+        private static ExpressionPattern PatternFromTypeName(string typeName) {
+            ExpressionPattern pattern  = null;
+            if (!typeName.EndsWith("Expr") && !typeName.EndsWith("TypeName")) {
+                typeName += "Expr";
+            }
+            if (Spec.ParsingTypes.TryGetValue(typeName, out Type type)) {
+                pattern = new ExpressionPattern(type);
+            }
+            else if (Spec.ParsingFunctions.TryGetValue(
+                typeName,
+                out Func<Expr, Expr> fn
+            )) {
+                pattern = new ExpressionPattern(fn);
+            }
+            return pattern;
+        }
+
+        public void ToAxion(CodeWriter c) {
+            c.Write(
+                "macro ", Name, "(", Syntax,
+                ")", Scope
+            );
+        }
+
+        public void ToCSharp(CodeWriter c) {
             throw new NotSupportedException();
         }
     }
