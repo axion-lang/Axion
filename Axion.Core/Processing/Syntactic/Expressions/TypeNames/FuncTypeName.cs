@@ -22,10 +22,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         public FuncTypeName(
-            Expr     parent,
-            TypeName argsType   = null,
-            TypeName returnType = null
-        ) : base(parent) {
+            Expr?     parent     = null,
+            TypeName? argsType   = null,
+            TypeName? returnType = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(argsType, returnType)
+        ) {
             ArgsType   = argsType;
             ReturnType = returnType;
         }

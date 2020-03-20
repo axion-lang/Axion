@@ -1,5 +1,6 @@
 using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
@@ -8,11 +9,11 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
-    ///         for_comprehension:
-    ///             'for' name_list 'in' infix_list (('if'|'unless') condition)* [for_comprehension];
+    ///         for-comprehension:
+    ///             'for' multiple-name 'in' multiple-infix (('if'|'unless') condition)* [for-comprehension];
     ///     </c>
     /// </summary>
-    public class ForComprehension : Expr {
+    public class ForComprehension : InfixExpr {
         private Expr target;
 
         [NoTraversePath]
@@ -56,10 +57,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public override TypeName ValueType => Target.ValueType;
 
         public ForComprehension(
-            Expr parent   = null,
-            Expr target   = null,
-            bool isNested = false
-        ) : base(parent) {
+            Expr? parent   = null,
+            Expr? target   = null,
+            bool  isNested = false
+        ) : base(
+            parent
+         ?? GetParentFromChildren(target)
+        ) {
             IsNested   = isNested;
             Target     = target;
             Conditions = new NodeList<Expr>(this);
@@ -69,28 +73,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             SetSpan(
                 () => {
                     if (Target == null && !IsNested) {
-                        Target = InfixExpr.Parse(this);
+                        Target = Parse(this);
                     }
 
                     Stream.Eat(KeywordFor);
-                    Item = Parsing.MultipleExprs(
-                        this,
-                        AtomExpr.Parse,
-                        typeof(NameExpr)
-                    );
+                    Item = Multiple<AtomExpr>.Parse(this);
                     Stream.Eat(OpIn);
-                    Iterable = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
+                    Iterable = Multiple<InfixExpr>.Parse(this);
 
                     while (Stream.PeekIs(KeywordIf, KeywordUnless)) {
                         if (Stream.MaybeEat(KeywordIf)) {
-                            Conditions.Add(InfixExpr.Parse(this));
+                            Conditions.Add(Parse(this));
                         }
                         else if (Stream.MaybeEat(KeywordUnless)) {
                             Conditions.Add(
                                 new UnaryExpr(
                                     this,
                                     OpNot,
-                                    InfixExpr.Parse(this)
+                                    Parse(this)
                                 )
                             );
                         }

@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Axion.Core.Processing.CodeGen;
+using Axion.Core;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Source;
@@ -17,11 +17,11 @@ namespace Axion.Testing.NUnit.Parser {
             SourceUnit src2 = MakeSourceFromCode("validateAge(getAge(parseData(person)))");
             Parse(src2);
             Assert.That(src2.Blames.Count == 0, $"unit2.Blames.Count == {src2.Blames.Count}");
-            var a = new CodeWriter(ProcessingOptions.ToAxion);
-            a.Write(src2.Ast);
-            var b = new CodeWriter(ProcessingOptions.ToAxion);
-            b.Write(src1.Ast);
-            Assert.AreEqual(a.ToString(), b.ToString());
+
+            Compiler.Process(src1, ProcessingMode.Transpilation, ProcessingOptions.ToAxion);
+            Compiler.Process(src2, ProcessingMode.Transpilation, ProcessingOptions.ToAxion);
+
+            Assert.AreEqual(src1.CodeWriter.ToString(), src2.CodeWriter.ToString());
         }
 
         [Test]

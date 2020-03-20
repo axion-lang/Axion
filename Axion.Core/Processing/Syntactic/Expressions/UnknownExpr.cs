@@ -1,15 +1,16 @@
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///         unknown_expr:
+    ///         unknown-expr:
     ///             TOKEN* (NEWLINE | END);
     ///     </c>
     /// </summary>
-    public class UnknownExpr : Expr {
+    public class UnknownExpr : AtomExpr {
         public UnknownExpr(Expr parent) : base(parent) {
             LangException.Report(BlameType.InvalidSyntax, this);
         }

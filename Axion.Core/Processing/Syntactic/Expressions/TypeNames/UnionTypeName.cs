@@ -4,7 +4,7 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
-    ///         union_type:
+    ///         union-type:
     ///             type ('|' type)+;
     ///     </c>
     /// </summary>
@@ -23,8 +23,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => SetNode(ref right, value);
         }
 
-        public UnionTypeName(Expr parent, TypeName left) : base(parent) {
-            Left = left;
+        public UnionTypeName(
+            Expr?     parent = null,
+            TypeName? left   = null,
+            TypeName? right  = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(left, right)
+        ) {
+            Left  = left;
+            Right = right;
         }
 
         public UnionTypeName Parse() {

@@ -1,16 +1,17 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
+namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
-    ///         code_unquoted_expr:
+    ///         code-unquoted-expr:
     ///             '$' expr;
     ///     </c>
     /// </summary>
-    public class CodeUnquotedExpr : Expr, IAtomExpr {
+    public class CodeUnquotedExpr : PostfixExpr {
         private Expr val;
 
         public Expr Value {
@@ -22,9 +23,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public override TypeName ValueType => Value.ValueType;
 
         public CodeUnquotedExpr(
-            Expr parent = null,
-            Expr value  = null
-        ) : base(parent) {
+            Expr? parent = null,
+            Expr? value  = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(value)
+        ) {
             Value = value;
         }
 
@@ -32,7 +36,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             SetSpan(
                 () => {
                     Stream.Eat(TokenType.Dollar);
-                    Value = PostfixExpr.Parse(this);
+                    Value = Parse(this);
                 }
             );
             return this;

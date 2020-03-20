@@ -78,6 +78,7 @@ namespace Axion.Core.Processing.Lexical {
         ///     with expected strings.
         /// </summary>
         public bool PeekIs(params string[] expected) {
+            // TODO: resolve bottleneck (select peek pieces to element of each unique size?)
             return expected.Any(s => s == Peek(s.Length));
         }
 

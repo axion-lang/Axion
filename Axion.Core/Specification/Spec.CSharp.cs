@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -37,7 +38,7 @@ namespace Axion.Core.Specification {
 
             // @formatter:off
 
-            public static readonly Dictionary<string, string> BuiltInNames = new Dictionary<string, string> {
+            public static readonly ImmutableDictionary<string, string> BuiltInNames = new Dictionary<string, string> {
                 { "Int8",         "sbyte" },
                 { "UInt8",        "byte" },
                 { "Int16",        "short" },
@@ -53,12 +54,12 @@ namespace Axion.Core.Specification {
                 { "Bool",         "bool" },
                 { "Object",       "object" },
                 { "self",         "this" }
-            };
+            }.ToImmutableDictionary();
 
-            public static readonly Dictionary<TokenType, string> BinaryOperators = new Dictionary<TokenType, string> {
+            public static readonly ImmutableDictionary<TokenType, string> BinaryOperators = new Dictionary<TokenType, string> {
                 { OpAnd,                "&&" },
                 { OpOr,                 "||" }
-            };
+            }.ToImmutableDictionary();
             
             // @formatter:on
         }

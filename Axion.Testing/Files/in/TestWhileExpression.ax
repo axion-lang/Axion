@@ -7,7 +7,7 @@ while i < 10:
         continue
     if i == 9:
         break
-nobreak:
+no-break:
     Console.WriteLine("No break")
 
 # c style
@@ -22,7 +22,7 @@ while i < 10 {
         break
     }
 }
-nobreak {
+no-break {
     Console.WriteLine("No break")
 }
 
@@ -35,5 +35,5 @@ while i < 10
         continue
     if i == 9
         break
-nobreak
+no-break
     Console.WriteLine("No break")

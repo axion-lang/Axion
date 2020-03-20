@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.MacroPatterns;
 
@@ -10,7 +11,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     but some piece of code defined as expression
     ///     by language macros.
     /// </summary>
-    public class MacroApplicationExpr : Expr, IDecoratedExpr {
+    public class MacroApplicationExpr : AtomExpr, IDecorableExpr {
         private MacroDef? macroDef;
 
         public MacroDef? MacroDef {
@@ -26,7 +27,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 () => {
                     Ast.MacroApplicationParts.Push(this);
                     MacroDef = Ast.Macros.FirstOrDefault(
-                        macro => macro.Syntax.Patterns[0] is TokenPattern
+                        macro => macro.Syntax.Patterns.Length > 0
+                              && macro.Syntax.Patterns[0] is TokenPattern
                               && macro.Syntax.Match(Parent)
                     );
                     Ast.MacroApplicationParts.Pop();
@@ -35,7 +37,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return this;
         }
 
-        public MacroApplicationExpr Parse(Expr leftExpr) {
+        public new MacroApplicationExpr Parse(Expr leftExpr) {
             SetSpan(
                 () => {
                     Ast.MacroApplicationParts.Push(this);

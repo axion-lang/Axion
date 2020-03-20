@@ -9,9 +9,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
     ///         type
-    ///             : simple_type  | tuple_type
-    ///             | generic_type | array_type
-    ///             | union_type;
+    ///             : simple-type  | tuple-type
+    ///             | generic-type | array-type
+    ///             | union-type;
     ///     </c>
     /// </summary>
     public class TypeName : Expr {
@@ -66,8 +66,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         /// <summary>
         ///     <c>
-        ///         type_list:
-        ///             [simple_name '='] type {',' [simple_name '='] type};
+        ///         multiple-type:
+        ///             [simple-name '='] type {',' [simple-name '='] type};
         ///     </c>
         ///     for class, enum, enum item.
         /// </summary>
@@ -79,8 +79,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                 NameExpr name     = null;
                 int      startIdx = Stream.TokenIdx;
                 if (Stream.PeekIs(Identifier)) {
-                    name = new NameExpr(this).Parse();
-                    if (!Stream.MaybeEat(OpAssign)) {
+                    NameExpr typeLabel = new NameExpr(this).Parse();
+                    if (Stream.MaybeEat(OpAssign)) {
+                        name = typeLabel;
+                    }
+                    else {
                         Stream.MoveAbsolute(startIdx);
                     }
                 }

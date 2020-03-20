@@ -4,13 +4,13 @@
     ///     process source unit.
     /// </summary>
     public enum ProcessingMode {
-        None,
+        Default = Reduction,
 
         /// <summary>
         ///     Perform lexical analysis on source
         ///     and generate tokens list from it.
         /// </summary>
-        Lexing,
+        Lexing = 1,
 
         /// <summary>
         ///     Generate Abstract Syntax Tree

@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.MacroPatterns;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -10,21 +13,22 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     /// <summary>
     ///     ebnf-syntax-expr:
-    ///     '$(', {syntax-rule-expr}, ')';
+    ///         '$(', {syntax-rule-expr}, ')';
     ///     syntax-rule-expr:
-    ///     ID, ':', syntax-description-expr, ';';
+    ///         ID, ':', syntax-description-expr, ';';
     ///     syntax-description-expr:
-    ///     ID
-    ///     | STRING
-    ///     | '[', rhs, ']'
-    ///     | '{', rhs, '}'
-    ///     | '(', rhs, ')'
-    ///     | rhs, '|', rhs
-    ///     | rhs, ',', rhs;
+    ///         ID
+    ///         | STRING
+    ///         | '[', rhs, ']'
+    ///         | '{', rhs, '}'
+    ///         | '(', rhs, ')'
+    ///         | rhs, '|', rhs
+    ///         | rhs, ',', rhs;
     /// </summary>
-    public class EBNFSyntaxExpr : Expr {
-        public EBNFSyntaxExpr(Expr parent = null) : base(parent) { }
+    public class EBNFSyntaxExpr : AtomExpr {
         public CascadePattern Syntax { get; private set; }
+
+        public EBNFSyntaxExpr(Expr parent) : base(parent) { }
 
         public EBNFSyntaxExpr Parse() {
             var patterns = new List<IPattern>();
@@ -73,27 +77,31 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
                     }
                     // expression, [type defined in macro parameters]: expr-name 
                     else if (Stream.MaybeEat(Identifier)) {
-                        IDefinitionExpr def = GetParentOfType<BlockExpr>()
+                        IDefinitionExpr def = GetParentOfType<ScopeExpr>()
                             .GetDefByName(Stream.Token.Content);
-                        if (def is FunctionParameter fnParam
-                         && fnParam.ValueType is SimpleTypeName exprTypeName
-                         && exprTypeName.Name.Qualifiers.Count      >= 2
-                         && exprTypeName.Name.Qualifiers[0].Content == "Syntax") {
-                            // Transform "Syntax.Block" => "BlockExpr", etc.
-                            // Syntax.<ExprType>
-                            //        ~~~~~~~~~~
-                            string typeName = exprTypeName.Name.Qualifiers[1].Content;
-                            if (!typeName.EndsWith("Expr") && !typeName.EndsWith("TypeName")) {
-                                typeName += "Expr";
+                        if (def is FunctionParameter fnParam) {
+                            if (fnParam.ValueType is SimpleTypeName exprTypeName
+                             && exprTypeName.Name.Qualifiers.Count == 1) {
+                                // Transform "<Name>" -> "<Name>Expr"
+                                string typeName = exprTypeName.Name.Qualifiers[0].Content;
+                                if (!typeName.EndsWith("Expr") && !typeName.EndsWith("TypeName")) {
+                                    typeName += "Expr";
+                                }
+                                if (Spec.ParsingTypes.TryGetValue(typeName, out Type type)) {
+                                    pattern = new ExpressionPattern(type);
+                                }
+                                else if (Spec.ParsingFunctions.TryGetValue(
+                                    typeName,
+                                    out Func<Expr, Expr> fn
+                                )) {
+                                    pattern = new ExpressionPattern(fn);
+                                }
+                                else {
+                                    LangException.Report(BlameType.InvalidMacroParameter, fnParam);
+                                }
                             }
-                            if (Spec.ParsingTypes.TryGetValue(typeName, out Type type)) {
-                                pattern = new ExpressionPattern(type);
-                            }
-                            else if (Spec.ParsingFunctions.TryGetValue(
-                                typeName,
-                                out Func<Expr, Expr> fn
-                            )) {
-                                pattern = new ExpressionPattern(fn);
+                            else {
+                                LangException.Report(BlameType.InvalidMacroParameter, fnParam);
                             }
                         }
                     }
@@ -114,6 +122,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
                 return patterns[0];
             }
             return new CascadePattern(patterns.ToArray());
+        }
+
+        public override void ToAxion(CodeWriter c) {
+            c.Write("$null");
         }
     }
 }

@@ -2,14 +2,14 @@ using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
 
-namespace Axion.Core.Processing.Syntactic.Expressions {
+namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
     /// <summary>
     ///     <c>
-    ///         parenthesis_expr:
+    ///         parenthesis-expr:
     ///             '(' expr ')';
     ///     </c>
     /// </summary>
-    public class ParenthesizedExpr : Expr {
+    public class ParenthesizedExpr<T> : Multiple<T> where T : Expr {
         private Expr val;
 
         public Expr Value {
@@ -21,7 +21,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         public override TypeName ValueType => Value.ValueType;
 
         internal ParenthesizedExpr(Expr value) : base(value.Parent) {
-            MarkPosition(Value = value);
+            Value = value;
+            MarkPosition(Value);
         }
 
         public override void ToAxion(CodeWriter c) {

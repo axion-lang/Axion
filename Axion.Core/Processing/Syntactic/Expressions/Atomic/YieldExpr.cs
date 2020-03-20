@@ -1,14 +1,16 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     /// <summary>
     ///     <c>
-    ///         yield_expr:
-    ///             'yield' ('from' infix_expr) | infix_list;
+    ///         yield-expr:
+    ///             'yield' ('from' infix-expr) | multiple-infix;
     ///     </c>
     /// </summary>
-    public class YieldExpr : Expr, IStatementExpr {
+    public class YieldExpr : AtomExpr {
         private Expr val;
 
         public Expr Value {
@@ -19,10 +21,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public bool IsYieldFrom { get; set; }
 
         public YieldExpr(
-            Expr parent      = null,
-            Expr value       = null,
-            bool isYieldFrom = false
-        ) : base(parent) {
+            Expr? parent      = null,
+            Expr? value       = null,
+            bool  isYieldFrom = false
+        ) : base(
+            parent
+         ?? GetParentFromChildren(value)
+        ) {
             Value       = value;
             IsYieldFrom = isYieldFrom;
         }
@@ -31,11 +36,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             SetSpan(
                 () => {
                     Stream.Eat(KeywordYield);
-                    if (Stream.MaybeEat(KeywordFrom)) {
+                    if (Stream.MaybeEat("from")) {
                         Value = InfixExpr.Parse(this);
                     }
                     else {
-                        Value = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
+                        Value = Multiple<InfixExpr>.ParseGenerally(this);
                     }
                 }
             );

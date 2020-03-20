@@ -1,16 +1,18 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     /// <summary>
     ///     <c>
-    ///         binary_expr:
+    ///         binary-expr:
     ///             expr OPERATOR expr;
     ///     </c>
     /// </summary>
-    public class BinaryExpr : Expr {
+    public class BinaryExpr : InfixExpr {
         private Expr left;
 
         public Expr Left {
@@ -28,14 +30,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
         public Token Operator { get; }
 
         public BinaryExpr(
-            Expr  parent = null,
-            Expr  left   = null,
-            Token op     = null,
-            Expr  right  = null
-        ) : base(parent) {
-            MarkStart(Left = left);
+            Expr?  parent = null,
+            Expr?  left   = null,
+            Token? op     = null,
+            Expr?  right  = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(left, right)
+        ) {
+            Left     = left;
             Operator = op;
-            MarkEnd(Right = right);
+            Right    = right;
+            MarkStart(Left);
+            MarkEnd(Right);
         }
 
         public override void ToAxion(CodeWriter c) {
@@ -54,7 +61,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             }
             else if (Operator.Is(OpIn)) {
                 // in (list1 or|and list2)
-                if (Right is ParenthesizedExpr paren
+                if (Right is ParenthesizedExpr<Expr> paren
                  && paren.Value is BinaryExpr collections
                  && collections.Operator.Is(OpAnd, OpOr)) {
                     c.Write(

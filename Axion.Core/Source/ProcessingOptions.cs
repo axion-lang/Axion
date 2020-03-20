@@ -7,9 +7,13 @@ namespace Axion.Core.Source {
     [Flags]
     public enum ProcessingOptions {
         /// <summary>
-        ///     Source is processed by default.
+        ///     No additional options.
         /// </summary>
         None = 0,
+
+        /// <summary>
+        ///     Source is processed by default.
+        /// </summary>
         Default = CheckIndentationConsistency,
 
         /// <summary>

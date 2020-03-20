@@ -3,16 +3,18 @@ using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.MacroPatterns;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Traversal;
 using Axion.Core.Source;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     Abstract Syntax Tree built from source code.
     /// </summary>
-    public class Ast : BlockExpr {
+    public class Ast : ScopeExpr {
         internal List<MacroDef> Macros => Source.GetAllDefinitions().Values.OfType<MacroDef>().ToList();
 
         internal readonly Stack<MacroApplicationExpr> MacroApplicationParts =
@@ -72,13 +74,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             var rootClasses   = new List<Expr>();
             var rootFunctions = new List<Expr>();
             foreach (Expr e in Items) {
-                if (e is ModuleDef) {
+                Expr item = e;
+                // decorator is just a wrapper,
+                // so we need to unpack it's content.
+                if (e is DecorableExpr dec) {
+                    item = dec.Target;
+                }
+                if (item is ModuleDef) {
                     c.Write(e);
                 }
-                else if (e is ClassDef) {
+                else if (item is ClassDef) {
                     rootClasses.Add(e);
                 }
-                else if (e is FunctionDef) {
+                else if (item is FunctionDef) {
                     rootFunctions.Add(e);
                 }
                 else {
@@ -88,34 +96,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
             c.Write(
                 new ModuleDef(
-                    this,
-                    new NameExpr("__RootModule__"),
-                    new BlockExpr(
-                        this,
+                    "__RootModule__",
+                    FromItems(
                         new[] {
                             new ClassDef(
-                                this,
-                                new NameExpr("__RootClass__"),
-                                block: new BlockExpr(
-                                    this,
+                                "__RootClass__",
+                                scope: FromItems(
                                     new[] {
-                                        new DecoratedExpr(
-                                            this,
-                                            new[] { new NameExpr("static") },
-                                            new FunctionDef(
-                                                this,
-                                                new NameExpr("Main"),
+                                        new DecorableExpr(
+                                            decorators: new[] { new NameExpr("static") },
+                                            target: new FunctionDef(
+                                                "Main",
                                                 new[] {
                                                     new FunctionParameter(
-                                                        this,
-                                                        new NameExpr("args"),
+                                                        "args",
                                                         new ArrayTypeName(
                                                             this,
                                                             new SimpleTypeName("string")
                                                         )
                                                     )
                                                 },
-                                                block: new BlockExpr(
+                                                scope: new ScopeExpr(
                                                     this,
                                                     rootItems.ToArray()
                                                 ),

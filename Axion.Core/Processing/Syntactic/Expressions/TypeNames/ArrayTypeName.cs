@@ -4,7 +4,7 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
-    ///         array_type:
+    ///         array-type:
     ///             type '[' ']';
     ///     </c>
     /// </summary>
@@ -16,7 +16,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => SetNode(ref elementType, value);
         }
 
-        public ArrayTypeName(Expr parent = null, TypeName elementType = null) : base(parent) {
+        public ArrayTypeName(
+            Expr?     parent      = null,
+            TypeName? elementType = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(elementType)
+        ) {
             ElementType = elementType;
         }
 

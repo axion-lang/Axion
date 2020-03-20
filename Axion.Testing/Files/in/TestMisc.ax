@@ -5,7 +5,7 @@ x <= y <= z
 x = f'Hello, {name}!'
 
 # 1-36 based number
-#x = 36::h87zw29::i32
+#x = 36`h87zw29`i32
 
 # unpacking
 () = Object.(a, b, c)

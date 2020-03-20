@@ -2,17 +2,17 @@
 # It contains all standard macro definitions.
 
 macro do-while-statement (
-    block:     Syntax.Block,
-    condition: Syntax.Infix
+    scope:     Scope,
+    condition: Infix
 )
-    syntax = $('do', block, ('while' | 'until'), condition)
+    syntax = $('do', scope, ('while' | 'until'), condition)
     
     if syntax[2] == 'while'
         condition = {{ not $condition }}
     
     return {{
         while true {
-            $block
+            $scope
             if $condition {
                 break
             }
@@ -21,71 +21,75 @@ macro do-while-statement (
 
 
 macro until-statement (
-    block:     Syntax.Block,
-    condition: Syntax.Infix
+    scope:     Scope,
+    condition: Infix
 )
-    syntax = $('until', condition, block)
+    syntax = $('until', condition, scope)
     
     return {{
         while not $condition {
-            $block
+            $scope
         }
     }}
 
 
 macro for-in-statement (
-    item:     Syntax.Atom,
-    iterable: Syntax.Infix,
-    block:    Syntax.Block
+    item:     Atom,
+    iterable: Infix,
+    scope:    Scope
 )
-    syntax = $('for', item, 'in', iterable, block)
+    syntax = $('for', item, 'in', iterable, scope)
     
     return {{ }}
 
 
 macro for-index-statement (
-    init:      Syntax.Any,
-    condition: Syntax.Infix,
-    step:      Syntax.Infix,
-    block:     Syntax.Block
+    init:      Any,
+    condition: Infix,
+    step:      Infix,
+    scope:     Scope
 )
-    syntax = $('for', init, ',', condition, ',', step, block)
+    syntax = $('for', init, ',', condition, ',', step, scope)
     
     return {{
         $init
         while $condition {
-            $block
+            $scope
             $step
         }
     }}
 
 
 macro unless-statement (
-    condition: Syntax.Infix,
-    block:     Syntax.Block
+    condition:  Infix,
+    then-scope: Scope,
+    else-scope: Scope
 )
-    syntax = $('unless', condition, block, ['else', block])
+    syntax = $('unless', condition, then-scope, ['else', else-scope])
     
     return {{
         if not $condition {
-            $block
+            $scope
+        }
+        else {
+            $else-scope
         }
     }}
 
 
 macro raise-statement (
-    type-name: Syntax.TypeName,
-    args-lst:  Syntax.InfixList
+    type-name: TypeName,
+    args-lst:  Infix
 )
-    syntax = $('raise', type-name, ['(', [args-lst], ')'])
+    syntax = $('raise', type-name, ['(', [arg, [{',', arg}]], ')'])
     
     return {{ }}
 
 
 macro match-expression (
-    target:  Syntax.Any,
-    pattern: Syntax.Infix,
-    value:   Syntax.Any
+    target:  Any,
+    pattern: Infix,
+    value:   Any
 )
     syntax = $(
         target, 'match', {pattern, ':', value}
@@ -95,18 +99,18 @@ macro match-expression (
 
 
 macro object-initializer-expression (
-    type-name:    Syntax.TypeName,
-    args:         Syntax.Infix,
-    initializers: Syntax.Infix,
+    type-name:   TypeName,
+    arg:         Infix,
+    initializer: Infix,
 )
     syntax = $(
         'new',
         (
-            ('(', args, [{',', args}], [','], ')')
+            ('(', arg, [{',', arg}], [','], ')')
           | (
                 type-name,
-                ['(', [args, [{',', args}], [',']], ')'],
-                ['{', [initializers, [{',', initializers}], [',']], '}']
+                ['(', [arg, [{',', arg}], [',']], ')'],
+                ['{', [initializer, [{',', initializer}], [',']], '}']
             )
         )
     )
@@ -115,17 +119,17 @@ macro object-initializer-expression (
 
 
 macro list-init-expression (
-    items: Syntax.Infix
+    item: Infix
 )
-    syntax = $('[', [items, [{',', items}], [',']], ']')
+    syntax = $('[', [item, [{',', item}], [',']], ']')
 
     return {{ }}
 
 
 
 macro map-init-expression (
-    key:   Syntax.Infix,
-    value: Syntax.Infix,
+    key:   Infix,
+    value: Infix,
 )
     syntax = $(
         '{',
@@ -141,7 +145,7 @@ macro map-init-expression (
 
 
 macro set-init-expression (
-    value: Syntax.Infix,
+    value: Infix,
 )
     syntax = $(
         '{',
@@ -164,33 +168,32 @@ macro set-init-expression (
 #     uniq-name++
 #====================
 macro times-statement (
-    counter-end:  Syntax.Infix,
-    block:        Syntax.Block,
-    counter-name: Syntax.Name
+    counter-end:  Infix,
+    scope:        Scope,
+    counter-name: Name
 )
-    syntax = $(counter-end, 'times', block)
+    syntax = $(counter-end, 'times', scope)
     
-    # counter-name = new Syntax.Name()
+    # counter-name = new Name()
     
     return {{
         $counter-name = 0
         while $counter-name < $counter-end {
-            $block
+            $scope
             $counter-name++
         }
     }}
 
 
 macro with-statement (
-    expr: Syntax.Binary
-        | Syntax.VarDefinition,
-    value: Syntax.Name,
-    init:  Syntax.Expression,
-    block: Syntax.Block
+    expr:  Any,
+    value: Name,
+    init:  Expression,
+    scope: Scope
 )
-    syntax = $('with', expr, block)
+    syntax = $('with', expr, scope)
 
-    if value is Syntax.Name
+    if value is Name
         name = value
     else # l = r
         init = value
@@ -199,7 +202,7 @@ macro with-statement (
     return {{
         $init
         try {
-            $block
+            $scope
         }
         finally {
             $name.destroy()

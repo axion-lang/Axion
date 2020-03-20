@@ -5,21 +5,21 @@ using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
     ///     <c>
-    ///         variable_definition_expr:
-    ///             ['let'] simple_name_list
+    ///         variable-definition-expr:
+    ///             ['let'] simple-multiple-name
     ///             [':' type]
-    ///             ['=' expr_list];
+    ///             ['=' multiple-expr];
     ///     </c>
     /// </summary>
-    public class VarDef : NameDef, IStatementExpr {
+    public class VarDef : NameDef {
         public bool IsImmutable { get; }
 
         public VarDef(
-            Expr     parent    = null,
-            NameExpr name      = null,
-            TypeName type      = null,
-            Expr     value     = null,
-            bool     immutable = false
+            Expr?     parent    = null,
+            NameExpr? name      = null,
+            TypeName? type      = null,
+            Expr?     value     = null,
+            bool      immutable = false
         ) : base(parent, name, type, value) {
             IsImmutable = immutable;
         }

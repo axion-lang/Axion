@@ -2,8 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Axion.Core.Processing.Syntactic.Expressions;
+using Axion.Core.Processing.Traversal;
 
-namespace Axion.Core.Processing.Syntactic.Expressions {
+namespace Axion.Core.Processing.Syntactic {
+    /// <summary>
+    ///     A special implementation of List that can handle expressions.
+    ///     It can automatically bind parent of items
+    ///     to one defined on list construction,
+    ///     and provide some other useful methods.
+    /// </summary>
     public class NodeList<T> : IList<T> where T : Expr {
         public           Expr     Parent { get; }
         private readonly IList<T> items;
@@ -58,7 +66,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
 
-        internal static NodeList<T> From(Expr parent, IEnumerable<T> collection) {
+        internal static NodeList<T> From(Expr parent, IEnumerable<T>? collection) {
             if (collection == null) {
                 return new NodeList<T>(parent);
             }
@@ -106,6 +114,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return items.Contains(item);
         }
 
+        public void Clear() {
+            items.Clear();
+        }
+
         public IEnumerator<T> GetEnumerator() {
             return items.GetEnumerator();
         }
@@ -122,11 +134,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         [Obsolete]
         void ICollection<T>.Add(T item) {
             Add(item);
-        }
-
-        [Obsolete]
-        void ICollection<T>.Clear() {
-            throw new NotSupportedException();
         }
 
         [Obsolete]

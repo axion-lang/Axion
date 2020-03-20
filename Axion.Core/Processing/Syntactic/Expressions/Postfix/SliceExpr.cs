@@ -1,10 +1,10 @@
 using Axion.Core.Processing.CodeGen;
 
-namespace Axion.Core.Processing.Syntactic.Expressions {
+namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
-    ///         slice_expr:
-    ///             [preglobal_expr] ':' [preglobal_expr] [':' [preglobal_expr]];
+    ///         slice-expr:
+    ///             [infix-expr] ':' [infix-expr] [':' [infix-expr]];
     ///     </c>
     /// </summary>
     public class SliceExpr : Expr {
@@ -30,11 +30,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public SliceExpr(
-            Expr parent = null,
-            Expr from   = null,
-            Expr to     = null,
-            Expr step   = null
-        ) : base(parent) {
+            Expr? parent = null,
+            Expr? from   = null,
+            Expr? to     = null,
+            Expr? step   = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(from, to, step)
+        ) {
             From = from;
             To   = to;
             Step = step;

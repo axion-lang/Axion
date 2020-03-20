@@ -1,4 +1,5 @@
 using System;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
 
@@ -28,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
                 return true;
             }
 
-            parent.Ast.MacroExpectationType = type;
+            parent.Ast.MacroExpectType = type;
             if (typeof(TypeName).IsAssignableFrom(type)) {
                 e = new TypeName(parent).ParseTypeName();
             }
@@ -36,7 +37,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
                 e = AnyExpr.Parse(parent);
             }
 
-            parent.Ast.MacroExpectationType = null;
+            parent.Ast.MacroExpectType = null;
             if (type.IsInstanceOfType(e)) {
                 parent.Ast.MacroApplicationParts.Peek().Expressions.Add(e);
                 return true;

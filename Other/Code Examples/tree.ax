@@ -62,16 +62,16 @@ while levelWidth < h
 Console.ForegroundColor = ConsoleColor.DarkYellow;
 
 # Stem below the tree
-stemWidth: int = h / 3
-if stemWidth % 2 == 0
-    stemWidth++
+stem-width: int = h / 3
+if stem-width % 2 == 0
+    stem-width++
 
-stemHeight: int = 1 + h / 8
-stemSpaces: int = levelWidth - stemWidth / 2
+stem-height: int = 1 + h / 8
+stem-spaces: int = levelWidth - stem-width / 2
 
 l = 0
-while l < stemHeight
-    Console.Write("".PadRight(x + stemSpaces, ` `))
-    Console.Write("".PadRight(stemWidth, `|`))
+while l < stem-height
+    Console.Write("".PadRight(x + stem-spaces, ` `))
+    Console.Write("".PadRight(stem-width, `|`))
     Console.WriteLine()
     l++

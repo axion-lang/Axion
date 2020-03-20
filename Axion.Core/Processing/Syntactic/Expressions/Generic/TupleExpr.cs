@@ -5,16 +5,16 @@ using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions {
+namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
     /// <summary>
     ///     <c>
-    ///         tuple_expr:
-    ///             tuple_paren_expr | (expr_list [',']);
-    ///         tuple_paren_expr:
-    ///             '(' expr_list [','] ')';
+    ///         tuple-expr:
+    ///             tuple-paren-expr | (multiple-expr [',']);
+    ///         tuple-paren-expr:
+    ///             '(' multiple-expr [','] ')';
     ///     </c>
     /// </summary>
-    public class TupleExpr : Expr {
+    public class TupleExpr<T> : Multiple<T> where T : Expr {
         private NodeList<Expr> expressions;
 
         public NodeList<Expr> Expressions {
@@ -31,8 +31,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         );
 
         internal TupleExpr(
-            Expr              parent      = null,
-            IEnumerable<Expr> expressions = null
+            Expr               parent,
+            IEnumerable<Expr>? expressions = null
         ) : base(parent) {
             Expressions = NodeList<Expr>.From(this, expressions);
             if (Expressions.Count > 0) {
@@ -43,7 +43,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
 
-        public TupleExpr ParseEmpty() {
+        public TupleExpr<T> ParseEmpty() {
             Stream.Eat(OpenParenthesis);
             Stream.Eat(CloseParenthesis);
             return this;

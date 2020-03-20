@@ -19,10 +19,11 @@ namespace Axion.Core.Processing.Lexical {
         private          Location      startLoc;
 
         // Variables for indentation analysis
-        private         char             indentChar = '\0';
-        private         int              indentSize;
-        private         int              lastIndentLen;
-        private         int              indentLevel;
+        private char indentChar = '\0';
+        private int  indentSize;
+        private int  lastIndentLen;
+        private int  indentLevel;
+
         public readonly Stack<Token>     MismatchingPairs   = new Stack<Token>();
         public readonly Stack<TokenType> ProcessTerminators = new Stack<TokenType>();
 
@@ -53,10 +54,6 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private T BindSpan<T>(T token) where T : Token {
-            if (token == null) {
-                return null;
-            }
-
             token.MarkStart(startLoc);
             token.MarkEnd(stream.Location);
             return token;
@@ -82,7 +79,7 @@ namespace Axion.Core.Processing.Lexical {
                 return ReadWhite();
             }
 
-            if (stream.PeekIs(IdStart)) {
+            if (stream.Peek().IsIdStart()) {
                 return ReadId();
             }
 
@@ -145,7 +142,7 @@ namespace Axion.Core.Processing.Lexical {
              || ln.StartsWith(OneLineCommentMark)
              || MismatchingPairs.Count > 0
              || src.TokenStream.Tokens[^2] is OperatorToken op && op.Side == InputSide.Both
-             || NotIndentRegex.IsMatch(ln)) {
+             || NonIndentRegex.IsMatch(ln)) {
                 src.TokenStream.Tokens[^1].EndingWhite += value;
                 return null;
             }
@@ -213,9 +210,9 @@ namespace Axion.Core.Processing.Lexical {
         private Token ReadId() {
             do {
                 AddNext();
-            } while (stream.PeekIs(IdPart)
-                  && (!stream.PeekIs(IdNotEnd)
-                   || IdAfterNotEnd.Contains(stream.Peek(2)[1])));
+            } while (stream.Peek().IsIdPart()
+                  && (!stream.Peek().IsIdNonEnd()
+                   || stream.Peek(2)[1].IsIdAfterNonEnd()));
 
             if (stream.PeekIs(StringQuotes)) {
                 return ReadString();
@@ -235,7 +232,6 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             type = Identifier;
-            value.Replace("-", "_");
             content.Replace("-", "_");
 
             return NewTokenFromContext();
@@ -369,29 +365,30 @@ namespace Axion.Core.Processing.Lexical {
                 // if string has prefixes, then
                 // ReadString was called from ReadId,
                 // and content == string prefixes.
-                prefixes = content.ToString().ToLower();
-                value.Clear();
+                prefixes = content.ToString();
+                value.Clear().Append(prefixes);
                 content.Clear();
                 for (var i = 0; i < prefixes.Length; i++) {
-                    char p  = prefixes[i];
-                    var  ps = p.ToString();
-                    if (!StringPrefixes.Contains(p)) {
-                        Token token = BindSpan(
-                            new Token(
-                                src, Invalid, ps, ps,
-                                "", stream.Location.Add(0, i)
-                            )
-                        );
-                        LangException.Report(
-                            BlameType.InvalidStringPrefix,
-                            token
-                        );
+                    char p = prefixes[i];
+                    if (StringPrefixes.Contains(char.ToLower(p))) {
+                        continue;
                     }
+                    var ps = p.ToString();
+                    Token token = BindSpan(
+                        new Token(
+                            src, Invalid, ps, ps,
+                            "", stream.Location.Add(0, i)
+                        )
+                    );
+                    LangException.Report(
+                        BlameType.InvalidStringPrefix,
+                        token
+                    );
                 }
             }
 
             AddChar(false, StringQuotes);
-            var    quote        = value[0].ToString();
+            var    quote        = value[^1].ToString();
             string closingQuote = quote;
             if (AddNext(false, quote.Multiply(2))) {
                 quote = quote.Multiply(3);
@@ -463,7 +460,7 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private StringInterpolation ReadStringInterpolation() {
-            var        interpolation = new StringInterpolation(stream);
+            var        interpolation = new StringInterpolation(src);
             SourceUnit iSrc          = interpolation.Source;
             var        lexer         = new Lexer(interpolation.Source);
 

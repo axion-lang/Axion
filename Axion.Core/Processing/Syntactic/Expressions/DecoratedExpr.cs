@@ -2,11 +2,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
-    public class DecoratedExpr : Expr, IDecoratedExpr {
+    public class DecorableExpr : Expr, IDecorableExpr {
         private NodeList<Expr> decorators;
 
         public NodeList<Expr> Decorators {
@@ -21,16 +22,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref target, value);
         }
 
-        internal DecoratedExpr(
-            Expr              parent     = null,
-            IEnumerable<Expr> decorators = null,
-            Expr              target     = null
-        ) : base(parent) {
+        internal DecorableExpr(
+            Expr?              parent     = null,
+            IEnumerable<Expr>? decorators = null,
+            Expr?              target     = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(target)
+        ) {
             Decorators = NodeList<Expr>.From(this, decorators);
             Target     = target;
         }
 
-        public DecoratedExpr Parse() {
+        public DecorableExpr Parse() {
             SetSpan(
                 () => {
                     Stream.Eat(At);
@@ -42,7 +46,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                         Stream.Eat(CloseBracket);
                     }
                     else {
-                        Decorators.Add(InfixExpr.Parse(this));
+                        Decorators.Add(PrefixExpr.Parse(this));
                     }
 
                     Target = AnyExpr.Parse(this);

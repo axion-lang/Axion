@@ -8,22 +8,31 @@ using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
+using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
 using Axion.Core.Processing.Syntactic.Expressions.Postfix;
+using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.Traversal {
     public class NoTraversePathAttribute : Attribute { }
 
     public static class Traversing {
-        public static void Traverse(Expr node) {
-            Action<ITreePath> walker = Walker;
-            if (!node.Path.Traversed) {
-                walker(node.Path);
+        /// <summary>
+        ///     Applies (if possible) traversing/reducing function
+        ///     to each child node of specified root expression.
+        /// </summary>
+        public static void Traverse(Expr root) {
+            // TODO: fix reducing of macros
+            if (root is MacroApplicationExpr) {
+                return;
+            }
+            if (!root.Path.Traversed) {
+                Walker(root.Path);
             }
 
-            node = node.Path.Node;
-            PropertyInfo[] exprProps = node.GetType().GetProperties();
+            root = root.Path.Node;
+            PropertyInfo[] exprProps = root.GetType().GetProperties();
             IEnumerable<PropertyInfo> childProps = exprProps.Where(
                 p => typeof(Expr).IsAssignableFrom(p.PropertyType)
                   && !Attribute.IsDefined(p, typeof(NoTraversePathAttribute), false)
@@ -36,7 +45,7 @@ namespace Axion.Core.Processing.Traversal {
                   && typeof(Span).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0])
             );
             foreach (PropertyInfo prop in childProps) {
-                object obj = prop.GetValue(node);
+                object obj = prop.GetValue(root);
                 if (obj == null) {
                     continue;
                 }
@@ -61,6 +70,11 @@ namespace Axion.Core.Processing.Traversal {
             }
         }
 
+        /// <summary>
+        ///     Default traversing/reducing function for Axion source code.
+        ///     Simplifies some specific syntax to generic representation.
+        ///     (e.g. resolves pipelines, unwraps class data-members, no-break loop, etc.)
+        /// </summary>
         public static void Walker(ITreePath path) {
             switch (path.Node) {
             case TupleTypeName t when t.Types.Count == 0: {
@@ -70,7 +84,7 @@ namespace Axion.Core.Processing.Traversal {
             }
 
             case UnionTypeName unionTypeName: {
-                // LeftType | RightType -> Union[LeftType, RightType]
+                // `LeftType | RightType` -> `Union[LeftType, RightType]`
                 path.Node = new GenericTypeName(
                     path.Node.Parent,
                     new SimpleTypeName("Union"),
@@ -83,7 +97,7 @@ namespace Axion.Core.Processing.Traversal {
             case BinaryExpr bin when bin.Operator.Is(TokenType.OpIs)
                                   && bin.Right is UnaryExpr un
                                   && un.Operator.Is(TokenType.OpNot): {
-                // x is (not (y)) -> not (x is y)
+                // `x is (not (y))` -> `not (x is y)`
                 path.Node = new UnaryExpr(
                     path.Node.Parent,
                     TokenType.OpNot,
@@ -99,43 +113,43 @@ namespace Axion.Core.Processing.Traversal {
             }
 
             case BinaryExpr bin when bin.Operator.Is(TokenType.RightPipeline): {
-                // arg |> func -> func(arg)
+                // `arg |> func` -> `func(arg)`
                 path.Node = new FuncCallExpr(
                     path.Node.Parent,
                     bin.Right,
-                    new FuncCallArg(path.Node.Parent, bin.Left)
+                    new FuncCallArg(path.Node.Parent, value: bin.Left)
                 );
                 path.Traversed = true;
                 break;
             }
 
             case BinaryExpr bin when bin.Operator.Is(TokenType.OpAssign)
-                                  && bin.Left is TupleExpr tpl: {
+                                  && bin.Left.GetType().IsGenericType
+                                  && bin.Left.GetType().GetGenericTypeDefinition() == typeof(TupleExpr<>): {
                 // (x, y) = GetCoordinates()
                 // <=======================>
                 // unwrappedX = GetCoordinates()
                 // x = unwrappedX.x
                 // y = unwrappedX.y
-                var block = bin.GetParentOfType<BlockExpr>();
-                (_, int deconstructionIdx) = block.IndexOf(bin);
+                var scope = bin.GetParentOfType<ScopeExpr>();
+                (_, int deconstructionIdx) = scope.IndexOf(bin);
                 var deconstructionVar = new VarDef(
-                    block,
-                    new NameExpr(block.CreateUniqueId("unwrapped{0}")),
+                    scope,
+                    new NameExpr(scope.CreateUniqueId("unwrapped{0}")),
                     value: bin.Right,
                     immutable: true
                 );
-                block.Items[deconstructionIdx] = deconstructionVar;
+                scope.Items[deconstructionIdx] = deconstructionVar;
+                var tpl = (TupleExpr<Expr>) bin.Left;
                 for (var i = 0; i < tpl.Expressions.Count; i++) {
-                    block.Items.Insert(
+                    scope.Items.Insert(
                         deconstructionIdx + i + 1,
-                        new BinaryExpr(
-                            block,
-                            tpl.Expressions[i],
-                            new OperatorToken(
-                                path.Node.Source,
-                                tokenType: TokenType.OpAssign
-                            ),
-                            new MemberAccessExpr(block, deconstructionVar.Name) { Member = tpl.Expressions[i] }
+                        new VarDef(
+                            scope,
+                            (NameExpr) tpl.Expressions[i],
+                            value: new MemberAccessExpr(scope, deconstructionVar.Name) {
+                                Member = tpl.Expressions[i]
+                            }
                         )
                     );
                 }
@@ -144,9 +158,9 @@ namespace Axion.Core.Processing.Traversal {
                 break;
             }
 
-            case WhileExpr whileExpr when whileExpr.NoBreakBlock != null: {
+            case WhileExpr whileExpr when whileExpr.NoBreakScope != null: {
                 // Add bool before loop, that indicates, was break reached or not.
-                // Find all 'break'-s in child blocks and set this
+                // Find all 'break'-s in child scopes and set this
                 // bool to 'true' before exiting the loop.
                 // Example:
                 // while x
@@ -157,19 +171,19 @@ namespace Axion.Core.Processing.Traversal {
                 // nobreak
                 //     do3()
                 // <============================>
-                // loop_X_nobreak = true
+                // loop-X-nobreak = true
                 // while x
                 //     do()
                 //     if a
                 //         do2()
-                //         loop_X_nobreak = false
+                //         loop-X-nobreak = false
                 //         break
-                // if loop_X_nobreak
+                // if loop-X-nobreak
                 //     do3()
-                var block = path.Node.GetParentOfType<BlockExpr>();
-                (_, int whileIndex) = block.IndexOf(whileExpr);
-                var flagName = new NameExpr(block.CreateUniqueId("loop_{0}_nobreak"));
-                block.Items.Insert(
+                var scope = path.Node.GetParentOfType<ScopeExpr>();
+                (_, int whileIndex) = scope.IndexOf(whileExpr);
+                var flagName = new NameExpr(scope.CreateUniqueId("loop_{0}_nobreak"));
+                scope.Items.Insert(
                     whileIndex,
                     new VarDef(
                         path.Node,
@@ -178,24 +192,42 @@ namespace Axion.Core.Processing.Traversal {
                     )
                 );
                 // index of while == whileIdx + 1
-                List<(BreakExpr item, BlockExpr itemParentBlock, int itemIndex)> breaks =
-                    whileExpr.Block.FindItemsOfType<BreakExpr>();
+                List<(BreakExpr item, ScopeExpr itemParentScope, int itemIndex)> breaks =
+                    whileExpr.Scope.FindItemsOfType<BreakExpr>();
                 var boolSetter = new BinaryExpr(
                     path.Node,
                     flagName,
                     new OperatorToken(path.Node.Source, tokenType: TokenType.OpAssign),
                     new ConstantExpr(path.Node, "false")
                 );
-                foreach ((_, BlockExpr itemParentBlock, int itemIndex) in breaks) {
-                    itemParentBlock.Items.Insert(itemIndex, boolSetter);
+                foreach ((_, ScopeExpr itemParentScope, int itemIndex) in breaks) {
+                    itemParentScope.Items.Insert(itemIndex, boolSetter);
                 }
 
-                block.Items.Insert(
+                scope.Items.Insert(
                     whileIndex + 2,
-                    new ConditionalExpr(path.Node, flagName, whileExpr.NoBreakBlock)
+                    new IfExpr(path.Node, flagName, whileExpr.NoBreakScope)
                 );
-                whileExpr.NoBreakBlock = null;
+                whileExpr.NoBreakScope = null;
                 path.Traversed         = true;
+                break;
+            }
+
+            case ClassDef cls when cls.DataMembers.Count > 0: {
+                // class Point (x: int, y: int)
+                //     fn print
+                //         print(x, y)
+                // <============================>
+                // class Point
+                //     x: int
+                //     y: int
+                //     fn print
+                //         print(x, y)
+                foreach (Expr dataMember in cls.DataMembers) {
+                    cls.Scope.Items.Insert(0, dataMember);
+                }
+                cls.DataMembers.Clear();
+                path.Traversed = true;
                 break;
             }
             }

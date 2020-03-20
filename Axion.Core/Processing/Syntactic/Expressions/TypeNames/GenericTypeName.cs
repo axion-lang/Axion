@@ -5,9 +5,9 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
-    ///         generic_type:
-    ///             type type_args;
-    ///         type_args:
+    ///         generic-type:
+    ///             type type-args;
+    ///         type-args:
     ///             '[' type {',' type} ']';
     ///     </c>
     /// </summary>
@@ -27,10 +27,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         public GenericTypeName(
-            Expr                  parent,
-            TypeName              target   = null,
-            IEnumerable<TypeName> typeArgs = null
-        ) : base(parent) {
+            Expr?                  parent   = null,
+            TypeName?              target   = null,
+            IEnumerable<TypeName>? typeArgs = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(target)
+        ) {
             Target        = target;
             TypeArguments = NodeList<TypeName>.From(this, typeArgs);
         }

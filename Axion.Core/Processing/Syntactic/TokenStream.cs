@@ -6,6 +6,7 @@ using Axion.Core.Processing.Lexical.Tokens;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic {
+    [DebuggerDisplay("{TokenIdx}: '{Token.Value}', then '{Peek.Value}'.")]
     public class TokenStream {
         public readonly List<Token> Tokens = new List<Token>();
         public          int         TokenIdx { get; private set; } = -1;
@@ -55,11 +56,11 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         /// <summary>
-        ///     Skips new line token, failing,
+        ///     Skips next token, failing,
         ///     if the next token type is not
         ///     the same as passed in parameter.
         /// </summary>
-        public Token Eat(params TokenType[] types) {
+        public Token? Eat(params TokenType[] types) {
             SkipTrivial(types);
             EatAny();
             if (Token.Is(types)) {
@@ -86,25 +87,26 @@ namespace Axion.Core.Processing.Syntactic {
             return false;
         }
 
+        public bool MaybeEat(string value) {
+            SkipTrivial();
+            if (ExactPeek.Value == value) {
+                EatAny();
+                return true;
+            }
+
+            return false;
+        }
+
         public void MoveAbsolute(int tokenIndex) {
             Debug.Assert(tokenIndex >= -1 && tokenIndex < Tokens.Count);
             TokenIdx = tokenIndex;
         }
 
         private void SkipTrivial(params TokenType[] wantedTypes) {
-            while (true) {
-                if (ExactPeek.Is(Comment)) {
-                    EatAny();
-                }
-                // if we got newline before wanted type, just skip it
-                // (except we WANT to get newline)
-                else if (ExactPeek.Is(Newline)
-                      && !wantedTypes.Contains(Newline)) {
-                    EatAny();
-                }
-                else {
-                    break;
-                }
+            bool skipNewlines = !wantedTypes.Contains(Newline);
+            while (ExactPeek.Type == Comment
+                || ExactPeek.Type == Newline && skipNewlines) {
+                EatAny();
             }
         }
     }

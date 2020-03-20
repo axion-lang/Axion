@@ -1,30 +1,32 @@
 using System;
 using System.Runtime.CompilerServices;
+using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
+using Axion.Core.Source;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///         expr_list:
+    ///         multiple-expr:
     ///             expr {',' expr};
-    ///         infix_list:
-    ///             infix_expr {',' infix_expr};
-    ///         simple_name_list:
-    ///             simple_name_expr {',' simple_name_expr};
-    ///         single_expr:
-    ///             conditional_expr | while_expr | for_expr    |
-    ///             try_expr         | with_expr  | import_expr |
+    ///         multiple-infix:
+    ///             infix-expr {',' infix-expr};
+    ///         simple-multiple-name:
+    ///             simple-name-expr {',' simple-name-expr};
+    ///         single-expr:
+    ///             conditional-expr | while-expr | for-expr    |
+    ///             try-expr         | with-expr  | import-expr |
     ///             decorated;
     ///         decorated:
-    ///             module_def | class_def  | enum_def |
-    ///             func_def   | small_expr;
-    ///         small_expr:
-    ///             pass_expr | expr_expr | flow_expr;
-    ///         flow_expr:
-    ///             break_expr | continue_expr | return_expr |
-    ///             raise_expr | yield_expr;
+    ///             module-def | class-def  | enum-def |
+    ///             func-def   | small-expr;
+    ///         small-expr:
+    ///             pass-expr | expr-expr | flow-expr;
+    ///         flow-expr:
+    ///             break-expr | continue-expr | return-expr |
+    ///             raise-expr | yield-expr;
     ///     </c>
     /// </summary>
     public class Expr : Span {
@@ -49,7 +51,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         internal T? GetParentOfType<T>() where T : Expr {
             Expr p = this;
             if (p is Ast) {
-                if (typeof(T).IsSubclassOf(typeof(BlockExpr))) {
+                if (typeof(T).IsSubclassOf(typeof(ScopeExpr))) {
                     return (T) p;
                 }
 
@@ -79,10 +81,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         [NoTraversePath]
         public virtual TypeName ValueType {
             get => valueType;
-            set => SetNode(ref valueType, value);
+            protected set => SetNode(ref valueType, value);
         }
 
-        internal Type        MacroExpectationType;
+        internal Type        MacroExpectType;
         internal TokenStream Stream => Source.TokenStream;
         protected Expr() : base(null) { }
 
@@ -90,9 +92,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Parent = parent;
         }
 
+        protected static Expr GetParentFromChildren(params Expr?[] initExpressions) {
+            foreach (Expr? expr in initExpressions) {
+                if (expr?.Parent != null) {
+                    return expr.Parent;
+                }
+            }
+            throw new ArgumentNullException(
+                nameof(initExpressions),
+                "Cannot create instance of expression: unable to get it's parent neither from argument, nor from child expressions."
+            );
+        }
+
         protected void SetNode<T>(
-            ref T                     field,
-            T                         value,
+            ref T?                    field,
+            T?                        value,
             [CallerMemberName] string callerName = ""
         ) where T : Expr {
             if (field == value) {
@@ -132,6 +146,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkStart(Stream.Peek);
             constructor();
             MarkEnd(Stream.Token);
+        }
+
+        public override string ToString() {
+            var cw = new CodeWriter(ProcessingOptions.ToAxion);
+            ToAxion(cw);
+            return cw.ToString();
         }
     }
 }

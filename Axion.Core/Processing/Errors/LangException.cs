@@ -102,17 +102,25 @@ namespace Axion.Core.Processing.Errors {
             );
             Console.WriteLine();
             // line with error
-            ScriptBench.DrawLineNumber(errorSpan.Start.Line + 1);
+            DrawLineNumber(errorSpan.Start.Line + 1);
             ConsoleUtils.WriteLine(lines[0]);
             // error pointer
             ConsoleUtils.WriteLine((pointer, color));
             // next lines
             for (int i = errorSpan.Start.Line + 1; i < lines.Count; i++) {
-                ScriptBench.DrawLineNumber(i + 1);
+                DrawLineNumber(i + 1);
                 ConsoleUtils.WriteLine(lines[i]);
             }
+        }
 
-            Console.WriteLine();
+        private static void DrawLineNumber(int lineNumber) {
+            var strNum = lineNumber.ToString();
+            int width  = Math.Max(strNum.Length, 4);
+            string view =
+                strNum.PadLeft(width  + 1)
+                      .PadRight(width + 2)
+              + "│ ";
+            ConsoleUtils.Write((view, ScriptBenchSettings.DefaultFramesColor));
         }
 
         public override string ToString() {

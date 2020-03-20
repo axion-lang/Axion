@@ -2,15 +2,19 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
 using Axion.Core.Specification;
 
-namespace Axion.Core.Processing.Syntactic.Expressions {
+namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// <summary>
     ///     <c>
-    ///         prefix_expr:
-    ///             (PREFIX_OPERATOR prefix_expr) | suffix_expr;
+    ///         prefix-expr:
+    ///             (PREFIX-OPERATOR prefix-expr) | suffix-expr;
     ///     </c>
     /// </summary>
-    public static class PrefixExpr {
-        internal static Expr Parse(Expr parent) {
+    public class PrefixExpr : InfixExpr {
+        protected PrefixExpr() { }
+
+        protected PrefixExpr(Expr parent) : base(parent) { }
+
+        internal new static PrefixExpr Parse(Expr parent) {
             TokenStream s = parent.Source.TokenStream;
 
             if (s.MaybeEat(Spec.PrefixOperators)) {

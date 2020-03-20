@@ -2,19 +2,19 @@ using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
+namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     /// <summary>
     ///     <c>
-    ///         empty_expr:
+    ///         empty-expr:
     ///             ';' | 'pass';
     ///     </c>
     /// </summary>
-    public class EmptyExpr : Expr, IAtomExpr, IStatementExpr {
+    public class EmptyExpr : Expr {
         public Token Mark { get; set; }
 
         public EmptyExpr(
-            Expr  parent = null,
-            Token mark   = null
+            Expr   parent,
+            Token? mark = null
         ) : base(parent) {
             Mark = mark;
         }

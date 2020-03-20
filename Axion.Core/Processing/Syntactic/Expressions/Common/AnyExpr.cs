@@ -1,82 +1,63 @@
+using System;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
+using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
+using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions {
+namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// <summary>
     ///     <c>
-    ///         var_expr
-    ///             : infix_list
+    ///         var-expr
+    ///             : multiple-infix
     ///             | (['let'] assignable
     ///                [':' type]
-    ///                ['=' infix_list]);
+    ///                ['=' multiple-infix]);
     ///     </c>
     /// </summary>
     public static class AnyExpr {
         internal static Expr Parse(Expr parent) {
             TokenStream s = parent.Source.TokenStream;
 
-            switch (s.Peek.Type) {
-            case KeywordModule: {
-                return new ModuleDef(parent).Parse();
-            }
-
-            case KeywordClass: {
+            if (s.PeekIs(KeywordClass)) {
                 return new ClassDef(parent).Parse();
             }
-
-            case KeywordFn: {
+            if (s.PeekIs(KeywordFn)) {
                 return new FunctionDef(parent).Parse();
             }
-
-            case KeywordMacro: {
+            if (s.PeekIs(KeywordMacro)) {
                 return new MacroDef(parent).Parse();
             }
-
-            case KeywordIf: {
-                return new ConditionalExpr(parent).Parse();
+            if (s.PeekIs(KeywordModule)) {
+                return new ModuleDef(parent).Parse();
             }
-
-            case KeywordWhile: {
+            if (s.PeekIs(KeywordIf)) {
+                return new IfExpr(parent).Parse();
+            }
+            if (s.PeekIs(KeywordWhile)) {
                 return new WhileExpr(parent).Parse();
             }
-
-            case At: {
-                return new DecoratedExpr(parent).Parse();
+            if (s.PeekIs(At)) {
+                return new DecorableExpr(parent).Parse();
             }
-
-            case Semicolon:
-            case KeywordPass: {
-                return new EmptyExpr(parent).Parse();
-            }
-
-            case Indent:
-            case OpenBrace:
-            case Colon
-                when parent.Ast.MacroExpectationType == typeof(BlockExpr): {
-                return new BlockExpr(parent).Parse();
-            }
-
-            case KeywordBreak: {
+            if (s.PeekIs(KeywordBreak)) {
                 return new BreakExpr(parent).Parse();
             }
-
-            case KeywordContinue: {
+            if (s.PeekIs(KeywordContinue)) {
                 return new ContinueExpr(parent).Parse();
             }
-
-            case KeywordReturn: {
+            if (s.PeekIs(KeywordReturn)) {
                 return new ReturnExpr(parent).Parse();
             }
-
-            case KeywordYield: {
-                return new YieldExpr(parent).Parse();
+            if (s.PeekIs(Semicolon, KeywordPass)) {
+                return new EmptyExpr(parent).Parse();
             }
+            if (s.PeekIs(Indent, OpenBrace, Colon)) {
+                return new ScopeExpr(parent).Parse();
             }
-
             bool isImmutable = s.MaybeEat(KeywordLet);
 
             Expr expr = InfixExpr.Parse(parent);
@@ -85,7 +66,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 // ['let'] name '=' expr
                 // --------------------^
                 if (bin.Left is NameExpr name
-                 && !bin.GetParentOfType<BlockExpr>().IsDefined(name.ToString())) {
+                 && !bin.GetParentOfType<ScopeExpr>().IsDefined(name.ToString())) {
                     return new VarDef(
                         parent,
                         name,
@@ -94,19 +75,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                         isImmutable
                     );
                 }
-
-                if (bin.Left is TupleExpr) {
+                Type valueType = bin.Left.GetType();
+                if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(TupleExpr<>)) {
                     return bin;
                 }
             }
 
-            // ['let'] name [':' type_name ['=' infix_expr]]
+            // ['let'] name [':' type-name ['=' infix-expr]]
             // -----------^
             if (!isImmutable && !s.MaybeEat(Colon)) {
                 return expr;
             }
 
-            // ['let'] name ':' type_name ['=' infix_expr]
+            // ['let'] name ':' type-name ['=' infix-expr]
             // -----------------^
             if (!(expr is NameExpr varName)) {
                 LangException.Report(BlameType.ExpectedVarName, expr);
@@ -116,7 +97,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             TypeName type  = new TypeName(parent).ParseTypeName();
             Expr     value = null;
             if (s.MaybeEat(OpAssign)) {
-                // ['let'] name ':' type_name '=' infix_expr
+                // ['let'] name ':' type-name '=' infix-expr
                 // -------------------------------^
                 value = InfixExpr.Parse(parent);
             }

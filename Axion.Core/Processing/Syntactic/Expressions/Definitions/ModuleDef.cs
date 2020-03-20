@@ -5,11 +5,11 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
     ///     <c>
-    ///         module_def:
-    ///             'module' name block;
+    ///         module-def:
+    ///             'module' name scope;
     ///     </c>
     /// </summary>
-    public class ModuleDef : Expr, IDefinitionExpr, IDecoratedExpr {
+    public class ModuleDef : Expr, IDefinitionExpr, IDecorableExpr {
         private NameExpr name;
 
         public NameExpr Name {
@@ -17,20 +17,28 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => SetNode(ref name, value);
         }
 
-        private BlockExpr block;
+        private ScopeExpr scope;
 
-        public BlockExpr Block {
-            get => block;
-            set => SetNode(ref block, value);
+        public ScopeExpr Scope {
+            get => scope;
+            set => SetNode(ref scope, value);
         }
 
         internal ModuleDef(
-            Expr      parent,
-            NameExpr  name  = null,
-            BlockExpr block = null
-        ) : base(parent) {
+            string?    name  = null,
+            ScopeExpr? scope = null
+        ) : this(null, new NameExpr(name), scope) { }
+
+        internal ModuleDef(
+            Expr?      parent = null,
+            NameExpr?  name   = null,
+            ScopeExpr? scope  = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(name, scope)
+        ) {
             Name  = name;
-            Block = block;
+            Scope = scope;
         }
 
         public ModuleDef Parse() {
@@ -38,24 +46,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 () => {
                     Stream.Eat(KeywordModule);
                     Name  = new NameExpr(this).Parse();
-                    Block = new BlockExpr(this).Parse();
+                    Scope = new ScopeExpr(this).Parse();
                 }
             );
             return this;
         }
 
         public override void ToAxion(CodeWriter c) {
-            c.Write("module ", Name, Block);
+            c.Write("module ", Name, Scope);
         }
 
         public override void ToCSharp(CodeWriter c) {
             c.Write("namespace ", Name);
             c.WriteLine();
-            c.Write(Block);
+            c.Write(Scope);
         }
 
         public override void ToPython(CodeWriter c) {
-            c.AddJoin("", Block.Items, true);
+            c.AddJoin("", Scope.Items, true);
         }
     }
 }

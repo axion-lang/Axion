@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
+using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Specification;
 using Newtonsoft.Json;
 
@@ -42,8 +45,19 @@ namespace Axion.Core.Source {
             }
         }
 
-        internal ProcessingOptions Options        = ProcessingOptions.None;
-        internal ProcessingMode    ProcessingMode = ProcessingMode.None;
+        public bool HasErrors => Blames.Any(b => b.Severity == BlameSeverity.Error);
+
+        private ProcessingOptions options = ProcessingOptions.Default;
+
+        internal ProcessingOptions Options {
+            get => options;
+            set {
+                options    = value;
+                CodeWriter = new CodeWriter(options);
+            }
+        }
+
+        internal ProcessingMode ProcessingMode = ProcessingMode.Default;
 
         public List<LangException> Blames      { get; } = new List<LangException>();
         public TextStream          TextStream  { get; private set; }
@@ -54,11 +68,12 @@ namespace Axion.Core.Source {
 
         private HashSet<string> CustomKeywords { get; } = new HashSet<string>();
 
-        public CodeWriter CodeWriter { get; set; }
+        public CodeWriter CodeWriter { get; private set; }
 
-        private Dictionary<string, SourceUnit> Dependencies { get; } = new Dictionary<string, SourceUnit>();
+        private Dictionary<string, SourceUnit> Dependencies { get; set; } = new Dictionary<string, SourceUnit>();
 
-        private Dictionary<string, IDefinitionExpr> Definitions { get; } = new Dictionary<string, IDefinitionExpr>();
+        private Dictionary<string, IDefinitionExpr> Definitions { get; set; } =
+            new Dictionary<string, IDefinitionExpr>();
 
         #region File paths
 
@@ -73,15 +88,14 @@ namespace Axion.Core.Source {
 
         /// <summary>
         ///     Path to file where generated result is located.
-        ///     When not specified in constructor,
-        ///     then file name assigned to date and time of instance creation.
         /// </summary>
-        public FileInfo? OutputFilePath {
+        public FileInfo OutputFilePath {
             get {
                 if (outputFilePath != null) {
                     return outputFilePath;
                 }
 
+                // ReSharper disable PossibleNullReferenceException
                 outputFilePath = new FileInfo(
                     Path.Combine(
                         SourceFilePath.Directory.FullName,
@@ -90,6 +104,7 @@ namespace Axion.Core.Source {
                     )
                 );
                 Utilities.ResolvePath(outputFilePath.Directory.FullName);
+                // ReSharper restore PossibleNullReferenceException
                 return outputFilePath;
             }
         }
@@ -99,31 +114,16 @@ namespace Axion.Core.Source {
         /// <summary>
         ///     Path to file where processing debug output is located.
         /// </summary>
-        public FileInfo DebugFilePath {
-            get {
-                if (debugFilePath != null) {
-                    return debugFilePath;
-                }
-
-                debugFilePath = new FileInfo(
-                    Path.Combine(
-                        SourceFilePath.Directory.FullName,
-                        "debug",
-                        Path.GetFileNameWithoutExtension(SourceFilePath.FullName) + DebugFileExt
-                    )
-                );
-                Utilities.ResolvePath(debugFilePath.Directory.FullName);
-                return debugFilePath;
-            }
-        }
+        public FileInfo DebugFilePath => debugFilePath ?? OutputFilePath;
 
         #endregion
 
         private SourceUnit(
-            string   code       = "",
-            FileInfo sourcePath = null,
-            FileInfo outputPath = null,
-            FileInfo debugPath  = null
+            string    code       = "",
+            FileInfo? sourcePath = null,
+            FileInfo? outputPath = null,
+            FileInfo? debugPath  = null,
+            bool      noStdLib   = false
         ) {
             if (sourcePath == null) {
                 sourcePath = new FileInfo(
@@ -133,16 +133,11 @@ namespace Axion.Core.Source {
                         "tmp-" + DateTime.Now.ToFileName() + SourceFileExt
                     )
                 );
-                Utilities.ResolvePath(sourcePath.Directory?.FullName);
+                // ReSharper disable once PossibleNullReferenceException
+                Utilities.ResolvePath(sourcePath.Directory.FullName);
             }
 
             SourceFilePath = sourcePath;
-            if (SourceFilePath.Extension != SourceFileExt) {
-                throw new ArgumentException(
-                    $"Source file must have {SourceFileExt} extension.",
-                    nameof(sourcePath)
-                );
-            }
 
             if (outputPath != null) {
                 outputFilePath = outputPath;
@@ -155,16 +150,22 @@ namespace Axion.Core.Source {
             TextStream  = new TextStream(code);
             TokenStream = new TokenStream();
             Ast         = new Ast(this);
+            CodeWriter  = new CodeWriter(Options);
 
-            var macrosFile = new FileInfo(
-                Path.Combine(
-                    new DirectoryInfo(Compiler.WorkDir).Parent.Parent.Parent.Parent.FullName,
-                    "Axion.Modules",
-                    "macros.ax"
-                )
-            );
-            if (SourceFilePath.FullName != macrosFile.FullName) {
-                AddDependency(FromFile(macrosFile));
+            if (!noStdLib) {
+                // ReSharper disable PossibleNullReferenceException
+                // BUG macros.ax is retrieved only from compiler sources (should be replaced with Axion stdlib location)
+                var macrosFile = new FileInfo(
+                    Path.Combine(
+                        new DirectoryInfo(Compiler.WorkDir).Parent.Parent.Parent.Parent.FullName,
+                        "Axion.Modules",
+                        "macros.ax"
+                    )
+                );
+                // ReSharper restore PossibleNullReferenceException
+                if (SourceFilePath.FullName != macrosFile.FullName) {
+                    AddDependency(FromFile(macrosFile));
+                }
             }
         }
 
@@ -186,13 +187,19 @@ namespace Axion.Core.Source {
 
         public void AddDefinition(IDefinitionExpr def) {
             if (def.Name != null) {
-                if (Definitions.ContainsKey(def.Name.ToString())) {
+                var name = def.Name.ToString();
+                if (Definitions.ContainsKey(name)) {
                     LangException.Report(BlameType.NameIsAlreadyDefined, def.Name);
                 }
                 else {
-                    Definitions.Add(def.Name.ToString(), def);
+                    Definitions.Add(name, def);
                 }
             }
+        }
+
+        public bool IsCustomKeyword(Token id) {
+            // TODO: resolve bottleneck
+            return CustomKeywords.Contains(id.Content);
         }
 
         public HashSet<string> GetAllCustomKeywords() {
@@ -212,23 +219,28 @@ namespace Axion.Core.Source {
             }
         }
 
-        public static SourceUnit FromCode(string code, FileInfo outFilePath = null) {
+        public static SourceUnit FromCode(string code, FileInfo? outFilePath = null) {
             return new SourceUnit(
                 code,
                 outputPath: outFilePath
             );
         }
 
-        public static SourceUnit FromLines(string[] lines, FileInfo outFilePath = null) {
+        public static SourceUnit FromLines(IEnumerable<string> lines, FileInfo? outFilePath = null) {
             return new SourceUnit(
                 string.Join("\n", lines),
                 outputPath: outFilePath
             );
         }
 
-        public static SourceUnit FromFile(FileInfo srcFilePath, FileInfo outFilePath = null) {
+        public static SourceUnit? FromFile(FileInfo srcFilePath, FileInfo? outFilePath = null) {
             if (!srcFilePath.Exists) {
-                throw new FileNotFoundException();
+                Compiler.Logger.Error($"'{srcFilePath.Name}' does not exists.");
+                return null;
+            }
+            if (srcFilePath.Extension != SourceFileExt) {
+                Compiler.Logger.Error($"'{srcFilePath.Name}' file must have {SourceFileExt} extension.");
+                return null;
             }
 
             return new SourceUnit(
@@ -238,8 +250,8 @@ namespace Axion.Core.Source {
             );
         }
 
-        public static SourceUnit FromInterpolation(TextStream stream) {
-            return new SourceUnit { TextStream = stream };
+        public static SourceUnit FromInterpolation(SourceUnit source) {
+            return new SourceUnit(noStdLib: true) { TextStream = source.TextStream, Definitions = source.Definitions };
         }
     }
 }

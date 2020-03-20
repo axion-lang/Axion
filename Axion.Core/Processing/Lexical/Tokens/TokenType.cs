@@ -82,12 +82,10 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         KeywordFalse,
         KeywordFn,
         KeywordFor,
-        KeywordFrom,
         KeywordIf,
         KeywordMacro,
         KeywordModule,
         KeywordNil,
-        KeywordNoBreak,
         KeywordPass,
         KeywordReturn,
         KeywordTrue,
@@ -162,7 +160,10 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             case CloseBracket:     return OpenBracket;
             case CloseBrace:       return OpenBrace;
             // should never be thrown
-            default: throw new Exception("Internal error: Cannot return matching bracket for non-bracket token type.");
+            default:
+                throw new InvalidOperationException(
+                    "Internal error: Cannot return matching bracket for non-bracket token type."
+                );
             }
         }
 

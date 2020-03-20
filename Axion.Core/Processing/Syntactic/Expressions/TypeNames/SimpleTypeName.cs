@@ -4,7 +4,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
-    ///         simple_type:
+    ///         simple-type:
     ///             name;
     ///     </c>
     /// </summary>

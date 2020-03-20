@@ -1,14 +1,16 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
+namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     /// <summary>
     ///     <c>
-    ///         return_expr:
-    ///             'return' [expr_list];
+    ///         return-expr:
+    ///             'return' [multiple-expr];
     ///     </c>
     /// </summary>
     public class ReturnExpr : Expr {
@@ -23,9 +25,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public override TypeName ValueType => Value.ValueType;
 
         public ReturnExpr(
-            Expr parent = null,
-            Expr value  = null
-        ) : base(parent) {
+            Expr? parent = null,
+            Expr? value  = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(value)
+        ) {
             Value = value;
         }
 
@@ -34,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
                 () => {
                     Stream.Eat(KeywordReturn);
                     if (!Stream.PeekIs(Spec.NeverExprStartTypes)) {
-                        Value = Parsing.MultipleExprs(this);
+                        Value = Multiple<InfixExpr>.ParseGenerally(this);
                     }
                 }
             );

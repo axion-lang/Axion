@@ -1,14 +1,15 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
+namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     /// <summary>
     ///     <c>
-    ///         continue_expr:
-    ///             'continue' [name];
+    ///         break-expr:
+    ///             'break' [name];
     ///     </c>
     /// </summary>
-    public class ContinueExpr : Expr, IStatementExpr {
+    public class BreakExpr : Expr {
         private NameExpr loopName;
 
         public NameExpr LoopName {
@@ -16,38 +17,42 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             set => SetNode(ref loopName, value);
         }
 
-        public ContinueExpr(
-            Expr     parent   = null,
-            NameExpr loopName = null
-        ) : base(parent) {
+        public BreakExpr(
+            Expr?     parent   = null,
+            NameExpr? loopName = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(loopName)
+        ) {
             LoopName = loopName;
         }
 
-        public ContinueExpr Parse() {
+        public BreakExpr Parse() {
             SetSpan(
                 () => {
-                    Stream.Eat(KeywordContinue);
+                    Stream.Eat(KeywordBreak);
                     if (Stream.PeekIs(Identifier)) {
                         LoopName = new NameExpr(this).Parse();
                     }
                 }
             );
+
             return this;
         }
 
         public override void ToAxion(CodeWriter c) {
-            c.Write("continue");
+            c.Write("break");
             if (LoopName != null) {
                 c.Write(" ", LoopName);
             }
         }
 
         public override void ToCSharp(CodeWriter c) {
-            c.Write("continue");
+            c.Write("break");
         }
 
         public override void ToPython(CodeWriter c) {
-            c.Write("continue");
+            c.Write("break");
         }
     }
 }

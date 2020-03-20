@@ -5,13 +5,13 @@
 #import numpy as np
 
 class DecisionTree
-    fn init(self.depth = 5, self.min_leaf_size = 5)
-        decision_boundary = 0
+    fn init(self.depth = 5, self.min-leaf-size = 5)
+        decision-boundary = 0
         left = None
         right = None
         prediction = None
 
-    fn mean_squared_error(label, prediction)
+    fn mean-squared-error(label, prediction)
         # @param labels: a one dimensional numpy array
         # @param prediction: a floating point value
         # returns: error if prediction is used to estimate the labels
@@ -36,48 +36,48 @@ class DecisionTree
             print("Error: Data set labels must be one dimensional")
             return
 
-        if x.len < 2 * min_leaf_size or depth == 1
+        if x.len < 2 * min-leaf-size or depth == 1
             prediction = np.mean(y)
             return
 
-        best_split = 0
-        min_error = mean_squared_error(x,np.mean(y)) * 2
+        best-split = 0
+        min-error = mean-squared-error(x,np.mean(y)) * 2
 
         # loop over all possible splits for the decision tree. find the best split.
         # if no split exists that is less than 2 * error for the entire array
         # then the data set is not split and the average for the entire array is used as the predictor
         for i in 0...x.len
-            if x[:i].len < min_leaf_size or x[i:].len < min_leaf_size
+            if x[:i].len < min-leaf-size or x[i:].len < min-leaf-size
                 continue
-            error_left = mean_squared_error(x[:i], np.mean(y[:i]))
-            error_right = mean_squared_error(x[i:], np.mean(y[i:]))
-            error = error_left + error_right
-            if error < min_error
-                best_split = i
-                min_error = error
+            error-left = mean-squared-error(x[:i], np.mean(y[:i]))
+            error-right = mean-squared-error(x[i:], np.mean(y[i:]))
+            error = error-left + error-right
+            if error < min-error
+                best-split = i
+                min-error = error
 
-        if best_split != 0
-            left_x = x[:best_split]
-            left_y = y[:best_split]
-            right_x = x[best_split:]
-            right_y = y[best_split:]
+        if best-split != 0
+            left-x = x[:best-split]
+            left-y = y[:best-split]
+            right-x = x[best-split:]
+            right-y = y[best-split:]
 
-            decision_boundary = x[best_split]
-            left = DecisionTree(depth = depth - 1, min_leaf_size = min_leaf_size)
-            right = DecisionTree(depth = depth - 1, min_leaf_size = min_leaf_size)
-            left.train(left_x, left_y)
-            right.train(right_x, right_y)
+            decision-boundary = x[best-split]
+            left = DecisionTree(depth = depth - 1, min-leaf-size = min-leaf-size)
+            right = DecisionTree(depth = depth - 1, min-leaf-size = min-leaf-size)
+            left.train(left-x, left-y)
+            right.train(right-x, right-y)
         else
             prediction = np.mean(y)
 
-    fn predict(x: Float)
+    fn predict(x: float)
         # @param x: a floating point value to predict the label of
         # the prediction function works by recursively calling the predict function
         # of the appropriate subtrees based on the tree's decision boundary
         if prediction is not None
             return prediction
         elif left or right is not None
-            if x >= decision_boundary
+            if x >= decision-boundary
                 return right.predict(x)
             else
                 return left.predict(x)
@@ -92,13 +92,13 @@ fn main
     x = np.arange(-1.0, 1.0, 0.005)
     y = np.sin(x)
 
-    tree = DecisionTree(depth = 10, min_leaf_size = 10)
+    tree = DecisionTree(depth = 10, min-leaf-size = 10)
     tree.train(x,y)
 
-    test_cases = (np.random.rand(10) * 2) - 1
-    predictions = np.array([tree.predict(x) for x in test_cases])
-    avg_error = np.mean((predictions - test_cases) ** 2)
+    test-cases = (np.random.rand(10) * 2) - 1
+    predictions = np.array([tree.predict(x) for x in test-cases])
+    avg-error = np.mean((predictions - test-cases) ** 2)
 
-    print("Test values: " + test_cases)
+    print("Test values: " + test-cases)
     print("Predictions: " + predictions)
-    print("Average error: " + avg_error)
+    print("Average error: " + avg-error)

@@ -5,20 +5,22 @@ using System.Reflection;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
+using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
-    ///         block:
+    ///         scope:
     ///             (':' expr)
     ///             | ([':'] '{' expr* '}')
     ///             | ([':'] NEWLINE INDENT expr+ OUTDENT);
     ///     </c>
     /// </summary>
-    public class BlockExpr : Expr {
+    public class ScopeExpr : Expr {
         private NodeList<Expr> items;
 
         public NodeList<Expr> Items {
@@ -26,9 +28,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => SetNode(ref items, value);
         }
 
-        internal BlockExpr(
-            Expr              parent = null,
-            IEnumerable<Expr> items  = null
+        internal ScopeExpr(
+            Expr               parent,
+            IEnumerable<Expr>? items = null
         ) : base(parent) {
             Items = NodeList<Expr>.From(this, items);
 
@@ -37,10 +39,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
 
-        internal BlockExpr(
-            Expr          parent = null,
+        internal ScopeExpr(
+            Expr          parent,
             params Expr[] items
-        ) : base(parent) {
+        ) : base(parent ?? GetParentFromChildren(items)) {
             Items = NodeList<Expr>.From(this, items);
 
             if (Items.Count != 0) {
@@ -48,7 +50,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
 
-        protected BlockExpr() { }
+        internal static ScopeExpr FromItems(params Expr[] items) {
+            return new ScopeExpr(null, items);
+        }
+
+        internal static ScopeExpr FromItems(IEnumerable<Expr> items) {
+            Expr[] scopeItems = items.ToArray();
+            Expr   parent     = GetParentFromChildren(scopeItems);
+            return new ScopeExpr(parent, scopeItems);
+        }
+
+        protected ScopeExpr() { }
 
         public string CreateUniqueId(string formattedId) {
             var    i  = 0;
@@ -67,7 +79,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public IDefinitionExpr? GetDefByName(string name) {
             if (!(this is Ast)) {
-                IDefinitionExpr e = GetParentOfType<BlockExpr>().GetDefByName(name);
+                IDefinitionExpr e = GetParentOfType<ScopeExpr>().GetDefByName(name);
                 if (e != null) {
                     return e;
                 }
@@ -94,24 +106,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return defs.ToArray();
         }
 
-        public List<(T item, BlockExpr itemParentBlock, int itemIndex)> FindItemsOfType<T>(
-            List<(T item, BlockExpr itemParentBlock, int itemIndex)> _outs = null
+        public List<(T item, ScopeExpr itemParentScope, int itemIndex)> FindItemsOfType<T>(
+            List<(T item, ScopeExpr itemParentScope, int itemIndex)>? _outs = null
         ) {
-            _outs ??= new List<(T item, BlockExpr itemParentBlock, int itemIndex)>();
+            _outs ??= new List<(T item, ScopeExpr itemParentScope, int itemIndex)>();
             for (var i = 0; i < Items.Count; i++) {
                 Expr item = Items[i];
                 if (item is T expr) {
                     _outs.Add((expr, this, i));
                 }
                 else {
-                    IEnumerable<PropertyInfo> childBlockProps =
+                    IEnumerable<PropertyInfo> childProps =
                         item.GetType().GetProperties().Where(
                             p => p.PropertyType
-                              == typeof(BlockExpr)
+                              == typeof(ScopeExpr)
                               && p.Name != nameof(Parent)
                         );
-                    foreach (PropertyInfo blockProp in childBlockProps) {
-                        var b = (BlockExpr) blockProp.GetValue(item);
+                    foreach (PropertyInfo prop in childProps) {
+                        var b = (ScopeExpr) prop.GetValue(item);
                         b?.FindItemsOfType(_outs);
                     }
                 }
@@ -120,24 +132,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return _outs;
         }
 
-        public (BlockExpr itemParentBlock, int itemIndex) IndexOf<T>(T expression) where T : Expr {
+        public (ScopeExpr? itemParentScope, int itemIndex) IndexOf<T>(T expression) where T : Expr {
             for (var i = 0; i < Items.Count; i++) {
                 Expr item = Items[i];
                 if (item == expression) {
                     return (this, i);
                 }
 
-                IEnumerable<PropertyInfo> childBlockProps = item.GetType().GetProperties().Where(
+                IEnumerable<PropertyInfo> childProps = item.GetType().GetProperties().Where(
                     p => p.PropertyType
-                      == typeof(BlockExpr)
+                      == typeof(ScopeExpr)
                       && p.Name != nameof(Parent)
                 );
-                foreach (PropertyInfo blockProp in childBlockProps) {
+                foreach (PropertyInfo prop in childProps) {
                     var b =
-                        (BlockExpr) blockProp.GetValue(item);
-                    (BlockExpr itemParentBlock, int itemIndex)? idx = b?.IndexOf(expression);
+                        (ScopeExpr) prop.GetValue(item);
+                    (ScopeExpr itemParentScope, int itemIndex)? idx = b?.IndexOf(expression);
                     if (idx != null && idx != (null, -1)) {
-                        return ((BlockExpr itemParentBlock, int itemIndex)) idx;
+                        return ((ScopeExpr itemParentScope, int itemIndex)) idx;
                     }
                 }
             }
@@ -145,8 +157,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return (null, -1);
         }
 
-        public BlockExpr Parse(BlockType blockType = BlockType.Default) {
-            if (!Stream.PeekIs(Spec.BlockStartMarks)) {
+        public ScopeExpr Parse(ScopeType type = ScopeType.Default) {
+            if (!Stream.PeekIs(Spec.ScopeStartMarks)) {
                 return this;
             }
 
@@ -154,8 +166,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 () => {
                     TokenType terminator = ParseStart(this);
 
-                    if (terminator == Outdent && blockType.HasFlag(BlockType.Lambda)) {
-                        LangException.Report(BlameType.IndentationBasedBlockNotAllowed, this);
+                    if (terminator == Outdent && type.HasFlag(ScopeType.Lambda)) {
+                        LangException.Report(BlameType.IndentationBasedScopeNotAllowed, this);
                     }
 
                     if (terminator == Newline) {
@@ -174,24 +186,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         /// <summary>
-        ///     Starts parsing the statement's block,
-        ///     returns terminator what can be used to parse block end.
+        ///     Starts parsing the statement's scope,
+        ///     returns terminator what can be used to parse scope end.
         /// </summary>
-        internal static TokenType ParseStart(Expr parent) {
+        private static TokenType ParseStart(Expr parent) {
             // colon
             bool  hasColon   = parent.Stream.MaybeEat(Colon);
-            Token blockStart = parent.Stream.Token;
+            Token scopeStart = parent.Stream.Token;
 
             // newline
             bool hasNewline = hasColon
                 ? parent.Stream.MaybeEat(Newline)
-                : blockStart.Is(Newline);
+                : scopeStart.Is(Newline);
 
             // '{'
             if (parent.Stream.MaybeEat(OpenBrace)) {
                 if (hasColon) {
                     // ':' '{'
-                    LangException.Report(BlameType.RedundantColonWithBraces, blockStart);
+                    LangException.Report(BlameType.RedundantColonWithBraces, scopeStart);
                 }
 
                 return CloseBrace;
@@ -204,11 +216,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
             if (hasNewline) {
                 // newline followed by not indent or '{'
-                LangException.Report(BlameType.ExpectedBlockDeclaration, parent.Stream.Peek);
+                LangException.Report(BlameType.ExpectedScopeDeclaration, parent.Stream.Peek);
             }
-            // exactly a 1-line block
+            // exactly a 1-line scope
             else if (!hasColon) {
-                // one line block must have a colon
+                // one line scope must have a colon
                 LangException.ReportUnexpectedSyntax(Colon, parent.Stream.Peek);
             }
 
@@ -239,7 +251,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 c.Write(item);
                 if (!(Parent is ClassDef || Parent is ModuleDef)
                  && !(item is IDefinitionExpr
-                   || item is ConditionalExpr
+                   || item is IfExpr
                    || item is WhileExpr
                    || item is MacroApplicationExpr)
                  || item is VarDef) {
@@ -265,7 +277,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     }
 
     [Flags]
-    public enum BlockType {
+    public enum ScopeType {
         Default,
         Lambda
     }

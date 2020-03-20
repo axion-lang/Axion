@@ -2,16 +2,17 @@ using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
-    ///         func_call_expr:
-    ///             atom '(' [arg_list | (arg for_comprehension)] ')';
+    ///         func-call-expr:
+    ///             atom '(' [multiple-arg | (arg for-comprehension)] ')';
     ///     </c>
     /// </summary>
-    public class FuncCallExpr : Expr {
+    public class FuncCallExpr : PostfixExpr {
         private Expr target;
 
         public Expr Target {
@@ -27,10 +28,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         }
 
         public FuncCallExpr(
-            Expr                 parent = null,
-            Expr                 target = null,
+            Expr?                parent = null,
+            Expr?                target = null,
             params FuncCallArg[] args
-        ) : base(parent) {
+        ) : base(
+            parent
+         ?? GetParentFromChildren(target)
+        ) {
             Target = target;
             Args   = NodeList<FuncCallArg>.From(this, args);
         }
@@ -80,22 +84,23 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => SetNode(ref val, value);
         }
 
-        internal FuncCallArg(Expr parent = null, Expr value = null) : base(parent) {
-            MarkPosition(Value = value);
-        }
-
         internal FuncCallArg(
-            Expr     parent = null,
-            NameExpr name   = null,
-            Expr     value  = null
-        ) : base(parent) {
-            MarkStart(Name = name);
-            MarkEnd(Value  = value);
+            Expr?     parent = null,
+            NameExpr? name   = null,
+            Expr?     value  = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(name, value)
+        ) {
+            Name  = name;
+            Value = value;
+            MarkStart(Name);
+            MarkEnd(Value);
         }
 
         /// <summary>
         ///     <c>
-        ///         arg_list:
+        ///         multiple-arg:
         ///             comprehension
         ///             | ({ argument ',' }
         ///                (argument [',']
@@ -106,9 +111,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         ///     </c>
         /// </summary>
         internal static NodeList<FuncCallArg> ParseArgList(
-            Expr        parent         = null,
-            FuncCallArg first          = null,
-            bool        allowGenerator = false
+            Expr         parent,
+            FuncCallArg? first          = null,
+            bool         allowGenerator = false
         ) {
             var args = new NodeList<FuncCallArg>(parent);
 
@@ -138,13 +143,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     if (parent.Stream.PeekIs(KeywordFor)) {
                         arg = new FuncCallArg(
                             parent,
-                            new ForComprehension(parent, value) { IsGenerator = true }.Parse()
+                            value: new ForComprehension(parent, value) { IsGenerator = true }.Parse()
                         );
                     }
                     else {
                         // TODO: star args
                         parent.Stream.MaybeEat(OpMultiply);
-                        arg = new FuncCallArg(parent, value);
+                        arg = new FuncCallArg(parent, value: value);
                     }
                 }
 

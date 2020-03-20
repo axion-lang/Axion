@@ -62,7 +62,7 @@ namespace Axion {
                                 }
 
                                 if (args.EditorHelp) {
-                                    var dummy = new ScriptBench(showFullHelp: true);
+                                    ScriptBench.DrawHelpBox();
                                     return 0;
                                 }
 
@@ -130,41 +130,61 @@ namespace Axion {
                     // exit from interpreter to main loop
                     logger.Info("\nInteractive interpreter closed.");
                     return;
-                }
+                default:
+                    // Disable logging while editing
+                    LogManager.Configuration.Variables["consoleLogLevel"] = "Fatal";
+                    LogManager.Configuration.Variables["fileLogLevel"]    = "Fatal";
+                    LogManager.ReconfigExistingLoggers();
 
-                // Disable logging while editing
-                LogManager.Configuration.Variables["consoleLogLevel"] = "Fatal";
-                LogManager.Configuration.Variables["fileLogLevel"]    = "Fatal";
-                LogManager.ReconfigExistingLoggers();
+                    // initialize editor
+                    var editor = new ScriptBench(
+                        firstCodeLine: rawInput,
+                        highlighter: new AxionSyntaxHighlighter()
+                    );
+                    string[] codeLines = editor.Run();
 
-                // initialize editor
-                var editor = new ScriptBench(
-                    new ScriptBenchSettings(highlighter: new AxionSyntaxHighlighter()),
-                    rawInput
-                );
-                string[] codeLines = editor.Run();
+                    // Re-enable logging
+                    LogManager.Configuration.Variables["consoleLogLevel"] = "Info";
+                    LogManager.Configuration.Variables["fileLogLevel"]    = "Info";
+                    LogManager.ReconfigExistingLoggers();
 
-                // Re-enable logging
-                LogManager.Configuration.Variables["consoleLogLevel"] = "Info";
-                LogManager.Configuration.Variables["fileLogLevel"]    = "Info";
-                LogManager.ReconfigExistingLoggers();
+                    if (string.IsNullOrWhiteSpace(string.Join("", codeLines))) {
+                        continue;
+                    }
 
-                // interpret as source code and output result
-                SourceUnit src = SourceUnit.FromLines(codeLines);
-                Compiler.Process(src, ProcessingMode.Transpilation, ProcessingOptions.ToCSharp);
+                    // interpret as source code and output result
+                    SourceUnit src = SourceUnit.FromLines(codeLines);
+                    Compiler.Process(src, ProcessingMode.Transpilation, ProcessingOptions.ToCSharp);
+                    if (src.HasErrors) {
+                        break;
+                    }
 
-                try {
-                    logger.Info("Interpretation:");
-                    ExecuteCSharp(src.CodeWriter.ToString());
-                }
-                catch (CompilationErrorException e) {
-                    logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
+                    try {
+                        logger.Info("Interpretation:");
+                        ExecuteCSharp(src.CodeWriter.ToString());
+                    }
+                    catch (CompilationErrorException e) {
+                        logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
+                    }
+                    break;
                 }
             }
         }
 
         private static void ProcessSources(CommandLineArguments args) {
-            SourceUnit src;
+            var pMode    = ProcessingMode.Reduction;
+            var pOptions = ProcessingOptions.Default;
+            if (!string.IsNullOrWhiteSpace(args.Mode.ToLower())) {
+                if (Enum.TryParse(args.Mode, true, out pOptions)) {
+                    pMode = ProcessingMode.Transpilation;
+                }
+                else {
+                    logger.Error("Unknown processing mode.");
+                    return;
+                }
+            }
+
+            SourceUnit? src;
             if (args.Files.Any()) {
                 int filesCount = args.Files.Count();
                 if (filesCount > 1) {
@@ -178,6 +198,9 @@ namespace Axion {
                 }
 
                 src = SourceUnit.FromFile(inputFiles[0]);
+                if (src == null) {
+                    return;
+                }
             }
             else if (!string.IsNullOrWhiteSpace(args.Code)) {
                 src = SourceUnit.FromCode(Utilities.TrimMatchingChars(args.Code, '"'));
@@ -185,13 +208,6 @@ namespace Axion {
             else {
                 logger.Error("Neither code nor path to source file not specified.");
                 return;
-            }
-
-            var pMode    = ProcessingMode.Reduction;
-            var pOptions = ProcessingOptions.Default;
-            if (args.Mode.ToLower().StartsWith("to")
-             && Enum.TryParse(args.Mode, true, out pOptions)) {
-                pMode = ProcessingMode.Transpilation;
             }
 
             Compiler.Process(src, pMode, pOptions);

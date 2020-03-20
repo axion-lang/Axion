@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Lexical.Tokens;
@@ -25,7 +24,7 @@ namespace Axion.Core {
         /// </summary>
         public static readonly string OutDir = Path.Combine(WorkDir, "output");
 
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        internal static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public static void Process(
             SourceUnit        src,
@@ -35,20 +34,18 @@ namespace Axion.Core {
             src.ProcessingMode = mode;
             src.Options        = options;
             Process(src);
-            src.ProcessingMode = ProcessingMode.None;
-            src.Options        = ProcessingOptions.None;
         }
 
         private static void Process(SourceUnit src) {
-            logger.Info($"Processing '{src.SourceFilePath.Name}'");
+            Logger.Info($"Processing '{src.SourceFilePath.Name}'");
             if (string.IsNullOrWhiteSpace(src.TextStream.Text)) {
-                logger.Error("Source is empty. Processing aborted.");
+                Logger.Error("Source is empty. Processing aborted.");
                 return;
             }
 
             foreach ((ProcessingMode mode, Action<SourceUnit> action) in CompilationSteps) {
                 action(src);
-                if (src.ProcessingMode == mode) {
+                if (src.ProcessingMode == mode || src.HasErrors) {
                     break;
                 }
             }
@@ -61,7 +58,7 @@ namespace Axion.Core {
                 }
             }
 
-            logger.Info(
+            Logger.Info(
                 errCount > 0
                     ? "Processing terminated due to errors above"
                     : "Processing finished"
@@ -77,10 +74,10 @@ namespace Axion.Core {
             };
 
         public static void Lex(SourceUnit src) {
-            logger.Debug("Tokens list generation");
+            Logger.Debug("Tokens list generation");
             var lexer = new Lexer(src);
             while (true) {
-                Token token = lexer.Read();
+                Token? token = lexer.Read();
                 if (token == null) {
                     continue;
                 }
@@ -97,30 +94,26 @@ namespace Axion.Core {
         }
 
         private static void Parse(SourceUnit src) {
-            logger.Debug("Abstract Syntax Tree generation");
+            Logger.Debug("Abstract Syntax Tree generation");
             src.Ast.Parse();
         }
 
         private static void Reduce(SourceUnit src) {
-            logger.Debug("Syntax tree reducing");
+            Logger.Debug("Syntax tree reducing");
             Traversing.Traverse(src.Ast);
         }
 
         private static void Transpile(SourceUnit src) {
             try {
-                src.CodeWriter = new CodeWriter(src.Options);
                 src.CodeWriter.Write(src.Ast);
                 var code = src.CodeWriter.ToString();
-                logger.Debug("Transpiler output");
-                logger.Debug(code);
-                if (!(File.Exists(src.OutputFilePath.FullName)
-                   && src.OutputFilePath.Extension == ".ax")) {
-                    File.WriteAllText(src.OutputFilePath.FullName, code);
-                }
+                Logger.Debug("Transpiler output");
+                Logger.Debug(code);
+                File.WriteAllText(src.OutputFilePath.FullName, code);
             }
             catch (Exception ex) {
-                logger.Error("Transpiling failed:");
-                logger.Info(ex.Message);
+                Logger.Error("Transpiling failed:");
+                Logger.Info(ex.Message);
             }
         }
     }

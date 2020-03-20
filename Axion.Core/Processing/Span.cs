@@ -9,7 +9,7 @@ namespace Axion.Core.Processing {
     /// </summary>
     public class Span {
         [JsonIgnore]
-        public SourceUnit Source;
+        public SourceUnit Source { get; set; }
 
         public Location Start { get; private set; }
         public Location End   { get; private set; }
@@ -28,12 +28,12 @@ namespace Axion.Core.Processing {
             End = end;
         }
 
-        internal void MarkStart(Span mark) {
-            Start = mark.Start;
+        internal void MarkStart(Span? mark) {
+            Start = mark?.Start ?? Start;
         }
 
-        internal void MarkEnd(Span mark) {
-            End = mark.End;
+        internal void MarkEnd(Span? mark) {
+            End = mark?.End ?? End;
         }
 
         internal void MarkPosition(Span mark) {

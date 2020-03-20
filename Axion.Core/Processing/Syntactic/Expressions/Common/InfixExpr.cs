@@ -1,26 +1,27 @@
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
 using Axion.Core.Processing.Syntactic.Expressions.Postfix;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions {
+namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// <summary>
     ///     <c>
-    ///         infix_expr:
-    ///             prefix_expr (ID | SYMBOL) infix_expr;
+    ///         infix-expr:
+    ///             prefix-expr (ID | SYMBOL) infix-expr;
     ///     </c>
     /// </summary>
-    public static class InfixExpr {
-        internal static Expr ParseList(Expr parent) {
-            return Parsing.MultipleExprs(parent, Parse);
-        }
+    public class InfixExpr : Expr {
+        protected InfixExpr() { }
 
-        internal static Expr Parse(Expr parent) {
+        protected InfixExpr(Expr parent) : base(parent) { }
+
+        internal static InfixExpr Parse(Expr parent) {
             TokenStream s = parent.Source.TokenStream;
 
-            Expr ParseInfix(int precedence) {
-                Expr leftExpr = PrefixExpr.Parse(parent);
-                if (leftExpr is IDefinitionExpr) {
+            InfixExpr ParseInfix(int precedence) {
+                InfixExpr leftExpr = PrefixExpr.Parse(parent);
+                if (leftExpr is IDefinitionExpr || s.Peek.Type.IsCloseBracket() || s.PeekIs(Comma)) {
                     return leftExpr;
                 }
 
@@ -35,6 +36,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     if (s.Peek is OperatorToken opToken) {
                         newPrecedence = opToken.Precedence;
                     }
+                    // NOTE: this condition disallows identifiers to be used as operators.
                     else if (!s.Token.Is(Newline, Outdent) && s.PeekIs(Identifier)) {
                         newPrecedence = 4;
                     }

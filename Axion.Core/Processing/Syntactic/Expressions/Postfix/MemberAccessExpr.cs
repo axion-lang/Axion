@@ -1,14 +1,15 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
-    ///         member_expr:
+    ///         member-expr:
     ///             atom '.' ID;
     ///     </c>
     /// </summary>
-    public class MemberAccessExpr : Expr {
+    public class MemberAccessExpr : PostfixExpr {
         private Expr target;
 
         public Expr Target {
@@ -23,7 +24,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => SetNode(ref member, value);
         }
 
-        public MemberAccessExpr(Expr parent = null, Expr target = null) : base(parent) {
+        public MemberAccessExpr(
+            Expr? parent = null,
+            Expr? target = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(target)
+        ) {
             Target = target;
         }
 

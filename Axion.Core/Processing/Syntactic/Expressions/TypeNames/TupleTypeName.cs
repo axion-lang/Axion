@@ -5,8 +5,8 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
-    ///         tuple_type:
-    ///             tuple_paren_expr;
+    ///         tuple-type:
+    ///             tuple-paren-expr;
     ///     </c>
     /// TODO fix syntax for tuple type name
     /// </summary>
@@ -18,7 +18,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => SetNode(ref types, value);
         }
 
-        public TupleTypeName(Expr parent, IEnumerable<TypeName> types = null) : base(parent) {
+        public TupleTypeName(
+            Expr                   parent,
+            IEnumerable<TypeName>? types = null
+        ) : base(parent) {
             Types = NodeList<TypeName>.From(this, types);
         }
 

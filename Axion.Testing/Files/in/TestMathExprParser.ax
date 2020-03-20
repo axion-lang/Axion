@@ -1,38 +1,38 @@
 # import math
 
 _CONSTANTS = {
-    'pi' : math.pi,
-    'e' : math.e,
-    'phi': (1 + 5 ** 0.5) / 2
+    'pi'  : math.pi,
+    'e'   : math.e,
+    'phi' : (1 + 5 ** 0.5) / 2
 }
 
 _FUNCTIONS = {
-    'abs': abs,
-    'acos': math.acos,
-    'asin': math.asin,
-    'atan': math.atan,
-    'atan2': math.atan2,
-    'ceil': math.ceil,
-    'cos': math.cos,
-    'cosh': math.cosh,
-    'degrees': math.degrees,
-    'exp': math.exp,
-    'fabs': math.fabs,
-    'floor': math.floor,
-    'fmod': math.fmod,
-    'frexp': math.frexp,
-    'hypot': math.hypot,
-    'ldexp': math.ldexp,
-    'log': math.log,
-    'log10': math.log10,
-    'modf': math.modf,
-    'pow': math.pow,
-    'radians': math.radians,
-    'sin': math.sin,
-    'sinh': math.sinh,
-    'sqrt': math.sqrt,
-    'tan': math.tan,
-    'tanh': math.tanh
+    'abs'     : abs,
+    'acos'    : math.acos,
+    'asin'    : math.asin,
+    'atan'    : math.atan,
+    'atan2'   : math.atan2,
+    'ceil'    : math.ceil,
+    'cos'     : math.cos,
+    'cosh'    : math.cosh,
+    'degrees' : math.degrees,
+    'exp'     : math.exp,
+    'fabs'    : math.fabs,
+    'floor'   : math.floor,
+    'fmod'    : math.fmod,
+    'frexp'   : math.frexp,
+    'hypot'   : math.hypot,
+    'ldexp'   : math.ldexp,
+    'log'     : math.log,
+    'log10'   : math.log10,
+    'modf'    : math.modf,
+    'pow'     : math.pow,
+    'radians' : math.radians,
+    'sin'     : math.sin,
+    'sinh'    : math.sinh,
+    'sqrt'    : math.sqrt,
+    'tan'     : math.tan,
+    'tanh'    : math.tanh
 }
 
 class Parser

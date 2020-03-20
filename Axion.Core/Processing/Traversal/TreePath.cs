@@ -1,7 +1,13 @@
 using System.Reflection;
+using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 
-namespace Axion.Core.Processing.Syntactic {
+namespace Axion.Core.Processing.Traversal {
+    /// <summary>
+    ///     Data structure designed to simplify AST traversing.
+    ///     It binds each child to parent by reference,
+    ///     so you can dynamically modify/replace child expressions.
+    /// </summary>
     public interface ITreePath {
         bool Traversed { get; set; }
         Expr Node      { get; set; }

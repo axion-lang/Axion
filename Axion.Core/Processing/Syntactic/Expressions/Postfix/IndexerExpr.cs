@@ -1,17 +1,19 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
-    ///         index_expr:
-    ///             atom '[' (infix_expr | slice) {',' (infix_expr | slice)} [','] ']';
+    ///         index-expr:
+    ///             atom '[' (infix-expr | slice) {',' (infix-expr | slice)} [','] ']';
     ///         slice:
-    ///             [infix_expr] ':' [infix_expr] [':' [infix_expr]];
+    ///             [infix-expr] ':' [infix-expr] [':' [infix-expr]];
     ///     </c>
     /// </summary>
-    public class IndexerExpr : Expr {
+    public class IndexerExpr : PostfixExpr {
         private Expr target;
 
         public Expr Target {
@@ -26,7 +28,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => SetNode(ref index, value);
         }
 
-        public IndexerExpr(Expr parent, Expr target = null) : base(parent) {
+        public IndexerExpr(
+            Expr? parent = null,
+            Expr? target = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(target)
+        ) {
             Target = target;
         }
 
@@ -74,8 +82,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                             Stream.Eat(Comma);
                         }
                     }
-
-                    Index = Parsing.MaybeTuple(expressions);
+                    Index = expressions.Count == 1 ? expressions[0] : new TupleExpr<Expr>(this, expressions);
                     Stream.Eat(CloseBracket);
                 }
             );

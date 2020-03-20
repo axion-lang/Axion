@@ -1,15 +1,16 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     /// <summary>
     ///     <c>
-    ///         unary_expr:
-    ///             UNARY_LEFT prefix_expr
-    ///             | suffix_expr UNARY_RIGHT;
+    ///         unary-expr:
+    ///             UNARY-LEFT prefix-expr
+    ///             | suffix-expr UNARY-RIGHT;
     ///     </c>
     /// </summary>
-    public class UnaryExpr : Expr {
+    public class UnaryExpr : PostfixExpr {
         public readonly OperatorToken Operator;
         private         Expr          val;
 
@@ -19,21 +20,29 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
         }
 
         public UnaryExpr(
-            Expr          parent = null,
-            OperatorToken op     = null,
-            Expr          expr   = null
-        ) : base(parent) {
+            Expr?          parent = null,
+            OperatorToken? op     = null,
+            Expr?          value  = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(value)
+        ) {
             MarkStart(Operator = op);
-            MarkEnd(Value      = expr);
+            MarkEnd(Value      = value);
         }
 
         public UnaryExpr(
-            Expr      parent = null,
+            Expr?     parent = null,
             TokenType opType = TokenType.None,
-            Expr      expr   = null
-        ) : base(parent) {
-            MarkStart(Operator = new OperatorToken(Source, tokenType: opType));
-            MarkEnd(Value      = expr);
+            Expr?     value  = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(value)
+        ) {
+            Operator = new OperatorToken(Source, tokenType: opType);
+            Value    = value;
+            MarkStart(Operator);
+            MarkEnd(Value);
         }
 
         public override void ToAxion(CodeWriter c) {

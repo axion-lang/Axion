@@ -18,13 +18,13 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public override TypeName ValueType   => Spec.StringType;
 
         internal StringToken(
-            SourceUnit                source,
-            string                    value          = "",
-            string                    content        = "",
-            bool                      isUnclosed     = false,
-            string                    prefixes       = "",
-            string                    quote          = "\"",
-            List<StringInterpolation> interpolations = null
+            SourceUnit                 source,
+            string                     value          = "",
+            string                     content        = "",
+            bool                       isUnclosed     = false,
+            string                     prefixes       = "",
+            string                     quote          = "\"",
+            List<StringInterpolation>? interpolations = null
         ) : base(source, TokenType.String, value, content) {
             IsUnclosed     = isUnclosed;
             Prefixes       = prefixes;
@@ -67,7 +67,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     }
 
     public class StringInterpolation : Span {
-        public StringInterpolation(TextStream stream)
-            : base(SourceUnit.FromInterpolation(stream)) { }
+        public StringInterpolation(SourceUnit source)
+            : base(SourceUnit.FromInterpolation(source)) { }
     }
 }

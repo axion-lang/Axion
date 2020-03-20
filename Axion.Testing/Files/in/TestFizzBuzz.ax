@@ -2,6 +2,7 @@
 
 fizz-buzz(1, 100)
 
+@[public, static]
 fn fizz-buzz (start: int, end: int)
     i = start
     while i < end

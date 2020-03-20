@@ -1,3 +1,6 @@
+# This file is a part of Axion built-ins.
+# It contains all standard macro definitions.
+
 macro do-while-statement (
     block:     Syntax.Block,
     condition: Syntax.Infix
@@ -17,25 +20,6 @@ macro do-while-statement (
     }}
 
 
-macro for-in-statement (
-    item:     Syntax.Atom,
-    iterable: Syntax.Infix,
-    block:    Syntax.Block
-)
-    syntax = $('for', item, 'in', iterable, block)
-    
-    return {{ }}
-
-
-macro raise-statement (
-    type-name: Syntax.TypeName,
-    args-lst:  Syntax.InfixList
-)
-    syntax = $('raise', type-name, ['(', [args-lst], ')'])
-    
-    return {{ }}
-
-
 macro until-statement (
     block:     Syntax.Block,
     condition: Syntax.Infix
@@ -47,6 +31,16 @@ macro until-statement (
             $block
         }
     }}
+
+
+macro for-in-statement (
+    item:     Syntax.Atom,
+    iterable: Syntax.Infix,
+    block:    Syntax.Block
+)
+    syntax = $('for', item, 'in', iterable, block)
+    
+    return {{ }}
 
 
 macro for-index-statement (
@@ -70,7 +64,7 @@ macro unless-statement (
     condition: Syntax.Infix,
     block:     Syntax.Block
 )
-    syntax = $('unless', condition, block)
+    syntax = $('unless', condition, block, ['else', block])
     
     return {{
         if not $condition {
@@ -79,9 +73,135 @@ macro unless-statement (
     }}
 
 
-macro list-init-statement (
-    items: Syntax.InfixExpr[]
+macro raise-statement (
+    type-name: Syntax.TypeName,
+    args-lst:  Syntax.InfixList
 )
-    syntax = $('[', [items, {',', items}, [',']], ']')
+    syntax = $('raise', type-name, ['(', [args-lst], ')'])
     
     return {{ }}
+
+
+macro match-expression (
+    target:  Syntax.Any,
+    pattern: Syntax.Infix,
+    value:   Syntax.Any
+)
+    syntax = $(
+        target, 'match', {pattern, ':', value}
+    )
+
+    return {{ }}
+
+
+macro object-initializer-expression (
+    type-name:    Syntax.TypeName,
+    args:         Syntax.Infix,
+    initializers: Syntax.Infix,
+)
+    syntax = $(
+        'new',
+        (
+            ('(', args, [{',', args}], [','], ')')
+          | (
+                type-name,
+                ['(', [args, [{',', args}], [',']], ')'],
+                ['{', [initializers, [{',', initializers}], [',']], '}']
+            )
+        )
+    )
+
+    return {{ }}
+
+
+macro list-init-expression (
+    items: Syntax.Infix
+)
+    syntax = $('[', [items, [{',', items}], [',']], ']')
+
+    return {{ }}
+
+
+
+macro map-init-expression (
+    key:   Syntax.Infix,
+    value: Syntax.Infix,
+)
+    syntax = $(
+        '{',
+        [
+            key, ':', value,
+            [{',', key, ':', value}],
+            [',']
+        ],
+        '}'
+    )
+
+    return {{ }}
+
+
+macro set-init-expression (
+    value: Syntax.Infix,
+)
+    syntax = $(
+        '{',
+        value,
+        [{',', value}],
+        [','],
+        '}'
+    )
+
+    return {{ }}
+
+
+#====================
+# x times
+#     do-smth()
+#====================
+# uniq-name = 0
+# while uniq-name < x
+#     do-smth()
+#     uniq-name++
+#====================
+macro times-statement (
+    counter-end:  Syntax.Infix,
+    block:        Syntax.Block,
+    counter-name: Syntax.Name
+)
+    syntax = $(counter-end, 'times', block)
+    
+    # counter-name = new Syntax.Name()
+    
+    return {{
+        $counter-name = 0
+        while $counter-name < $counter-end {
+            $block
+            $counter-name++
+        }
+    }}
+
+
+macro with-statement (
+    expr: Syntax.Binary
+        | Syntax.VarDefinition,
+    value: Syntax.Name,
+    init:  Syntax.Expression,
+    block: Syntax.Block
+)
+    syntax = $('with', expr, block)
+
+    if value is Syntax.Name
+        name = value
+    else # l = r
+        init = value
+        name = value.Left
+
+    return {{
+        $init
+        try {
+            $block
+        }
+        finally {
+            $name.destroy()
+        }
+    }}

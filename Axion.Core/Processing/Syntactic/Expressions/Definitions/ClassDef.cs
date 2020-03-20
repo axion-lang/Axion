@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
@@ -8,11 +9,11 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
     ///     <c>
-    ///         class_def:
-    ///             'class' simple_name [type_args] ['&lt;-' type_arg_list] block;
+    ///         class-def:
+    ///             'class' simple-name [type-args] ['&lt;-' type-multiple-arg] scope;
     ///     </c>
     /// </summary>
-    public class ClassDef : Expr, IDefinitionExpr, IDecoratedExpr {
+    public class ClassDef : Expr, IDefinitionExpr, IDecorableExpr {
         private NameExpr name;
 
         public NameExpr Name {
@@ -34,31 +35,45 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => SetNode(ref keywords, value);
         }
 
-        private BlockExpr block;
+        private ScopeExpr scope;
 
-        public BlockExpr Block {
-            get => block;
-            set => SetNode(ref block, value);
+        public ScopeExpr Scope {
+            get => scope;
+            set => SetNode(ref scope, value);
         }
 
-        private Expr dataMembers;
+        private NodeList<Expr> dataMembers;
 
-        public Expr DataMembers {
+        public NodeList<Expr> DataMembers {
             get => dataMembers;
             set => SetNode(ref dataMembers, value);
         }
 
         public ClassDef(
-            Expr                  parent   = null,
-            NameExpr              name     = null,
-            IEnumerable<TypeName> bases    = null,
-            IEnumerable<Expr>     keywords = null,
-            BlockExpr             block    = null
-        ) : base(parent) {
-            Name     = name;
-            Bases    = NodeList<TypeName>.From(this, bases);
-            Keywords = NodeList<Expr>.From(this, keywords);
-            Block    = block;
+            string?                name     = null,
+            IEnumerable<TypeName>? bases    = null,
+            IEnumerable<Expr>?     keywords = null,
+            ScopeExpr?             scope    = null
+        ) : this(
+            null, new NameExpr(name), bases, keywords,
+            scope
+        ) { }
+
+        public ClassDef(
+            Expr?                  parent   = null,
+            NameExpr?              name     = null,
+            IEnumerable<TypeName>? bases    = null,
+            IEnumerable<Expr>?     keywords = null,
+            ScopeExpr?             scope    = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(name, scope)
+        ) {
+            Name        = name;
+            Bases       = NodeList<TypeName>.From(this, bases);
+            Keywords    = NodeList<Expr>.From(this, keywords);
+            DataMembers = new NodeList<Expr>(this);
+            Scope       = scope;
         }
 
         public ClassDef Parse() {
@@ -67,8 +82,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     Stream.Eat(KeywordClass);
                     Name = new NameExpr(this).Parse(true);
 
-                    if (Stream.PeekIs(OpenParenthesis)) {
-                        DataMembers = Parsing.MultipleExprs(this, expectedTypes: typeof(NameDef));
+                    if (Stream.MaybeEat(OpenParenthesis)) {
+                        if (!Stream.PeekIs(CloseParenthesis)) {
+                            do {
+                                DataMembers.Add(AnyExpr.Parse(this));
+                            } while (Stream.MaybeEat(Comma));
+                        }
+
+                        Stream.Eat(CloseParenthesis);
                     }
 
                     // TODO: add generic classes
@@ -85,11 +106,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                         }
                     }
 
-                    if (Stream.PeekIs(Spec.BlockStartMarks)) {
-                        Block = new BlockExpr(this).Parse();
-                    }
-                    else {
-                        Block = new BlockExpr(this);
+                    Scope = new ScopeExpr(this);
+                    if (Stream.PeekIs(Spec.ScopeStartMarks)) {
+                        Scope.Parse();
                     }
                 }
             );
@@ -98,30 +117,38 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public override void ToAxion(CodeWriter c) {
             c.Write("class ", Name);
+            if (DataMembers.Count > 0) {
+                c.Write("(");
+                c.AddJoin(", ", DataMembers);
+                c.Write(")");
+            }
             if (Bases.Count > 0) {
-                c.Write(" <- ", Bases);
+                c.Write(" <- ");
+                c.AddJoin(", ", Bases);
             }
 
-            c.Write(Block);
+            c.Write(Scope);
         }
 
         public override void ToCSharp(CodeWriter c) {
             c.Write("public class ", Name);
             if (Bases.Count > 0) {
-                c.Write(" <- ", Bases);
+                c.Write(" : ");
+                c.AddJoin(", ", Bases);
             }
-
             c.WriteLine();
-            c.Write(Block);
+            c.Write(Scope);
         }
 
         public override void ToPython(CodeWriter c) {
             c.Write("class ", Name);
             if (Bases.Count > 0) {
-                c.Write("(", Bases, ")");
+                c.Write("(");
+                c.AddJoin(", ", Bases);
+                c.Write(")");
             }
 
-            c.Write(Block);
+            c.Write(Scope);
         }
     }
 }

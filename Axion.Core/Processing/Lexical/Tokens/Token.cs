@@ -20,13 +20,13 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public string EndingWhite { get; set; }
 
         [JsonIgnore]
-        public virtual TypeName ValueType { get; }
+        public virtual TypeName? ValueType { get; }
 
         public Token(
             SourceUnit source,
             TokenType  type        = None,
             string     value       = "",
-            string     content     = null,
+            string?    content     = null,
             string     endingWhite = "",
             Location   start       = default,
             Location   end         = default

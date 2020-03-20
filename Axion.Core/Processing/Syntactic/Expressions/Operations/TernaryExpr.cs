@@ -1,4 +1,6 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
@@ -6,11 +8,11 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     /// <summary>
     ///     <c>
-    ///         ternary_expr:
-    ///             expr_list ('if' | 'unless') infix_expr ['else' expr_list];
+    ///         ternary-expr:
+    ///             multiple-expr ('if' | 'unless') infix-expr ['else' multiple-expr];
     ///     </c>
     /// </summary>
-    public class TernaryExpr : Expr {
+    public class TernaryExpr : InfixExpr {
         private Expr condition;
 
         public Expr Condition {
@@ -36,14 +38,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
         public override TypeName ValueType => TrueExpr.ValueType;
 
         internal TernaryExpr(
-            Expr parent    = null,
-            Expr condition = null,
-            Expr trueExpr  = null,
-            Expr falseExpr = null
-        ) : base(parent) {
+            Expr? parent    = null,
+            Expr? condition = null,
+            Expr? trueExpr  = null,
+            Expr? falseExpr = null
+        ) : base(
+            parent
+         ?? GetParentFromChildren(condition, trueExpr, falseExpr)
+        ) {
             Condition = condition;
             TrueExpr  = trueExpr;
             FalseExpr = falseExpr;
+            MarkStart(TrueExpr);
+            MarkEnd(FalseExpr);
         }
 
         public TernaryExpr Parse() {
@@ -59,9 +66,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
                         TrueExpr = AnyExpr.Parse(this);
                     }
 
-                    Condition = InfixExpr.Parse(this);
+                    Condition = Parse(this);
                     if (Stream.MaybeEat(KeywordElse)) {
-                        FalseExpr = Parsing.MultipleExprs(this, expectedTypes: typeof(IInfixExpr));
+                        FalseExpr = Multiple<InfixExpr>.ParseGenerally(this);
                     }
 
                     if (invert) {
