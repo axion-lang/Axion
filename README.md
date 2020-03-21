@@ -7,30 +7,30 @@
 
 ### :open_file_folder: Distribution
 
-| Directory        | Contents                                                                      | Platform       |
-|------------------|-------------------------------------------------------------------------------|----------------|
-| [`Axion`](Axion)             | Interface for compiler: CLI, ScriptBench editor, interpreter (C# code runner) | NET Core       |
-| [`Axion.Modules`](Modules)   | Built-in modules for language, written in Axion iteslf                        | Axion          |
-| [`Axion.Core`](Axion.Core)   | Language core: lexer/parser/transpiler                                        | NET Standard   |
-| [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable) | NET Core |
-| [`Other`](Other)             | Code examples, arts, etc.                                                     |                |
+| Directory                                               | Contents                                                                      | Platform         |
+|---------------------------------------------------------|-------------------------------------------------------------------------------|------------------|
+| [`Axion`](Axion)                                        | Interface for compiler: CLI, ScriptBench editor, interpreter (C# code runner) | NET Core         |
+| [`Axion.Modules`](Modules)                              | Built-in modules for language, written in Axion iteslf                        | Axion            |
+| [`Axion.Core`](Axion.Core)                              | Language core: lexer/parser/transpiler                                        | NET Standard     |
+| [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable)               | NET Core         |
+| [`Other`](Other)                                        | Code examples, arts, etc.                                                     |                  |
 
 ### :dart: Objectives
 
--  **Powerful language-oriented programming & macros system**
--  **Inter-transpiling to other popular languages**
--  **Implementation of common design patterns quickly and simply**
--  **Convenient, simple and easy to read**
--  **Static typing with less annotations**
--  **High-performance**
+ -  **Powerful language-oriented programming & macros system**
+ -  **Inter-transpiling to other popular languages**
+ -  **Implementation of common design patterns quickly and simply**
+ -  **Convenient, simple and easy to read**
+ -  **Static typing with less annotations**
+ -  **High-performance**
 
 ### :chart: Progress
 
--  **Lexical analyzer**
--  **Syntax parser**
--  **Interpreter (based on C# transpiling)**
--  **Console code editor with syntax highlighting & error reporting**
--  **C#, Python transpilers**
+ -  **Lexical analyzer**
+ -  **Syntax parser**
+ -  **Interpreter (based on C# transpiling)**
+ -  **Console code editor with syntax highlighting & error reporting**
+ -  **C#, Python transpilers**
 
 ### :rocket: Launching
 
