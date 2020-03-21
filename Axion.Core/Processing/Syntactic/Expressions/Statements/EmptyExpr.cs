@@ -28,7 +28,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             c.Write(Mark);
         }
 
-        public override void ToCSharp(CodeWriter c) { }
+        public override void ToCSharp(CodeWriter c) {
+            // Don't write anything, semicolon is inserted at the scope level.
+        }
 
         public override void ToPython(CodeWriter c) {
             c.Write("pass");

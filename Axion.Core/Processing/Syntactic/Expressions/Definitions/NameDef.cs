@@ -8,21 +8,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public NameExpr Name {
             get => name;
-            set => SetNode(ref name, value);
+            set => name = BindNode(value);
         }
 
-        private Expr value;
+        private Expr val;
 
         public Expr Value {
-            get => value;
-            set => SetNode(ref this.value, value);
+            get => val;
+            set => val = BindNode(value);
         }
 
         private TypeName valueType;
 
         public sealed override TypeName ValueType {
             get => valueType /* BUG here ?? Right.ValueType*/;
-            protected set => SetNode(ref valueType, value);
+            protected set => valueType = BindNode(value);
         }
 
         public NameDef(

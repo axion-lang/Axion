@@ -16,7 +16,8 @@ namespace Axion.Core.Processing.Traversal {
     public class NodeTreePath : ITreePath {
         private readonly PropertyInfo refToNodeInParent;
         private readonly Expr         node;
-        public           bool         Traversed { get; set; } = false;
+
+        public bool Traversed { get; set; }
 
         public Expr Node {
             get => node;
@@ -32,7 +33,8 @@ namespace Axion.Core.Processing.Traversal {
     public class NodeListTreePath<T> : ITreePath where T : Expr {
         private readonly NodeList<T> list;
         internal         int         IndexInList;
-        public           bool        Traversed { get; set; } = false;
+
+        public bool Traversed { get; set; }
 
         public Expr Node {
             get => list[IndexInList];

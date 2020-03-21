@@ -38,14 +38,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
                     list.Add(parserFunc(parent));
                 } while (s.MaybeEat(Comma));
             }
-            // generator | comprehension
-            // TODO HERE 'for' can be after 'newline', but if it's inside (), {} or []
-            // else if (parens && list[0] is ForComprehension fcomp) {
-            //     s.Eat(CloseParenthesis);
-            //     fcomp.IsGenerator = true;
-            //     return fcomp;
-            // }
-
+            
             if (parens) {
                 s.Eat(CloseParenthesis);
                 if (list.Count == 1) {

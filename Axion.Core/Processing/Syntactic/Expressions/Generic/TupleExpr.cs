@@ -19,7 +19,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
 
         public NodeList<Expr> Expressions {
             get => expressions;
-            set => SetNode(ref expressions, value);
+            set => expressions = BindNode(value);
         }
 
         [NoTraversePath]

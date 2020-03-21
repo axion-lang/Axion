@@ -116,13 +116,10 @@ namespace Axion.Core.Processing.Lexical {
                 Move();
                 return C;
             }
-
-            foreach (char value in expected) {
-                char nxt = Peek();
-                if (nxt == value) {
-                    Move();
-                    return nxt.ToString();
-                }
+            char nxt = Peek();
+            if (expected.Contains(nxt)) {
+                Move();
+                return nxt.ToString();
             }
 
             return null;

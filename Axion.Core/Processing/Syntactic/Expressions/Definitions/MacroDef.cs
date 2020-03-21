@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
@@ -25,17 +24,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public ScopeExpr Scope {
             get => scope;
-            set => SetNode(ref scope, value);
+            set => scope = BindNode(value);
         }
 
         private NameExpr name;
 
         public NameExpr Name {
             get => name;
-            set => SetNode(ref name, value);
+            set => name = BindNode(value);
         }
 
-        public Dictionary<string, string> NamedSyntaxParts = new Dictionary<string, string>();
+        public readonly Dictionary<string, string> NamedSyntaxParts = new Dictionary<string, string>();
 
         internal MacroDef(Expr parent) : base(parent) {
             Syntax = new CascadePattern();
@@ -90,17 +89,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             var patterns = new List<IPattern>();
             do {
                 IPattern pattern = null;
-                // syntax group: (x, y)
+                // syntax group `(x, y)`
                 if (Stream.MaybeEat(OpenParenthesis)) {
                     pattern = ParseSyntaxDescription();
                     Stream.Eat(CloseParenthesis);
                 }
-                // optional pattern: [x]
+                // optional pattern `[x]`
                 else if (Stream.MaybeEat(OpenBracket)) {
                     pattern = new OptionalPattern(ParseSyntaxDescription());
                     Stream.Eat(CloseBracket);
                 }
-                // multiple pattern: {x}
+                // multiple pattern `{x}`
                 else if (Stream.MaybeEat(OpenBrace)) {
                     pattern = new MultiplePattern(ParseSyntaxDescription());
                     Stream.Eat(CloseBrace);
@@ -111,7 +110,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                         Source.RegisterCustomKeyword(Stream.Token.Content);
                         pattern = new TokenPattern(Stream.Token.Content);
                     }
-                    // expr-name: TypeName 
+                    // expr-name `TypeName` 
                     else if (Stream.MaybeEat(Identifier)) {
                         Token id          = Stream.Token;
                         bool  typeDefined = NamedSyntaxParts.ContainsKey(id.Content);
@@ -143,7 +142,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     // TODO error
                     continue;
                 }
-                // or pattern: x | y
+                // or pattern `x | y`
                 if (Stream.MaybeEat(OpBitOr)) {
                     patterns.Add(new OrPattern(pattern, ParseSyntaxDescription()));
                 }
@@ -159,7 +158,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         private static ExpressionPattern PatternFromTypeName(string typeName) {
-            ExpressionPattern pattern  = null;
+            ExpressionPattern pattern = null;
             if (!typeName.EndsWith("Expr") && !typeName.EndsWith("TypeName")) {
                 typeName += "Expr";
             }
@@ -175,14 +174,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             return pattern;
         }
 
-        public void ToAxion(CodeWriter c) {
+        public override void ToAxion(CodeWriter c) {
             c.Write(
                 "macro ", Name, "(", Syntax,
                 ")", Scope
             );
         }
 
-        public void ToCSharp(CodeWriter c) {
+        public override void ToCSharp(CodeWriter c) {
             throw new NotSupportedException();
         }
     }

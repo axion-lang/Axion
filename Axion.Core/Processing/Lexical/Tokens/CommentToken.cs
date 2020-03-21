@@ -1,6 +1,5 @@
 ﻿using Axion.Core.Processing.CodeGen;
 using Axion.Core.Source;
-using static Axion.Core.Specification.Spec;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class CommentToken : Token {

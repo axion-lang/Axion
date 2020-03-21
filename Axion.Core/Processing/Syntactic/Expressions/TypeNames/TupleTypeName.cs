@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public NodeList<TypeName> Types {
             get => types;
-            set => SetNode(ref types, value);
+            set => types = BindNode(value);
         }
 
         public TupleTypeName(
@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
                     if (!Stream.PeekIs(CloseParenthesis)) {
                         do {
-                            Types.Add(TypeName.Parse(this));
+                            Types.Add(Parse(this));
                         } while (Stream.MaybeEat(Comma));
                     }
 

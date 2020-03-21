@@ -16,21 +16,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public Expr Condition {
             get => condition;
-            set => SetNode(ref condition, value);
+            set => condition = BindNode(value);
         }
 
         private ScopeExpr thenScope;
 
         public ScopeExpr ThenScope {
             get => thenScope;
-            set => SetNode(ref thenScope, value);
+            set => thenScope = BindNode(value);
         }
 
         private ScopeExpr elseScope;
 
         public ScopeExpr ElseScope {
             get => elseScope;
-            set => SetNode(ref elseScope, value);
+            set => elseScope = BindNode(value);
         }
 
         internal IfExpr(

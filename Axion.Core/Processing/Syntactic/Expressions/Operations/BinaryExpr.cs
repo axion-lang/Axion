@@ -17,14 +17,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
 
         public Expr Left {
             get => left;
-            set => SetNode(ref left, value);
+            set => left = BindNode(value);
         }
 
         private Expr right;
 
         public Expr Right {
             get => right;
-            set => SetNode(ref right, value);
+            set => right = BindNode(value);
         }
 
         public Token Operator { get; }

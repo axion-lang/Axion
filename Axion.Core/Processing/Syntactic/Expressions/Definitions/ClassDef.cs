@@ -18,35 +18,35 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public NameExpr Name {
             get => name;
-            set => SetNode(ref name, value);
+            set => name = BindNode(value);
         }
 
         private NodeList<TypeName> bases;
 
         public NodeList<TypeName> Bases {
             get => bases;
-            set => SetNode(ref bases, value);
+            set => bases = BindNode(value);
         }
 
         private NodeList<Expr> keywords;
 
         public NodeList<Expr> Keywords {
             get => keywords;
-            set => SetNode(ref keywords, value);
+            set => keywords = BindNode(value);
         }
 
         private ScopeExpr scope;
 
         public ScopeExpr Scope {
             get => scope;
-            set => SetNode(ref scope, value);
+            set => scope = BindNode(value);
         }
 
         private NodeList<Expr> dataMembers;
 
         public NodeList<Expr> DataMembers {
             get => dataMembers;
-            set => SetNode(ref dataMembers, value);
+            set => dataMembers = BindNode(value);
         }
 
         public ClassDef(

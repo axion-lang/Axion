@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public NameExpr Name {
             get => name;
-            set => SetNode(ref name, value);
+            set => name = BindNode(value);
         }
 
         public SimpleTypeName(Expr parent) : base(parent) { }

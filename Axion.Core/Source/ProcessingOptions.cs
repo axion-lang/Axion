@@ -20,30 +20,30 @@ namespace Axion.Core.Source {
         ///     Check code against inconsistent
         ///     indentation (mixed spaced and tabs).
         /// </summary>
-        CheckIndentationConsistency = 1 << 2,
+        CheckIndentationConsistency = 0b1,
 
         /// <summary>
         ///     Conversion Axion source back into
         ///     Axion source (debugging mode).
         /// </summary>
-        ToAxion,
+        ToAxion = 0b01000,
 
         /// <summary>
         ///     Conversion Axion source into
         ///     C# programming language source.
         /// </summary>
-        ToCSharp,
+        ToCSharp = 0b00100,
 
         /// <summary>
         ///     Conversion Axion source into
         ///     Python programming language source.
         /// </summary>
-        ToPython,
+        ToPython = 0b00010,
 
         /// <summary>
         ///     Conversion Axion source into
         ///     Pascal programming language source.
         /// </summary>
-        ToPascal
+        ToPascal = 0b00001
     }
 }

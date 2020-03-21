@@ -25,7 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public NodeList<Expr> Items {
             get => items;
-            set => SetNode(ref items, value);
+            set => items = BindNode(value);
         }
 
         internal ScopeExpr(

@@ -17,21 +17,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
 
         public Expr Condition {
             get => condition;
-            set => SetNode(ref condition, value);
+            set => condition = BindNode(value);
         }
 
         private Expr trueExpr;
 
         public Expr TrueExpr {
             get => trueExpr;
-            set => SetNode(ref trueExpr, value);
+            set => trueExpr = BindNode(value);
         }
 
         private Expr falseExpr;
 
         public Expr FalseExpr {
             get => falseExpr;
-            set => SetNode(ref falseExpr, value);
+            set => falseExpr = BindNode(value);
         }
 
         [NoTraversePath]

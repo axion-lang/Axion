@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public Expr Value {
             get => val;
-            set => SetNode(ref val, value);
+            set => val = BindNode(value);
         }
 
         [NoTraversePath]

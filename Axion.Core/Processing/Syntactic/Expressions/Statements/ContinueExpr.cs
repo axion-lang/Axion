@@ -14,7 +14,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
 
         public NameExpr LoopName {
             get => loopName;
-            set => SetNode(ref loopName, value);
+            set => loopName = BindNode(value);
         }
 
         public ContinueExpr(

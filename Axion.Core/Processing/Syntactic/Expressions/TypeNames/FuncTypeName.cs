@@ -11,14 +11,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public TypeName ArgsType {
             get => argsType;
-            set => SetNode(ref argsType, value);
+            set => argsType = BindNode(value);
         }
 
         private TypeName returnType;
 
         public TypeName ReturnType {
             get => returnType;
-            set => SetNode(ref returnType, value);
+            set => returnType = BindNode(value);
         }
 
         public FuncTypeName(
@@ -37,11 +37,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             SetSpan(
                 () => {
                     if (ArgsType == null) {
-                        ArgsType = TypeName.Parse(this);
+                        ArgsType = Parse(this);
                     }
 
                     Stream.Eat(RightArrow);
-                    ReturnType = TypeName.Parse(this);
+                    ReturnType = Parse(this);
                 }
             );
             return this;

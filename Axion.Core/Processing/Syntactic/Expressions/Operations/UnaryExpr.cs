@@ -11,13 +11,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     ///     </c>
     /// </summary>
     public class UnaryExpr : PostfixExpr {
-        public readonly OperatorToken Operator;
-        private         Expr          val;
+        private Expr val;
 
         public Expr Value {
             get => val;
-            set => SetNode(ref val, value);
+            set => val = BindNode(value);
         }
+
+        public OperatorToken Operator { get; }
 
         public UnaryExpr(
             Expr?          parent = null,
@@ -27,8 +28,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             parent
          ?? GetParentFromChildren(value)
         ) {
-            MarkStart(Operator = op);
-            MarkEnd(Value      = value);
+            Operator = op;
+            Value    = value;
+            MarkStart(Operator);
+            MarkEnd(Value);
         }
 
         public UnaryExpr(

@@ -12,21 +12,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         internal Expr From {
             get => from;
-            set => SetNode(ref from, value);
+            set => from = BindNode(value);
         }
 
         private Expr to;
 
         public Expr To {
             get => to;
-            set => SetNode(ref to, value);
+            set => to = BindNode(value);
         }
 
         private Expr step;
 
         public Expr Step {
             get => step;
-            set => SetNode(ref step, value);
+            set => step = BindNode(value);
         }
 
         public SliceExpr(

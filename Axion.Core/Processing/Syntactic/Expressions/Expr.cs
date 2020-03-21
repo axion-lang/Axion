@@ -81,7 +81,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         [NoTraversePath]
         public virtual TypeName ValueType {
             get => valueType;
-            protected set => SetNode(ref valueType, value);
+            protected set => valueType = BindNode(value);
         }
 
         internal Type        MacroExpectType;
@@ -104,29 +104,22 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             );
         }
 
-        protected void SetNode<T>(
-            ref T?                    field,
+        protected T? BindNode<T>(
             T?                        value,
             [CallerMemberName] string callerName = ""
         ) where T : Expr {
-            if (field == value) {
-                return;
+            if (value == null) {
+                return value;
             }
 
-            if (value != null) {
-                value.Parent = this;
-                value.Path   = new NodeTreePath(value, GetType().GetProperty(callerName));
-            }
+            value.Parent = this;
+            value.Path   = new NodeTreePath(value, GetType().GetProperty(callerName));
 
-            field = value;
+            return value;
         }
 
-        protected void SetNode<T>(ref NodeList<T> field, NodeList<T> value)
+        protected NodeList<T> BindNode<T>(NodeList<T> value)
             where T : Expr {
-            if (field == value) {
-                return;
-            }
-
             if (value != null && value.Count > 0) {
                 for (var i = 0; i < value.Count; i++) {
                     if (value[i] is Expr expr) {
@@ -139,7 +132,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 value = new NodeList<T>(this);
             }
 
-            field = value;
+            return value;
         }
 
         protected void SetSpan(Action constructor) {

@@ -14,14 +14,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public Expr Target {
             get => target;
-            set => SetNode(ref target, value);
+            set => target = BindNode(value);
         }
 
         private Expr member;
 
         public Expr Member {
             get => member;
-            set => SetNode(ref member, value);
+            set => member = BindNode(value);
         }
 
         public MemberAccessExpr(

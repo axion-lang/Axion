@@ -16,21 +16,11 @@ namespace Axion.Testing.NUnit.Parser {
         }
 
         private static void Parse(SourceUnit source) {
-            // Compiler.Process(
-            //     source,
-            //     ProcessingMode.Transpilation,
-            //     ProcessingOptions.ToAxion
-            // );
             Compiler.Process(
                 source,
                 ProcessingMode.Transpilation,
                 ProcessingOptions.ToCSharp
             );
-            // Compiler.Process(
-            //     source,
-            //     ProcessingMode.Transpilation,
-            //     ProcessingOptions.ToPython
-            // );
         }
 
         [Test]
@@ -68,13 +58,7 @@ namespace Axion.Testing.NUnit.Parser {
             SourceUnit source = ParseTestFile();
             Assert.AreEqual(4, source.Blames.Count);
         }
-
-        // [Test]
-        // public void TestEnumDef() {
-        //     SourceUnit source = ParseTestFile();
-        //     Assert.AreEqual(0, source.Blames.Count);
-        // }
-
+        
         [Test]
         public void TestDesignPatterns() {
             for (var i = 0; i < SourceFiles.Count; i++) {
@@ -97,12 +81,6 @@ namespace Axion.Testing.NUnit.Parser {
                 Assert.That(source.TokenStream.Tokens.Count > 0, file.Name + ": Tokens count == 0");
             }
         }
-
-        // [Test]
-        // public void TestDecorators() {
-        //     SourceUnit source = ParseTestFile();
-        //     Assert.AreEqual(0, source.Blames.Count);
-        // }
 
         [Test]
         public void TestDotExpressions() {

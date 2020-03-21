@@ -13,14 +13,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public TypeName Left {
             get => left;
-            set => SetNode(ref left, value);
+            set => left = BindNode(value);
         }
 
         private TypeName right;
 
         public TypeName Right {
             get => right;
-            set => SetNode(ref right, value);
+            set => right = BindNode(value);
         }
 
         public UnionTypeName(
@@ -39,11 +39,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             SetSpan(
                 () => {
                     if (Left == null) {
-                        Left = TypeName.Parse(this);
+                        Left = Parse(this);
                     }
 
                     Stream.Eat(OpBitOr);
-                    Right = TypeName.Parse(this);
+                    Right = Parse(this);
                 }
             );
             return this;

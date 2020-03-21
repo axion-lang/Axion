@@ -19,7 +19,7 @@ namespace Axion.Core.Processing.Lexical {
         private          Location      startLoc;
 
         // Variables for indentation analysis
-        private char indentChar = '\0';
+        private char indentChar;
         private int  indentSize;
         private int  lastIndentLen;
         private int  indentLevel;
@@ -33,7 +33,11 @@ namespace Axion.Core.Processing.Lexical {
             ProcessTerminators.Push(End);
         }
 
-        private bool AddChar(bool isContent = true, params char[] expect) {
+        private bool TryAddChar(char expected, bool isContent = true) {
+            return TryAddChar(new[] { expected }, isContent);
+        }
+
+        private bool TryAddChar(char[] expect, bool isContent = true) {
             string eaten = stream.Eat(expect) ?? "";
             value.Append(eaten);
             if (isContent) {
@@ -127,7 +131,10 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private Token ReadWhite() {
-            while (AddChar(expect: White)) { }
+            bool addNext;
+            do {
+                addNext = TryAddChar(White);
+            } while (addNext);
 
             if (src.TokenStream.Tokens.Count == 0) {
                 lastIndentLen = value.Length;
@@ -137,7 +144,7 @@ namespace Axion.Core.Processing.Lexical {
 
             string ln = stream.RestOfLine;
             // check that whitespace is not meaningful here
-            if (!src.TokenStream.Tokens.Last().Is(Newline)
+            if (!src.TokenStream.Tokens[^1].Is(Newline)
              || string.IsNullOrWhiteSpace(ln)
              || ln.StartsWith(OneLineCommentMark)
              || MismatchingPairs.Count > 0
@@ -148,7 +155,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             // indentation processing
-            if (indentChar == '\0') {
+            if (indentChar == default) {
                 indentChar = value[0];
             }
 
@@ -239,7 +246,11 @@ namespace Axion.Core.Processing.Lexical {
 
         private Token ReadNewline() {
             type = Newline;
-            while (AddChar(expect: Eols)) { }
+
+            bool addNext;
+            do {
+                addNext = TryAddChar(Eols);
+            } while (addNext);
 
             src.TokenStream.Tokens.Add(NewTokenFromContext());
             value.Clear();
@@ -261,14 +272,17 @@ namespace Axion.Core.Processing.Lexical {
 
         private Token ReadEoc() {
             type = End;
-            AddChar(expect: Eoc);
+            TryAddChar(Eoc);
             return NewTokenFromContext();
         }
 
         private NumberToken ReadNumber() {
-            while (AddChar(expect: '0')) { }
+            bool addNext;
+            do {
+                addNext = TryAddChar('0');
+            } while (addNext);
 
-            while (AddChar(expect: NumbersDec)) {
+            while (TryAddChar(NumbersDec)) {
                 content.Append(stream.C);
             }
 
@@ -304,9 +318,9 @@ namespace Axion.Core.Processing.Lexical {
             AddNext(false, CharacterQuote);
             while (!AddNext(false, CharacterQuote)) {
                 if (stream.AtEndOfLine) {
-                    CharToken tu = BindSpan(new CharToken(src, value.ToString(), content.ToString(), true));
-                    LangException.Report(BlameType.UnclosedCharacterLiteral, tu);
-                    return tu;
+                    CharToken unclosed = BindSpan(new CharToken(src, value.ToString(), content.ToString(), true));
+                    LangException.Report(BlameType.UnclosedCharacterLiteral, unclosed);
+                    return unclosed;
                 }
 
                 if (stream.PeekIs('\\')) {
@@ -387,7 +401,7 @@ namespace Axion.Core.Processing.Lexical {
                 }
             }
 
-            AddChar(false, StringQuotes);
+            TryAddChar(StringQuotes, false);
             var    quote        = value[^1].ToString();
             string closingQuote = quote;
             if (AddNext(false, quote.Multiply(2))) {

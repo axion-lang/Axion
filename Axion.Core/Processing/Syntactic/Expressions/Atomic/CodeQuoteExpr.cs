@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public ScopeExpr Scope {
             get => scope;
-            set => SetNode(ref scope, value);
+            set => scope = BindNode(value);
         }
 
         [NoTraversePath]

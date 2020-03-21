@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public TypeName ElementType {
             get => elementType;
-            set => SetNode(ref elementType, value);
+            set => elementType = BindNode(value);
         }
 
         public ArrayTypeName(
@@ -30,7 +30,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             SetSpan(
                 () => {
                     if (ElementType == null) {
-                        ElementType = TypeName.Parse(this);
+                        ElementType = Parse(this);
                     }
 
                     Stream.Eat(OpenBracket);

@@ -73,9 +73,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         ///     for class, enum, enum item.
         /// </summary>
         internal static List<(TypeName type, NameExpr label)> ParseNamedTypeArgs(Expr parent) {
-            TokenStream s = parent.Stream;
-            var   typeArgs = new List<(TypeName, NameExpr)>();
-            Token start    = s.Peek;
+            TokenStream s        = parent.Stream;
+            var         typeArgs = new List<(TypeName, NameExpr)>();
+            Token       start    = s.Peek;
 
             do {
                 NameExpr name     = null;

@@ -16,14 +16,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public TypeName Target {
             get => target;
-            set => SetNode(ref target, value);
+            set => target = BindNode(value);
         }
 
         private NodeList<TypeName> typeArguments;
 
         public NodeList<TypeName> TypeArguments {
             get => typeArguments;
-            set => SetNode(ref typeArguments, value);
+            set => typeArguments = BindNode(value);
         }
 
         public GenericTypeName(
@@ -41,11 +41,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         public GenericTypeName Parse() {
             SetSpan(
                 () => {
-                    if (Target == null) { }
+                    if (Target == null) {
+                        Target = TypeName.Parse(this);
+                    }
 
                     Stream.Eat(OpenBracket);
                     do {
-                        TypeArguments.Add(TypeName.Parse(this));
+                        TypeArguments.Add(Parse(this));
                     } while (Stream.MaybeEat(Comma));
 
                     Stream.Eat(CloseBracket);

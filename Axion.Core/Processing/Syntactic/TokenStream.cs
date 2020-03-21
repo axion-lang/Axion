@@ -8,8 +8,8 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic {
     [DebuggerDisplay("{TokenIdx}: '{Token.Value}', then '{Peek.Value}'.")]
     public class TokenStream {
-        public readonly List<Token> Tokens = new List<Token>();
-        public          int         TokenIdx { get; private set; } = -1;
+        public List<Token> Tokens   { get; }              = new List<Token>();
+        public int         TokenIdx { get; private set; } = -1;
 
         public Token Token =>
             TokenIdx > -1 && TokenIdx < Tokens.Count

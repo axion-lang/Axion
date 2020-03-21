@@ -18,14 +18,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public Expr Target {
             get => target;
-            set => SetNode(ref target, value);
+            set => target = BindNode(value);
         }
 
         private Expr index;
 
         public Expr Index {
             get => index;
-            set => SetNode(ref index, value);
+            set => index = BindNode(value);
         }
 
         public IndexerExpr(

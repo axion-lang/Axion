@@ -19,35 +19,35 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         [NoTraversePath]
         public Expr Target {
             get => target;
-            set => SetNode(ref target, value);
+            set => target = BindNode(value);
         }
 
         private Expr item;
 
         public Expr Item {
             get => item;
-            set => SetNode(ref item, value);
+            set => item = BindNode(value);
         }
 
         private Expr iterable;
 
         public Expr Iterable {
             get => iterable;
-            set => SetNode(ref iterable, value);
+            set => iterable = BindNode(value);
         }
 
         private NodeList<Expr> conditions;
 
         public NodeList<Expr> Conditions {
             get => conditions;
-            set => SetNode(ref conditions, value);
+            set => conditions = BindNode(value);
         }
 
         private Expr right;
 
         public Expr Right {
             get => right;
-            set => SetNode(ref right, value);
+            set => right = BindNode(value);
         }
 
         public          bool IsGenerator;

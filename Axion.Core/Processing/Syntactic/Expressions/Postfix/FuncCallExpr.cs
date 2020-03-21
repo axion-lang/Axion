@@ -17,14 +17,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public Expr Target {
             get => target;
-            set => SetNode(ref target, value);
+            set => target = BindNode(value);
         }
 
         private NodeList<FuncCallArg> args;
 
         public NodeList<FuncCallArg> Args {
             get => args;
-            set => SetNode(ref args, value);
+            set => args = BindNode(value);
         }
 
         public FuncCallExpr(
@@ -74,14 +74,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public NameExpr Name {
             get => name;
-            set => SetNode(ref name, value);
+            set => name = BindNode(value);
         }
 
         private Expr val;
 
         public Expr Value {
             get => val;
-            set => SetNode(ref val, value);
+            set => val = BindNode(value);
         }
 
         internal FuncCallArg(
@@ -129,27 +129,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 FuncCallArg arg;
                 // named arg
                 if (parent.Stream.PeekIs(Identifier) && parent.Stream.PeekByIs(2, OpAssign)) {
-                    var name = (NameExpr) AtomExpr.Parse(parent);
+                    var argName = (NameExpr) AtomExpr.Parse(parent);
                     parent.Stream.Eat(OpAssign);
-                    Expr value = InfixExpr.Parse(parent);
-                    arg = new FuncCallArg(parent, name, value);
-                    if (args.Any(a => a.Name.ToString() == name.ToString())) {
+                    InfixExpr argValue = InfixExpr.Parse(parent);
+                    arg = new FuncCallArg(parent, argName, argValue);
+                    if (args.Any(a => a.Name.ToString() == argName.ToString())) {
                         LangException.Report(BlameType.DuplicatedNamedArgument, arg);
                     }
                 }
                 else {
-                    Expr value = InfixExpr.Parse(parent);
+                    Expr argValue = InfixExpr.Parse(parent);
                     // generator arg
                     if (parent.Stream.PeekIs(KeywordFor)) {
                         arg = new FuncCallArg(
                             parent,
-                            value: new ForComprehension(parent, value) { IsGenerator = true }.Parse()
+                            value: new ForComprehension(parent, argValue) { IsGenerator = true }.Parse()
                         );
                     }
                     else {
                         // TODO: star args
                         parent.Stream.MaybeEat(OpMultiply);
-                        arg = new FuncCallArg(parent, value: value);
+                        arg = new FuncCallArg(parent, value: argValue);
                     }
                 }
 

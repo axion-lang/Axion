@@ -1,7 +1,7 @@
 ﻿namespace Axion.Core.Processing.Errors {
     public class BlameType {
-        public readonly string        Description;
-        public readonly BlameSeverity Severity;
+        public string        Description { get; }
+        public BlameSeverity Severity    { get; }
 
         internal BlameType(string description, BlameSeverity severity) {
             Description = description;
