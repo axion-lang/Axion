@@ -3,6 +3,7 @@
 <h2 align="center">Welcome to Axion programming language toolset</h2>
 <h3 align="center">:construction: Under construction :construction:</h3>
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5c60bd255f884ed88bb9248155f8abac)](https://app.codacy.com/manual/f1uctus/Axion?utm_source=github.com&utm_medium=referral&utm_content=F1uctus/Axion&utm_campaign=Badge_Grade_Dashboard)
 [![Build status](https://ci.appveyor.com/api/projects/status/ij2j74injuejodf2?svg=true)](https://ci.appveyor.com/project/F1uctus/axion)
 
 ### :open_file_folder: Distribution
