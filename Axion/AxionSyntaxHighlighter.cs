@@ -83,14 +83,7 @@ namespace Axion {
                     newColor = GetSimpleTokenColor(token);
                 }
 
-                // optimization: append text to last ColoredValue
-                // if it's color equal to previous one. 
-                //if (values.Count > 0 && newColor == values[^1].Color) {
-                //    values[^1].Value += text;
-                //}
-                //else {
                 values.Add(new ColoredValue(text, newColor, isWhite));
-                //}
             }
             return values;
         }
