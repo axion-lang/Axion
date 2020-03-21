@@ -10,8 +10,10 @@
 | Directory        | Contents                                                                      | Platform       |
 |------------------|-------------------------------------------------------------------------------|----------------|
 | [`Axion`](Axion)             | Interface for compiler: CLI, ScriptBench editor, interpreter (C# code runner) | NET Core       |
+| [`Axion.Modules`](Modules)   | Built-in modules for language, written in Axion iteslf                        | Axion          |
 | [`Axion.Core`](Axion.Core)   | Language core: lexer/parser/transpiler                                        | NET Standard   |
 | [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable) | NET Core |
+| [`Other`](Other)             | Code examples, arts, etc.                                                     |                |
 
 ### :dart: Objectives
 
@@ -19,24 +21,25 @@
 -  **Inter-transpiling to other popular languages**
 -  **Implementation of common design patterns quickly and simply**
 -  **Convenient, simple and easy to read**
--  **Static typed with less annotations**
+-  **Static typing with less annotations**
 -  **High-performance**
 
 ### :chart: Progress
 
--  **Console interactive interpreter (based on C# transpiling) and code editor**
 -  **Lexical analyzer**
 -  **Syntax parser**
+-  **Interpreter (based on C# transpiling)**
+-  **Console code editor with syntax highlighting & error reporting**
 -  **C#, Python transpilers**
 
 ### :rocket: Launching
 
 You can launch compiler with `dotnet run -vq`
 in `Axion.csproj` folder and type `-h` in console to get support
-about arguments for compiler CLI interface.
+about arguments for compiler interface.
 
 At the moment toolset supports interpretation of the Axion source
-with `-i` cli-argument (through console code editor) and
+with `-i` CLI argument (through console code editor) and
 file processing with `-f "<path>.ax" -m <to-output_lang>` arguments.
 
 Interpretation is performed by transpiling Axion to C# and running
