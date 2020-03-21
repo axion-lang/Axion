@@ -3,8 +3,20 @@
 <h2 align="center">Welcome to Axion programming language toolset</h2>
 <h3 align="center">:construction: Under construction :construction:</h3>
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5c60bd255f884ed88bb9248155f8abac)](https://app.codacy.com/manual/f1uctus/Axion?utm_source=github.com&utm_medium=referral&utm_content=F1uctus/Axion&utm_campaign=Badge_Grade_Dashboard)
-[![Build status](https://ci.appveyor.com/api/projects/status/ij2j74injuejodf2?svg=true)](https://ci.appveyor.com/project/F1uctus/axion)
+<p align="center">
+	<a href="https://app.codacy.com/manual/f1uctus/Axion?utm_source=github.com&utm_medium=referral&utm_content=F1uctus/Axion&utm_campaign=Badge_Grade_Dashboard">
+		<img src="https://api.codacy.com/project/badge/Grade/5c60bd255f884ed88bb9248155f8abac"
+			 alt="Codacy Badge">
+	</a>
+  <a href="https://ci.appveyor.com/project/F1uctus/axion">
+		<img src="https://ci.appveyor.com/api/projects/status/ij2j74injuejodf2?svg=true"
+			 alt="Build Status">
+	</a>
+	<a href="https://gitmoji.carloscuesta.me">
+		<img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg?style=flat-square"
+			 alt="Gitmoji">
+	</a>
+</p>
 
 ### :open_file_folder: Distribution
 
