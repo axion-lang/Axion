@@ -1,42 +1,45 @@
-<img align="center" src="Other/Graphics/Axion_Mini.png" />
+<img align="center" src="Axion-mini.png" />
 
 <h2 align="center">Welcome to Axion programming language toolset</h2>
-<h3 align="center">:\:\:\:\:\:\:\:\:\: Under construction :/:/:/:/:/:/:/:/:/:</h3>
+<h3 align="center">:construction: Under construction :construction:</h3>
 
 [![Build status](https://ci.appveyor.com/api/projects/status/ij2j74injuejodf2?svg=true)](https://ci.appveyor.com/project/F1uctus/axion)
 
-### Repository consists of 3 parts:
+### :open_file_folder: Distribution
 
-- **Language core (lexer, parser, interpreter, etc.) (.NET Standard)**
-- **A .NET Core wrapper around language core (mainly to provide unit-testing and launching)**
-- **Import of [CodeConsole](https://github.com/F1uctus/CodeConsole) project (to use the console code editor with syntax highlighting) (a bit unstable)**
+| Directory        | Contents                                                                      | Platform       |
+|------------------|-------------------------------------------------------------------------------|----------------|
+| [`Axion`](Axion)             | Interface for compiler: CLI, ScriptBench editor, interpreter (C# code runner) | NET Core       |
+| [`Axion.Core`](Axion.Core)   | Language core: lexer/parser/transpiler                                        | NET Standard   |
+| [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable) | NET Core |
 
-### Objectives:
+### :dart: Objectives
 
-- **Language union (provide inter-transpiling to other popular languages).**
-- **Implementation of common design patterns quickly and simply.**
-- **Convenient, simple and easy to read**
+-  **Powerful language-oriented programming & macros system**
+-  **Inter-transpiling to other popular languages**
+-  **Implementation of common design patterns quickly and simply**
+-  **Convenient, simple and easy to read**
 -  **Static typed with less annotations**
-- **High-performance**
+-  **High-performance**
 
-### Progress:
+### :chart: Progress
 
-- **Console interactive interpreter (based on C# transpiling) and code editor**
-- **Lexical analyzer**
-- **Syntax parser**
-- **Transpiling to C/C++ or Rust is planned**
+-  **Console interactive interpreter (based on C# transpiling) and code editor**
+-  **Lexical analyzer**
+-  **Syntax parser**
+-  **C#, Python transpilers**
 
-### Launching:
+### :rocket: Launching
 
-Now compiler supports interpretation of Axion source
-with `-i` option (through embedded code editor) and
-also file processing with `-f "<path>.ax" -m <output_lang>` options.
+You can launch compiler with `dotnet run -vq`
+in `Axion.csproj` folder and type `-h` in console to get support
+about arguments for compiler CLI interface.
+
+At the moment toolset supports interpretation of the Axion source
+with `-i` cli-argument (through console code editor) and
+file processing with `-f "<path>.ax" -m <to-output_lang>` arguments.
 
 Interpretation is performed by transpiling Axion to C# and running
 it through Roslyn (still incomplete and doesn't support some syntax).
 
-You can launch compiler with `dotnet run Axion.dll`
-in bin folder and type `-h` in console to get support
-about arguments for compiler CLI interface.
-
-### You can take a look at syntax in [project wiki](https://github.com/F1uctus/Axion/wiki)
+### :scroll: You can take a look at the language syntax in [project wiki](https://github.com/F1uctus/Axion/wiki)
