@@ -10,7 +10,7 @@
 | Directory        | Contents                                                                      | Platform       |
 |------------------|-------------------------------------------------------------------------------|----------------|
 | [`Axion`](Axion)             | Interface for compiler: CLI, ScriptBench editor, interpreter (C# code runner) | NET Core       |
-| [`Axion.Core`](Axion.Core)   | Language core compiler: lexer/parser/transpiler                               | NET Standard   |
+| [`Axion.Core`](Axion.Core)   | Language core: lexer/parser/transpiler                                        | NET Standard   |
 | [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable) | NET Core |
 
 ### :dart: Objectives
@@ -35,11 +35,11 @@ You can launch compiler with `dotnet run -vq`
 in `Axion.csproj` folder and type `-h` in console to get support
 about arguments for compiler CLI interface.
 
-Now compiler supports interpretation of Axion source
-with `-i` option (through console code editor) and
-file processing with `-f "<path>.ax" -m <output_lang>` options.
+At the moment toolset supports interpretation of the Axion source
+with `-i` cli-argument (through console code editor) and
+file processing with `-f "<path>.ax" -m <to-output_lang>` arguments.
 
 Interpretation is performed by transpiling Axion to C# and running
 it through Roslyn (still incomplete and doesn't support some syntax).
 
-### :scroll: You can take a look at syntax in [project wiki](https://github.com/F1uctus/Axion/wiki)
+### :scroll: You can take a look at the language syntax in [project wiki](https://github.com/F1uctus/Axion/wiki)
