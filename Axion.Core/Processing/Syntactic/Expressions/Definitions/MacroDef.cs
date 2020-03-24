@@ -15,7 +15,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///         macro-def:
     ///             'macro' simple-name syntax-description scope;
     ///     </c>
-    ///     TODO fix macro def syntax
     /// </summary>
     public class MacroDef : Expr, IDefinitionExpr {
         public CascadePattern Syntax { get; private set; }
@@ -73,17 +72,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         /// <summary>
         ///     syntax-description:
-        ///         '$(', {syntax-rule-expr}, ')';
-        ///     syntax-rule-expr:
-        ///         ID, ':', syntax-description-expr, ';';
+        ///         ID ':' syntax-description-expr ';';
         ///     syntax-description-expr:
         ///         ID
         ///         | STRING
-        ///         | '[', rhs, ']'
-        ///         | '{', rhs, '}'
-        ///         | '(', rhs, ')'
-        ///         | rhs, '|', rhs
-        ///         | rhs, ',', rhs;
+        ///         | ('[' syntax-description-expr ']')
+        ///         | ('{' syntax-description-expr '}')
+        ///         | ('(' syntax-description-expr ')')
+        ///         | (syntax-description-expr '|' syntax-description-expr)
+        ///         | (syntax-description-expr ',' syntax-description-expr);
         /// </summary>
         private CascadePattern ParseSyntaxDescription() {
             var patterns = new List<IPattern>();

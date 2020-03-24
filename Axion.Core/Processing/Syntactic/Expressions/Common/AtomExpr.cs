@@ -41,10 +41,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             if (s.PeekIs(OpenParenthesis)) {
                 // empty tuple
                 if (s.PeekByIs(2, CloseParenthesis)) {
-                    return new TupleExpr<AtomExpr>(parent).ParseEmpty();
+                    return new TupleExpr(parent).ParseEmpty();
                 }
 
-                return Multiple<AtomExpr>.ParseGenerally(parent);
+                return Multiple<InfixExpr>.ParseGenerally(parent);
             }
             if (Spec.Constants.Contains(s.Peek.Type)) {
                 return new ConstantExpr(parent).Parse();

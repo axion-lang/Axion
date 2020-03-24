@@ -1,7 +1,6 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
-using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
@@ -82,7 +81,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                             Stream.Eat(Comma);
                         }
                     }
-                    Index = expressions.Count == 1 ? expressions[0] : new TupleExpr<Expr>(this, expressions);
+                    Index = expressions.Count == 1 ? expressions[0] : new TupleExpr(this, expressions);
                     Stream.Eat(CloseBracket);
                 }
             );

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Source;
 using Axion.Core.Specification;
 using CodeConsole;
@@ -36,13 +38,44 @@ namespace Axion.Core.Processing.Errors {
             StackTrace   = new StackTrace(2).ToString();
         }
 
+        public static void ReportUnexpectedType(Type expectedType, Expr expr) {
+            BlameType blameType;
+            if (expectedType == typeof(AtomExpr)) {
+                blameType = BlameType.ExpectedAtomExpr;
+            }
+            else if (expectedType == typeof(PostfixExpr)) {
+                blameType = BlameType.ExpectedPostfixExpr;
+            }
+            else if (expectedType == typeof(PrefixExpr)) {
+                blameType = BlameType.ExpectedPrefixExpr;
+            }
+            else if (expectedType == typeof(InfixExpr)) {
+                blameType = BlameType.ExpectedInfixExpr;
+            }
+            else {
+                throw new ArgumentException($"Cannot get blame type for {expectedType.Name}");
+            }
+            var ex = new LangException(blameType.Description, blameType.Severity, expr);
+            expr.Source.Blames.Add(ex);
+        }
+
+        public static void ReportMismatchedBracket(Token bracket) {
+            TokenType matchingBracket = bracket.Type.GetMatchingBracket();
+            var ex = new LangException(
+                $"`{bracket.Value}` has no matching `{matchingBracket.GetValue()}`",
+                BlameSeverity.Error,
+                bracket
+            );
+            bracket.Source.Blames.Add(ex);
+        }
+
         public static void ReportUnexpectedSyntax(TokenType expected, Span span) {
             var ex = new LangException(
-                $"Invalid syntax, expected '{expected.GetValue()}', got '{span.Source.TokenStream.Peek.Type.GetValue()}'.",
+                $"Invalid syntax, expected `{expected.GetValue()}`, got `{span.Source.TokenStream.Peek.Type.GetValue()}`.",
                 BlameSeverity.Error,
                 span
             );
-            ex.targetSource.Blames.Add(ex);
+            span.Source.Blames.Add(ex);
         }
 
         public static void Report(BlameType type, Span span) {

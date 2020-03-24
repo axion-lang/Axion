@@ -18,7 +18,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     public class FunctionDef : AtomExpr, IDefinitionExpr {
         private NameExpr? name;
 
-        public NameExpr Name {
+        public NameExpr? Name {
             get => name;
             set => name = BindNode(value);
         }

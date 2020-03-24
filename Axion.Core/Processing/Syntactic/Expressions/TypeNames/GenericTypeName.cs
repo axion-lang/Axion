@@ -42,7 +42,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             SetSpan(
                 () => {
                     if (Target == null) {
-                        Target = TypeName.Parse(this);
+                        Target = Parse(this);
                     }
 
                     Stream.Eat(OpenBracket);

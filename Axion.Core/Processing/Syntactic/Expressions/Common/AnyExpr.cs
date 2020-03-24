@@ -1,8 +1,7 @@
-using System;
 using Axion.Core.Processing.Errors;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
-using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -58,7 +57,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             if (s.PeekIs(Indent, OpenBrace, Colon)) {
                 return new ScopeExpr(parent).Parse();
             }
-            bool isImmutable = s.MaybeEat(KeywordLet);
+            Token immutableKw = s.MaybeEat(KeywordLet) ? s.Token : null;
 
             Expr expr = InfixExpr.Parse(parent);
 
@@ -69,21 +68,20 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                  && !bin.GetParentOfType<ScopeExpr>().IsDefined(name.ToString())) {
                     return new VarDef(
                         parent,
+                        immutableKw,
                         name,
                         null,
-                        bin.Right,
-                        isImmutable
+                        bin.Right
                     );
                 }
-                Type valueType = bin.Left.GetType();
-                if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(TupleExpr<>)) {
+                if (bin.Left is TupleExpr) {
                     return bin;
                 }
             }
 
             // ['let'] name [':' type-name ['=' infix-expr]]
             // -----------^
-            if (!isImmutable && !s.MaybeEat(Colon)) {
+            if (immutableKw == null && !s.MaybeEat(Colon)) {
                 return expr;
             }
 
@@ -103,8 +101,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             }
 
             return new VarDef(
-                parent, varName, type, value,
-                isImmutable
+                parent, immutableKw, varName, type,
+                value
             );
         }
     }

@@ -89,7 +89,7 @@ namespace Axion.Core {
             }
 
             foreach (Token mismatch in lexer.MismatchingPairs) {
-                LangException.Report(BlameType.MismatchedBracket, mismatch);
+                LangException.ReportMismatchedBracket(mismatch);
             }
         }
 

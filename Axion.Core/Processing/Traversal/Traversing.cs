@@ -8,7 +8,6 @@ using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
-using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
 using Axion.Core.Processing.Syntactic.Expressions.Postfix;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
@@ -124,8 +123,7 @@ namespace Axion.Core.Processing.Traversal {
             }
 
             case BinaryExpr bin when bin.Operator.Is(TokenType.OpAssign)
-                                  && bin.Left.GetType().IsGenericType
-                                  && bin.Left.GetType().GetGenericTypeDefinition() == typeof(TupleExpr<>): {
+                                  && bin.Left is TupleExpr tpl: {
                 // (x, y) = GetCoordinates()
                 // <=======================>
                 // unwrappedX = GetCoordinates()
@@ -135,18 +133,17 @@ namespace Axion.Core.Processing.Traversal {
                 (_, int deconstructionIdx) = scope.IndexOf(bin);
                 var deconstructionVar = new VarDef(
                     scope,
+                    new Token(bin.Source, TokenType.KeywordLet),
                     new NameExpr(scope.CreateUniqueId("unwrapped{0}")),
-                    value: bin.Right,
-                    immutable: true
+                    value: bin.Right
                 );
                 scope.Items[deconstructionIdx] = deconstructionVar;
-                var tpl = (TupleExpr<Expr>) bin.Left;
                 for (var i = 0; i < tpl.Expressions.Count; i++) {
                     scope.Items.Insert(
                         deconstructionIdx + i + 1,
                         new VarDef(
                             scope,
-                            (NameExpr) tpl.Expressions[i],
+                            name: (NameExpr) tpl.Expressions[i],
                             value: new MemberAccessExpr(scope, deconstructionVar.Name) {
                                 Member = tpl.Expressions[i]
                             }
@@ -187,7 +184,7 @@ namespace Axion.Core.Processing.Traversal {
                     whileIndex,
                     new VarDef(
                         path.Node,
-                        flagName,
+                        name: flagName,
                         value: new ConstantExpr(path.Node, "true")
                     )
                 );

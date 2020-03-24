@@ -1,7 +1,6 @@
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
-using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -61,7 +60,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             }
             else if (Operator.Is(OpIn)) {
                 // in (list1 or|and list2)
-                if (Right is ParenthesizedExpr<Expr> paren
+                if (Right is ParenthesizedExpr paren
                  && paren.Value is BinaryExpr collections
                  && collections.Operator.Is(OpAnd, OpOr)) {
                     c.Write(

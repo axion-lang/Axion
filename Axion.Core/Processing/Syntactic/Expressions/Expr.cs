@@ -108,12 +108,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             T?                        value,
             [CallerMemberName] string callerName = ""
         ) where T : Expr {
-            if (value == null) {
-                return value;
+            if (value != null) {
+                value.Parent = this;
+                value.Path   = new NodeTreePath(value, GetType().GetProperty(callerName));
             }
-
-            value.Parent = this;
-            value.Path   = new NodeTreePath(value, GetType().GetProperty(callerName));
 
             return value;
         }

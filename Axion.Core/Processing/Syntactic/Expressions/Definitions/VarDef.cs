@@ -15,13 +15,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         public bool IsImmutable { get; }
 
         public VarDef(
-            Expr?     parent    = null,
-            NameExpr? name      = null,
-            TypeName? type      = null,
-            Expr?     value     = null,
-            bool      immutable = false
+            Expr?     parent      = null,
+            Span?     kwImmutable = null,
+            NameExpr? name        = null,
+            TypeName? type        = null,
+            Expr?     value       = null
         ) : base(parent, name, type, value) {
-            IsImmutable = immutable;
+            IsImmutable = kwImmutable != null;
+
+            MarkStart(kwImmutable   ?? name);
+            MarkEnd((value ?? type) ?? name);
         }
 
         public override void ToAxion(CodeWriter c) {

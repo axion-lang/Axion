@@ -39,6 +39,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             Value     = value;
         }
 
+        // TODO: all name references as property
+
         public override void ToAxion(CodeWriter c) {
             c.Write(Name);
             if (ValueType != null) {

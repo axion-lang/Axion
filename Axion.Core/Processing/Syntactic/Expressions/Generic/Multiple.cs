@@ -1,4 +1,5 @@
 using System;
+using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -9,16 +10,31 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
     ///         inner:
     ///             %expr {',' %expr}
     ///     </c>
+    ///     Provides functions for comma-separated expression lists
+    ///     parsing with automatic error reporting. 
     /// </summary>
     public class Multiple<T> : AtomExpr where T : Expr {
         protected Multiple(Expr parent) : base(parent) { }
 
         /// <summary>
-        ///     Parses multiple of ANY expr and ensures that it's similar to type of T.
+        ///     Parses multiple of <see cref="AnyExpr"/> and
+        ///     reports errors if any of them is not compliant to T.
         /// </summary>
-        internal static Multiple<Expr> ParseGenerally(Expr parent) {
-            // TODO: add check for <T> compliance.
-            return Multiple<Expr>.Parse(parent);
+        internal static AtomExpr ParseGenerally(Expr parent) {
+            AtomExpr e = Multiple<Expr>.Parse(parent);
+            if (e is TupleExpr tpl) {
+                foreach (Expr expr in tpl.Expressions) {
+                    if (!(expr is T)) {
+                        LangException.ReportUnexpectedType(typeof(T), expr);
+                    }
+                }
+            }
+            else {
+                if (!(e is T)) {
+                    LangException.ReportUnexpectedType(typeof(T), e);
+                }
+            }
+            return e;
         }
 
         /// <summary>
@@ -26,27 +42,22 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
         ///     expressions with optional parenthesis
         ///     (e.g. tuples)
         /// </summary>
-        internal new static Multiple<T> Parse(Expr parent) {
+        internal new static AtomExpr Parse(Expr parent) {
             TokenStream      s          = parent.Source.TokenStream;
             Func<Expr, Expr> parserFunc = Auxiliary.GetParsingFunction<T>();
             bool             parens     = s.MaybeEat(OpenParenthesis);
             var              list       = new NodeList<Expr>(parent) { parserFunc(parent) };
-
             // tuple
-            if (s.MaybeEat(Comma)) {
-                do {
-                    list.Add(parserFunc(parent));
-                } while (s.MaybeEat(Comma));
+            while (s.MaybeEat(Comma)) {
+                list.Add(parserFunc(parent));
             }
-            
             if (parens) {
                 s.Eat(CloseParenthesis);
-                if (list.Count == 1) {
-                    return new ParenthesizedExpr<T>(list[0]);
-                }
             }
-
-            return new TupleExpr<T>(list.Parent, list);
+            if (list.Count > 1) {
+                return new TupleExpr(list.Parent, list);
+            }
+            return new ParenthesizedExpr(list[0]);
         }
     }
 }

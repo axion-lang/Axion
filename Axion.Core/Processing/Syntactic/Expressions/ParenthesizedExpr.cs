@@ -1,15 +1,16 @@
 using Axion.Core.Processing.CodeGen;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
+namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         parenthesis-expr:
     ///             '(' expr ')';
     ///     </c>
     /// </summary>
-    public class ParenthesizedExpr<T> : Multiple<T> where T : Expr {
+    public class ParenthesizedExpr : AtomExpr {
         private Expr val;
 
         public Expr Value {

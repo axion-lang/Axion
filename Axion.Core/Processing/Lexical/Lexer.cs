@@ -492,7 +492,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             foreach (Token mismatch in lexer.MismatchingPairs) {
-                LangException.Report(BlameType.MismatchedBracket, mismatch);
+                LangException.ReportMismatchedBracket(mismatch);
             }
 
             // remove '{' '}'

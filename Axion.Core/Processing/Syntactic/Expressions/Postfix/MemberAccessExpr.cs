@@ -48,6 +48,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             return this;
         }
 
+        // TODO: check for accessing prop/field existence
+
         public override void ToAxion(CodeWriter c) {
             c.Write(Target, ".", Member);
         }
