@@ -17,21 +17,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
 
         public Expr Condition {
             get => condition;
-            set => condition = BindNode(value);
+            set => condition = Bind(value);
         }
 
         private Expr trueExpr;
 
         public Expr TrueExpr {
             get => trueExpr;
-            set => trueExpr = BindNode(value);
+            set => trueExpr = Bind(value);
         }
 
         private Expr falseExpr;
 
         public Expr FalseExpr {
             get => falseExpr;
-            set => falseExpr = BindNode(value);
+            set => falseExpr = Bind(value);
         }
 
         [NoTraversePath]
@@ -79,7 +79,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write(TrueExpr, " if ", Condition);
             if (FalseExpr != null) {
                 c.Write(" else ", FalseExpr);
@@ -94,10 +94,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             else {
                 c.Write(FalseExpr);
             }
-        }
-
-        public override void ToPython(CodeWriter c) {
-            ToAxion(c);
         }
     }
 }

@@ -16,14 +16,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
 
         public Expr Left {
             get => left;
-            set => left = BindNode(value);
+            set => left = Bind(value);
         }
 
         private Expr right;
 
         public Expr Right {
             get => right;
-            set => right = BindNode(value);
+            set => right = Bind(value);
         }
 
         public Token Operator { get; }
@@ -44,7 +44,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             MarkEnd(Right);
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write(
                 Left, " ", Operator.Value, " ",
                 Right
@@ -89,13 +89,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
                     Right
                 );
             }
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write(
-                Left, " ", Operator.Value, " ",
-                Right
-            );
         }
     }
 }

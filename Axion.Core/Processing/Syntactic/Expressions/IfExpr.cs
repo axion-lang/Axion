@@ -16,21 +16,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public Expr Condition {
             get => condition;
-            set => condition = BindNode(value);
+            set => condition = Bind(value);
         }
 
         private ScopeExpr thenScope;
 
         public ScopeExpr ThenScope {
             get => thenScope;
-            set => thenScope = BindNode(value);
+            set => thenScope = Bind(value);
         }
 
         private ScopeExpr elseScope;
 
         public ScopeExpr ElseScope {
             get => elseScope;
-            set => elseScope = BindNode(value);
+            set => elseScope = Bind(value);
         }
 
         internal IfExpr(
@@ -68,7 +68,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write("if ", Condition, ThenScope);
             if (ElseScope != null) {
                 c.Write("else", ElseScope);
@@ -82,13 +82,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             if (ElseScope != null) {
                 c.WriteLine("else");
                 c.Write(ElseScope);
-            }
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write("if ", Condition, ThenScope);
-            if (ElseScope != null) {
-                c.Write("else", ElseScope);
             }
         }
 

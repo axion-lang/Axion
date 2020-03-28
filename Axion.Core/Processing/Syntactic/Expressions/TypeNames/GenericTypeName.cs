@@ -16,14 +16,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public TypeName Target {
             get => target;
-            set => target = BindNode(value);
+            set => target = Bind(value);
         }
 
         private NodeList<TypeName> typeArguments;
 
         public NodeList<TypeName> TypeArguments {
             get => typeArguments;
-            set => typeArguments = BindNode(value);
+            set => typeArguments = Bind(value);
         }
 
         public GenericTypeName(
@@ -56,7 +56,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write(Target, "[");
             c.AddJoin(",", TypeArguments);
             c.Write("]");
@@ -66,12 +66,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             c.Write(Target, "<");
             c.AddJoin(",", TypeArguments);
             c.Write(">");
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write(Target, "[");
-            c.AddJoin(",", TypeArguments);
-            c.Write("]");
         }
     }
 }

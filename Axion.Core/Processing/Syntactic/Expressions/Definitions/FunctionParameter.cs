@@ -15,21 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///             ID ':' type ['=' infix-expr]
     ///     </c>
     /// </summary>
-    public sealed class FunctionParameter : Expr, IDefinitionExpr, IDecorableExpr {
-        private NameExpr name;
-
-        public NameExpr Name {
-            get => name;
-            set => name = BindNode(value);
-        }
-
-        private Expr defaultValue;
-
-        public Expr DefaultValue {
-            get => defaultValue;
-            set => defaultValue = BindNode(value);
-        }
-
+    public sealed class FunctionParameter : NameDef {
         public FunctionParameter(
             string?   name         = null,
             TypeName? valueType    = null,
@@ -45,9 +31,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             parent
          ?? GetParentFromChildren(name, valueType, defaultValue)
         ) {
-            Name         = name;
-            ValueType    = valueType;
-            DefaultValue = defaultValue;
+            Name      = name;
+            ValueType = valueType;
+            Value     = defaultValue;
         }
 
         public FunctionParameter Parse(HashSet<string> names) {
@@ -68,7 +54,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     names.Add(Name.ToString());
 
                     if (Stream.MaybeEat(OpAssign)) {
-                        DefaultValue = InfixExpr.Parse(this);
+                        Value = InfixExpr.Parse(this);
                     }
                 }
             );
@@ -132,10 +118,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                         param = new FunctionParameter(parent).Parse(names);
                     }
 
-                    if (param.DefaultValue != null) {
+                    if (param.Value != null) {
                         needDefault = true;
                     }
-                    else if (needDefault && param.DefaultValue == null) {
+                    else if (needDefault) {
                         LangException.Report(BlameType.ExpectedDefaultParameterValue, parent);
                     }
 
@@ -165,14 +151,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             return parameters;
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write(Name);
             if (ValueType != null) {
                 c.Write(": ", ValueType);
             }
 
-            if (DefaultValue != null) {
-                c.Write(" = ", DefaultValue);
+            if (Value != null) {
+                c.Write(" = ", Value);
             }
         }
 
@@ -182,19 +168,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             }
 
             c.Write(Name);
-            if (DefaultValue != null) {
-                c.Write(" = ", DefaultValue);
-            }
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write(Name);
-            if (ValueType != null) {
-                c.Write(": ", ValueType);
-            }
-
-            if (DefaultValue != null) {
-                c.Write(" = ", DefaultValue);
+            if (Value != null) {
+                c.Write(" = ", Value);
             }
         }
     }

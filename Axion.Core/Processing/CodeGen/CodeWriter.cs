@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.CodeGen {
         private readonly IndentedTextWriter writer;
         private          bool               lastLineEmpty;
 
-        public int Indent {
+        public int IndentLevel {
             get => writer.Indent;
             set => writer.Indent = value;
         }

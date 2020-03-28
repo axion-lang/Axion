@@ -13,14 +13,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public TypeName Left {
             get => left;
-            set => left = BindNode(value);
+            set => left = Bind(value);
         }
 
         private TypeName right;
 
         public TypeName Right {
             get => right;
-            set => right = BindNode(value);
+            set => right = Bind(value);
         }
 
         public UnionTypeName(

@@ -62,11 +62,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             return this;
         }
 
-        public override string ToString() {
-            return string.Join("", Tokens.Select(t => t.Content));
+        public override void ToDefault(CodeWriter c) {
+            c.Write(string.Join("", Tokens.Select(t => t.Content)));
         }
 
         public override void ToAxion(CodeWriter c) {
+            // Preserve original code formatting
             c.AddJoin(".", Qualifiers);
         }
 
@@ -76,11 +77,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
                 return;
             }
 
-            c.Write(ToString());
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write(ToString());
+            ToDefault(c);
         }
     }
 }

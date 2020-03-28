@@ -14,7 +14,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
 
         public NameExpr LoopName {
             get => loopName;
-            set => loopName = BindNode(value);
+            set => loopName = Bind(value);
         }
 
         public ContinueExpr(
@@ -39,19 +39,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             return this;
         }
 
+        public override void ToDefault(CodeWriter c) {
+            c.Write("continue");
+        }
+
         public override void ToAxion(CodeWriter c) {
             c.Write("continue");
             if (LoopName != null) {
                 c.Write(" ", LoopName);
             }
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write("continue");
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write("continue");
         }
     }
 }

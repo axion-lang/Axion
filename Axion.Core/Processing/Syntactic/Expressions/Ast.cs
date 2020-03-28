@@ -134,9 +134,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             c.WriteLine("program PascalFromAxion;");
             c.WriteLine("var x, y: integer;");
             c.WriteLine("begin");
-            c.Indent++;
+            c.IndentLevel++;
             c.AddJoin("", Items, true);
-            c.Indent--;
+            c.IndentLevel--;
             c.WriteLine("end.");
         }
     }

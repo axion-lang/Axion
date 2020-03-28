@@ -14,14 +14,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public Expr Target {
             get => target;
-            set => target = BindNode(value);
+            set => target = Bind(value);
         }
 
         private Expr member;
 
         public Expr Member {
             get => member;
-            set => member = BindNode(value);
+            set => member = Bind(value);
         }
 
         public MemberAccessExpr(
@@ -50,20 +50,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         // TODO: check for accessing prop/field existence
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write(Target, ".", Member);
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            ToAxion(c);
-        }
-
-        public override void ToPython(CodeWriter c) {
-            ToAxion(c);
-        }
-
-        public override void ToPascal(CodeWriter c) {
-            ToAxion(c);
         }
     }
 }

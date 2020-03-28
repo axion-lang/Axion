@@ -20,7 +20,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public NodeList<Expr> Expressions {
             get => expressions;
-            set => expressions = BindNode(value);
+            set => expressions = Bind(value);
         }
 
         [NoTraversePath]
@@ -50,19 +50,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
-            c.Write("(");
-            c.AddJoin(", ", Expressions);
-            c.Write(")");
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write("(");
-            c.AddJoin(", ", Expressions);
-            c.Write(")");
-        }
-
-        public override void ToPython(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write("(");
             c.AddJoin(", ", Expressions);
             c.Write(")");

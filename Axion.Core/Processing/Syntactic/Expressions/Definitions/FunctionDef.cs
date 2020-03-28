@@ -20,28 +20,28 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public NameExpr? Name {
             get => name;
-            set => name = BindNode(value);
+            set => name = Bind(value);
         }
 
         private TypeName returnType;
 
         public TypeName ReturnType {
             get => returnType;
-            set => returnType = BindNode(value);
+            set => returnType = Bind(value);
         }
 
         private NodeList<FunctionParameter> parameters;
 
         public NodeList<FunctionParameter> Parameters {
             get => parameters;
-            set => parameters = BindNode(value);
+            set => parameters = Bind(value);
         }
 
         private ScopeExpr scope;
 
         public ScopeExpr Scope {
             get => scope;
-            set => scope = BindNode(value);
+            set => scope = Bind(value);
         }
 
         [NoTraversePath]

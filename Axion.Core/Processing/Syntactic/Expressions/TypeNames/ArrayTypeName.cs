@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public TypeName ElementType {
             get => elementType;
-            set => elementType = BindNode(value);
+            set => elementType = Bind(value);
         }
 
         public ArrayTypeName(
@@ -40,11 +40,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
-            c.Write(ElementType, "[]");
-        }
-
-        public override void ToCSharp(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write(ElementType, "[]");
         }
 

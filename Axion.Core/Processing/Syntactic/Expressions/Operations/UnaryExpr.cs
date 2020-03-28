@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
 
         public Expr Value {
             get => val;
-            set => val = BindNode(value);
+            set => val = Bind(value);
         }
 
         public OperatorToken Operator { get; }
@@ -48,7 +48,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             MarkEnd(Value);
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             if (Operator.Side == InputSide.Right) {
                 c.Write(Operator.Value, " (", Value, ")");
             }
@@ -69,10 +69,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             else {
                 c.Write("(", Value, ") ", op);
             }
-        }
-
-        public override void ToPython(CodeWriter c) {
-            ToAxion(c);
         }
     }
 }

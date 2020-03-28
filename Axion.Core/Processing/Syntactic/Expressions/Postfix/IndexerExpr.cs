@@ -17,14 +17,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public Expr Target {
             get => target;
-            set => target = BindNode(value);
+            set => target = Bind(value);
         }
 
         private Expr index;
 
         public Expr Index {
             get => index;
-            set => index = BindNode(value);
+            set => index = Bind(value);
         }
 
         public IndexerExpr(
@@ -88,7 +88,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write(Target);
             if (Index is SliceExpr) {
                 c.Write(Index);
@@ -96,18 +96,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             else {
                 c.Write("[", Index, "]");
             }
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            ToAxion(c);
-        }
-
-        public override void ToPython(CodeWriter c) {
-            ToAxion(c);
-        }
-
-        public override void ToPascal(CodeWriter c) {
-            ToAxion(c);
         }
     }
 }

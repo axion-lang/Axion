@@ -25,7 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public NodeList<Expr> Items {
             get => items;
-            set => items = BindNode(value);
+            set => items = Bind(value);
         }
 
         internal ScopeExpr(
@@ -228,11 +228,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 c.WriteLine(" {");
             }
 
-            c.Indent++;
+            c.IndentLevel++;
             c.MaybeWriteLine();
             c.AddJoin("", Items, true);
             c.MaybeWriteLine();
-            c.Indent--;
+            c.IndentLevel--;
 
             if (inAnonFn) {
                 c.Write("}");
@@ -241,7 +241,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public override void ToCSharp(CodeWriter c) {
             c.WriteLine("{");
-            c.Indent++;
+            c.IndentLevel++;
             foreach (Expr item in Items) {
                 c.Write(item);
                 if (!(Parent is ClassDef || Parent is ModuleDef)
@@ -256,17 +256,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 c.MaybeWriteLine();
             }
 
-            c.Indent--;
+            c.IndentLevel--;
             c.Write("}");
             c.MaybeWriteLine();
         }
 
         public override void ToPython(CodeWriter c) {
             c.Write(":");
-            c.Indent++;
+            c.IndentLevel++;
             c.WriteLine();
             c.AddJoin("", Items, true);
-            c.Indent--;
+            c.IndentLevel--;
             c.MaybeWriteLine();
         }
     }

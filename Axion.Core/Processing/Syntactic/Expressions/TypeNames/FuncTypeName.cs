@@ -11,14 +11,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public TypeName ArgsType {
             get => argsType;
-            set => argsType = BindNode(value);
+            set => argsType = Bind(value);
         }
 
         private TypeName returnType;
 
         public TypeName ReturnType {
             get => returnType;
-            set => returnType = BindNode(value);
+            set => returnType = Bind(value);
         }
 
         public FuncTypeName(

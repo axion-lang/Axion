@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public MacroDef? MacroDef {
             get => macroDef;
-            private set => macroDef = BindNode(value);
+            private set => macroDef = Bind(value);
         }
 
         public List<Span> Expressions { get; } = new List<Span>();
@@ -65,20 +65,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.AddJoin(" ", Expressions);
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            ToAxion(c);
-        }
-
-        public override void ToPython(CodeWriter c) {
-            ToAxion(c);
-        }
-
-        public override void ToPascal(CodeWriter c) {
-            ToAxion(c);
         }
     }
 }

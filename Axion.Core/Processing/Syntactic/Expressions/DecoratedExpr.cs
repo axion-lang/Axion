@@ -12,14 +12,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public NodeList<Expr> Decorators {
             get => decorators;
-            set => decorators = BindNode(value);
+            set => decorators = Bind(value);
         }
 
         private Expr target;
 
         public Expr Target {
             get => target;
-            set => target = BindNode(value);
+            set => target = Bind(value);
         }
 
         internal DecorableExpr(

@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public NodeList<TypeName> Types {
             get => types;
-            set => types = BindNode(value);
+            set => types = Bind(value);
         }
 
         public TupleTypeName(
@@ -42,19 +42,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
-            c.Write("(");
-            c.AddJoin(", ", types);
-            c.Write(")");
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write("(");
-            c.AddJoin(", ", types);
-            c.Write(")");
-        }
-
-        public override void ToPython(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write("(");
             c.AddJoin(", ", types);
             c.Write(")");

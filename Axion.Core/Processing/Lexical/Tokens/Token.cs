@@ -51,15 +51,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             return false;
         }
 
-        public override void ToAxion(CodeWriter c) {
-            c.Write(Value);
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write(Value);
-        }
-
-        public override void ToPython(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write(Value);
         }
 

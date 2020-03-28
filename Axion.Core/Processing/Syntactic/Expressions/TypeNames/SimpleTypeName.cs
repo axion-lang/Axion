@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public NameExpr Name {
             get => name;
-            set => name = BindNode(value);
+            set => name = Bind(value);
         }
 
         public SimpleTypeName(Expr parent) : base(parent) { }
@@ -27,15 +27,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             Name = new NameExpr(name);
         }
 
-        public override void ToAxion(CodeWriter c) {
-            c.Write(Name);
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write(Name);
-        }
-
-        public override void ToPython(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write(Name);
         }
     }

@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public Expr Value {
             get => val;
-            set => val = BindNode(value);
+            set => val = Bind(value);
         }
 
         [NoTraversePath]
@@ -43,15 +43,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
-            c.Write("await ", Value);
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write("await ", Value);
-        }
-
-        public override void ToPython(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write("await ", Value);
         }
     }

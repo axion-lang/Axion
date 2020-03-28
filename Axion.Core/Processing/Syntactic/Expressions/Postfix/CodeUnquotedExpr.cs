@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public Expr Value {
             get => val;
-            set => val = BindNode(value);
+            set => val = Bind(value);
         }
 
         [NoTraversePath]

@@ -17,14 +17,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public Expr Target {
             get => target;
-            set => target = BindNode(value);
+            set => target = Bind(value);
         }
 
         private NodeList<FuncCallArg> args;
 
         public NodeList<FuncCallArg> Args {
             get => args;
-            set => args = BindNode(value);
+            set => args = Bind(value);
         }
 
         public FuncCallExpr(
@@ -74,14 +74,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public NameExpr Name {
             get => name;
-            set => name = BindNode(value);
+            set => name = Bind(value);
         }
 
         private Expr val;
 
         public Expr Value {
             get => val;
-            set => val = BindNode(value);
+            set => val = Bind(value);
         }
 
         internal FuncCallArg(
@@ -162,7 +162,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             return args;
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             if (Name != null) {
                 c.Write(Name, " = ");
             }
@@ -176,10 +176,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             }
 
             c.Write(Value);
-        }
-
-        public override void ToPython(CodeWriter c) {
-            ToAxion(c);
         }
     }
 }

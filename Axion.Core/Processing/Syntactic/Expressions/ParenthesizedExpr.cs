@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public Expr Value {
             get => val;
-            set => val = BindNode(value);
+            set => val = Bind(value);
         }
 
         [NoTraversePath]
@@ -26,19 +26,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             MarkPosition(Value);
         }
 
-        public override void ToAxion(CodeWriter c) {
-            c.Write("(", Value, ")");
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write("(", Value, ")");
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write("(", Value, ")");
-        }
-
-        public override void ToPascal(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write("(", Value, ")");
         }
     }

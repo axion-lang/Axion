@@ -23,14 +23,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public ScopeExpr Scope {
             get => scope;
-            set => scope = BindNode(value);
+            set => scope = Bind(value);
         }
 
         private NameExpr name;
 
         public NameExpr Name {
             get => name;
-            set => name = BindNode(value);
+            set => name = Bind(value);
         }
 
         public readonly Dictionary<string, string> NamedSyntaxParts = new Dictionary<string, string>();
@@ -176,10 +176,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 "macro ", Name, "(", Syntax,
                 ")", Scope
             );
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            throw new NotSupportedException();
         }
     }
 }

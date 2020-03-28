@@ -12,21 +12,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         internal Expr From {
             get => from;
-            set => from = BindNode(value);
+            set => from = Bind(value);
         }
 
         private Expr to;
 
         public Expr To {
             get => to;
-            set => to = BindNode(value);
+            set => to = Bind(value);
         }
 
         private Expr step;
 
         public Expr Step {
             get => step;
-            set => step = BindNode(value);
+            set => step = Bind(value);
         }
 
         public SliceExpr(
@@ -45,7 +45,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             MarkPosition(from ?? to ?? step, step ?? to ?? from);
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write(
                 "[", From, ":", To,
                 ":", Step, "]"
@@ -57,10 +57,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 ".Slice(", From, ", ", To,
                 ", ", Step, ")"
             );
-        }
-
-        public override void ToPython(CodeWriter c) {
-            ToAxion(c);
         }
     }
 }

@@ -15,21 +15,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
 
         public Expr Condition {
             get => condition;
-            set => condition = BindNode(value);
+            set => condition = Bind(value);
         }
 
         private ScopeExpr scope;
 
         public ScopeExpr Scope {
             get => scope;
-            set => scope = BindNode(value);
+            set => scope = Bind(value);
         }
 
         private ScopeExpr? noBreakScope;
 
         public ScopeExpr? NoBreakScope {
             get => noBreakScope;
-            set => noBreakScope = BindNode(value);
+            set => noBreakScope = Bind(value);
         }
 
         public WhileExpr(

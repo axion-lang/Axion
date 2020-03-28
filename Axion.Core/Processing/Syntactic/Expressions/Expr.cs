@@ -81,7 +81,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         [NoTraversePath]
         public virtual TypeName ValueType {
             get => valueType;
-            protected set => valueType = BindNode(value);
+            protected set => valueType = Bind(value);
         }
 
         internal Type        MacroExpectType;
@@ -104,7 +104,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             );
         }
 
-        protected T? BindNode<T>(
+        protected T? Bind<T>(
             T?                        value,
             [CallerMemberName] string callerName = ""
         ) where T : Expr {
@@ -116,7 +116,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return value;
         }
 
-        protected NodeList<T> BindNode<T>(NodeList<T> value)
+        protected NodeList<T> Bind<T>(NodeList<T> value)
             where T : Expr {
             if (value != null && value.Count > 0) {
                 for (var i = 0; i < value.Count; i++) {

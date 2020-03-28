@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public Expr Value {
             get => val;
-            set => val = BindNode(value);
+            set => val = Bind(value);
         }
 
         public bool IsYieldFrom { get; set; }
@@ -47,7 +47,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write("yield ");
             if (IsYieldFrom) {
                 c.Write("from ");
@@ -58,15 +58,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public override void ToCSharp(CodeWriter c) {
             c.Write("yield return ", Value);
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write("yield ");
-            if (IsYieldFrom) {
-                c.Write("from ");
-            }
-
-            c.Write(Value);
         }
     }
 }

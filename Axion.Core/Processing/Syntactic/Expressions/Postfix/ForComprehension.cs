@@ -19,35 +19,35 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         [NoTraversePath]
         public Expr Target {
             get => target;
-            set => target = BindNode(value);
+            set => target = Bind(value);
         }
 
         private Expr item;
 
         public Expr Item {
             get => item;
-            set => item = BindNode(value);
+            set => item = Bind(value);
         }
 
         private Expr iterable;
 
         public Expr Iterable {
             get => iterable;
-            set => iterable = BindNode(value);
+            set => iterable = Bind(value);
         }
 
         private NodeList<Expr> conditions;
 
         public NodeList<Expr> Conditions {
             get => conditions;
-            set => conditions = BindNode(value);
+            set => conditions = Bind(value);
         }
 
         private Expr right;
 
         public Expr Right {
             get => right;
-            set => right = BindNode(value);
+            set => right = Bind(value);
         }
 
         public          bool IsGenerator;
@@ -104,7 +104,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             if (!IsNested) {
                 c.Write(Target);
             }
@@ -132,10 +132,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             if (!IsNested) {
                 c.Write(" select ", Target);
             }
-        }
-
-        public override void ToPython(CodeWriter c) {
-            ToAxion(c);
         }
     }
 }

@@ -40,15 +40,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             return this;
         }
 
-        public override void ToAxion(CodeWriter c) {
-            c.Write(Literal);
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write(Literal);
-        }
-
-        public override void ToPython(CodeWriter c) {
+        public override void ToDefault(CodeWriter c) {
             c.Write(Literal);
         }
     }

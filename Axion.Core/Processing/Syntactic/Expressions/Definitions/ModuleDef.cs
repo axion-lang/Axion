@@ -14,14 +14,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public NameExpr Name {
             get => name;
-            set => name = BindNode(value);
+            set => name = Bind(value);
         }
 
         private ScopeExpr scope;
 
         public ScopeExpr Scope {
             get => scope;
-            set => scope = BindNode(value);
+            set => scope = Bind(value);
         }
 
         internal ModuleDef(
