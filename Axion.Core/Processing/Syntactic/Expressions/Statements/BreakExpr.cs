@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -38,17 +37,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             );
 
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write("break");
-        }
-
-        public override void ToAxion(CodeWriter c) {
-            c.Write("break");
-            if (LoopName != null) {
-                c.Write(" ", LoopName);
-            }
         }
     }
 }

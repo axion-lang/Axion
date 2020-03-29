@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
@@ -25,33 +24,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
             MarkStart(kwImmutable   ?? name);
             MarkEnd((value ?? type) ?? name);
-        }
-
-        public override void ToAxion(CodeWriter c) {
-            if (IsImmutable) {
-                c.Write("let ");
-            }
-
-            c.Write(Name);
-            if (ValueType != null) {
-                c.Write(": ", ValueType);
-            }
-
-            if (Value != null) {
-                c.Write(" = ", Value);
-            }
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            if (Value == null) {
-                c.Write(ValueType, " ", Name);
-            }
-            else {
-                c.Write(
-                    (object) ValueType ?? "var", " ", Name, " = ",
-                    Value
-                );
-            }
         }
     }
 }

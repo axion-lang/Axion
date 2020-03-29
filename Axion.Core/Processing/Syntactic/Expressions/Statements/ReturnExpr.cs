@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -44,13 +43,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
                 }
             );
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write("return");
-            if (Value != null) {
-                c.Write(" ", Value);
-            }
         }
     }
 }

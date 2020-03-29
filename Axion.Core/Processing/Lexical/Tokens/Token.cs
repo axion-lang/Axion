@@ -1,5 +1,4 @@
 ﻿using System.Web;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Source;
 using Newtonsoft.Json;
@@ -49,10 +48,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             }
 
             return false;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write(Value);
         }
 
         public override string ToString() {

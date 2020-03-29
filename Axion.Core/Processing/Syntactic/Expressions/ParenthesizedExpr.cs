@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
@@ -24,10 +23,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         internal ParenthesizedExpr(Expr value) : base(value.Parent) {
             Value = value;
             MarkPosition(Value);
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write("(", Value, ")");
         }
     }
 }

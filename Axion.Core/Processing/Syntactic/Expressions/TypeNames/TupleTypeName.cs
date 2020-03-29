@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Axion.Core.Processing.CodeGen;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
@@ -40,12 +39,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                 }
             );
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write("(");
-            c.AddJoin(", ", types);
-            c.Write(")");
         }
     }
 }

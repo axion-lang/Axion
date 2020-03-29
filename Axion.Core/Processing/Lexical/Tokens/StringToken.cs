@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Web;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Source;
 using Axion.Core.Specification;
@@ -36,33 +34,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public bool HasPrefix(string prefix) {
             return Prefixes.Contains(prefix.ToLower())
                 || Prefixes.Contains(prefix.ToUpper());
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            if (HasPrefix("f")) {
-                c.Write("$");
-            }
-
-            c.Write("\"", HttpUtility.JavaScriptStringEncode(Content));
-            if (!IsUnclosed) {
-                c.Write("\"");
-            }
-        }
-
-        public override void ToPython(CodeWriter c) {
-            if (HasPrefix("f")) {
-                c.Write("f");
-            }
-
-            if (HasPrefix("r")) {
-                c.Write("r");
-            }
-
-            c.Write(IsMultiline ? "\"\"\"" : "\"");
-            c.Write(HttpUtility.JavaScriptStringEncode(Content));
-            if (!IsUnclosed) {
-                c.Write(IsMultiline ? "\"\"\"" : "\"");
-            }
         }
     }
 

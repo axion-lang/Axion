@@ -32,16 +32,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 }
 
                 while (true) {
-                    int newPrecedence;
+                    int newPrecedence = -1;
                     if (s.Peek is OperatorToken opToken) {
                         newPrecedence = opToken.Precedence;
                     }
                     // NOTE: this condition disallows identifiers to be used as operators.
                     else if (!s.Token.Is(Newline, Outdent) && s.PeekIs(Identifier)) {
                         newPrecedence = 4;
-                    }
-                    else {
-                        break;
                     }
 
                     if (newPrecedence < precedence) {

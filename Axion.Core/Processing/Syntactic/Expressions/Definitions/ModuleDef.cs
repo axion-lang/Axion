@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -50,20 +49,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 }
             );
             return this;
-        }
-
-        public override void ToAxion(CodeWriter c) {
-            c.Write("module ", Name, Scope);
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write("namespace ", Name);
-            c.WriteLine();
-            c.Write(Scope);
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.AddJoin("", Scope.Items, true);
         }
     }
 }

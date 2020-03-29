@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
@@ -169,13 +168,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 pattern = new ExpressionPattern(fn);
             }
             return pattern;
-        }
-
-        public override void ToAxion(CodeWriter c) {
-            c.Write(
-                "macro ", Name, "(", Syntax,
-                ")", Scope
-            );
         }
     }
 }

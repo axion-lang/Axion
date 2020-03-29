@@ -1,5 +1,4 @@
-﻿using Axion.Core.Processing.CodeGen;
-using Axion.Core.Source;
+﻿using Axion.Core.Source;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class CommentToken : Token {
@@ -15,22 +14,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         ) : base(source, TokenType.Comment, value, content) {
             IsUnclosed  = isUnclosed;
             IsMultiline = isMultiline;
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            if (IsMultiline) {
-                c.Write("/*" + Content);
-                if (!IsUnclosed) {
-                    c.Write("*/");
-                }
-            }
-            else {
-                c.Write("//" + Content);
-            }
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write("#", Content);
         }
     }
 }

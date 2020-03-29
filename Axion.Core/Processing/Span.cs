@@ -1,5 +1,3 @@
-using System;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Source;
 using Newtonsoft.Json;
 
@@ -44,46 +42,6 @@ namespace Axion.Core.Processing {
         internal void MarkPosition(Span start, Span end) {
             Start = start.Start;
             End   = end.End;
-        }
-
-        /// <summary>
-        ///     Default transpiling function for code span.
-        ///     If span has not 
-        /// </summary>
-        public virtual void ToDefault(CodeWriter c) {
-            throw new NotSupportedException($"{GetType().FullName}");
-        }
-
-        /// <summary>
-        ///     Converts this code span
-        ///     to it's string representation in Axion language.
-        /// </summary>
-        public virtual void ToAxion(CodeWriter c) {
-            ToDefault(c);
-        }
-
-        /// <summary>
-        ///     Converts this code span
-        ///     to it's string representation in C# language.
-        /// </summary>
-        public virtual void ToCSharp(CodeWriter c) {
-            ToDefault(c);
-        }
-
-        /// <summary>
-        ///     Converts this code span
-        ///     to it's string representation in Python language.
-        /// </summary>
-        public virtual void ToPython(CodeWriter c) {
-            ToDefault(c);
-        }
-
-        /// <summary>
-        ///     Converts this code span
-        ///     to it's string representation in Pascal language.
-        /// </summary>
-        public virtual void ToPascal(CodeWriter c) {
-            ToDefault(c);
         }
 
         public override string ToString() {

@@ -1,5 +1,4 @@
-﻿using Axion.Core.Processing.CodeGen;
-using Axion.Core.Processing.Syntactic.Expressions.Common;
+﻿using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
@@ -66,30 +65,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
             );
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write("if ", Condition, ThenScope);
-            if (ElseScope != null) {
-                c.Write("else", ElseScope);
-            }
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write("if (", Condition);
-            c.WriteLine(")");
-            c.Write(ThenScope);
-            if (ElseScope != null) {
-                c.WriteLine("else");
-                c.Write(ElseScope);
-            }
-        }
-
-        public override void ToPascal(CodeWriter c) {
-            c.Write("if ", Condition, " then", ThenScope);
-            if (ElseScope != null) {
-                c.Write("else", ElseScope);
-            }
         }
     }
 }

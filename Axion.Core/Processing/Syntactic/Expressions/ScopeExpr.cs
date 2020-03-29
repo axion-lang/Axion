@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
-using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -220,54 +218,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
 
             return Newline;
-        }
-
-        public override void ToAxion(CodeWriter c) {
-            bool inAnonFn = Parent is FunctionDef fn && fn.Name == null;
-            if (inAnonFn) {
-                c.WriteLine(" {");
-            }
-
-            c.IndentLevel++;
-            c.MaybeWriteLine();
-            c.AddJoin("", Items, true);
-            c.MaybeWriteLine();
-            c.IndentLevel--;
-
-            if (inAnonFn) {
-                c.Write("}");
-            }
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.WriteLine("{");
-            c.IndentLevel++;
-            foreach (Expr item in Items) {
-                c.Write(item);
-                if (!(Parent is ClassDef || Parent is ModuleDef)
-                 && !(item is IDefinitionExpr
-                   || item is IfExpr
-                   || item is WhileExpr
-                   || item is MacroApplicationExpr)
-                 || item is VarDef) {
-                    c.Write(";");
-                }
-
-                c.MaybeWriteLine();
-            }
-
-            c.IndentLevel--;
-            c.Write("}");
-            c.MaybeWriteLine();
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write(":");
-            c.IndentLevel++;
-            c.WriteLine();
-            c.AddJoin("", Items, true);
-            c.IndentLevel--;
-            c.MaybeWriteLine();
         }
     }
 

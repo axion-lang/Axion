@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 
@@ -46,29 +45,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             Value    = value;
             MarkStart(Operator);
             MarkEnd(Value);
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            if (Operator.Side == InputSide.Right) {
-                c.Write(Operator.Value, " (", Value, ")");
-            }
-            else {
-                c.Write("(", Value, ") ", Operator.Value);
-            }
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            string op = Operator.Value;
-            if (op == "not") {
-                op = "!";
-            }
-
-            if (Operator.Side == InputSide.Right) {
-                c.Write(op, " (", Value, ")");
-            }
-            else {
-                c.Write("(", Value, ") ", op);
-            }
         }
     }
 }

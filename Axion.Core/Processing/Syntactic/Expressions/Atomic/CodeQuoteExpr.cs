@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -45,10 +44,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
                 }
             );
             return this;
-        }
-
-        public override void ToAxion(CodeWriter c) {
-            c.Write("{{", Scope, "}}");
         }
     }
 }

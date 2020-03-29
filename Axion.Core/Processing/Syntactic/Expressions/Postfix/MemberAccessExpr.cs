@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -49,9 +48,5 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         }
 
         // TODO: check for accessing prop/field existence
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write(Target, ".", Member);
-        }
     }
 }

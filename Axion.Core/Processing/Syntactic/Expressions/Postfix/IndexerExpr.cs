@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
@@ -86,16 +85,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 }
             );
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write(Target);
-            if (Index is SliceExpr) {
-                c.Write(Index);
-            }
-            else {
-                c.Write("[", Index, "]");
-            }
         }
     }
 }

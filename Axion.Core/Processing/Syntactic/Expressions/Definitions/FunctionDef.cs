@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
@@ -131,54 +130,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 }
             );
             return this;
-        }
-
-        public override void ToAxion(CodeWriter c) {
-            c.Write("fn ");
-            if (Name != null) {
-                c.Write(Name, " ");
-            }
-
-            if (Parameters.Count > 0) {
-                c.Write("(");
-                c.AddJoin(", ", Parameters);
-                c.Write(") ");
-            }
-
-            if (ValueType != null) {
-                c.Write("-> ", ValueType);
-            }
-
-            c.Write(Scope);
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            if (Name == null) {
-                c.Write("(");
-                c.AddJoin(", ", Parameters);
-                c.Write(") => ", Scope);
-            }
-            else {
-                // BUG type inference stuck in infinite loop (get-value in MathExprParser)
-                c.Write(
-                    "public ", ValueType, " ", Name,
-                    "("
-                );
-                c.AddJoin(", ", Parameters);
-                c.WriteLine(")");
-                c.Write(Scope);
-            }
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write("def ", Name, "(");
-            c.AddJoin(", ", Parameters);
-            c.Write(")");
-            if (ValueType != null) {
-                c.Write(" -> ", ValueType);
-            }
-
-            c.Write(Scope);
         }
     }
 }

@@ -28,27 +28,27 @@ while levelWidth < h
         r = 0
         while r < levelWidth
             if rnd.Next(5) == 0 and not lastWasDecor
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Cyan
                 Console.Write(decorations[rnd.Next(decorations.Length)])
                 lastWasDecor = true
             else
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.ForegroundColor = ConsoleColor.DarkGreen
                 Console.Write("/")
                 lastWasDecor = false
             r++
 
-        Console.ForegroundColor = ConsoleColor.DarkGreen;
+        Console.ForegroundColor = ConsoleColor.DarkGreen
         # Thin stem
         Console.Write("|")
         # Right side \\\\\
         r = 0
         while r < levelWidth
             if rnd.Next(5) == 0 and not lastWasDecor
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Cyan
                 Console.Write(decorations[rnd.Next(decorations.Length)])
                 lastWasDecor = true
             else
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.ForegroundColor = ConsoleColor.DarkGreen
                 Console.Write("\\")
                 lastWasDecor = false
             r++
@@ -59,7 +59,7 @@ while levelWidth < h
     levelWidth++
     treeSpaces--
 
-Console.ForegroundColor = ConsoleColor.DarkYellow;
+Console.ForegroundColor = ConsoleColor.DarkYellow
 
 # Stem below the tree
 stem-width: int = h / 3

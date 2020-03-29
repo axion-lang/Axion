@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.MacroPatterns;
@@ -63,10 +62,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
             );
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.AddJoin(" ", Expressions);
         }
     }
 }

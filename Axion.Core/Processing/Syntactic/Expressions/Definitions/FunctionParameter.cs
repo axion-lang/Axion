@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
@@ -149,28 +148,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             }
 
             return parameters;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write(Name);
-            if (ValueType != null) {
-                c.Write(": ", ValueType);
-            }
-
-            if (Value != null) {
-                c.Write(" = ", Value);
-            }
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            if (!(Parent is FunctionDef f && f.Name == null)) {
-                c.Write(ValueType, " ");
-            }
-
-            c.Write(Name);
-            if (Value != null) {
-                c.Write(" = ", Value);
-            }
         }
     }
 }

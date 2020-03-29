@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -77,23 +76,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
                 }
             );
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write(TrueExpr, " if ", Condition);
-            if (FalseExpr != null) {
-                c.Write(" else ", FalseExpr);
-            }
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write(Condition, " ? ", TrueExpr, " : ");
-            if (FalseExpr == null) {
-                c.Write("default");
-            }
-            else {
-                c.Write(FalseExpr);
-            }
         }
     }
 }

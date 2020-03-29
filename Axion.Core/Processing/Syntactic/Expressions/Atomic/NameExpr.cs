@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -60,24 +59,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
                 }
             );
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write(string.Join("", Tokens.Select(t => t.Content)));
-        }
-
-        public override void ToAxion(CodeWriter c) {
-            // Preserve original code formatting
-            c.AddJoin(".", Qualifiers);
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            if (IsSimple && Qualifiers[0].Content == "self") {
-                c.Write("this");
-                return;
-            }
-
-            ToDefault(c);
         }
     }
 }

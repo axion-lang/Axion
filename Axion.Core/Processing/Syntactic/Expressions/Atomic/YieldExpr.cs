@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
@@ -45,19 +44,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
                 }
             );
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write("yield ");
-            if (IsYieldFrom) {
-                c.Write("from ");
-            }
-
-            c.Write(Value);
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write("yield return ", Value);
         }
     }
 }

@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
@@ -40,39 +39,5 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         // TODO: all name references as property
-
-        public override void ToAxion(CodeWriter c) {
-            c.Write(Name);
-            if (ValueType != null) {
-                c.Write(": ", ValueType);
-            }
-
-            if (Value != null) {
-                c.Write(" = ", Value);
-            }
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            if (Value == null) {
-                c.Write(ValueType, " ", Name);
-            }
-            else {
-                c.Write(
-                    (object) ValueType ?? "var", " ", Name, " = ",
-                    Value
-                );
-            }
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write(Name);
-            if (ValueType != null) {
-                c.Write(": ", ValueType);
-            }
-
-            if (Value != null) {
-                c.Write(" = ", Value);
-            }
-        }
     }
 }

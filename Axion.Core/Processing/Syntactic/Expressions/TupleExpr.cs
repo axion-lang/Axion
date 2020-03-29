@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
@@ -48,12 +47,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Stream.Eat(OpenParenthesis);
             Stream.Eat(CloseParenthesis);
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write("(");
-            c.AddJoin(", ", Expressions);
-            c.Write(")");
         }
     }
 }

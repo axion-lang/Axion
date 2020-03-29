@@ -108,7 +108,7 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        internal static SourceUnit MakeSourceFromFile([CallerMemberName] string fileName = null) {
+        internal static SourceUnit MakeSourceFromFile(string fileName) {
             return SourceUnit.FromFile(new FileInfo(Path.Combine(InPath, fileName + SourceUnit.SourceFileExt)));
         }
 

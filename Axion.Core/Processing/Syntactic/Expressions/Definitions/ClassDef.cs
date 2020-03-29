@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -113,42 +112,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 }
             );
             return this;
-        }
-
-        public override void ToAxion(CodeWriter c) {
-            c.Write("class ", Name);
-            if (DataMembers.Count > 0) {
-                c.Write("(");
-                c.AddJoin(", ", DataMembers);
-                c.Write(")");
-            }
-            if (Bases.Count > 0) {
-                c.Write(" <- ");
-                c.AddJoin(", ", Bases);
-            }
-
-            c.Write(Scope);
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write("public class ", Name);
-            if (Bases.Count > 0) {
-                c.Write(" : ");
-                c.AddJoin(", ", Bases);
-            }
-            c.WriteLine();
-            c.Write(Scope);
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write("class ", Name);
-            if (Bases.Count > 0) {
-                c.Write("(");
-                c.AddJoin(", ", Bases);
-                c.Write(")");
-            }
-
-            c.Write(Scope);
         }
     }
 }

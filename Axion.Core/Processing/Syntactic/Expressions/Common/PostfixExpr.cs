@@ -48,7 +48,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
 
             if (s.MaybeEat(OpIncrement, OpDecrement)) {
                 var op = (OperatorToken) s.Token;
-                op.Side = InputSide.Right;
+                op.Side = InputSide.Left;
                 value   = new UnaryExpr(parent, op, value);
             }
 

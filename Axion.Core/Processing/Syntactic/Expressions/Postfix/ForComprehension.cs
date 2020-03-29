@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
@@ -102,36 +101,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 }
             );
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            if (!IsNested) {
-                c.Write(Target);
-            }
-
-            c.Write(
-                " for ",
-                Item,
-                " in ",
-                Iterable,
-                Right
-            );
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write("from ", Item, " in ", Iterable);
-            if (Right != null) {
-                c.Write(" ", Right);
-            }
-
-            if (Conditions.Count > 0) {
-                c.Write(" where ");
-                c.AddJoin(" && ", Conditions);
-            }
-
-            if (!IsNested) {
-                c.Write(" select ", Target);
-            }
         }
     }
 }

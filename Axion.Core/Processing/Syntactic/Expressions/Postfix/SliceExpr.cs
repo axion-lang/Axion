@@ -1,5 +1,3 @@
-using Axion.Core.Processing.CodeGen;
-
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
@@ -43,20 +41,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             Step = step;
 
             MarkPosition(from ?? to ?? step, step ?? to ?? from);
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write(
-                "[", From, ":", To,
-                ":", Step, "]"
-            );
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write(
-                ".Slice(", From, ", ", To,
-                ", ", Step, ")"
-            );
         }
     }
 }

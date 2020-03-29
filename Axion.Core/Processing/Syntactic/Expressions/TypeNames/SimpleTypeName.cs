@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
@@ -25,10 +24,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public SimpleTypeName(string name) {
             Name = new NameExpr(name);
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write(Name);
         }
     }
 }

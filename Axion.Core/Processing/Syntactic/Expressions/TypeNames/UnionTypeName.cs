@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
@@ -47,10 +46,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                 }
             );
             return this;
-        }
-
-        public override void ToAxion(CodeWriter c) {
-            c.Write(Left, " | ", Right);
         }
     }
 }

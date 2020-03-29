@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -62,27 +61,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
                 }
             );
             return this;
-        }
-
-        public override void ToAxion(CodeWriter c) {
-            c.Write("while ", Condition, Scope);
-            if (NoBreakScope != null) {
-                c.Write("nobreak", NoBreakScope);
-            }
-        }
-
-        public override void ToCSharp(CodeWriter c) {
-            c.Write("while (", Condition);
-            c.WriteLine(")");
-            c.Write(Scope);
-        }
-
-        public override void ToPython(CodeWriter c) {
-            c.Write("while ", Condition, Scope);
-        }
-
-        public override void ToPascal(CodeWriter c) {
-            c.Write("while ", Condition, " do", Scope);
         }
     }
 }

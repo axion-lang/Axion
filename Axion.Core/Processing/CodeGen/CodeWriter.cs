@@ -11,10 +11,11 @@ namespace Axion.Core.Processing.CodeGen {
     ///     for multiple target languages.
     /// </summary>
     public class CodeWriter : IDisposable {
-        private readonly ProcessingOptions  options;
         private readonly StringWriter       baseWriter;
         private readonly IndentedTextWriter writer;
         private          bool               lastLineEmpty;
+
+        private readonly ConverterFromAxion converter;
 
         public int IndentLevel {
             get => writer.Indent;
@@ -22,55 +23,39 @@ namespace Axion.Core.Processing.CodeGen {
         }
 
         public CodeWriter(ProcessingOptions options) {
-            this.options = options;
-            baseWriter   = new StringWriter();
-            writer       = new IndentedTextWriter(baseWriter);
+            baseWriter = new StringWriter();
+            writer     = new IndentedTextWriter(baseWriter);
+            if (options.HasFlag(ProcessingOptions.ToAxion)) {
+                converter = new AxionToAxionConverter(this);
+            }
+            else if (options.HasFlag(ProcessingOptions.ToCSharp)) {
+                converter = new AxionToCSharpConverter(this);
+            }
+            else if (options.HasFlag(ProcessingOptions.ToPython)) {
+                converter = new AxionToPythonConverter(this);
+            }
+            else if (options.HasFlag(ProcessingOptions.ToPascal)) {
+                converter = new AxionToPascalConverter(this);
+            }
+            else {
+                throw new NotSupportedException($"Code building for '{options:G}' mode is not supported.");
+            }
         }
 
         public void Write(params object[] values) {
             lastLineEmpty = false;
-            if (options.HasFlag(ProcessingOptions.ToAxion)) {
-                foreach (object val in values) {
-                    if (val is Span translatable) {
-                        translatable.ToAxion(this);
+            foreach (object val in values) {
+                if (val is Span translatable) {
+                    try {
+                        converter.Convert((dynamic) translatable);
                     }
-                    else {
-                        writer.Write(val);
-                    }
-                }
-            }
-            else if (options.HasFlag(ProcessingOptions.ToCSharp)) {
-                foreach (object val in values) {
-                    if (val is Span translatable) {
-                        translatable.ToCSharp(this);
-                    }
-                    else {
-                        writer.Write(val);
+                    catch {
+                        Write(translatable.ToString());
                     }
                 }
-            }
-            else if (options.HasFlag(ProcessingOptions.ToPython)) {
-                foreach (object val in values) {
-                    if (val is Span translatable) {
-                        translatable.ToPython(this);
-                    }
-                    else {
-                        writer.Write(val);
-                    }
+                else {
+                    writer.Write(val);
                 }
-            }
-            else if (options.HasFlag(ProcessingOptions.ToPascal)) {
-                foreach (object val in values) {
-                    if (val is Span translatable) {
-                        translatable.ToPascal(this);
-                    }
-                    else {
-                        writer.Write(val);
-                    }
-                }
-            }
-            else {
-                throw new NotSupportedException($"Code building for '{options:G}' mode is not supported.");
             }
         }
 

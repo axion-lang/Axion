@@ -1,4 +1,3 @@
-using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -38,10 +37,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public ConstantExpr Parse() {
             SetSpan(() => { Literal = Stream.EatAny(); });
             return this;
-        }
-
-        public override void ToDefault(CodeWriter c) {
-            c.Write(Literal);
         }
     }
 }

@@ -141,7 +141,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public override string ToString() {
             var cw = new CodeWriter(ProcessingOptions.ToAxion);
-            ToAxion(cw);
+            cw.Write(this);
             return cw.ToString();
         }
     }
