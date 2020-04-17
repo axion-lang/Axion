@@ -10,19 +10,22 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class ParenthesizedExpr : AtomExpr {
-        private Expr val;
+        private Expr val = null!;
 
         public Expr Value {
             get => val;
-            set => val = Bind(value);
+            set {
+                val = Bind(value);
+                MarkPosition(val);
+            }
         }
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public override TypeName ValueType => Value.ValueType;
 
         internal ParenthesizedExpr(Expr value) : base(value.Parent) {
             Value = value;
-            MarkPosition(Value);
+
         }
     }
 }

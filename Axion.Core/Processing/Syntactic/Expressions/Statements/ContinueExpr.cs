@@ -9,22 +9,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///     </c>
     /// </summary>
     public class ContinueExpr : Expr {
-        private NameExpr loopName;
+        private NameExpr? loopName;
 
-        public NameExpr LoopName {
+        public NameExpr? LoopName {
             get => loopName;
-            set => loopName = Bind(value);
+            set => loopName = BindNullable(value);
         }
 
-        public ContinueExpr(
-            Expr?     parent   = null,
-            NameExpr? loopName = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(loopName)
-        ) {
-            LoopName = loopName;
-        }
+        public ContinueExpr(Expr parent) : base(parent) { }
 
         public ContinueExpr Parse() {
             SetSpan(

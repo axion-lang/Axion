@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public MacroDef? MacroDef {
             get => macroDef;
-            private set => macroDef = Bind(value);
+            private set => macroDef = BindNullable(value);
         }
 
         public List<Span> Expressions { get; } = new List<Span>();

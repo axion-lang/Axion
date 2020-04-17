@@ -55,7 +55,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
                 s.Eat(CloseParenthesis);
             }
             if (list.Count > 1) {
-                return new TupleExpr(list.Parent, list);
+                return new TupleExpr(list.Parent!) { Expressions = list };
             }
             return new ParenthesizedExpr(list[0]);
         }

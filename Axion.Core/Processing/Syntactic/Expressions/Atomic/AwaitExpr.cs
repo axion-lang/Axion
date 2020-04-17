@@ -12,25 +12,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class AwaitExpr : AtomExpr {
-        private Expr val;
+        private Expr val = null!;
 
         public Expr Value {
             get => val;
             set => val = Bind(value);
         }
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public override TypeName ValueType => Value.ValueType;
 
-        public AwaitExpr(
-            Expr? parent = null,
-            Expr? value  = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(value)
-        ) {
-            Value = value;
-        }
+        public AwaitExpr(Expr parent) : base(parent) { }
 
         public AwaitExpr Parse() {
             SetSpan(

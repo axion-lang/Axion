@@ -33,24 +33,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             set => falseExpr = Bind(value);
         }
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public override TypeName ValueType => TrueExpr.ValueType;
 
-        internal TernaryExpr(
-            Expr? parent    = null,
-            Expr? condition = null,
-            Expr? trueExpr  = null,
-            Expr? falseExpr = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(condition, trueExpr, falseExpr)
-        ) {
-            Condition = condition;
-            TrueExpr  = trueExpr;
-            FalseExpr = falseExpr;
-            MarkStart(TrueExpr);
-            MarkEnd(FalseExpr);
-        }
+        internal TernaryExpr(Expr parent) : base(parent) { }
 
         public TernaryExpr Parse() {
             SetSpan(
@@ -61,10 +47,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
                         invert = true;
                     }
 
-                    if (TrueExpr == null) {
-                        TrueExpr = AnyExpr.Parse(this);
-                    }
-
+                    TrueExpr ??= AnyExpr.Parse(this);
                     Condition = Parse(this);
                     if (Stream.MaybeEat(KeywordElse)) {
                         FalseExpr = Multiple<InfixExpr>.ParseGenerally(this);

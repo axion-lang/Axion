@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Axion.Core.Processing.Lexical.Tokens;
 
 namespace Axion.Core {
     public static class Utilities {
@@ -18,6 +19,10 @@ namespace Axion.Core {
         /// </summary>
         internal static string ToFileName(this DateTime dt) {
             return dt.ToString(timedFileNameFormat, dateTimeFormat);
+        }
+
+        internal static List<T> OfType<T>(this IEnumerable<T> tokens, TokenType type) where T : Token {
+            return tokens.Where(t => t.Type == type).ToList();
         }
 
         public static void ResolvePath(string path) {
@@ -66,7 +71,7 @@ namespace Axion.Core {
             return Enumerable.Union(collection1, collection2).ToArray();
         }
 
-        #region Get user input and split it into launch arguments
+        #region String utilities
 
         /// <summary>
         ///     Splits user command line input to arguments.

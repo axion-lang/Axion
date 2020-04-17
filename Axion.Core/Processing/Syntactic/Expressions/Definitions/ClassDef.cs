@@ -13,66 +13,45 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public class ClassDef : Expr, IDefinitionExpr, IDecorableExpr {
-        private NameExpr name;
+        private NameExpr name = null!;
 
         public NameExpr Name {
             get => name;
             set => name = Bind(value);
         }
 
-        private NodeList<TypeName> bases;
+        private NodeList<TypeName> bases = null!;
 
         public NodeList<TypeName> Bases {
             get => bases;
             set => bases = Bind(value);
         }
 
-        private NodeList<Expr> keywords;
+        private NodeList<Expr> keywords = null!;
 
         public NodeList<Expr> Keywords {
             get => keywords;
             set => keywords = Bind(value);
         }
 
-        private ScopeExpr scope;
+        private ScopeExpr scope = null!;
 
         public ScopeExpr Scope {
             get => scope;
             set => scope = Bind(value);
         }
 
-        private NodeList<Expr> dataMembers;
+        private NodeList<Expr>? dataMembers;
 
-        public NodeList<Expr> DataMembers {
+        public NodeList<Expr>? DataMembers {
             get => dataMembers;
-            set => dataMembers = Bind(value);
+            set => dataMembers = BindNullable(value);
         }
 
-        public ClassDef(
-            string?                name     = null,
-            IEnumerable<TypeName>? bases    = null,
-            IEnumerable<Expr>?     keywords = null,
-            ScopeExpr?             scope    = null
-        ) : this(
-            null, new NameExpr(name), bases, keywords,
-            scope
-        ) { }
-
-        public ClassDef(
-            Expr?                  parent   = null,
-            NameExpr?              name     = null,
-            IEnumerable<TypeName>? bases    = null,
-            IEnumerable<Expr>?     keywords = null,
-            ScopeExpr?             scope    = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(name, scope)
-        ) {
-            Name        = name;
-            Bases       = NodeList<TypeName>.From(this, bases);
-            Keywords    = NodeList<Expr>.From(this, keywords);
+        public ClassDef(Expr parent) : base(parent) {
+            Bases = new NodeList<TypeName>(this);
+            Keywords = new NodeList<Expr>(this);
             DataMembers = new NodeList<Expr>(this);
-            Scope       = scope;
         }
 
         public ClassDef Parse() {

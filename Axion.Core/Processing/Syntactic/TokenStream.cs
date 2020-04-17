@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
@@ -36,8 +37,8 @@ namespace Axion.Core.Processing.Syntactic {
             SkipTrivial(expected);
             if (TokenIdx + peekBy < Tokens.Count) {
                 Token peekN = Tokens[TokenIdx + peekBy];
-                for (var i = 0; i < expected.Length; i++) {
-                    if (peekN.Is(expected[i])) {
+                foreach (TokenType t in expected) {
+                    if (peekN.Is(t)) {
                         return true;
                     }
                 }
@@ -89,12 +90,12 @@ namespace Axion.Core.Processing.Syntactic {
 
         public bool MaybeEat(string value) {
             SkipTrivial();
-            if (ExactPeek.Value == value) {
-                EatAny();
-                return true;
+            if (ExactPeek.Value != value) {
+                return false;
             }
+            EatAny();
+            return true;
 
-            return false;
         }
 
         public void MoveAbsolute(int tokenIndex) {

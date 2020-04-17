@@ -12,27 +12,20 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class CodeQuoteExpr : AtomExpr {
-        private ScopeExpr scope;
+        private ScopeExpr scope = null!;
 
         public ScopeExpr Scope {
             get => scope;
             set => scope = Bind(value);
         }
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public override TypeName ValueType => Scope.ValueType;
 
-        public CodeQuoteExpr(
-            Expr?      parent = null,
-            ScopeExpr? scope  = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(scope)
-        ) {
-            Scope = scope ?? new ScopeExpr(this);
-        }
+        public CodeQuoteExpr(Expr parent) : base(parent) { }
 
         public CodeQuoteExpr Parse() {
+            Scope ??= new ScopeExpr(this);
             SetSpan(
                 () => {
                     Stream.Eat(DoubleOpenBrace);

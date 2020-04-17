@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     public class ForComprehension : InfixExpr {
         private Expr target;
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public Expr Target {
             get => target;
             set => target = Bind(value);
@@ -52,7 +52,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public          bool IsGenerator;
         public readonly bool IsNested;
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public override TypeName ValueType => Target.ValueType;
 
         public ForComprehension(

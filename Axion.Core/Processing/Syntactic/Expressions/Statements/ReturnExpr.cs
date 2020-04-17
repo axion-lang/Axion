@@ -13,25 +13,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///     </c>
     /// </summary>
     public class ReturnExpr : Expr {
-        private Expr val;
+        private Expr? val;
 
-        public Expr Value {
+        public Expr? Value {
             get => val;
-            set => val = Bind(value);
+            set => val = BindNullable(value);
         }
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public override TypeName ValueType => Value.ValueType;
 
-        public ReturnExpr(
-            Expr? parent = null,
-            Expr? value  = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(value)
-        ) {
-            Value = value;
-        }
+        public ReturnExpr(Expr parent) : base(parent) { }
 
         public ReturnExpr Parse() {
             SetSpan(

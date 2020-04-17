@@ -1,33 +1,24 @@
-using System.Collections.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     public class DecorableExpr : Expr, IDecorableExpr {
-        private NodeList<Expr> decorators;
+        private NodeList<Expr> decorators = null!;
 
         public NodeList<Expr> Decorators {
             get => decorators;
             set => decorators = Bind(value);
         }
 
-        private Expr target;
+        private Expr target = null!;
 
         public Expr Target {
             get => target;
             set => target = Bind(value);
         }
 
-        internal DecorableExpr(
-            Expr?              parent     = null,
-            IEnumerable<Expr>? decorators = null,
-            Expr?              target     = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(target)
-        ) {
-            Decorators = NodeList<Expr>.From(this, decorators);
-            Target     = target;
+        internal DecorableExpr(Expr parent) : base(parent) {
+            Decorators = new NodeList<Expr>(this);
         }
 
         public DecorableExpr Parse() {

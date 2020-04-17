@@ -26,7 +26,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             while (true) {
                 Token exactPeek = s.ExactPeek;
                 if (s.PeekIs(OpDot)) {
-                    value = new MemberAccessExpr(parent, value).Parse();
+                    value = new MemberAccessExpr(parent) { Target = value }.Parse();
                 }
                 // NOTE: this condition makes _impossible_ placement of
                 //     function invocation parenthesis on the next line, e.g:
@@ -39,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                     value = new FuncCallExpr(parent, value).Parse(true);
                 }
                 else if (s.PeekIs(OpenBracket)) {
-                    value = new IndexerExpr(parent, value).Parse();
+                    value = new IndexerExpr(parent) { Target = value }.Parse();
                 }
                 else {
                     break;

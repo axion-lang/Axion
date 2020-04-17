@@ -6,41 +6,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///     </c>
     /// </summary>
     public class SliceExpr : Expr {
-        private Expr from;
+        private Expr? from;
 
-        internal Expr From {
+        public Expr? From {
             get => from;
-            set => from = Bind(value);
+            set => from = BindNullable(value);
         }
 
-        private Expr to;
+        private Expr? to;
 
-        public Expr To {
+        public Expr? To {
             get => to;
-            set => to = Bind(value);
+            set => to = BindNullable(value);
         }
 
-        private Expr step;
+        private Expr? step;
 
-        public Expr Step {
+        public Expr? Step {
             get => step;
-            set => step = Bind(value);
+            set => step = BindNullable(value);
         }
 
-        public SliceExpr(
-            Expr? parent = null,
-            Expr? from   = null,
-            Expr? to     = null,
-            Expr? step   = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(from, to, step)
-        ) {
-            From = from;
-            To   = to;
-            Step = step;
-
-            MarkPosition(from ?? to ?? step, step ?? to ?? from);
-        }
+        public SliceExpr(Expr parent) : base(parent) { }
     }
 }

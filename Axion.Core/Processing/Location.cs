@@ -5,7 +5,7 @@ namespace Axion.Core.Processing {
     ///     (line, column) position of code in source (0-based).
     ///     Convertible to (int, int) 2-tuple.
     /// </summary>
-    public struct Location : IEquatable<Location> {
+    public readonly struct Location : IEquatable<Location> {
         public readonly int Line;
         public readonly int Column;
 

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -30,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class Expr : Span {
-        private Ast ast;
+        private Ast ast = null!;
 
         internal Ast Ast {
             get {
@@ -48,7 +49,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
 
-        internal T? GetParentOfType<T>() where T : Expr {
+        // TODO: extract to Node class
+        internal T? GetParent<T>() where T : Expr {
             Expr p = this;
             if (p is Ast) {
                 if (typeof(T).IsSubclassOf(typeof(ScopeExpr))) {
@@ -70,21 +72,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
 
-        internal ITreePath Path;
+        internal ITreePath Path = null!;
 
-        [NoTraversePath]
+        [NoPathTraversing]
         protected internal Expr? Parent { get; set; }
 
-        private TypeName valueType;
+        private TypeName valueType = null!;
 
         [JsonIgnore]
-        [NoTraversePath]
+        [NoPathTraversing]
         public virtual TypeName ValueType {
             get => valueType;
-            protected set => valueType = Bind(value);
+            protected internal set => valueType = Bind(value);
         }
 
-        internal Type        MacroExpectType;
+        internal Type?        MacroExpectType;
         internal TokenStream Stream => Source.TokenStream;
         protected Expr() : base(null) { }
 
@@ -104,32 +106,60 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             );
         }
 
-        protected T? Bind<T>(
+        protected T Bind<T>(
             T?                        value,
             [CallerMemberName] string callerName = ""
         ) where T : Expr {
-            if (value != null) {
-                value.Parent = this;
-                value.Path   = new NodeTreePath(value, GetType().GetProperty(callerName));
+            if (value == null) {
+                throw new ArgumentNullException(nameof(value));
             }
+            value.Parent = this;
+            value.Path   = new NodeTreePath(value, GetType().GetProperty(callerName));
 
             return value;
         }
 
-        protected NodeList<T> Bind<T>(NodeList<T> value)
+        protected T? BindNullable<T>(
+            T?                        value,
+            [CallerMemberName] string callerName = ""
+        ) where T : Expr {
+            if (value == null) {
+                return value;
+            }
+            value.Parent = this;
+            value.Path   = new NodeTreePath(value, GetType().GetProperty(callerName));
+
+            return value;
+        }
+
+        protected NodeList<T> Bind<T>([NotNull] NodeList<T> value)
             where T : Expr {
-            if (value != null && value.Count > 0) {
-                for (var i = 0; i < value.Count; i++) {
-                    if (value[i] is Expr expr) {
-                        expr.Parent = this;
-                        expr.Path   = new NodeListTreePath<T>(value, i);
-                    }
+            if (value == null) {
+                throw new ArgumentNullException(nameof(value));
+            }
+            if (value.Count == 0) {
+                return new NodeList<T>(this);
+            }
+            for (var i = 0; i < value.Count; i++) {
+                if (value[i] is Expr expr) {
+                    expr.Parent = this;
+                    expr.Path   = new NodeListTreePath<T>(value, i);
                 }
             }
-            else {
-                value = new NodeList<T>(this);
-            }
+            return value;
+        }
 
+        protected NodeList<T> BindNullable<T>(NodeList<T>? value)
+            where T : Expr {
+            if (value == null || value.Count == 0) {
+                return new NodeList<T>(this);
+            }
+            for (var i = 0; i < value.Count; i++) {
+                if (value[i] is Expr expr) {
+                    expr.Parent = this;
+                    expr.Path   = new NodeListTreePath<T>(value, i);
+                }
+            }
             return value;
         }
 

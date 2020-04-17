@@ -6,40 +6,30 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
     ///         index-expr:
-    ///             atom '[' (infix-expr | slice) {',' (infix-expr | slice)} [','] ']';
+    ///         atom '[' (infix-expr | slice) {',' (infix-expr | slice)} [','] ']';
     ///         slice:
-    ///             [infix-expr] ':' [infix-expr] [':' [infix-expr]];
+    ///         [infix-expr] ':' [infix-expr] [':' [infix-expr]];
     ///     </c>
     /// </summary>
     public class IndexerExpr : PostfixExpr {
-        private Expr target;
-
-        public Expr Target {
-            get => target;
-            set => target = Bind(value);
-        }
-
-        private Expr index;
+        private Expr index = null!;
 
         public Expr Index {
             get => index;
             set => index = Bind(value);
         }
 
-        public IndexerExpr(
-            Expr? parent = null,
-            Expr? target = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(target)
-        ) {
-            Target = target;
+        private Expr target = null!;
+
+        public Expr Target {
+            get => target;
+            set => target = Bind(value);
         }
 
+        public IndexerExpr(Expr parent) : base(parent) { }
+
         public IndexerExpr Parse() {
-            if (Target == null) {
-                Target = AtomExpr.Parse(this);
-            }
+            Target ??= AtomExpr.Parse(this);
 
             SetSpan(
                 () => {
@@ -64,7 +54,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                                     step = InfixExpr.Parse(this);
                                 }
 
-                                expressions.Add(new SliceExpr(this, start, stop, step));
+                                expressions.Add(new SliceExpr(this) { From = start, To = stop, Step = step });
                                 break;
                             }
 
@@ -80,7 +70,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                             Stream.Eat(Comma);
                         }
                     }
-                    Index = expressions.Count == 1 ? expressions[0] : new TupleExpr(this, expressions);
+                    Index = expressions.Count == 1
+                        ? expressions[0]
+                        : new TupleExpr(this) { Expressions = expressions };
                     Stream.Eat(CloseBracket);
                 }
             );

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -14,16 +13,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class NameExpr : AtomExpr {
-        public List<Token> Tokens     { get; }
-        public List<Token> Qualifiers => Tokens.Where(t => t.Type == Identifier).ToList();
+        public List<Token> Tokens     { get; } = new List<Token>();
+        public List<Token> Qualifiers => Tokens.OfType(Identifier);
         public bool        IsSimple   => Qualifiers.Count == 1;
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public override TypeName ValueType =>
-            ((Expr) GetParentOfType<ScopeExpr>().GetDefByName(ToString()))?.ValueType;
+            ((Expr) GetParent<ScopeExpr>().GetDefByName(this))?.ValueType;
 
         public NameExpr(string name) {
-            Tokens = new List<Token>();
             if (name.Contains('.')) {
                 string[] qs = name.Split('.');
                 for (var i = 0; i < qs.Length; i++) {
@@ -39,21 +37,20 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             }
         }
 
-        public NameExpr(Expr parent, IEnumerable<Token>? tokens = null) : base(parent) {
-            Tokens = tokens?.ToList() ?? new List<Token>();
-        }
+        public NameExpr(Expr parent) : base(parent) { }
 
         public NameExpr Parse(bool simple = false) {
             SetSpan(
                 () => {
                     Stream.Eat(Identifier);
                     Tokens.Add(Stream.Token);
-                    if (!simple) {
-                        while (Stream.MaybeEat(OpDot)) {
+                    if (simple) {
+                        return;
+                    }
+                    while (Stream.MaybeEat(OpDot)) {
+                        Tokens.Add(Stream.Token);
+                        if (Stream.Eat(Identifier) != null) {
                             Tokens.Add(Stream.Token);
-                            if (Stream.Eat(Identifier) != null) {
-                                Tokens.Add(Stream.Token);
-                            }
                         }
                     }
                 }

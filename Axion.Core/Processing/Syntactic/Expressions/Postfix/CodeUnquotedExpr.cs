@@ -18,7 +18,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => val = Bind(value);
         }
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public override TypeName ValueType => Value.ValueType;
 
         public CodeUnquotedExpr(

@@ -11,40 +11,28 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class IfExpr : Expr, IDecorableExpr {
-        private Expr condition;
+        private Expr condition = null!;
 
         public Expr Condition {
             get => condition;
             set => condition = Bind(value);
         }
 
-        private ScopeExpr thenScope;
+        private ScopeExpr thenScope = null!;
 
         public ScopeExpr ThenScope {
             get => thenScope;
             set => thenScope = Bind(value);
         }
 
-        private ScopeExpr elseScope;
+        private ScopeExpr elseScope = null!;
 
         public ScopeExpr ElseScope {
             get => elseScope;
             set => elseScope = Bind(value);
         }
 
-        internal IfExpr(
-            Expr?      parent    = null,
-            Expr?      condition = null,
-            ScopeExpr? thenScope = null,
-            ScopeExpr? elseScope = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(condition, thenScope, elseScope)
-        ) {
-            Condition = condition;
-            ThenScope = thenScope;
-            ElseScope = elseScope;
-        }
+        internal IfExpr(Expr parent) : base(parent) { }
 
         public IfExpr Parse(bool elseIf = false) {
             SetSpan(

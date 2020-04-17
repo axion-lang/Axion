@@ -11,21 +11,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class ConstantExpr : AtomExpr {
-        public Token Literal { get; set; }
+        public Token Literal { get; set; } = null!;
 
-        [NoTraversePath]
-        public override TypeName ValueType => Literal.ValueType;
+        [NoPathTraversing]
+        public override TypeName ValueType => Literal.ValueType!;
 
         public static ConstantExpr ParseNew(Expr parent) {
             return new ConstantExpr(parent).Parse();
         }
 
-        public ConstantExpr(
-            Expr   parent,
-            Token? literal = null
-        ) : base(parent) {
-            Literal = literal;
-        }
+        public ConstantExpr(Expr parent) : base(parent) { }
 
         public ConstantExpr(
             Expr   parent,

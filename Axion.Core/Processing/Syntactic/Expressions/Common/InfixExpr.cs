@@ -60,7 +60,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                     }
 
                     if (s.PeekIs(KeywordIf, KeywordUnless)) {
-                        return new TernaryExpr(parent, trueExpr: leftExpr).Parse();
+                        return new TernaryExpr(parent) { TrueExpr = leftExpr }.Parse();
                     }
                 }
 

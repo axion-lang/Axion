@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -15,14 +14,22 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class TupleExpr : AtomExpr {
-        private NodeList<Expr> expressions;
+        private NodeList<Expr> expressions = null!;
 
         public NodeList<Expr> Expressions {
             get => expressions;
-            set => expressions = Bind(value);
+            set {
+                expressions = Bind(value);
+                if (expressions.Count > 0) {
+                    MarkPosition(
+                        expressions[0],
+                        expressions[^1]
+                    );
+                }
+            }
         }
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public override TypeName ValueType => new TupleTypeName(
             this, NodeList<TypeName>.From(
                 this,
@@ -30,18 +37,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             )
         );
 
-        internal TupleExpr(
-            Expr               parent,
-            IEnumerable<Expr>? expressions = null
-        ) : base(parent) {
-            Expressions = NodeList<Expr>.From(this, expressions);
-            if (Expressions.Count > 0) {
-                MarkPosition(
-                    Expressions[0],
-                    Expressions[^1]
-                );
-            }
-        }
+        internal TupleExpr(Expr parent) : base(parent) { }
 
         public TupleExpr ParseEmpty() {
             Stream.Eat(OpenParenthesis);

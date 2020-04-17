@@ -10,37 +10,25 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class YieldExpr : AtomExpr {
-        private Expr val;
+        private Expr? val;
 
-        public Expr Value {
+        public Expr? Value {
             get => val;
-            set => val = Bind(value);
+            set => val = BindNullable(value);
         }
 
         public bool IsYieldFrom { get; set; }
 
-        public YieldExpr(
-            Expr? parent      = null,
-            Expr? value       = null,
-            bool  isYieldFrom = false
-        ) : base(
-            parent
-         ?? GetParentFromChildren(value)
-        ) {
-            Value       = value;
-            IsYieldFrom = isYieldFrom;
-        }
+        public YieldExpr(Expr parent) : base(parent) { }
 
         public YieldExpr Parse() {
             SetSpan(
                 () => {
                     Stream.Eat(KeywordYield);
-                    if (Stream.MaybeEat("from")) {
-                        Value = InfixExpr.Parse(this);
-                    }
-                    else {
-                        Value = Multiple<InfixExpr>.ParseGenerally(this);
-                    }
+                    IsYieldFrom = Stream.MaybeEat("from");
+                    Value = IsYieldFrom
+                        ? InfixExpr.Parse(this)
+                        : Multiple<InfixExpr>.ParseGenerally(this);
                 }
             );
             return this;

@@ -18,7 +18,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         internal TypeName(Expr parent) : base(parent) { }
         protected TypeName() { }
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public override TypeName ValueType => this;
 
         internal static TypeName Parse(Expr parent) {
@@ -55,11 +55,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             // trailing
             // union
             if (s.PeekIs(OpBitOr)) {
-                leftTypeName = new UnionTypeName(parent, leftTypeName).Parse();
+                leftTypeName = new UnionTypeName(parent) { Left = leftTypeName }.Parse();
             }
 
             if (s.PeekIs(RightArrow)) {
-                leftTypeName = new FuncTypeName(parent, leftTypeName).Parse();
+                leftTypeName = new FuncTypeName(parent) { ArgsType = leftTypeName }.Parse();
             }
 
             return leftTypeName;

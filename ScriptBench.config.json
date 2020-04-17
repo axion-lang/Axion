@@ -1,0 +1,21 @@
+{
+  "DefaultHeader": "No errors found.",
+  "MainColor": "DarkGray",
+  "AccentColor": "Magenta",
+  "SingleLinePrompt": "i>> ",
+  "TabSize": 4,
+  "ShowWhitespaces": false,
+  "DrawingChars": {
+    "DownRight": "┌",
+    "DownLeft": "┐",
+    "UpRight": "└",
+    "UpLeft": "┘",
+    "Vertical": "│",
+    "VerticalRight": "├",
+    "VerticalLeft": "┤",
+    "Horizontal": "─",
+    "HorizontalDown": "┬",
+    "HorizontalUp": "┴",
+    "Cross": "┼"
+  }
+}

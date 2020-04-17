@@ -57,7 +57,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             if (s.PeekIs(Indent, OpenBrace, Colon)) {
                 return new ScopeExpr(parent).Parse();
             }
-            Token immutableKw = s.MaybeEat(KeywordLet) ? s.Token : null;
+            Token? immutableKw = s.MaybeEat(KeywordLet)
+                ? s.Token
+                : null;
 
             Expr expr = InfixExpr.Parse(parent);
 
@@ -65,14 +67,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 // ['let'] name '=' expr
                 // --------------------^
                 if (bin.Left is NameExpr name
-                 && !bin.GetParentOfType<ScopeExpr>().IsDefined(name.ToString())) {
-                    return new VarDef(
-                        parent,
-                        immutableKw,
-                        name,
-                        null,
-                        bin.Right
-                    );
+                 && !bin.GetParent<ScopeExpr>().IsDefined(name)) {
+                    return new VarDef(parent, immutableKw) {
+                        Name  = name,
+                        Value = bin.Right
+                    };
                 }
                 if (bin.Left is TupleExpr) {
                     return bin;
@@ -89,21 +88,22 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             // -----------------^
             if (!(expr is NameExpr varName)) {
                 LangException.Report(BlameType.ExpectedVarName, expr);
-                varName = null;
+                return expr;
             }
 
             TypeName type  = TypeName.Parse(parent);
-            Expr     value = null;
+            Expr?    value = null;
             if (s.MaybeEat(OpAssign)) {
                 // ['let'] name ':' type-name '=' infix-expr
                 // -------------------------------^
                 value = InfixExpr.Parse(parent);
             }
 
-            return new VarDef(
-                parent, immutableKw, varName, type,
-                value
-            );
+            return new VarDef(parent, immutableKw) {
+                Name      = varName,
+                ValueType = type,
+                Value     = value
+            };
         }
     }
 }

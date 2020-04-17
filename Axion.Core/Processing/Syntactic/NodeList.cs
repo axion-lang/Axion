@@ -13,7 +13,23 @@ namespace Axion.Core.Processing.Syntactic {
     ///     and provide some other useful methods.
     /// </summary>
     public class NodeList<T> : IList<T> where T : Expr {
-        public           Expr     Parent { get; }
+        private Expr? parent;
+
+        public Expr? Parent {
+            get => parent;
+            set {
+                parent = value;
+                if (parent == null || items == null) {
+                    return;
+                }
+                foreach (T item in items) {
+                    if (item != null) {
+                        item.Parent = parent;
+                    }
+                }
+            }
+        }
+
         private readonly IList<T> items;
 
         void IList<T>.RemoveAt(int index) {
@@ -76,12 +92,26 @@ namespace Axion.Core.Processing.Syntactic {
             return new NodeList<T>(parent, collection.ToList());
         }
 
-        internal NodeList(Expr parent) {
+        internal static NodeList<Expr> From(params Expr[] collection) {
+            if (collection == null) {
+                return new NodeList<Expr>(null);
+            }
+            return new NodeList<Expr>(null, collection.ToList());
+        }
+
+        internal static NodeList<T> From(params T[] collection) {
+            if (collection == null) {
+                return new NodeList<T>(null);
+            }
+            return new NodeList<T>(null, collection.ToList());
+        }
+
+        internal NodeList(Expr? parent) {
             Parent = parent;
             items  = new List<T>();
         }
 
-        private NodeList(Expr parent, IList<T> collection) {
+        private NodeList(Expr? parent, IList<T> collection) {
             Parent = parent;
             items  = collection;
         }

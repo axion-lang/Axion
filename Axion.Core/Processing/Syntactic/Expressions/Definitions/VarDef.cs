@@ -1,6 +1,3 @@
-using Axion.Core.Processing.Syntactic.Expressions.Atomic;
-using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
     ///     <c>
@@ -13,17 +10,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     public class VarDef : NameDef {
         public bool IsImmutable { get; }
 
-        public VarDef(
-            Expr?     parent      = null,
-            Span?     kwImmutable = null,
-            NameExpr? name        = null,
-            TypeName? type        = null,
-            Expr?     value       = null
-        ) : base(parent, name, type, value) {
+        public VarDef(Expr parent, Span? kwImmutable = null) : base(parent) {
             IsImmutable = kwImmutable != null;
-
-            MarkStart(kwImmutable   ?? name);
-            MarkEnd((value ?? type) ?? name);
         }
     }
 }

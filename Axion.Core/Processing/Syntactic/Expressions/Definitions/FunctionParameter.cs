@@ -15,25 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public sealed class FunctionParameter : NameDef {
-        public FunctionParameter(
-            string?   name         = null,
-            TypeName? valueType    = null,
-            Expr?     defaultValue = null
-        ) : this(null, new NameExpr(name), valueType, defaultValue) { }
-
-        public FunctionParameter(
-            Expr?     parent       = null,
-            NameExpr? name         = null,
-            TypeName? valueType    = null,
-            Expr?     defaultValue = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(name, valueType, defaultValue)
-        ) {
-            Name      = name;
-            ValueType = valueType;
-            Value     = defaultValue;
-        }
+        public FunctionParameter(Expr parent) : base(parent) { }
 
         public FunctionParameter Parse(HashSet<string> names) {
             SetSpan(

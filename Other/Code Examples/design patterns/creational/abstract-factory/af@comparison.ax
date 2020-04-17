@@ -1,0 +1,204 @@
+# Provide an interface for creating families of related or
+# dependent objects without specifying their concrete classes
+
+# Axion version
+
+# Abstract Factory
+class WarriorFactory
+    fn create-knight
+    fn create-archer
+
+# Concrete Factory
+class OrcWarriorFactory <- WarriorFactory
+    fn create-knight
+        return new OrcKnight
+
+    fn create-archer
+        return new OrcArcher
+
+# Concrete Factory
+class ElfWarriorFactory <- WarriorFactory
+    fn create-knight
+        return new ElfKnight
+
+    fn create-archer
+        return new ElfArcher
+
+# Abstract Product
+class Knight
+    fn inspect
+        return cls.name.split('::').last
+
+# Abstract Product
+class Archer
+    fn inspect
+        return cls.name.split('::').last
+
+# Products
+class OrcKnight <- Knight
+class ElfKnight <- Knight
+
+class OrcArcher <- Archer
+class ElfArcher <- Archer
+
+# Client
+class Army (
+    @private knights = [],
+    @private archers = []
+)
+    fn init(factory)
+        3 times
+            knights << factory.create-knight()
+        3 times
+            archers << factory.create-archer()
+
+    fn inspect
+        return f"Knights {knights.map(inspect)}  Archers {archers.map(inspect)}"
+
+orcs = new Army(new OrcWarriorFactory)
+print(f"Orcs army: {orcs.inspect()}")
+
+elves = new Army(new ElfWarriorFactory)
+print(f"Elves army: {elves.inspect()}")
+
+# Orcs army: Knights ["OrcKnight", "OrcKnight", "OrcKnight"]  Archers ["OrcArcher", "OrcArcher", "OrcArcher"]
+# Elves army: Knights ["ElfKnight", "ElfKnight", "ElfKnight"]  Archers ["ElfArcher", "ElfArcher", "ElfArcher"]
+
+
+
+
+
+# # Python version
+# 
+# from abc import ABCMeta, abstractmethod
+# 
+# # Abstract Factory
+# class WarriorFactory(metaclass=ABCMeta):
+#     def create_knight(self): pass
+#     def create_archer(self): pass
+# 
+# # Concrete Factory
+# class OrcWarriorFactory(WarriorFactory):
+#     def create_knight(self):
+#         return new OrcKnight
+# 
+#     def create_archer(self):
+#         return new OrcArcher
+# 
+# # Concrete Factory
+# class ElfWarriorFactory(WarriorFactory):
+#     def create_knight(self):
+#         return new ElfKnight
+# 
+#     def create_archer(self):
+#         return new ElfArcher
+# 
+# # Abstract Product
+# class Knight:
+#     def inspect(self):
+#         self.cls.name.split('::').last
+# 
+# # Abstract Product
+# class Archer:
+#     def inspect(self):
+#         cls.name.split('::').last
+# 
+# # Products
+# class OrcKnight(Knight): pass
+# class ElfKnight(Knight): pass
+# 
+# class OrcArcher(Archer): pass
+# class ElfArcher(Archer): pass
+# 
+# # Client
+# class Army:
+#     knights: List[Knight] = []
+#     archers: List[Archer] = []
+# 
+#     def __init__(factory):
+#         for i in range(3):
+#             knights.append(factory.create_knight())
+#         for i in range(3):
+#             archers.append(factory.create_archer())
+# 
+#     def inspect():
+#         return f"Knights {knights.map(inspect)}  Archers {archers.map(inspect)}"
+# 
+# if __name__ == "__main__":
+#     orcs = Army(OrcWarriorFactory())
+#     print(f"Orcs army: {orcs.inspect()}")
+# 
+#     elves = Army(ElfWarriorFactory())
+#     print(f"Elves army: {elves.inspect()}")
+# 
+# # Orcs army: Knights ["OrcKnight", "OrcKnight", "OrcKnight"]  Archers ["OrcArcher", "OrcArcher", "OrcArcher"]
+# # Elves army: Knights ["ElfKnight", "ElfKnight", "ElfKnight"]  Archers ["ElfArcher", "ElfArcher", "ElfArcher"]
+# 
+# 
+# 
+# 
+# 
+# 
+# # Axion C# target
+# 
+# class WarriorFactory
+#     @virtual fn create-knight -> Knight
+#         return null
+#     @virtual fn create-archer -> Archer
+#         return null
+# 
+# # Concrete Factory
+# class OrcWarriorFactory <- WarriorFactory
+#     @override fn create-knight -> Knight
+#         return new OrcKnight()
+# 
+#     @override fn create-archer -> Archer
+#         return new OrcArcher()
+# 
+# # Concrete Factory
+# class ElfWarriorFactory <- WarriorFactory
+#     @override fn create-knight -> Knight
+#         return new ElfKnight()
+# 
+#     @override fn create-archer -> Archer
+#         return new ElfArcher()
+# 
+# # Abstract Product
+# class Knight
+#     fn inspect
+#         return "Knight"
+# 
+# # Abstract Product
+# class Archer
+#     fn inspect
+#         return "Archer"
+# 
+# class OrcKnight <- Knight
+# class ElfKnight <- Knight
+# 
+# class OrcArcher <- Archer
+# class ElfArcher <- Archer
+# 
+# # Client
+# class Army
+#     @static fn make(factory: WarriorFactory) -> (List[Knight] , List[Archer])
+#         knights = new List[Knight]()
+#         archers = new List[Archer]()
+#         i = 0
+#         while i < 3
+#             knights.Add(factory.create-knight())
+#             i++
+#         i = 0
+#         while i < 3
+#             archers.Add(factory.create-archer())
+#             i++
+#         return (knights, archers)
+# 
+#     @static fn inspect(knights: List[Knight], archers: List[Archer]) -> string
+#         return "Knights: " + string.Join(",", knights) + "; Archers: " + string.Join(",", archers) + "."
+# 
+# (orc_knights, orc_archers) = Army.make(new OrcWarriorFactory())
+# Console.WriteLine("Orcs army: " + Army.inspect(orc_knights, orc_archers))
+# 
+# (elven_knights, elven_archers) = Army.make(new ElfWarriorFactory())
+# Console.WriteLine("Elves army: " + Army.inspect(elven_knights, elven_archers))

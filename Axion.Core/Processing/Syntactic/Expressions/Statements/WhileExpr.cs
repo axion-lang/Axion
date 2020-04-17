@@ -10,14 +10,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///     </c>
     /// </summary>
     public class WhileExpr : Expr, IDecorableExpr {
-        private Expr condition;
+        private Expr condition = null!;
 
         public Expr Condition {
             get => condition;
             set => condition = Bind(value);
         }
 
-        private ScopeExpr scope;
+        private ScopeExpr scope = null!;
 
         public ScopeExpr Scope {
             get => scope;
@@ -28,26 +28,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
 
         public ScopeExpr? NoBreakScope {
             get => noBreakScope;
-            set => noBreakScope = Bind(value);
+            set => noBreakScope = BindNullable(value);
         }
 
-        public WhileExpr(
-            Expr?      parent       = null,
-            Expr?      condition    = null,
-            ScopeExpr? scope        = null,
-            ScopeExpr? noBreakScope = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(
-                condition,
-                scope,
-                noBreakScope
-            )
-        ) {
-            Condition    = condition;
-            Scope        = scope;
-            NoBreakScope = noBreakScope;
-        }
+        public WhileExpr(Expr parent) : base(parent) { }
 
         public Expr Parse() {
             SetSpan(

@@ -19,37 +19,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public NameExpr? Name {
             get => name;
-            set => name = Bind(value);
+            set => name = BindNullable(value);
         }
 
-        private TypeName returnType;
-
-        public TypeName ReturnType {
-            get => returnType;
-            set => returnType = Bind(value);
-        }
-
-        private NodeList<FunctionParameter> parameters;
+        private NodeList<FunctionParameter> parameters = null!;
 
         public NodeList<FunctionParameter> Parameters {
             get => parameters;
             set => parameters = Bind(value);
         }
 
-        private ScopeExpr scope;
+        private ScopeExpr scope = null!;
 
         public ScopeExpr Scope {
             get => scope;
             set => scope = Bind(value);
         }
 
-        [NoTraversePath]
+        [NoPathTraversing]
         public override TypeName ValueType {
             get {
-                if (ReturnType != null) {
-                    return ReturnType;
-                }
-
                 try {
                     List<(ReturnExpr item, ScopeExpr itemParentScope, int itemIndex)> returns =
                         Scope.FindItemsOfType<ReturnExpr>();
@@ -66,31 +55,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             }
         }
 
-        public FunctionDef(
-            string?                         name       = null,
-            IEnumerable<FunctionParameter>? parameters = null,
-            TypeName?                       returnType = null,
-            ScopeExpr?                      scope      = null
-        ) : this(
-            null, new NameExpr(name), parameters, returnType,
-            scope
-        ) { }
-
-        public FunctionDef(
-            Expr?                           parent     = null,
-            NameExpr?                       name       = null,
-            IEnumerable<FunctionParameter>? parameters = null,
-            TypeName?                       returnType = null,
-            ScopeExpr?                      scope      = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(name, returnType, scope)
-        ) {
-            Name       = name;
-            Parameters = NodeList<FunctionParameter>.From(this, parameters);
-            ReturnType = returnType;
-            Scope      = scope;
-        }
+        public FunctionDef(Expr parent) : base(parent) { }
 
         public FunctionDef Parse(bool anonymous = false) {
             SetSpan(
@@ -114,7 +79,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
                     // return type
                     if (Stream.MaybeEat(RightArrow)) {
-                        ReturnType = TypeName.Parse(this);
+                        ValueType = TypeName.Parse(this);
                     }
 
                     if (Stream.PeekIs(Spec.ScopeStartMarks)) {

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
@@ -46,7 +47,8 @@ namespace Axion.Core.Processing.CodeGen {
             else {
                 // BUG type inference stuck in infinite loop (get-value in MathExprParser)
                 cw.Write(
-                    "public ", e.ValueType, " ", e.Name,
+                    "public ", e.ValueType, " ",
+                    e.Name,
                     "("
                 );
                 cw.AddJoin(", ", e.Parameters);
@@ -67,7 +69,10 @@ namespace Axion.Core.Processing.CodeGen {
             }
             else {
                 cw.Write(
-                    (object) e.ValueType ?? "var", " ", e.Name, " = ",
+                    (object) e.ValueType ?? "var",
+                    " ",
+                    e.Name,
+                    " = ",
                     e.Value
                 );
             }
@@ -79,7 +84,10 @@ namespace Axion.Core.Processing.CodeGen {
             }
             else {
                 cw.Write(
-                    (object) e.ValueType ?? "var", " ", e.Name, " = ",
+                    (object) e.ValueType ?? "var",
+                    " ",
+                    e.Name,
+                    " = ",
                     e.Value
                 );
             }
@@ -88,7 +96,10 @@ namespace Axion.Core.Processing.CodeGen {
         public override void Convert(BinaryExpr e) {
             if (e.Operator.Is(OpPower)) {
                 cw.Write(
-                    "Math.Pow(", e.Left, ", ", e.Right,
+                    "Math.Pow(",
+                    e.Left,
+                    ", ",
+                    e.Right,
                     ")"
                 );
             }
@@ -111,7 +122,12 @@ namespace Axion.Core.Processing.CodeGen {
                     );
                 }
                 else {
-                    cw.Write(e.Right, ".Contains(", e.Left, ")");
+                    cw.Write(
+                        e.Right,
+                        ".Contains(",
+                        e.Left,
+                        ")"
+                    );
                 }
             }
             else {
@@ -119,14 +135,20 @@ namespace Axion.Core.Processing.CodeGen {
                     op = e.Operator.Value;
                 }
                 cw.Write(
-                    e.Left, " ", op, " ",
+                    e.Left,
+                    " ",
+                    op,
+                    " ",
                     e.Right
                 );
             }
         }
 
         public override void Convert(TernaryExpr e) {
-            cw.Write(e.Condition, " ? ", e.TrueExpr, " : ");
+            cw.Write(
+                e.Condition, " ? ", e.TrueExpr,
+                " : "
+            );
             if (e.FalseExpr == null) {
                 cw.Write("default");
             }
@@ -142,15 +164,24 @@ namespace Axion.Core.Processing.CodeGen {
             }
 
             if (e.Operator.Side == InputSide.Right) {
-                cw.Write(op, " (", e.Value, ")");
+                cw.Write(
+                    op, " (", e.Value,
+                    ")"
+                );
             }
             else {
-                cw.Write("(", e.Value, ") ", op);
+                cw.Write(
+                    "(", e.Value, ") ",
+                    op
+                );
             }
         }
 
         public override void Convert(ForComprehension e) {
-            cw.Write("from ", e.Item, " in ", e.Iterable);
+            cw.Write(
+                "from ", e.Item, " in ",
+                e.Iterable
+            );
             if (e.Right != null) {
                 cw.Write(" ", e.Right);
             }
@@ -196,7 +227,8 @@ namespace Axion.Core.Processing.CodeGen {
 
         public override void Convert(FuncTypeName e) {
             cw.Write(
-                "Func<", e.ArgsType, ", ", e.ReturnType,
+                "Func<", e.ArgsType, ", ",
+                e.ReturnType,
                 ">"
             );
         }
@@ -252,40 +284,38 @@ namespace Axion.Core.Processing.CodeGen {
             }
 
             cw.Write(
-                new ModuleDef(
-                    "__RootModule__",
-                    ScopeExpr.FromItems(
+                new ModuleDef(e) {
+                    Name = new NameExpr("__RootModule__"),
+                    Scope = ScopeExpr.FromItems(
                         new[] {
-                            new ClassDef(
-                                "__RootClass__",
-                                scope: ScopeExpr.FromItems(
+                            new ClassDef(e) {
+                                Name = new NameExpr("__RootClass__"),
+                                Scope = ScopeExpr.FromItems(
                                     new[] {
-                                        new DecorableExpr(
-                                            decorators: new[] { new NameExpr("static") },
-                                            target: new FunctionDef(
-                                                "Main",
-                                                new[] {
-                                                    new FunctionParameter(
-                                                        "args",
-                                                        new ArrayTypeName(
+                                        new DecorableExpr(e) {
+                                            Decorators =
+                                                NodeList<Expr>.From(new NameExpr("static")),
+                                            Target = new FunctionDef(e) {
+                                                Name = new NameExpr("Main"),
+                                                Parameters = NodeList<FunctionParameter>.From(
+                                                    new FunctionParameter(e) {
+                                                        Name = new NameExpr("args"),
+                                                        ValueType = new ArrayTypeName(
                                                             e,
                                                             new SimpleTypeName("string")
                                                         )
-                                                    )
-                                                },
-                                                scope: new ScopeExpr(
-                                                    e,
-                                                    rootItems
+                                                    }
                                                 ),
-                                                returnType: new SimpleTypeName("void")
-                                            )
-                                        )
+                                                Scope     = new ScopeExpr(e, rootItems),
+                                                ValueType = new SimpleTypeName("void")
+                                            }
+                                        }
                                     }.Union(rootFunctions)
                                 )
-                            )
+                            }
                         }.Union(rootClasses)
                     )
-                )
+                }
             );
         }
 
@@ -304,10 +334,11 @@ namespace Axion.Core.Processing.CodeGen {
             cw.Write("if (", e.Condition);
             cw.WriteLine(")");
             cw.Write(e.ThenScope);
-            if (e.ElseScope != null) {
-                cw.WriteLine("else");
-                cw.Write(e.ElseScope);
+            if (e.ElseScope == null) {
+                return;
             }
+            cw.WriteLine("else");
+            cw.Write(e.ElseScope);
         }
 
         public override void Convert(ScopeExpr e) {

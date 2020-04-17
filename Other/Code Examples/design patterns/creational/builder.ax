@@ -81,8 +81,8 @@ class Director
 # Director gets the concrete builder object from the client
 # (application code). That is because application knows better
 # which builder it has to use to get a specific product.
-class Application:
-    fn makeCar -> (Car, Manual):
+class Application
+    fn makeCar -> (Car, Manual)
         director = Director()
 
         builder = CarBuilder()

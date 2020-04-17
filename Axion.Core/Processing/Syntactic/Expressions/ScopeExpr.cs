@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Specification;
@@ -19,7 +20,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class ScopeExpr : Expr {
-        private NodeList<Expr> items;
+        private NodeList<Expr> items = null!;
 
         public NodeList<Expr> Items {
             get => items;
@@ -38,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         internal ScopeExpr(
-            Expr          parent,
+            Expr?         parent,
             params Expr[] items
         ) : base(parent ?? GetParentFromChildren(items)) {
             Items = NodeList<Expr>.From(this, items);
@@ -71,13 +72,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return id;
         }
 
+        public bool IsDefined(NameExpr name) {
+            return GetDefByName(name) != null;
+        }
+
         public bool IsDefined(string name) {
             return GetDefByName(name) != null;
         }
 
+        public IDefinitionExpr? GetDefByName(NameExpr name) {
+            return GetDefByName(name.ToString());
+        }
+
         public IDefinitionExpr? GetDefByName(string name) {
             if (!(this is Ast)) {
-                IDefinitionExpr e = GetParentOfType<ScopeExpr>().GetDefByName(name);
+                IDefinitionExpr e = GetParent<ScopeExpr>().GetDefByName(name);
                 if (e != null) {
                     return e;
                 }
@@ -91,7 +100,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             List<IDefinitionExpr> defs = Items.OfType<IDefinitionExpr>().ToList();
 
             // Add parameters of function if inside it.
-            var parentFn = GetParentOfType<FunctionDef>();
+            var parentFn = GetParent<FunctionDef>();
             if (parentFn != null) {
                 defs.AddRange(parentFn.Parameters);
             }
@@ -138,8 +147,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                       && p.Name != nameof(Parent)
                 );
                 foreach (PropertyInfo prop in childProps) {
-                    var b =
-                        (ScopeExpr) prop.GetValue(item);
+                    var b = (ScopeExpr) prop.GetValue(item);
                     (ScopeExpr itemParentScope, int itemIndex)? idx = b?.IndexOf(expression);
                     if (idx != null && idx != (null, -1)) {
                         return ((ScopeExpr itemParentScope, int itemIndex)) idx;

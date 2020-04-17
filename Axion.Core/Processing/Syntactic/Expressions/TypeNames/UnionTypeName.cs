@@ -8,31 +8,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///     </c>
     /// </summary>
     public class UnionTypeName : TypeName {
-        private TypeName left;
+        private TypeName left = null!;
 
         public TypeName Left {
             get => left;
             set => left = Bind(value);
         }
 
-        private TypeName right;
+        private TypeName right = null!;
 
         public TypeName Right {
             get => right;
             set => right = Bind(value);
         }
 
-        public UnionTypeName(
-            Expr?     parent = null,
-            TypeName? left   = null,
-            TypeName? right  = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(left, right)
-        ) {
-            Left  = left;
-            Right = right;
-        }
+        public UnionTypeName(Expr parent) : base(parent) { }
 
         public UnionTypeName Parse() {
             SetSpan(

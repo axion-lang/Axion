@@ -9,37 +9,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///     </c>
     /// </summary>
     public class MemberAccessExpr : PostfixExpr {
-        private Expr target;
+        private Expr target = null!;
 
         public Expr Target {
             get => target;
             set => target = Bind(value);
         }
 
-        private Expr member;
+        private Expr member = null!;
 
         public Expr Member {
             get => member;
             set => member = Bind(value);
         }
 
-        public MemberAccessExpr(
-            Expr? parent = null,
-            Expr? target = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(target)
-        ) {
-            Target = target;
-        }
+        public MemberAccessExpr(Expr parent) : base(parent) { }
 
         public MemberAccessExpr Parse() {
             SetSpan(
                 () => {
-                    if (Target == null) {
-                        Target = AtomExpr.Parse(this);
-                    }
-
+                    Target ??= AtomExpr.Parse(this);
                     Stream.Eat(OpDot);
                     Member = AtomExpr.Parse(this);
                 }

@@ -9,36 +9,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public class ModuleDef : Expr, IDefinitionExpr, IDecorableExpr {
-        private NameExpr name;
+        private NameExpr name = null!;
 
         public NameExpr Name {
             get => name;
             set => name = Bind(value);
         }
 
-        private ScopeExpr scope;
+        private ScopeExpr scope = null!;
 
         public ScopeExpr Scope {
             get => scope;
             set => scope = Bind(value);
         }
 
-        internal ModuleDef(
-            string?    name  = null,
-            ScopeExpr? scope = null
-        ) : this(null, new NameExpr(name), scope) { }
-
-        internal ModuleDef(
-            Expr?      parent = null,
-            NameExpr?  name   = null,
-            ScopeExpr? scope  = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(name, scope)
-        ) {
-            Name  = name;
-            Scope = scope;
-        }
+        internal ModuleDef(Expr parent) : base(parent) { }
 
         public ModuleDef Parse() {
             SetSpan(

@@ -6,31 +6,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///     </c>
     /// </summary>
     public class FuncTypeName : TypeName {
-        private TypeName argsType;
+        private TypeName argsType = null!;
 
         public TypeName ArgsType {
             get => argsType;
             set => argsType = Bind(value);
         }
 
-        private TypeName returnType;
+        private TypeName returnType = null!;
 
         public TypeName ReturnType {
             get => returnType;
             set => returnType = Bind(value);
         }
 
-        public FuncTypeName(
-            Expr?     parent     = null,
-            TypeName? argsType   = null,
-            TypeName? returnType = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(argsType, returnType)
-        ) {
-            ArgsType   = argsType;
-            ReturnType = returnType;
-        }
+        public FuncTypeName(Expr parent) : base(parent) { }
 
         public FuncTypeName Parse() {
             SetSpan(

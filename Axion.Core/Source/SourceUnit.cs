@@ -152,20 +152,22 @@ namespace Axion.Core.Source {
             Ast         = new Ast(this);
             CodeWriter  = new CodeWriter(Options);
 
-            if (!noStdLib) {
-                // ReSharper disable PossibleNullReferenceException
-                // BUG macros.ax is retrieved only from compiler sources (should be replaced with Axion stdlib location)
-                var macrosFile = new FileInfo(
-                    Path.Combine(
-                        new DirectoryInfo(Compiler.WorkDir).Parent.Parent.Parent.Parent.FullName,
-                        "Axion.Modules",
-                        "macros.ax"
-                    )
-                );
-                // ReSharper restore PossibleNullReferenceException
-                if (SourceFilePath.FullName != macrosFile.FullName) {
-                    AddDependency(FromFile(macrosFile));
-                }
+            if (noStdLib) {
+                return;
+            }
+
+            // ReSharper disable PossibleNullReferenceException
+            // BUG macros.ax is retrieved only from compiler sources (should be replaced with Axion stdlib location)
+            var macrosFile = new FileInfo(
+                Path.Combine(
+                    new DirectoryInfo(Compiler.WorkDir).Parent.Parent.Parent.Parent.FullName,
+                    "Axion.Modules",
+                    "macros.ax"
+                )
+            );
+            // ReSharper restore PossibleNullReferenceException
+            if (SourceFilePath.FullName != macrosFile.FullName) {
+                AddDependency(FromFile(macrosFile));
             }
         }
 
@@ -186,14 +188,15 @@ namespace Axion.Core.Source {
         }
 
         public void AddDefinition(IDefinitionExpr def) {
-            if (def.Name != null) {
-                var name = def.Name.ToString();
-                if (Definitions.ContainsKey(name)) {
-                    LangException.Report(BlameType.NameIsAlreadyDefined, def.Name);
-                }
-                else {
-                    Definitions.Add(name, def);
-                }
+            if (def.Name == null) {
+                throw new ArgumentException("Definition name cannot be null", nameof(def));
+            }
+            var name = def.Name.ToString();
+            if (Definitions.ContainsKey(name)) {
+                LangException.Report(BlameType.NameIsAlreadyDefined, def.Name);
+            }
+            else {
+                Definitions.Add(name, def);
             }
         }
 
