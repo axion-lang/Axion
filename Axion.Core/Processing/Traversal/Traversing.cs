@@ -8,6 +8,7 @@ using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
+using Axion.Core.Processing.Syntactic.Expressions.MacroPatterns;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
 using Axion.Core.Processing.Syntactic.Expressions.Postfix;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
@@ -23,7 +24,7 @@ namespace Axion.Core.Processing.Traversal {
         /// </summary>
         public static void Traverse(Expr root) {
             // TODO: fix reducing of macros
-            if (root is MacroApplicationExpr) {
+            if (root is MacroApplicationExpr || root is Pattern) {
                 return;
             }
             if (!root.Path.Traversed) {

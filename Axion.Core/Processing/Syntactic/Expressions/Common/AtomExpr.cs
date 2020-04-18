@@ -51,7 +51,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             }
 
             MacroApplicationExpr macro = new MacroApplicationExpr(parent).Parse();
-            if (macro.MacroDef != null) {
+            if (macro.Macro != null) {
                 return macro;
             }
 

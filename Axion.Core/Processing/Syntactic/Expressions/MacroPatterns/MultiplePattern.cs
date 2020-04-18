@@ -1,22 +1,36 @@
+using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+
 namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
-    public class MultiplePattern : IPattern {
-        internal readonly IPattern Pattern;
+    /// <summary>
+    ///     <c>
+    ///         multiple-pattern:
+    ///             '{' syntax-pattern '}'
+    ///     </c>
+    /// </summary>
+    public class MultiplePattern : Pattern {
+        private Pattern pattern = null!;
 
-        public MultiplePattern(IPattern pattern) {
-            Pattern = pattern;
+        public Pattern Pattern {
+            get => pattern;
+            set => pattern = Bind(value);
         }
 
-        public MultiplePattern(params IPattern[] patterns) {
-            Pattern = new CascadePattern(patterns);
-        }
+        public MultiplePattern(Expr parent) : base(parent) { }
 
-        public bool Match(Expr parent) {
+        public override bool Match(Expr parent) {
             var matchCount = 0;
             while (Pattern.Match(parent)) {
                 matchCount++;
             }
 
             return matchCount > 0;
+        }
+
+        public MultiplePattern Parse() {
+            Stream.Eat(OpenBrace);
+            Pattern = new CascadePattern(this).Parse();
+            Stream.Eat(CloseBrace);
+            return this;
         }
     }
 }

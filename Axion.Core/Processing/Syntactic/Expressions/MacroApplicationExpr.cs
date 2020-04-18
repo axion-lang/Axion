@@ -11,11 +11,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     by language macros.
     /// </summary>
     public class MacroApplicationExpr : AtomExpr, IDecorableExpr {
-        private MacroDef? macroDef;
+        private MacroDef? macro;
 
-        public MacroDef? MacroDef {
-            get => macroDef;
-            private set => macroDef = BindNullable(value);
+        public MacroDef? Macro {
+            get => macro;
+            private set => macro = BindNullable(value);
         }
 
         public List<Span> Expressions { get; } = new List<Span>();
@@ -25,10 +25,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             SetSpan(
                 () => {
                     Ast.MacroApplicationParts.Push(this);
-                    MacroDef = Ast.Macros.FirstOrDefault(
-                        macro => macro.Syntax.Patterns.Length > 0
-                              && macro.Syntax.Patterns[0] is TokenPattern
-                              && macro.Syntax.Match(Parent)
+                    Macro = Ast.Macros.FirstOrDefault(
+                        m => m.Syntax.Patterns.Count > 0
+                              && m.Syntax.Patterns[0] is TokenPattern
+                              && m.Syntax.Match(this)
                     );
                     Ast.MacroApplicationParts.Pop();
                 }
@@ -42,17 +42,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     Ast.MacroApplicationParts.Push(this);
                     int startIdx = Stream.TokenIdx;
 
-                    MacroDef = Ast.Macros.FirstOrDefault(
-                        m => m.Syntax.Patterns.Length > 1
+                    Macro = Ast.Macros.FirstOrDefault(
+                        m => m.Syntax.Patterns.Count > 1
                           && m.Syntax.Patterns[1] is TokenPattern t
-                          && t.Value == Stream.Peek.Value
+                          && t.Match(this)
                     );
-                    if (MacroDef != null) {
-                        var restCascade = new CascadePattern(MacroDef.Syntax.Patterns.Skip(2).ToArray());
+                    if (Macro != null) {
+                        var restCascade = new CascadePattern(this) {
+                            Patterns = NodeList<Pattern>.From(this, Macro.Syntax.Patterns.Skip(2))
+                        };
                         Expressions.Add(Stream.EatAny());
                         Expressions.Add(leftExpr);
-                        if (!restCascade.Match(Parent)) {
-                            MacroDef = null;
+                        if (!restCascade.Match(this)) {
+                            Macro = null;
                             Stream.MoveAbsolute(startIdx);
                             Expressions.Clear();
                         }

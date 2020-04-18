@@ -1,19 +1,30 @@
-namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
-    public class TokenPattern : IPattern {
-        internal readonly string Value;
+using Axion.Core.Processing.Lexical.Tokens;
 
-        public TokenPattern(string value) {
-            Value = value;
+namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
+    /// <summary>
+    ///     <c>
+    ///         token-pattern:
+    ///             STRING;
+    ///     </c>
+    /// </summary>
+    public class TokenPattern : Pattern {
+        internal Token Value;
+
+        public TokenPattern(Expr parent) : base(parent) { }
+
+        public override bool Match(Expr parent) {
+            if (parent.Stream.Peek.Content != Value.Content) {
+                return false;
+            }
+            parent.Stream.Eat();
+            parent.Ast.MacroApplicationParts.Peek().Expressions.Add(parent.Stream.Token);
+            return true;
         }
 
-        public bool Match(Expr parent) {
-            if (parent.Stream.Peek.Content == Value) {
-                parent.Stream.Eat();
-                parent.Ast.MacroApplicationParts.Peek().Expressions.Add(parent.Stream.Token);
-                return true;
-            }
-
-            return false;
+        public TokenPattern Parse() {
+            Value = Stream.Eat()!;
+            Source.RegisterCustomKeyword(Value.Content);
+            return this;
         }
     }
 }

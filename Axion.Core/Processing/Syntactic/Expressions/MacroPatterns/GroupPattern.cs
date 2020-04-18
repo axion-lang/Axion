@@ -3,11 +3,11 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
     /// <summary>
     ///     <c>
-    ///         optional-pattern:
-    ///             '[' syntax-pattern ']';
+    ///         group-pattern:
+    ///             '(' syntax-pattern ')';
     ///     </c>
     /// </summary>
-    public class OptionalPattern : Pattern {
+    public class GroupPattern : Pattern {
         private Pattern pattern = null!;
 
         public Pattern Pattern {
@@ -15,17 +15,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
             set => pattern = Bind(value);
         }
 
-        public OptionalPattern(Expr parent) : base(parent) { }
+        public GroupPattern(Expr parent) : base(parent) { }
 
         public override bool Match(Expr parent) {
-            Pattern.Match(parent);
-            return true;
+            return Pattern.Match(parent);
         }
 
-        public OptionalPattern Parse() {
-            Stream.Eat(OpenBracket);
+        public GroupPattern Parse() {
+            Stream.Eat(OpenParenthesis);
             Pattern = new CascadePattern(this).Parse();
-            Stream.Eat(CloseBracket);
+            Stream.Eat(CloseParenthesis);
             return this;
         }
     }

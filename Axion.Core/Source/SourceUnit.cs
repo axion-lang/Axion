@@ -156,6 +156,7 @@ namespace Axion.Core.Source {
                 return;
             }
 
+            // TODO: One AST for multiple files from one package. (definitions in one place)
             // ReSharper disable PossibleNullReferenceException
             // BUG macros.ax is retrieved only from compiler sources (should be replaced with Axion stdlib location)
             var macrosFile = new FileInfo(
