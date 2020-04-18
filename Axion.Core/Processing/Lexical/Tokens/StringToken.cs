@@ -23,7 +23,12 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             string                     prefixes       = "",
             string                     quote          = "\"",
             List<StringInterpolation>? interpolations = null
-        ) : base(source, TokenType.String, value, content) {
+        ) : base(
+            source,
+            TokenType.String,
+            value,
+            content
+        ) {
             IsUnclosed     = isUnclosed;
             Prefixes       = prefixes;
             Quote          = quote;
@@ -32,13 +37,12 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
 
         public bool HasPrefix(string prefix) {
-            return Prefixes.Contains(prefix.ToLower())
-                || Prefixes.Contains(prefix.ToUpper());
+            return Prefixes.Contains(prefix.ToLower()) || Prefixes.Contains(prefix.ToUpper());
         }
     }
 
     public class StringInterpolation : Span {
-        public StringInterpolation(SourceUnit source)
-            : base(SourceUnit.FromInterpolation(source)) { }
+        public StringInterpolation(SourceUnit source) :
+            base(SourceUnit.FromInterpolation(source)) { }
     }
 }

@@ -21,12 +21,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         [NoPathTraversing]
         public override TypeName ValueType => Value.ValueType;
 
-        public CodeUnquotedExpr(
-            Expr? parent = null,
-            Expr? value  = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(value)
+        public CodeUnquotedExpr(Expr? parent = null, Expr? value = null) : base(
+            parent ?? GetParentFromChildren(value)
         ) {
             Value = value;
         }

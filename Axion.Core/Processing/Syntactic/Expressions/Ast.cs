@@ -11,7 +11,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     Abstract Syntax Tree built from source code.
     /// </summary>
     public class Ast : ScopeExpr {
-        internal List<MacroDef> Macros => Source.GetAllDefinitions().Values.OfType<MacroDef>().ToList();
+        internal List<MacroDef> Macros =>
+            Source.GetAllDefinitions().Values.OfType<MacroDef>().ToList();
 
         internal readonly Stack<MacroApplicationExpr> MacroApplicationParts =
             new Stack<MacroApplicationExpr>();

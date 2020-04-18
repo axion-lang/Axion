@@ -34,7 +34,12 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private bool TryAddChar(char expected, bool isContent = true) {
-            return TryAddChar(new[] { expected }, isContent);
+            return TryAddChar(
+                new[] {
+                    expected
+                },
+                isContent
+            );
         }
 
         private bool TryAddChar(char[] expect, bool isContent = true) {
@@ -57,14 +62,20 @@ namespace Axion.Core.Processing.Lexical {
             return eaten != "";
         }
 
-        private T BindSpan<T>(T token) where T : Token {
+        private T BindSpan<T>(T token)
+            where T : Token {
             token.MarkStart(startLoc);
             token.MarkEnd(stream.Location);
             return token;
         }
 
         private Token NewTokenFromContext() {
-            var token = new Token(src, type, value.ToString(), content.ToString());
+            var token = new Token(
+                src,
+                type,
+                value.ToString(),
+                content.ToString()
+            );
             token.MarkStart(startLoc);
             token.MarkEnd(stream.Location);
             return token;
@@ -218,8 +229,7 @@ namespace Axion.Core.Processing.Lexical {
             do {
                 AddNext();
             } while (stream.Peek().IsIdPart()
-                  && (!stream.Peek().IsIdNonEnd()
-                   || stream.Peek(2)[1].IsIdAfterNonEnd()));
+                  && (!stream.Peek().IsIdNonEnd() || stream.Peek(2)[1].IsIdAfterNonEnd()));
 
             if (stream.PeekIs(StringQuotes)) {
                 return ReadString();
@@ -318,7 +328,14 @@ namespace Axion.Core.Processing.Lexical {
             AddNext(false, CharacterQuote);
             while (!AddNext(false, CharacterQuote)) {
                 if (stream.AtEndOfLine) {
-                    CharToken unclosed = BindSpan(new CharToken(src, value.ToString(), content.ToString(), true));
+                    CharToken unclosed = BindSpan(
+                        new CharToken(
+                            src,
+                            value.ToString(),
+                            content.ToString(),
+                            true
+                        )
+                    );
                     LangException.Report(BlameType.UnclosedCharacterLiteral, unclosed);
                     return unclosed;
                 }
@@ -358,7 +375,10 @@ namespace Axion.Core.Processing.Lexical {
                 if (stream.PeekIs(Eoc)) {
                     CommentToken t = BindSpan(
                         new CommentToken(
-                            src, value.ToString(), content.ToString(), true,
+                            src,
+                            value.ToString(),
+                            content.ToString(),
+                            true,
                             true
                         )
                     );
@@ -370,7 +390,14 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             AddNext(false, MultiLineCommentMark);
-            return BindSpan(new CommentToken(src, value.ToString(), content.ToString(), true));
+            return BindSpan(
+                new CommentToken(
+                    src,
+                    value.ToString(),
+                    content.ToString(),
+                    true
+                )
+            );
         }
 
         private Token ReadString() {
@@ -390,14 +417,15 @@ namespace Axion.Core.Processing.Lexical {
                     var ps = p.ToString();
                     Token token = BindSpan(
                         new Token(
-                            src, Invalid, ps, ps,
-                            "", stream.Location.Add(0, i)
+                            src,
+                            Invalid,
+                            ps,
+                            ps,
+                            "",
+                            stream.Location.Add(0, i)
                         )
                     );
-                    LangException.Report(
-                        BlameType.InvalidStringPrefix,
-                        token
-                    );
+                    LangException.Report(BlameType.InvalidStringPrefix, token);
                 }
             }
 
@@ -431,8 +459,7 @@ namespace Axion.Core.Processing.Lexical {
                 if (stream.PeekIs('\\') && !prefixes.Contains("r")) {
                     ReadEscapeSeq();
                 }
-                else if (stream.PeekIs(Eols) && quote.Length == 1
-                      || stream.PeekIs(Eoc)) {
+                else if (stream.PeekIs(Eols) && quote.Length == 1 || stream.PeekIs(Eoc)) {
                     unclosed = true;
                     break;
                 }

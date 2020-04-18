@@ -57,20 +57,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             if (s.PeekIs(Indent, OpenBrace, Colon)) {
                 return new ScopeExpr(parent).Parse();
             }
-            Token? immutableKw = s.MaybeEat(KeywordLet)
-                ? s.Token
-                : null;
+            Token? immutableKw = s.MaybeEat(KeywordLet) ? s.Token : null;
 
             Expr expr = InfixExpr.Parse(parent);
 
             if (expr is BinaryExpr bin && bin.Operator.Is(OpAssign)) {
                 // ['let'] name '=' expr
                 // --------------------^
-                if (bin.Left is NameExpr name
-                 && !bin.GetParent<ScopeExpr>().IsDefined(name)) {
+                if (bin.Left is NameExpr name && !bin.GetParent<ScopeExpr>().IsDefined(name)) {
                     return new VarDef(parent, immutableKw) {
-                        Name  = name,
-                        Value = bin.Right
+                        Name = name, Value = bin.Right
                     };
                 }
                 if (bin.Left is TupleExpr) {
@@ -100,9 +96,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             }
 
             return new VarDef(parent, immutableKw) {
-                Name      = varName,
-                ValueType = type,
-                Value     = value
+                Name = varName, ValueType = type, Value = value
             };
         }
     }

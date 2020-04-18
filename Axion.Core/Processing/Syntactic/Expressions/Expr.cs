@@ -50,7 +50,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         // TODO: extract to Node class
-        internal T? GetParent<T>() where T : Expr {
+        internal T? GetParent<T>()
+            where T : Expr {
             Expr p = this;
             if (p is Ast) {
                 if (typeof(T).IsSubclassOf(typeof(ScopeExpr))) {
@@ -86,7 +87,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             protected internal set => valueType = Bind(value);
         }
 
-        internal Type?        MacroExpectType;
+        internal Type?       MacroExpectType;
         internal TokenStream Stream => Source.TokenStream;
         protected Expr() : base(null) { }
 
@@ -106,10 +107,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             );
         }
 
-        protected T Bind<T>(
-            T?                        value,
-            [CallerMemberName] string callerName = ""
-        ) where T : Expr {
+        protected T Bind<T>(T? value, [CallerMemberName] string callerName = "")
+            where T : Expr {
             if (value == null) {
                 throw new ArgumentNullException(nameof(value));
             }
@@ -119,10 +118,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return value;
         }
 
-        protected T? BindNullable<T>(
-            T?                        value,
-            [CallerMemberName] string callerName = ""
-        ) where T : Expr {
+        protected T? BindNullable<T>(T? value, [CallerMemberName] string callerName = "")
+            where T : Expr {
             if (value == null) {
                 return value;
             }

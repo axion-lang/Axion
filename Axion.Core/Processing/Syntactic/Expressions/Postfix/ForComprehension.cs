@@ -55,14 +55,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         [NoPathTraversing]
         public override TypeName ValueType => Target.ValueType;
 
-        public ForComprehension(
-            Expr? parent   = null,
-            Expr? target   = null,
-            bool  isNested = false
-        ) : base(
-            parent
-         ?? GetParentFromChildren(target)
-        ) {
+        public ForComprehension(Expr? parent = null, Expr? target = null, bool isNested = false) :
+            base(parent ?? GetParentFromChildren(target)) {
             IsNested   = isNested;
             Target     = target;
             Conditions = new NodeList<Expr>(this);
@@ -85,13 +79,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                             Conditions.Add(Parse(this));
                         }
                         else if (Stream.MaybeEat(KeywordUnless)) {
-                            Conditions.Add(
-                                new UnaryExpr(
-                                    this,
-                                    OpNot,
-                                    Parse(this)
-                                )
-                            );
+                            Conditions.Add(new UnaryExpr(this, OpNot, Parse(this)));
                         }
                     }
 

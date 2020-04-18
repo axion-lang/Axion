@@ -23,8 +23,7 @@ namespace Axion.Core.Processing {
         }
 
         public bool Equals(Location other) {
-            return Line   == other.Line
-                && Column == other.Column;
+            return Line == other.Line && Column == other.Column;
         }
 
         public override bool Equals(object? obj) {

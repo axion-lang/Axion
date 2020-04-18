@@ -20,13 +20,21 @@ namespace Axion.Core.Specification {
         public const string MultiLineCommentMark = "###";
         public const string CharacterQuote       = "`";
 
-        public static readonly char[] Eols = { '\r', '\n' };
+        public static readonly char[] Eols = {
+            '\r', '\n'
+        };
 
-        public static readonly char[] StringQuotes = { '"', '\'' };
+        public static readonly char[] StringQuotes = {
+            '"', '\''
+        };
 
-        public static readonly char[] StringPrefixes = { 'r', 'f' };
+        public static readonly char[] StringPrefixes = {
+            'r', 'f'
+        };
 
-        public static readonly char[] White = { ' ', '\t' };
+        public static readonly char[] White = {
+            ' ', '\t'
+        };
 
         // @formatter:off
 
@@ -58,22 +66,22 @@ namespace Axion.Core.Specification {
             return c.IsIdAfterNonEnd() || c.IsIdNonEnd();
         }
 
-        public static readonly Dictionary<string, string> EscapeSequences =
-            new Dictionary<string, string> {
-                { "0", "\u0000" },
-                { "a", "\u0007" },
-                { "b", "\u0008" },
-                { "f", "\u000c" },
-                { "n", "\u000a" },
-                { "r", "\u000d" },
-                { "t", "\u0009" },
-                { "v", "\u000b" },
-                { "\\", "\\" },
-                { "\"", "\"" },
-                { "\'", "\'" }
-            };
-
         // @formatter:off
+
+        public static readonly Dictionary<string, string> EscapeSequences =
+        new Dictionary<string, string> {
+            { "0", "\u0000" },
+            { "a", "\u0007" },
+            { "b", "\u0008" },
+            { "f", "\u000c" },
+            { "n", "\u000a" },
+            { "r", "\u000d" },
+            { "t", "\u0009" },
+            { "v", "\u000b" },
+            { "\\", "\\" },
+            { "\"", "\"" },
+            { "\'", "\'" }
+        };
 
         public static readonly Dictionary<string, (TokenType Type, int Precedence, InputSide Side)> Operators =
         new Dictionary<string, (TokenType, int, InputSide)> {
@@ -158,16 +166,30 @@ namespace Axion.Core.Specification {
         /// <summary>
         ///     Maps language keyword's string value to it's token type.
         /// </summary>
-        public static readonly Dictionary<string, TokenType> Keywords =
-            Enum.GetNames(typeof(TokenType))
-                .Where(n => n.StartsWith("Keyword"))
-                .Select(
-                    n => {
-                        Enum.TryParse(n, out TokenType type);
-                        return (n.Remove(0, 7).ToLower(), type);
-                    }
-                )
-                .ToDictionary(x => x.Item1, x => x.Item2);
+        public static readonly Dictionary<string, TokenType> Keywords = Enum
+                                                                        .GetNames(typeof(TokenType))
+                                                                        .Where(
+                                                                            n => n.StartsWith(
+                                                                                "Keyword"
+                                                                            )
+                                                                        )
+                                                                        .Select(
+                                                                            n => {
+                                                                                Enum.TryParse(
+                                                                                    n,
+                                                                                    out TokenType
+                                                                                        type
+                                                                                );
+                                                                                return (
+                                                                                    n.Remove(0, 7)
+                                                                                     .ToLower(),
+                                                                                    type);
+                                                                            }
+                                                                        )
+                                                                        .ToDictionary(
+                                                                            x => x.Item1,
+                                                                            x => x.Item2
+                                                                        );
 
         /// <summary>
         ///     Token types that are applicable on the left side of expression.
@@ -184,7 +206,9 @@ namespace Axion.Core.Specification {
         /// <summary>
         ///     Token types that can start a scope expression.
         /// </summary>
-        public static readonly TokenType[] ScopeStartMarks = { Colon, OpenBrace, Indent };
+        public static readonly TokenType[] ScopeStartMarks = {
+            Colon, OpenBrace, Indent
+        };
 
         internal static readonly TokenType[] Constants = {
             TokenType.String,

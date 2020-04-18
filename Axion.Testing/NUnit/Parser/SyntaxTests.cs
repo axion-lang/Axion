@@ -16,11 +16,7 @@ namespace Axion.Testing.NUnit.Parser {
         }
 
         private static void Parse(SourceUnit source) {
-            Compiler.Process(
-                source,
-                ProcessingMode.Transpilation,
-                ProcessingOptions.ToCSharp
-            );
+            Compiler.Process(source, ProcessingMode.Transpilation, ProcessingOptions.ToCSharp);
         }
 
         [Test]
@@ -58,7 +54,7 @@ namespace Axion.Testing.NUnit.Parser {
             SourceUnit source = ParseTestFile();
             Assert.AreEqual(4, source.Blames.Count);
         }
-        
+
         [Test]
         public void TestDesignPatterns() {
             for (var i = 0; i < SourceFiles.Count; i++) {
@@ -67,10 +63,7 @@ namespace Axion.Testing.NUnit.Parser {
                     file,
                     new FileInfo(OutPath + nameof(TestDesignPatterns) + i + TestExtension)
                 );
-                Compiler.Process(
-                    source,
-                    ProcessingMode.Parsing
-                );
+                Compiler.Process(source, ProcessingMode.Parsing);
                 Assert.That(
                     source.Blames.All(
                         b => b.Severity != BlameSeverity.Error

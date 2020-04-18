@@ -70,7 +70,8 @@ namespace Axion.Core.Source {
 
         public CodeWriter CodeWriter { get; private set; }
 
-        private Dictionary<string, SourceUnit> Dependencies { get; set; } = new Dictionary<string, SourceUnit>();
+        private Dictionary<string, SourceUnit> Dependencies { get; set; } =
+            new Dictionary<string, SourceUnit>();
 
         private Dictionary<string, IDefinitionExpr> Definitions { get; set; } =
             new Dictionary<string, IDefinitionExpr>();
@@ -224,17 +225,14 @@ namespace Axion.Core.Source {
         }
 
         public static SourceUnit FromCode(string code, FileInfo? outFilePath = null) {
-            return new SourceUnit(
-                code,
-                outputPath: outFilePath
-            );
+            return new SourceUnit(code, outputPath: outFilePath);
         }
 
-        public static SourceUnit FromLines(IEnumerable<string> lines, FileInfo? outFilePath = null) {
-            return new SourceUnit(
-                string.Join("\n", lines),
-                outputPath: outFilePath
-            );
+        public static SourceUnit FromLines(
+            IEnumerable<string> lines,
+            FileInfo?           outFilePath = null
+        ) {
+            return new SourceUnit(string.Join("\n", lines), outputPath: outFilePath);
         }
 
         public static SourceUnit? FromFile(FileInfo srcFilePath, FileInfo? outFilePath = null) {
@@ -243,19 +241,19 @@ namespace Axion.Core.Source {
                 return null;
             }
             if (srcFilePath.Extension != SourceFileExt) {
-                Compiler.Logger.Error($"'{srcFilePath.Name}' file must have {SourceFileExt} extension.");
+                Compiler.Logger.Error(
+                    $"'{srcFilePath.Name}' file must have {SourceFileExt} extension."
+                );
                 return null;
             }
 
-            return new SourceUnit(
-                File.ReadAllText(srcFilePath.FullName),
-                srcFilePath,
-                outFilePath
-            );
+            return new SourceUnit(File.ReadAllText(srcFilePath.FullName), srcFilePath, outFilePath);
         }
 
         public static SourceUnit FromInterpolation(SourceUnit source) {
-            return new SourceUnit(noStdLib: true) { TextStream = source.TextStream, Definitions = source.Definitions };
+            return new SourceUnit(noStdLib: true) {
+                TextStream = source.TextStream, Definitions = source.Definitions
+            };
         }
     }
 }

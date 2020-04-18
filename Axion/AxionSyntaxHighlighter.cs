@@ -46,18 +46,14 @@ namespace Axion {
                  && (token.End.Line < renderPosition.Y
                   || token.End.Line   == renderPosition.Y
                   && token.End.Column <= renderPosition.X
-                  && !token.Is(Newline)
-                    )) {
+                  && !token.Is(Newline))) {
                     continue;
                 }
 
                 if (!foundRenderStart) {
                     // when found token closest to last render position,
                     // re-render it to prevent invalid highlighting.
-                    renderPosition = new Point(
-                        token.Start.Column,
-                        token.Start.Line
-                    );
+                    renderPosition   = new Point(token.Start.Column, token.Start.Line);
                     foundRenderStart = true;
                 }
 
@@ -69,15 +65,18 @@ namespace Axion {
                 ConsoleColor newColor;
                 var          isWhite = false;
 
-                if (token.Is(Newline, Whitespace, Indent, Outdent)) {
+                if (token.Is(
+                    Newline,
+                    Whitespace,
+                    Indent,
+                    Outdent
+                )) {
                     newColor = DarkGray;
                     isWhite  = true;
                 }
                 else if (token.Is(Identifier)) {
                     // highlight error types
-                    newColor = token.Value.EndsWith("Error")
-                        ? DarkMagenta
-                        : Cyan;
+                    newColor = token.Value.EndsWith("Error") ? DarkMagenta : Cyan;
                 }
                 else {
                     newColor = GetSimpleTokenColor(token);

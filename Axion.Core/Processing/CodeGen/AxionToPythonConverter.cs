@@ -80,7 +80,10 @@ namespace Axion.Core.Processing.CodeGen {
 
         public override void Convert(FuncTypeName e) {
             cw.Write(
-                "Callable[[", e.ArgsType, "], ", e.ReturnType,
+                "Callable[[",
+                e.ArgsType,
+                "], ",
+                e.ReturnType,
                 "]"
             );
         }

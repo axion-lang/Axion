@@ -12,7 +12,12 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             string     value      = "",
             string     content    = "",
             bool       isUnclosed = false
-        ) : base(source, TokenType.Character, value, content) {
+        ) : base(
+            source,
+            TokenType.Character,
+            value,
+            content
+        ) {
             IsUnclosed = isUnclosed;
         }
     }

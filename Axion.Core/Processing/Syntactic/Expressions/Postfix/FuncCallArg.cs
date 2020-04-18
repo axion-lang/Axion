@@ -58,11 +58,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             while (true) {
                 FuncCallArg arg;
                 // named arg
-                if (parent.Stream.PeekIs(TokenType.Identifier) && parent.Stream.PeekByIs(2, TokenType.OpAssign)) {
+                if (parent.Stream.PeekIs(TokenType.Identifier)
+                 && parent.Stream.PeekByIs(2, TokenType.OpAssign)) {
                     var argName = (NameExpr) AtomExpr.Parse(parent);
                     parent.Stream.Eat(TokenType.OpAssign);
                     InfixExpr argValue = InfixExpr.Parse(parent);
-                    arg = new FuncCallArg(parent) { Name = argName, Value = argValue };
+                    arg = new FuncCallArg(parent) {
+                        Name = argName, Value = argValue
+                    };
                     if (args.Any(a => a.Name.ToString() == argName.ToString())) {
                         LangException.Report(BlameType.DuplicatedNamedArgument, arg);
                     }
@@ -72,13 +75,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     // generator arg
                     if (parent.Stream.PeekIs(TokenType.KeywordFor)) {
                         arg = new FuncCallArg(parent) {
-                            Value = new ForComprehension(parent, argValue) { IsGenerator = true }.Parse()
+                            Value = new ForComprehension(parent, argValue) {
+                                IsGenerator = true
+                            }.Parse()
                         };
                     }
                     else {
                         // TODO: star args
                         parent.Stream.MaybeEat(TokenType.OpMultiply);
-                        arg = new FuncCallArg(parent) { Value = argValue };
+                        arg = new FuncCallArg(parent) {
+                            Value = argValue
+                        };
                     }
                 }
 

@@ -56,7 +56,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     //         }
                     //     }}
                     Stream.Eat(KeywordMacro);
-                    Name = new NameExpr(this).Parse(true);
+                    Name   = new NameExpr(this).Parse(true);
                     Syntax = new CascadePattern(this);
                     // EBNF-based syntax definition
                     if (Stream.Eat(OpenParenthesis) != null) {

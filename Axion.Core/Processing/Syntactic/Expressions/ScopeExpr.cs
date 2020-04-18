@@ -27,10 +27,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => items = Bind(value);
         }
 
-        internal ScopeExpr(
-            Expr               parent,
-            IEnumerable<Expr>? items = null
-        ) : base(parent) {
+        internal ScopeExpr(Expr parent, IEnumerable<Expr>? items = null) : base(parent) {
             Items = NodeList<Expr>.From(this, items);
 
             if (Items.Count != 0) {
@@ -38,10 +35,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
 
-        internal ScopeExpr(
-            Expr?         parent,
-            params Expr[] items
-        ) : base(parent ?? GetParentFromChildren(items)) {
+        internal ScopeExpr(Expr? parent, params Expr[] items) : base(
+            parent ?? GetParentFromChildren(items)
+        ) {
             Items = NodeList<Expr>.From(this, items);
 
             if (Items.Count != 0) {
@@ -118,12 +114,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     _outs.Add((expr, this, i));
                 }
                 else {
-                    IEnumerable<PropertyInfo> childProps =
-                        item.GetType().GetProperties().Where(
-                            p => p.PropertyType
-                              == typeof(ScopeExpr)
-                              && p.Name != nameof(Parent)
-                        );
+                    IEnumerable<PropertyInfo> childProps = item
+                                                           .GetType()
+                                                           .GetProperties()
+                                                           .Where(
+                                                               p => p.PropertyType
+                                                                 == typeof(ScopeExpr)
+                                                                 && p.Name != nameof(Parent)
+                                                           );
                     foreach (PropertyInfo prop in childProps) {
                         var b = (ScopeExpr) prop.GetValue(item);
                         b?.FindItemsOfType(_outs);
@@ -134,20 +132,23 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return _outs;
         }
 
-        public (ScopeExpr? itemParentScope, int itemIndex) IndexOf<T>(T expression) where T : Expr {
+        public (ScopeExpr? itemParentScope, int itemIndex) IndexOf<T>(T expression)
+            where T : Expr {
             for (var i = 0; i < Items.Count; i++) {
                 Expr item = Items[i];
                 if (item == expression) {
                     return (this, i);
                 }
 
-                IEnumerable<PropertyInfo> childProps = item.GetType().GetProperties().Where(
-                    p => p.PropertyType
-                      == typeof(ScopeExpr)
-                      && p.Name != nameof(Parent)
-                );
+                IEnumerable<PropertyInfo> childProps = item
+                                                       .GetType()
+                                                       .GetProperties()
+                                                       .Where(
+                                                           p => p.PropertyType == typeof(ScopeExpr)
+                                                             && p.Name         != nameof(Parent)
+                                                       );
                 foreach (PropertyInfo prop in childProps) {
-                    var b = (ScopeExpr) prop.GetValue(item);
+                    var                                         b = (ScopeExpr) prop.GetValue(item);
                     (ScopeExpr itemParentScope, int itemIndex)? idx = b?.IndexOf(expression);
                     if (idx != null && idx != (null, -1)) {
                         return ((ScopeExpr itemParentScope, int itemIndex)) idx;
@@ -196,9 +197,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Token scopeStart = parent.Stream.Token;
 
             // newline
-            bool hasNewline = hasColon
-                ? parent.Stream.MaybeEat(Newline)
-                : scopeStart.Is(Newline);
+            bool hasNewline = hasColon ? parent.Stream.MaybeEat(Newline) : scopeStart.Is(Newline);
 
             // '{'
             if (parent.Stream.MaybeEat(OpenBrace)) {

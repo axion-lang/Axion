@@ -37,8 +37,7 @@ namespace Axion.Core.Processing.Traversal {
                 p => typeof(Expr).IsAssignableFrom(p.PropertyType)
                   && !Attribute.IsDefined(p, typeof(NoPathTraversingAttribute), false)
                   || p.PropertyType.IsGenericType
-                  && p.PropertyType
-                      .GetInterfaces()
+                  && p.PropertyType.GetInterfaces()
                       .Where(i => i.IsGenericType)
                       .Select(i => i.GetGenericTypeDefinition())
                       .Contains(typeof(IList<>))
@@ -87,7 +86,9 @@ namespace Axion.Core.Processing.Traversal {
                 path.Node = new GenericTypeName(
                     path.Node.Parent,
                     new SimpleTypeName("Union"),
-                    new NodeList<TypeName>(path.Node) { unionTypeName.Left, unionTypeName.Right }
+                    new NodeList<TypeName>(path.Node) {
+                        unionTypeName.Left, unionTypeName.Right
+                    }
                 );
                 path.Traversed = true;
                 break;
@@ -136,7 +137,9 @@ namespace Axion.Core.Processing.Traversal {
                 var deconstructionVar = new VarDef(
                     scope,
                     new Token(bin.Source, TokenType.KeywordLet)
-                ) { Name = new NameExpr(scope.CreateUniqueId("unwrapped{0}")), Value = bin.Right };
+                ) {
+                    Name = new NameExpr(scope.CreateUniqueId("unwrapped{0}")), Value = bin.Right
+                };
                 scope.Items[deconstructionIdx] = deconstructionVar;
                 for (var i = 0; i < tpl.Expressions.Count; i++) {
                     scope.Items.Insert(
@@ -144,8 +147,7 @@ namespace Axion.Core.Processing.Traversal {
                         new VarDef(scope) {
                             Name = (NameExpr) tpl.Expressions[i],
                             Value = new MemberAccessExpr(scope) {
-                                Target = deconstructionVar.Name,
-                                Member = tpl.Expressions[i]
+                                Target = deconstructionVar.Name, Member = tpl.Expressions[i]
                             }
                         }
                     );
@@ -182,7 +184,9 @@ namespace Axion.Core.Processing.Traversal {
                 var flagName = new NameExpr(scope.CreateUniqueId("loop_{0}_nobreak"));
                 scope.Items.Insert(
                     whileIndex,
-                    new VarDef(path.Node) { Name = flagName, Value = new ConstantExpr(path.Node, "true") }
+                    new VarDef(path.Node) {
+                        Name = flagName, Value = new ConstantExpr(path.Node, "true")
+                    }
                 );
                 // index of while == whileIdx + 1
                 List<(BreakExpr item, ScopeExpr itemParentScope, int itemIndex)> breaks =
@@ -199,7 +203,9 @@ namespace Axion.Core.Processing.Traversal {
 
                 scope.Items.Insert(
                     whileIndex + 2,
-                    new IfExpr(path.Node) { Condition = flagName, ThenScope = whileExpr.NoBreakScope }
+                    new IfExpr(path.Node) {
+                        Condition = flagName, ThenScope = whileExpr.NoBreakScope
+                    }
                 );
                 whileExpr.NoBreakScope = null;
                 path.Traversed         = true;

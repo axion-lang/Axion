@@ -21,7 +21,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
 
             InfixExpr ParseInfix(int precedence) {
                 InfixExpr leftExpr = PrefixExpr.Parse(parent);
-                if (leftExpr is IDefinitionExpr || s.Peek.Type.IsCloseBracket() || s.PeekIs(Comma)) {
+                if (leftExpr is IDefinitionExpr
+                 || s.Peek.Type.IsCloseBracket()
+                 || s.PeekIs(Comma)) {
                     return leftExpr;
                 }
 
@@ -60,7 +62,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                     }
 
                     if (s.PeekIs(KeywordIf, KeywordUnless)) {
-                        return new TernaryExpr(parent) { TrueExpr = leftExpr }.Parse();
+                        return new TernaryExpr(parent) {
+                            TrueExpr = leftExpr
+                        }.Parse();
                     }
                 }
 

@@ -15,12 +15,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => elementType = Bind(value);
         }
 
-        public ArrayTypeName(
-            Expr?     parent      = null,
-            TypeName? elementType = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(elementType)
+        public ArrayTypeName(Expr? parent = null, TypeName? elementType = null) : base(
+            parent ?? GetParentFromChildren(elementType)
         ) {
             ElementType = elementType;
         }

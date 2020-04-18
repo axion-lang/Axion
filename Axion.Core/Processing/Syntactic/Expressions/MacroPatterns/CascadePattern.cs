@@ -26,7 +26,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
             }
             Stream.MoveAbsolute(startIdx);
             return false;
-
         }
 
         public CascadePattern Parse() {

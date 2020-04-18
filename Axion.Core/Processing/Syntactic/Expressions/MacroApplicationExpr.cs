@@ -27,8 +27,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     Ast.MacroApplicationParts.Push(this);
                     Macro = Ast.Macros.FirstOrDefault(
                         m => m.Syntax.Patterns.Count > 0
-                              && m.Syntax.Patterns[0] is TokenPattern
-                              && m.Syntax.Match(this)
+                          && m.Syntax.Patterns[0] is TokenPattern
+                          && m.Syntax.Match(this)
                     );
                     Ast.MacroApplicationParts.Pop();
                 }

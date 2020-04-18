@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
     /// </summary>
     public class ExpressionPattern : Pattern {
         private Func<Expr, Expr> parseFunc = null!;
-        private Type             type = null!;
+        private Type             type      = null!;
 
         public ExpressionPattern(Expr parent) : base(parent) { }
 
@@ -44,12 +44,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
                 return true;
             }
             return false;
-
         }
 
         public ExpressionPattern Parse() {
-            Token id = Stream.Eat(Identifier)!;
-            var namedParts = GetParent<MacroDef>().NamedSyntaxParts;
+            Token id          = Stream.Eat(Identifier)!;
+            var   namedParts  = GetParent<MacroDef>().NamedSyntaxParts;
             bool  typeDefined = namedParts.ContainsKey(id.Content);
             if (typeDefined) {
                 PatternFromTypeName(namedParts[id.Content]);
@@ -83,10 +82,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
             if (Spec.ParsingTypes.TryGetValue(typeName, out Type t)) {
                 type = t;
             }
-            else if (Spec.ParsingFunctions.TryGetValue(
-                typeName,
-                out Func<Expr, Expr> fn
-            )) {
+            else if (Spec.ParsingFunctions.TryGetValue(typeName, out Func<Expr, Expr> fn)) {
                 parseFunc = fn;
             }
         }

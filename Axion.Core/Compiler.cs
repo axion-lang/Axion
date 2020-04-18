@@ -59,11 +59,11 @@ namespace Axion.Core {
             }
 
             Logger.Info(
-                errCount > 0
-                    ? "Processing terminated due to errors above"
-                    : "Processing finished"
+                errCount > 0 ? "Processing terminated due to errors above" : "Processing finished"
             );
         }
+
+        // @formatter:off
 
         public static readonly Dictionary<ProcessingMode, Action<SourceUnit>> CompilationSteps =
             new Dictionary<ProcessingMode, Action<SourceUnit>> {
@@ -72,6 +72,8 @@ namespace Axion.Core {
                 { ProcessingMode.Reduction, Reduce },
                 { ProcessingMode.Transpilation, Transpile }
             };
+
+        // @formatter:on
 
         public static void Lex(SourceUnit src) {
             Logger.Debug("Tokens list generation");

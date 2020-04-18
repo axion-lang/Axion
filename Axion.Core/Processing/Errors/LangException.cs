@@ -21,14 +21,12 @@ namespace Axion.Core.Processing.Errors {
         public override string        StackTrace { get; }
         public          BlameSeverity Severity   { get; }
 
-        [JsonProperty]
-        private readonly Span errorSpan;
+        [JsonProperty] private readonly Span errorSpan;
 
-        [JsonProperty]
-        private readonly SourceUnit targetSource;
+        [JsonProperty] private readonly SourceUnit targetSource;
 
-        [JsonProperty]
-        private readonly string time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+        [JsonProperty] private readonly string time =
+            DateTime.Now.ToString(CultureInfo.InvariantCulture);
 
         private LangException(string message, BlameSeverity severity, Span span) {
             Severity     = severity;
@@ -84,8 +82,12 @@ namespace Axion.Core.Processing.Errors {
         }
 
         internal void PrintToConsole() {
-            string[] codeLines =
-                targetSource.TextStream.Text.Split(new[] { "\n" }, StringSplitOptions.None);
+            string[] codeLines = targetSource.TextStream.Text.Split(
+                new[] {
+                    "\n"
+                },
+                StringSplitOptions.None
+            );
 
             var lines = new List<string>();
             // limit code piece by 5 lines
@@ -147,12 +149,9 @@ namespace Axion.Core.Processing.Errors {
         }
 
         private static void DrawLineNumber(int lineNumber) {
-            var strNum = lineNumber.ToString();
-            int width  = Math.Max(strNum.Length, 4);
-            string view =
-                strNum.PadLeft(width  + 1)
-                      .PadRight(width + 2)
-              + "│ ";
+            var    strNum = lineNumber.ToString();
+            int    width  = Math.Max(strNum.Length, 4);
+            string view   = strNum.PadLeft(width + 1).PadRight(width + 2) + "│ ";
             ConsoleUtils.Write((view, ScriptBenchSettings.DefaultFramesColor));
         }
 

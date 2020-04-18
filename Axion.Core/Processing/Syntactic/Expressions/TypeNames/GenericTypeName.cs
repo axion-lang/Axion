@@ -29,10 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             Expr?                  parent   = null,
             TypeName?              target   = null,
             IEnumerable<TypeName>? typeArgs = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(target)
-        ) {
+        ) : base(parent ?? GetParentFromChildren(target)) {
             Target        = target;
             TypeArguments = NodeList<TypeName>.From(this, typeArgs);
         }

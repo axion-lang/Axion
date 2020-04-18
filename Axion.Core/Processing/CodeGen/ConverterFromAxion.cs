@@ -103,7 +103,10 @@ namespace Axion.Core.Processing.CodeGen {
 
         public virtual void Convert(BinaryExpr e) {
             cw.Write(
-                e.Left, " ", e.Operator.Value, " ",
+                e.Left,
+                " ",
+                e.Operator.Value,
+                " ",
                 e.Right
             );
         }
@@ -117,10 +120,20 @@ namespace Axion.Core.Processing.CodeGen {
 
         public virtual void Convert(UnaryExpr e) {
             if (e.Operator.Side == InputSide.Right) {
-                cw.Write(e.Operator.Value, " (", e.Value, ")");
+                cw.Write(
+                    e.Operator.Value,
+                    " (",
+                    e.Value,
+                    ")"
+                );
             }
             else {
-                cw.Write("(", e.Value, ") ", e.Operator.Value);
+                cw.Write(
+                    "(",
+                    e.Value,
+                    ") ",
+                    e.Operator.Value
+                );
             }
         }
 
@@ -183,8 +196,13 @@ namespace Axion.Core.Processing.CodeGen {
 
         public virtual void Convert(SliceExpr e) {
             cw.Write(
-                "[", e.From, ":", e.To,
-                ":", e.Step, "]"
+                "[",
+                e.From,
+                ":",
+                e.To,
+                ":",
+                e.Step,
+                "]"
             );
         }
 

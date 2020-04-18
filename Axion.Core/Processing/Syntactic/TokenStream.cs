@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
@@ -13,14 +12,10 @@ namespace Axion.Core.Processing.Syntactic {
         public int         TokenIdx { get; private set; } = -1;
 
         public Token Token =>
-            TokenIdx > -1 && TokenIdx < Tokens.Count
-                ? Tokens[TokenIdx]
-                : Tokens[^1];
+            TokenIdx > -1 && TokenIdx < Tokens.Count ? Tokens[TokenIdx] : Tokens[^1];
 
         public Token ExactPeek =>
-            TokenIdx + 1 < Tokens.Count
-                ? Tokens[TokenIdx + 1]
-                : Tokens[^1];
+            TokenIdx + 1 < Tokens.Count ? Tokens[TokenIdx + 1] : Tokens[^1];
 
         public Token Peek {
             get {
@@ -48,8 +43,7 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         public Token EatAny(int pos = 1) {
-            if (TokenIdx + pos >= 0
-             && TokenIdx + pos < Tokens.Count) {
+            if (TokenIdx + pos >= 0 && TokenIdx + pos < Tokens.Count) {
                 TokenIdx += pos;
             }
 
@@ -95,7 +89,6 @@ namespace Axion.Core.Processing.Syntactic {
             }
             EatAny();
             return true;
-
         }
 
         public void MoveAbsolute(int tokenIndex) {
@@ -105,8 +98,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         private void SkipTrivial(params TokenType[] wantedTypes) {
             bool skipNewlines = !wantedTypes.Contains(Newline);
-            while (ExactPeek.Type == Comment
-                || ExactPeek.Type == Newline && skipNewlines) {
+            while (ExactPeek.Type == Comment || ExactPeek.Type == Newline && skipNewlines) {
                 EatAny();
             }
         }

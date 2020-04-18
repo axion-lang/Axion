@@ -11,15 +11,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     public class EmptyExpr : Expr {
         public Token Mark { get; set; }
 
-        public EmptyExpr(
-            Expr   parent,
-            Token? mark = null
-        ) : base(parent) {
+        public EmptyExpr(Expr parent, Token? mark = null) : base(parent) {
             Mark = mark;
         }
 
         public EmptyExpr Parse() {
-            SetSpan(() => { Mark = Stream.Eat(Semicolon, KeywordPass); });
+            SetSpan(
+                () => {
+                    Mark = Stream.Eat(Semicolon, KeywordPass);
+                }
+            );
             return this;
         }
     }

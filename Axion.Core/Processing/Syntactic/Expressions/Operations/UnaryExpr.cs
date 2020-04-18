@@ -19,13 +19,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
 
         public OperatorToken Operator { get; }
 
-        public UnaryExpr(
-            Expr?          parent = null,
-            OperatorToken? op     = null,
-            Expr?          value  = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(value)
+        public UnaryExpr(Expr? parent = null, OperatorToken? op = null, Expr? value = null) : base(
+            parent ?? GetParentFromChildren(value)
         ) {
             Operator = op;
             Value    = value;
@@ -33,14 +28,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             MarkEnd(Value);
         }
 
-        public UnaryExpr(
-            Expr?     parent = null,
-            TokenType opType = TokenType.None,
-            Expr?     value  = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(value)
-        ) {
+        public UnaryExpr(Expr? parent = null, TokenType opType = TokenType.None, Expr? value = null)
+            : base(parent ?? GetParentFromChildren(value)) {
             Operator = new OperatorToken(Source, tokenType: opType);
             Value    = value;
             MarkStart(Operator);

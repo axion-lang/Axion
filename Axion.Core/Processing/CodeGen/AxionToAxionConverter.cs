@@ -48,8 +48,12 @@ namespace Axion.Core.Processing.CodeGen {
 
         public override void Convert(MacroDef e) {
             cw.Write(
-                "macro ", e.Name, "(", e.Syntax,
-                ")", e.Scope
+                "macro ",
+                e.Name,
+                "(",
+                e.Syntax,
+                ")",
+                e.Scope
             );
         }
 

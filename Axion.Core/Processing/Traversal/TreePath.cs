@@ -30,7 +30,8 @@ namespace Axion.Core.Processing.Traversal {
         }
     }
 
-    public class NodeListTreePath<T> : ITreePath where T : Expr {
+    public class NodeListTreePath<T> : ITreePath
+        where T : Expr {
         private readonly NodeList<T> list;
         internal         int         IndexInList;
 

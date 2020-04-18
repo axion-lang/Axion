@@ -49,17 +49,23 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                                 }
 
                                 Expr step = null;
-                                if (Stream.MaybeEat(Colon)
-                                 && !Stream.PeekIs(Comma, CloseBracket)) {
+                                if (Stream.MaybeEat(Colon) && !Stream.PeekIs(Comma, CloseBracket)) {
                                     step = InfixExpr.Parse(this);
                                 }
 
-                                expressions.Add(new SliceExpr(this) { From = start, To = stop, Step = step });
+                                expressions.Add(
+                                    new SliceExpr(this) {
+                                        From = start, To = stop, Step = step
+                                    }
+                                );
                                 break;
                             }
 
                             if (start == null) {
-                                LangException.Report(BlameType.InvalidIndexerExpression, Stream.Token);
+                                LangException.Report(
+                                    BlameType.InvalidIndexerExpression,
+                                    Stream.Token
+                                );
                             }
 
                             expressions.Add(start);
@@ -72,7 +78,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     }
                     Index = expressions.Count == 1
                         ? expressions[0]
-                        : new TupleExpr(this) { Expressions = expressions };
+                        : new TupleExpr(this) {
+                            Expressions = expressions
+                        };
                     Stream.Eat(CloseBracket);
                 }
             );

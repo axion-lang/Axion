@@ -1,5 +1,3 @@
 namespace Axion.Core.Source {
-    public class Module {
-        
-    }
+    public class Module { }
 }

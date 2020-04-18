@@ -67,10 +67,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
                     // parameters
                     if (Stream.MaybeEat(OpenParenthesis)) {
-                        Parameters = FunctionParameter.ParseList(
-                            this,
-                            CloseParenthesis
-                        );
+                        Parameters = FunctionParameter.ParseList(this, CloseParenthesis);
                         Stream.Eat(CloseParenthesis);
                     }
                     else {
@@ -84,9 +81,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
                     if (Stream.PeekIs(Spec.ScopeStartMarks)) {
                         Scope = new ScopeExpr(this).Parse(
-                            anonymous
-                                ? ScopeType.Lambda
-                                : ScopeType.Default
+                            anonymous ? ScopeType.Lambda : ScopeType.Default
                         );
                     }
                     else {

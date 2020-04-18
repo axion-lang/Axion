@@ -11,7 +11,12 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             string     content     = "",
             bool       isMultiline = false,
             bool       isUnclosed  = false
-        ) : base(source, TokenType.Comment, value, content) {
+        ) : base(
+            source,
+            TokenType.Comment,
+            value,
+            content
+        ) {
             IsUnclosed  = isUnclosed;
             IsMultiline = isMultiline;
         }

@@ -18,7 +18,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         public SimpleTypeName(Expr parent) : base(parent) { }
 
         public SimpleTypeName Parse() {
-            SetSpan(() => { Name = new NameExpr(this).Parse(); });
+            SetSpan(
+                () => {
+                    Name = new NameExpr(this).Parse();
+                }
+            );
             return this;
         }
 

@@ -12,7 +12,8 @@ namespace Axion.Core.Processing.Syntactic {
     ///     to one defined on list construction,
     ///     and provide some other useful methods.
     /// </summary>
-    public class NodeList<T> : IList<T> where T : Expr {
+    public class NodeList<T> : IList<T>
+        where T : Expr {
         private Expr? parent;
 
         public Expr? Parent {
@@ -54,9 +55,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         public T First {
             get =>
-                items.Count > 0
-                    ? items[0]
-                    : throw new IndexOutOfRangeException();
+                items.Count > 0 ? items[0] : throw new IndexOutOfRangeException();
             set {
                 if (items.Count > 0) {
                     items[0] = value;
@@ -69,9 +68,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         public T Last {
             get =>
-                items.Count > 0
-                    ? items[^1]
-                    : throw new IndexOutOfRangeException();
+                items.Count > 0 ? items[^1] : throw new IndexOutOfRangeException();
             set {
                 if (items.Count > 0) {
                     items[^1] = value;
@@ -181,7 +178,9 @@ namespace Axion.Core.Processing.Syntactic {
                 );
             }
             if (array.Length - arrayIndex < Count) {
-                throw new ArgumentException("Not enough elements after index in the destination array.");
+                throw new ArgumentException(
+                    "Not enough elements after index in the destination array."
+                );
             }
 
             for (var i = 0; i < Count; i++) {

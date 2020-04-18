@@ -49,8 +49,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public ClassDef(Expr parent) : base(parent) {
-            Bases = new NodeList<TypeName>(this);
-            Keywords = new NodeList<Expr>(this);
+            Bases       = new NodeList<TypeName>(this);
+            Keywords    = new NodeList<Expr>(this);
             DataMembers = new NodeList<Expr>(this);
         }
 

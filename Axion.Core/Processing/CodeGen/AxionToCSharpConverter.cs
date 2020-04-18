@@ -47,7 +47,9 @@ namespace Axion.Core.Processing.CodeGen {
             else {
                 // BUG type inference stuck in infinite loop (get-value in MathExprParser)
                 cw.Write(
-                    "public ", e.ValueType, " ",
+                    "public ",
+                    e.ValueType,
+                    " ",
                     e.Name,
                     "("
                 );
@@ -146,7 +148,9 @@ namespace Axion.Core.Processing.CodeGen {
 
         public override void Convert(TernaryExpr e) {
             cw.Write(
-                e.Condition, " ? ", e.TrueExpr,
+                e.Condition,
+                " ? ",
+                e.TrueExpr,
                 " : "
             );
             if (e.FalseExpr == null) {
@@ -165,13 +169,17 @@ namespace Axion.Core.Processing.CodeGen {
 
             if (e.Operator.Side == InputSide.Right) {
                 cw.Write(
-                    op, " (", e.Value,
+                    op,
+                    " (",
+                    e.Value,
                     ")"
                 );
             }
             else {
                 cw.Write(
-                    "(", e.Value, ") ",
+                    "(",
+                    e.Value,
+                    ") ",
                     op
                 );
             }
@@ -179,7 +187,9 @@ namespace Axion.Core.Processing.CodeGen {
 
         public override void Convert(ForComprehension e) {
             cw.Write(
-                "from ", e.Item, " in ",
+                "from ",
+                e.Item,
+                " in ",
                 e.Iterable
             );
             if (e.Right != null) {
@@ -227,7 +237,9 @@ namespace Axion.Core.Processing.CodeGen {
 
         public override void Convert(FuncTypeName e) {
             cw.Write(
-                "Func<", e.ArgsType, ", ",
+                "Func<",
+                e.ArgsType,
+                ", ",
                 e.ReturnType,
                 ">"
             );

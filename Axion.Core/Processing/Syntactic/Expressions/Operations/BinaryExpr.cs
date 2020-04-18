@@ -30,10 +30,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             Expr?  left   = null,
             Token? op     = null,
             Expr?  right  = null
-        ) : base(
-            parent
-         ?? GetParentFromChildren(left, right)
-        ) {
+        ) : base(parent ?? GetParentFromChildren(left, right)) {
             Left     = left;
             Operator = op;
             Right    = right;

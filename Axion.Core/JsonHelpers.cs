@@ -23,9 +23,8 @@ namespace Axion.Core {
             JsonProperty property = base.CreateProperty(member, memberSerialization);
 
             Predicate<object> shouldSerialize = property.ShouldSerialize;
-            property.ShouldSerialize = obj =>
-                (shouldSerialize == null || shouldSerialize(obj))
-             && !IsEmptyCollection(property, obj);
+            property.ShouldSerialize = obj => (shouldSerialize == null || shouldSerialize(obj))
+                                           && !IsEmptyCollection(property, obj);
             return property;
         }
 

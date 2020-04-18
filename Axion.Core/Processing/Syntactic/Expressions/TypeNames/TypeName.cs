@@ -28,9 +28,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             // tuple
             if (s.PeekIs(OpenParenthesis)) {
                 TupleTypeName tuple = new TupleTypeName(parent).Parse();
-                leftTypeName = tuple.Types.Count == 1
-                    ? tuple.Types[0]
-                    : tuple;
+                leftTypeName = tuple.Types.Count == 1 ? tuple.Types[0] : tuple;
             }
             // simple
             else if (s.PeekIs(Identifier)) {
@@ -55,11 +53,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             // trailing
             // union
             if (s.PeekIs(OpBitOr)) {
-                leftTypeName = new UnionTypeName(parent) { Left = leftTypeName }.Parse();
+                leftTypeName = new UnionTypeName(parent) {
+                    Left = leftTypeName
+                }.Parse();
             }
 
             if (s.PeekIs(RightArrow)) {
-                leftTypeName = new FuncTypeName(parent) { ArgsType = leftTypeName }.Parse();
+                leftTypeName = new FuncTypeName(parent) {
+                    ArgsType = leftTypeName
+                }.Parse();
             }
 
             return leftTypeName;

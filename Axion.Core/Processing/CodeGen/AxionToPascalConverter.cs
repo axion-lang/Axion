@@ -15,7 +15,12 @@ namespace Axion.Core.Processing.CodeGen {
         }
 
         public override void Convert(IfExpr e) {
-            cw.Write("if ", e.Condition, " then", e.ThenScope);
+            cw.Write(
+                "if ",
+                e.Condition,
+                " then",
+                e.ThenScope
+            );
             if (e.ElseScope != null) {
                 cw.Write("else", e.ElseScope);
             }

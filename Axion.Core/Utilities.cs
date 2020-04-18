@@ -21,7 +21,8 @@ namespace Axion.Core {
             return dt.ToString(timedFileNameFormat, dateTimeFormat);
         }
 
-        internal static List<T> OfType<T>(this IEnumerable<T> tokens, TokenType type) where T : Token {
+        internal static List<T> OfType<T>(this IEnumerable<T> tokens, TokenType type)
+            where T : Token {
             return tokens.Where(t => t.Type == type).ToList();
         }
 

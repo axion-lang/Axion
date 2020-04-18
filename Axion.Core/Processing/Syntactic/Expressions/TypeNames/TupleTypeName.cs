@@ -17,10 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => types = Bind(value);
         }
 
-        public TupleTypeName(
-            Expr                   parent,
-            IEnumerable<TypeName>? types = null
-        ) : base(parent) {
+        public TupleTypeName(Expr parent, IEnumerable<TypeName>? types = null) : base(parent) {
             Types = NodeList<TypeName>.From(this, types);
         }
 

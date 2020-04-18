@@ -47,8 +47,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
                         invert = true;
                     }
 
-                    TrueExpr ??= AnyExpr.Parse(this);
-                    Condition = Parse(this);
+                    TrueExpr  ??= AnyExpr.Parse(this);
+                    Condition =   Parse(this);
                     if (Stream.MaybeEat(KeywordElse)) {
                         FalseExpr = Multiple<InfixExpr>.ParseGenerally(this);
                     }

@@ -69,10 +69,7 @@ namespace Axion.Testing.NUnit.Lexer {
         [Test]
         public void TestFailStringInvalidEscape() {
             SourceUnit src = MakeSourceFromCode(
-                string.Join(
-                    Environment.NewLine,
-                    "'invalid -> \\m <- escape!'"
-                )
+                string.Join(Environment.NewLine, "'invalid -> \\m <- escape!'")
             );
             Lex(src);
             Assert.AreEqual(1, src.Blames.Count);

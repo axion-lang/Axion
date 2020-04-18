@@ -25,7 +25,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         internal ParenthesizedExpr(Expr value) : base(value.Parent) {
             Value = value;
-
         }
     }
 }

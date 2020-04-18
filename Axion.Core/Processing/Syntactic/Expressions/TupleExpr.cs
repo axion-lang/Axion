@@ -21,20 +21,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set {
                 expressions = Bind(value);
                 if (expressions.Count > 0) {
-                    MarkPosition(
-                        expressions[0],
-                        expressions[^1]
-                    );
+                    MarkPosition(expressions[0], expressions[^1]);
                 }
             }
         }
 
         [NoPathTraversing]
         public override TypeName ValueType => new TupleTypeName(
-            this, NodeList<TypeName>.From(
-                this,
-                Expressions.Select(e => e.ValueType)
-            )
+            this,
+            NodeList<TypeName>.From(this, Expressions.Select(e => e.ValueType))
         );
 
         internal TupleExpr(Expr parent) : base(parent) { }

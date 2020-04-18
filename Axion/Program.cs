@@ -37,51 +37,50 @@ namespace Axion {
             // main processing loop
             while (true) {
                 if (arguments.Length > 0) {
-                    cliParser
-                        .ParseArguments<CommandLineArguments>(arguments)
-                        .MapResult(
-                            args => {
-                                if (args.Exit) {
-                                    Environment.Exit(0);
-                                }
+                    cliParser.ParseArguments<CommandLineArguments>(arguments)
+                             .MapResult(
+                                 args => {
+                                     if (args.Exit) {
+                                         Environment.Exit(0);
+                                     }
 
-                                if (args.Cls) {
-                                    Console.Clear();
-                                    PrintIntro();
-                                    return 0;
-                                }
+                                     if (args.Cls) {
+                                         Console.Clear();
+                                         PrintIntro();
+                                         return 0;
+                                     }
 
-                                if (args.Version) {
-                                    ConsoleUtils.WriteLine(Compiler.Version);
-                                    return 0;
-                                }
+                                     if (args.Version) {
+                                         ConsoleUtils.WriteLine(Compiler.Version);
+                                         return 0;
+                                     }
 
-                                if (args.Help) {
-                                    ConsoleUtils.WriteLine(CommandLineArguments.HelpText);
-                                    return 0;
-                                }
+                                     if (args.Help) {
+                                         ConsoleUtils.WriteLine(CommandLineArguments.HelpText);
+                                         return 0;
+                                     }
 
-                                if (args.EditorHelp) {
-                                    ScriptBench.DrawHelpBox();
-                                    return 0;
-                                }
+                                     if (args.EditorHelp) {
+                                         ScriptBench.DrawHelpBox();
+                                         return 0;
+                                     }
 
-                                if (args.Interactive) {
-                                    EnterInteractiveMode();
-                                    return 0;
-                                }
+                                     if (args.Interactive) {
+                                         EnterInteractiveMode();
+                                         return 0;
+                                     }
 
-                                ProcessSources(args);
-                                return 0;
-                            },
-                            errors => {
-                                foreach (Error e in errors) {
-                                    logger.Error(e.ToString());
-                                }
+                                     ProcessSources(args);
+                                     return 0;
+                                 },
+                                 errors => {
+                                     foreach (Error e in errors) {
+                                         logger.Error(e.ToString());
+                                     }
 
-                                return 0;
-                            }
-                        );
+                                     return 0;
+                                 }
+                             );
                 }
 
                 // wait for next command
@@ -108,7 +107,9 @@ namespace Axion {
                 ("Working in ", ConsoleColor.White),
                 (Compiler.WorkDir, ConsoleColor.DarkYellow)
             );
-            ConsoleUtils.WriteLine("Type '-h', or '--help' to get documentation about launch arguments.\n");
+            ConsoleUtils.WriteLine(
+                "Type '-h', or '--help' to get documentation about launch arguments.\n"
+            );
         }
 
         private static void EnterInteractiveMode() {
@@ -194,7 +195,9 @@ namespace Axion {
 
                 var inputFiles = new FileInfo[filesCount];
                 for (var i = 0; i < filesCount; i++) {
-                    inputFiles[i] = new FileInfo(Utilities.TrimMatchingChars(args.Files.ElementAt(i), '"'));
+                    inputFiles[i] = new FileInfo(
+                        Utilities.TrimMatchingChars(args.Files.ElementAt(i), '"')
+                    );
                 }
 
                 src = SourceUnit.FromFile(inputFiles[0]);
@@ -219,7 +222,9 @@ namespace Axion {
             }
 
             var refs = new List<MetadataReference>(
-                Spec.CSharp.DefaultImports.Select(asm => MetadataReference.CreateFromFile(asm.Location))
+                Spec.CSharp.DefaultImports.Select(
+                    asm => MetadataReference.CreateFromFile(asm.Location)
+                )
             );
 
             // Location of the .NET assemblies
@@ -229,17 +234,27 @@ namespace Axion {
             // These assemblies couldn't be loaded correctly via the same construction as above.
             refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "mscorlib.dll")));
             refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")));
-            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")));
-            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")));
+            refs.Add(
+                MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll"))
+            );
+            refs.Add(
+                MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll"))
+            );
             refs.Add(MetadataReference.CreateFromFile(typeof(Console).Assembly.Location));
-            refs.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Private.CoreLib.dll")));
+            refs.Add(
+                MetadataReference.CreateFromFile(
+                    Path.Combine(assemblyPath, "System.Private.CoreLib.dll")
+                )
+            );
 
             string     assemblyName = Path.GetRandomFileName();
             SyntaxTree syntaxTree   = CSharpSyntaxTree.ParseText(csCode);
 
             var compilation = CSharpCompilation.Create(
                 assemblyName,
-                new[] { syntaxTree },
+                new[] {
+                    syntaxTree
+                },
                 refs,
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );
@@ -256,7 +271,12 @@ namespace Axion {
 
                 // Let's assume that compiler anyway 'd create Main method for us :)
                 // ReSharper disable once PossibleNullReferenceException
-                main.Invoke(null, new object[] { new string[0] });
+                main.Invoke(
+                    null,
+                    new object[] {
+                        new string[0]
+                    }
+                );
             }
             else {
                 IEnumerable<Diagnostic> failures = result.Diagnostics.Where(

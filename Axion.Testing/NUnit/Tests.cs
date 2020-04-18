@@ -109,7 +109,9 @@ namespace Axion.Testing.NUnit {
         }
 
         internal static SourceUnit MakeSourceFromFile(string fileName) {
-            return SourceUnit.FromFile(new FileInfo(Path.Combine(InPath, fileName + SourceUnit.SourceFileExt)));
+            return SourceUnit.FromFile(
+                new FileInfo(Path.Combine(InPath, fileName + SourceUnit.SourceFileExt))
+            );
         }
 
         internal static SourceUnit MakeSourceFromCode(
@@ -131,9 +133,9 @@ namespace Axion.Testing.NUnit {
         [Test]
         public static void SpecificationCheck() {
             // check keywords completeness
-            IEnumerable<string> definedKws =
-                Enum.GetNames(typeof(TokenType))
-                    .Where(name => name.ToUpper().StartsWith("KEYWORD"));
+            IEnumerable<string> definedKws = Enum
+                                             .GetNames(typeof(TokenType))
+                                             .Where(name => name.ToUpper().StartsWith("KEYWORD"));
 
             foreach (string kw in definedKws) {
                 Enum.TryParse(kw, out TokenType type);

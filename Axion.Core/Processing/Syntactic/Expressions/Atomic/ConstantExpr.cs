@@ -22,15 +22,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public ConstantExpr(Expr parent) : base(parent) { }
 
-        public ConstantExpr(
-            Expr   parent,
-            string literal
-        ) : base(parent) {
+        public ConstantExpr(Expr parent, string literal) : base(parent) {
             Literal = new Token(Source, value: literal);
         }
 
         public ConstantExpr Parse() {
-            SetSpan(() => { Literal = Stream.EatAny(); });
+            SetSpan(
+                () => {
+                    Literal = Stream.EatAny();
+                }
+            );
             return this;
         }
     }

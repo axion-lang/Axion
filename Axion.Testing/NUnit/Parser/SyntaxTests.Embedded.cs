@@ -43,10 +43,7 @@ namespace Axion.Testing.NUnit.Parser {
             );
             Parse(src);
             Assert.That(src.Blames.Count == 0, $"Blames.Count == {src.Blames.Count}");
-            TypeName[] stmts =
-                src.Ast.Items
-                   .Select(s => ((VarDef) s).ValueType)
-                   .ToArray();
+            TypeName[] stmts = src.Ast.Items.Select(s => ((VarDef) s).ValueType).ToArray();
             Assert.That(stmts.Length == 10);
         }
     }
