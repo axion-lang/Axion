@@ -33,12 +33,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
                 return true;
             }
 
-            parent.Ast.MacroExpectType = type;
             e = typeof(TypeName).IsAssignableFrom(type)
                 ? TypeName.Parse(parent)
                 : AnyExpr.Parse(parent);
 
-            parent.Ast.MacroExpectType = null;
             if (type.IsInstanceOfType(e)) {
                 parent.Ast.MacroApplicationParts.Peek().Expressions.Add(e);
                 return true;

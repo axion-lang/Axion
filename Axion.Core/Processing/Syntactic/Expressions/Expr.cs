@@ -87,7 +87,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             protected internal set => valueType = Bind(value);
         }
 
-        internal Type?       MacroExpectType;
         internal TokenStream Stream => Source.TokenStream;
         protected Expr() : base(null) { }
 

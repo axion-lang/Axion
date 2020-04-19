@@ -15,7 +15,7 @@
         /// </summary>
         public bool CheckIndentationConsistency { get; }
 
-        public static ProcessingOptions Debug { get; } = new ProcessingOptions("axion", true);
+        public static ProcessingOptions Debug { get; } = new ProcessingOptions("axion");
 
         public ProcessingOptions(string targetType, bool checkIndentationConsistency = true) {
             TargetType                  = targetType.Trim().ToLower();
