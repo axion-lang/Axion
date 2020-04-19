@@ -4,9 +4,13 @@ using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// <summary>
+    ///     "Prefix" expression is any <see cref="PostfixExpr"/>
+    ///     coming after any count of allowed prefix operators.
+    ///     <br/>
+    ///     (e.g ++++++!x is valid expression)
     ///     <c>
     ///         prefix-expr:
-    ///             (PREFIX-OPERATOR prefix-expr) | suffix-expr;
+    ///             (PREFIX-OPERATOR prefix) | postfix;
     ///     </c>
     /// </summary>
     public class PrefixExpr : InfixExpr {

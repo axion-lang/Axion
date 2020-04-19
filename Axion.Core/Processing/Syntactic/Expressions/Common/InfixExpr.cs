@@ -6,9 +6,22 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// <summary>
+    ///     [Strictness appears here.]
+    ///     "Infix" is an expression that usually consists
+    ///     of 3 parts.
+    ///     <br/>
+    ///     Infix includes
+    ///     <br/>
+    ///     - Binary/ternary operations;
+    ///     <br/>
+    ///     - Infix-macros (that start with an expression, then token);
+    ///     <br/>
+    ///     - And also any <see cref="PrefixExpr"/>.
     ///     <c>
-    ///         infix-expr:
-    ///             prefix-expr (ID | SYMBOL) infix-expr;
+    ///         infix
+    ///             : prefix (ID | SYMBOL) infix
+    ///             | for-comprehension
+    ///             | ternary-expr;
     ///     </c>
     /// </summary>
     public class InfixExpr : Expr {
@@ -38,7 +51,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                     if (s.Peek is OperatorToken opToken) {
                         newPrecedence = opToken.Precedence;
                     }
-                    // NOTE: this condition disallows identifiers to be used as operators.
+                    // NOTE: this condition disallows identifiers on newline to be used as operators.
                     else if (!s.Token.Is(Newline, Outdent) && s.PeekIs(Identifier)) {
                         newPrecedence = 4;
                     }

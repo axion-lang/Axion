@@ -7,12 +7,25 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// <summary>
+    ///     "Atom" expression has no detachable parts.
+    ///     <br/>
+    ///     It meant to be embedded in other expressions.
+    ///     <br/>
+    ///     Exceptions, like 'await' or 'yield' can appear
+    ///     on the top level of <see cref="AnyExpr"/> if needed,
+    ///     but they're still embeddable ones.
     ///     <c>
     ///         atom
     ///             : name
     ///             | await-expr
+    ///             | yield-expr
+    ///             | anon-fn-expr
+    ///             | code-quote-expr
+    ///             | tuple-expr
     ///             | parenthesis-expr
-    ///             | CONSTANT;
+    ///             | const-expr
+    ///             | atom-macro-expr
+    ///             | unknown-expr;
     ///     </c>
     /// </summary>
     public class AtomExpr : PostfixExpr {

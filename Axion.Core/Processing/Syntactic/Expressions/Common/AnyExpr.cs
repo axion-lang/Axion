@@ -9,12 +9,35 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// <summary>
+    ///     "Any" is a top level expression that
+    ///     don't appear inside other expressions.
+    ///     <br/>
+    ///     Any expression embeds <see cref="InfixExpr"/> in itself,
+    ///     but not every <see cref="InfixExpr"/> is <see cref="AnyExpr"/>.
+    ///     <br/>
+    ///     This class is too general and it has no strict hierarchy,
+    ///     that's why <see cref="Parse"/> method
+    ///     returns <see cref="Expr"/> and not <see cref="AnyExpr"/>.
     ///     <c>
-    ///         var-expr
-    ///             : multiple-infix
-    ///             | (['let'] assignable
-    ///                [':' type]
-    ///                ['=' multiple-infix]);
+    ///         any
+    ///             : class-def
+    ///             | fn-def
+    ///             | macro-def
+    ///             | module-def
+    ///             | if-expr
+    ///             | while-expr
+    ///             | decorable-expr
+    ///             | break-expr
+    ///             | continue-expr
+    ///             | return-expr
+    ///             | empty-expr
+    ///             | scope-expr
+    ///             | infix
+    ///             | var-def;
+    ///         var-def:
+    ///             (['let'] assignable
+    ///             [':' type]
+    ///             ['=' multiple-infix]);
     ///     </c>
     /// </summary>
     public static class AnyExpr {
@@ -57,9 +80,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             if (s.PeekIs(Indent, OpenBrace, Colon)) {
                 return new ScopeExpr(parent).Parse();
             }
-            Token? immutableKw = s.MaybeEat(KeywordLet) ? s.Token : null;
 
-            Expr expr = InfixExpr.Parse(parent);
+            Token? immutableKw = s.MaybeEat(KeywordLet) ? s.Token : null;
+            Expr   expr        = InfixExpr.Parse(parent);
 
             if (expr is BinaryExpr bin && bin.Operator.Is(OpAssign)) {
                 // ['let'] name '=' expr

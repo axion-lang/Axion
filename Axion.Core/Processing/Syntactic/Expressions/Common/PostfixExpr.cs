@@ -5,11 +5,16 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// <summary>
+    ///     "Postfix" expression is any <see cref="AtomExpr"/>
+    ///     that may be followed by non-infix (terminal) token
+    ///     and maybe other next parts.
     ///     <c>
-    ///         suffix-expr:
-    ///         atom
-    ///         {'|>' atom }
-    ///         | ({ member | call-expr | index-expr } ['++' | '--']));
+    ///         postfix:
+    ///             atom
+    ///             { member
+    ///             | call-expr
+    ///             | index-expr }
+    ///             ['++' | '--'];
     ///     </c>
     /// </summary>
     public class PostfixExpr : PrefixExpr {
@@ -20,6 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
         internal new static PostfixExpr Parse(Expr parent) {
             TokenStream s = parent.Source.TokenStream;
 
+            // TODO: look about it.
             bool        unquoted = !s.PeekByIs(2, OpenParenthesis) && s.MaybeEat(Dollar);
             PostfixExpr value    = AtomExpr.Parse(parent);
 
