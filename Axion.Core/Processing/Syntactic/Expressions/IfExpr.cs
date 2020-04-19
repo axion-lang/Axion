@@ -48,7 +48,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                         ElseScope = new ScopeExpr(this).Parse();
                     }
                     else if (Stream.MaybeEat(KeywordElif)) {
-                        ElseScope = new ScopeExpr(this, new IfExpr(this).Parse(true));
+                        ElseScope = new ScopeExpr(this) {
+                            Items = new NodeList<Expr>(this) {
+                                new IfExpr(this).Parse(true)
+                            }
+                        };
                     }
                 }
             );

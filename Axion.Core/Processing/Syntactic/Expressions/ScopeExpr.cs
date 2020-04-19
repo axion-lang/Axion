@@ -23,37 +23,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         private NodeList<Expr> items = null!;
 
         public NodeList<Expr> Items {
-            get => items;
+            get => InitIfNull(ref items);
             set => items = Bind(value);
         }
 
-        internal ScopeExpr(Node parent, IEnumerable<Expr>? items = null) : base(parent) {
-            Items = NodeList<Expr>.From(this, items);
-
-            if (Items.Count != 0) {
-                MarkPosition(Items.First, Items.Last);
-            }
-        }
-
-        internal ScopeExpr(Node? parent, params Expr[] items) : base(
-            parent ?? GetParentFromChildren(items)
-        ) {
-            Items = NodeList<Expr>.From(this, items);
-
-            if (Items.Count != 0) {
-                MarkPosition(Items.First, Items.Last);
-            }
-        }
-
-        internal static ScopeExpr FromItems(params Expr[] items) {
-            return new ScopeExpr(null, items);
-        }
-
-        internal static ScopeExpr FromItems(IEnumerable<Expr> items) {
-            Expr[] scopeItems = items.ToArray();
-            Node   parent     = GetParentFromChildren(scopeItems);
-            return new ScopeExpr(parent, scopeItems);
-        }
+        internal ScopeExpr(Node parent) : base(parent) { }
 
         protected ScopeExpr() { }
 

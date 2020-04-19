@@ -14,10 +14,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public Expr Value {
             get => val;
-            set {
-                val = Bind(value);
-                MarkPosition(val);
-            }
+            set => val = Bind(value);
         }
 
         [NoPathTraversing]

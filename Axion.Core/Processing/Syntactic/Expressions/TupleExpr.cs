@@ -17,13 +17,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         private NodeList<Expr> expressions = null!;
 
         public NodeList<Expr> Expressions {
-            get => expressions;
-            set {
-                expressions = Bind(value);
-                if (expressions.Count > 0) {
-                    MarkPosition(expressions[0], expressions[^1]);
-                }
-            }
+            get => InitIfNull(ref expressions);
+            set => expressions = Bind(value);
         }
 
         [NoPathTraversing]

@@ -13,20 +13,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
 
         public Expr Left {
             get => left;
-            set {
-                left = Bind(value);
-                MarkStart(left);
-            }
+            set => left = Bind(value);
         }
 
         private Expr right = null!;
 
         public Expr Right {
             get => right;
-            set {
-                right = Bind(value);
-                MarkEnd(right);
-            }
+            set => right = Bind(value);
         }
 
         public Token Operator { get; set; }

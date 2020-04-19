@@ -1,3 +1,4 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -13,6 +14,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///     </c>
     /// </summary>
     public class ReturnExpr : Expr {
+        private Token? kwReturn;
+
+        public Token? KwReturn {
+            get => kwReturn;
+            set => kwReturn = BindNullable(value);
+        }
+
         private Expr? val;
 
         public Expr? Value {
@@ -26,14 +34,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
         public ReturnExpr(Node parent) : base(parent) { }
 
         public ReturnExpr Parse() {
-            SetSpan(
-                () => {
-                    Stream.Eat(KeywordReturn);
-                    if (!Stream.PeekIs(Spec.NeverExprStartTypes)) {
-                        Value = Multiple<InfixExpr>.ParseGenerally(this);
-                    }
-                }
-            );
+            KwReturn = Stream.Eat(KeywordReturn);
+            if (!Stream.PeekIs(Spec.NeverExprStartTypes)) {
+                Value = Multiple<InfixExpr>.ParseGenerally(this);
+            }
             return this;
         }
     }

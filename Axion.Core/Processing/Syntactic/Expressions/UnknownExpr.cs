@@ -11,18 +11,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class UnknownExpr : AtomExpr {
+        private NodeList<Token> tokens = null!;
+
+        public NodeList<Token> Tokens {
+            get => InitIfNull(ref tokens);
+            set => tokens = Bind(value);
+        }
+
         public UnknownExpr(Node parent) : base(parent) {
             LangException.Report(BlameType.InvalidSyntax, this);
         }
 
         public UnknownExpr Parse() {
-            SetSpan(
-                () => {
-                    while (!Stream.PeekIs(Newline, TokenType.End)) {
-                        Stream.Eat();
-                    }
-                }
-            );
+            while (!Stream.PeekIs(Newline, TokenType.End)) {
+                Tokens.Add(Stream.Eat());
+            }
             return this;
         }
     }

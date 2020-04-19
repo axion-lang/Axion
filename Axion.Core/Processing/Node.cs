@@ -16,11 +16,24 @@ namespace Axion.Core.Processing {
         [JsonIgnore]
         public Unit Source { get; set; }
 
-        public Location Start { get; private set; }
-        public Location End   { get; private set; }
+        /// <summary>
+        ///     Start location of this node's code span.
+        /// </summary>
+        public Location Start { get; private protected set; }
+
+        /// <summary>
+        ///     End location of this node's code span.
+        /// </summary>
+        public Location End { get; private protected set; }
 
         private Ast ast = null!;
 
+        /// <summary>
+        ///     Abstract Syntax Tree root of this node.
+        ///     <exception cref="NullReferenceException">
+        ///         Thrown if node is not completely bound at the moment.
+        ///     </exception>
+        /// </summary>
         internal Ast Ast {
             get {
                 if (ast != null) {
@@ -37,13 +50,23 @@ namespace Axion.Core.Processing {
             }
         }
 
+        /// <summary>
+        ///     Direct reference to the attribute of
+        ///     parent to which this node is bound.
+        /// </summary>
         internal ITreePath Path = null!;
 
+        /// <summary>
+        ///     Reference to parent of this node.
+        /// </summary>
         [NoPathTraversing]
         protected internal Node? Parent { get; set; }
 
         private TypeName valueType = null!;
 
+        /// <summary>
+        ///     Language type-name of this node that can be inferred from context.
+        /// </summary>
         [JsonIgnore]
         [NoPathTraversing]
         public virtual TypeName ValueType {
@@ -57,17 +80,13 @@ namespace Axion.Core.Processing {
             End    = end;
         }
 
+        /// <summary>
+        ///     Returns first parent of this node with given type.
+        ///     (<code>null</code> if parent of given type is not exists).
+        /// </summary>
         internal T? GetParent<T>()
             where T : Node {
             Node p = this;
-            if (p is Ast) {
-                if (typeof(T).IsSubclassOf(typeof(ScopeExpr))) {
-                    return (T) p;
-                }
-
-                return null;
-            }
-
             while (true) {
                 p = p.Parent;
                 if (p == null || p is T) {
@@ -80,19 +99,16 @@ namespace Axion.Core.Processing {
             }
         }
 
-        protected static Node GetParentFromChildren(params Node?[] nodes) {
-            foreach (Node? n in nodes) {
-                if (n?.Parent != null) {
-                    return n.Parent;
-                }
-            }
-            throw new ArgumentNullException(
-                nameof(nodes),
-                "Cannot create instance of expression: unable to get it's parent neither from argument, nor from child expressions."
-            );
-        }
+        #region Node binding methods
 
-        protected T Bind<T>(T? value, [CallerMemberName] string callerName = "")
+        /// <summary>
+        ///     [ONLY-INSIDE-PROPERTY]
+        ///     Binds given property value to this node and extends it's span if needed.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown if provided property value is null.
+        /// </exception>
+        protected T Bind<T>(T value, [CallerMemberName] string callerName = "")
             where T : Node {
             if (value == null) {
                 throw new ArgumentNullException(nameof(value));
@@ -100,6 +116,10 @@ namespace Axion.Core.Processing {
             return BindNode(value, callerName);
         }
 
+        /// <summary>
+        ///     [ONLY-INSIDE-PROPERTY]
+        ///     Binds given property value to this node and extends it's span if needed.
+        /// </summary>
         protected T? BindNullable<T>(T? value, [CallerMemberName] string callerName = "")
             where T : Node {
             if (value == null) {
@@ -108,7 +128,12 @@ namespace Axion.Core.Processing {
             return BindNode(value, callerName);
         }
 
-        private T BindNode<T>(T value, string callerName) where T : Node {
+        /// <summary>
+        ///     Internal node binding method.
+        ///     Creates a path to parent attribute.
+        /// </summary>
+        private T BindNode<T>(T value, string callerName)
+            where T : Node {
             ExtendSpan(value);
 
             value.Parent = this;
@@ -117,55 +142,40 @@ namespace Axion.Core.Processing {
             return value;
         }
 
-        protected NodeList<T> Bind<T>([NotNull] NodeList<T> value)
+        /// <summary>
+        ///     [ONLY-INSIDE-PROPERTY]
+        ///     Binds given property value to this node and extends it's span if needed.
+        /// </summary>=
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown if provided property value is null.
+        /// </exception>
+        protected NodeList<T> Bind<T>([NotNull] NodeList<T> list)
             where T : Node {
-            if (value == null) {
-                throw new ArgumentNullException(nameof(value));
+            if (list == null) {
+                throw new ArgumentNullException(nameof(list));
             }
-            if (value.Count == 0) {
+            if (list.Count == 0) {
                 return new NodeList<T>(this);
             }
-            for (var i = 0; i < value.Count; i++) {
-                if (value[i] is Node n) {
+            ExtendSpan(list[0], list[^1]);
+
+            for (var i = 0; i < list.Count; i++) {
+                if (list[i] is Node n) {
                     n.Parent = this;
-                    n.Path   = new NodeListTreePath<T>(value, i);
+                    n.Path   = new NodeListTreePath<T>(list, i);
                 }
             }
-            return value;
+            return list;
         }
+
+        #endregion
 
         #region Location marking methods
-
-        internal void MarkStart(Location start) {
-            Start = start;
-        }
-
-        internal void MarkEnd(Location end) {
-            End = end;
-        }
-
-        internal void MarkStart(Node? mark) {
-            Start = mark?.Start ?? Start;
-        }
-
-        internal void MarkEnd(Node? mark) {
-            End = mark?.End ?? End;
-        }
-
-        internal void MarkPosition(Node? mark) {
-            MarkStart(mark);
-            MarkEnd(mark);
-        }
-
-        internal void MarkPosition(Node start, Node end) {
-            Start = start.Start;
-            End   = end.End;
-        }
 
         /// <summary>
         ///     Extends this span of code if provided mark is out of existing span.
         /// </summary>
-        internal void ExtendSpan(Node n) {
+        private void ExtendSpan(Node n) {
             if (n.Start < Start) {
                 Start = n.Start;
             }
@@ -177,7 +187,7 @@ namespace Axion.Core.Processing {
         /// <summary>
         ///     Extends this span of code if any of provided marks is out of existing span.
         /// </summary>
-        internal void ExtendSpan(Node a, Node b) {
+        private void ExtendSpan(Node a, Node b) {
             if (a.Start < Start) {
                 Start = a.Start;
             }

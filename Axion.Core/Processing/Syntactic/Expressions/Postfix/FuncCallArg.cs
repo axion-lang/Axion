@@ -10,20 +10,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public NameExpr? Name {
             get => name;
-            set {
-                name = BindNullable(value);
-                MarkStart(name);
-            }
+            set => name = BindNullable(value);
         }
 
         private Expr val = null!;
 
         public Expr Value {
             get => val;
-            set {
-                val = Bind(value);
-                MarkEnd(val);
-            }
+            set => val = Bind(value);
         }
 
         internal FuncCallArg(Node parent) : base(parent) { }

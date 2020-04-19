@@ -273,7 +273,7 @@ namespace Axion.Core.Processing.CodeGen {
                 cw.WriteLine($"using {directive};");
             }
 
-            var rootItems     = new List<Expr>();
+            var rootItems     = new NodeList<Expr>(e);
             var rootClasses   = new List<Expr>();
             var rootFunctions = new List<Expr>();
             foreach (Expr expr in e.Items) {
@@ -300,35 +300,47 @@ namespace Axion.Core.Processing.CodeGen {
             cw.Write(
                 new ModuleDef(e) {
                     Name = new NameExpr("__RootModule__"),
-                    Scope = ScopeExpr.FromItems(
-                        new[] {
-                            new ClassDef(e) {
-                                Name = new NameExpr("__RootClass__"),
-                                Scope = ScopeExpr.FromItems(
-                                    new[] {
-                                        new DecorableExpr(e) {
-                                            Decorators =
-                                                NodeList<Expr>.From(new NameExpr("static")),
-                                            Target = new FunctionDef(e) {
-                                                Name = new NameExpr("Main"),
-                                                Parameters = NodeList<FunctionParameter>.From(
-                                                    new FunctionParameter(e) {
-                                                        Name = new NameExpr("args"),
-                                                        ValueType = new ArrayTypeName(e) {
-                                                            ElementType =
-                                                                new SimpleTypeName("string")
-                                                        }
+                    Scope = new ScopeExpr(e) {
+                        Items = NodeList<Expr>.From(
+                            e,
+                            new[] {
+                                new ClassDef(e) {
+                                    Name = new NameExpr("__RootClass__"),
+                                    Scope = new ScopeExpr(e) {
+                                        Items = NodeList<Expr>.From(
+                                            e,
+                                            new[] {
+                                                new DecorableExpr(e) {
+                                                    Decorators =
+                                                        NodeList<Expr>.From(new NameExpr("static")),
+                                                    Target = new FunctionDef(e) {
+                                                        Name = new NameExpr("Main"),
+                                                        Parameters =
+                                                            NodeList<FunctionParameter>.From(
+                                                                new FunctionParameter(e) {
+                                                                    Name = new NameExpr("args"),
+                                                                    ValueType =
+                                                                        new ArrayTypeName(e) {
+                                                                            ElementType =
+                                                                                new SimpleTypeName(
+                                                                                    "string"
+                                                                                )
+                                                                        }
+                                                                }
+                                                            ),
+                                                        Scope = new ScopeExpr(e) {
+                                                            Items = rootItems
+                                                        },
+                                                        ValueType = new SimpleTypeName("void")
                                                     }
-                                                ),
-                                                Scope     = new ScopeExpr(e, rootItems),
-                                                ValueType = new SimpleTypeName("void")
-                                            }
-                                        }
-                                    }.Union(rootFunctions)
-                                )
-                            }
-                        }.Union(rootClasses)
-                    )
+                                                }
+                                            }.Union(rootFunctions)
+                                        )
+                                    }
+                                }
+                            }.Union(rootClasses)
+                        )
+                    }
                 }
             );
         }

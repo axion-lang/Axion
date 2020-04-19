@@ -25,7 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         private NodeList<FunctionParameter> parameters = null!;
 
         public NodeList<FunctionParameter> Parameters {
-            get => parameters;
+            get => InitIfNull(ref parameters);
             set => parameters = Bind(value);
         }
 
@@ -67,11 +67,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
                     // parameters
                     if (Stream.MaybeEat(OpenParenthesis)) {
+                        // TODO: reworking of parameter lists
                         Parameters = FunctionParameter.ParseList(this, CloseParenthesis);
                         Stream.Eat(CloseParenthesis);
-                    }
-                    else {
-                        Parameters = new NodeList<FunctionParameter>(this);
                     }
 
                     // return type

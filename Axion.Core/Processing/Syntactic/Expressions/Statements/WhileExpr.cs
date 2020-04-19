@@ -1,3 +1,4 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -10,6 +11,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///     </c>
     /// </summary>
     public class WhileExpr : Expr, IDecorableExpr {
+        private Token? kwWhile;
+
+        public Token? KwWhile {
+            get => kwWhile;
+            set => kwWhile = BindNullable(value);
+        }
+
         private Expr condition = null!;
 
         public Expr Condition {
@@ -24,6 +32,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             set => scope = Bind(value);
         }
 
+        private Token? kwNoBreak;
+
+        public Token? KwNoBreak {
+            get => kwNoBreak;
+            set => kwNoBreak = BindNullable(value);
+        }
+
         private ScopeExpr? noBreakScope;
 
         public ScopeExpr? NoBreakScope {
@@ -34,16 +49,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
         public WhileExpr(Node parent) : base(parent) { }
 
         public Expr Parse() {
-            SetSpan(
-                () => {
-                    Stream.Eat(KeywordWhile);
-                    Condition = InfixExpr.Parse(this);
-                    Scope     = new ScopeExpr(this).Parse();
-                    if (Stream.MaybeEat("no-break")) {
-                        NoBreakScope = new ScopeExpr(this).Parse();
-                    }
-                }
-            );
+            KwWhile   = Stream.Eat(KeywordWhile);
+            Condition = InfixExpr.Parse(this);
+            Scope     = new ScopeExpr(this).Parse();
+            if (Stream.MaybeEat("no-break")) {
+                KwNoBreak    = Stream.Token;
+                NoBreakScope = new ScopeExpr(this).Parse();
+            }
             return this;
         }
     }

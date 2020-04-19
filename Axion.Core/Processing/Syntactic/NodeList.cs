@@ -86,21 +86,21 @@ namespace Axion.Core.Processing.Syntactic {
             if (collection is List<T> list) {
                 return new NodeList<T>(parent, list);
             }
-            return new NodeList<T>(parent, collection.ToList());
+            return new NodeList<T>(parent, collection);
         }
 
         internal static NodeList<Expr> From(params Expr[] collection) {
             if (collection == null) {
                 return new NodeList<Expr>(null);
             }
-            return new NodeList<Expr>(null, collection.ToList());
+            return new NodeList<Expr>(null, collection);
         }
 
         internal static NodeList<T> From(params T[] collection) {
             if (collection == null) {
                 return new NodeList<T>(null);
             }
-            return new NodeList<T>(null, collection.ToList());
+            return new NodeList<T>(null, collection);
         }
 
         internal NodeList(Node parent) {
@@ -108,9 +108,9 @@ namespace Axion.Core.Processing.Syntactic {
             items  = new List<T>();
         }
 
-        private NodeList(Node? parent, IList<T> collection) {
+        private NodeList(Node? parent, IEnumerable<T> collection) {
             Parent = parent;
-            items  = collection;
+            items  = collection.ToList();
         }
 
         public void Insert(int index, T item) {

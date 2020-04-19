@@ -50,6 +50,14 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             return false;
         }
 
+        internal void MarkStart(Location start) {
+            Start = start;
+        }
+
+        internal void MarkEnd(Location end) {
+            End = end;
+        }
+
         public override string ToString() {
             return Type
                  + " :: "

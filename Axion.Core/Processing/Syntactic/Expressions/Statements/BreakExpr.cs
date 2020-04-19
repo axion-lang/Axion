@@ -1,3 +1,4 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -9,6 +10,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///     </c>
     /// </summary>
     public class BreakExpr : Expr {
+        private Token? kwBreak;
+
+        public Token? KwBreak {
+            get => kwBreak;
+            set => kwBreak = BindNullable(value);
+        }
+
         private NameExpr? loopName;
 
         public NameExpr? LoopName {
@@ -19,15 +27,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
         public BreakExpr(Node parent) : base(parent) { }
 
         public BreakExpr Parse() {
-            SetSpan(
-                () => {
-                    Stream.Eat(KeywordBreak);
-                    if (Stream.PeekIs(Identifier)) {
-                        LoopName = new NameExpr(this).Parse();
-                    }
-                }
-            );
-
+            KwBreak = Stream.Eat(KeywordBreak);
+            if (Stream.PeekIs(Identifier)) {
+                LoopName = new NameExpr(this).Parse();
+            }
             return this;
         }
     }

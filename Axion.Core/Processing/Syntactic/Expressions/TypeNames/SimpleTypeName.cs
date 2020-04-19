@@ -25,6 +25,5 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             Name = new NameExpr(this).Parse();
             return this;
         }
-
     }
 }

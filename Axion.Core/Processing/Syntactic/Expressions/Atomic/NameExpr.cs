@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         private NodeList<Token> tokens = null!;
 
         public NodeList<Token> Tokens {
-            get => tokens;
+            get => InitIfNull(ref tokens);
             set => tokens = Bind(value);
         }
 
@@ -28,7 +28,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             ((Expr) GetParent<ScopeExpr>().GetDefByName(this))?.ValueType;
 
         public NameExpr(string name) {
-            Tokens = new NodeList<Token>(this);
             if (name.Contains('.')) {
                 string[] qs = name.Split('.');
                 for (var i = 0; i < qs.Length; i++) {
@@ -47,7 +46,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public NameExpr(Node parent) : base(parent) { }
 
         public NameExpr Parse(bool simple = false) {
-            Tokens ??= new NodeList<Token>(this);
             Stream.Eat(Identifier);
             Tokens.Add(Stream.Token);
             if (simple) {

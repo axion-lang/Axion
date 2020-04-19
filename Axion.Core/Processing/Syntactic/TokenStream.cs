@@ -51,6 +51,15 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         /// <summary>
+        ///     Skips and returns next token.
+        /// </summary>
+        public Token Eat() {
+            SkipTrivial();
+            EatAny();
+            return Token;
+        }
+
+        /// <summary>
         ///     Skips next token, failing,
         ///     if the next token type is not
         ///     the same as passed in parameter.

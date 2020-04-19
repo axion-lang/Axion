@@ -33,10 +33,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Parent = parent;
         }
 
+        protected NodeList<T> InitIfNull<T>(ref NodeList<T> list)
+            where T : Node {
+            if (list == null) {
+                list = new NodeList<T>(this);
+            }
+            return list;
+        }
+
         protected void SetSpan(Action constructor) {
-            MarkStart(Stream.Peek);
+            Start = Stream.Peek.Start;
             constructor();
-            MarkEnd(Stream.Token);
+            End = Stream.Token.End;
         }
 
         public override string ToString() {
