@@ -183,7 +183,7 @@ namespace Axion.Core.Processing.Traversal {
                 scope.Items.Insert(
                     whileIndex,
                     new VarDef(path.Node) {
-                        Name = flagName, Value = new ConstantExpr(path.Node, "true")
+                        Name = flagName, Value = ConstantExpr.True(path.Node)
                     }
                 );
                 // index of while == whileIdx + 1
@@ -192,7 +192,7 @@ namespace Axion.Core.Processing.Traversal {
                 var boolSetter = new BinaryExpr(path.Node) {
                     Left     = flagName,
                     Operator = new OperatorToken(path.Node.Source, tokenType: TokenType.OpAssign),
-                    Right    = new ConstantExpr(path.Node, "false")
+                    Right    = ConstantExpr.True(path.Node)
                 };
                 foreach ((_, ScopeExpr itemParentScope, int itemIndex) in breaks) {
                     itemParentScope.Items.Insert(itemIndex, boolSetter);

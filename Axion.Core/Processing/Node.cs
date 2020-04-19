@@ -97,10 +97,7 @@ namespace Axion.Core.Processing {
             if (value == null) {
                 throw new ArgumentNullException(nameof(value));
             }
-            value.Parent = this;
-            value.Path   = new NodeTreePath(value, GetType().GetProperty(callerName));
-
-            return value;
+            return BindNode(value, callerName);
         }
 
         protected T? BindNullable<T>(T? value, [CallerMemberName] string callerName = "")
@@ -108,6 +105,12 @@ namespace Axion.Core.Processing {
             if (value == null) {
                 return value;
             }
+            return BindNode(value, callerName);
+        }
+
+        private T BindNode<T>(T value, string callerName) where T : Node {
+            ExtendSpan(value);
+
             value.Parent = this;
             value.Path   = new NodeTreePath(value, GetType().GetProperty(callerName));
 
@@ -120,20 +123,6 @@ namespace Axion.Core.Processing {
                 throw new ArgumentNullException(nameof(value));
             }
             if (value.Count == 0) {
-                return new NodeList<T>(this);
-            }
-            for (var i = 0; i < value.Count; i++) {
-                if (value[i] is Node n) {
-                    n.Parent = this;
-                    n.Path   = new NodeListTreePath<T>(value, i);
-                }
-            }
-            return value;
-        }
-
-        protected NodeList<T> BindNullable<T>(NodeList<T>? value)
-            where T : Node {
-            if (value == null || value.Count == 0) {
                 return new NodeList<T>(this);
             }
             for (var i = 0; i < value.Count; i++) {
@@ -163,14 +152,44 @@ namespace Axion.Core.Processing {
             End = mark?.End ?? End;
         }
 
-        internal void MarkPosition(Node mark) {
-            Start = mark.Start;
-            End   = mark.End;
+        internal void MarkPosition(Node? mark) {
+            MarkStart(mark);
+            MarkEnd(mark);
         }
 
         internal void MarkPosition(Node start, Node end) {
             Start = start.Start;
             End   = end.End;
+        }
+
+        /// <summary>
+        ///     Extends this span of code if provided mark is out of existing span.
+        /// </summary>
+        internal void ExtendSpan(Node n) {
+            if (n.Start < Start) {
+                Start = n.Start;
+            }
+            if (n.End > End) {
+                End = n.End;
+            }
+        }
+
+        /// <summary>
+        ///     Extends this span of code if any of provided marks is out of existing span.
+        /// </summary>
+        internal void ExtendSpan(Node a, Node b) {
+            if (a.Start < Start) {
+                Start = a.Start;
+            }
+            else if (b.Start < Start) {
+                Start = b.Start;
+            }
+            if (b.End > End) {
+                End = b.End;
+            }
+            else if (a.End > End) {
+                End = a.End;
+            }
         }
 
         #endregion

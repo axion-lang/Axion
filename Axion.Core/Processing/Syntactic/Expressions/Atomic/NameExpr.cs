@@ -13,7 +13,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class NameExpr : AtomExpr {
-        public List<Token> Tokens     { get; } = new List<Token>();
+        private NodeList<Token> tokens = null!;
+
+        public NodeList<Token> Tokens {
+            get => tokens;
+            set => tokens = Bind(value);
+        }
+
         public List<Token> Qualifiers => Tokens.OfType(Identifier);
         public bool        IsSimple   => Qualifiers.Count == 1;
 
@@ -22,6 +28,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             ((Expr) GetParent<ScopeExpr>().GetDefByName(this))?.ValueType;
 
         public NameExpr(string name) {
+            Tokens = new NodeList<Token>(this);
             if (name.Contains('.')) {
                 string[] qs = name.Split('.');
                 for (var i = 0; i < qs.Length; i++) {
@@ -40,21 +47,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public NameExpr(Node parent) : base(parent) { }
 
         public NameExpr Parse(bool simple = false) {
-            SetSpan(
-                () => {
-                    Stream.Eat(Identifier);
+            Tokens ??= new NodeList<Token>(this);
+            Stream.Eat(Identifier);
+            Tokens.Add(Stream.Token);
+            if (simple) {
+                return this;
+            }
+            while (Stream.MaybeEat(OpDot)) {
+                Tokens.Add(Stream.Token);
+                if (Stream.Eat(Identifier) != null) {
                     Tokens.Add(Stream.Token);
-                    if (simple) {
-                        return;
-                    }
-                    while (Stream.MaybeEat(OpDot)) {
-                        Tokens.Add(Stream.Token);
-                        if (Stream.Eat(Identifier) != null) {
-                            Tokens.Add(Stream.Token);
-                        }
-                    }
                 }
-            );
+            }
             return this;
         }
     }

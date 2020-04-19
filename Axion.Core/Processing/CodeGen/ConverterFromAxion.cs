@@ -72,7 +72,7 @@ namespace Axion.Core.Processing.CodeGen {
 
         public virtual void Convert(YieldExpr e) {
             cw.Write("yield ");
-            if (e.IsYieldFrom) {
+            if (e.KwFrom != null) {
                 cw.Write("from ");
             }
 

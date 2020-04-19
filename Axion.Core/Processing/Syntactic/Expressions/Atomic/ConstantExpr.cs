@@ -11,10 +11,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class ConstantExpr : AtomExpr {
-        public Token Literal { get; set; } = null!;
+        private Token? literal;
+
+        public Token? Literal {
+            get => literal;
+            set => literal = BindNullable(value);
+        }
 
         [NoPathTraversing]
         public override TypeName ValueType => Literal.ValueType!;
+
+        public static ConstantExpr True(Node parent) => new ConstantExpr(parent) {
+            Literal = new Token(parent.Source, TokenType.KeywordTrue)
+        };
+
+        public static ConstantExpr False(Node parent) => new ConstantExpr(parent) {
+            Literal = new Token(parent.Source, TokenType.KeywordFalse)
+        };
+
+        public static ConstantExpr Nil(Node parent) => new ConstantExpr(parent) {
+            Literal = new Token(parent.Source, TokenType.KeywordNil)
+        };
 
         public static ConstantExpr ParseNew(Expr parent) {
             return new ConstantExpr(parent).Parse();
@@ -22,16 +39,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public ConstantExpr(Node parent) : base(parent) { }
 
-        public ConstantExpr(Node parent, string literal) : base(parent) {
-            Literal = new Token(Source, value: literal);
-        }
-
         public ConstantExpr Parse() {
-            SetSpan(
-                () => {
-                    Literal = Stream.EatAny();
-                }
-            );
+            Literal = Stream.EatAny();
             return this;
         }
     }

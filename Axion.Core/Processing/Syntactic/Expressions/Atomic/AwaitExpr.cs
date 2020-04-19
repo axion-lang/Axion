@@ -1,3 +1,4 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -12,6 +13,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class AwaitExpr : AtomExpr {
+        private Token? kwAwait;
+
+        public Token? KwAwait {
+            get => kwAwait;
+            set => kwAwait = BindNullable(value);
+        }
+
         private Expr val = null!;
 
         public Expr Value {
@@ -25,12 +33,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public AwaitExpr(Node parent) : base(parent) { }
 
         public AwaitExpr Parse() {
-            SetSpan(
-                () => {
-                    Stream.Eat(KeywordAwait);
-                    Value = Multiple<Expr>.ParseGenerally(this);
-                }
-            );
+            KwAwait = Stream.Eat(KeywordAwait);
+            Value   = Multiple<Expr>.ParseGenerally(this);
             return this;
         }
     }

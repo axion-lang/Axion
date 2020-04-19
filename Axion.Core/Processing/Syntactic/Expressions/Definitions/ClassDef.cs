@@ -41,11 +41,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => scope = Bind(value);
         }
 
-        private NodeList<Expr>? dataMembers;
+        private NodeList<Expr> dataMembers;
 
-        public NodeList<Expr>? DataMembers {
+        public NodeList<Expr> DataMembers {
             get => dataMembers;
-            set => dataMembers = BindNullable(value);
+            set => dataMembers = Bind(value);
         }
 
         public ClassDef(Node parent) : base(parent) {

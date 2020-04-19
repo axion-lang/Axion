@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///     </c>
     /// </summary>
     public class SimpleTypeName : TypeName {
-        private NameExpr name;
+        private NameExpr name = null!;
 
         public NameExpr Name {
             get => name;
@@ -17,17 +17,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public SimpleTypeName(Node parent) : base(parent) { }
 
-        public SimpleTypeName Parse() {
-            SetSpan(
-                () => {
-                    Name = new NameExpr(this).Parse();
-                }
-            );
-            return this;
-        }
-
         public SimpleTypeName(string name) {
             Name = new NameExpr(name);
         }
+
+        public SimpleTypeName Parse() {
+            Name = new NameExpr(this).Parse();
+            return this;
+        }
+
     }
 }

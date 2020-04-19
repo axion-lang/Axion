@@ -1,3 +1,4 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
@@ -10,6 +11,20 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class YieldExpr : AtomExpr {
+        private Token? kwYield;
+
+        public Token? KwYield {
+            get => kwYield;
+            set => kwYield = BindNullable(value);
+        }
+
+        private Token? kwFrom;
+
+        public Token? KwFrom {
+            get => kwFrom;
+            set => kwFrom = BindNullable(value);
+        }
+
         private Expr? val;
 
         public Expr? Value {
@@ -17,20 +32,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             set => val = BindNullable(value);
         }
 
-        public bool IsYieldFrom { get; set; }
-
         public YieldExpr(Node parent) : base(parent) { }
 
         public YieldExpr Parse() {
-            SetSpan(
-                () => {
-                    Stream.Eat(KeywordYield);
-                    IsYieldFrom = Stream.MaybeEat("from");
-                    Value = IsYieldFrom
-                        ? InfixExpr.Parse(this)
-                        : Multiple<InfixExpr>.ParseGenerally(this);
-                }
-            );
+            KwYield = Stream.Eat(KeywordYield);
+            if (Stream.MaybeEat("from")) {
+                KwFrom = Stream.Token;
+                Value  = InfixExpr.Parse(this);
+            }
+            else {
+                Value = Multiple<InfixExpr>.ParseGenerally(this);
+            }
             return this;
         }
     }

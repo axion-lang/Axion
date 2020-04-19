@@ -12,11 +12,25 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class CodeQuoteExpr : AtomExpr {
+        private Token? openQuote;
+
+        public Token? OpenQuote {
+            get => openQuote;
+            set => openQuote = BindNullable(value);
+        }
+
         private ScopeExpr scope = null!;
 
         public ScopeExpr Scope {
             get => scope;
             set => scope = Bind(value);
+        }
+
+        private Token? closeQuote;
+
+        public Token? CloseQuote {
+            get => closeQuote;
+            set => closeQuote = BindNullable(value);
         }
 
         [NoPathTraversing]
@@ -25,17 +39,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public CodeQuoteExpr(Node parent) : base(parent) { }
 
         public CodeQuoteExpr Parse() {
-            Scope ??= new ScopeExpr(this);
-            SetSpan(
-                () => {
-                    Stream.Eat(DoubleOpenBrace);
-                    while (!Stream.PeekIs(DoubleCloseBrace, TokenType.End)) {
-                        Scope.Items.Add(AnyExpr.Parse(this));
-                    }
+            Scope     ??= new ScopeExpr(this);
+            OpenQuote =   Stream.Eat(DoubleOpenBrace);
+            while (!Stream.PeekIs(DoubleCloseBrace, TokenType.End)) {
+                Scope.Items.Add(AnyExpr.Parse(this));
+            }
 
-                    Stream.Eat(DoubleCloseBrace);
-                }
-            );
+            CloseQuote = Stream.Eat(DoubleCloseBrace);
             return this;
         }
     }

@@ -44,6 +44,22 @@ namespace Axion.Core.Processing {
             return !left.Equals(right);
         }
 
+        public static bool operator <(Location left, Location right) {
+            return left.Line < right.Line || left.Line == right.Line && left.Column < right.Column;
+        }
+
+        public static bool operator >(Location left, Location right) {
+            return left.Line > right.Line || left.Line == right.Line && left.Column > right.Column;
+        }
+
+        public static bool operator <=(Location left, Location right) {
+            return left.Line < right.Line || left.Line == right.Line && left.Column <= right.Column;
+        }
+
+        public static bool operator >=(Location left, Location right) {
+            return left.Line > right.Line || left.Line == right.Line && left.Column >= right.Column;
+        }
+
         public static implicit operator Location((int, int) position) {
             (int line, int column) = position;
             return new Location(line, column);
