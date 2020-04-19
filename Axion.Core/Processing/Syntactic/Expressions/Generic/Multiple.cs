@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
     /// </summary>
     public class Multiple<T> : AtomExpr
         where T : Expr {
-        protected Multiple(Expr parent) : base(parent) { }
+        protected Multiple(Node parent) : base(parent) { }
 
         /// <summary>
         ///     Parses multiple of <see cref="AnyExpr"/> and

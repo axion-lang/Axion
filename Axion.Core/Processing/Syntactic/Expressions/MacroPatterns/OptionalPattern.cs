@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
             set => pattern = Bind(value);
         }
 
-        public OptionalPattern(Expr parent) : base(parent) { }
+        public OptionalPattern(Node parent) : base(parent) { }
 
         public override bool Match(Expr parent) {
             Pattern.Match(parent);

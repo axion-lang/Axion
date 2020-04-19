@@ -8,18 +8,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///     </c>
     /// </summary>
     public class ArrayTypeName : TypeName {
-        private TypeName elementType;
+        private TypeName elementType = null!;
 
         public TypeName ElementType {
             get => elementType;
             set => elementType = Bind(value);
         }
 
-        public ArrayTypeName(Expr? parent = null, TypeName? elementType = null) : base(
-            parent ?? GetParentFromChildren(elementType)
-        ) {
-            ElementType = elementType;
-        }
+        public ArrayTypeName(Node parent) : base(parent) { }
 
         public ArrayTypeName Parse() {
             SetSpan(

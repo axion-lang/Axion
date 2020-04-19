@@ -20,7 +20,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => returnType = Bind(value);
         }
 
-        public FuncTypeName(Expr parent) : base(parent) { }
+        public FuncTypeName(Node parent) : base(parent) { }
 
         public FuncTypeName Parse() {
             SetSpan(

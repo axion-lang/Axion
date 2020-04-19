@@ -41,7 +41,7 @@ namespace Axion.Core.Processing.CodeGen {
         public void Write(params object[] values) {
             lastLineEmpty = false;
             foreach (object val in values) {
-                if (val is Span translatable) {
+                if (val is Node translatable) {
                     try {
                         converter.Convert((dynamic) translatable);
                     }
@@ -68,7 +68,7 @@ namespace Axion.Core.Processing.CodeGen {
         }
 
         public void AddJoin<T>(string separator, IList<T> items, bool indent = false)
-            where T : Span {
+            where T : Node {
             if (items.Count == 0) {
                 return;
             }

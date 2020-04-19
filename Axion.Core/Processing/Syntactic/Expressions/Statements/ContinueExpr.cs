@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             set => loopName = BindNullable(value);
         }
 
-        public ContinueExpr(Expr parent) : base(parent) { }
+        public ContinueExpr(Node parent) : base(parent) { }
 
         public ContinueExpr Parse() {
             SetSpan(

@@ -24,7 +24,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             protected internal set => valueType = Bind(value);
         }
 
-        public NameDef(Expr parent) : base(parent) { }
+        public NameDef(Node parent) : base(parent) { }
 
         // TODO: all name references as property
     }

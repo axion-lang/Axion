@@ -12,7 +12,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     public class PrefixExpr : InfixExpr {
         protected PrefixExpr() { }
 
-        protected PrefixExpr(Expr parent) : base(parent) { }
+        protected PrefixExpr(Node parent) : base(parent) { }
 
         internal new static PrefixExpr Parse(Expr parent) {
             TokenStream s = parent.Source.TokenStream;
@@ -20,7 +20,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             if (s.MaybeEat(Spec.PrefixOperators)) {
                 var op = (OperatorToken) s.Token;
                 op.Side = InputSide.Right;
-                return new UnaryExpr(parent, op, Parse(parent));
+                return new UnaryExpr(parent) {
+                    Operator = op, Value = Parse(parent)
+                };
             }
 
             return PostfixExpr.Parse(parent);

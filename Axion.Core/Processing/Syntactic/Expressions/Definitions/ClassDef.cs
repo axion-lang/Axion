@@ -48,7 +48,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => dataMembers = BindNullable(value);
         }
 
-        public ClassDef(Expr parent) : base(parent) {
+        public ClassDef(Node parent) : base(parent) {
             Bases       = new NodeList<TypeName>(this);
             Keywords    = new NodeList<Expr>(this);
             DataMembers = new NodeList<Expr>(this);

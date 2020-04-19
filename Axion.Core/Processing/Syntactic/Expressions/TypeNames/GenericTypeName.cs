@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
@@ -11,30 +10,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///     </c>
     /// </summary>
     public class GenericTypeName : TypeName {
-        private TypeName target;
+        private TypeName target = null!;
 
         public TypeName Target {
             get => target;
             set => target = Bind(value);
         }
 
-        private NodeList<TypeName> typeArguments;
+        private NodeList<TypeName> typeArguments = null!;
 
         public NodeList<TypeName> TypeArguments {
             get => typeArguments;
             set => typeArguments = Bind(value);
         }
 
-        public GenericTypeName(
-            Expr?                  parent   = null,
-            TypeName?              target   = null,
-            IEnumerable<TypeName>? typeArgs = null
-        ) : base(parent ?? GetParentFromChildren(target)) {
-            Target        = target;
-            TypeArguments = NodeList<TypeName>.From(this, typeArgs);
-        }
+        public GenericTypeName(Node parent) : base(parent) { }
 
         public GenericTypeName Parse() {
+            TypeArguments ??= new NodeList<TypeName>(this);
             SetSpan(
                 () => {
                     if (Target == null) {

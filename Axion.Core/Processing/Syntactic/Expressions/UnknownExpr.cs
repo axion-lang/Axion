@@ -11,7 +11,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class UnknownExpr : AtomExpr {
-        public UnknownExpr(Expr parent) : base(parent) {
+        public UnknownExpr(Node parent) : base(parent) {
             LangException.Report(BlameType.InvalidSyntax, this);
         }
 

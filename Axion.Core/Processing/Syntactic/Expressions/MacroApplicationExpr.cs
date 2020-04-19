@@ -18,8 +18,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             private set => macro = BindNullable(value);
         }
 
-        public List<Span> Expressions { get; } = new List<Span>();
-        public MacroApplicationExpr(Expr parent) : base(parent) { }
+        public List<Node> Expressions { get; } = new List<Node>();
+        public MacroApplicationExpr(Node parent) : base(parent) { }
 
         public MacroApplicationExpr Parse() {
             SetSpan(

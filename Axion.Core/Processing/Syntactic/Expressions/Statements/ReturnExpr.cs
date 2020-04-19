@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
         [NoPathTraversing]
         public override TypeName ValueType => Value.ValueType;
 
-        public ReturnExpr(Expr parent) : base(parent) { }
+        public ReturnExpr(Node parent) : base(parent) { }
 
         public ReturnExpr Parse() {
             SetSpan(

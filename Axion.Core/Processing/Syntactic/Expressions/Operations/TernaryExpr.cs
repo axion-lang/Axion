@@ -36,7 +36,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
         [NoPathTraversing]
         public override TypeName ValueType => TrueExpr.ValueType;
 
-        internal TernaryExpr(Expr parent) : base(parent) { }
+        internal TernaryExpr(Node parent) : base(parent) { }
 
         public TernaryExpr Parse() {
             SetSpan(

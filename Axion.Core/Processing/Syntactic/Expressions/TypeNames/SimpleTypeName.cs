@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => name = Bind(value);
         }
 
-        public SimpleTypeName(Expr parent) : base(parent) { }
+        public SimpleTypeName(Node parent) : base(parent) { }
 
         public SimpleTypeName Parse() {
             SetSpan(

@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => elseScope = Bind(value);
         }
 
-        internal IfExpr(Expr parent) : base(parent) { }
+        internal IfExpr(Node parent) : base(parent) { }
 
         public IfExpr Parse(bool elseIf = false) {
             SetSpan(

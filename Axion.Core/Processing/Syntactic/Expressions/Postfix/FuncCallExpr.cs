@@ -9,27 +9,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///     </c>
     /// </summary>
     public class FuncCallExpr : PostfixExpr {
-        private Expr target;
+        private Expr target = null!;
 
         public Expr Target {
             get => target;
             set => target = Bind(value);
         }
 
-        private NodeList<FuncCallArg> args;
+        private NodeList<FuncCallArg> args = null!;
 
         public NodeList<FuncCallArg> Args {
             get => args;
             set => args = Bind(value);
         }
 
-        public FuncCallExpr(Expr? parent = null, Expr? target = null, params FuncCallArg[] args) :
-            base(parent ?? GetParentFromChildren(target)) {
-            Target = target;
-            Args   = NodeList<FuncCallArg>.From(this, args);
-        }
+        public FuncCallExpr(Node parent) : base(parent) { }
 
         public FuncCallExpr Parse(bool allowGenerator = false) {
+            Args ??= new NodeList<FuncCallArg>(this);
             SetSpan(
                 () => {
                     Stream.Eat(OpenParenthesis);

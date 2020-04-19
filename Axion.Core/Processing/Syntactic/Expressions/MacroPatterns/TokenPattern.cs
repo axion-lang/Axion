@@ -10,7 +10,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
     public class TokenPattern : Pattern {
         internal Token Value;
 
-        public TokenPattern(Expr parent) : base(parent) { }
+        public TokenPattern(Node parent) : base(parent) { }
 
         public override bool Match(Expr parent) {
             if (parent.Stream.Peek.Content != Value.Content) {

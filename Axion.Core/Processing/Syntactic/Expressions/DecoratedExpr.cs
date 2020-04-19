@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => target = Bind(value);
         }
 
-        internal DecorableExpr(Expr parent) : base(parent) {
+        internal DecorableExpr(Node parent) : base(parent) {
             Decorators = new NodeList<Expr>(this);
         }
 

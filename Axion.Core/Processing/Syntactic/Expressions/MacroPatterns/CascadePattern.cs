@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
             set => patterns = Bind(value);
         }
 
-        public CascadePattern(Expr parent) : base(parent) { }
+        public CascadePattern(Node parent) : base(parent) { }
 
         public override bool Match(Expr parent) {
             int startIdx = Stream.TokenIdx;

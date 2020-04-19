@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Traversal {
         ///     Applies (if possible) traversing/reducing function
         ///     to each child node of specified root expression.
         /// </summary>
-        public static void Traverse(Expr root) {
+        public static void Traverse(Node root) {
             // TODO: fix reducing of macros
             if (root is MacroApplicationExpr || root is Pattern) {
                 return;
@@ -41,7 +41,7 @@ namespace Axion.Core.Processing.Traversal {
                       .Where(i => i.IsGenericType)
                       .Select(i => i.GetGenericTypeDefinition())
                       .Contains(typeof(IList<>))
-                  && typeof(Span).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0])
+                  && typeof(Node).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0])
             );
             foreach (PropertyInfo prop in childProps) {
                 object obj = prop.GetValue(root);
@@ -52,7 +52,7 @@ namespace Axion.Core.Processing.Traversal {
                     break;
                 default:
                     try {
-                        List<Span> list = ((IEnumerable) obj).OfType<Span>().ToList();
+                        List<Node> list = ((IEnumerable) obj).OfType<Node>().ToList();
                         // for loop required, expressions collection
                         // can be modified.
                         // ReSharper disable once ForCanBeConvertedToForeach
@@ -83,13 +83,12 @@ namespace Axion.Core.Processing.Traversal {
 
             case UnionTypeName unionTypeName: {
                 // `LeftType | RightType` -> `Union[LeftType, RightType]`
-                path.Node = new GenericTypeName(
-                    path.Node.Parent,
-                    new SimpleTypeName("Union"),
-                    new NodeList<TypeName>(path.Node) {
+                path.Node = new GenericTypeName(path.Node.Parent) {
+                    Target = new SimpleTypeName("Union"),
+                    TypeArguments = new NodeList<TypeName>(path.Node) {
                         unionTypeName.Left, unionTypeName.Right
                     }
-                );
+                };
                 path.Traversed = true;
                 break;
             }
@@ -98,29 +97,28 @@ namespace Axion.Core.Processing.Traversal {
                                   && bin.Right is UnaryExpr un
                                   && un.Operator.Is(TokenType.OpNot): {
                 // `x is (not (y))` -> `not (x is y)`
-                path.Node = new UnaryExpr(
-                    path.Node.Parent,
-                    TokenType.OpNot,
-                    new BinaryExpr(
-                        path.Node,
-                        bin.Left,
-                        new OperatorToken(path.Node.Source, tokenType: TokenType.OpIs),
-                        un.Value
-                    )
-                );
+                path.Node = new UnaryExpr(path.Node.Parent) {
+                    Operator = new OperatorToken(path.Node.Source, tokenType: TokenType.OpNot),
+                    Value = new BinaryExpr(path.Node) {
+                        Left     = bin.Left,
+                        Operator = new OperatorToken(path.Node.Source, tokenType: TokenType.OpIs),
+                        Right    = un.Value
+                    }
+                };
                 path.Traversed = true;
                 break;
             }
 
             case BinaryExpr bin when bin.Operator.Is(TokenType.RightPipeline): {
                 // `arg |> func` -> `func(arg)`
-                path.Node = new FuncCallExpr(
-                    path.Node.Parent,
-                    bin.Right,
-                    new FuncCallArg(path.Node.Parent) {
-                        Value = bin.Left
+                path.Node = new FuncCallExpr(path.Node.Parent) {
+                    Target = bin.Right,
+                    Args = new NodeList<FuncCallArg>(path.Node.Parent) {
+                        new FuncCallArg(path.Node.Parent) {
+                            Value = bin.Left
+                        }
                     }
-                );
+                };
                 path.Traversed = true;
                 break;
             }
@@ -191,12 +189,11 @@ namespace Axion.Core.Processing.Traversal {
                 // index of while == whileIdx + 1
                 List<(BreakExpr item, ScopeExpr itemParentScope, int itemIndex)> breaks =
                     whileExpr.Scope.FindItemsOfType<BreakExpr>();
-                var boolSetter = new BinaryExpr(
-                    path.Node,
-                    flagName,
-                    new OperatorToken(path.Node.Source, tokenType: TokenType.OpAssign),
-                    new ConstantExpr(path.Node, "false")
-                );
+                var boolSetter = new BinaryExpr(path.Node) {
+                    Left     = flagName,
+                    Operator = new OperatorToken(path.Node.Source, tokenType: TokenType.OpAssign),
+                    Right    = new ConstantExpr(path.Node, "false")
+                };
                 foreach ((_, ScopeExpr itemParentScope, int itemIndex) in breaks) {
                     itemParentScope.Items.Insert(itemIndex, boolSetter);
                 }

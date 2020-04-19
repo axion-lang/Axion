@@ -11,7 +11,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///     </c>
     /// </summary>
     public class CodeUnquotedExpr : PostfixExpr {
-        private Expr val;
+        private Expr val = null!;
 
         public Expr Value {
             get => val;
@@ -21,11 +21,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         [NoPathTraversing]
         public override TypeName ValueType => Value.ValueType;
 
-        public CodeUnquotedExpr(Expr? parent = null, Expr? value = null) : base(
-            parent ?? GetParentFromChildren(value)
-        ) {
-            Value = value;
-        }
+        public CodeUnquotedExpr(Node parent) : base(parent) { }
 
         public CodeUnquotedExpr Parse() {
             SetSpan(

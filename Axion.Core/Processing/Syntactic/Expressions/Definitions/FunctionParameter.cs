@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public sealed class FunctionParameter : NameDef {
-        public FunctionParameter(Expr parent) : base(parent) { }
+        public FunctionParameter(Node parent) : base(parent) { }
 
         public FunctionParameter Parse(HashSet<string> names) {
             SetSpan(

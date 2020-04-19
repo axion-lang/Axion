@@ -14,7 +14,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     public class InfixExpr : Expr {
         protected InfixExpr() { }
 
-        protected InfixExpr(Expr parent) : base(parent) { }
+        protected InfixExpr(Node parent) : base(parent) { }
 
         internal static InfixExpr Parse(Expr parent) {
             TokenStream s = parent.Source.TokenStream;
@@ -48,17 +48,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                     }
 
                     s.EatAny();
-                    leftExpr = new BinaryExpr(
-                        parent,
-                        leftExpr,
-                        s.Token,
-                        ParseInfix(newPrecedence + 1)
-                    );
+                    leftExpr = new BinaryExpr(parent) {
+                        Left = leftExpr, Operator = s.Token, Right = ParseInfix(newPrecedence + 1)
+                    };
                 }
 
                 if (!s.Token.Is(Newline, Outdent)) {
                     if (s.PeekIs(KeywordFor)) {
-                        leftExpr = new ForComprehension(parent, leftExpr).Parse();
+                        leftExpr = new ForComprehension(parent) {
+                            Target = leftExpr
+                        }.Parse();
                     }
 
                     if (s.PeekIs(KeywordIf, KeywordUnless)) {

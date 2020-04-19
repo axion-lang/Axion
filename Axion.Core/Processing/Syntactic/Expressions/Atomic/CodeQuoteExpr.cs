@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         [NoPathTraversing]
         public override TypeName ValueType => Scope.ValueType;
 
-        public CodeQuoteExpr(Expr parent) : base(parent) { }
+        public CodeQuoteExpr(Node parent) : base(parent) { }
 
         public CodeQuoteExpr Parse() {
             Scope ??= new ScopeExpr(this);

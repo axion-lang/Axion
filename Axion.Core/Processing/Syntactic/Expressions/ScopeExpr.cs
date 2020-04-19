@@ -27,7 +27,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => items = Bind(value);
         }
 
-        internal ScopeExpr(Expr parent, IEnumerable<Expr>? items = null) : base(parent) {
+        internal ScopeExpr(Node parent, IEnumerable<Expr>? items = null) : base(parent) {
             Items = NodeList<Expr>.From(this, items);
 
             if (Items.Count != 0) {
@@ -35,7 +35,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
 
-        internal ScopeExpr(Expr? parent, params Expr[] items) : base(
+        internal ScopeExpr(Node? parent, params Expr[] items) : base(
             parent ?? GetParentFromChildren(items)
         ) {
             Items = NodeList<Expr>.From(this, items);
@@ -51,7 +51,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         internal static ScopeExpr FromItems(IEnumerable<Expr> items) {
             Expr[] scopeItems = items.ToArray();
-            Expr   parent     = GetParentFromChildren(scopeItems);
+            Node   parent     = GetParentFromChildren(scopeItems);
             return new ScopeExpr(parent, scopeItems);
         }
 

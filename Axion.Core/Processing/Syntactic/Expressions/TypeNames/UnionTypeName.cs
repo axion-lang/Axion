@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => right = Bind(value);
         }
 
-        public UnionTypeName(Expr parent) : base(parent) { }
+        public UnionTypeName(Node parent) : base(parent) { }
 
         public UnionTypeName Parse() {
             SetSpan(

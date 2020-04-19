@@ -18,7 +18,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     public class AtomExpr : PostfixExpr {
         protected AtomExpr() { }
 
-        protected AtomExpr(Expr parent) : base(parent) { }
+        protected AtomExpr(Node parent) : base(parent) { }
 
         internal new static AtomExpr Parse(Expr parent) {
             TokenStream s = parent.Source.TokenStream;

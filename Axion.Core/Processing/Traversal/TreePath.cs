@@ -1,6 +1,5 @@
 using System.Reflection;
 using Axion.Core.Processing.Syntactic;
-using Axion.Core.Processing.Syntactic.Expressions;
 
 namespace Axion.Core.Processing.Traversal {
     /// <summary>
@@ -10,34 +9,34 @@ namespace Axion.Core.Processing.Traversal {
     /// </summary>
     public interface ITreePath {
         bool Traversed { get; set; }
-        Expr Node      { get; set; }
+        Node Node      { get; set; }
     }
 
     public class NodeTreePath : ITreePath {
         private readonly PropertyInfo refToNodeInParent;
-        private readonly Expr         node;
+        private readonly Node         node;
 
         public bool Traversed { get; set; }
 
-        public Expr Node {
+        public Node Node {
             get => node;
             set => refToNodeInParent.SetValue(node.Parent, value);
         }
 
-        public NodeTreePath(Expr node, PropertyInfo refToNodeInParent) {
+        public NodeTreePath(Node node, PropertyInfo refToNodeInParent) {
             this.node              = node;
             this.refToNodeInParent = refToNodeInParent;
         }
     }
 
     public class NodeListTreePath<T> : ITreePath
-        where T : Expr {
+        where T : Node {
         private readonly NodeList<T> list;
         internal         int         IndexInList;
 
         public bool Traversed { get; set; }
 
-        public Expr Node {
+        public Node Node {
             get => list[IndexInList];
             set => list[IndexInList] = (T) value;
         }

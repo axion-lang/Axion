@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
             set => pattern = Bind(value);
         }
 
-        public GroupPattern(Expr parent) : base(parent) { }
+        public GroupPattern(Node parent) : base(parent) { }
 
         public override bool Match(Expr parent) {
             return Pattern.Match(parent);

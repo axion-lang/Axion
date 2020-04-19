@@ -55,7 +55,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             }
         }
 
-        public FunctionDef(Expr parent) : base(parent) { }
+        public FunctionDef(Node parent) : base(parent) { }
 
         public FunctionDef Parse(bool anonymous = false) {
             SetSpan(

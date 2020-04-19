@@ -20,9 +20,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             return new ConstantExpr(parent).Parse();
         }
 
-        public ConstantExpr(Expr parent) : base(parent) { }
+        public ConstantExpr(Node parent) : base(parent) { }
 
-        public ConstantExpr(Expr parent, string literal) : base(parent) {
+        public ConstantExpr(Node parent, string literal) : base(parent) {
             Literal = new Token(Source, value: literal);
         }
 

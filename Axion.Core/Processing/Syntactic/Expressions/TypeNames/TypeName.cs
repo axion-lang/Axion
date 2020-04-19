@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///     </c>
     /// </summary>
     public class TypeName : Expr {
-        internal TypeName(Expr parent) : base(parent) { }
+        internal TypeName(Node parent) : base(parent) { }
         protected TypeName() { }
 
         [NoPathTraversing]
@@ -42,12 +42,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             // middle
             // generic ('[' followed by not ']')
             if (s.PeekIs(OpenBracket) && !s.PeekByIs(2, CloseBracket)) {
-                leftTypeName = new GenericTypeName(parent, leftTypeName).Parse();
+                leftTypeName = new GenericTypeName(parent) {
+                    Target = leftTypeName
+                }.Parse();
             }
 
             // array
             if (s.PeekIs(OpenBracket)) {
-                leftTypeName = new ArrayTypeName(parent, leftTypeName).Parse();
+                leftTypeName = new ArrayTypeName(parent) {
+                    ElementType = leftTypeName
+                }.Parse();
             }
 
             // trailing
@@ -99,7 +103,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                 // redundant parens
                 LangException.Report(
                     BlameType.RedundantEmptyListOfTypeArguments,
-                    new Span(parent.Source, start.Start, s.Token.End)
+                    new Node(parent.Source, start.Start, s.Token.End)
                 );
             }
 

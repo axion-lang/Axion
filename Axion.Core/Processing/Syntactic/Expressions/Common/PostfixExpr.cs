@@ -15,7 +15,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     public class PostfixExpr : PrefixExpr {
         protected PostfixExpr() { }
 
-        protected PostfixExpr(Expr parent) : base(parent) { }
+        protected PostfixExpr(Node parent) : base(parent) { }
 
         internal new static PostfixExpr Parse(Expr parent) {
             TokenStream s = parent.Source.TokenStream;
@@ -38,7 +38,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 //     starting with open paren is incorrectly treated
                 //     as continuation of previous stmt.
                 else if (s.PeekIs(OpenParenthesis) && s.Peek == exactPeek) {
-                    value = new FuncCallExpr(parent, value).Parse(true);
+                    value = new FuncCallExpr(parent) {
+                        Target = value
+                    }.Parse(true);
                 }
                 else if (s.PeekIs(OpenBracket)) {
                     value = new IndexerExpr(parent) {
@@ -53,11 +55,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             if (s.MaybeEat(OpIncrement, OpDecrement)) {
                 var op = (OperatorToken) s.Token;
                 op.Side = InputSide.Left;
-                value   = new UnaryExpr(parent, op, value);
+                value = new UnaryExpr(parent) {
+                    Operator = op, Value = value
+                };
             }
 
             if (unquoted) {
-                value = new CodeUnquotedExpr(parent, value);
+                value = new CodeUnquotedExpr(parent) {
+                    Value = value
+                };
             }
 
             return value;

@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         [NoPathTraversing]
         public override TypeName ValueType => Value.ValueType;
 
-        public AwaitExpr(Expr parent) : base(parent) { }
+        public AwaitExpr(Node parent) : base(parent) { }
 
         public AwaitExpr Parse() {
             SetSpan(

@@ -9,33 +9,28 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     ///     </c>
     /// </summary>
     public class BinaryExpr : InfixExpr {
-        private Expr left;
+        private Expr left = null!;
 
         public Expr Left {
             get => left;
-            set => left = Bind(value);
+            set {
+                left = Bind(value);
+                MarkStart(left);
+            }
         }
 
-        private Expr right;
+        private Expr right = null!;
 
         public Expr Right {
             get => right;
-            set => right = Bind(value);
+            set {
+                right = Bind(value);
+                MarkEnd(right);
+            }
         }
 
-        public Token Operator { get; }
+        public Token Operator { get; set; }
 
-        public BinaryExpr(
-            Expr?  parent = null,
-            Expr?  left   = null,
-            Token? op     = null,
-            Expr?  right  = null
-        ) : base(parent ?? GetParentFromChildren(left, right)) {
-            Left     = left;
-            Operator = op;
-            Right    = right;
-            MarkStart(Left);
-            MarkEnd(Right);
-        }
+        public BinaryExpr(Node parent) : base(parent) { }
     }
 }

@@ -18,7 +18,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
         private Func<Expr, Expr> parseFunc = null!;
         private Type             type      = null!;
 
-        public ExpressionPattern(Expr parent) : base(parent) { }
+        public ExpressionPattern(Node parent) : base(parent) { }
 
         public override bool Match(Expr parent) {
             // leave expression non-starters to next token pattern.

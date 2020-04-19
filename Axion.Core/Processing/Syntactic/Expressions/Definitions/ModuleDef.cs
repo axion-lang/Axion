@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => scope = Bind(value);
         }
 
-        internal ModuleDef(Expr parent) : base(parent) { }
+        internal ModuleDef(Node parent) : base(parent) { }
 
         public ModuleDef Parse() {
             SetSpan(

@@ -10,7 +10,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     public class VarDef : NameDef {
         public bool IsImmutable { get; }
 
-        public VarDef(Expr parent, Span? kwImmutable = null) : base(parent) {
+        public VarDef(Node parent, Node? kwImmutable = null) : base(parent) {
             IsImmutable = kwImmutable != null;
         }
     }

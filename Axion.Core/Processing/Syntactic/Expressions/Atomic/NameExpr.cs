@@ -37,7 +37,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             }
         }
 
-        public NameExpr(Expr parent) : base(parent) { }
+        public NameExpr(Node parent) : base(parent) { }
 
         public NameExpr Parse(bool simple = false) {
             SetSpan(

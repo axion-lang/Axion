@@ -21,19 +21,19 @@ namespace Axion.Core.Processing.Errors {
         public override string        StackTrace { get; }
         public          BlameSeverity Severity   { get; }
 
-        [JsonProperty] private readonly Span errorSpan;
+        [JsonProperty] private readonly Node errorSpan;
 
         [JsonProperty] private readonly Unit targetUnit;
 
         [JsonProperty] private readonly string time =
             DateTime.Now.ToString(CultureInfo.InvariantCulture);
 
-        private LangException(string message, BlameSeverity severity, Span span) {
-            Severity     = severity;
-            Message      = message;
-            errorSpan    = span;
+        private LangException(string message, BlameSeverity severity, Node span) {
+            Severity   = severity;
+            Message    = message;
+            errorSpan  = span;
             targetUnit = span.Source;
-            StackTrace   = new StackTrace(2).ToString();
+            StackTrace = new StackTrace(2).ToString();
         }
 
         public static void ReportUnexpectedType(Type expectedType, Expr expr) {
@@ -67,7 +67,7 @@ namespace Axion.Core.Processing.Errors {
             bracket.Source.Blames.Add(ex);
         }
 
-        public static void ReportUnexpectedSyntax(TokenType expected, Span span) {
+        public static void ReportUnexpectedSyntax(TokenType expected, Node span) {
             var ex = new LangException(
                 $"Invalid syntax, expected `{expected.GetValue()}`, got `{span.Source.TokenStream.Peek.Type.GetValue()}`.",
                 BlameSeverity.Error,
@@ -76,7 +76,7 @@ namespace Axion.Core.Processing.Errors {
             span.Source.Blames.Add(ex);
         }
 
-        public static void Report(BlameType type, Span span) {
+        public static void Report(BlameType type, Node span) {
             var ex = new LangException(type.Description, type.Severity, span);
             ex.targetUnit.Blames.Add(ex);
         }

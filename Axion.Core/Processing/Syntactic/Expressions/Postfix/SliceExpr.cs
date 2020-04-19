@@ -27,6 +27,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => step = BindNullable(value);
         }
 
-        public SliceExpr(Expr parent) : base(parent) { }
+        public SliceExpr(Node parent) : base(parent) { }
     }
 }

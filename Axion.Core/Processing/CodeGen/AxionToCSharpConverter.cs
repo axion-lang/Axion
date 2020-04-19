@@ -314,10 +314,10 @@ namespace Axion.Core.Processing.CodeGen {
                                                 Parameters = NodeList<FunctionParameter>.From(
                                                     new FunctionParameter(e) {
                                                         Name = new NameExpr("args"),
-                                                        ValueType = new ArrayTypeName(
-                                                            e,
-                                                            new SimpleTypeName("string")
-                                                        )
+                                                        ValueType = new ArrayTypeName(e) {
+                                                            ElementType =
+                                                                new SimpleTypeName("string")
+                                                        }
                                                     }
                                                 ),
                                                 Scope     = new ScopeExpr(e, rootItems),

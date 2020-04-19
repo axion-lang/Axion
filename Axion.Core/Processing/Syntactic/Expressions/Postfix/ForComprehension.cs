@@ -1,3 +1,4 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
@@ -13,7 +14,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///     </c>
     /// </summary>
     public class ForComprehension : InfixExpr {
-        private Expr target;
+        private Expr target = null!;
 
         [NoPathTraversing]
         public Expr Target {
@@ -21,48 +22,44 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => target = Bind(value);
         }
 
-        private Expr item;
+        private Expr item = null!;
 
         public Expr Item {
             get => item;
             set => item = Bind(value);
         }
 
-        private Expr iterable;
+        private Expr iterable = null!;
 
         public Expr Iterable {
             get => iterable;
             set => iterable = Bind(value);
         }
 
-        private NodeList<Expr> conditions;
+        private NodeList<Expr> conditions = null!;
 
         public NodeList<Expr> Conditions {
             get => conditions;
             set => conditions = Bind(value);
         }
 
-        private Expr right;
+        private Expr? right;
 
-        public Expr Right {
+        public Expr? Right {
             get => right;
-            set => right = Bind(value);
+            set => right = BindNullable(value);
         }
 
-        public          bool IsGenerator;
-        public readonly bool IsNested;
+        public bool IsGenerator;
+        public bool IsNested;
 
         [NoPathTraversing]
         public override TypeName ValueType => Target.ValueType;
 
-        public ForComprehension(Expr? parent = null, Expr? target = null, bool isNested = false) :
-            base(parent ?? GetParentFromChildren(target)) {
-            IsNested   = isNested;
-            Target     = target;
-            Conditions = new NodeList<Expr>(this);
-        }
+        public ForComprehension(Node parent) : base(parent) { }
 
         public ForComprehension Parse() {
+            Conditions ??= new NodeList<Expr>(this);
             SetSpan(
                 () => {
                     if (Target == null && !IsNested) {
@@ -79,12 +76,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                             Conditions.Add(Parse(this));
                         }
                         else if (Stream.MaybeEat(KeywordUnless)) {
-                            Conditions.Add(new UnaryExpr(this, OpNot, Parse(this)));
+                            Conditions.Add(
+                                new UnaryExpr(this) {
+                                    Operator = new OperatorToken(Source, tokenType: OpNot),
+                                    Value    = Parse(this)
+                                }
+                            );
                         }
                     }
 
                     if (Stream.PeekIs(KeywordFor)) {
-                        Right = new ForComprehension(Parent, this, true).Parse();
+                        Right = new ForComprehension(Parent) {
+                            Target = this, IsNested = true
+                        }.Parse();
                     }
                 }
             );

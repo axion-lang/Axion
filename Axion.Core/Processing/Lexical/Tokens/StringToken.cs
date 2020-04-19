@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public override TypeName ValueType   => Spec.StringType;
 
         internal StringToken(
-            Unit                 source,
+            Unit                       source,
             string                     value          = "",
             string                     content        = "",
             bool                       isUnclosed     = false,
@@ -41,8 +41,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
     }
 
-    public class StringInterpolation : Span {
-        public StringInterpolation(Unit source) :
-            base(Unit.FromInterpolation(source)) { }
+    public class StringInterpolation : Node {
+        public StringInterpolation(Unit source) : base(Unit.FromInterpolation(source)) { }
     }
 }

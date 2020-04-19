@@ -6,11 +6,11 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public bool IsUnclosed  { get; }
 
         internal CommentToken(
-            Unit source,
-            string     value       = "",
-            string     content     = "",
-            bool       isMultiline = false,
-            bool       isUnclosed  = false
+            Unit   source,
+            string value       = "",
+            string content     = "",
+            bool   isMultiline = false,
+            bool   isUnclosed  = false
         ) : base(
             source,
             TokenType.Comment,

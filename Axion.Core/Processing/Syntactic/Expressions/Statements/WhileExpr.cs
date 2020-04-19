@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             set => noBreakScope = BindNullable(value);
         }
 
-        public WhileExpr(Expr parent) : base(parent) { }
+        public WhileExpr(Node parent) : base(parent) { }
 
         public Expr Parse() {
             SetSpan(

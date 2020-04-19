@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => member = Bind(value);
         }
 
-        public MemberAccessExpr(Expr parent) : base(parent) { }
+        public MemberAccessExpr(Node parent) : base(parent) { }
 
         public MemberAccessExpr Parse() {
             SetSpan(

@@ -13,10 +13,10 @@ namespace Axion.Core.Processing.Syntactic {
     ///     and provide some other useful methods.
     /// </summary>
     public class NodeList<T> : IList<T>
-        where T : Expr {
-        private Expr? parent;
+        where T : Node {
+        private Node? parent;
 
-        public Expr? Parent {
+        public Node? Parent {
             get => parent;
             set {
                 parent = value;
@@ -79,7 +79,7 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        internal static NodeList<T> From(Expr parent, IEnumerable<T>? collection) {
+        internal static NodeList<T> From(Node parent, IEnumerable<T>? collection) {
             if (collection == null) {
                 return new NodeList<T>(parent);
             }
@@ -103,12 +103,12 @@ namespace Axion.Core.Processing.Syntactic {
             return new NodeList<T>(null, collection.ToList());
         }
 
-        internal NodeList(Expr? parent) {
+        internal NodeList(Node parent) {
             Parent = parent;
             items  = new List<T>();
         }
 
-        private NodeList(Expr? parent, IList<T> collection) {
+        private NodeList(Node? parent, IList<T> collection) {
             Parent = parent;
             items  = collection;
         }

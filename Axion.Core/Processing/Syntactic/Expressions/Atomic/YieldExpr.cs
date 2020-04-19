@@ -19,7 +19,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public bool IsYieldFrom { get; set; }
 
-        public YieldExpr(Expr parent) : base(parent) { }
+        public YieldExpr(Node parent) : base(parent) { }
 
         public YieldExpr Parse() {
             SetSpan(

@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             set => loopName = BindNullable(value);
         }
 
-        public BreakExpr(Expr parent) : base(parent) { }
+        public BreakExpr(Node parent) : base(parent) { }
 
         public BreakExpr Parse() {
             SetSpan(

@@ -26,7 +26,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => target = Bind(value);
         }
 
-        public IndexerExpr(Expr parent) : base(parent) { }
+        public IndexerExpr(Node parent) : base(parent) { }
 
         public IndexerExpr Parse() {
             Target ??= AtomExpr.Parse(this);

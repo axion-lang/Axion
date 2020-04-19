@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
-    public class Token : Span {
+    public class Token : Node {
         [JsonProperty(Order = 1)]
         public TokenType Type { get; set; }
 
@@ -22,13 +22,13 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public virtual TypeName? ValueType { get; }
 
         public Token(
-            Unit source,
-            TokenType  type        = None,
-            string     value       = "",
-            string?    content     = null,
-            string     endingWhite = "",
-            Location   start       = default,
-            Location   end         = default
+            Unit      source,
+            TokenType type        = None,
+            string    value       = "",
+            string?   content     = null,
+            string    endingWhite = "",
+            Location  start       = default,
+            Location  end         = default
         ) : base(source, start, end) {
             Type        = type;
             Value       = value;

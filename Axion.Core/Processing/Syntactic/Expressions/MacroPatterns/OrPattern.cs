@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
             set => right = Bind(value);
         }
 
-        public OrPattern(Expr parent) : base(parent) { }
+        public OrPattern(Node parent) : base(parent) { }
 
         public override bool Match(Expr parent) {
             return Left.Match(parent) || Right.Match(parent);

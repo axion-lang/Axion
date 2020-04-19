@@ -26,7 +26,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             }
         }
 
-        internal FuncCallArg(Expr parent) : base(parent) { }
+        internal FuncCallArg(Node parent) : base(parent) { }
 
         /// <summary>
         ///     <c>
@@ -75,8 +75,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     // generator arg
                     if (parent.Stream.PeekIs(TokenType.KeywordFor)) {
                         arg = new FuncCallArg(parent) {
-                            Value = new ForComprehension(parent, argValue) {
-                                IsGenerator = true
+                            Value = new ForComprehension(parent) {
+                                Target = argValue, IsGenerator = true
                             }.Parse()
                         };
                     }

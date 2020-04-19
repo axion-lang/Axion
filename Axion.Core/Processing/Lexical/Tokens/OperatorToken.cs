@@ -10,9 +10,9 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public InputSide Side       { get; set; }
 
         internal OperatorToken(
-            Unit source,
-            string     value     = "",
-            TokenType  tokenType = TokenType.None
+            Unit      source,
+            string    value     = "",
+            TokenType tokenType = TokenType.None
         ) : base(source, tokenType, value) {
             if (tokenType != TokenType.None) {
                 Value = Spec.Operators.First(kvp => kvp.Value.Item1 == tokenType).Key;

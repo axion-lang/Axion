@@ -35,7 +35,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         public readonly Dictionary<string, string> NamedSyntaxParts =
             new Dictionary<string, string>();
 
-        internal MacroDef(Expr parent) : base(parent) { }
+        internal MacroDef(Node parent) : base(parent) { }
 
         public MacroDef Parse() {
             SetSpan(

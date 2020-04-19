@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             NodeList<TypeName>.From(this, Expressions.Select(e => e.ValueType))
         );
 
-        internal TupleExpr(Expr parent) : base(parent) { }
+        internal TupleExpr(Node parent) : base(parent) { }
 
         public TupleExpr ParseEmpty() {
             Stream.Eat(OpenParenthesis);

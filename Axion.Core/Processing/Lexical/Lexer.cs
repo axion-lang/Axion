@@ -9,7 +9,7 @@ using static Axion.Core.Specification.Spec;
 
 namespace Axion.Core.Processing.Lexical {
     public class Lexer {
-        private readonly Unit src;
+        private readonly Unit       src;
         private readonly TextStream stream;
 
         // Variables for current token creation
@@ -191,7 +191,7 @@ namespace Axion.Core.Processing.Lexical {
             if (!consistent) {
                 LangException.Report(
                     BlameType.InconsistentIndentation,
-                    new Span(src, inconsistencyStart, stream.Location.Add(0, -1))
+                    new Node(src, inconsistencyStart, stream.Location.Add(0, -1))
                 );
             }
             else {
@@ -501,9 +501,9 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private StringInterpolation ReadStringInterpolation() {
-            var        interpolation = new StringInterpolation(src);
+            var  interpolation = new StringInterpolation(src);
             Unit iSrc          = interpolation.Source;
-            var        lexer         = new Lexer(interpolation.Source);
+            var  lexer         = new Lexer(interpolation.Source);
 
             lexer.ProcessTerminators.Push(CloseBrace);
             while (true) {
@@ -601,7 +601,7 @@ namespace Axion.Core.Processing.Lexical {
             void RaiseError(BlameType blameType) {
                 LangException.Report(
                     blameType,
-                    new Span(src, escapeStart, stream.Location.Add(0, -1))
+                    new Node(src, escapeStart, stream.Location.Add(0, -1))
                 );
                 value.Append(raw);
                 content.Append(raw);
