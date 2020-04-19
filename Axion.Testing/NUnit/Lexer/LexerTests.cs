@@ -5,14 +5,14 @@ using NUnit.Framework;
 namespace Axion.Testing.NUnit.Lexer {
     [TestFixture]
     public partial class LexerTests : Tests {
-        private static void Lex(SourceUnit source) {
-            Compiler.Process(source, ProcessingMode.Lexing);
+        private static void Lex(Unit source) {
+            Compiler.Process(source, ProcessingMode.Lexing, ProcessingOptions.Debug);
         }
 
         [Test]
         public void TestDashIdentifier() {
             const string id     = "ident-ifier-";
-            SourceUnit   source = MakeSourceFromCode(id);
+            Unit   source = MakeSourceFromCode(id);
             Lex(source);
             // id, minus, EOC
             Assert.AreEqual(3, source.TokenStream.Tokens.Count);
@@ -22,7 +22,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestMismatchingClosingBracket() {
-            SourceUnit source = MakeSourceFromCode("}");
+            Unit source = MakeSourceFromCode("}");
             Lex(source);
             // mismatching bracket
             Assert.AreEqual(1, source.Blames.Count);

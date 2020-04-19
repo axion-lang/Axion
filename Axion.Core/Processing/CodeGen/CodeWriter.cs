@@ -17,6 +17,8 @@ namespace Axion.Core.Processing.CodeGen {
 
         private readonly ConverterFromAxion converter;
 
+        public string OutputFileExtension => converter.OutputFileExtension;
+
         public int IndentLevel {
             get => writer.Indent;
             set => writer.Indent = value;
@@ -25,23 +27,15 @@ namespace Axion.Core.Processing.CodeGen {
         public CodeWriter(ProcessingOptions options) {
             baseWriter = new StringWriter();
             writer     = new IndentedTextWriter(baseWriter);
-            if (options.HasFlag(ProcessingOptions.ToAxion)) {
-                converter = new AxionToAxionConverter(this);
-            }
-            else if (options.HasFlag(ProcessingOptions.ToCSharp)) {
-                converter = new AxionToCSharpConverter(this);
-            }
-            else if (options.HasFlag(ProcessingOptions.ToPython)) {
-                converter = new AxionToPythonConverter(this);
-            }
-            else if (options.HasFlag(ProcessingOptions.ToPascal)) {
-                converter = new AxionToPascalConverter(this);
-            }
-            else {
-                throw new NotSupportedException(
+            converter = options.TargetType switch {
+                "axion"  => new AxionToAxionConverter(this),
+                "csharp" => new AxionToCSharpConverter(this),
+                "python" => new AxionToPythonConverter(this),
+                "pascal" => new AxionToPascalConverter(this),
+                _ => throw new NotSupportedException(
                     $"Code building for '{options:G}' mode is not supported."
-                );
-            }
+                )
+            };
         }
 
         public void Write(params object[] values) {

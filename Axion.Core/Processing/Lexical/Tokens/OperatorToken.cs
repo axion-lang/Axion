@@ -10,7 +10,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public InputSide Side       { get; set; }
 
         internal OperatorToken(
-            SourceUnit source,
+            Unit source,
             string     value     = "",
             TokenType  tokenType = TokenType.None
         ) : base(source, tokenType, value) {

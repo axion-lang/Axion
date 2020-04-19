@@ -9,7 +9,7 @@ using static Axion.Core.Specification.Spec;
 
 namespace Axion.Core.Processing.Lexical {
     public class Lexer {
-        private readonly SourceUnit src;
+        private readonly Unit src;
         private readonly TextStream stream;
 
         // Variables for current token creation
@@ -27,7 +27,7 @@ namespace Axion.Core.Processing.Lexical {
         public readonly Stack<Token>     MismatchingPairs   = new Stack<Token>();
         public readonly Stack<TokenType> ProcessTerminators = new Stack<TokenType>();
 
-        public Lexer(SourceUnit source) {
+        public Lexer(Unit source) {
             src    = source;
             stream = src.TextStream;
             ProcessTerminators.Push(End);
@@ -502,7 +502,7 @@ namespace Axion.Core.Processing.Lexical {
 
         private StringInterpolation ReadStringInterpolation() {
             var        interpolation = new StringInterpolation(src);
-            SourceUnit iSrc          = interpolation.Source;
+            Unit iSrc          = interpolation.Source;
             var        lexer         = new Lexer(interpolation.Source);
 
             lexer.ProcessTerminators.Push(CloseBrace);

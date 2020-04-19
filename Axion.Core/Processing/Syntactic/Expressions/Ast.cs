@@ -17,10 +17,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         internal readonly Stack<MacroApplicationExpr> MacroApplicationParts =
             new Stack<MacroApplicationExpr>();
 
-        internal Ast(SourceUnit src) {
+        internal Ast(Unit src) {
             Source = src;
             Parent = this;
-            Path   = new NodeTreePath(this, typeof(SourceUnit).GetProperty(nameof(SourceUnit.Ast)));
+            Path   = new NodeTreePath(this, typeof(Unit).GetProperty(nameof(Unit.Ast)));
             Items  = new NodeList<Expr>(this);
         }
 

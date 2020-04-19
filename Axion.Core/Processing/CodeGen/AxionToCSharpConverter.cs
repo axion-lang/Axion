@@ -14,6 +14,8 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.CodeGen {
     public class AxionToCSharpConverter : ConverterFromAxion {
+        public override string OutputFileExtension => ".cs";
+
         public AxionToCSharpConverter(CodeWriter cw) : base(cw) { }
 
         public override void Convert(NameExpr e) {

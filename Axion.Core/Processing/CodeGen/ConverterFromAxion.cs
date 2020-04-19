@@ -14,6 +14,8 @@ namespace Axion.Core.Processing.CodeGen {
     public abstract class ConverterFromAxion {
         protected CodeWriter cw { get; }
 
+        public abstract string OutputFileExtension { get; }
+
         public ConverterFromAxion(CodeWriter writer) {
             cw = writer;
         }

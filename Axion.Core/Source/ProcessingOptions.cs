@@ -1,49 +1,25 @@
-﻿using System;
-
-namespace Axion.Core.Source {
+﻿namespace Axion.Core.Source {
     /// <summary>
     ///     Defines some settings for source code processing.
     /// </summary>
-    [Flags]
-    public enum ProcessingOptions {
+    public class ProcessingOptions {
         /// <summary>
-        ///     No additional options.
+        ///     Target source to compile Axion code into.
+        ///     (e.g. 'Python', 'C#', etc.)
         /// </summary>
-        None = 0,
-
-        /// <summary>
-        ///     Source is processed by default.
-        /// </summary>
-        Default = CheckIndentationConsistency,
+        public string TargetType { get; }
 
         /// <summary>
         ///     Check code against inconsistent
         ///     indentation (mixed spaced and tabs).
         /// </summary>
-        CheckIndentationConsistency = 0b1,
+        public bool CheckIndentationConsistency { get; }
 
-        /// <summary>
-        ///     Conversion Axion source back into
-        ///     Axion source (debugging mode).
-        /// </summary>
-        ToAxion = 0b01000,
+        public static ProcessingOptions Debug { get; } = new ProcessingOptions("axion", true);
 
-        /// <summary>
-        ///     Conversion Axion source into
-        ///     C# programming language source.
-        /// </summary>
-        ToCSharp = 0b00100,
-
-        /// <summary>
-        ///     Conversion Axion source into
-        ///     Python programming language source.
-        /// </summary>
-        ToPython = 0b00010,
-
-        /// <summary>
-        ///     Conversion Axion source into
-        ///     Pascal programming language source.
-        /// </summary>
-        ToPascal = 0b00001
+        public ProcessingOptions(string targetType, bool checkIndentationConsistency = true) {
+            TargetType                  = targetType.Trim().ToLower();
+            CheckIndentationConsistency = checkIndentationConsistency;
+        }
     }
 }

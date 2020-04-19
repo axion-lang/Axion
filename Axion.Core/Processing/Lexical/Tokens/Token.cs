@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public virtual TypeName? ValueType { get; }
 
         public Token(
-            SourceUnit source,
+            Unit source,
             TokenType  type        = None,
             string     value       = "",
             string?    content     = null,

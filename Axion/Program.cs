@@ -154,8 +154,8 @@ namespace Axion {
                     }
 
                     // interpret as source code and output result
-                    SourceUnit src = SourceUnit.FromLines(codeLines);
-                    Compiler.Process(src, ProcessingMode.Transpilation, ProcessingOptions.ToCSharp);
+                    Unit src = Unit.FromLines(codeLines);
+                    Compiler.Process(src, ProcessingMode.Transpilation, new ProcessingOptions("csharp"));
                     if (src.HasErrors) {
                         break;
                     }
@@ -174,18 +174,13 @@ namespace Axion {
 
         private static void ProcessSources(CommandLineArguments args) {
             var pMode    = ProcessingMode.Reduction;
-            var pOptions = ProcessingOptions.Default;
-            if (!string.IsNullOrWhiteSpace(args.Mode.ToLower())) {
-                if (Enum.TryParse(args.Mode, true, out pOptions)) {
-                    pMode = ProcessingMode.Transpilation;
-                }
-                else {
-                    logger.Error("Unknown processing mode.");
-                    return;
-                }
+            var pOptions = ProcessingOptions.Debug;
+            if (!string.IsNullOrWhiteSpace(args.Mode)) {
+                pMode = ProcessingMode.Transpilation;
+                pOptions = new ProcessingOptions(args.Mode.Substring(2));
             }
 
-            SourceUnit? src;
+            Unit? src;
             if (args.Files.Any()) {
                 int filesCount = args.Files.Count();
                 if (filesCount > 1) {
@@ -200,13 +195,13 @@ namespace Axion {
                     );
                 }
 
-                src = SourceUnit.FromFile(inputFiles[0]);
+                src = Unit.FromFile(inputFiles[0]);
                 if (src == null) {
                     return;
                 }
             }
             else if (!string.IsNullOrWhiteSpace(args.Code)) {
-                src = SourceUnit.FromCode(Utilities.TrimMatchingChars(args.Code, '"'));
+                src = Unit.FromCode(Utilities.TrimMatchingChars(args.Code, '"'));
             }
             else {
                 logger.Error("Neither code nor path to source file not specified.");

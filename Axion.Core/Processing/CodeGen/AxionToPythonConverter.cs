@@ -7,6 +7,8 @@ using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.CodeGen {
     public class AxionToPythonConverter : ConverterFromAxion {
+        public override string OutputFileExtension => ".py";
+
         public AxionToPythonConverter(CodeWriter cw) : base(cw) { }
 
         public override void Convert(CommentToken e) {

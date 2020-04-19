@@ -19,35 +19,13 @@ namespace Axion.Core.Source {
     ///     are performed with that class.
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    public sealed class SourceUnit {
+    public sealed class Unit {
         public const string SourceFileExt = ".ax";
         public const string DebugFileExt  = ".dbg.json";
 
-        public string OutputFileExt {
-            get {
-                if (Options.HasFlag(ProcessingOptions.ToAxion)) {
-                    return ".ax";
-                }
-
-                if (Options.HasFlag(ProcessingOptions.ToCSharp)) {
-                    return ".cs";
-                }
-
-                if (Options.HasFlag(ProcessingOptions.ToPython)) {
-                    return ".py";
-                }
-
-                if (Options.HasFlag(ProcessingOptions.ToPascal)) {
-                    return ".pas";
-                }
-
-                return ".out";
-            }
-        }
-
         public bool HasErrors => Blames.Any(b => b.Severity == BlameSeverity.Error);
 
-        private ProcessingOptions options = ProcessingOptions.Default;
+        private ProcessingOptions options = ProcessingOptions.Debug;
 
         internal ProcessingOptions Options {
             get => options;
@@ -70,8 +48,8 @@ namespace Axion.Core.Source {
 
         public CodeWriter CodeWriter { get; private set; }
 
-        private Dictionary<string, SourceUnit> Dependencies { get; set; } =
-            new Dictionary<string, SourceUnit>();
+        private Dictionary<string, Unit> Dependencies { get; set; } =
+            new Dictionary<string, Unit>();
 
         private Dictionary<string, IDefinitionExpr> Definitions { get; set; } =
             new Dictionary<string, IDefinitionExpr>();
@@ -101,7 +79,8 @@ namespace Axion.Core.Source {
                     Path.Combine(
                         SourceFilePath.Directory.FullName,
                         "out",
-                        Path.GetFileNameWithoutExtension(SourceFilePath.FullName) + OutputFileExt
+                        Path.GetFileNameWithoutExtension(SourceFilePath.FullName)
+                      + CodeWriter.OutputFileExtension
                     )
                 );
                 Utilities.ResolvePath(outputFilePath.Directory.FullName);
@@ -119,7 +98,7 @@ namespace Axion.Core.Source {
 
         #endregion
 
-        private SourceUnit(
+        private Unit(
             string    code       = "",
             FileInfo? sourcePath = null,
             FileInfo? outputPath = null,
@@ -173,13 +152,13 @@ namespace Axion.Core.Source {
             }
         }
 
-        public void AddDependency(SourceUnit src) {
+        public void AddDependency(Unit src) {
             Dependencies.Add(src.SourceFilePath.ToString(), src);
-            Compiler.Process(src, ProcessingMode.Reduction);
+            Compiler.Process(src, ProcessingMode.Reduction, ProcessingOptions.Debug);
         }
 
         public Dictionary<string, IDefinitionExpr> GetAllDefinitions() {
-            foreach (SourceUnit dep in Dependencies.Values) {
+            foreach (Unit dep in Dependencies.Values) {
                 foreach (IDefinitionExpr def in dep.Ast.GetScopedDefs()) {
                     if (!Definitions.ContainsKey(def.Name.ToString())) {
                         Definitions.Add(def.Name.ToString(), def);
@@ -208,7 +187,7 @@ namespace Axion.Core.Source {
         }
 
         public HashSet<string> GetAllCustomKeywords() {
-            foreach (SourceUnit dep in Dependencies.Values) {
+            foreach (Unit dep in Dependencies.Values) {
                 foreach (string kw in dep.CustomKeywords) {
                     CustomKeywords.Add(kw);
                 }
@@ -224,18 +203,15 @@ namespace Axion.Core.Source {
             }
         }
 
-        public static SourceUnit FromCode(string code, FileInfo? outFilePath = null) {
-            return new SourceUnit(code, outputPath: outFilePath);
+        public static Unit FromCode(string code, FileInfo? outFilePath = null) {
+            return new Unit(code, outputPath: outFilePath);
         }
 
-        public static SourceUnit FromLines(
-            IEnumerable<string> lines,
-            FileInfo?           outFilePath = null
-        ) {
-            return new SourceUnit(string.Join("\n", lines), outputPath: outFilePath);
+        public static Unit FromLines(IEnumerable<string> lines, FileInfo? outFilePath = null) {
+            return new Unit(string.Join("\n", lines), outputPath: outFilePath);
         }
 
-        public static SourceUnit? FromFile(FileInfo srcFilePath, FileInfo? outFilePath = null) {
+        public static Unit? FromFile(FileInfo srcFilePath, FileInfo? outFilePath = null) {
             if (!srcFilePath.Exists) {
                 Compiler.Logger.Error($"'{srcFilePath.Name}' does not exists.");
                 return null;
@@ -247,11 +223,11 @@ namespace Axion.Core.Source {
                 return null;
             }
 
-            return new SourceUnit(File.ReadAllText(srcFilePath.FullName), srcFilePath, outFilePath);
+            return new Unit(File.ReadAllText(srcFilePath.FullName), srcFilePath, outFilePath);
         }
 
-        public static SourceUnit FromInterpolation(SourceUnit source) {
-            return new SourceUnit(noStdLib: true) {
+        public static Unit FromInterpolation(Unit source) {
+            return new Unit(noStdLib: true) {
                 TextStream = source.TextStream, Definitions = source.Definitions
             };
         }

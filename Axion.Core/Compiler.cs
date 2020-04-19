@@ -27,23 +27,23 @@ namespace Axion.Core {
         internal static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public static void Process(
-            SourceUnit        src,
+            Unit              src,
             ProcessingMode    mode,
-            ProcessingOptions options = ProcessingOptions.Default
+            ProcessingOptions options
         ) {
             src.ProcessingMode = mode;
             src.Options        = options;
             Process(src);
         }
 
-        private static void Process(SourceUnit src) {
+        private static void Process(Unit src) {
             Logger.Info($"Processing '{src.SourceFilePath.Name}'");
             if (string.IsNullOrWhiteSpace(src.TextStream.Text)) {
                 Logger.Error("Source is empty. Processing aborted.");
                 return;
             }
 
-            foreach ((ProcessingMode mode, Action<SourceUnit> action) in CompilationSteps) {
+            foreach ((ProcessingMode mode, Action<Unit> action) in CompilationSteps) {
                 action(src);
                 if (src.ProcessingMode == mode || src.HasErrors) {
                     break;
@@ -65,8 +65,8 @@ namespace Axion.Core {
 
         // @formatter:off
 
-        public static readonly Dictionary<ProcessingMode, Action<SourceUnit>> CompilationSteps =
-            new Dictionary<ProcessingMode, Action<SourceUnit>> {
+        public static readonly Dictionary<ProcessingMode, Action<Unit>> CompilationSteps =
+            new Dictionary<ProcessingMode, Action<Unit>> {
                 { ProcessingMode.Lexing, Lex },
                 { ProcessingMode.Parsing, Parse },
                 { ProcessingMode.Reduction, Reduce },
@@ -75,7 +75,7 @@ namespace Axion.Core {
 
         // @formatter:on
 
-        public static void Lex(SourceUnit src) {
+        public static void Lex(Unit src) {
             Logger.Debug("Tokens list generation");
             var lexer = new Lexer(src);
             while (true) {
@@ -95,17 +95,17 @@ namespace Axion.Core {
             }
         }
 
-        private static void Parse(SourceUnit src) {
+        private static void Parse(Unit src) {
             Logger.Debug("Abstract Syntax Tree generation");
             src.Ast.Parse();
         }
 
-        private static void Reduce(SourceUnit src) {
+        private static void Reduce(Unit src) {
             Logger.Debug("Syntax tree reducing");
             Traversing.Traverse(src.Ast);
         }
 
-        private static void Transpile(SourceUnit src) {
+        private static void Transpile(Unit src) {
             try {
                 src.CodeWriter.Write(src.Ast);
                 var code = src.CodeWriter.ToString();

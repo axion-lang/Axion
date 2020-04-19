@@ -7,12 +7,12 @@ namespace Axion.Core.Processing {
     /// </summary>
     public class Span {
         [JsonIgnore]
-        public SourceUnit Source { get; set; }
+        public Unit Source { get; set; }
 
         public Location Start { get; private set; }
         public Location End   { get; private set; }
 
-        public Span(SourceUnit source, Location start = default, Location end = default) {
+        public Span(Unit source, Location start = default, Location end = default) {
             Source = source;
             Start  = start;
             End    = end;

@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public          bool     IsUnclosed { get; }
 
         internal CharToken(
-            SourceUnit source,
+            Unit source,
             string     value      = "",
             string     content    = "",
             bool       isUnclosed = false

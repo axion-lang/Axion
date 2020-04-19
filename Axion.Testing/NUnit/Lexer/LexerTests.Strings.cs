@@ -6,7 +6,7 @@ namespace Axion.Testing.NUnit.Lexer {
     public partial class LexerTests {
         [Test]
         public void TestVariousStrings() {
-            SourceUnit src = MakeSourceFromCode(
+            Unit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1 = \"regular literal\"",
@@ -68,7 +68,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestFailStringInvalidEscape() {
-            SourceUnit src = MakeSourceFromCode(
+            Unit src = MakeSourceFromCode(
                 string.Join(Environment.NewLine, "'invalid -> \\m <- escape!'")
             );
             Lex(src);
@@ -77,7 +77,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestFailStringTruncatedUEscape() {
-            SourceUnit src = MakeSourceFromCode(
+            Unit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "'invalid -> \\U5 <- escape!'",
@@ -90,7 +90,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestStringEscSequences() {
-            SourceUnit src = MakeSourceFromCode(
+            Unit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1e = \"esc: \\r\\n\\f\\t\\v\"",

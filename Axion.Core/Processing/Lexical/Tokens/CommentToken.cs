@@ -6,7 +6,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public bool IsUnclosed  { get; }
 
         internal CommentToken(
-            SourceUnit source,
+            Unit source,
             string     value       = "",
             string     content     = "",
             bool       isMultiline = false,

@@ -6,7 +6,7 @@ namespace Axion.Testing.NUnit.Lexer {
     public partial class LexerTests {
         [Test]
         public void TestTabsIndentation() {
-            SourceUnit src = MakeSourceFromCode(
+            Unit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "i = 0",
@@ -25,7 +25,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestSpacesIndentation() {
-            SourceUnit src = MakeSourceFromCode(
+            Unit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "i = 0",
@@ -44,7 +44,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestWarnMixedIndentation() {
-            SourceUnit src = MakeSourceFromCode(
+            Unit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "i = 0",

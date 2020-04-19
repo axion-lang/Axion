@@ -8,6 +8,8 @@ using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.CodeGen {
     public class AxionToAxionConverter : ConverterFromAxion {
+        public override string OutputFileExtension => ".ax";
+
         public AxionToAxionConverter(CodeWriter cw) : base(cw) { }
 
         public override void Convert(CharToken e) {

@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Errors {
 
         [JsonProperty] private readonly Span errorSpan;
 
-        [JsonProperty] private readonly SourceUnit targetSource;
+        [JsonProperty] private readonly Unit targetUnit;
 
         [JsonProperty] private readonly string time =
             DateTime.Now.ToString(CultureInfo.InvariantCulture);
@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Errors {
             Severity     = severity;
             Message      = message;
             errorSpan    = span;
-            targetSource = span.Source;
+            targetUnit = span.Source;
             StackTrace   = new StackTrace(2).ToString();
         }
 
@@ -78,11 +78,11 @@ namespace Axion.Core.Processing.Errors {
 
         public static void Report(BlameType type, Span span) {
             var ex = new LangException(type.Description, type.Severity, span);
-            ex.targetSource.Blames.Add(ex);
+            ex.targetUnit.Blames.Add(ex);
         }
 
         internal void PrintToConsole() {
-            string[] codeLines = targetSource.TextStream.Text.Split(
+            string[] codeLines = targetUnit.TextStream.Text.Split(
                 new[] {
                     "\n"
                 },
@@ -133,7 +133,7 @@ namespace Axion.Core.Processing.Errors {
             ConsoleUtils.WriteLine((Severity.ToString("G") + ": " + Message, color));
             // file name
             ConsoleUtils.WriteLine(
-                $"--> {targetSource.SourceFilePath}:{errorSpan.Start.Line + 1},{errorSpan.Start.Column + 1}"
+                $"--> {targetUnit.SourceFilePath}:{errorSpan.Start.Line + 1},{errorSpan.Start.Column + 1}"
             );
             Console.WriteLine();
             // line with error

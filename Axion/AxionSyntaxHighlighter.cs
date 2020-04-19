@@ -22,7 +22,7 @@ namespace Axion {
             out IReadOnlyList<Exception> blames
         ) {
             renderPosition = lastRenderEndPosition;
-            SourceUnit src = SourceUnit.FromLines(codeLines);
+            Unit src = Unit.FromLines(codeLines);
             // NOTE: direct call to Compiler.Lex works faster than Compiler.Process function chain.
             Compiler.Lex(src);
             blames = src.Blames;
@@ -32,7 +32,7 @@ namespace Axion {
         }
 
         public List<ColoredValue> Highlight(string code) {
-            SourceUnit src = SourceUnit.FromCode(code);
+            Unit src = Unit.FromCode(code);
             Compiler.Lex(src);
             return HighlightTokens(src.TokenStream.Tokens);
         }

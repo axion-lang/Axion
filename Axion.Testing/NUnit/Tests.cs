@@ -98,7 +98,7 @@ namespace Axion.Testing.NUnit {
 
         private void ScanSources(DirectoryInfo dir) {
             foreach (FileInfo file in dir.EnumerateFiles()) {
-                if (file.Extension == SourceUnit.SourceFileExt) {
+                if (file.Extension == Unit.SourceFileExt) {
                     SourceFiles.Add(file);
                 }
             }
@@ -108,17 +108,17 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        internal static SourceUnit MakeSourceFromFile(string fileName) {
-            return SourceUnit.FromFile(
-                new FileInfo(Path.Combine(InPath, fileName + SourceUnit.SourceFileExt))
+        internal static Unit MakeSourceFromFile(string fileName) {
+            return Unit.FromFile(
+                new FileInfo(Path.Combine(InPath, fileName + Unit.SourceFileExt))
             );
         }
 
-        internal static SourceUnit MakeSourceFromCode(
+        internal static Unit MakeSourceFromCode(
             string                    code,
             [CallerMemberName] string fileName = null
         ) {
-            return SourceUnit.FromCode(
+            return Unit.FromCode(
                 code,
                 new FileInfo(Path.Combine(OutPath, fileName + TestExtension))
             );

@@ -9,49 +9,49 @@ using NUnit.Framework;
 namespace Axion.Testing.NUnit.Parser {
     [TestFixture]
     public partial class SyntaxParserTests : Tests {
-        private static SourceUnit ParseTestFile([CallerMemberName] string testName = null) {
-            SourceUnit source = MakeSourceFromFile(testName);
+        private static Unit ParseTestFile([CallerMemberName] string testName = null) {
+            Unit source = MakeSourceFromFile(testName);
             Parse(source);
             return source;
         }
 
-        private static void Parse(SourceUnit source) {
-            Compiler.Process(source, ProcessingMode.Transpilation, ProcessingOptions.ToCSharp);
+        private static void Parse(Unit source) {
+            Compiler.Process(source, ProcessingMode.Transpilation, new ProcessingOptions("csharp"));
         }
 
         [Test]
         public void TestBisectAlgorithm() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestClassDef() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestConditionalExpression() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestConsole2048() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestConsoleSnake() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestDecisionTree() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(4, source.Blames.Count);
         }
 
@@ -59,11 +59,11 @@ namespace Axion.Testing.NUnit.Parser {
         public void TestDesignPatterns() {
             for (var i = 0; i < SourceFiles.Count; i++) {
                 FileInfo file = SourceFiles[i];
-                SourceUnit source = SourceUnit.FromFile(
+                Unit source = Unit.FromFile(
                     file,
                     new FileInfo(OutPath + nameof(TestDesignPatterns) + i + TestExtension)
                 );
-                Compiler.Process(source, ProcessingMode.Parsing);
+                Compiler.Process(source, ProcessingMode.Parsing, ProcessingOptions.Debug);
                 Assert.That(
                     source.Blames.All(
                         b => b.Severity != BlameSeverity.Error
@@ -77,86 +77,86 @@ namespace Axion.Testing.NUnit.Parser {
 
         [Test]
         public void TestDotExpressions() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestDoWhileMacro() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestFastFib() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestFizzBuzz() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestFuncCalls() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestFuncDef() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(15, source.Blames.Count);
         }
 
         [Test]
         public void TestHuffmanCompression() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(2, source.Blames.Count);
         }
 
         [Test]
         public void TestMatchMacro() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestMathExprParser() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(5, source.Blames.Count);
         }
 
         [Test]
         public void TestMisc() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(4, source.Blames.Count);
         }
 
         [Test]
         public void TestModuleDef() {
-            SourceUnit unit1 = MakeSourceFromCode("module ExampleModule: pass");
+            Unit unit1 = MakeSourceFromCode("module ExampleModule: pass");
             Parse(unit1);
             Assert.That(unit1.Blames.Count == 0, $"unit1.Blames.Count == {unit1.Blames.Count}");
         }
 
         [Test]
         public void TestNestedForComprehension() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
 
         [Test]
         public void TestObjectTreeFromList() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(2, source.Blames.Count);
         }
 
         [Test]
         public void TestWhileExpression() {
-            SourceUnit source = ParseTestFile();
+            Unit source = ParseTestFile();
             Assert.AreEqual(0, source.Blames.Count);
         }
     }

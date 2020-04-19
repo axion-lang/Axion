@@ -10,23 +10,23 @@ namespace Axion.Testing.NUnit.Parser {
     public partial class SyntaxParserTests {
         [Test]
         public void TestPipelineOperator() {
-            SourceUnit src1 = MakeSourceFromCode("person |> parseData |> getAge |> validateAge");
+            Unit src1 = MakeSourceFromCode("person |> parseData |> getAge |> validateAge");
             Parse(src1);
             Assert.That(src1.Blames.Count == 0, $"unit1.Blames.Count == {src1.Blames.Count}");
 
-            SourceUnit src2 = MakeSourceFromCode("validateAge(getAge(parseData(person)))");
+            Unit src2 = MakeSourceFromCode("validateAge(getAge(parseData(person)))");
             Parse(src2);
             Assert.That(src2.Blames.Count == 0, $"unit2.Blames.Count == {src2.Blames.Count}");
 
-            Compiler.Process(src1, ProcessingMode.Transpilation, ProcessingOptions.ToAxion);
-            Compiler.Process(src2, ProcessingMode.Transpilation, ProcessingOptions.ToAxion);
+            Compiler.Process(src1, ProcessingMode.Transpilation, ProcessingOptions.Debug);
+            Compiler.Process(src2, ProcessingMode.Transpilation, ProcessingOptions.Debug);
 
             Assert.AreEqual(src1.CodeWriter.ToString(), src2.CodeWriter.ToString());
         }
 
         [Test]
         public void TestTypeNames() {
-            SourceUnit src = MakeSourceFromCode(
+            Unit src = MakeSourceFromCode(
                 string.Join(
                     Environment.NewLine,
                     "type0: A.Qualified.Name",
