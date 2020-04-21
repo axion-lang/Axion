@@ -1,3 +1,4 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -11,21 +12,35 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     ///     </c>
     /// </summary>
     public class TernaryExpr : InfixExpr {
-        private Expr condition;
+        private Expr condition = null!;
 
         public Expr Condition {
             get => condition;
             set => condition = Bind(value);
         }
 
-        private Expr trueExpr;
+        private Token? trueMark;
+
+        public Token? TrueMark {
+            get => trueMark;
+            set => trueMark = BindNullable(value);
+        }
+
+        private Expr trueExpr = null!;
 
         public Expr TrueExpr {
             get => trueExpr;
             set => trueExpr = Bind(value);
         }
 
-        private Expr falseExpr;
+        private Token? falseMark;
+
+        public Token? FalseMark {
+            get => falseMark;
+            set => falseMark = BindNullable(value);
+        }
+
+        private Expr falseExpr = null!;
 
         public Expr FalseExpr {
             get => falseExpr;
@@ -37,25 +52,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
         internal TernaryExpr(Node parent) : base(parent) { }
 
         public TernaryExpr Parse() {
-            SetSpan(
-                () => {
-                    var invert = false;
-                    if (!Stream.MaybeEat(KeywordIf)) {
-                        Stream.Eat(KeywordUnless);
-                        invert = true;
-                    }
-
-                    TrueExpr  ??= AnyExpr.Parse(this);
-                    Condition =   Parse(this);
-                    if (Stream.MaybeEat(KeywordElse)) {
-                        FalseExpr = Multiple<InfixExpr>.ParseGenerally(this);
-                    }
-
-                    if (invert) {
-                        (TrueExpr, FalseExpr) = (FalseExpr, TrueExpr);
-                    }
-                }
-            );
+            var invert = false;
+            if (!Stream.MaybeEat(KeywordIf)) {
+                Stream.Eat(KeywordUnless);
+                invert = true;
+            }
+            TrueMark  =   Stream.Token;
+            TrueExpr  ??= AnyExpr.Parse(this);
+            Condition =   Parse(this);
+            if (Stream.MaybeEat(KeywordElse)) {
+                FalseMark = Stream.Token;
+                FalseExpr = Multiple<InfixExpr>.ParseGenerally(this);
+            }
+            if (invert) {
+                (TrueExpr, FalseExpr) = (FalseExpr, TrueExpr);
+            }
             return this;
         }
     }
