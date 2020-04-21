@@ -244,7 +244,7 @@ namespace Axion.Core.Processing.CodeGen {
 
         public virtual void Convert(GenericTypeName e) {
             cw.Write(e.Target, "[");
-            cw.AddJoin(",", e.TypeArguments);
+            cw.AddJoin(",", e.TypeArgs);
             cw.Write("]");
         }
 

@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Axion.Core.Processing.CodeGen;
 using Axion.Core.Source;
 
@@ -25,32 +27,40 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///             raise-expr | yield-expr;
     ///     </c>
     /// </summary>
+    [DebuggerDisplay("{" + nameof(debuggerDisplay) + ",nq}")]
     public class Expr : Node {
         internal TokenStream Stream => Source.TokenStream;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string debuggerDisplay {
+            get {
+                var cw = new CodeWriter(new ProcessingOptions("axion", false));
+                cw.Write(this);
+                return cw.ToString();
+            }
+        }
+
         protected Expr() : base(null) { }
 
         internal Expr(Node parent) : base(parent.Source, parent.Start, parent.End) {
             Parent = parent;
         }
 
-        protected NodeList<T> InitIfNull<T>(ref NodeList<T> list)
-            where T : Node {
-            if (list == null) {
-                list = new NodeList<T>(this);
+        protected ScopeExpr InitIfNull(
+            ref                ScopeExpr n,
+            [CallerMemberName] string    propertyName = ""
+        ) {
+            if (n == null) {
+                n = new ScopeExpr(this);
             }
-            return list;
+            n = Bind(n, propertyName);
+            return n;
         }
 
         protected void SetSpan(Action constructor) {
             Start = Stream.Peek.Start;
             constructor();
             End = Stream.Token.End;
-        }
-
-        public override string ToString() {
-            var cw = new CodeWriter(new ProcessingOptions("axion", false));
-            cw.Write(this);
-            return cw.ToString();
         }
     }
 }

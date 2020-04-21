@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             set => mark = Bind(value);
         }
 
-        public EmptyExpr(Expr parent) : base(parent) { }
+        public EmptyExpr(Node parent) : base(parent) { }
 
         public EmptyExpr Parse() {
             Mark = Stream.Eat(Semicolon, KeywordPass);

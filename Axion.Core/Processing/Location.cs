@@ -36,6 +36,14 @@ namespace Axion.Core.Processing {
             }
         }
 
+        public static Location Min(Location a, Location b) {
+            return a <= b ? a : b;
+        }
+
+        public static Location Max(Location a, Location b) {
+            return a >= b ? a : b;
+        }
+
         public static bool operator ==(Location left, Location right) {
             return left.Equals(right);
         }

@@ -2,27 +2,23 @@ using System.Collections.Generic;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
-using Axion.Core.Processing.Traversal;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
-    ///         type
-    ///             : simple-type  | tuple-type
+    ///         type: simple-type  | tuple-type
     ///             | generic-type | array-type
-    ///             | union-type;
+    ///             | union-type   | func-type;
     ///     </c>
     /// </summary>
-    public class TypeName : Expr {
+    public abstract class TypeName : Expr {
         internal TypeName(Node parent) : base(parent) { }
+        
         protected TypeName() { }
 
-        [NoPathTraversing]
-        public override TypeName ValueType => this;
-
-        internal static TypeName Parse(Expr parent) {
-            TokenStream s = parent.Stream;
+        internal static TypeName Parse(Node parent) {
+            TokenStream s = parent.Source.TokenStream;
             // leading
             TypeName leftTypeName;
             // tuple
@@ -78,14 +74,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         ///     </c>
         ///     for class, enum, enum item.
         /// </summary>
-        internal static List<(TypeName type, NameExpr label)> ParseNamedTypeArgs(Expr parent) {
-            TokenStream s        = parent.Stream;
-            var         typeArgs = new List<(TypeName, NameExpr)>();
+        internal static List<(TypeName type, NameExpr? label)> ParseNamedTypeArgs(Node parent) {
+            TokenStream s        = parent.Source.TokenStream;
+            var         typeArgs = new List<(TypeName, NameExpr?)>();
             Token       start    = s.Peek;
 
             do {
-                NameExpr name     = null;
-                int      startIdx = s.TokenIdx;
+                NameExpr? name     = null;
+                int       startIdx = s.TokenIdx;
                 if (s.PeekIs(Identifier)) {
                     NameExpr typeLabel = new NameExpr(parent).Parse();
                     if (s.MaybeEat(OpAssign)) {

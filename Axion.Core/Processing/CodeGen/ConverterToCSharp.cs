@@ -13,10 +13,10 @@ using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.CodeGen {
-    public class AxionToCSharpConverter : ConverterFromAxion {
+    public class ConverterToCSharp : ConverterFromAxion {
         public override string OutputFileExtension => ".cs";
 
-        public AxionToCSharpConverter(CodeWriter cw) : base(cw) { }
+        public ConverterToCSharp(CodeWriter cw) : base(cw) { }
 
         public override void Convert(NameExpr e) {
             if (e.IsSimple && e.Qualifiers[0].Content == "self") {
@@ -249,7 +249,7 @@ namespace Axion.Core.Processing.CodeGen {
 
         public override void Convert(GenericTypeName e) {
             cw.Write(e.Target, "<");
-            cw.AddJoin(",", e.TypeArguments);
+            cw.AddJoin(",", e.TypeArgs);
             cw.Write(">");
         }
 

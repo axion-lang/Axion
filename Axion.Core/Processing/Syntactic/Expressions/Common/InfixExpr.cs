@@ -29,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
 
         protected InfixExpr(Node parent) : base(parent) { }
 
-        internal static InfixExpr Parse(Expr parent) {
+        internal static InfixExpr Parse(Node parent) {
             TokenStream s = parent.Source.TokenStream;
 
             InfixExpr ParseInfix(int precedence) {

@@ -24,7 +24,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
 
         public OrPattern(Node parent) : base(parent) { }
 
-        public override bool Match(Expr parent) {
+        public override bool Match(Node parent) {
             return Left.Match(parent) || Right.Match(parent);
         }
 

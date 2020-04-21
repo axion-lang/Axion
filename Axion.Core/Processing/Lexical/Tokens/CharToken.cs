@@ -1,4 +1,4 @@
-﻿using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Source;
 using Axion.Core.Specification;
 

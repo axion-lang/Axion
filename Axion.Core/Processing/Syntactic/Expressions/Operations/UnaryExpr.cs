@@ -17,7 +17,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             set => val = Bind(value);
         }
 
-        public OperatorToken Operator { get; set; } = null!;
+        private OperatorToken @operator = null!;
+
+        public OperatorToken Operator {
+            get => @operator;
+            set => @operator = Bind(value);
+        }
 
         public UnaryExpr(Node parent) : base(parent) { }
     }

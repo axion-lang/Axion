@@ -12,17 +12,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
 
         public TokenPattern(Node parent) : base(parent) { }
 
-        public override bool Match(Expr parent) {
-            if (parent.Stream.Peek.Content != Value.Content) {
+        public override bool Match(Node parent) {
+            var s = parent.Source.TokenStream;
+            if (s.Peek.Content != Value.Content) {
                 return false;
             }
-            parent.Stream.Eat();
-            parent.Ast.MacroApplicationParts.Peek().Expressions.Add(parent.Stream.Token);
+            parent.Ast.MacroApplicationParts.Peek().Expressions.Add(s.Eat());
             return true;
         }
 
         public TokenPattern Parse() {
-            Value = Stream.Eat()!;
+            Value = Stream.Eat();
             Source.RegisterCustomKeyword(Value.Content);
             return this;
         }

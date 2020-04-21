@@ -40,9 +40,8 @@ namespace Axion.Core.Processing.Syntactic {
         public T this[int i] {
             get => items[i];
             set {
-                value.Parent = Parent;
-                value.Path   = new NodeListTreePath<T>(this, i);
-                items[i]     = value;
+                Parent.Bind(value, this, i);
+                items[i] = value;
             }
         }
 
@@ -108,18 +107,17 @@ namespace Axion.Core.Processing.Syntactic {
             items  = new List<T>();
         }
 
-        private NodeList(Node? parent, IEnumerable<T> collection) {
+        internal NodeList(Node? parent, IEnumerable<T>? collection) {
             Parent = parent;
-            items  = collection.ToList();
+            items  = collection?.ToList() ?? new List<T>();
         }
 
         public void Insert(int index, T item) {
-            item.Parent = Parent;
-            item.Path   = new NodeListTreePath<T>(this, index);
             if (index == Count) {
-                items.Add(item);
+                Add(item);
             }
             else {
+                Parent.Bind(item, this, index);
                 items.Insert(index, item);
                 for (int i = index; i < Count; i++) {
                     ((NodeListTreePath<T>) items[i].Path).IndexInList = i;
@@ -128,8 +126,7 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         public void Add(T item) {
-            item.Path   = new NodeListTreePath<T>(this, Count);
-            item.Parent = Parent;
+            item = Parent.Bind(item, this, Count);
             items.Add(item);
         }
 

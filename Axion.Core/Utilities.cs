@@ -21,9 +21,9 @@ namespace Axion.Core {
             return dt.ToString(timedFileNameFormat, dateTimeFormat);
         }
 
-        internal static List<T> OfType<T>(this IEnumerable<T> tokens, TokenType type)
+        internal static T[] OfType<T>(this IEnumerable<T> tokens, TokenType type)
             where T : Token {
-            return tokens.Where(t => t.Type == type).ToList();
+            return tokens.Where(t => t.Type == type).ToArray();
         }
 
         public static void ResolvePath(string path) {

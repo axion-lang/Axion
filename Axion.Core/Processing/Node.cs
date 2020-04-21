@@ -99,6 +99,15 @@ namespace Axion.Core.Processing {
             }
         }
 
+        protected NodeList<T> InitIfNull<T>(ref NodeList<T> list)
+            where T : Node {
+            if (list == null) {
+                list = new NodeList<T>(this);
+            }
+            list = Bind(list);
+            return list;
+        }
+
         #region Node binding methods
 
         /// <summary>
@@ -108,36 +117,49 @@ namespace Axion.Core.Processing {
         /// <exception cref="ArgumentNullException">
         ///     Thrown if provided property value is null.
         /// </exception>
-        protected T Bind<T>(T value, [CallerMemberName] string callerName = "")
+        protected T Bind<T>(T value, [CallerMemberName] string propertyName = "")
             where T : Node {
             if (value == null) {
                 throw new ArgumentNullException(nameof(value));
             }
-            return BindNode(value, callerName);
+            return BindNode(value, propertyName);
         }
 
         /// <summary>
         ///     [ONLY-INSIDE-PROPERTY]
         ///     Binds given property value to this node and extends it's span if needed.
         /// </summary>
-        protected T? BindNullable<T>(T? value, [CallerMemberName] string callerName = "")
+        protected T? BindNullable<T>(T? value, [CallerMemberName] string propertyName = "")
             where T : Node {
             if (value == null) {
                 return value;
             }
-            return BindNode(value, callerName);
+            return BindNode(value, propertyName);
         }
 
         /// <summary>
         ///     Internal node binding method.
         ///     Creates a path to parent attribute.
         /// </summary>
-        private T BindNode<T>(T value, string callerName)
+        private T BindNode<T>(T value, string propertyName)
             where T : Node {
             ExtendSpan(value);
 
             value.Parent = this;
-            value.Path   = new NodeTreePath(value, GetType().GetProperty(callerName));
+            value.Path   = new NodeTreePath(value, GetType().GetProperty(propertyName));
+
+            return value;
+        }
+
+        /// <summary>
+        ///     Binds given node to this node and extends parent span if needed.
+        /// </summary>
+        public T Bind<T>(T value, NodeList<T> list, int index)
+            where T : Node {
+            ExtendSpan(value);
+
+            value.Parent = this;
+            value.Path   = new NodeListTreePath<T>(list, index);
 
             return value;
         }
@@ -172,15 +194,29 @@ namespace Axion.Core.Processing {
 
         #region Location marking methods
 
+        private bool firstTimeSpanMarking = true;
+
         /// <summary>
         ///     Extends this span of code if provided mark is out of existing span.
         /// </summary>
         private void ExtendSpan(Node n) {
+            // if span is marked first time, set span equal to starting one
+            // to prevent new node spanning from (1,1) to end.
+            if (firstTimeSpanMarking) {
+                Start                = n.Start;
+                End                  = n.End;
+                firstTimeSpanMarking = false;
+                return;
+            }
             if (n.Start < Start) {
                 Start = n.Start;
             }
             if (n.End > End) {
                 End = n.End;
+            }
+            // fix negative span
+            if (End < Start) {
+                End = Start;
             }
         }
 
@@ -188,6 +224,14 @@ namespace Axion.Core.Processing {
         ///     Extends this span of code if any of provided marks is out of existing span.
         /// </summary>
         private void ExtendSpan(Node a, Node b) {
+            // if span is marked first time, select least span of a & b.
+            // to prevent new node spanning from (1,1) to end.
+            if (firstTimeSpanMarking) {
+                Start                = Location.Max(a.Start, b.Start);
+                End                  = Location.Min(a.End, b.End);
+                firstTimeSpanMarking = false;
+                return;
+            }
             if (a.Start < Start) {
                 Start = a.Start;
             }
@@ -199,6 +243,10 @@ namespace Axion.Core.Processing {
             }
             else if (a.End > End) {
                 End = a.End;
+            }
+            // fix negative span
+            if (End < Start) {
+                End = Start;
             }
         }
 

@@ -32,10 +32,10 @@ namespace Axion.Core.Processing.Traversal {
             }
 
             root = root.Path.Node;
-            PropertyInfo[] exprProps = root.GetType().GetProperties();
-            IEnumerable<PropertyInfo> childProps = exprProps.Where(
-                p => typeof(Expr).IsAssignableFrom(p.PropertyType)
-                  && !Attribute.IsDefined(p, typeof(NoPathTraversingAttribute), false)
+            PropertyInfo[] nodeProps = root.GetType().GetProperties();
+            IEnumerable<PropertyInfo> childProps = nodeProps.Where(
+                p => typeof(Node).IsAssignableFrom(p.PropertyType)
+                  && !Attribute.IsDefined(p, typeof(NoPathTraversingAttribute), true)
                   || p.PropertyType.IsGenericType
                   && p.PropertyType.GetInterfaces()
                       .Where(i => i.IsGenericType)
@@ -47,17 +47,17 @@ namespace Axion.Core.Processing.Traversal {
                 object obj = prop.GetValue(root);
                 switch (obj) {
                 case null: continue;
-                case Expr expr:
-                    Traverse(expr);
+                case Node n:
+                    Traverse(n);
                     break;
                 default:
                     try {
-                        List<Node> list = ((IEnumerable) obj).OfType<Node>().ToList();
+                        Node[] list = ((IEnumerable) obj).OfType<Node>().ToArray();
                         // for loop required, expressions collection
                         // can be modified.
                         // ReSharper disable once ForCanBeConvertedToForeach
-                        for (var i = 0; i < list.Count; i++) {
-                            Traverse((Expr) list[i]);
+                        for (var i = 0; i < list.Length; i++) {
+                            Traverse(list[i]);
                         }
                     }
                     catch (InvalidCastException) {
@@ -85,7 +85,7 @@ namespace Axion.Core.Processing.Traversal {
                 // `LeftType | RightType` -> `Union[LeftType, RightType]`
                 path.Node = new GenericTypeName(path.Node.Parent) {
                     Target = new SimpleTypeName("Union"),
-                    TypeArguments = new NodeList<TypeName>(path.Node) {
+                    TypeArgs = new NodeList<TypeName>(path.Node) {
                         unionTypeName.Left, unionTypeName.Right
                     }
                 };

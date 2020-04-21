@@ -52,9 +52,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         ///     </c>
         /// </summary>
         public static NodeList<FunctionParameter> ParseList(
-            Expr               parent,
+            Node               parent,
             params TokenType[] terminators
         ) {
+            var s = parent.Source.TokenStream;
+
             var parameters               = new NodeList<FunctionParameter>(parent);
             var names                    = new HashSet<string>(StringComparer.Ordinal);
             var haveMultiply             = false;
@@ -63,23 +65,20 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             FunctionParameter listParameter = null;
             FunctionParameter mapParameter  = null;
             var               needDefault   = false;
-            while (!parent.Stream.PeekIs(terminators)) {
-                if (parent.Stream.MaybeEat(OpPower)) {
+            while (!s.PeekIs(terminators)) {
+                if (s.MaybeEat(OpPower)) {
                     mapParameter = new FunctionParameter(parent).Parse(names);
-                    parent.Stream.Eat(terminators);
+                    s.Eat(terminators);
                     break;
                 }
 
-                if (parent.Stream.MaybeEat(OpMultiply)) {
+                if (s.MaybeEat(OpMultiply)) {
                     if (haveMultiply) {
-                        LangException.Report(
-                            BlameType.CannotHaveMoreThan1ListParameter,
-                            parent.Stream.Peek
-                        );
+                        LangException.Report(BlameType.CannotHaveMoreThan1ListParameter, s.Peek);
                         return new NodeList<FunctionParameter>(parent);
                     }
 
-                    if (!parent.Stream.PeekIs(Comma)) {
+                    if (!s.PeekIs(Comma)) {
                         listParameter = new FunctionParameter(parent).Parse(names);
                     }
                     // else got ", *,"
@@ -109,7 +108,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     parameters.Add(param);
                 }
 
-                if (parent.Stream.PeekIs(terminators) || !parent.Stream.MaybeEat(Comma)) {
+                if (s.PeekIs(terminators) || !s.MaybeEat(Comma)) {
                     break;
                 }
             }
@@ -118,7 +117,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
              && listParameter == null
              && mapParameter  != null
              && !haveKeywordOnlyParameter) {
-                LangException.Report(BlameType.NamedArgsMustFollowBareStar, parent.Stream.Token);
+                LangException.Report(BlameType.NamedArgsMustFollowBareStar, s.Token);
             }
 
             if (listParameter != null) {

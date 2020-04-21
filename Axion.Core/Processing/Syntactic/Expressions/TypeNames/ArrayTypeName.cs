@@ -1,3 +1,4 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
@@ -15,19 +16,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => elementType = Bind(value);
         }
 
+        private Token? openingBracket;
+
+        public Token? OpeningBracket {
+            get => openingBracket;
+            set => openingBracket = BindNullable(value);
+        }
+
+        private Token? closingBracket;
+
+        public Token? ClosingBracket {
+            get => closingBracket;
+            set => closingBracket = BindNullable(value);
+        }
+
         public ArrayTypeName(Node parent) : base(parent) { }
 
         public ArrayTypeName Parse() {
-            SetSpan(
-                () => {
-                    if (ElementType == null) {
-                        ElementType = Parse(this);
-                    }
+            ElementType ??= Parse(this);
 
-                    Stream.Eat(OpenBracket);
-                    Stream.Eat(CloseBracket);
-                }
-            );
+            OpeningBracket = Stream.Eat(OpenBracket);
+            ClosingBracket = Stream.Eat(CloseBracket);
             return this;
         }
     }

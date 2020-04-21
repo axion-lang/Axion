@@ -1,7 +1,6 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Processing.Traversal;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
@@ -18,7 +17,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => val = Bind(value);
         }
 
-        [NoPathTraversing]
         public override TypeName ValueType => Value.ValueType;
 
         public CodeUnquotedExpr(Node parent) : base(parent) { }

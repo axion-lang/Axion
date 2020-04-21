@@ -11,14 +11,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     by language macros.
     /// </summary>
     public class MacroApplicationExpr : AtomExpr, IDecorableExpr {
-        private MacroDef? macro;
-
-        public MacroDef? Macro {
-            get => macro;
-            private set => macro = BindNullable(value);
-        }
+        public MacroDef? Macro { get; set; }
 
         public List<Node> Expressions { get; } = new List<Node>();
+
         public MacroApplicationExpr(Node parent) : base(parent) { }
 
         public MacroApplicationExpr Parse() {
@@ -36,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return this;
         }
 
-        public new MacroApplicationExpr Parse(Expr leftExpr) {
+        public MacroApplicationExpr Parse(Expr leftExpr) {
             SetSpan(
                 () => {
                     Ast.MacroApplicationParts.Push(this);

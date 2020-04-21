@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Source;
 using Axion.Core.Specification;
@@ -10,19 +11,25 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public string Quote        { get; }
         public string EndingQuotes { get; }
 
-        public List<StringInterpolation> Interpolations { get; }
+        private NodeList<StringInterpolation> interpolations = null!;
 
-        public          bool     IsMultiline => Quote.Length == 3;
-        public override TypeName ValueType   => Spec.StringType;
+        public NodeList<StringInterpolation> Interpolations {
+            get => InitIfNull(ref interpolations);
+            set => interpolations = Bind(value);
+        }
+
+        public bool IsMultiline => Quote.Length == 3;
+
+        public override TypeName ValueType => Spec.StringType;
 
         internal StringToken(
-            Unit                       source,
-            string                     value          = "",
-            string                     content        = "",
-            bool                       isUnclosed     = false,
-            string                     prefixes       = "",
-            string                     quote          = "\"",
-            List<StringInterpolation>? interpolations = null
+            Unit                              source,
+            string                            value          = "",
+            string                            content        = "",
+            bool                              isUnclosed     = false,
+            string                            prefixes       = "",
+            string                            quote          = "\"",
+            IEnumerable<StringInterpolation>? interpolations = null
         ) : base(
             source,
             TokenType.String,
@@ -32,7 +39,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             IsUnclosed     = isUnclosed;
             Prefixes       = prefixes;
             Quote          = quote;
-            Interpolations = interpolations ?? new List<StringInterpolation>();
+            Interpolations = new NodeList<StringInterpolation>(this, interpolations);
             EndingQuotes   = "";
         }
 

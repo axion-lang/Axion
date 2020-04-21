@@ -28,10 +28,10 @@ namespace Axion.Core.Processing.CodeGen {
             baseWriter = new StringWriter();
             writer     = new IndentedTextWriter(baseWriter);
             converter = options.TargetType switch {
-                "axion"  => new AxionToAxionConverter(this),
-                "csharp" => new AxionToCSharpConverter(this),
-                "python" => new AxionToPythonConverter(this),
-                "pascal" => new AxionToPascalConverter(this),
+                "axion"  => new ConverterToAxion(this),
+                "csharp" => new ConverterToCSharp(this),
+                "python" => new ConverterToPython(this),
+                "pascal" => new ConverterToPascal(this),
                 _ => throw new NotSupportedException(
                     $"Code building for '{options:G}' mode is not supported."
                 )

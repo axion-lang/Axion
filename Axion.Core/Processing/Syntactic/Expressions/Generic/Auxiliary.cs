@@ -4,12 +4,12 @@ using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
     public static class Auxiliary {
-        public static Func<Expr, Expr> GetParsingFunction<T>()
+        public static Func<Node, Expr> GetParsingFunction<T>()
             where T : Expr {
-            Func<Expr, Expr> parserFunc = AnyExpr.Parse;
+            Func<Node, Expr> parserFunc = AnyExpr.Parse;
             if (Spec.ParsingFunctions.TryGetValue(
                 typeof(T).Name,
-                out Func<Expr, Expr> specialParsingFunc
+                out Func<Node, Expr> specialParsingFunc
             )) {
                 parserFunc = specialParsingFunc;
             }

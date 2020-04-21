@@ -1,12 +1,11 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
     ///     <c>
     ///         generic-type:
-    ///             type type-args;
-    ///         type-args:
-    ///             '[' type {',' type} ']';
+    ///             type '[' type {',' type} ']';
     ///     </c>
     /// </summary>
     public class GenericTypeName : TypeName {
@@ -17,31 +16,37 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => target = Bind(value);
         }
 
-        private NodeList<TypeName> typeArguments = null!;
+        private Token? typeArgsStartMark;
 
-        public NodeList<TypeName> TypeArguments {
-            get => typeArguments;
-            set => typeArguments = Bind(value);
+        public Token? TypeArgsStartMark {
+            get => typeArgsStartMark;
+            set => typeArgsStartMark = BindNullable(value);
+        }
+
+        private NodeList<TypeName> typeArgs = null!;
+
+        public NodeList<TypeName> TypeArgs {
+            get => InitIfNull(ref typeArgs);
+            set => typeArgs = Bind(value);
+        }
+
+        private Token? typeArgsEndMark;
+
+        public Token? TypeArgsEndMark {
+            get => typeArgsEndMark;
+            set => typeArgsEndMark = BindNullable(value);
         }
 
         public GenericTypeName(Node parent) : base(parent) { }
 
         public GenericTypeName Parse() {
-            TypeArguments ??= new NodeList<TypeName>(this);
-            SetSpan(
-                () => {
-                    if (Target == null) {
-                        Target = Parse(this);
-                    }
+            Target ??= Parse(this);
 
-                    Stream.Eat(OpenBracket);
-                    do {
-                        TypeArguments.Add(Parse(this));
-                    } while (Stream.MaybeEat(Comma));
-
-                    Stream.Eat(CloseBracket);
-                }
-            );
+            TypeArgsStartMark = Stream.Eat(OpenBracket);
+            do {
+                TypeArgs.Add(Parse(this));
+            } while (Stream.MaybeEat(Comma));
+            TypeArgsEndMark = Stream.Eat(CloseBracket);
             return this;
         }
     }

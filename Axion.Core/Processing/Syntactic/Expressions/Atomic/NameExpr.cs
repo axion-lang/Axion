@@ -1,8 +1,7 @@
-using System.Collections.Generic;
+using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Processing.Traversal;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
@@ -20,10 +19,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             set => tokens = Bind(value);
         }
 
-        public List<Token> Qualifiers => Tokens.OfType(Identifier);
-        public bool        IsSimple   => Qualifiers.Count == 1;
+        public Token[] Qualifiers => Tokens.OfType(Identifier);
+        public bool    IsSimple   => Qualifiers.Length == 1;
 
-        [NoPathTraversing]
         public override TypeName ValueType =>
             ((Expr) GetParent<ScopeExpr>().GetDefByName(this))?.ValueType;
 
@@ -46,18 +44,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public NameExpr(Node parent) : base(parent) { }
 
         public NameExpr Parse(bool simple = false) {
-            Stream.Eat(Identifier);
-            Tokens.Add(Stream.Token);
+            Tokens.Add(Stream.Eat(Identifier));
             if (simple) {
                 return this;
             }
-            while (Stream.MaybeEat(OpDot)) {
-                Tokens.Add(Stream.Token);
-                if (Stream.Eat(Identifier) != null) {
-                    Tokens.Add(Stream.Token);
-                }
+            while (Stream.PeekIs(OpDot)) {
+                Tokens.Add(Stream.Eat());
+                Tokens.Add(Stream.Eat(Identifier));
             }
             return this;
+        }
+
+        public override string ToString() {
+            return string.Join(".", Qualifiers.Select(q => q.Content));
         }
     }
 }

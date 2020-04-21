@@ -7,10 +7,10 @@ using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.CodeGen {
-    public class AxionToAxionConverter : ConverterFromAxion {
+    public class ConverterToAxion : ConverterFromAxion {
         public override string OutputFileExtension => ".ax";
 
-        public AxionToAxionConverter(CodeWriter cw) : base(cw) { }
+        public ConverterToAxion(CodeWriter cw) : base(cw) { }
 
         public override void Convert(CharToken e) {
             cw.Write(e.Value);

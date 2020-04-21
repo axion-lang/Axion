@@ -3,7 +3,6 @@ using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Processing.Traversal;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -36,7 +35,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => scope = Bind(value);
         }
 
-        [NoPathTraversing]
         public override TypeName ValueType {
             get {
                 try {

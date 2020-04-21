@@ -51,28 +51,17 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         /// <summary>
-        ///     Skips and returns next token.
+        ///     Skips and returns the next token.
+        ///     Reports error, if the next token type
+        ///     is not the same as passed in parameter.
         /// </summary>
-        public Token Eat() {
-            SkipTrivial();
-            EatAny();
-            return Token;
-        }
-
-        /// <summary>
-        ///     Skips next token, failing,
-        ///     if the next token type is not
-        ///     the same as passed in parameter.
-        /// </summary>
-        public Token? Eat(params TokenType[] types) {
+        public Token Eat(params TokenType[] types) {
             SkipTrivial(types);
             EatAny();
-            if (Token.Is(types)) {
-                return Token;
+            if (!Token.Is(types)) {
+                LangException.Report(BlameType.InvalidSyntax, Token);
             }
-
-            LangException.Report(BlameType.InvalidSyntax, Token);
-            return null;
+            return Token;
         }
 
         /// <summary>

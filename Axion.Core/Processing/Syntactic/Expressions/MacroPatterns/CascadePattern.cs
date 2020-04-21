@@ -13,13 +13,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
         private NodeList<Pattern> patterns;
 
         internal NodeList<Pattern> Patterns {
-            get => patterns;
+            get => InitIfNull(ref patterns);
             set => patterns = Bind(value);
         }
 
         public CascadePattern(Node parent) : base(parent) { }
 
-        public override bool Match(Expr parent) {
+        public override bool Match(Node parent) {
             int startIdx = Stream.TokenIdx;
             if (Patterns.All(pattern => pattern.Match(parent))) {
                 return true;
@@ -29,7 +29,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
         }
 
         public CascadePattern Parse() {
-            Patterns ??= new NodeList<Pattern>(this);
             do {
                 Pattern pattern;
                 // syntax group `(x, y)`

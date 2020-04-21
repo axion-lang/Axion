@@ -1,10 +1,10 @@
 using Axion.Core.Processing.Syntactic.Expressions;
 
 namespace Axion.Core.Processing.CodeGen {
-    public class AxionToPascalConverter : ConverterFromAxion {
+    public class ConverterToPascal : ConverterFromAxion {
         public override string OutputFileExtension => ".pas";
 
-        public AxionToPascalConverter(CodeWriter cw) : base(cw) { }
+        public ConverterToPascal(CodeWriter cw) : base(cw) { }
 
         public override void Convert(Ast e) {
             cw.WriteLine("program PascalFromAxion;");

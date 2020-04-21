@@ -2,7 +2,6 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Processing.Traversal;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -28,7 +27,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             set => val = BindNullable(value);
         }
 
-        [NoPathTraversing]
         public override TypeName ValueType => Value.ValueType;
 
         public ReturnExpr(Node parent) : base(parent) { }

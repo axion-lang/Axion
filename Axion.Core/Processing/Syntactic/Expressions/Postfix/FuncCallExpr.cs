@@ -19,14 +19,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         private NodeList<FuncCallArg> args = null!;
 
         public NodeList<FuncCallArg> Args {
-            get => args;
+            get => InitIfNull(ref args);
             set => args = Bind(value);
         }
 
         public FuncCallExpr(Node parent) : base(parent) { }
 
         public FuncCallExpr Parse(bool allowGenerator = false) {
-            Args ??= new NodeList<FuncCallArg>(this);
             SetSpan(
                 () => {
                     Stream.Eat(OpenParenthesis);

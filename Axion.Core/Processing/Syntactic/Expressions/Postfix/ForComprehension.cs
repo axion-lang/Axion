@@ -39,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         private NodeList<Expr> conditions = null!;
 
         public NodeList<Expr> Conditions {
-            get => conditions;
+            get => InitIfNull(ref conditions);
             set => conditions = Bind(value);
         }
 
@@ -53,13 +53,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public bool IsGenerator;
         public bool IsNested;
 
-        [NoPathTraversing]
         public override TypeName ValueType => Target.ValueType;
 
         public ForComprehension(Node parent) : base(parent) { }
 
         public ForComprehension Parse() {
-            Conditions ??= new NodeList<Expr>(this);
             SetSpan(
                 () => {
                     if (Target == null && !IsNested) {

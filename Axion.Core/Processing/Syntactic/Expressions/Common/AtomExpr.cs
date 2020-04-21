@@ -33,7 +33,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
 
         protected AtomExpr(Node parent) : base(parent) { }
 
-        internal new static AtomExpr Parse(Expr parent) {
+        internal new static AtomExpr Parse(Node parent) {
             TokenStream s = parent.Source.TokenStream;
 
             if (s.PeekIs(Identifier) && !parent.Source.IsCustomKeyword(s.Peek)) {

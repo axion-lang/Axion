@@ -21,7 +21,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
         ///     Parses multiple of <see cref="AnyExpr"/> and
         ///     reports errors if any of them is not compliant to T.
         /// </summary>
-        internal static AtomExpr ParseGenerally(Expr parent) {
+        internal static AtomExpr ParseGenerally(Node parent) {
             AtomExpr e = Multiple<Expr>.Parse(parent);
             if (e is TupleExpr tpl) {
                 foreach (Expr expr in tpl.Expressions) {
@@ -43,9 +43,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
         ///     expressions with optional parenthesis
         ///     (e.g. tuples)
         /// </summary>
-        internal new static AtomExpr Parse(Expr parent) {
+        internal new static AtomExpr Parse(Node parent) {
             TokenStream      s          = parent.Source.TokenStream;
-            Func<Expr, Expr> parserFunc = Auxiliary.GetParsingFunction<T>();
+            Func<Node, Expr> parserFunc = Auxiliary.GetParsingFunction<T>();
             bool             parens     = s.MaybeEat(OpenParenthesis);
             var list = new NodeList<Expr>(parent) {
                 parserFunc(parent)

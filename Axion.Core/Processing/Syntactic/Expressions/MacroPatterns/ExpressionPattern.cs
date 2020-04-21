@@ -15,14 +15,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
     ///     </c>
     /// </summary>
     public class ExpressionPattern : Pattern {
-        private Func<Expr, Expr> parseFunc = null!;
+        private Func<Node, Expr> parseFunc = null!;
         private Type             type      = null!;
 
         public ExpressionPattern(Node parent) : base(parent) { }
 
-        public override bool Match(Expr parent) {
+        public override bool Match(Node parent) {
             // leave expression non-starters to next token pattern.
-            if (parent.Stream.PeekIs(Spec.NeverExprStartTypes)) {
+            if (parent.Source.TokenStream.PeekIs(Spec.NeverExprStartTypes)) {
                 return true;
             }
 
@@ -45,7 +45,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
         }
 
         public ExpressionPattern Parse() {
-            Token id          = Stream.Eat(Identifier)!;
+            Token id          = Stream.Eat(Identifier);
             var   namedParts  = GetParent<MacroDef>().NamedSyntaxParts;
             bool  typeDefined = namedParts.ContainsKey(id.Content);
             if (typeDefined) {
@@ -54,9 +54,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
             if (Stream.MaybeEat(Colon)) {
                 TypeName tn = TypeName.Parse(this);
                 if (!typeDefined
-                 && tn is SimpleTypeName exprTypeName
-                 && exprTypeName.Name.Qualifiers.Count == 1) {
-                    string typeName = exprTypeName.Name.Qualifiers[0].Content;
+                 && tn is SimpleTypeName simpleTypeName
+                 && simpleTypeName.Name.IsSimple) {
+                    string typeName = simpleTypeName.Name.Qualifiers[0].Content;
                     PatternFromTypeName(typeName);
                     namedParts.Add(id.Content, typeName);
                 }
@@ -80,7 +80,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
             if (Spec.ParsingTypes.TryGetValue(typeName, out Type t)) {
                 type = t;
             }
-            else if (Spec.ParsingFunctions.TryGetValue(typeName, out Func<Expr, Expr> fn)) {
+            else if (Spec.ParsingFunctions.TryGetValue(typeName, out Func<Node, Expr> fn)) {
                 parseFunc = fn;
             }
         }

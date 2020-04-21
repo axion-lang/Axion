@@ -41,7 +41,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///     </c>
     /// </summary>
     public static class AnyExpr {
-        internal static Expr Parse(Expr parent) {
+        internal static Expr Parse(Node parent) {
             TokenStream s = parent.Source.TokenStream;
 
             if (s.PeekIs(KeywordClass)) {
@@ -81,10 +81,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 return new ScopeExpr(parent).Parse();
             }
 
-            Token? immutableKw = s.MaybeEat(KeywordLet) ? s.Token : null;
-            Expr   expr        = InfixExpr.Parse(parent);
+            Token?    immutableKw = s.MaybeEat(KeywordLet) ? s.Token : null;
+            InfixExpr infix       = InfixExpr.Parse(parent);
 
-            if (expr is BinaryExpr bin && bin.Operator.Is(OpAssign)) {
+            if (infix is BinaryExpr bin && bin.Operator.Is(OpAssign)) {
                 // ['let'] name '=' expr
                 // --------------------^
                 if (bin.Left is NameExpr name && !bin.GetParent<ScopeExpr>().IsDefined(name)) {
@@ -100,14 +100,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             // ['let'] name [':' type-name ['=' infix-expr]]
             // -----------^
             if (immutableKw == null && !s.MaybeEat(Colon)) {
-                return expr;
+                return infix;
             }
 
             // ['let'] name ':' type-name ['=' infix-expr]
             // -----------------^
-            if (!(expr is NameExpr varName)) {
-                LangException.Report(BlameType.ExpectedVarName, expr);
-                return expr;
+            if (!(infix is NameExpr varName)) {
+                LangException.Report(BlameType.ExpectedVarName, infix);
+                return infix;
             }
 
             TypeName type  = TypeName.Parse(parent);

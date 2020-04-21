@@ -5,7 +5,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     /// <summary>
     ///     <c>
     ///         binary-expr:
-    ///             expr OPERATOR expr;
+    ///             infix OPERATOR infix;
     ///     </c>
     /// </summary>
     public class BinaryExpr : InfixExpr {
@@ -23,7 +23,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             set => right = Bind(value);
         }
 
-        public Token Operator { get; set; }
+        private Token @operator = null!;
+
+        public Token Operator {
+            get => @operator;
+            set => @operator = Bind(value);
+        }
 
         public BinaryExpr(Node parent) : base(parent) { }
     }

@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
 
         protected PostfixExpr(Node parent) : base(parent) { }
 
-        internal new static PostfixExpr Parse(Expr parent) {
+        internal new static PostfixExpr Parse(Node parent) {
             TokenStream s = parent.Source.TokenStream;
 
             // TODO: look about it.

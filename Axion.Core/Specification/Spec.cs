@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Axion.Core.Processing;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
@@ -264,8 +265,8 @@ namespace Axion.Core.Specification {
         internal static readonly TypeName CharType   = new SimpleTypeName("Char");
         internal static readonly TypeName StringType = new SimpleTypeName("String");
 
-        internal static readonly Dictionary<string, Func<Expr, Expr>> ParsingFunctions =
-            new Dictionary<string, Func<Expr, Expr>> {
+        internal static readonly Dictionary<string, Func<Node, Expr>> ParsingFunctions =
+            new Dictionary<string, Func<Node, Expr>> {
                 { "Expr",          AnyExpr.Parse },
                 { "AnyExpr",       AnyExpr.Parse },
                 { "InfixExpr",     InfixExpr.Parse },

@@ -12,11 +12,11 @@ namespace Axion.Testing.NUnit.Parser {
         public void TestPipelineOperator() {
             Unit src1 = MakeSourceFromCode("person |> parseData |> getAge |> validateAge");
             Parse(src1);
-            Assert.That(src1.Blames.Count == 0, $"unit1.Blames.Count == {src1.Blames.Count}");
+            Assert.AreEqual(0, src1.Blames.Count);
 
             Unit src2 = MakeSourceFromCode("validateAge(getAge(parseData(person)))");
             Parse(src2);
-            Assert.That(src2.Blames.Count == 0, $"unit2.Blames.Count == {src2.Blames.Count}");
+            Assert.AreEqual(0, src2.Blames.Count);
 
             Compiler.Process(src1, ProcessingMode.Transpilation, ProcessingOptions.Debug);
             Compiler.Process(src2, ProcessingMode.Transpilation, ProcessingOptions.Debug);
@@ -42,9 +42,9 @@ namespace Axion.Testing.NUnit.Parser {
                 )
             );
             Parse(src);
-            Assert.That(src.Blames.Count == 0, $"Blames.Count == {src.Blames.Count}");
+            Assert.AreEqual(0, src.Blames.Count);
             TypeName[] stmts = src.Ast.Items.Select(s => ((VarDef) s).ValueType).ToArray();
-            Assert.That(stmts.Length == 10);
+            Assert.AreEqual(10, stmts.Length);
         }
     }
 }

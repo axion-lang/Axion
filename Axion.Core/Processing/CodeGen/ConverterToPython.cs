@@ -6,10 +6,10 @@ using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
 namespace Axion.Core.Processing.CodeGen {
-    public class AxionToPythonConverter : ConverterFromAxion {
+    public class ConverterToPython : ConverterFromAxion {
         public override string OutputFileExtension => ".py";
 
-        public AxionToPythonConverter(CodeWriter cw) : base(cw) { }
+        public ConverterToPython(CodeWriter cw) : base(cw) { }
 
         public override void Convert(CommentToken e) {
             cw.Write("#", e.Content);

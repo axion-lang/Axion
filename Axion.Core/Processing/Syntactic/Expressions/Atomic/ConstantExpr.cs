@@ -1,7 +1,6 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Processing.Traversal;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     /// <summary>
@@ -11,14 +10,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class ConstantExpr : AtomExpr {
-        private Token? literal;
+        private Token literal = null!;
 
-        public Token? Literal {
+        public Token Literal {
             get => literal;
-            set => literal = BindNullable(value);
+            set => literal = Bind(value);
         }
 
-        [NoPathTraversing]
         public override TypeName ValueType => Literal.ValueType!;
 
         public ConstantExpr(Node parent) : base(parent) { }
@@ -41,12 +39,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             };
         }
 
-        public static ConstantExpr ParseNew(Expr parent) {
+        public static ConstantExpr ParseNew(Node parent) {
             return new ConstantExpr(parent).Parse();
         }
 
         public ConstantExpr Parse() {
-            Literal = Stream.EatAny();
+            Literal ??= Stream.EatAny();
             return this;
         }
     }

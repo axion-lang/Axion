@@ -1,6 +1,5 @@
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Processing.Traversal;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
@@ -17,7 +16,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => val = Bind(value);
         }
 
-        [NoPathTraversing]
         public override TypeName ValueType => Value.ValueType;
 
         internal ParenthesizedExpr(Expr value) : base(value.Parent) {

@@ -165,16 +165,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         ///     Starts parsing the statement's scope,
         ///     returns terminator what can be used to parse scope end.
         /// </summary>
-        private static TokenType ParseStart(Expr parent) {
+        private static TokenType ParseStart(Node parent) {
+            var s = parent.Source.TokenStream;
             // colon
-            bool  hasColon   = parent.Stream.MaybeEat(Colon);
-            Token scopeStart = parent.Stream.Token;
+            bool  hasColon   = s.MaybeEat(Colon);
+            Token scopeStart = s.Token;
 
             // newline
-            bool hasNewline = hasColon ? parent.Stream.MaybeEat(Newline) : scopeStart.Is(Newline);
+            bool hasNewline = hasColon ? s.MaybeEat(Newline) : scopeStart.Is(Newline);
 
             // '{'
-            if (parent.Stream.MaybeEat(OpenBrace)) {
+            if (s.MaybeEat(OpenBrace)) {
                 if (hasColon) {
                     // ':' '{'
                     LangException.Report(BlameType.RedundantColonWithBraces, scopeStart);
@@ -184,18 +185,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
 
             // indent
-            if (parent.Stream.MaybeEat(Indent)) {
+            if (s.MaybeEat(Indent)) {
                 return Outdent;
             }
 
             if (hasNewline) {
                 // newline followed by not indent or '{'
-                LangException.Report(BlameType.ExpectedScopeDeclaration, parent.Stream.Peek);
+                LangException.Report(BlameType.ExpectedScopeDeclaration, s.Peek);
             }
             // exactly a 1-line scope
             else if (!hasColon) {
                 // one line scope must have a colon
-                LangException.ReportUnexpectedSyntax(Colon, parent.Stream.Peek);
+                LangException.ReportUnexpectedSyntax(Colon, s.Peek);
             }
 
             return Newline;

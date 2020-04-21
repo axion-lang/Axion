@@ -14,7 +14,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
     public abstract class Pattern : Expr {
         // NOTE: here Match uses parent parameter because
         // we may want to match macro from another file.
-        public abstract bool Match(Expr parent);
+        public abstract bool Match(Node parent);
 
         protected Pattern(Node parent) : base(parent) { }
     }

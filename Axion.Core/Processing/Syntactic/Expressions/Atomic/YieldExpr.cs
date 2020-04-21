@@ -35,7 +35,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public YieldExpr(Node parent) : base(parent) { }
 
         public YieldExpr Parse() {
-            KwYield = Stream.Eat(KeywordYield);
+            KwYield ??= Stream.Eat(KeywordYield);
             if (Stream.MaybeEat("from")) {
                 KwFrom = Stream.Token;
                 Value  = InfixExpr.Parse(this);

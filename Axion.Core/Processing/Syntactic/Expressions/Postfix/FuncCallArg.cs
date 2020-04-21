@@ -35,27 +35,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         ///     </c>
         /// </summary>
         internal static NodeList<FuncCallArg> ParseArgList(
-            Expr         parent,
+            Node         parent,
             FuncCallArg? first          = null,
             bool         allowGenerator = false
         ) {
+            var s    = parent.Source.TokenStream;
             var args = new NodeList<FuncCallArg>(parent);
 
             if (first != null) {
                 args.Add(first);
             }
 
-            if (parent.Stream.PeekIs(TokenType.CloseParenthesis)) {
+            if (s.PeekIs(TokenType.CloseParenthesis)) {
                 return args;
             }
 
             while (true) {
                 FuncCallArg arg;
                 // named arg
-                if (parent.Stream.PeekIs(TokenType.Identifier)
-                 && parent.Stream.PeekByIs(2, TokenType.OpAssign)) {
+                if (s.PeekIs(TokenType.Identifier) && s.PeekByIs(2, TokenType.OpAssign)) {
                     var argName = (NameExpr) AtomExpr.Parse(parent);
-                    parent.Stream.Eat(TokenType.OpAssign);
+                    s.Eat(TokenType.OpAssign);
                     InfixExpr argValue = InfixExpr.Parse(parent);
                     arg = new FuncCallArg(parent) {
                         Name = argName, Value = argValue
@@ -67,7 +67,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 else {
                     Expr argValue = InfixExpr.Parse(parent);
                     // generator arg
-                    if (parent.Stream.PeekIs(TokenType.KeywordFor)) {
+                    if (s.PeekIs(TokenType.KeywordFor)) {
                         arg = new FuncCallArg(parent) {
                             Value = new ForComprehension(parent) {
                                 Target = argValue, IsGenerator = true
@@ -76,7 +76,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     }
                     else {
                         // TODO: star args
-                        parent.Stream.MaybeEat(TokenType.OpMultiply);
+                        s.MaybeEat(TokenType.OpMultiply);
                         arg = new FuncCallArg(parent) {
                             Value = argValue
                         };
@@ -84,7 +84,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 }
 
                 args.Add(arg);
-                if (!parent.Stream.MaybeEat(TokenType.Comma)) {
+                if (!s.MaybeEat(TokenType.Comma)) {
                     break;
                 }
             }

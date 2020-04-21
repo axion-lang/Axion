@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
 
         public MultiplePattern(Node parent) : base(parent) { }
 
-        public override bool Match(Expr parent) {
+        public override bool Match(Node parent) {
             var matchCount = 0;
             while (Pattern.Match(parent)) {
                 matchCount++;
