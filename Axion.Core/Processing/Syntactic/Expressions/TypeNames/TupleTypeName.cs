@@ -19,7 +19,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         private NodeList<TypeName> types = null!;
 
         public NodeList<TypeName> Types {
-            get => types;
+            get => InitIfNull(ref types);
             set => types = Bind(value);
         }
 
