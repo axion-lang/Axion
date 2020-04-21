@@ -46,7 +46,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
 
         public ExpressionPattern Parse() {
             Token id          = Stream.Eat(Identifier);
-            var   namedParts  = GetParent<MacroDef>().NamedSyntaxParts;
+            var   namedParts  = GetParent<MacroDef>()!.NamedSyntaxParts;
             bool  typeDefined = namedParts.ContainsKey(id.Content);
             if (typeDefined) {
                 PatternFromTypeName(namedParts[id.Content]);

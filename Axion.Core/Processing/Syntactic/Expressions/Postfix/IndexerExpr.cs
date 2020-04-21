@@ -37,18 +37,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     Stream.Eat(OpenBracket);
                     if (!Stream.PeekIs(CloseBracket)) {
                         while (true) {
-                            Expr start = null;
+                            Expr? start = null;
                             if (!Stream.PeekIs(Colon)) {
                                 start = InfixExpr.Parse(this);
                             }
 
                             if (Stream.MaybeEat(Colon)) {
-                                Expr stop = null;
+                                Expr? stop = null;
                                 if (!Stream.PeekIs(Colon, Comma, CloseBracket)) {
                                     stop = InfixExpr.Parse(this);
                                 }
 
-                                Expr step = null;
+                                Expr? step = null;
                                 if (Stream.MaybeEat(Colon) && !Stream.PeekIs(Comma, CloseBracket)) {
                                     step = InfixExpr.Parse(this);
                                 }
@@ -67,8 +67,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                                     Stream.Token
                                 );
                             }
-
-                            expressions.Add(start);
+                            else {
+                                expressions.Add(start);
+                            }
                             if (Stream.PeekIs(CloseBracket)) {
                                 break;
                             }

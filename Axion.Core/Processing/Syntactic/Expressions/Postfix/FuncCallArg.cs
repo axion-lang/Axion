@@ -60,7 +60,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     arg = new FuncCallArg(parent) {
                         Name = argName, Value = argValue
                     };
-                    if (args.Any(a => a.Name.ToString() == argName.ToString())) {
+                    if (args.Any(a => a.Name?.ToString() == argName.ToString())) {
                         LangException.Report(BlameType.DuplicatedNamedArgument, arg);
                     }
                 }

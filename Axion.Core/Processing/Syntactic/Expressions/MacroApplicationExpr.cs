@@ -45,7 +45,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     );
                     if (Macro != null) {
                         var restCascade = new CascadePattern(this) {
-                            Patterns = NodeList<Pattern>.From(this, Macro.Syntax.Patterns.Skip(2))
+                            Patterns = new NodeList<Pattern>(this, Macro.Syntax.Patterns.Skip(2))
                         };
                         Expressions.Add(Stream.EatAny());
                         Expressions.Add(leftExpr);

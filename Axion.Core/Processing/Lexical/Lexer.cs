@@ -141,7 +141,7 @@ namespace Axion.Core.Processing.Lexical {
             return t;
         }
 
-        private Token ReadWhite() {
+        private Token? ReadWhite() {
             bool addNext;
             do {
                 addNext = TryAddChar(White);
@@ -254,7 +254,7 @@ namespace Axion.Core.Processing.Lexical {
             return NewTokenFromContext();
         }
 
-        private Token ReadNewline() {
+        private Token? ReadNewline() {
             type = Newline;
 
             bool addNext;
@@ -507,7 +507,7 @@ namespace Axion.Core.Processing.Lexical {
 
             lexer.ProcessTerminators.Push(CloseBrace);
             while (true) {
-                Token token = lexer.Read();
+                Token? token = lexer.Read();
                 if (token == null) {
                     continue;
                 }
@@ -530,7 +530,7 @@ namespace Axion.Core.Processing.Lexical {
 
         private void ReadEscapeSeq() {
             Location escapeStart = stream.Location;
-            string   raw         = stream.Eat('\\');
+            string   raw         = stream.Eat('\\')!;
             var      escaped     = "";
             // \t, \n, etc
             if (stream.Eat(EscapeSequences.Keys.ToArray()) != null) {

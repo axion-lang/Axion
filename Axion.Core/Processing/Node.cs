@@ -40,9 +40,12 @@ namespace Axion.Core.Processing {
                     return ast;
                 }
 
-                Node p = this;
+                Node? p = this;
                 while (!(p is Ast)) {
-                    p = p.Parent;
+                    p = p?.Parent
+                     ?? throw new NullReferenceException(
+                            "Cannot get AST for non-completely bound node"
+                        );
                 }
 
                 ast = (Ast) p;
@@ -86,11 +89,11 @@ namespace Axion.Core.Processing {
         /// </summary>
         internal T? GetParent<T>()
             where T : Node {
-            Node p = this;
+            Node? p = this;
             while (true) {
                 p = p.Parent;
                 if (p == null || p is T) {
-                    return (T) p;
+                    return (T?) p;
                 }
 
                 if (p is Ast) {

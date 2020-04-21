@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Traversal;
 
 namespace Axion.Core.Processing.Syntactic {
@@ -40,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic {
         public T this[int i] {
             get => items[i];
             set {
-                Parent.Bind(value, this, i);
+                Parent?.Bind(value, this, i);
                 items[i] = value;
             }
         }
@@ -78,36 +77,12 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        internal static NodeList<T> From(Node parent, IEnumerable<T>? collection) {
-            if (collection == null) {
-                return new NodeList<T>(parent);
-            }
-            if (collection is List<T> list) {
-                return new NodeList<T>(parent, list);
-            }
-            return new NodeList<T>(parent, collection);
-        }
-
-        internal static NodeList<Expr> From(params Expr[] collection) {
-            if (collection == null) {
-                return new NodeList<Expr>(null);
-            }
-            return new NodeList<Expr>(null, collection);
-        }
-
-        internal static NodeList<T> From(params T[] collection) {
-            if (collection == null) {
-                return new NodeList<T>(null);
-            }
-            return new NodeList<T>(null, collection);
-        }
-
         internal NodeList(Node parent) {
             Parent = parent;
             items  = new List<T>();
         }
 
-        internal NodeList(Node? parent, IEnumerable<T>? collection) {
+        internal NodeList(Node parent, IEnumerable<T>? collection) {
             Parent = parent;
             items  = collection?.ToList() ?? new List<T>();
         }
@@ -117,7 +92,7 @@ namespace Axion.Core.Processing.Syntactic {
                 Add(item);
             }
             else {
-                Parent.Bind(item, this, index);
+                Parent?.Bind(item, this, index);
                 items.Insert(index, item);
                 for (int i = index; i < Count; i++) {
                     ((NodeListTreePath<T>) items[i].Path).IndexInList = i;
@@ -126,7 +101,7 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         public void Add(T item) {
-            item = Parent.Bind(item, this, Count);
+            Parent?.Bind(item, this, Count);
             items.Add(item);
         }
 

@@ -38,9 +38,9 @@ namespace Axion.Core.Processing.CodeGen {
             };
         }
 
-        public void Write(params object[] values) {
+        public void Write(params object?[] values) {
             lastLineEmpty = false;
-            foreach (object val in values) {
+            foreach (object? val in values) {
                 if (val is Node translatable) {
                     try {
                         converter.Convert((dynamic) translatable);

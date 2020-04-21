@@ -1,6 +1,4 @@
 using System.Web;
-using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Processing.Traversal;
 using Axion.Core.Source;
 using Newtonsoft.Json;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
@@ -18,10 +16,6 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         [JsonProperty(Order = 4)]
         public string EndingWhite { get; set; }
-
-        [JsonIgnore]
-        [NoPathTraversing]
-        public virtual TypeName? ValueType { get; }
 
         public Token(
             Unit      source,

@@ -62,9 +62,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             var haveMultiply             = false;
             var haveKeywordOnlyParameter = false;
             // we want these to be the last two parameters
-            FunctionParameter listParameter = null;
-            FunctionParameter mapParameter  = null;
-            var               needDefault   = false;
+            FunctionParameter? listParameter = null;
+            FunctionParameter? mapParameter  = null;
+            var                needDefault   = false;
             while (!s.PeekIs(terminators)) {
                 if (s.MaybeEat(OpPower)) {
                     mapParameter = new FunctionParameter(parent).Parse(names);

@@ -21,7 +21,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public override TypeName ValueType => new TupleTypeName(this) {
-            Types = NodeList<TypeName>.From(this, Expressions.Select(e => e.ValueType))
+            Types = new NodeList<TypeName>(this, Expressions.Select(e => e.ValueType))
         };
 
         internal TupleExpr(Node parent) : base(parent) { }

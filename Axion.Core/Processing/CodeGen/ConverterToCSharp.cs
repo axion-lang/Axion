@@ -301,31 +301,39 @@ namespace Axion.Core.Processing.CodeGen {
                 new ModuleDef(e) {
                     Name = new NameExpr("__RootModule__"),
                     Scope = new ScopeExpr(e) {
-                        Items = NodeList<Expr>.From(
+                        Items = new NodeList<Expr>(
                             e,
                             new[] {
                                 new ClassDef(e) {
                                     Name = new NameExpr("__RootClass__"),
                                     Scope = new ScopeExpr(e) {
-                                        Items = NodeList<Expr>.From(
+                                        Items = new NodeList<Expr>(
                                             e,
                                             new[] {
                                                 new DecorableExpr(e) {
-                                                    Decorators =
-                                                        NodeList<Expr>.From(new NameExpr("static")),
+                                                    Decorators = new NodeList<Expr>(
+                                                        e,
+                                                        new[] {
+                                                            new NameExpr("static")
+                                                        }
+                                                    ),
                                                     Target = new FunctionDef(e) {
                                                         Name = new NameExpr("Main"),
                                                         Parameters =
-                                                            NodeList<FunctionParameter>.From(
-                                                                new FunctionParameter(e) {
-                                                                    Name = new NameExpr("args"),
-                                                                    ValueType =
-                                                                        new ArrayTypeName(e) {
-                                                                            ElementType =
-                                                                                new SimpleTypeName(
-                                                                                    "string"
-                                                                                )
-                                                                        }
+                                                            new NodeList<FunctionParameter>(
+                                                                e,
+                                                                new[] {
+                                                                    new FunctionParameter(e) {
+                                                                        Name = new NameExpr("args"),
+                                                                        ValueType =
+                                                                            new ArrayTypeName(e) {
+                                                                                ElementType =
+                                                                                    new
+                                                                                        SimpleTypeName(
+                                                                                            "string"
+                                                                                        )
+                                                                            }
+                                                                    }
                                                                 }
                                                             ),
                                                         Scope = new ScopeExpr(e) {
