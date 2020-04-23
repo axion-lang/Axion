@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
-using Axion.Core.Processing.Syntactic.Expressions.MacroPatterns;
+using Axion.Core.Processing.Syntactic.Expressions.Patterns;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>

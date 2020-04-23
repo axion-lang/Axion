@@ -1,6 +1,6 @@
 using Axion.Core.Processing.Lexical.Tokens;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
+namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     /// <summary>
     ///     <c>
     ///         token-pattern:

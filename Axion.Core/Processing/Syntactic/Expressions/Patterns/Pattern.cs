@@ -1,4 +1,4 @@
-namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
+namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     /// <summary>
     ///     <c>
     ///         syntax-pattern

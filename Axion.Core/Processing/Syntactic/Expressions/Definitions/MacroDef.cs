@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
-using Axion.Core.Processing.Syntactic.Expressions.MacroPatterns;
+using Axion.Core.Processing.Syntactic.Expressions.Patterns;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {

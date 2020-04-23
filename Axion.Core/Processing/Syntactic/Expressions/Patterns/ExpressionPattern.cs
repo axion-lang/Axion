@@ -7,7 +7,7 @@ using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.MacroPatterns {
+namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     /// <summary>
     ///     <c>
     ///         expression-pattern:
