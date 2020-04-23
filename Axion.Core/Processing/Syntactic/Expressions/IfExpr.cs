@@ -10,7 +10,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///             ['else' scope];
     ///     </c>
     /// </summary>
-    public class IfExpr : Expr, IDecorableExpr {
+    public class IfExpr : Expr {
         private Expr condition = null!;
 
         public Expr Condition {

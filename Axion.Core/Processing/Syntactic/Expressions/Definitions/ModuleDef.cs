@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -24,6 +25,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         internal ModuleDef(Node parent) : base(parent) { }
+
+        public DecoratedExpr WithDecorators(params Expr[] items) {
+            return new DecoratedExpr(Parent) {
+                Target = this, Decorators = new NodeList<Expr>(this, items)
+            };
+        }
+
+        public ModuleDef WithScope(params Expr[] items) {
+            return WithScope((IEnumerable<Expr>) items);
+        }
+
+        public ModuleDef WithScope(IEnumerable<Expr> items) {
+            Scope = new ScopeExpr(this).WithItems(items);
+            return this;
+        }
 
         public ModuleDef Parse() {
             SetSpan(

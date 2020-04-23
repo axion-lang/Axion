@@ -63,7 +63,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 return new WhileExpr(parent).Parse();
             }
             if (s.PeekIs(At)) {
-                return new DecorableExpr(parent).Parse();
+                return new DecoratedExpr(parent).Parse();
             }
             if (s.PeekIs(KeywordBreak)) {
                 return new BreakExpr(parent).Parse();

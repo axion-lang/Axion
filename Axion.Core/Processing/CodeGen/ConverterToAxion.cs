@@ -115,7 +115,7 @@ namespace Axion.Core.Processing.CodeGen {
             cw.Write(e.Left, " | ", e.Right);
         }
 
-        public override void Convert(DecorableExpr e) {
+        public override void Convert(DecoratedExpr e) {
             if (e.Decorators.Count == 1) {
                 cw.Write("@", e.Decorators[0], e.Target);
             }

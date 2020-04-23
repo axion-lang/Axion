@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///             'fn' [name] ['(' [multiple-parameters] ')'] ['->' type] scope;
     ///     </c>
     /// </summary>
-    public class FunctionDef : AtomExpr, IDefinitionExpr {
+    public class FunctionDef : AtomExpr, IDefinitionExpr, IDecorableExpr {
         private NameExpr? name;
 
         public NameExpr? Name {
@@ -54,6 +54,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public FunctionDef(Node parent) : base(parent) { }
+
+        public DecoratedExpr WithDecorators(params Expr[] items) {
+            return new DecoratedExpr(Parent) {
+                Target = this, Decorators = new NodeList<Expr>(this, items)
+            };
+        }
+
+        public FunctionDef WithScope(params Expr[] items) {
+            return WithScope((IEnumerable<Expr>) items);
+        }
+
+        public FunctionDef WithScope(IEnumerable<Expr> items) {
+            Scope = new ScopeExpr(this).WithItems(items);
+            return this;
+        }
+
+        public FunctionDef WithParameters(params FunctionParameter[] items) {
+            Parameters = new NodeList<FunctionParameter>(this, items);
+            return this;
+        }
 
         public FunctionDef Parse(bool anonymous = false) {
             SetSpan(

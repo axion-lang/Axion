@@ -58,6 +58,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public ClassDef(Node parent) : base(parent) { }
 
+        public DecoratedExpr WithDecorators(params Expr[] items) {
+            return new DecoratedExpr(Parent) {
+                Target = this, Decorators = new NodeList<Expr>(this, items)
+            };
+        }
+
+        public ClassDef WithScope(params Expr[] items) {
+            return WithScope((IEnumerable<Expr>) items);
+        }
+
+        public ClassDef WithScope(IEnumerable<Expr> items) {
+            Scope = new ScopeExpr(this).WithItems(items);
+            return this;
+        }
+
         public ClassDef Parse() {
             KwClass = Stream.Eat(KeywordClass);
             Name    = new NameExpr(this).Parse(true);

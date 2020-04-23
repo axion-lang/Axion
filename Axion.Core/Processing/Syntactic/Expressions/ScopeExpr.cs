@@ -31,6 +31,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         protected ScopeExpr() { }
 
+        public ScopeExpr WithItems(IEnumerable<Expr> list) {
+            Items = new NodeList<Expr>(this, list);
+            return this;
+        }
+
         public string CreateUniqueId(string formattedId) {
             var    i  = 0;
             string id = string.Format(formattedId, i);

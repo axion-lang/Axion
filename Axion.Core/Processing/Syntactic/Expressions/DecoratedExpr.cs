@@ -2,11 +2,11 @@ using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
-    public class DecorableExpr : Expr, IDecorableExpr {
+    public class DecoratedExpr : Expr {
         private NodeList<Expr> decorators = null!;
 
         public NodeList<Expr> Decorators {
-            get => decorators;
+            get => InitIfNull(ref decorators);
             set => decorators = Bind(value);
         }
 
@@ -17,11 +17,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => target = Bind(value);
         }
 
-        internal DecorableExpr(Node parent) : base(parent) {
-            Decorators = new NodeList<Expr>(this);
-        }
+        internal DecoratedExpr(Node parent) : base(parent) { }
 
-        public DecorableExpr Parse() {
+        public DecoratedExpr Parse() {
             SetSpan(
                 () => {
                     Stream.Eat(At);

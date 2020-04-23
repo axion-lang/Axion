@@ -280,7 +280,7 @@ namespace Axion.Core.Processing.CodeGen {
                 Expr item = expr;
                 // decorator is just a wrapper,
                 // so we need to unpack it's content.
-                if (expr is DecorableExpr dec) {
+                if (expr is DecoratedExpr dec) {
                     item = dec.Target;
                 }
                 if (item is ModuleDef) {
@@ -299,61 +299,34 @@ namespace Axion.Core.Processing.CodeGen {
 
             cw.Write(
                 new ModuleDef(e) {
-                    Name = new NameExpr("__RootModule__"),
-                    Scope = new ScopeExpr(e) {
-                        Items = new NodeList<Expr>(
-                            e,
+                    Name = new NameExpr("__RootModule__")
+                }.WithScope(
+                    new[] {
+                        new ClassDef(e) {
+                            Name = new NameExpr("__RootClass__")
+                        }.WithScope(
                             new[] {
-                                new ClassDef(e) {
-                                    Name = new NameExpr("__RootClass__"),
-                                    Scope = new ScopeExpr(e) {
-                                        Items = new NodeList<Expr>(
-                                            e,
-                                            new[] {
-                                                new DecorableExpr(e) {
-                                                    Decorators = new NodeList<Expr>(
-                                                        e,
-                                                        new[] {
-                                                            new NameExpr("static")
-                                                        }
-                                                    ),
-                                                    Target = new FunctionDef(e) {
-                                                        Name = new NameExpr("Main"),
-                                                        Parameters =
-                                                            new NodeList<FunctionParameter>(
-                                                                e,
-                                                                new[] {
-                                                                    new FunctionParameter(e) {
-                                                                        Name = new NameExpr("args"),
-                                                                        ValueType =
-                                                                            new ArrayTypeName(e) {
-                                                                                ElementType =
-                                                                                    new
-                                                                                        SimpleTypeName(
-                                                                                            "string"
-                                                                                        )
-                                                                            }
-                                                                    }
-                                                                }
-                                                            ),
-                                                        Scope = new ScopeExpr(e) {
-                                                            Items = rootItems
-                                                        },
-                                                        ValueType = new SimpleTypeName("void")
-                                                    }
-                                                }
-                                            }.Union(rootFunctions)
-                                        )
-                                    }
-                                }
-                            }.Union(rootClasses)
+                                new FunctionDef(e) {
+                                        Name      = new NameExpr("Main"),
+                                        ValueType = new SimpleTypeName("void")
+                                    }.WithParameters(
+                                         new FunctionParameter(e) {
+                                             Name = new NameExpr("args"),
+                                             ValueType = new ArrayTypeName(e) {
+                                                 ElementType = new SimpleTypeName("string")
+                                             }
+                                         }
+                                     )
+                                     .WithScope(rootItems)
+                                     .WithDecorators(new NameExpr("static"))
+                            }.Union(rootFunctions)
                         )
-                    }
-                }
+                    }.Union(rootClasses)
+                )
             );
         }
 
-        public override void Convert(DecorableExpr e) {
+        public override void Convert(DecoratedExpr e) {
             foreach (Expr decorator in e.Decorators) {
                 if (decorator is NameExpr n
                  && Spec.CSharp.AllowedModifiers.Contains(n.ToString())) {

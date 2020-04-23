@@ -10,7 +10,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     but some piece of code defined as expression
     ///     by language macros.
     /// </summary>
-    public class MacroApplicationExpr : AtomExpr, IDecorableExpr {
+    public class MacroApplicationExpr : AtomExpr {
         public MacroDef? Macro { get; set; }
 
         public List<Node> Expressions { get; } = new List<Node>();

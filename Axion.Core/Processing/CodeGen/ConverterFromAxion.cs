@@ -266,7 +266,7 @@ namespace Axion.Core.Processing.CodeGen {
             cw.AddJoin("\n", e.Items);
         }
 
-        public virtual void Convert(DecorableExpr e) {
+        public virtual void Convert(DecoratedExpr e) {
             throw new NotSupportedException();
         }
 

@@ -90,7 +90,7 @@ namespace Axion.Core.Processing.CodeGen {
             );
         }
 
-        public override void Convert(DecorableExpr e) {
+        public override void Convert(DecoratedExpr e) {
             foreach (Expr decorator in e.Decorators) {
                 cw.WriteLine("@", decorator);
             }
