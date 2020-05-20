@@ -50,9 +50,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             ref                ScopeExpr n,
             [CallerMemberName] string    propertyName = ""
         ) {
-            if (n == null) {
-                n = new ScopeExpr(this);
-            }
+            n ??= new ScopeExpr(this);
             n = Bind(n, propertyName);
             return n;
         }

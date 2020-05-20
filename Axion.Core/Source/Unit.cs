@@ -8,7 +8,6 @@ using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Specification;
 using Newtonsoft.Json;
 
@@ -25,9 +24,20 @@ namespace Axion.Core.Source {
 
         public bool HasErrors => Blames.Any(b => b.Severity == BlameSeverity.Error);
 
+        public List<LangException> Blames { get; } = new List<LangException>();
+
+        public TextStream TextStream { get; private set; }
+
+        public TokenStream TokenStream { get; }
+
+        [JsonProperty]
+        public Ast Ast { get; }
+
+        public HashSet<string> CustomKeywords { get; } = new HashSet<string>();
+
         private ProcessingOptions options = ProcessingOptions.Debug;
 
-        internal ProcessingOptions Options {
+        public ProcessingOptions Options {
             get => options;
             set {
                 options    = value;
@@ -35,24 +45,7 @@ namespace Axion.Core.Source {
             }
         }
 
-        internal ProcessingMode ProcessingMode = ProcessingMode.Default;
-
-        public List<LangException> Blames      { get; } = new List<LangException>();
-        public TextStream          TextStream  { get; private set; }
-        public TokenStream         TokenStream { get; }
-
-        [JsonProperty]
-        public Ast Ast { get; set; }
-
-        private HashSet<string> CustomKeywords { get; } = new HashSet<string>();
-
         public CodeWriter CodeWriter { get; private set; }
-
-        private Dictionary<string, Unit> Dependencies { get; set; } =
-            new Dictionary<string, Unit>();
-
-        private Dictionary<string, IDefinitionExpr> Definitions { get; set; } =
-            new Dictionary<string, IDefinitionExpr>();
 
         #region File paths
 
@@ -98,12 +91,15 @@ namespace Axion.Core.Source {
 
         #endregion
 
+        public Module Module { get; set; }
+
+        public Dictionary<string, Module> Imports { get; } = new Dictionary<string, Module>();
+
         private Unit(
             string    code       = "",
             FileInfo? sourcePath = null,
             FileInfo? outputPath = null,
-            FileInfo? debugPath  = null,
-            bool      noStdLib   = false
+            FileInfo? debugPath  = null
         ) {
             if (sourcePath == null) {
                 sourcePath = new FileInfo(
@@ -131,54 +127,11 @@ namespace Axion.Core.Source {
             TokenStream = new TokenStream();
             Ast         = new Ast(this);
             CodeWriter  = new CodeWriter(Options);
-
-            if (noStdLib) {
-                return;
-            }
-
-            // TODO: One AST for multiple files from one package. (definitions in one place)
-            // ReSharper disable PossibleNullReferenceException
-            // BUG macros.ax is retrieved only from compiler sources (should be replaced with Axion stdlib location)
-            var macrosFile = new FileInfo(
-                Path.Combine(
-                    new DirectoryInfo(Compiler.WorkDir).Parent.Parent.Parent.Parent.FullName,
-                    "Axion.Modules",
-                    "macros.ax"
-                )
-            );
-            // ReSharper restore PossibleNullReferenceException
-            if (SourceFilePath.FullName != macrosFile.FullName) {
-                AddDependency(FromFile(macrosFile));
-            }
         }
 
         public void AddDependency(Unit src) {
-            Dependencies.Add(src.SourceFilePath.ToString(), src);
+            Imports.Add(src.SourceFilePath.ToString(), src);
             Compiler.Process(src, ProcessingMode.Reduction, ProcessingOptions.Debug);
-        }
-
-        public Dictionary<string, IDefinitionExpr> GetAllDefinitions() {
-            foreach (Unit dep in Dependencies.Values) {
-                foreach (IDefinitionExpr def in dep.Ast.GetScopedDefs()) {
-                    if (!Definitions.ContainsKey(def.Name.ToString())) {
-                        Definitions.Add(def.Name.ToString(), def);
-                    }
-                }
-            }
-            return Definitions;
-        }
-
-        public void AddDefinition(IDefinitionExpr def) {
-            if (def.Name == null) {
-                throw new ArgumentException("Definition name cannot be null", nameof(def));
-            }
-            var name = def.Name.ToString();
-            if (Definitions.ContainsKey(name)) {
-                LangException.Report(BlameType.NameIsAlreadyDefined, def.Name);
-            }
-            else {
-                Definitions.Add(name, def);
-            }
         }
 
         public bool IsCustomKeyword(Token id) {
@@ -187,7 +140,7 @@ namespace Axion.Core.Source {
         }
 
         public HashSet<string> GetAllCustomKeywords() {
-            foreach (Unit dep in Dependencies.Values) {
+            foreach (Unit dep in Imports.Values) {
                 foreach (string kw in dep.CustomKeywords) {
                     CustomKeywords.Add(kw);
                 }
@@ -211,24 +164,22 @@ namespace Axion.Core.Source {
             return new Unit(string.Join("\n", lines), outputPath: outFilePath);
         }
 
-        public static Unit? FromFile(FileInfo srcFilePath, FileInfo? outFilePath = null) {
+        public static Unit FromFile(FileInfo srcFilePath, FileInfo? outFilePath = null) {
             if (!srcFilePath.Exists) {
-                Compiler.Logger.Error($"'{srcFilePath.Name}' does not exists.");
-                return null;
+                throw new FileNotFoundException($"'{srcFilePath.Name}' does not exists.");
             }
             if (srcFilePath.Extension != SourceFileExt) {
-                Compiler.Logger.Error(
+                throw new ArgumentException(
                     $"'{srcFilePath.Name}' file must have {SourceFileExt} extension."
                 );
-                return null;
             }
 
             return new Unit(File.ReadAllText(srcFilePath.FullName), srcFilePath, outFilePath);
         }
 
         public static Unit FromInterpolation(Unit source) {
-            return new Unit(noStdLib: true) {
-                TextStream = source.TextStream, Definitions = source.Definitions
+            return new Unit {
+                TextStream = source.TextStream, Module = source.Module
             };
         }
     }

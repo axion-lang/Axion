@@ -208,7 +208,7 @@ namespace Axion.Core.Specification {
         ///     Token types that can start a scope expression.
         /// </summary>
         public static readonly TokenType[] ScopeStartMarks = {
-            Colon, OpenBrace, Indent
+            OpenBrace, Indent
         };
 
         internal static readonly TokenType[] Constants = {

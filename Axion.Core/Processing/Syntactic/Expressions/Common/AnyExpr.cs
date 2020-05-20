@@ -5,6 +5,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Common {
@@ -65,6 +66,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             if (s.PeekIs(At)) {
                 return new DecoratedExpr(parent).Parse();
             }
+            if (s.PeekIs(KeywordImport)) {
+                return new ImportExpr(parent).Parse();
+            }
             if (s.PeekIs(KeywordBreak)) {
                 return new BreakExpr(parent).Parse();
             }
@@ -77,7 +81,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             if (s.PeekIs(Semicolon, KeywordPass)) {
                 return new EmptyExpr(parent).Parse();
             }
-            if (s.PeekIs(Indent, OpenBrace, Colon)) {
+            if (s.PeekIs(Spec.ScopeStartMarks)) {
                 return new ScopeExpr(parent).Parse();
             }
 

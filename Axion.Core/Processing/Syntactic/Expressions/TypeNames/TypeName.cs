@@ -99,7 +99,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                 // redundant parens
                 LangException.Report(
                     BlameType.RedundantEmptyListOfTypeArguments,
-                    new Node(parent.Source, start.Start, s.Token.End)
+                    start
                 );
             }
 

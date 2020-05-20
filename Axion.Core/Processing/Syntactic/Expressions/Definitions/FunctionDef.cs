@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
@@ -14,6 +15,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public class FunctionDef : AtomExpr, IDefinitionExpr, IDecorableExpr {
+        private Token? kwFn;
+
+        public Token? KwFn {
+            get => kwFn;
+            set => kwFn = BindNullable(value);
+        }
+
         private NameExpr? name;
 
         public NameExpr? Name {
@@ -31,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         private ScopeExpr scope = null!;
 
         public ScopeExpr Scope {
-            get => scope;
+            get => InitIfNull(ref scope);
             set => scope = Bind(value);
         }
 
@@ -76,35 +84,29 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public FunctionDef Parse(bool anonymous = false) {
-            SetSpan(
-                () => {
-                    Stream.Eat(KeywordFn);
-                    if (!anonymous) {
-                        Name = new NameExpr(this).Parse();
-                    }
+            kwFn = Stream.Eat(KeywordFn);
 
-                    // parameters
-                    if (Stream.MaybeEat(OpenParenthesis)) {
-                        // TODO: reworking of parameter lists
-                        Parameters = FunctionParameter.ParseList(this, CloseParenthesis);
-                        Stream.Eat(CloseParenthesis);
-                    }
+            // name
+            if (!anonymous) {
+                Name = new NameExpr(this).Parse();
+            }
 
-                    // return type
-                    if (Stream.MaybeEat(RightArrow)) {
-                        ValueType = TypeName.Parse(this);
-                    }
+            // parameters
+            if (Stream.MaybeEat(OpenParenthesis)) {
+                // TODO: reworking of parameter lists
+                Parameters = FunctionParameter.ParseList(this, CloseParenthesis);
+                Stream.Eat(CloseParenthesis);
+            }
 
-                    if (Stream.PeekIs(Spec.ScopeStartMarks)) {
-                        Scope = new ScopeExpr(this).Parse(
-                            anonymous ? ScopeType.Lambda : ScopeType.Default
-                        );
-                    }
-                    else {
-                        Scope = new ScopeExpr(this);
-                    }
-                }
-            );
+            // return type
+            if (Stream.MaybeEat(RightArrow)) {
+                ValueType = TypeName.Parse(this);
+            }
+
+            // scope
+            if (Stream.PeekIs(Spec.ScopeStartMarks)) {
+                Scope.Parse(!anonymous);
+            }
             return this;
         }
     }

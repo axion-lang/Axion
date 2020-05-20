@@ -34,15 +34,18 @@
         public static readonly BlameType NamedArgsMustFollowBareStar              = new BlameType("named arguments must follow bare *",                              BlameSeverity.Error);
         public static readonly BlameType InvalidStringPrefix                      = new BlameType("invalid string prefix",                                           BlameSeverity.Error);
         public static readonly BlameType ExpectedVarName                          = new BlameType("variable name expected",                                          BlameSeverity.Error);
+        public static readonly BlameType ExpectedImportedModuleName               = new BlameType("imported module name expected",                                   BlameSeverity.Error);
         public static readonly BlameType ImpossibleToInferType                    = new BlameType("impossible to infer type in this context",                        BlameSeverity.Error);
         public static readonly BlameType NameIsAlreadyDefined                     = new BlameType("this name is already defined above",                              BlameSeverity.Error);
         public static readonly BlameType InvalidMacroParameter                    = new BlameType("invalid parameter for macro",                                     BlameSeverity.Error);
-        
+        public static readonly BlameType ModuleSelfImport                         = new BlameType("can't import module from file inside it",                         BlameSeverity.Error);
+
         public static readonly BlameType ExpectedAtomExpr                         = new BlameType("atomic expression expected",                                      BlameSeverity.Error);
         public static readonly BlameType ExpectedPostfixExpr                      = new BlameType("postfix expression expected",                                     BlameSeverity.Error);
         public static readonly BlameType ExpectedPrefixExpr                       = new BlameType("prefix expression expected",                                      BlameSeverity.Error);
         public static readonly BlameType ExpectedInfixExpr                        = new BlameType("infix expression expected",                                       BlameSeverity.Error);
-        
+
+        public static readonly BlameType DuplicatedImport                         = new BlameType("module is already imported",                                      BlameSeverity.Warning);
         public static readonly BlameType Redundant10Radix                         = new BlameType("redundant specifier, number radix is 10 by default",              BlameSeverity.Warning);
         public static readonly BlameType RedundantEmptyListOfTypeArguments        = new BlameType("empty list of type arguments is redundant",                       BlameSeverity.Warning);
         

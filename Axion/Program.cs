@@ -195,8 +195,11 @@ namespace Axion {
                     );
                 }
 
-                src = Unit.FromFile(inputFiles[0]);
-                if (src == null) {
+                try {
+                    src = Unit.FromFile(inputFiles[0]);
+                }
+                catch (Exception e) {
+                    logger.Error(e);
                     return;
                 }
             }

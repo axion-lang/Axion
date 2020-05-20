@@ -19,8 +19,8 @@ namespace Axion.Testing.NUnit {
 
         private readonly string samplesPath = Path.Combine(
             axionTestingDir.Parent.FullName,
-            "Other",
-            "Code Examples"
+            "misc",
+            "code-examples"
         );
 
         protected string SamplesPath {
@@ -35,8 +35,7 @@ namespace Axion.Testing.NUnit {
 
         private static readonly string outPath = Path.Combine(
             axionTestingDir.FullName,
-            "Files",
-            "in",
+            "test-files",
             "out"
         );
 
@@ -52,8 +51,7 @@ namespace Axion.Testing.NUnit {
 
         private static readonly string inPath = Path.Combine(
             axionTestingDir.FullName,
-            "Files",
-            "in"
+            "test-files"
         );
 
         protected static string InPath {

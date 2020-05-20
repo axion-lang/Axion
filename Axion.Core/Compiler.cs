@@ -8,10 +8,12 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Traversal;
 using Axion.Core.Source;
 using NLog;
+using Module = Axion.Core.Source.Module;
 
 namespace Axion.Core {
-    public static class Compiler {
+    public class Compiler {
         private static readonly Assembly coreAsm = Assembly.GetExecutingAssembly();
+
         public static readonly  string   Version = coreAsm.GetName().Version.ToString();
 
         /// <summary>
@@ -24,7 +26,30 @@ namespace Axion.Core {
         /// </summary>
         public static readonly string OutDir = Path.Combine(WorkDir, "output");
 
-        internal static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+        internal readonly Module StdModule;
+
+        public Compiler(string pathToStdLib) {
+            try {
+                StdModule = Module.Root(pathToStdLib);
+            }
+            catch (DirectoryNotFoundException e) {
+                logger.Error(e.Message);
+                return;
+            }
+            StdModule.AddSubmodule("macros").AddUnit("macros.ax");
+        }
+
+        public static void Process(
+            Module            module,
+            ProcessingMode    mode,
+            ProcessingOptions options
+        ) {
+            module.ProcessingMode = mode;
+            module.Options        = options;
+            Process(src);
+        }
 
         public static void Process(
             Unit              src,
@@ -36,10 +61,14 @@ namespace Axion.Core {
             Process(src);
         }
 
+        private static void Process(Module module) {
+
+        }
+
         private static void Process(Unit src) {
-            Logger.Info($"Processing '{src.SourceFilePath.Name}'");
+            logger.Info($"Processing '{src.SourceFilePath.Name}'");
             if (string.IsNullOrWhiteSpace(src.TextStream.Text)) {
-                Logger.Error("Source is empty. Processing aborted.");
+                logger.Error("Source is empty. Processing aborted.");
                 return;
             }
 
@@ -58,7 +87,7 @@ namespace Axion.Core {
                 }
             }
 
-            Logger.Info(
+            logger.Info(
                 errCount > 0 ? "Processing terminated due to errors above" : "Processing finished"
             );
         }
@@ -76,7 +105,7 @@ namespace Axion.Core {
         // @formatter:on
 
         public static void Lex(Unit src) {
-            Logger.Debug("Tokens list generation");
+            logger.Debug("Tokens list generation");
             var lexer = new Lexer(src);
             while (true) {
                 Token? token = lexer.Read();
@@ -96,12 +125,12 @@ namespace Axion.Core {
         }
 
         private static void Parse(Unit src) {
-            Logger.Debug("Abstract Syntax Tree generation");
+            logger.Debug("Abstract Syntax Tree generation");
             src.Ast.Parse();
         }
 
         private static void Reduce(Unit src) {
-            Logger.Debug("Syntax tree reducing");
+            logger.Debug("Syntax tree reducing");
             Traversing.Traverse(src.Ast);
         }
 
@@ -109,13 +138,13 @@ namespace Axion.Core {
             try {
                 src.CodeWriter.Write(src.Ast);
                 var code = src.CodeWriter.ToString();
-                Logger.Debug("Transpiler output");
-                Logger.Debug(code);
+                logger.Debug("Transpiler output");
+                logger.Debug(code);
                 File.WriteAllText(src.OutputFilePath.FullName, code);
             }
             catch (Exception ex) {
-                Logger.Error("Transpiling failed:");
-                Logger.Info(ex.Message);
+                logger.Error("Transpiling failed:");
+                logger.Info(ex.Message);
             }
         }
     }

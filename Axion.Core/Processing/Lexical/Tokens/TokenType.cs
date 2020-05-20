@@ -83,6 +83,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         KeywordFn,
         KeywordFor,
         KeywordIf,
+        KeywordImport,
         KeywordMacro,
         KeywordModule,
         KeywordNil,

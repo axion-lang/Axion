@@ -14,7 +14,7 @@ namespace Axion.Core.Processing {
     /// </summary>
     public class Node {
         [JsonIgnore]
-        public Unit Source { get; set; }
+        public Unit Source { get; private protected set; }
 
         /// <summary>
         ///     Start location of this node's code span.
@@ -53,18 +53,6 @@ namespace Axion.Core.Processing {
             }
         }
 
-        /// <summary>
-        ///     Direct reference to the attribute of
-        ///     parent to which this node is bound.
-        /// </summary>
-        internal ITreePath Path = null!;
-
-        /// <summary>
-        ///     Reference to parent of this node.
-        /// </summary>
-        [NoPathTraversing]
-        protected internal Node? Parent { get; set; }
-
         private TypeName valueType = null!;
 
         /// <summary>
@@ -76,6 +64,18 @@ namespace Axion.Core.Processing {
             get => valueType;
             protected internal set => valueType = Bind(value);
         }
+
+        /// <summary>
+        ///     Direct reference to the attribute of
+        ///     parent to which this node is bound.
+        /// </summary>
+        internal ITreePath Path = null!;
+
+        /// <summary>
+        ///     Reference to parent of this node.
+        /// </summary>
+        [NoPathTraversing]
+        protected internal Node? Parent { get; set; }
 
         public Node(Unit source, Location start = default, Location end = default) {
             Source = source;

@@ -14,9 +14,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         scope:
-    ///             (':' expr)
-    ///             | ([':'] '{' expr* '}')
-    ///             | ([':'] NEWLINE INDENT expr+ OUTDENT);
+    ///             expr
+    ///             | ('{' expr* '}')
+    ///             | (NEWLINE INDENT expr+ OUTDENT);
     ///     </c>
     /// </summary>
     public class ScopeExpr : Expr {
@@ -61,7 +61,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public IDefinitionExpr? GetDefByName(string name) {
             if (!(this is Ast)) {
-                IDefinitionExpr e = GetParent<ScopeExpr>().GetDefByName(name);
+                IDefinitionExpr? e = GetParent<ScopeExpr>()?.GetDefByName(name);
                 if (e != null) {
                     return e;
                 }
@@ -138,28 +138,35 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return (null, -1);
         }
 
-        public ScopeExpr Parse(ScopeType type = ScopeType.Default) {
+        public ScopeExpr Parse(bool allowIndent = true) {
             if (!Stream.PeekIs(Spec.ScopeStartMarks)) {
                 return this;
             }
 
             SetSpan(
                 () => {
-                    TokenType terminator = ParseStart(this);
+                    ScopeType scopeType = ParseStart(this);
 
-                    if (terminator == Outdent && type.HasFlag(ScopeType.Lambda)) {
-                        LangException.Report(BlameType.IndentationBasedScopeNotAllowed, this);
-                    }
-
-                    if (terminator == Newline) {
+                    if (scopeType == ScopeType.Single) {
                         Items.Add(AnyExpr.Parse(this));
                     }
-                    else {
-                        while (!Stream.MaybeEat(terminator)
-                            && !Stream.PeekIs(TokenType.End)
-                            && !(terminator == Newline && Stream.Token.Is(Newline))) {
+                    else if (scopeType == ScopeType.Indented) {
+                        if (allowIndent) {
+                            while (!Stream.MaybeEat(Outdent, TokenType.End)) {
+                                Items.Add(AnyExpr.Parse(this));
+                            }
+                        }
+                        else {
+                            LangException.Report(BlameType.IndentationBasedScopeNotAllowed, this);
+                        }
+                    }
+                    else if (scopeType == ScopeType.Embraced) {
+                        while (!Stream.MaybeEat(CloseBrace, TokenType.End)) {
                             Items.Add(AnyExpr.Parse(this));
                         }
+                    }
+                    else {
+                        throw new NotSupportedException("Invalid scope type.");
                     }
                 }
             );
@@ -170,28 +177,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         ///     Starts parsing the statement's scope,
         ///     returns terminator what can be used to parse scope end.
         /// </summary>
-        private static TokenType ParseStart(Node parent) {
+        private static ScopeType ParseStart(Node parent) {
             var s = parent.Source.TokenStream;
-            // colon
-            bool  hasColon   = s.MaybeEat(Colon);
-            Token scopeStart = s.Token;
-
             // newline
-            bool hasNewline = hasColon ? s.MaybeEat(Newline) : scopeStart.Is(Newline);
+            bool hasNewline = s.MaybeEat(Newline);
 
             // '{'
             if (s.MaybeEat(OpenBrace)) {
-                if (hasColon) {
-                    // ':' '{'
-                    LangException.Report(BlameType.RedundantColonWithBraces, scopeStart);
-                }
-
-                return CloseBrace;
+                return ScopeType.Embraced;
             }
 
             // indent
             if (s.MaybeEat(Indent)) {
-                return Outdent;
+                return ScopeType.Indented;
             }
 
             if (hasNewline) {
@@ -199,18 +197,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 LangException.Report(BlameType.ExpectedScopeDeclaration, s.Peek);
             }
             // exactly a 1-line scope
-            else if (!hasColon) {
-                // one line scope must have a colon
-                LangException.ReportUnexpectedSyntax(Colon, s.Peek);
-            }
-
-            return Newline;
+            return ScopeType.Single;
         }
     }
 
     [Flags]
     public enum ScopeType {
-        Default,
-        Lambda
+        Indented,
+        Embraced,
+        Single
     }
 }

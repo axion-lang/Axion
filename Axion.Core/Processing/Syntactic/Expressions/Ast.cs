@@ -12,7 +12,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     /// </summary>
     public class Ast : ScopeExpr {
         internal List<MacroDef> Macros =>
-            Source.GetAllDefinitions().Values.OfType<MacroDef>().ToList();
+            Source.Module.GetDefinitions().Values.OfType<MacroDef>().ToList();
 
         internal readonly Stack<MacroApplicationExpr> MacroApplicationParts =
             new Stack<MacroApplicationExpr>();
@@ -21,17 +21,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             Source = src;
             Parent = this;
             Path   = new NodeTreePath(this, typeof(Unit).GetProperty(nameof(Unit.Ast)));
-            Items  = new NodeList<Expr>(this);
         }
 
         internal void Parse() {
             SetSpan(
                 () => {
-                    while (!Stream.MaybeEat(TokenType.End) && !Stream.PeekIs(TokenType.End)) {
+                    while (!Stream.MaybeEat(TokenType.End)) {
                         Expr item = AnyExpr.Parse(this);
                         Items.Add(item);
                         if (item is IDefinitionExpr def) {
-                            Source.AddDefinition(def);
+                            Source.Module.AddDefinition(def);
                         }
                     }
                 }
