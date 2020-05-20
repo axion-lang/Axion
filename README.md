@@ -1,4 +1,6 @@
-<img align="center" src="Other/Graphics/Axion-mini.png" />
+<p align="center">
+  <img src="Other/Graphics/Axion-mini.png" />
+</p>
 
 <h2 align="center">Welcome to Axion programming language toolset</h2>
 <h3 align="center">:construction: Under construction :construction:</h3>
@@ -18,7 +20,7 @@
   </a>
 </p>
 
-### :open_file_folder: Distribution
+<h3 align="center">:open_file_folder: Distribution</h3>
 
 | Directory                                               | Contents                                                                      | Platform         |
 |---------------------------------------------------------|-------------------------------------------------------------------------------|------------------|
@@ -28,7 +30,7 @@
 | [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable)               | NET Core         |
 | [`Other`](Other)                                        | Code examples, arts, etc.                                                     |                  |
 
-### :dart: Key features
+<h3 align="center">:dart: Key features</h3>
 
 - **Maximal expressiveness**
 
@@ -51,7 +53,7 @@
 
   Compile-time computations, macros expansion, and transpiling to fastest target language's code.
 
-### :chart: Progress
+<h3 align="center">:chart: Progress</h3>
 
 - **Lexical analyzer**
 - **Syntax parser**
@@ -59,7 +61,7 @@
 - **Console code editor with syntax highlighting & error reporting**
 - **C#, Python transpilers**
 
-### :rocket: Launching
+<h3 align="center">:rocket: Launching</h3>
 
 You can launch compiler with `dotnet run` in `Axion.csproj` folder
 and type `-h` in console to get support about arguments for compiler interface.
@@ -71,4 +73,4 @@ file processing with `-f "<path>.ax" -m <to-output_lang>` arguments.
 Interpretation is performed by transpiling Axion to C# and running
 it through Roslyn (still incomplete and doesn't support some syntax).
 
-### :scroll: You can take a look at the language syntax in [project wiki](https://github.com/F1uctus/Axion/wiki)
+<h3 align="center">:scroll: You can take a look at the language syntax in <a href="https://github.com/F1uctus/Axion/wiki">project wiki</a></h3>
