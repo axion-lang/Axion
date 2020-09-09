@@ -8,13 +8,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     ///     </c>
     /// </summary>
     public class TokenPattern : Pattern {
-        internal Token Value;
+        internal Token? Value;
 
         public TokenPattern(Node parent) : base(parent) { }
 
         public override bool Match(Node parent) {
             var s = parent.Source.TokenStream;
-            if (s.Peek.Content != Value.Content) {
+            if (s.Peek.Content != Value?.Content) {
                 return false;
             }
             parent.Ast.MacroApplicationParts.Peek().Expressions.Add(s.Eat());
