@@ -2,11 +2,11 @@ using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     public class NameDef : Expr, IDefinitionExpr, IDecorableExpr {
-        private NameExpr name = null!;
+        private NameExpr? name;
 
-        public NameExpr Name {
+        public NameExpr? Name {
             get => name;
-            set => name = Bind(value);
+            set => name = BindNullable(value);
         }
 
         private Expr? val;
