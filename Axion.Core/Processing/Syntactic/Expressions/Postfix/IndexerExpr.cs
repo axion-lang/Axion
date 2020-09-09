@@ -12,18 +12,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///     </c>
     /// </summary>
     public class IndexerExpr : PostfixExpr {
-        private Expr index = null!;
+        private Expr? index;
 
-        public Expr Index {
+        public Expr? Index {
             get => index;
-            set => index = Bind(value);
+            set => index = BindNullable(value);
         }
 
-        private Expr target = null!;
+        private Expr? target;
 
-        public Expr Target {
+        public Expr? Target {
             get => target;
-            set => target = Bind(value);
+            set => target = BindNullable(value);
         }
 
         public IndexerExpr(Node parent) : base(parent) { }
