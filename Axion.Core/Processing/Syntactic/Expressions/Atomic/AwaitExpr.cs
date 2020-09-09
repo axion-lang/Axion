@@ -19,14 +19,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             set => kwAwait = BindNullable(value);
         }
 
-        private Expr val = null!;
+        private Expr? val;
 
-        public Expr Value {
+        public Expr? Value {
             get => val;
-            set => val = Bind(value);
+            set => val = BindNullable(value);
         }
 
-        public override TypeName ValueType => Value.ValueType;
+        public override TypeName? ValueType => Value?.ValueType;
 
         public AwaitExpr(Node parent) : base(parent) { }
 
