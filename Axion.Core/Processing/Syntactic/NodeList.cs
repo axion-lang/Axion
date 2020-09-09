@@ -12,14 +12,14 @@ namespace Axion.Core.Processing.Syntactic {
     ///     and provide some other useful methods.
     /// </summary>
     public class NodeList<T> : IList<T>
-        where T : Node {
+        where T : Node? {
         private Node? parent;
 
         public Node? Parent {
             get => parent;
             set {
                 parent = value;
-                if (parent == null || items == null) {
+                if (parent == null) {
                     return;
                 }
                 foreach (T item in items) {
@@ -78,13 +78,13 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         internal NodeList(Node parent) {
-            Parent = parent;
             items  = new List<T>();
+            Parent = parent;
         }
 
         internal NodeList(Node parent, IEnumerable<T>? collection) {
-            Parent = parent;
             items  = collection?.ToList() ?? new List<T>();
+            Parent = parent;
         }
 
         public void Insert(int index, T item) {
