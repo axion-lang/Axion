@@ -3,18 +3,18 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     public class DecoratedExpr : Expr {
-        private NodeList<Expr> decorators = null!;
+        private NodeList<Expr>? decorators;
 
         public NodeList<Expr> Decorators {
             get => InitIfNull(ref decorators);
             set => decorators = Bind(value);
         }
 
-        private Expr target = null!;
+        private Expr? target;
 
-        public Expr Target {
+        public Expr? Target {
             get => target;
-            set => target = Bind(value);
+            set => target = BindNullable(value);
         }
 
         internal DecoratedExpr(Node parent) : base(parent) { }
