@@ -9,11 +9,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///     </c>
     /// </summary>
     public class FuncTypeName : TypeName {
-        private TypeName argsType = null!;
+        private TypeName? argsType;
 
-        public TypeName ArgsType {
+        public TypeName? ArgsType {
             get => argsType;
-            set => argsType = Bind(value);
+            set => argsType = BindNullable(value);
         }
 
         private Token? joiningMark;
@@ -33,10 +33,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         public FuncTypeName(Node parent) : base(parent) { }
 
         public FuncTypeName Parse() {
-            ArgsType ??= Parse(this);
-
-            JoiningMark = Stream.Eat(RightArrow);
-            ReturnType  = Parse(this);
+            ArgsType    ??= Parse(this);
+            JoiningMark =   Stream.Eat(RightArrow);
+            ReturnType  =   Parse(this);
             return this;
         }
     }
