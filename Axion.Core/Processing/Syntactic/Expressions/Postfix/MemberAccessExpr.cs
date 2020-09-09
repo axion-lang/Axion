@@ -9,18 +9,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///     </c>
     /// </summary>
     public class MemberAccessExpr : PostfixExpr {
-        private Expr target = null!;
+        private Expr? target;
 
-        public Expr Target {
+        public Expr? Target {
             get => target;
-            set => target = Bind(value);
+            set => target = BindNullable(value);
         }
 
-        private Expr member = null!;
+        private Expr? member;
 
-        public Expr Member {
+        public Expr? Member {
             get => member;
-            set => member = Bind(value);
+            set => member = BindNullable(value);
         }
 
         public MemberAccessExpr(Node parent) : base(parent) { }
