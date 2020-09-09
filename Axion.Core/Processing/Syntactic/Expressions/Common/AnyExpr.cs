@@ -88,10 +88,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             Token?    immutableKw = s.MaybeEat(KeywordLet) ? s.Token : null;
             InfixExpr infix       = InfixExpr.Parse(parent);
 
-            if (infix is BinaryExpr bin && bin.Operator.Is(OpAssign)) {
+            if (infix is BinaryExpr bin && (bin.Operator?.Is(OpAssign) ?? false)) {
                 // ['let'] name '=' expr
                 // --------------------^
-                if (bin.Left is NameExpr name && !bin.GetParent<ScopeExpr>().IsDefined(name)) {
+                if (bin.Left is NameExpr name && !bin.GetParent<ScopeExpr>()!.IsDefined(name)) {
                     return new VarDef(parent, immutableKw) {
                         Name = name, Value = bin.Right
                     };
@@ -114,8 +114,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 return infix;
             }
 
-            TypeName type  = TypeName.Parse(parent);
-            Expr?    value = null;
+            TypeName? type  = TypeName.Parse(parent);
+            Expr?     value = null;
             if (s.MaybeEat(OpAssign)) {
                 // ['let'] name ':' type-name '=' infix-expr
                 // -------------------------------^
