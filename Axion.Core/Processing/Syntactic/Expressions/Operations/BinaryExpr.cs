@@ -9,25 +9,25 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     ///     </c>
     /// </summary>
     public class BinaryExpr : InfixExpr {
-        private Expr left = null!;
+        private Expr? left;
 
-        public Expr Left {
+        public Expr? Left {
             get => left;
-            set => left = Bind(value);
+            set => left = BindNullable(value);
         }
 
-        private Expr right = null!;
+        private Expr? right;
 
-        public Expr Right {
+        public Expr? Right {
             get => right;
-            set => right = Bind(value);
+            set => right = BindNullable(value);
         }
 
-        private Token @operator = null!;
+        private Token? @operator;
 
-        public Token Operator {
+        public Token? Operator {
             get => @operator;
-            set => @operator = Bind(value);
+            set => @operator = BindNullable(value);
         }
 
         public BinaryExpr(Node parent) : base(parent) { }
