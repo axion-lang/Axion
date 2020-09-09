@@ -18,7 +18,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             set => openQuote = BindNullable(value);
         }
 
-        private ScopeExpr scope = null!;
+        private ScopeExpr? scope;
 
         public ScopeExpr Scope {
             get => InitIfNull(ref scope);
@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             set => closeQuote = BindNullable(value);
         }
 
-        public override TypeName ValueType => Scope.ValueType;
+        public override TypeName? ValueType => Scope.ValueType;
 
         public CodeQuoteExpr(Node parent) : base(parent) { }
 
