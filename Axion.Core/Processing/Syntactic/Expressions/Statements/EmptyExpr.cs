@@ -9,11 +9,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///     </c>
     /// </summary>
     public class EmptyExpr : Expr {
-        private Token mark;
+        private Token? mark;
 
-        public Token Mark {
+        public Token? Mark {
             get => mark;
-            set => mark = Bind(value);
+            set => mark = BindNullable(value);
         }
 
         public EmptyExpr(Node parent) : base(parent) { }
