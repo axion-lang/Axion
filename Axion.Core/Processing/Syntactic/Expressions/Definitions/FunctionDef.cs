@@ -29,21 +29,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => name = BindNullable(value);
         }
 
-        private NodeList<FunctionParameter> parameters = null!;
+        private NodeList<FunctionParameter>? parameters;
 
         public NodeList<FunctionParameter> Parameters {
             get => InitIfNull(ref parameters);
             set => parameters = Bind(value);
         }
 
-        private ScopeExpr scope = null!;
+        private ScopeExpr? scope;
 
         public ScopeExpr Scope {
             get => InitIfNull(ref scope);
             set => scope = Bind(value);
         }
 
-        public override TypeName ValueType {
+        public override TypeName? ValueType {
             get {
                 try {
                     List<(ReturnExpr item, ScopeExpr itemParentScope, int itemIndex)> returns =
