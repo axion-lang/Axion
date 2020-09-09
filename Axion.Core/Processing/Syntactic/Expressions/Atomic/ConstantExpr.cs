@@ -10,14 +10,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class ConstantExpr : AtomExpr {
-        private Token literal = null!;
+        private Token? literal;
 
-        public Token Literal {
+        public Token? Literal {
             get => literal;
-            set => literal = Bind(value);
+            set => literal = BindNullable(value);
         }
 
-        public override TypeName ValueType => Literal.ValueType!;
+        public override TypeName? ValueType => Literal?.ValueType;
 
         public ConstantExpr(Node parent) : base(parent) { }
 
