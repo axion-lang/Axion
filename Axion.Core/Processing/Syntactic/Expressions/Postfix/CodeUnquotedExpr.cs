@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => val = Bind(value);
         }
 
-        public override TypeName ValueType => Value.ValueType;
+        public override TypeName? ValueType => Value.ValueType;
 
         public CodeUnquotedExpr(Node parent) : base(parent) { }
 
