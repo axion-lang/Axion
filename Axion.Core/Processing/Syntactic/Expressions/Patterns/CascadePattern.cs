@@ -10,7 +10,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     ///     </c>
     /// </summary>
     public class CascadePattern : Pattern {
-        private NodeList<Pattern> patterns;
+        private NodeList<Pattern>? patterns;
 
         internal NodeList<Pattern> Patterns {
             get => InitIfNull(ref patterns);
