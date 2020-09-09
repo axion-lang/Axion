@@ -11,11 +11,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public class MacroDef : Expr, IDefinitionExpr {
-        private NameExpr name = null!;
+        private NameExpr? name;
 
-        public NameExpr Name {
+        public NameExpr? Name {
             get => name;
-            set => name = Bind(value);
+            set => name = BindNullable(value);
         }
 
         private CascadePattern syntax = null!;
@@ -59,7 +59,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     Name   = new NameExpr(this).Parse(true);
                     Syntax = new CascadePattern(this);
                     // EBNF-based syntax definition
-                    if (Stream.Eat(OpenParenthesis) != null) {
+                    if (Stream.MaybeEat(OpenParenthesis)) {
                         Syntax.Parse();
                         Stream.Eat(CloseParenthesis);
                     }
