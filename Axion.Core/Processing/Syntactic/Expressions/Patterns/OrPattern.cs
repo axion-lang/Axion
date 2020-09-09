@@ -8,11 +8,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     ///     </c>
     /// </summary>
     public class OrPattern : Pattern {
-        private Pattern left = null!;
+        private Pattern? left;
 
-        public Pattern Left {
+        public Pattern? Left {
             get => left;
-            set => left = Bind(value);
+            set => left = BindNullable(value);
         }
 
         private Pattern right = null!;
@@ -25,7 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
         public OrPattern(Node parent) : base(parent) { }
 
         public override bool Match(Node parent) {
-            return Left.Match(parent) || Right.Match(parent);
+            return (Left?.Match(parent) ?? false) || Right.Match(parent);
         }
 
         public OrPattern Parse() {
