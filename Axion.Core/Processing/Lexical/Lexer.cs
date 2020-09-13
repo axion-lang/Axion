@@ -89,7 +89,7 @@ namespace Axion.Core.Processing.Lexical {
             return ReadInternal();
         }
 
-        private Token ReadInternal() {
+        private Token? ReadInternal() {
             if (stream.PeekIs(White)) {
                 return ReadWhite();
             }
