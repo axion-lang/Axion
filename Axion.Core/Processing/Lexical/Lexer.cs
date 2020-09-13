@@ -293,7 +293,7 @@ namespace Axion.Core.Processing.Lexical {
             } while (addNext);
 
             while (TryAddChar(NumbersDec)) {
-                content.Append(stream.C);
+                content.Append(stream.Char);
             }
 
             return BindSpan(new NumberToken(src, value.ToString(), content.ToString()));
@@ -534,18 +534,18 @@ namespace Axion.Core.Processing.Lexical {
             var      escaped     = "";
             // \t, \n, etc
             if (stream.Eat(EscapeSequences.Keys.ToArray()) != null) {
-                raw     += stream.C;
-                escaped += EscapeSequences[stream.C];
+                raw     += stream.Char;
+                escaped += EscapeSequences[stream.Char];
             }
             // \u h{4} or \U h{8}
             else if (stream.Eat("u", "U") != null) {
-                string u = stream.C;
+                char u = stream.Char;
                 raw += u;
-                int uEscapeLen = u == "u" ? 4 : 8;
+                int uEscapeLen = u == 'u' ? 4 : 8;
                 var escapeLen  = 0;
                 while (escapeLen < uEscapeLen) {
                     if (stream.Eat(NumbersHex) != null) {
-                        raw += stream.C;
+                        raw += stream.Char;
                         escapeLen++;
                     }
                     else {
@@ -570,9 +570,9 @@ namespace Axion.Core.Processing.Lexical {
                 }
             }
             else if (stream.Eat("x") != null) {
-                raw += stream.C;
+                raw += stream.Char;
                 while (stream.Eat(NumbersHex) != null && raw.Length < 4) {
-                    raw += stream.C;
+                    raw += stream.Char;
                 }
 
                 if (raw.Length != 4) {

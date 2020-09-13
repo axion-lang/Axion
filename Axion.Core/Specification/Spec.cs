@@ -69,19 +69,19 @@ namespace Axion.Core.Specification {
 
         // @formatter:off
 
-        public static readonly Dictionary<string, string> EscapeSequences =
-        new Dictionary<string, string> {
-            { "0", "\u0000" },
-            { "a", "\u0007" },
-            { "b", "\u0008" },
-            { "f", "\u000c" },
-            { "n", "\u000a" },
-            { "r", "\u000d" },
-            { "t", "\u0009" },
-            { "v", "\u000b" },
-            { "\\", "\\" },
-            { "\"", "\"" },
-            { "\'", "\'" }
+        public static readonly Dictionary<char, string> EscapeSequences =
+        new Dictionary<char, string> {
+            { '0', "\u0000" },
+            { 'a', "\u0007" },
+            { 'b', "\u0008" },
+            { 'f', "\u000c" },
+            { 'n', "\u000a" },
+            { 'r', "\u000d" },
+            { 't', "\u0009" },
+            { 'v', "\u000b" },
+            { '\\', "\\" },
+            { '\"', "\"" },
+            { '\'', "\'" }
         };
 
         public static readonly Dictionary<string, (TokenType Type, int Precedence, InputSide Side)> Operators =

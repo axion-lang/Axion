@@ -9,10 +9,11 @@ namespace Axion.Core.Processing.Lexical {
     ///     and moving backwards.
     /// </summary>
     public class TextStream {
-        private int    charIdx = -1;
-        private int    lineIdx;
-        private int    columnIdx;
-        public  string Text { get; }
+        private int charIdx = -1;
+        private int lineIdx;
+        private int columnIdx;
+
+        public string Text { get; }
 
         /// <summary>
         ///     0-based (Line, Column) position of character in source code.
@@ -39,7 +40,9 @@ namespace Axion.Core.Processing.Lexical {
         /// <summary>
         ///     Current (eaten) character.
         /// </summary>
-        public string C => charIdx < 0 ? Spec.EndOfCode.ToString() : Text[charIdx].ToString();
+        public char Char => charIdx < 0 ? Spec.EndOfCode : Text[charIdx];
+
+        public bool IsEmpty => string.IsNullOrWhiteSpace(Text);
 
         public TextStream(string text) {
             if (!text.EndsWith(Spec.EndOfCode)) {
@@ -93,7 +96,7 @@ namespace Axion.Core.Processing.Lexical {
         public string? Eat(params string[] expected) {
             if (expected.Length == 0) {
                 Move();
-                return C;
+                return Char.ToString();
             }
 
             foreach (string value in expected) {
@@ -114,7 +117,7 @@ namespace Axion.Core.Processing.Lexical {
         public string? Eat(params char[] expected) {
             if (expected.Length == 0) {
                 Move();
-                return C;
+                return Char.ToString();
             }
             char nxt = Peek();
             if (expected.Contains(nxt)) {
