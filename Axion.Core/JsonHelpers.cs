@@ -22,7 +22,7 @@ namespace Axion.Core {
         ) {
             JsonProperty property = base.CreateProperty(member, memberSerialization);
 
-            Predicate<object> shouldSerialize = property.ShouldSerialize;
+            Predicate<object>? shouldSerialize = property.ShouldSerialize;
             property.ShouldSerialize = obj => (shouldSerialize == null || shouldSerialize(obj))
                                            && !IsEmptyCollection(property, obj);
             return property;
@@ -30,7 +30,7 @@ namespace Axion.Core {
 
         private static bool IsEmptyCollection(JsonProperty property, object target) {
             try {
-                object value = property.ValueProvider.GetValue(target);
+                object? value = property.ValueProvider?.GetValue(target);
                 if (value is ICollection collection && collection.Count == 0) {
                     return true;
                 }
@@ -39,7 +39,7 @@ namespace Axion.Core {
                     return false;
                 }
 
-                PropertyInfo countProp = property.PropertyType.GetProperty("Count");
+                PropertyInfo? countProp = property.PropertyType?.GetProperty("Count");
                 if (countProp == null) {
                     return false;
                 }
