@@ -15,8 +15,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     ///     </c>
     /// </summary>
     public class ExpressionPattern : Pattern {
-        private Func<Node, Expr> parseFunc = null!;
-        private Type             type      = null!;
+        private Func<Node, Expr>? parseFunc;
+        private Type              type = null!;
 
         public ExpressionPattern(Node parent) : base(parent) { }
 
@@ -26,7 +26,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 return true;
             }
 
-            Expr e;
+            Expr? e;
             if (parseFunc != null) {
                 e = parseFunc(parent);
                 parent.Ast.MacroApplicationParts.Peek().Expressions.Add(e);
@@ -52,7 +52,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 PatternFromTypeName(namedParts[id.Content]);
             }
             if (Stream.MaybeEat(Colon)) {
-                TypeName tn = TypeName.Parse(this);
+                TypeName? tn = TypeName.Parse(this);
                 if (!typeDefined
                  && tn is SimpleTypeName simpleTypeName
                  && simpleTypeName.Name.IsSimple) {
