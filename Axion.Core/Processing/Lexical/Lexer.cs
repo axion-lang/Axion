@@ -130,7 +130,7 @@ namespace Axion.Core.Processing.Lexical {
                 return ReadNewline();
             }
 
-            if (stream.PeekIs(Eoc)) {
+            if (stream.PeekIs(EndOfCode)) {
                 return ReadEoc();
             }
 
@@ -282,7 +282,7 @@ namespace Axion.Core.Processing.Lexical {
 
         private Token ReadEoc() {
             type = End;
-            TryAddChar(Eoc);
+            TryAddChar(EndOfCode);
             return NewTokenFromContext();
         }
 
@@ -372,7 +372,7 @@ namespace Axion.Core.Processing.Lexical {
         private CommentToken ReadMultiLineComment() {
             AddNext(false, MultiLineCommentMark);
             while (!stream.PeekIs(MultiLineCommentMark)) {
-                if (stream.PeekIs(Eoc)) {
+                if (stream.PeekIs(EndOfCode)) {
                     CommentToken t = BindSpan(
                         new CommentToken(
                             src,
@@ -459,7 +459,7 @@ namespace Axion.Core.Processing.Lexical {
                 if (stream.PeekIs('\\') && !prefixes.Contains("r")) {
                     ReadEscapeSeq();
                 }
-                else if (stream.PeekIs(Eols) && quote.Length == 1 || stream.PeekIs(Eoc)) {
+                else if (stream.PeekIs(Eols) && quote.Length == 1 || stream.PeekIs(EndOfCode)) {
                     unclosed = true;
                     break;
                 }

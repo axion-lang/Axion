@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Lexical {
         /// <summary>
         ///     Checks that next character is line/source terminator.
         /// </summary>
-        public bool AtEndOfLine => Spec.Eols.Contains(Peek()) || PeekIs(Spec.Eoc);
+        public bool AtEndOfLine => Spec.Eols.Contains(Peek()) || PeekIs(Spec.EndOfCode);
 
         public string RestOfLine {
             get {
@@ -39,11 +39,11 @@ namespace Axion.Core.Processing.Lexical {
         /// <summary>
         ///     Current (eaten) character.
         /// </summary>
-        public string C => charIdx < 0 ? Spec.Eoc.ToString() : Text[charIdx].ToString();
+        public string C => charIdx < 0 ? Spec.EndOfCode.ToString() : Text[charIdx].ToString();
 
         public TextStream(string text) {
-            if (!text.EndsWith(Spec.Eoc)) {
-                text += Spec.Eoc;
+            if (!text.EndsWith(Spec.EndOfCode)) {
+                text += Spec.EndOfCode;
             }
 
             Text = text;
@@ -58,7 +58,7 @@ namespace Axion.Core.Processing.Lexical {
                 return Text[charIdx + 1];
             }
 
-            return Spec.Eoc;
+            return Spec.EndOfCode;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Axion.Core.Processing.Lexical {
                 return Text.Substring(charIdx + 1, length);
             }
 
-            return new string(Spec.Eoc, length);
+            return new string(Spec.EndOfCode, length);
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace Axion.Core.Processing.Lexical {
 
         private void Move(int by = 1) {
             Debug.Assert(by > 0);
-            while (by > 0 && Peek() != Spec.Eoc) {
+            while (by > 0 && Peek() != Spec.EndOfCode) {
                 if (Peek() == '\n') {
                     lineIdx++;
                     columnIdx = 0;

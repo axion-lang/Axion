@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -92,7 +92,7 @@ namespace Axion.Core.Processing.Errors {
             var lines = new List<string>();
             // limit code piece by 5 lines
             for (int i = errorSpan.Start.Line; i < codeLines.Length && lines.Count < 4; i++) {
-                lines.Add(codeLines[i].TrimEnd('\n', '\r', Spec.Eoc));
+                lines.Add(codeLines[i].TrimEnd('\n', '\r', Spec.EndOfCode));
             }
 
             if (lines.Count > codeLines.Length - errorSpan.Start.Line) {

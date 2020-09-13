@@ -16,7 +16,7 @@ namespace Axion.Core.Specification {
     ///     (allowed operators, keywords, etc.)
     /// </summary>
     public static partial class Spec {
-        public const char   Eoc                  = '\0';
+        public const char   EndOfCode            = '\0';
         public const string OneLineCommentMark   = "#";
         public const string MultiLineCommentMark = "###";
         public const string CharacterQuote       = "`";
