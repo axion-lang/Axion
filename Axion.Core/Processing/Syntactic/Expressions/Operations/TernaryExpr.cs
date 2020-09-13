@@ -58,7 +58,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
                 invert = true;
             }
             TrueMark  = Stream.Token;
-            TrueExpr  = AnyExpr.Parse(this);
+            TrueExpr  ??= AnyExpr.Parse(this);
             Condition = Parse(this);
             if (Stream.MaybeEat(KeywordElse)) {
                 FalseMark = Stream.Token;
