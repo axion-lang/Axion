@@ -1,0 +1,6 @@
+
+StdLibPath = '..\..\..\..\stdlib'
+
+ImportedMacros = [
+    './macros.ax'
+]
