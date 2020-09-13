@@ -24,7 +24,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             // tuple
             if (s.PeekIs(OpenParenthesis)) {
                 TupleTypeName tuple = new TupleTypeName(parent).Parse();
-                leftTypeName = tuple.Types.Count == 1 ? tuple.Types[0] : tuple;
+                leftTypeName = tuple.Types.Count == 1 ? tuple.Types[0]! : tuple;
             }
             // simple
             else if (s.PeekIs(Identifier)) {
@@ -74,9 +74,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         ///     </c>
         ///     for class, enum, enum item.
         /// </summary>
-        internal static List<(TypeName type, NameExpr? label)> ParseNamedTypeArgs(Node parent) {
+        internal static List<(TypeName? type, NameExpr? label)> ParseNamedTypeArgs(Node parent) {
             TokenStream s        = parent.Source.TokenStream;
-            var         typeArgs = new List<(TypeName, NameExpr?)>();
+            var         typeArgs = new List<(TypeName?, NameExpr?)>();
             Token       start    = s.Peek;
 
             do {

@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class TupleExpr : AtomExpr {
-        private NodeList<Expr> expressions = null!;
+        private NodeList<Expr>? expressions;
 
         public NodeList<Expr> Expressions {
             get => InitIfNull(ref expressions);
@@ -21,7 +21,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public override TypeName ValueType => new TupleTypeName(this) {
-            Types = new NodeList<TypeName>(this, Expressions.Select(e => e.ValueType))
+            Types = new NodeList<TypeName?>(this, Expressions.Select(e => e.ValueType))
         };
 
         internal TupleExpr(Node parent) : base(parent) { }

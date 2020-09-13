@@ -23,9 +23,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => typeArgsStartMark = BindNullable(value);
         }
 
-        private NodeList<TypeName> typeArgs = null!;
+        private NodeList<TypeName?>? typeArgs;
 
-        public NodeList<TypeName> TypeArgs {
+        public NodeList<TypeName?> TypeArgs {
             get => InitIfNull(ref typeArgs);
             set => typeArgs = Bind(value);
         }
