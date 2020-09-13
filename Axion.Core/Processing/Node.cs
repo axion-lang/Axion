@@ -57,13 +57,13 @@ namespace Axion.Core.Processing {
         ///     Direct reference to the attribute of
         ///     parent to which this node is bound.
         /// </summary>
-        internal ITreePath Path = null!;
+        public ITreePath Path { get; set; } = null!;
 
         /// <summary>
         ///     Reference to parent of this node.
         /// </summary>
         [NoPathTraversing]
-        protected internal Node? Parent { get; set; }
+        protected internal Node Parent { get; set; } = null!;
 
         private TypeName valueType = null!;
 
@@ -89,21 +89,18 @@ namespace Axion.Core.Processing {
         /// </summary>
         internal T? GetParent<T>()
             where T : Node {
-            Node? p = this;
+            Node p = this;
             while (true) {
                 p = p.Parent;
-                if (p == null || p is T) {
-                    return (T?) p;
-                }
-
-                if (p is Ast) {
-                    return null;
+                switch (p) {
+                case T node: return node;
+                case Ast _:  return null;
                 }
             }
         }
 
-        protected NodeList<T> InitIfNull<T>(ref NodeList<T> list)
-            where T : Node {
+        protected NodeList<T> InitIfNull<T>(ref NodeList<T>? list)
+            where T : Node? {
             if (list == null) {
                 list = new NodeList<T>(this);
             }
@@ -149,7 +146,7 @@ namespace Axion.Core.Processing {
             ExtendSpan(value);
 
             value.Parent = this;
-            value.Path   = new NodeTreePath(value, GetType().GetProperty(propertyName));
+            value.Path   = new NodeTreePath(value, GetType().GetProperty(propertyName)!);
 
             return value;
         }
