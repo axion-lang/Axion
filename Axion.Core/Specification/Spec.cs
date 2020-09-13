@@ -86,75 +86,71 @@ namespace Axion.Core.Specification {
 
         public static readonly Dictionary<string, (TokenType Type, int Precedence, InputSide Side)> Operators =
         new Dictionary<string, (TokenType, int, InputSide)> {
-            { "of",      (OpOf,                 19,  InputSide.Unknown) }, 
-            { ".",       (OpDot,                19,  InputSide.Unknown) }, 
+            { "of",      (OpOf,                 19,  InputSide.Unknown) },
+            { ".",       (OpDot,                19,  InputSide.Unknown) },
 
-            { "++",      (OpIncrement,          18,  InputSide.Unknown) }, 
-            { "--",      (OpDecrement,          18,  InputSide.Unknown) }, 
+            { "++",      (OpIncrement,          18,  InputSide.Unknown) },
+            { "--",      (OpDecrement,          18,  InputSide.Unknown) },
 
-            { "**",      (OpPower,              17,  InputSide.Both) },    
+            { "**",      (OpPower,              17,  InputSide.Both) },
 
-            { "not",     (OpNot,                16,  InputSide.Right) },   
-            { "~",       (OpBitNot,             16,  InputSide.Right) },   
+            { "not",     (OpNot,                16,  InputSide.Right) },
+            { "~",       (OpBitNot,             16,  InputSide.Right) },
 
-            { "*",       (OpMultiply,           15,  InputSide.Both) },    
-            { "/",       (OpTrueDivide,         15,  InputSide.Both) },    
-            { "//",      (OpFloorDivide,        15,  InputSide.Both) },    
-            { "%",       (OpRemainder,          15,  InputSide.Both) },    
+            { "*",       (OpMultiply,           15,  InputSide.Both) },
+            { "/",       (OpTrueDivide,         15,  InputSide.Both) },
+            { "//",      (OpFloorDivide,        15,  InputSide.Both) },
+            { "%",       (OpRemainder,          15,  InputSide.Both) },
 
-            { "+",       (OpPlus,               14,  InputSide.Unknown) }, 
-            { "-",       (OpMinus,              14,  InputSide.Unknown) }, 
+            { "+",       (OpPlus,               14,  InputSide.Unknown) },
+            { "-",       (OpMinus,              14,  InputSide.Unknown) },
 
-            { "<<",      (OpBitLeftShift,       13,  InputSide.Both) },    
-            { ">>",      (OpBitRightShift,      13,  InputSide.Both) },    
+            { "<<",      (OpBitLeftShift,       13,  InputSide.Both) },
+            { ">>",      (OpBitRightShift,      13,  InputSide.Both) },
 
-            { "...",     (Op3Dot,               12,  InputSide.Both) },    
-            { "..",      (Op2Dot,               12,  InputSide.Both) },    
+            { "...",     (Op3Dot,               12,  InputSide.Both) },
+            { "..",      (Op2Dot,               12,  InputSide.Both) },
 
-            { "<=>",     (Op3WayCompare,        11,  InputSide.Both) },    
+            { "<=>",     (Op3WayCompare,        11,  InputSide.Both) },
 
-            { "<",       (OpLess,               10,  InputSide.Both) },    
-            { "<=",      (OpLessOrEqual,        10,  InputSide.Both) },    
-            { ">",       (OpGreater,            10,  InputSide.Both) },    
-            { ">=",      (OpGreaterOrEqual,     10,  InputSide.Both) },    
+            { "<",       (OpLess,               10,  InputSide.Both) },
+            { "<=",      (OpLessOrEqual,        10,  InputSide.Both) },
+            { ">",       (OpGreater,            10,  InputSide.Both) },
+            { ">=",      (OpGreaterOrEqual,     10,  InputSide.Both) },
 
-            { "==",      (OpEqualsEquals,       9,   InputSide.Both) },    
-            { "!=",      (OpNotEquals,          9,   InputSide.Both) },    
+            { "==",      (OpEqualsEquals,       9,   InputSide.Both) },
+            { "!=",      (OpNotEquals,          9,   InputSide.Both) },
 
-            { "&",       (OpBitAnd,             8,   InputSide.Both) },    
-            { "^",       (OpBitXor,             7,   InputSide.Both) },    
-            { "|",       (OpBitOr,              6,   InputSide.Both) },    
+            { "&",       (OpBitAnd,             8,   InputSide.Both) },
+            { "^",       (OpBitXor,             7,   InputSide.Both) },
+            { "|",       (OpBitOr,              6,   InputSide.Both) },
 
-            { "is",      (OpIs,                 5,   InputSide.Both) },    
-            { "is-not",  (OpIsNot,              5,   InputSide.Both) },    
-            { "in",      (OpIn,                 5,   InputSide.Both) },    
-            { "not-in",  (OpNotIn,              5,   InputSide.Both) },    
+            { "is",      (OpIs,                 5,   InputSide.Both) },
+            { "in",      (OpIn,                 5,   InputSide.Both) },
 
-            { "|>",      (RightPipeline,        4,   InputSide.Both) },    
+            { "|>",      (RightPipeline,        4,   InputSide.Both) },
 
-            { "and",     (OpAnd,                3,   InputSide.Both) },    
+            { "and",     (OpAnd,                3,   InputSide.Both) },
 
-            { "or",      (OpOr,                 2,   InputSide.Both) },    
+            { "or",      (OpOr,                 2,   InputSide.Both) },
 
-            { "??",      (Op2Question,          1,   InputSide.Both) },    
+            { "??",      (Op2Question,          1,   InputSide.Both) },
 
-            { "=",       (OpAssign,             0,   InputSide.Both) },    
-            { "+=",      (OpPlusAssign,         0,   InputSide.Both) },    
-            { "-=",      (OpMinusAssign,        0,   InputSide.Both) },    
-            { "**=",     (OpPowerAssign,        0,   InputSide.Both) },    
-            { "*=",      (OpMultiplyAssign,     0,   InputSide.Both) },    
-            { "/=",      (OpFloorDivideAssign,  0,   InputSide.Both) },    
-            { "//=",     (OpTrueDivideAssign,   0,   InputSide.Both) },    
-            { "%=",      (OpRemainderAssign,    0,   InputSide.Both) },    
-            { "?=",      (OpQuestionAssign,     0,   InputSide.Both) },    
-            { "<<=",     (OpBitLShiftAssign,    0,   InputSide.Both) },    
-            { ">>=",     (OpBitRShiftAssign,    0,   InputSide.Both) },    
-            { "&=",      (OpBitAndAssign,       0,   InputSide.Both) },    
-            { "|=",      (OpBitOrAssign,        0,   InputSide.Both) },    
+            { "=",       (OpAssign,             0,   InputSide.Both) },
+            { "+=",      (OpPlusAssign,         0,   InputSide.Both) },
+            { "-=",      (OpMinusAssign,        0,   InputSide.Both) },
+            { "**=",     (OpPowerAssign,        0,   InputSide.Both) },
+            { "*=",      (OpMultiplyAssign,     0,   InputSide.Both) },
+            { "/=",      (OpFloorDivideAssign,  0,   InputSide.Both) },
+            { "//=",     (OpTrueDivideAssign,   0,   InputSide.Both) },
+            { "%=",      (OpRemainderAssign,    0,   InputSide.Both) },
+            { "?=",      (OpQuestionAssign,     0,   InputSide.Both) },
+            { "<<=",     (OpBitLShiftAssign,    0,   InputSide.Both) },
+            { ">>=",     (OpBitRShiftAssign,    0,   InputSide.Both) },
+            { "&=",      (OpBitAndAssign,       0,   InputSide.Both) },
+            { "|=",      (OpBitOrAssign,        0,   InputSide.Both) },
             { "^=",      (OpBitXorAssign,       0,   InputSide.Both) }
         };
-        
-        // @formatter:on
 
         public static readonly string[] OperatorsKeys =
             Operators.Keys.OrderByDescending(k => k.Length).ToArray();
@@ -167,30 +163,19 @@ namespace Axion.Core.Specification {
         /// <summary>
         ///     Maps language keyword's string value to it's token type.
         /// </summary>
-        public static readonly Dictionary<string, TokenType> Keywords = Enum
-                                                                        .GetNames(typeof(TokenType))
-                                                                        .Where(
-                                                                            n => n.StartsWith(
-                                                                                "Keyword"
-                                                                            )
-                                                                        )
-                                                                        .Select(
-                                                                            n => {
-                                                                                Enum.TryParse(
-                                                                                    n,
-                                                                                    out TokenType
-                                                                                        type
-                                                                                );
-                                                                                return (
-                                                                                    n.Remove(0, 7)
-                                                                                     .ToLower(),
-                                                                                    type);
-                                                                            }
-                                                                        )
-                                                                        .ToDictionary(
-                                                                            x => x.Item1,
-                                                                            x => x.Item2
-                                                                        );
+        public static readonly Dictionary<string, TokenType> Keywords =
+            Enum.GetNames(typeof(TokenType))
+                .Where(n => n.StartsWith("Keyword"))
+                .Select(n => {
+                        Enum.TryParse(n, out TokenType type);
+                        return (n.Remove(0, 7).ToLower(), type);
+                })
+                .ToDictionary(
+                    x => x.Item1,
+                    x => x.Item2
+                );
+        
+        // @formatter:on
 
         /// <summary>
         ///     Token types that are applicable on the left side of expression.
