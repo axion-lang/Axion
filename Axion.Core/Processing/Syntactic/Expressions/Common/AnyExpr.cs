@@ -77,7 +77,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             if (s.PeekIs(Semicolon, KeywordPass)) {
                 return new EmptyExpr(parent).Parse();
             }
-            if (s.PeekIs(Indent, OpenBrace, Colon)) {
+            if (s.PeekIs(Spec.ScopeStartMarks)) {
                 return new ScopeExpr(parent).Parse();
             }
 
