@@ -9,11 +9,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///     </c>
     /// </summary>
     public class GenericTypeName : TypeName {
-        private TypeName target = null!;
+        private TypeName? target;
 
-        public TypeName Target {
+        public TypeName? Target {
             get => target;
-            set => target = Bind(value);
+            set => target = BindNullable(value);
         }
 
         private Token? typeArgsStartMark;
