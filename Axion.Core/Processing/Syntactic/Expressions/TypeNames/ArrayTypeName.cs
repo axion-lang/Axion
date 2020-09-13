@@ -9,11 +9,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///     </c>
     /// </summary>
     public class ArrayTypeName : TypeName {
-        private TypeName elementType = null!;
+        private TypeName? elementType;
 
-        public TypeName ElementType {
+        public TypeName? ElementType {
             get => elementType;
-            set => elementType = Bind(value);
+            set => elementType = BindNullable(value);
         }
 
         private Token? openingBracket;

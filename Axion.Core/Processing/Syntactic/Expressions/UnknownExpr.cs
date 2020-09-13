@@ -11,7 +11,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class UnknownExpr : AtomExpr {
-        private NodeList<Token> tokens = null!;
+        private NodeList<Token>? tokens;
 
         public NodeList<Token> Tokens {
             get => InitIfNull(ref tokens);

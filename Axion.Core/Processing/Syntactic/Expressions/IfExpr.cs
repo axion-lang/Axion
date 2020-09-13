@@ -25,11 +25,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => thenScope = Bind(value);
         }
 
-        private ScopeExpr elseScope = null!;
+        private ScopeExpr? elseScope;
 
-        public ScopeExpr ElseScope {
+        public ScopeExpr? ElseScope {
             get => elseScope;
-            set => elseScope = Bind(value);
+            set => elseScope = BindNullable(value);
         }
 
         internal IfExpr(Node parent) : base(parent) { }

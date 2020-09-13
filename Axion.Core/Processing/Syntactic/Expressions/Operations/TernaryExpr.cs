@@ -12,11 +12,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     ///     </c>
     /// </summary>
     public class TernaryExpr : InfixExpr {
-        private Expr condition = null!;
+        private Expr? condition;
 
-        public Expr Condition {
+        public Expr? Condition {
             get => condition;
-            set => condition = Bind(value);
+            set => condition = BindNullable(value);
         }
 
         private Token? trueMark;
@@ -26,11 +26,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             set => trueMark = BindNullable(value);
         }
 
-        private Expr trueExpr = null!;
+        private Expr? trueExpr;
 
-        public Expr TrueExpr {
+        public Expr? TrueExpr {
             get => trueExpr;
-            set => trueExpr = Bind(value);
+            set => trueExpr = BindNullable(value);
         }
 
         private Token? falseMark;
@@ -40,14 +40,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             set => falseMark = BindNullable(value);
         }
 
-        private Expr falseExpr = null!;
+        private Expr? falseExpr;
 
-        public Expr FalseExpr {
+        public Expr? FalseExpr {
             get => falseExpr;
-            set => falseExpr = Bind(value);
+            set => falseExpr = BindNullable(value);
         }
 
-        public override TypeName ValueType => TrueExpr.ValueType;
+        public override TypeName? ValueType => TrueExpr?.ValueType ?? FalseExpr?.ValueType;
 
         internal TernaryExpr(Node parent) : base(parent) { }
 
@@ -57,15 +57,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
                 Stream.Eat(KeywordUnless);
                 invert = true;
             }
-            TrueMark  =   Stream.Token;
+            TrueMark  = Stream.Token;
             TrueExpr  ??= AnyExpr.Parse(this);
-            Condition =   Parse(this);
+            Condition = Parse(this);
             if (Stream.MaybeEat(KeywordElse)) {
                 FalseMark = Stream.Token;
                 FalseExpr = Multiple<InfixExpr>.ParseGenerally(this);
             }
             if (invert) {
-                (TrueExpr, FalseExpr) = (FalseExpr, TrueExpr);
+                (TrueExpr, FalseExpr) = (FalseExpr!, TrueExpr);
             }
             return this;
         }

@@ -9,11 +9,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///     </c>
     /// </summary>
     public class UnionTypeName : TypeName {
-        private TypeName left = null!;
+        private TypeName? left;
 
-        public TypeName Left {
+        public TypeName? Left {
             get => left;
-            set => left = Bind(value);
+            set => left = BindNullable(value);
         }
 
         private Token? joiningMark;
@@ -23,11 +23,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => joiningMark = BindNullable(value);
         }
 
-        private TypeName right = null!;
+        private TypeName? right;
 
-        public TypeName Right {
+        public TypeName? Right {
             get => right;
-            set => right = Bind(value);
+            set => right = BindNullable(value);
         }
 
         public UnionTypeName(Node parent) : base(parent) { }

@@ -27,7 +27,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             set => val = BindNullable(value);
         }
 
-        public override TypeName ValueType => Value.ValueType;
+        public override TypeName? ValueType => Value?.ValueType;
 
         public ReturnExpr(Node parent) : base(parent) { }
 

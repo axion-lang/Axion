@@ -21,21 +21,21 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => kwClass = BindNullable(value);
         }
 
-        private NameExpr name = null!;
+        private NameExpr? name;
 
-        public NameExpr Name {
+        public NameExpr? Name {
             get => name;
-            set => name = Bind(value);
+            set => name = BindNullable(value);
         }
 
-        private NodeList<TypeName> bases = null!;
+        private NodeList<TypeName>? bases;
 
         public NodeList<TypeName> Bases {
             get => InitIfNull(ref bases);
             set => bases = Bind(value);
         }
 
-        private NodeList<Expr> keywords = null!;
+        private NodeList<Expr>? keywords;
 
         public NodeList<Expr> Keywords {
             get => InitIfNull(ref keywords);
@@ -49,7 +49,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => scope = Bind(value);
         }
 
-        private NodeList<Expr> dataMembers = null!;
+        private NodeList<Expr>? dataMembers;
 
         public NodeList<Expr> DataMembers {
             get => InitIfNull(ref dataMembers);

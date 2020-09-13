@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => target = Bind(value);
         }
 
-        private NodeList<FuncCallArg> args = null!;
+        private NodeList<FuncCallArg>? args;
 
         public NodeList<FuncCallArg> Args {
             get => InitIfNull(ref args);

@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => val = Bind(value);
         }
 
-        public override TypeName ValueType => Value.ValueType;
+        public override TypeName? ValueType => Value.ValueType;
 
         internal ParenthesizedExpr(Expr value) : base(value.Parent) {
             Value = value;

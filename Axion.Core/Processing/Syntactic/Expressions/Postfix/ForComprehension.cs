@@ -14,12 +14,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///     </c>
     /// </summary>
     public class ForComprehension : InfixExpr {
-        private Expr target = null!;
+        private Expr? target;
 
         [NoPathTraversing]
-        public Expr Target {
+        public Expr? Target {
             get => target;
-            set => target = Bind(value);
+            set => target = BindNullable(value);
         }
 
         private Expr item = null!;
@@ -36,7 +36,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => iterable = Bind(value);
         }
 
-        private NodeList<Expr> conditions = null!;
+        private NodeList<Expr>? conditions;
 
         public NodeList<Expr> Conditions {
             get => InitIfNull(ref conditions);
@@ -53,7 +53,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public bool IsGenerator;
         public bool IsNested;
 
-        public override TypeName ValueType => Target.ValueType;
+        public override TypeName? ValueType => Target?.ValueType;
 
         public ForComprehension(Node parent) : base(parent) { }
 
@@ -84,7 +84,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     }
 
                     if (Stream.PeekIs(KeywordFor)) {
-                        Right = new ForComprehension(Parent) {
+                        Right = new ForComprehension(Parent!) {
                             Target = this, IsNested = true
                         }.Parse();
                     }
