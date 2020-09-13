@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         private ScopeExpr? scope;
 
         public ScopeExpr Scope {
-            get => scope;
+            get => InitIfNull(ref scope);
             set => scope = Bind(value);
         }
 

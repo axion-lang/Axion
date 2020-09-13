@@ -11,7 +11,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public string Quote        { get; }
         public string EndingQuotes { get; }
 
-        private NodeList<StringInterpolation> interpolations = null!;
+        private NodeList<StringInterpolation>? interpolations;
 
         public NodeList<StringInterpolation> Interpolations {
             get => InitIfNull(ref interpolations);

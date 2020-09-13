@@ -12,7 +12,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///     </c>
     /// </summary>
     public class NameExpr : AtomExpr {
-        private NodeList<Token> tokens = null!;
+        private NodeList<Token>? tokens;
 
         public NodeList<Token> Tokens {
             get => InitIfNull(ref tokens);
@@ -22,8 +22,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public Token[] Qualifiers => Tokens.OfType(Identifier);
         public bool    IsSimple   => Qualifiers.Length == 1;
 
-        public override TypeName ValueType =>
-            ((Expr) GetParent<ScopeExpr>().GetDefByName(this))?.ValueType;
+        public override TypeName? ValueType =>
+            ((Expr?) GetParent<ScopeExpr>()?.GetDefByName(this))?.ValueType;
 
         public NameExpr(string name) {
             if (name.Contains('.')) {

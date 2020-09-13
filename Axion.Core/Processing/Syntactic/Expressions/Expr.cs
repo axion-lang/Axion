@@ -47,13 +47,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         protected ScopeExpr InitIfNull(
-            ref                ScopeExpr n,
-            [CallerMemberName] string    propertyName = ""
+            ref                ScopeExpr? n,
+            [CallerMemberName] string     propertyName = ""
         ) {
-            if (n == null) {
-                n = new ScopeExpr(this);
-            }
-            n = Bind(n, propertyName);
+            n ??= new ScopeExpr(this);
+            n =   Bind(n, propertyName);
             return n;
         }
 

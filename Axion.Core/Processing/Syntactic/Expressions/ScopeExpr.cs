@@ -20,7 +20,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class ScopeExpr : Expr {
-        private NodeList<Expr> items = null!;
+        private NodeList<Expr>? items;
 
         public NodeList<Expr> Items {
             get => InitIfNull(ref items);
@@ -61,7 +61,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public IDefinitionExpr? GetDefByName(string name) {
             if (!(this is Ast)) {
-                IDefinitionExpr e = GetParent<ScopeExpr>().GetDefByName(name);
+                IDefinitionExpr? e = GetParent<ScopeExpr>()?.GetDefByName(name);
                 if (e != null) {
                     return e;
                 }
