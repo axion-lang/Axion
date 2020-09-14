@@ -25,7 +25,7 @@
 | Directory                                               | Contents                                                                      | Platform         |
 |---------------------------------------------------------|-------------------------------------------------------------------------------|------------------|
 | [`Axion`](Axion)                                        | Interface for compiler: CLI, ScriptBench editor, interpreter (C# code runner) | NET Core         |
-| [`Axion.Modules`](Modules)                              | Built-in modules for language, written in Axion iteslf                        | Axion            |
+| [`Axion.Modules`](Modules)                              | Built-in modules for language, written in Axion itself                        | Axion            |
 | [`Axion.Core`](Axion.Core)                              | Language core: lexer/parser/transpiler                                        | NET Standard     |
 | [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable)               | NET Core         |
 | [`misc`](misc)                                          | Code examples, arts, etc.                                                     |                  |
