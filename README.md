@@ -28,7 +28,7 @@
 | [`Axion.Modules`](Modules)                              | Built-in modules for language, written in Axion iteslf                        | Axion            |
 | [`Axion.Core`](Axion.Core)                              | Language core: lexer/parser/transpiler                                        | NET Standard     |
 | [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable)               | NET Core         |
-| [`Other`](Other)                                        | Code examples, arts, etc.                                                     |                  |
+| [`misc`](misc)                                          | Code examples, arts, etc.                                                     |                  |
 
 <h3 align="center">:dart: Key features</h3>
 
