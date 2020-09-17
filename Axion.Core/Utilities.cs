@@ -21,8 +21,10 @@ namespace Axion.Core {
             return dt.ToString(timedFileNameFormat, dateTimeFormat);
         }
 
-        internal static T[] OfType<T>(this IEnumerable<T> tokens, TokenType type)
-            where T : Token {
+        internal static T[] OfType<T>(
+            this IEnumerable<T> tokens,
+            TokenType           type
+        ) where T : Token {
             return tokens.Where(t => t.Type == type).ToArray();
         }
 
@@ -68,7 +70,10 @@ namespace Axion.Core {
             return null;
         }
 
-        public static T[] Union<T>(this IEnumerable<T> collection1, params T[] collection2) {
+        public static T[] Union<T>(
+            this   IEnumerable<T> collection1,
+            params T[]            collection2
+        ) {
             return Enumerable.Union(collection1, collection2).ToArray();
         }
 
@@ -94,7 +99,10 @@ namespace Axion.Core {
                    .Where(arg => !string.IsNullOrEmpty(arg));
         }
 
-        private static IEnumerable<string> Split(string str, Func<char, bool> controller) {
+        private static IEnumerable<string> Split(
+            string           str,
+            Func<char, bool> controller
+        ) {
             var nextPiece = 0;
             for (var c = 0; c < str.Length; c++) {
                 if (controller(str[c])) {

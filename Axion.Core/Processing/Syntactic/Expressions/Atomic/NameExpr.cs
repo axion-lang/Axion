@@ -25,33 +25,35 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public override TypeName? ValueType =>
             ((Expr?) GetParent<ScopeExpr>()?.GetDefByName(this))?.ValueType;
 
-        public NameExpr(string name) {
+        public NameExpr(Node parent) : base(parent) { }
+
+        public NameExpr(Node parent, string name) : base(parent) {
             if (name.Contains('.')) {
                 string[] qs = name.Split('.');
                 for (var i = 0; i < qs.Length; i++) {
                     string q = qs[i];
-                    Tokens.Add(new Token(Source, Identifier, q));
+                    Tokens.Add(new Token(Unit, Identifier, q));
                     if (i != qs.Length - 1) {
-                        Tokens.Add(new Token(Source, OpDot, "."));
+                        Tokens.Add(new Token(Unit, OpDot, "."));
                     }
                 }
             }
             else {
-                Tokens.Add(new Token(Source, Identifier, name));
+                Tokens.Add(new Token(Unit, Identifier, name));
             }
         }
-
-        public NameExpr(Node parent) : base(parent) { }
 
         public NameExpr Parse(bool simple = false) {
             Tokens.Add(Stream.Eat(Identifier));
             if (simple) {
                 return this;
             }
+
             while (Stream.PeekIs(OpDot)) {
                 Tokens.Add(Stream.Eat());
                 Tokens.Add(Stream.Eat(Identifier));
             }
+
             return this;
         }
 

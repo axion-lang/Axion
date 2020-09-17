@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
-using Axion.Core.Source;
 using Axion.Core.Specification;
 using CodeConsole;
 using CodeConsole.ScriptBench;
@@ -21,18 +21,25 @@ namespace Axion.Core.Processing.Errors {
         public override string        StackTrace { get; }
         public          BlameSeverity Severity   { get; }
 
-        [JsonProperty] private readonly Node errorSpan;
+        [JsonProperty]
+        private readonly CodeSpan errorSpan;
 
-        [JsonProperty] private readonly Unit targetUnit;
+        [JsonProperty]
+        private readonly Unit targetUnit;
 
-        [JsonProperty] private readonly string time =
+        [JsonProperty]
+        private readonly string time =
             DateTime.Now.ToString(CultureInfo.InvariantCulture);
 
-        private LangException(string message, BlameSeverity severity, Node span) {
+        private LangException(
+            string        message,
+            BlameSeverity severity,
+            CodeSpan      span
+        ) {
             Severity   = severity;
             Message    = message;
             errorSpan  = span;
-            targetUnit = span.Source;
+            targetUnit = span.Unit;
             StackTrace = new StackTrace(2).ToString();
         }
 
@@ -51,32 +58,42 @@ namespace Axion.Core.Processing.Errors {
                 blameType = BlameType.ExpectedInfixExpr;
             }
             else {
-                throw new ArgumentException($"Cannot get blame type for {expectedType.Name}");
+                throw new ArgumentException(
+                    $"Cannot get blame type for {expectedType.Name}"
+                );
             }
-            var ex = new LangException(blameType.Description, blameType.Severity, expr);
-            expr.Source.Blames.Add(ex);
+
+            var ex = new LangException(
+                blameType.Description,
+                blameType.Severity,
+                expr
+            );
+            expr.Unit.Blames.Add(ex);
         }
 
         public static void ReportMismatchedBracket(Token bracket) {
-            TokenType matchingBracket = bracket.Type.GetMatchingBracket();
+            var matchingBracket = bracket.Type.GetMatchingBracket();
             var ex = new LangException(
                 $"`{bracket.Value}` has no matching `{matchingBracket.GetValue()}`",
                 BlameSeverity.Error,
                 bracket
             );
-            bracket.Source.Blames.Add(ex);
+            bracket.Unit.Blames.Add(ex);
         }
 
-        public static void ReportUnexpectedSyntax(TokenType expected, Node span) {
+        public static void ReportUnexpectedSyntax(
+            TokenType expected,
+            CodeSpan  span
+        ) {
             var ex = new LangException(
-                $"Invalid syntax, expected `{expected.GetValue()}`, got `{span.Source.TokenStream.Peek.Type.GetValue()}`.",
+                $"Invalid syntax, expected `{expected.GetValue()}`, got `{span.Unit.TokenStream.Peek.Type.GetValue()}`.",
                 BlameSeverity.Error,
                 span
             );
-            span.Source.Blames.Add(ex);
+            span.Unit.Blames.Add(ex);
         }
 
-        public static void Report(BlameType type, Node span) {
+        public static void Report(BlameType type, CodeSpan span) {
             var ex = new LangException(type.Description, type.Severity, span);
             ex.targetUnit.Blames.Add(ex);
         }
@@ -91,7 +108,9 @@ namespace Axion.Core.Processing.Errors {
 
             var lines = new List<string>();
             // limit code piece by 5 lines
-            for (int i = errorSpan.Start.Line; i < codeLines.Length && lines.Count < 4; i++) {
+            for (int i = errorSpan.Start.Line;
+                 i < codeLines.Length && lines.Count < 4;
+                 i++) {
                 lines.Add(codeLines[i].TrimEnd('\n', '\r', Spec.EndOfCode));
             }
 
@@ -107,7 +126,8 @@ namespace Axion.Core.Processing.Errors {
                 errorTokenLength = lines[0].Length - errorSpan.Start.Column;
             }
             else {
-                errorTokenLength = errorSpan.End.Column - errorSpan.Start.Column;
+                errorTokenLength =
+                    errorSpan.End.Column - errorSpan.Start.Column;
             }
 
             // underline, red-colored
@@ -130,10 +150,12 @@ namespace Axion.Core.Processing.Errors {
                 : ConsoleColor.DarkYellow;
 
             // <severity>: <message>.
-            ConsoleUtils.WriteLine((Severity.ToString("G") + ": " + Message, color));
+            ConsoleUtils.WriteLine(
+                (Severity.ToString("G") + ": " + Message, color)
+            );
             // file name
             ConsoleUtils.WriteLine(
-                $"--> {targetUnit.SourceFilePath}:{errorSpan.Start.Line + 1},{errorSpan.Start.Column + 1}"
+                $"--> {targetUnit.SourceFile}:{errorSpan.Start.Line + 1},{errorSpan.Start.Column + 1}"
             );
             Console.WriteLine();
             // line with error
@@ -150,8 +172,8 @@ namespace Axion.Core.Processing.Errors {
 
         private static void DrawLineNumber(int lineNumber) {
             var    strNum = lineNumber.ToString();
-            int    width  = Math.Max(strNum.Length, 4);
-            string view   = strNum.PadLeft(width + 1).PadRight(width + 2) + "│ ";
+            int    width = Math.Max(strNum.Length, 4);
+            string view = strNum.PadLeft(width + 1).PadRight(width + 2) + "│ ";
             ConsoleUtils.Write((view, ScriptBenchSettings.DefaultFramesColor));
         }
 

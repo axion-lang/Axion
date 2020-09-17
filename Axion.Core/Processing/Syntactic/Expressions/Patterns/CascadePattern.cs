@@ -24,6 +24,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
             if (Patterns.All(pattern => pattern.Match(parent))) {
                 return true;
             }
+
             Stream.MoveAbsolute(startIdx);
             return false;
         }
@@ -56,6 +57,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                     LangException.Report(BlameType.InvalidSyntax, Stream.Peek);
                     continue;
                 }
+
                 // or pattern `x | y`
                 if (Stream.PeekIs(OpBitOr)) {
                     Patterns.Add(

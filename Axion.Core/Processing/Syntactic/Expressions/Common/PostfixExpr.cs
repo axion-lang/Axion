@@ -18,16 +18,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///     </c>
     /// </summary>
     public class PostfixExpr : PrefixExpr {
-        protected PostfixExpr() { }
-
         protected PostfixExpr(Node parent) : base(parent) { }
 
         internal new static PostfixExpr Parse(Node parent) {
-            TokenStream s = parent.Source.TokenStream;
+            TokenStream s = parent.Unit.TokenStream;
 
             // TODO: look about it.
-            bool        unquoted = !s.PeekByIs(2, OpenParenthesis) && s.MaybeEat(Dollar);
-            PostfixExpr value    = AtomExpr.Parse(parent);
+            var isUnquoted =
+                !s.PeekByIs(2, OpenParenthesis) && s.MaybeEat(Dollar);
+            PostfixExpr value = AtomExpr.Parse(parent);
 
             while (true) {
                 Token exactPeek = s.ExactPeek;
@@ -36,13 +35,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                         Target = value
                     }.Parse();
                 }
-                // NOTE: this condition makes _impossible_ placement of
-                //     function invocation parenthesis on the next line, e.g:
-                //         x = func
-                //         ()
-                //     But this trick resolves conflicts when stmt
-                //     starting with open paren is incorrectly treated
-                //     as continuation of previous stmt.
+                // NOTE: This condition makes _impossible_ placement of
+                //       function invocation parenthesis on the next line, e.g:
+                //           x = func
+                //           ()
+                //       But this also resolves conflicts when stmt
+                //       starting with open paren is incorrectly treated
+                //       as continuation of previous stmt, e.g:
+                //           x = not-a-function-just-a-value
+                //           (a, b) = (1, 2)
                 else if (s.PeekIs(OpenParenthesis) && s.Peek == exactPeek) {
                     value = new FuncCallExpr(parent) {
                         Target = value
@@ -62,11 +63,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 var op = (OperatorToken) s.Token;
                 op.Side = InputSide.Left;
                 value = new UnaryExpr(parent) {
-                    Operator = op, Value = value
+                    Operator = op,
+                    Value    = value
                 };
             }
 
-            if (unquoted) {
+            if (isUnquoted) {
                 value = new CodeUnquotedExpr(parent) {
                     Value = value
                 };

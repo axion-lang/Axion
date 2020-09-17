@@ -12,7 +12,7 @@ using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
-namespace Axion.Core.Processing.CodeGen {
+namespace Axion.Core.Processing.Emitting {
     public class ConverterToCSharp : ConverterFromAxion {
         public override string OutputFileExtension => ".cs";
 
@@ -23,6 +23,7 @@ namespace Axion.Core.Processing.CodeGen {
                 cw.Write("this");
                 return;
             }
+
             base.Convert(e);
         }
 
@@ -36,6 +37,7 @@ namespace Axion.Core.Processing.CodeGen {
                 cw.Write(" : ");
                 cw.AddJoin(", ", e.Bases);
             }
+
             cw.WriteLine();
             cw.Write(e.Scope);
         }
@@ -47,7 +49,7 @@ namespace Axion.Core.Processing.CodeGen {
                 cw.Write(") => ", e.Scope);
             }
             else {
-                // BUG type inference stuck in infinite loop (get-value in MathExprParser)
+                // BUG type inference stuck in infinite loop (get-value in TestMathExprParser)
                 cw.Write(
                     "public ",
                     e.ValueType,
@@ -73,7 +75,7 @@ namespace Axion.Core.Processing.CodeGen {
             }
             else {
                 cw.Write(
-                    (object) e.ValueType ?? "var",
+                    (object?) e.ValueType ?? "var",
                     " ",
                     e.Name,
                     " = ",
@@ -88,7 +90,7 @@ namespace Axion.Core.Processing.CodeGen {
             }
             else {
                 cw.Write(
-                    (object) e.ValueType ?? "var",
+                    (object?) e.ValueType ?? "var",
                     " ",
                     e.Name,
                     " = ",
@@ -98,7 +100,7 @@ namespace Axion.Core.Processing.CodeGen {
         }
 
         public override void Convert(BinaryExpr e) {
-            if (e.Operator.Is(OpPower)) {
+            if (e.Operator!.Is(OpPower)) {
                 cw.Write(
                     "Math.Pow(",
                     e.Left,
@@ -111,13 +113,14 @@ namespace Axion.Core.Processing.CodeGen {
                 // in (list1 or|and list2)
                 if (e.Right is ParenthesizedExpr paren
                  && paren.Value is BinaryExpr collections
-                 && collections.Operator.Is(OpAnd, OpOr)) {
+                 && collections.Operator!.Is(OpAnd, OpOr)) {
                     cw.Write(
                         collections.Right,
                         ".Contains(",
                         e.Left,
                         ") ",
-                        Spec.CSharp.BinaryOperators[collections.Operator.Type],
+                        Spec.CSharp.BinaryOperators[
+                            collections.Operator.Type],
                         " ",
                         collections.Left,
                         ".Contains(",
@@ -135,9 +138,13 @@ namespace Axion.Core.Processing.CodeGen {
                 }
             }
             else {
-                if (!Spec.CSharp.BinaryOperators.TryGetValue(e.Operator.Type, out string op)) {
+                if (!Spec.CSharp.BinaryOperators.TryGetValue(
+                    e.Operator.Type,
+                    out string op
+                )) {
                     op = e.Operator.Value;
                 }
+
                 cw.Write(
                     e.Left,
                     " ",
@@ -281,8 +288,9 @@ namespace Axion.Core.Processing.CodeGen {
                 // decorator is just a wrapper,
                 // so we need to unpack it's content.
                 if (expr is DecoratedExpr dec) {
-                    item = dec.Target;
+                    item = dec.Target!;
                 }
+
                 if (item is ModuleDef) {
                     cw.Write(expr);
                 }
@@ -299,26 +307,33 @@ namespace Axion.Core.Processing.CodeGen {
 
             cw.Write(
                 new ModuleDef(e) {
-                    Name = new NameExpr("__RootModule__")
+                    Name = new NameExpr(e, "__RootModule__")
                 }.WithScope(
                     new[] {
                         new ClassDef(e) {
-                            Name = new NameExpr("__RootClass__")
+                            Name = new NameExpr(e, "__RootClass__")
                         }.WithScope(
                             new[] {
                                 new FunctionDef(e) {
-                                        Name      = new NameExpr("Main"),
-                                        ValueType = new SimpleTypeName("void")
+                                        Name = new NameExpr(e, "Main"),
+                                        ValueType = new SimpleTypeName(
+                                            e,
+                                            "void"
+                                        )
                                     }.WithParameters(
                                          new FunctionParameter(e) {
-                                             Name = new NameExpr("args"),
+                                             Name = new NameExpr(e, "args"),
                                              ValueType = new ArrayTypeName(e) {
-                                                 ElementType = new SimpleTypeName("string")
+                                                 ElementType =
+                                                     new SimpleTypeName(
+                                                         e,
+                                                         Spec.StringType
+                                                     )
                                              }
                                          }
                                      )
                                      .WithScope(rootItems)
-                                     .WithDecorators(new NameExpr("static"))
+                                     .WithDecorators(new NameExpr(e, "static"))
                             }.Union(rootFunctions)
                         )
                     }.Union(rootClasses)
@@ -344,6 +359,7 @@ namespace Axion.Core.Processing.CodeGen {
             if (e.ElseScope == null) {
                 return;
             }
+
             cw.WriteLine("else");
             cw.Write(e.ElseScope);
         }

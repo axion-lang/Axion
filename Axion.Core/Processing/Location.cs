@@ -53,19 +53,23 @@ namespace Axion.Core.Processing {
         }
 
         public static bool operator <(Location left, Location right) {
-            return left.Line < right.Line || left.Line == right.Line && left.Column < right.Column;
+            return left.Line < right.Line
+                || left.Line == right.Line && left.Column < right.Column;
         }
 
         public static bool operator >(Location left, Location right) {
-            return left.Line > right.Line || left.Line == right.Line && left.Column > right.Column;
+            return left.Line > right.Line
+                || left.Line == right.Line && left.Column > right.Column;
         }
 
         public static bool operator <=(Location left, Location right) {
-            return left.Line < right.Line || left.Line == right.Line && left.Column <= right.Column;
+            return left.Line < right.Line
+                || left.Line == right.Line && left.Column <= right.Column;
         }
 
         public static bool operator >=(Location left, Location right) {
-            return left.Line > right.Line || left.Line == right.Line && left.Column >= right.Column;
+            return left.Line > right.Line
+                || left.Line == right.Line && left.Column >= right.Column;
         }
 
         public static implicit operator Location((int, int) position) {

@@ -11,8 +11,7 @@ namespace Axion.Core.Processing.Syntactic {
     ///     to one defined on list construction,
     ///     and provide some other useful methods.
     /// </summary>
-    public class NodeList<T> : IList<T>
-        where T : Node? {
+    public class NodeList<T> : IList<T> where T : Node {
         private Node? parent;
 
         public Node? Parent {
@@ -22,6 +21,7 @@ namespace Axion.Core.Processing.Syntactic {
                 if (parent == null) {
                     return;
                 }
+
                 foreach (T item in items) {
                     if (item != null) {
                         item.Parent = parent;
@@ -53,7 +53,9 @@ namespace Axion.Core.Processing.Syntactic {
 
         public T First {
             get =>
-                items.Count > 0 ? items[0] : throw new IndexOutOfRangeException();
+                items.Count > 0
+                    ? items[0]
+                    : throw new IndexOutOfRangeException();
             set {
                 if (items.Count > 0) {
                     items[0] = value;
@@ -66,7 +68,9 @@ namespace Axion.Core.Processing.Syntactic {
 
         public T Last {
             get =>
-                items.Count > 0 ? items[^1] : throw new IndexOutOfRangeException();
+                items.Count > 0
+                    ? items[^1]
+                    : throw new IndexOutOfRangeException();
             set {
                 if (items.Count > 0) {
                     items[^1] = value;
@@ -82,8 +86,8 @@ namespace Axion.Core.Processing.Syntactic {
             Parent = parent;
         }
 
-        internal NodeList(Node parent, IEnumerable<T>? collection) {
-            items  = collection?.ToList() ?? new List<T>();
+        internal NodeList(Node parent, IEnumerable<T> collection) {
+            items  = collection.ToList();
             Parent = parent;
         }
 
@@ -100,9 +104,10 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        public void Add(T item) {
+        public NodeList<T> Add(T item) {
             Parent?.Bind(item, this, Count);
             items.Add(item);
+            return this;
         }
 
         public int IndexOf(T item) {
@@ -140,15 +145,18 @@ namespace Axion.Core.Processing.Syntactic {
             if (array == null) {
                 throw new ArgumentNullException(nameof(array));
             }
+
             if (arrayIndex < 0) {
                 throw new ArgumentOutOfRangeException(nameof(arrayIndex));
             }
+
             if (array.Rank > 1) {
                 throw new ArgumentException(
                     "Only single dimensional arrays are supported for the requested action.",
                     nameof(array)
                 );
             }
+
             if (array.Length - arrayIndex < Count) {
                 throw new ArgumentException(
                     "Not enough elements after index in the destination array."

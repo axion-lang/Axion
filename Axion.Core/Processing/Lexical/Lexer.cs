@@ -1,35 +1,37 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Source;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 using static Axion.Core.Specification.Spec;
 
 namespace Axion.Core.Processing.Lexical {
     public class Lexer {
-        private readonly Unit       src;
+        private readonly Unit unit;
         private readonly TextStream stream;
 
         // Variables for current token creation
-        private          TokenType     type;
-        private readonly StringBuilder value   = new StringBuilder();
+        private TokenType type;
+        private readonly StringBuilder value = new StringBuilder();
         private readonly StringBuilder content = new StringBuilder();
-        private          Location      startLoc;
+        private Location startLoc;
 
         // Variables for indentation analysis
         private char indentChar;
-        private int  indentSize;
-        private int  lastIndentLen;
-        private int  indentLevel;
+        private int indentSize;
+        private int lastIndentLen;
+        private int indentLevel;
 
-        public readonly Stack<Token>     MismatchingPairs   = new Stack<Token>();
-        public readonly Stack<TokenType> ProcessTerminators = new Stack<TokenType>();
+        public readonly Stack<Token> MismatchingPairs = new Stack<Token>();
 
-        public Lexer(Unit source) {
-            src    = source;
-            stream = src.TextStream;
+        public readonly Stack<TokenType> ProcessTerminators =
+            new Stack<TokenType>();
+
+        public Lexer(Unit unit) {
+            this.unit = unit;
+            stream    = this.unit.TextStream;
             ProcessTerminators.Push(End);
         }
 
@@ -62,8 +64,7 @@ namespace Axion.Core.Processing.Lexical {
             return eaten != "";
         }
 
-        private T BindSpan<T>(T token)
-            where T : Token {
+        private T BindSpan<T>(T token) where T : Token {
             token.MarkStart(startLoc);
             token.MarkEnd(stream.Location);
             return token;
@@ -71,7 +72,7 @@ namespace Axion.Core.Processing.Lexical {
 
         private Token NewTokenFromContext() {
             var token = new Token(
-                src,
+                unit,
                 type,
                 value.ToString(),
                 content.ToString()
@@ -147,7 +148,7 @@ namespace Axion.Core.Processing.Lexical {
                 addNext = TryAddChar(White);
             } while (addNext);
 
-            if (src.TokenStream.Tokens.Count == 0) {
+            if (unit.TokenStream.Count == 0) {
                 lastIndentLen = value.Length;
                 type          = Whitespace;
                 return NewTokenFromContext();
@@ -155,13 +156,14 @@ namespace Axion.Core.Processing.Lexical {
 
             string ln = stream.RestOfLine;
             // check that whitespace is not meaningful here
-            if (!src.TokenStream.Tokens[^1].Is(Newline)
+            if (!unit.TokenStream[^1].Is(Newline)
              || string.IsNullOrWhiteSpace(ln)
              || ln.StartsWith(OneLineCommentMark)
              || MismatchingPairs.Count > 0
-             || src.TokenStream.Tokens[^2] is OperatorToken op && op.Side == InputSide.Both
+             || unit.TokenStream[^2] is OperatorToken op
+             && op.Side == InputSide.Both
              || NonIndentRegex.IsMatch(ln)) {
-                src.TokenStream.Tokens[^1].EndingWhite += value;
+                unit.TokenStream[^1].EndingWhite += value;
                 return null;
             }
 
@@ -191,7 +193,11 @@ namespace Axion.Core.Processing.Lexical {
             if (!consistent) {
                 LangException.Report(
                     BlameType.InconsistentIndentation,
-                    new Node(src, inconsistencyStart, stream.Location.Add(0, -1))
+                    new CodeSpan(
+                        unit,
+                        inconsistencyStart,
+                        stream.Location.Add(0, -1)
+                    )
                 );
             }
             else {
@@ -212,13 +218,13 @@ namespace Axion.Core.Processing.Lexical {
                 while (newIndentLen < lastIndentLen) {
                     indentLevel--;
                     lastIndentLen -= indentSize;
-                    src.TokenStream.Tokens.Add(NewTokenFromContext());
+                    unit.TokenStream.Add(NewTokenFromContext());
                     value.Clear();
                     content.Clear();
                 }
             }
             else {
-                src.TokenStream.Tokens[^1].EndingWhite += value;
+                unit.TokenStream[^1].EndingWhite += value;
             }
 
             lastIndentLen = newIndentLen;
@@ -229,13 +235,15 @@ namespace Axion.Core.Processing.Lexical {
             do {
                 AddNext();
             } while (stream.Peek().IsIdPart()
-                  && (!stream.Peek().IsIdNonEnd() || stream.Peek(2)[1].IsIdAfterNonEnd()));
+                  && (!stream.Peek().IsIdNonEnd()
+                   || stream.Peek(2)[1].IsIdAfterNonEnd()));
 
             if (stream.PeekIs(StringQuotes)) {
                 return ReadString();
             }
 
-            if (src.GetAllCustomKeywords().Contains(value.ToString())) {
+            if (unit.Module?.CustomKeywords.Contains(value.ToString())
+             ?? false) {
                 type = CustomKeyword;
                 return NewTokenFromContext();
             }
@@ -245,7 +253,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             if (OperatorsKeys.Contains(value.ToString())) {
-                return BindSpan(new OperatorToken(src, value.ToString()));
+                return BindSpan(new OperatorToken(unit, value.ToString()));
             }
 
             type = Identifier;
@@ -262,17 +270,17 @@ namespace Axion.Core.Processing.Lexical {
                 addNext = TryAddChar(Eols);
             } while (addNext);
 
-            src.TokenStream.Tokens.Add(NewTokenFromContext());
+            unit.TokenStream.Add(NewTokenFromContext());
             value.Clear();
             content.Clear();
 
-            if (!src.TextStream.PeekIs(White)) {
+            if (!unit.TextStream.PeekIs(White)) {
                 // root-level newline - reset indentation
                 lastIndentLen = 0;
                 while (indentLevel > 0) {
                     type     = Outdent;
                     startLoc = stream.Location;
-                    src.TokenStream.Tokens.Add(NewTokenFromContext());
+                    unit.TokenStream.Add(NewTokenFromContext());
                     indentLevel--;
                 }
             }
@@ -296,12 +304,14 @@ namespace Axion.Core.Processing.Lexical {
                 content.Append(stream.Char);
             }
 
-            return BindSpan(new NumberToken(src, value.ToString(), content.ToString()));
+            return BindSpan(
+                new NumberToken(unit, value.ToString(), content.ToString())
+            );
         }
 
         private OperatorToken ReadOperator() {
             AddNext(expect: OperatorsKeys);
-            return BindSpan(new OperatorToken(src, value.ToString()));
+            return BindSpan(new OperatorToken(unit, value.ToString()));
         }
 
         private Token ReadPunctuation() {
@@ -312,8 +322,9 @@ namespace Axion.Core.Processing.Lexical {
                 MismatchingPairs.Push(t);
             }
             else if (type.IsCloseBracket()) {
-                if (MismatchingPairs.Count                             > 0
-                 && MismatchingPairs.First().Type.GetMatchingBracket() == type) {
+                if (MismatchingPairs.Count > 0
+                 && MismatchingPairs.First().Type.GetMatchingBracket()
+                 == type) {
                     MismatchingPairs.Pop();
                 }
                 else {
@@ -330,13 +341,16 @@ namespace Axion.Core.Processing.Lexical {
                 if (stream.AtEndOfLine) {
                     CharToken unclosed = BindSpan(
                         new CharToken(
-                            src,
+                            unit,
                             value.ToString(),
                             content.ToString(),
                             true
                         )
                     );
-                    LangException.Report(BlameType.UnclosedCharacterLiteral, unclosed);
+                    LangException.Report(
+                        BlameType.UnclosedCharacterLiteral,
+                        unclosed
+                    );
                     return unclosed;
                 }
 
@@ -348,7 +362,9 @@ namespace Axion.Core.Processing.Lexical {
                 }
             }
 
-            CharToken t = BindSpan(new CharToken(src, value.ToString(), content.ToString()));
+            CharToken t = BindSpan(
+                new CharToken(unit, value.ToString(), content.ToString())
+            );
 
             if (content.Length == 0) {
                 LangException.Report(BlameType.EmptyCharacterLiteral, t);
@@ -366,7 +382,9 @@ namespace Axion.Core.Processing.Lexical {
                 AddNext();
             }
 
-            return BindSpan(new CommentToken(src, value.ToString(), content.ToString()));
+            return BindSpan(
+                new CommentToken(unit, value.ToString(), content.ToString())
+            );
         }
 
         private CommentToken ReadMultiLineComment() {
@@ -375,7 +393,7 @@ namespace Axion.Core.Processing.Lexical {
                 if (stream.PeekIs(EndOfCode)) {
                     CommentToken t = BindSpan(
                         new CommentToken(
-                            src,
+                            unit,
                             value.ToString(),
                             content.ToString(),
                             true,
@@ -392,7 +410,7 @@ namespace Axion.Core.Processing.Lexical {
             AddNext(false, MultiLineCommentMark);
             return BindSpan(
                 new CommentToken(
-                    src,
+                    unit,
                     value.ToString(),
                     content.ToString(),
                     true
@@ -414,10 +432,11 @@ namespace Axion.Core.Processing.Lexical {
                     if (StringPrefixes.Contains(char.ToLower(p))) {
                         continue;
                     }
+
                     var ps = p.ToString();
                     Token token = BindSpan(
                         new Token(
-                            src,
+                            unit,
                             Invalid,
                             ps,
                             ps,
@@ -438,7 +457,7 @@ namespace Axion.Core.Processing.Lexical {
             else if (AddNext(false, quote)) {
                 StringToken se = BindSpan(
                     new StringToken(
-                        src,
+                        unit,
                         value.ToString(),
                         content.ToString(),
                         false,
@@ -447,7 +466,10 @@ namespace Axion.Core.Processing.Lexical {
                     )
                 );
                 if (prefixes.Length > 0) {
-                    LangException.Report(BlameType.RedundantPrefixesForEmptyString, se);
+                    LangException.Report(
+                        BlameType.RedundantPrefixesForEmptyString,
+                        se
+                    );
                 }
 
                 return se;
@@ -459,7 +481,8 @@ namespace Axion.Core.Processing.Lexical {
                 if (stream.PeekIs('\\') && !prefixes.Contains("r")) {
                     ReadEscapeSeq();
                 }
-                else if (stream.PeekIs(Eols) && quote.Length == 1 || stream.PeekIs(EndOfCode)) {
+                else if (stream.PeekIs(Eols) && quote.Length == 1
+                      || stream.PeekIs(EndOfCode)) {
                     unclosed = true;
                     break;
                 }
@@ -480,7 +503,7 @@ namespace Axion.Core.Processing.Lexical {
 
             StringToken s = BindSpan(
                 new StringToken(
-                    src,
+                    unit,
                     value.ToString(),
                     content.ToString(),
                     unclosed,
@@ -501,9 +524,9 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private StringInterpolation ReadStringInterpolation() {
-            var  interpolation = new StringInterpolation(src);
-            Unit iSrc          = interpolation.Source;
-            var  lexer         = new Lexer(interpolation.Source);
+            var  interpolation = new StringInterpolation(unit);
+            Unit iSrc          = interpolation.Unit;
+            var  lexer         = new Lexer(interpolation.Unit);
 
             lexer.ProcessTerminators.Push(CloseBrace);
             while (true) {
@@ -512,7 +535,7 @@ namespace Axion.Core.Processing.Lexical {
                     continue;
                 }
 
-                iSrc.TokenStream.Tokens.Add(token);
+                iSrc.TokenStream.Add(token);
                 if (lexer.ProcessTerminators.Contains(token.Type)) {
                     break;
                 }
@@ -523,8 +546,8 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             // remove '{' '}'
-            iSrc.TokenStream.Tokens.RemoveAt(0);
-            iSrc.TokenStream.Tokens.RemoveAt(iSrc.TokenStream.Tokens.Count - 1);
+            iSrc.TokenStream.RemoveAt(0);
+            iSrc.TokenStream.RemoveAt(iSrc.TokenStream.Count - 1);
             return interpolation;
         }
 
@@ -601,7 +624,7 @@ namespace Axion.Core.Processing.Lexical {
             void RaiseError(BlameType blameType) {
                 LangException.Report(
                     blameType,
-                    new Node(src, escapeStart, stream.Location.Add(0, -1))
+                    new CodeSpan(unit, escapeStart, stream.Location.Add(0, -1))
                 );
                 value.Append(raw);
                 content.Append(raw);

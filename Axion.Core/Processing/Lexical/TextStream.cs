@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Lexical {
         private int lineIdx;
         private int columnIdx;
 
-        public string Text { get; }
+        public readonly string Text;
 
         /// <summary>
         ///     0-based (Line, Column) position of character in source code.
@@ -23,7 +23,8 @@ namespace Axion.Core.Processing.Lexical {
         /// <summary>
         ///     Checks that next character is line/source terminator.
         /// </summary>
-        public bool AtEndOfLine => Spec.Eols.Contains(Peek()) || PeekIs(Spec.EndOfCode);
+        public bool AtEndOfLine =>
+            Spec.Eols.Contains(Peek()) || PeekIs(Spec.EndOfCode);
 
         public string RestOfLine {
             get {
@@ -69,7 +70,8 @@ namespace Axion.Core.Processing.Lexical {
         ///     not eating them.
         /// </summary>
         public string Peek(int length) {
-            if (charIdx + 1 + length >= 0 && charIdx + 1 + length < Text.Length) {
+            if (charIdx + 1 + length >= 0
+             && charIdx + 1 + length < Text.Length) {
                 return Text.Substring(charIdx + 1, length);
             }
 
@@ -119,6 +121,7 @@ namespace Axion.Core.Processing.Lexical {
                 Move();
                 return Char.ToString();
             }
+
             char nxt = Peek();
             if (expected.Contains(nxt)) {
                 Move();

@@ -13,8 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
     ///     Provides functions for comma-separated expression lists
     ///     parsing with automatic error reporting. 
     /// </summary>
-    public class Multiple<T> : AtomExpr
-        where T : Expr {
+    public class Multiple<T> : AtomExpr where T : Expr {
         protected Multiple(Node parent) : base(parent) { }
 
         /// <summary>
@@ -35,6 +34,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
                     LangException.ReportUnexpectedType(typeof(T), e);
                 }
             }
+
             return e;
         }
 
@@ -44,9 +44,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
         ///     (e.g. tuples)
         /// </summary>
         internal new static AtomExpr Parse(Node parent) {
-            TokenStream      s          = parent.Source.TokenStream;
+            TokenStream      s          = parent.Unit.TokenStream;
             Func<Node, Expr> parserFunc = Auxiliary.GetParsingFunction<T>();
-            bool             parens     = s.MaybeEat(OpenParenthesis);
+            var              hasParens  = s.MaybeEat(OpenParenthesis);
             var list = new NodeList<Expr>(parent) {
                 parserFunc(parent)
             };
@@ -54,14 +54,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
             while (s.MaybeEat(Comma)) {
                 list.Add(parserFunc(parent));
             }
-            if (parens) {
+
+            if (hasParens) {
                 s.Eat(CloseParenthesis);
             }
+
             if (list.Count > 1) {
                 return new TupleExpr(list.Parent!) {
                     Expressions = list
                 };
             }
+
             return new ParenthesizedExpr(list[0]);
         }
     }

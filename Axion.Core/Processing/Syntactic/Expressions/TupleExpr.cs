@@ -20,9 +20,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => expressions = Bind(value);
         }
 
-        public override TypeName ValueType => new TupleTypeName(this) {
-            Types = new NodeList<TypeName?>(this, Expressions.Select(e => e.ValueType))
-        };
+        public override TypeName ValueType =>
+            new TupleTypeName(this) {
+                Types = new NodeList<TypeName>(
+                    this,
+                    Expressions.Where(e => e.ValueType != null)
+                               .Select(e => e.ValueType!)
+                )
+            };
 
         internal TupleExpr(Node parent) : base(parent) { }
 

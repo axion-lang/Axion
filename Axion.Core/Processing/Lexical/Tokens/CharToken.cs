@@ -1,19 +1,21 @@
+using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Source;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class CharToken : Token {
-        public override TypeName ValueType  => Spec.CharType;
-        public          bool     IsUnclosed { get; }
+        public override TypeName ValueType =>
+            new SimpleTypeName(this, Spec.CharType);
+
+        public bool IsUnclosed { get; }
 
         internal CharToken(
-            Unit   source,
+            Unit   unit,
             string value      = "",
             string content    = "",
             bool   isUnclosed = false
         ) : base(
-            source,
+            unit,
             TokenType.Character,
             value,
             content

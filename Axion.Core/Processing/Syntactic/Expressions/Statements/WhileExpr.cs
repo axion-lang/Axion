@@ -47,10 +47,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
         }
 
         public WhileExpr(Node parent) : base(parent) { }
-        
+
         public DecoratedExpr WithDecorators(params Expr[] items) {
             return new DecoratedExpr(Parent) {
-                Target = this, Decorators = new NodeList<Expr>(this, items)
+                Target     = this,
+                Decorators = new NodeList<Expr>(this, items)
             };
         }
 
@@ -62,6 +63,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
                 KwNoBreak    = Stream.Token;
                 NoBreakScope = new ScopeExpr(this).Parse();
             }
+
             return this;
         }
     }

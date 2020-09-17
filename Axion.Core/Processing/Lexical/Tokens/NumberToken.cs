@@ -1,13 +1,14 @@
-﻿using Axion.Core.Source;
+﻿using Axion.Core.Hierarchy;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class NumberToken : Token {
         // TODO: declare ValueType
-        internal NumberToken(Unit source, string value = "", string content = "") : base(
-            source,
-            TokenType.Number,
-            value,
-            content
-        ) { }
+        internal NumberToken(Unit unit, string value = "", string content = "")
+            : base(
+                unit,
+                TokenType.Number,
+                value,
+                content
+            ) { }
     }
 }

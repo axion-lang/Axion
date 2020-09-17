@@ -29,7 +29,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             SetSpan(
                 () => {
                     Stream.Eat(OpenParenthesis);
-                    Args = FuncCallArg.ParseArgList(this, allowGenerator: allowGenerator);
+                    Args = FuncCallArg.ParseArgList(
+                        this,
+                        allowGenerator: allowGenerator
+                    );
                     Stream.Eat(CloseParenthesis);
                 }
             );

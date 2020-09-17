@@ -2,50 +2,93 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Axion.Core.Hierarchy;
+using Axion.Core.Processing.Emitting;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic;
+using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Traversal;
-using Axion.Core.Source;
+using Axion.Core.Specification;
 using NLog;
+using Module = Axion.Core.Hierarchy.Module;
 
 namespace Axion.Core {
-    public static class Compiler {
-        private static readonly Assembly coreAsm = Assembly.GetExecutingAssembly();
-        public static readonly  string   Version = coreAsm.GetName().Version.ToString();
+    public class Compiler {
+        private static readonly Assembly coreAsm =
+            Assembly.GetExecutingAssembly();
+
+        public static readonly string Version =
+            coreAsm.GetName().Version.ToString();
 
         /// <summary>
         ///     Path to directory where compiler executable is located.
         /// </summary>
-        public static readonly string WorkDir = AppDomain.CurrentDomain.BaseDirectory;
+        public static readonly string WorkDir =
+            AppDomain.CurrentDomain.BaseDirectory;
 
         /// <summary>
         ///     Path to directory where generated output is located.
         /// </summary>
         public static readonly string OutDir = Path.Combine(WorkDir, "output");
 
-        internal static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger =
+            LogManager.GetCurrentClassLogger();
 
-        public static void Process(
-            Unit              src,
-            ProcessingMode    mode,
-            ProcessingOptions options
-        ) {
-            src.ProcessingMode = mode;
-            src.Options        = options;
-            Process(src);
+        public static string GetTempSourceFilePath() {
+            return Path.Combine(
+                WorkDir,
+                "temp",
+                "tmp-"
+              + DateTime.Now.ToFileName()
+              + Language.Axion.ToFileExtension()
+            );
         }
 
-        private static void Process(Unit src) {
-            Logger.Info($"Processing '{src.SourceFilePath.Name}'");
-            if (string.IsNullOrWhiteSpace(src.TextStream.Text)) {
-                Logger.Error("Source is empty. Processing aborted.");
-                return;
+        public static object? Process(
+            Project           project,
+            ProcessingOptions options
+        ) {
+            logger.Info($"Processing project '{project.ConfigFile.Name}'");
+            object? result = Process(project.MainModule, options);
+            return result;
+        }
+
+        public static object? Process(
+            Module            module,
+            ProcessingOptions options
+        ) {
+            logger.Info(
+                module.Parent == null
+                    ? $"Processing module '{module.Name}'"
+                    : $"Processing submodule '{module.Name}'"
+            );
+            object? result = null;
+            foreach ((_, Module subModule) in module.Submodules) {
+                result = Process(subModule, options);
             }
 
-            foreach ((ProcessingMode mode, Action<Unit> action) in CompilationSteps) {
-                action(src);
-                if (src.ProcessingMode == mode || src.HasErrors) {
+            foreach ((_, Unit unit) in module.Units) {
+                result = Process(unit, options);
+            }
+
+            return result;
+        }
+
+        public static object? Process(Unit src, ProcessingOptions options) {
+            logger.Info($"Processing '{src.SourceFile.Name}'");
+            if (src.TextStream.IsEmpty) {
+                logger.Error("Source is empty. Processing aborted.");
+                return null;
+            }
+
+            object? result = null;
+            foreach ((var stepMode,
+                      Func<Unit, ProcessingOptions, object> stepAction) in
+                CompilationSteps) {
+                result = stepAction(src, options);
+                if (options.ProcessingMode == stepMode || src.HasErrors) {
                     break;
                 }
             }
@@ -53,38 +96,41 @@ namespace Axion.Core {
             var errCount = 0;
             foreach (LangException e in src.Blames) {
                 e.PrintToConsole();
+                Console.WriteLine();
                 if (e.Severity == BlameSeverity.Error) {
                     errCount++;
                 }
             }
 
-            Logger.Info(
-                errCount > 0 ? "Processing terminated due to errors above" : "Processing finished"
-            );
+            if (errCount > 0) {
+                logger.Info("Processing finished");
+            }
+
+            return result;
         }
 
         // @formatter:off
 
-        public static readonly Dictionary<ProcessingMode, Action<Unit>> CompilationSteps =
-            new Dictionary<ProcessingMode, Action<Unit>> {
-                { ProcessingMode.Lexing, Lex },
-                { ProcessingMode.Parsing, Parse },
-                { ProcessingMode.Reduction, Reduce },
-                { ProcessingMode.Transpilation, Transpile }
-            };
+        public static readonly Dictionary<Mode, Func<Unit, ProcessingOptions, object>> CompilationSteps =
+        new Dictionary<Mode, Func<Unit, ProcessingOptions, object>> {
+            { Mode.Lexing, Lex },
+            { Mode.Parsing, Parse },
+            { Mode.Reduction, Reduce },
+            { Mode.Transpilation, Transpile }
+        };
 
         // @formatter:on
 
-        public static void Lex(Unit src) {
-            Logger.Debug("Tokens list generation");
+        public static TokenStream Lex(Unit src, ProcessingOptions options) {
+            logger.Debug("Tokens list generation");
             var lexer = new Lexer(src);
             while (true) {
-                Token? token = lexer.Read();
+                var token = lexer.Read();
                 if (token == null) {
                     continue;
                 }
 
-                src.TokenStream.Tokens.Add(token);
+                src.TokenStream.Add(token);
                 if (lexer.ProcessTerminators.Contains(token.Type)) {
                     break;
                 }
@@ -93,30 +139,47 @@ namespace Axion.Core {
             foreach (Token mismatch in lexer.MismatchingPairs) {
                 LangException.ReportMismatchedBracket(mismatch);
             }
+
+            return src.TokenStream;
         }
 
-        private static void Parse(Unit src) {
-            Logger.Debug("Abstract Syntax Tree generation");
+        private static Ast Parse(Unit src, ProcessingOptions options) {
+            logger.Debug("Abstract Syntax Tree generation");
             src.Ast.Parse();
+            return src.Ast;
         }
 
-        private static void Reduce(Unit src) {
-            Logger.Debug("Syntax tree reducing");
+        private static Ast Reduce(Unit src, ProcessingOptions options) {
+            logger.Debug("Syntax tree reducing");
             Traversing.Traverse(src.Ast);
+            return src.Ast;
         }
 
-        private static void Transpile(Unit src) {
+        private static CodeWriter Transpile(
+            Unit              src,
+            ProcessingOptions options
+        ) {
+            var cw = new CodeWriter(options);
             try {
-                src.CodeWriter.Write(src.Ast);
-                var code = src.CodeWriter.ToString();
-                Logger.Debug("Transpiler output");
-                Logger.Debug(code);
-                File.WriteAllText(src.OutputFilePath.FullName, code);
+                cw.Write(src.Ast);
+                var code = cw.ToString();
+                logger.Debug("Transpiler output");
+                logger.Debug(code);
+                File.WriteAllText(
+                    Path.Combine(
+                        src.OutputDirectory.FullName,
+                        src.SourceFile.Name
+                      + options.TargetLanguage.ToFileExtension()
+                    ),
+                    code
+                );
             }
             catch (Exception ex) {
-                Logger.Error("Transpiling failed:");
-                Logger.Info(ex.Message);
+                logger.Error("Transpiling failed:");
+                logger.Info(ex.Message);
             }
+
+            return cw;
         }
     }
 }

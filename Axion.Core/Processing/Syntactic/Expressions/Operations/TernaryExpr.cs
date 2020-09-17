@@ -47,7 +47,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             set => falseExpr = BindNullable(value);
         }
 
-        public override TypeName? ValueType => TrueExpr?.ValueType ?? FalseExpr?.ValueType;
+        public override TypeName? ValueType =>
+            TrueExpr?.ValueType ?? FalseExpr?.ValueType;
 
         internal TernaryExpr(Node parent) : base(parent) { }
 
@@ -57,16 +58,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
                 Stream.Eat(KeywordUnless);
                 invert = true;
             }
-            TrueMark  = Stream.Token;
+
+            TrueMark  =   Stream.Token;
             TrueExpr  ??= AnyExpr.Parse(this);
-            Condition = Parse(this);
+            Condition =   Parse(this);
             if (Stream.MaybeEat(KeywordElse)) {
                 FalseMark = Stream.Token;
                 FalseExpr = Multiple<InfixExpr>.ParseGenerally(this);
             }
+
             if (invert) {
                 (TrueExpr, FalseExpr) = (FalseExpr!, TrueExpr);
             }
+
             return this;
         }
     }

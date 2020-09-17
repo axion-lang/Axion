@@ -31,6 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             if (Stream.PeekIs(Identifier)) {
                 LoopName = new NameExpr(this).Parse();
             }
+
             return this;
         }
     }

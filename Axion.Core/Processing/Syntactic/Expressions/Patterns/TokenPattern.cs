@@ -13,17 +13,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
         public TokenPattern(Node parent) : base(parent) { }
 
         public override bool Match(Node parent) {
-            var s = parent.Source.TokenStream;
+            var s = parent.Unit.TokenStream;
             if (s.Peek.Content != Value?.Content) {
                 return false;
             }
+
             parent.Ast.MacroApplicationParts.Peek().Expressions.Add(s.Eat());
             return true;
         }
 
         public TokenPattern Parse() {
             Value = Stream.Eat();
-            Source.RegisterCustomKeyword(Value.Content);
+            Unit.Module.RegisterCustomKeyword(Value.Content);
             return this;
         }
     }

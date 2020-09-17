@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using Axion.Core;
+using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Source;
 using Axion.Core.Specification;
 using CodeConsole;
 using static System.ConsoleColor;
@@ -24,17 +24,17 @@ namespace Axion {
             renderPosition = lastRenderEndPosition;
             Unit src = Unit.FromLines(codeLines);
             // NOTE: direct call to Compiler.Lex works faster than Compiler.Process function chain.
-            Compiler.Lex(src);
+            Compiler.Lex(src, ProcessingOptions.Default);
             blames = src.Blames;
-            List<ColoredValue> values = HighlightTokens(src.TokenStream.Tokens);
+            List<ColoredValue> values = HighlightTokens(src.TokenStream);
             lastRenderEndPosition = renderPosition;
             return values;
         }
 
         public List<ColoredValue> Highlight(string code) {
             Unit src = Unit.FromCode(code);
-            Compiler.Lex(src);
-            return HighlightTokens(src.TokenStream.Tokens);
+            Compiler.Lex(src, ProcessingOptions.Default);
+            return HighlightTokens(src.TokenStream);
         }
 
         private List<ColoredValue> HighlightTokens(IEnumerable<Token> tokens) {
@@ -53,7 +53,10 @@ namespace Axion {
                 if (!foundRenderStart) {
                     // when found token closest to last render position,
                     // re-render it to prevent invalid highlighting.
-                    renderPosition   = new Point(token.Start.Column, token.Start.Line);
+                    renderPosition = new Point(
+                        token.Start.Column,
+                        token.Start.Line
+                    );
                     foundRenderStart = true;
                 }
 
@@ -76,7 +79,9 @@ namespace Axion {
                 }
                 else if (token.Is(Identifier)) {
                     // highlight error types
-                    newColor = token.Value.EndsWith("Error") ? DarkMagenta : Cyan;
+                    newColor = token.Value.EndsWith("Error")
+                        ? DarkMagenta
+                        : Cyan;
                 }
                 else {
                     newColor = GetSimpleTokenColor(token);
@@ -84,6 +89,7 @@ namespace Axion {
 
                 values.Add(new ColoredValue(text, newColor, isWhite));
             }
+
             return values;
         }
 

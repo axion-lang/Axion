@@ -69,33 +69,33 @@ macro for-index-statement ('for', init: Any, ',', condition: Infix, ',', step: I
     }}
 
 
-macro raise-statement ('raise', type-name: TypeName, ['(', [args: Infix, [{',', args}]], ')'])
+macro raise-statement ('raise', type-name: TypeName, ['(', [arg: Infix, [{',', arg}]], ')'])
 
 
-macro match-expression (target: Any, 'match', { patterns: Infix, ':', values: Any })
+macro match-expression (target: Any, 'match', { pattern: Infix, ':', value: Any })
 
 
 macro object-initializer-expression (
     'new',
     (
-        ('(', args: Any, [{',', args}], [','], ')')
+        ('(', arg: Any, [{',', arg}], [','], ')')
       | (
             type-name: TypeName,
-            ['(', [args, [{',', args}], [',']], ')'],
-            ['{', [initializers: Any, [{',', initializers}], [',']], '}']
+            ['(', [arg, [{',', arg}], [',']], ')'],
+            ['{', [initializer: Any, [{',', initializer}], [',']], '}']
         )
     )
 )
 
 
-macro list-init-expression ('[', [items: Infix, [{',', items}], [',']], ']')
+macro list-init-expression ('[', [item: Infix, [{',', item}], [',']], ']')
 
 
 macro map-init-expression (
     '{',
     [
-        keys: Infix, ':', values: Infix,
-        [{ ',', keys, ':', values }],
+        key: Infix, ':', value: Infix,
+        [{ ',', key, ':', value }],
         [',']
     ],
     '}'

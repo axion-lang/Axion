@@ -43,7 +43,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     // TODO: find code, that can be replaced with macro by patterns
                     // Example:
                     // ========
-                    // macro post-condition-loop ('do', scope: Scope, ('while' | 'until'), condition: Infix)
+                    // macro post-condition-loop (
+                    //     'do',
+                    //     scope: Scope,
+                    //     ('while' | 'until'),
+                    //     condition: Infix
+                    // )
                     //     if syntax[2] == 'while'
                     //         condition = {{ not $condition }}
                     // 
@@ -63,6 +68,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                         Syntax.Parse();
                         Stream.Eat(CloseParenthesis);
                     }
+
                     Scope = new ScopeExpr(this).Parse();
                 }
             );

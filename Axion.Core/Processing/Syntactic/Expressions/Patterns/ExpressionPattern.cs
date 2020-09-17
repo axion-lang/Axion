@@ -16,13 +16,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     /// </summary>
     public class ExpressionPattern : Pattern {
         private Func<Node, Expr>? parseFunc;
-        private Type              type = null!;
+        private Type type = null!;
 
         public ExpressionPattern(Node parent) : base(parent) { }
 
         public override bool Match(Node parent) {
+            if (parent.Unit.TokenStream.PeekIs(TokenType.End)) {
+                return false;
+            }
+
             // leave expression non-starters to next token pattern.
-            if (parent.Source.TokenStream.PeekIs(Spec.NeverExprStartTypes)) {
+            if (parent.Unit.TokenStream.PeekIs(Spec.NeverExprStartTypes)) {
                 return true;
             }
 
@@ -41,6 +45,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 parent.Ast.MacroApplicationParts.Peek().Expressions.Add(e);
                 return true;
             }
+
             return false;
         }
 
@@ -51,8 +56,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
             if (typeDefined) {
                 PatternFromTypeName(namedParts[id.Content]);
             }
+
             if (Stream.MaybeEat(Colon)) {
-                TypeName? tn = TypeName.Parse(this);
+                var tn = TypeName.Parse(this);
                 if (!typeDefined
                  && tn is SimpleTypeName simpleTypeName
                  && simpleTypeName.Name.IsSimple) {
@@ -67,9 +73,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                     LangException.Report(BlameType.InvalidMacroParameter, id);
                 }
             }
+
             if (type == null && parseFunc == null) {
                 LangException.Report(BlameType.ImpossibleToInferType, id);
             }
+
             return this;
         }
 
@@ -77,10 +85,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
             if (!typeName.EndsWith("Expr") && !typeName.EndsWith("TypeName")) {
                 typeName += "Expr";
             }
+
             if (Spec.ParsingTypes.TryGetValue(typeName, out Type t)) {
                 type = t;
             }
-            else if (Spec.ParsingFunctions.TryGetValue(typeName, out Func<Node, Expr> fn)) {
+            else if (Spec.ParsingFunctions.TryGetValue(
+                typeName,
+                out Func<Node, Expr> fn
+            )) {
                 parseFunc = fn;
             }
         }

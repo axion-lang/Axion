@@ -1,7 +1,7 @@
 using System.Collections.Generic;
+using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Source;
 using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
@@ -20,35 +20,42 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         public bool IsMultiline => Quote.Length == 3;
 
-        public override TypeName ValueType => Spec.StringType;
+        public override TypeName ValueType =>
+            new SimpleTypeName(this, Spec.StringType);
 
         internal StringToken(
-            Unit                              source,
-            string                            value          = "",
-            string                            content        = "",
-            bool                              isUnclosed     = false,
-            string                            prefixes       = "",
-            string                            quote          = "\"",
-            IEnumerable<StringInterpolation>? interpolations = null
+            Unit   unit,
+            string value      = "",
+            string content    = "",
+            bool   isUnclosed = false,
+            string prefixes   = "",
+            string quote      = "\"",
+            IEnumerable<StringInterpolation>? interpolations =
+                null
         ) : base(
-            source,
+            unit,
             TokenType.String,
             value,
             content
         ) {
-            IsUnclosed     = isUnclosed;
-            Prefixes       = prefixes;
-            Quote          = quote;
-            Interpolations = new NodeList<StringInterpolation>(this, interpolations);
-            EndingQuotes   = "";
+            IsUnclosed = isUnclosed;
+            Prefixes   = prefixes;
+            Quote      = quote;
+            Interpolations = interpolations == null
+                ? new NodeList<StringInterpolation>(this)
+                : new NodeList<StringInterpolation>(this, interpolations);
+            EndingQuotes = "";
         }
 
         public bool HasPrefix(string prefix) {
-            return Prefixes.Contains(prefix.ToLower()) || Prefixes.Contains(prefix.ToUpper());
+            return Prefixes.Contains(prefix.ToLower())
+                || Prefixes.Contains(prefix.ToUpper());
         }
     }
 
     public class StringInterpolation : Node {
-        public StringInterpolation(Unit source) : base(Unit.FromInterpolation(source)) { }
+        public StringInterpolation(Unit unit) : base(
+            Unit.FromInterpolation(unit)
+        ) { }
     }
 }

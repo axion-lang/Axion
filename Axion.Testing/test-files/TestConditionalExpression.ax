@@ -1,11 +1,5 @@
-# py style
-if condition:
-	doOneThing()
-else:
-	doOtherThing()
-
-if condition: doOneThing()
-else: doOtherThing()
+if condition doOneThing()
+else doOtherThing()
 
 # ax style
 if condition

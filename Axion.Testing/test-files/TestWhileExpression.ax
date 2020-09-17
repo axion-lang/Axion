@@ -1,15 +1,3 @@
-# py style
-i = 0
-while i < 10:
-    Console.WriteLine(f"i value: {i}")
-    i++
-    if i == 5:
-        continue
-    if i == 9:
-        break
-no-break:
-    Console.WriteLine("No break")
-
 # c style
 i = 0
 while i < 10 {

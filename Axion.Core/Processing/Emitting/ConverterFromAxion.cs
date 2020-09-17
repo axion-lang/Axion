@@ -10,7 +10,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Postfix;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
-namespace Axion.Core.Processing.CodeGen {
+namespace Axion.Core.Processing.Emitting {
     public abstract class ConverterFromAxion {
         protected CodeWriter cw { get; }
 
@@ -107,7 +107,7 @@ namespace Axion.Core.Processing.CodeGen {
             cw.Write(
                 e.Left,
                 " ",
-                e.Operator.Value,
+                e.Operator!.Value,
                 " ",
                 e.Right
             );

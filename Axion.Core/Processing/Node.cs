@@ -1,32 +1,19 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
-using Axion.Core.Source;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Processing {
     /// <summary>
     ///     Span of source code / Tree leaf with parent and children nodes.
     /// </summary>
-    public class Node {
-        [JsonIgnore]
-        public Unit Source { get; set; }
-
-        /// <summary>
-        ///     Start location of this node's code span.
-        /// </summary>
-        public Location Start { get; private protected set; }
-
-        /// <summary>
-        ///     End location of this node's code span.
-        /// </summary>
-        public Location End { get; private protected set; }
-
-        private Ast ast = null!;
+    public abstract class Node : CodeSpan {
+        private Ast? ast;
 
         /// <summary>
         ///     Abstract Syntax Tree root of this node.
@@ -40,12 +27,9 @@ namespace Axion.Core.Processing {
                     return ast;
                 }
 
-                Node? p = this;
+                Node p = this;
                 while (!(p is Ast)) {
-                    p = p?.Parent
-                     ?? throw new NullReferenceException(
-                            "Cannot get AST for non-completely bound node"
-                        );
+                    p = p.Parent;
                 }
 
                 ast = (Ast) p;
@@ -53,11 +37,23 @@ namespace Axion.Core.Processing {
             }
         }
 
+        private TypeName? valueType;
+
+        /// <summary>
+        ///     Language type-name of this node that can be inferred from context.
+        /// </summary>
+        [JsonIgnore]
+        [NoPathTraversing]
+        public virtual TypeName? ValueType {
+            get => valueType;
+            protected internal set => valueType = BindNullable(value);
+        }
+
         /// <summary>
         ///     Direct reference to the attribute of
         ///     parent to which this node is bound.
         /// </summary>
-        public ITreePath Path { get; set; } = null!;
+        public ITreePath Path { get; protected set; } = null!;
 
         /// <summary>
         ///     Reference to parent of this node.
@@ -65,30 +61,17 @@ namespace Axion.Core.Processing {
         [NoPathTraversing]
         protected internal Node Parent { get; set; } = null!;
 
-        private TypeName valueType = null!;
-
-        /// <summary>
-        ///     Language type-name of this node that can be inferred from context.
-        /// </summary>
-        [JsonIgnore]
-        [NoPathTraversing]
-        public virtual TypeName ValueType {
-            get => valueType;
-            protected internal set => valueType = Bind(value);
-        }
-
-        public Node(Unit source, Location start = default, Location end = default) {
-            Source = source;
-            Start  = start;
-            End    = end;
-        }
+        protected Node(
+            Unit     unit,
+            Location start = default,
+            Location end   = default
+        ) : base(unit, start, end) { }
 
         /// <summary>
         ///     Returns first parent of this node with given type.
         ///     (<code>null</code> if parent of given type is not exists).
         /// </summary>
-        internal T? GetParent<T>()
-            where T : Node {
+        internal T? GetParent<T>() where T : Node {
             Node p = this;
             while (true) {
                 p = p.Parent;
@@ -100,10 +83,11 @@ namespace Axion.Core.Processing {
         }
 
         protected NodeList<T> InitIfNull<T>(ref NodeList<T>? list)
-            where T : Node? {
+            where T : Node {
             if (list == null) {
                 list = new NodeList<T>(this);
             }
+
             list = Bind(list);
             return list;
         }
@@ -112,28 +96,36 @@ namespace Axion.Core.Processing {
 
         /// <summary>
         ///     [ONLY-INSIDE-PROPERTY]
-        ///     Binds given property value to this node and extends it's span if needed.
+        ///     Binds given property value to parent node
+        ///     and extends it's span if needed.
         /// </summary>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if provided property value is null.
         /// </exception>
-        protected T Bind<T>(T value, [CallerMemberName] string propertyName = "")
-            where T : Node {
+        protected T Bind<T>(
+            T                         value,
+            [CallerMemberName] string propertyName = ""
+        ) where T : Node {
             if (value == null) {
                 throw new ArgumentNullException(nameof(value));
             }
+
             return BindNode(value, propertyName);
         }
 
         /// <summary>
         ///     [ONLY-INSIDE-PROPERTY]
-        ///     Binds given property value to this node and extends it's span if needed.
+        ///     Binds given property value to parent node
+        ///     and extends it's span if needed.
         /// </summary>
-        protected T? BindNullable<T>(T? value, [CallerMemberName] string propertyName = "")
-            where T : Node {
+        protected T? BindNullable<T>(
+            T?                        value,
+            [CallerMemberName] string propertyName = ""
+        ) where T : Node {
             if (value == null) {
                 return value;
             }
+
             return BindNode(value, propertyName);
         }
 
@@ -141,21 +133,30 @@ namespace Axion.Core.Processing {
         ///     Internal node binding method.
         ///     Creates a path to parent attribute.
         /// </summary>
-        private T BindNode<T>(T value, string propertyName)
-            where T : Node {
+        private T BindNode<T>(T value, string propertyName) where T : Node {
             ExtendSpan(value);
 
             value.Parent = this;
-            value.Path   = new NodeTreePath(value, GetType().GetProperty(propertyName)!);
+            value.Path = new NodeTreePath(
+                value,
+                GetType().GetProperty(propertyName)!
+            );
 
             return value;
         }
 
         /// <summary>
-        ///     Binds given node to this node and extends parent span if needed.
+        ///     Binds child node to parent node
+        ///     and extends parent span if needed.
         /// </summary>
-        public T Bind<T>(T value, NodeList<T> list, int index)
-            where T : Node {
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown if provided property value is null.
+        /// </exception>
+        public T Bind<T>(T value, NodeList<T> list, int index) where T : Node {
+            if (value == null) {
+                throw new ArgumentNullException(nameof(value));
+            }
+
             ExtendSpan(value);
 
             value.Parent = this;
@@ -166,7 +167,8 @@ namespace Axion.Core.Processing {
 
         /// <summary>
         ///     [ONLY-INSIDE-PROPERTY]
-        ///     Binds given property value to this node and extends it's span if needed.
+        ///     Binds given property value to parent node
+        ///     and extends it's span if needed.
         /// </summary>=
         /// <exception cref="ArgumentNullException">
         ///     Thrown if provided property value is null.
@@ -176,9 +178,11 @@ namespace Axion.Core.Processing {
             if (list == null) {
                 throw new ArgumentNullException(nameof(list));
             }
+
             if (list.Count == 0) {
-                return new NodeList<T>(this);
+                return list;
             }
+
             ExtendSpan(list[0], list[^1]);
 
             for (var i = 0; i < list.Count; i++) {
@@ -187,6 +191,7 @@ namespace Axion.Core.Processing {
                     n.Path   = new NodeListTreePath<T>(list, i);
                 }
             }
+
             return list;
         }
 
@@ -197,9 +202,10 @@ namespace Axion.Core.Processing {
         private bool firstTimeSpanMarking = true;
 
         /// <summary>
-        ///     Extends this span of code if provided mark is out of existing span.
+        ///     Extends this span of code
+        ///     if provided mark is out of existing span.
         /// </summary>
-        private void ExtendSpan(Node n) {
+        public void ExtendSpan(CodeSpan n) {
             // if span is marked first time, set span equal to starting one
             // to prevent new node spanning from (1,1) to end.
             if (firstTimeSpanMarking) {
@@ -208,12 +214,15 @@ namespace Axion.Core.Processing {
                 firstTimeSpanMarking = false;
                 return;
             }
+
             if (n.Start < Start) {
                 Start = n.Start;
             }
+
             if (n.End > End) {
                 End = n.End;
             }
+
             // fix negative span
             if (End < Start) {
                 End = Start;
@@ -221,9 +230,10 @@ namespace Axion.Core.Processing {
         }
 
         /// <summary>
-        ///     Extends this span of code if any of provided marks is out of existing span.
+        ///     Extends this span of code
+        ///     if any of provided marks is out of existing span.
         /// </summary>
-        private void ExtendSpan(Node a, Node b) {
+        public void ExtendSpan(CodeSpan a, CodeSpan b) {
             // if span is marked first time, select least span of a & b.
             // to prevent new node spanning from (1,1) to end.
             if (firstTimeSpanMarking) {
@@ -232,18 +242,21 @@ namespace Axion.Core.Processing {
                 firstTimeSpanMarking = false;
                 return;
             }
+
             if (a.Start < Start) {
                 Start = a.Start;
             }
             else if (b.Start < Start) {
                 Start = b.Start;
             }
+
             if (b.End > End) {
                 End = b.End;
             }
             else if (a.End > End) {
                 End = a.End;
             }
+
             // fix negative span
             if (End < Start) {
                 End = Start;

@@ -11,9 +11,9 @@ x = f'Hello, {name}!'
 () = Object.(a, b, c)
 (x, y) = GetCoordinates()
 
-Seq.each (["one", "two", "three"], fn (s): Console.print(s))
+Seq.each (["one", "two", "three"], fn (s) Console.print(s))
 
-for x in range(0, 10): Console.println(x)
+for x in range(0, 10) { Console.println(x) }
 
 "this is a long text" |> capitalize |> shortenText
 
@@ -37,9 +37,9 @@ x = (1, 2) if 1 == 4 else (3, 4)
 x = a if a > b else b
 
 # loops
-for (x, y) in zip(1..9, 9..1): Console.print(x, y)
+for (x, y) in zip(1..9, 9..1) { Console.print(x, y) }
 
-for x in 1..9: Console.print(x)
+for x in 1..9 { Console.print(x) }
 
 x = 0
 until x >= 10 { Console.println(x) }
@@ -72,13 +72,13 @@ new Email[Address, Title]() { A = 2, B = 4 }
 let l = new List[Str]()
 
 # function as object
-x = fn (arg1: int, arg2: bool) { print(arg1, arg2) }
+x = fn (arg1: int, arg2: bool) print(arg1, arg2)
 
-x: Action = fn { Console.println('Hello, world!') }
+x: Action = fn Console.println('Hello, world!')
 
-cube: Func[int] = fn (x: int) { x * x * x }
+cube: Func[int] = fn (x: int) x * x * x
 
-cube: Func[BigInteger, BigInteger] = fn (x: BigInteger) { x * x * x }
+cube: Func[BigInteger, BigInteger] = fn (x: BigInteger) x * x * x
 Console.Write(cube(9999999999999999999))
 
 # TODO: make test

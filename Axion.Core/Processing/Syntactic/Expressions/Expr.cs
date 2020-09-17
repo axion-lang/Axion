@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Axion.Core.Processing.CodeGen;
-using Axion.Core.Source;
+using Axion.Core.Processing.Emitting;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
@@ -29,21 +29,23 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     /// </summary>
     [DebuggerDisplay("{" + nameof(debuggerDisplay) + ",nq}")]
     public class Expr : Node {
-        internal TokenStream Stream => Source.TokenStream;
+        internal TokenStream Stream => Unit.TokenStream;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string debuggerDisplay {
             get {
-                var cw = new CodeWriter(new ProcessingOptions("axion", false));
+                var cw = new CodeWriter(new ProcessingOptions(Language.Axion));
                 cw.Write(this);
                 return cw.ToString();
             }
         }
 
-        protected Expr() : base(null) { }
-
-        internal Expr(Node parent) : base(parent.Source, parent.Start, parent.End) {
-            Parent = parent;
+        protected Expr(Node? parent) : base(
+            parent?.Unit!,
+            parent?.Start ?? default,
+            parent?.End   ?? default
+        ) {
+            Parent = parent!;
         }
 
         protected ScopeExpr InitIfNull(

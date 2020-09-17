@@ -1,12 +1,12 @@
 using System;
-using Axion.Core.Source;
+using Axion.Core.Hierarchy;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Lexer {
     public partial class LexerTests {
         [Test]
         public void TestTabsIndentation() {
-            Unit src = MakeSourceFromCode(
+            Unit src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "i = 0",
@@ -25,7 +25,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestSpacesIndentation() {
-            Unit src = MakeSourceFromCode(
+            Unit src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "i = 0",
@@ -44,7 +44,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestWarnMixedIndentation() {
-            Unit src = MakeSourceFromCode(
+            Unit src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "i = 0",

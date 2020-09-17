@@ -6,7 +6,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Postfix;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
-namespace Axion.Core.Processing.CodeGen {
+namespace Axion.Core.Processing.Emitting {
     public class ConverterToAxion : ConverterFromAxion {
         public override string OutputFileExtension => ".ax";
 

@@ -44,18 +44,25 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
                             if (Stream.MaybeEat(Colon)) {
                                 Expr? stop = null;
-                                if (!Stream.PeekIs(Colon, Comma, CloseBracket)) {
+                                if (!Stream.PeekIs(
+                                    Colon,
+                                    Comma,
+                                    CloseBracket
+                                )) {
                                     stop = InfixExpr.Parse(this);
                                 }
 
                                 Expr? step = null;
-                                if (Stream.MaybeEat(Colon) && !Stream.PeekIs(Comma, CloseBracket)) {
+                                if (Stream.MaybeEat(Colon)
+                                 && !Stream.PeekIs(Comma, CloseBracket)) {
                                     step = InfixExpr.Parse(this);
                                 }
 
                                 expressions.Add(
                                     new SliceExpr(this) {
-                                        From = start, To = stop, Step = step
+                                        From = start,
+                                        To   = stop,
+                                        Step = step
                                     }
                                 );
                                 break;
@@ -70,6 +77,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                             else {
                                 expressions.Add(start);
                             }
+
                             if (Stream.PeekIs(CloseBracket)) {
                                 break;
                             }
@@ -77,6 +85,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                             Stream.Eat(Comma);
                         }
                     }
+
                     Index = expressions.Count == 1
                         ? expressions[0]
                         : new TupleExpr(this) {

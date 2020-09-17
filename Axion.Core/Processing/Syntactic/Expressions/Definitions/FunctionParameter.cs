@@ -25,11 +25,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                         ValueType = TypeName.Parse(this);
                     }
                     else {
-                        LangException.Report(BlameType.ImpossibleToInferType, Name);
+                        LangException.Report(
+                            BlameType.ImpossibleToInferType,
+                            Name
+                        );
                     }
 
                     if (names.Contains(Name.ToString())) {
-                        LangException.Report(BlameType.DuplicatedParameterInFunction, Name);
+                        LangException.Report(
+                            BlameType.DuplicatedParameterInFunction,
+                            Name
+                        );
                     }
 
                     names.Add(Name.ToString());
@@ -55,11 +61,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             Node               parent,
             params TokenType[] terminators
         ) {
-            var s = parent.Source.TokenStream;
+            var s = parent.Unit.TokenStream;
 
-            var parameters               = new NodeList<FunctionParameter>(parent);
-            var names                    = new HashSet<string>(StringComparer.Ordinal);
-            var haveMultiply             = false;
+            var parameters = new NodeList<FunctionParameter>(parent);
+            var names = new HashSet<string>(StringComparer.Ordinal);
+            var haveMultiply = false;
             var haveKeywordOnlyParameter = false;
             // we want these to be the last two parameters
             FunctionParameter? listParameter = null;
@@ -74,12 +80,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
                 if (s.MaybeEat(OpMultiply)) {
                     if (haveMultiply) {
-                        LangException.Report(BlameType.CannotHaveMoreThan1ListParameter, s.Peek);
+                        LangException.Report(
+                            BlameType.CannotHaveMoreThan1ListParameter,
+                            s.Peek
+                        );
                         return new NodeList<FunctionParameter>(parent);
                     }
 
                     if (!s.PeekIs(Comma)) {
-                        listParameter = new FunctionParameter(parent).Parse(names);
+                        listParameter =
+                            new FunctionParameter(parent).Parse(names);
                     }
                     // else got ", *,"
 
@@ -91,7 +101,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     // the "*" must also have a default value.
                     FunctionParameter param;
                     if (haveMultiply) {
-                        param                    = new FunctionParameter(parent).Parse(names);
+                        param = new FunctionParameter(parent).Parse(names);
                         haveKeywordOnlyParameter = true;
                     }
                     else {
@@ -102,7 +112,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                         needDefault = true;
                     }
                     else if (needDefault) {
-                        LangException.Report(BlameType.ExpectedDefaultParameterValue, parent);
+                        LangException.Report(
+                            BlameType.ExpectedDefaultParameterValue,
+                            parent
+                        );
                     }
 
                     parameters.Add(param);
@@ -117,7 +130,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
              && listParameter == null
              && mapParameter  != null
              && !haveKeywordOnlyParameter) {
-                LangException.Report(BlameType.NamedArgsMustFollowBareStar, s.Token);
+                LangException.Report(
+                    BlameType.NamedArgsMustFollowBareStar,
+                    s.Token
+                );
             }
 
             if (listParameter != null) {

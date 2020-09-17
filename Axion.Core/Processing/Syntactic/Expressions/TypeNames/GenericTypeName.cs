@@ -23,9 +23,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => typeArgsStartMark = BindNullable(value);
         }
 
-        private NodeList<TypeName?>? typeArgs;
+        private NodeList<TypeName>? typeArgs;
 
-        public NodeList<TypeName?> TypeArgs {
+        public NodeList<TypeName> TypeArgs {
             get => InitIfNull(ref typeArgs);
             set => typeArgs = Bind(value);
         }
@@ -46,6 +46,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             do {
                 TypeArgs.Add(Parse(this));
             } while (Stream.MaybeEat(Comma));
+
             TypeArgsEndMark = Stream.Eat(CloseBracket);
             return this;
         }

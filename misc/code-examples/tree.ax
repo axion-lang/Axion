@@ -19,7 +19,10 @@ lastWasDecor = false
 # Levels 2 to n-1:
 # Tree layers
 while levelWidth < h
-    treeLevelHeight = 1 if levelWidth == 1 or levelWidth == h - 1 else 2
+    treeLevelHeight = 2
+    if levelWidth == 1 or levelWidth == h - 1
+        treeLevelHeight = 1
+
     k = 0
     while k < treeLevelHeight
         # Leading whitespaces (X position + tree alignment)

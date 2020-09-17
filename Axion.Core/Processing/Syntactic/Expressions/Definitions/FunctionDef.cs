@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
@@ -14,6 +15,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public class FunctionDef : AtomExpr, IDefinitionExpr, IDecorableExpr {
+        private Token? kwFn;
+
+        public Token? KwFn {
+            get => kwFn;
+            set => kwFn = BindNullable(value);
+        }
+
         private NameExpr? name;
 
         public NameExpr? Name {
@@ -38,17 +46,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         public override TypeName? ValueType {
             get {
                 try {
-                    List<(ReturnExpr item, ScopeExpr itemParentScope, int itemIndex)> returns =
+                    List<(ReturnExpr item, ScopeExpr, int)> returns =
                         Scope.FindItemsOfType<ReturnExpr>();
                     // TODO: handle all possible returns (type unions)
                     if (returns.Count > 0) {
                         return returns[0].item.ValueType;
                     }
 
-                    return new SimpleTypeName("void");
+                    return new SimpleTypeName(this, Spec.VoidType);
                 }
                 catch {
-                    return new SimpleTypeName("UNKNOWN_TYPE");
+                    return new SimpleTypeName(this, Spec.UnknownType);
                 }
             }
         }
@@ -57,7 +65,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public DecoratedExpr WithDecorators(params Expr[] items) {
             return new DecoratedExpr(Parent) {
-                Target = this, Decorators = new NodeList<Expr>(this, items)
+                Target     = this,
+                Decorators = new NodeList<Expr>(this, items)
             };
         }
 
@@ -76,35 +85,37 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public FunctionDef Parse(bool anonymous = false) {
-            SetSpan(
-                () => {
-                    Stream.Eat(KeywordFn);
-                    if (!anonymous) {
-                        Name = new NameExpr(this).Parse();
-                    }
+            KwFn = Stream.Eat(KeywordFn);
 
-                    // parameters
-                    if (Stream.MaybeEat(OpenParenthesis)) {
-                        // TODO: reworking of parameter lists
-                        Parameters = FunctionParameter.ParseList(this, CloseParenthesis);
-                        Stream.Eat(CloseParenthesis);
-                    }
+            // name
+            if (!anonymous) {
+                Name = new NameExpr(this).Parse();
+            }
 
-                    // return type
-                    if (Stream.MaybeEat(RightArrow)) {
-                        ValueType = TypeName.Parse(this);
-                    }
+            // parameters
+            if (Stream.MaybeEat(OpenParenthesis)) {
+                // TODO: reworking parameter lists
+                Parameters = FunctionParameter.ParseList(
+                    this,
+                    CloseParenthesis
+                );
+                Stream.Eat(CloseParenthesis);
+            }
 
-                    if (Stream.PeekIs(Spec.ScopeStartMarks)) {
-                        Scope = new ScopeExpr(this).Parse(
-                            anonymous ? ScopeType.Lambda : ScopeType.Default
-                        );
-                    }
-                    else {
-                        Scope = new ScopeExpr(this);
-                    }
-                }
-            );
+            // return type
+            if (Stream.MaybeEat(RightArrow)) {
+                ValueType = TypeName.Parse(this);
+            }
+
+            // scope
+            if (Stream.PeekIs(Spec.ScopeStartMarks)) {
+                Scope.Parse();
+            }
+            // single expression: `fn (arg, ...) expr`
+            else if (anonymous) {
+                Scope.Items.Add(AnyExpr.Parse(Scope));
+            }
+
             return this;
         }
     }

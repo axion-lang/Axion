@@ -25,12 +25,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///     </c>
     /// </summary>
     public class InfixExpr : Expr {
-        protected InfixExpr() { }
-
         protected InfixExpr(Node parent) : base(parent) { }
 
         internal static InfixExpr Parse(Node parent) {
-            TokenStream s = parent.Source.TokenStream;
+            TokenStream s = parent.Unit.TokenStream;
 
             InfixExpr ParseInfix(int precedence) {
                 InfixExpr leftExpr = PrefixExpr.Parse(parent);
@@ -41,7 +39,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 }
 
                 // expr (keyword | expr) expr?
-                MacroApplicationExpr macro = new MacroApplicationExpr(parent).Parse(leftExpr);
+                MacroApplicationExpr macro =
+                    new MacroApplicationExpr(parent).Parse(leftExpr);
                 if (macro.Macro != null) {
                     return macro;
                 }
@@ -52,7 +51,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                         newPrecedence = opToken.Precedence;
                     }
                     // NOTE: this condition disallows identifiers on newline to be used as operators.
-                    else if (!s.Token.Is(Newline, Outdent) && s.PeekIs(Identifier)) {
+                    else if (!s.Token.Is(Newline, Outdent)
+                          && s.PeekIs(Identifier)) {
                         newPrecedence = 4;
                     }
 
@@ -62,7 +62,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
 
                     s.EatAny();
                     leftExpr = new BinaryExpr(parent) {
-                        Left = leftExpr, Operator = s.Token, Right = ParseInfix(newPrecedence + 1)
+                        Left     = leftExpr,
+                        Operator = s.Token,
+                        Right    = ParseInfix(newPrecedence + 1)
                     };
                 }
 

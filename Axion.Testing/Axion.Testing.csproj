@@ -28,14 +28,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Files\in\out\**" />
+      <Compile Remove="test-files\**" />
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Remove="Files\in\out\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Files\in\out\**" />
+      <None Remove="test-files\**" />
     </ItemGroup>
 </Project>

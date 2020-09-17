@@ -1,9 +1,9 @@
-﻿namespace Axion.Core.Source {
+﻿namespace Axion.Core {
     /// <summary>
     ///     Determines how compiler must
     ///     process source unit.
     /// </summary>
-    public enum ProcessingMode {
+    public enum Mode {
         Default = Reduction,
 
         /// <summary>

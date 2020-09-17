@@ -43,6 +43,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             else {
                 Value = Multiple<InfixExpr>.ParseGenerally(this);
             }
+
             return this;
         }
     }

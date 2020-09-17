@@ -14,9 +14,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
     ///     <c>
     ///         scope:
-    ///             (':' expr)
-    ///             | ([':'] '{' expr* '}')
-    ///             | ([':'] NEWLINE INDENT expr+ OUTDENT);
+    ///             expr
+    ///             | ('{' expr* '}')
+    ///             | (NEWLINE INDENT expr+ OUTDENT);
     ///     </c>
     /// </summary>
     public class ScopeExpr : Expr {
@@ -29,20 +29,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         internal ScopeExpr(Node parent) : base(parent) { }
 
-        protected ScopeExpr() { }
-
         public ScopeExpr WithItems(IEnumerable<Expr> list) {
             Items = new NodeList<Expr>(this, list);
             return this;
         }
 
         public string CreateUniqueId(string formattedId) {
-            var    i  = 0;
-            string id = string.Format(formattedId, i);
-            while (IsDefined(id)) {
-                i++;
+            var    i = 0;
+            string id;
+            do {
                 id = string.Format(formattedId, i);
-            }
+                i++;
+            } while (IsDefined(id));
 
             return id;
         }
@@ -72,7 +70,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public IDefinitionExpr[] GetScopedDefs() {
-            List<IDefinitionExpr> defs = Items.OfType<IDefinitionExpr>().ToList();
+            List<IDefinitionExpr> defs =
+                Items.OfType<IDefinitionExpr>().ToList();
 
             // Add parameters of function if inside it.
             var parentFn = GetParent<FunctionDef>();
@@ -83,26 +82,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return defs.ToArray();
         }
 
-        public List<(T item, ScopeExpr itemParentScope, int itemIndex)> FindItemsOfType<T>(
-            List<(T item, ScopeExpr itemParentScope, int itemIndex)>? _outs = null
-        ) {
-            _outs ??= new List<(T item, ScopeExpr itemParentScope, int itemIndex)>();
+        public List<(T item, ScopeExpr itemParentScope, int itemIndex)>
+            FindItemsOfType<T>(
+                List<(T item, ScopeExpr itemParentScope, int itemIndex)>? _outs
+                    = null
+            ) {
+            _outs ??=
+                new List<(T item, ScopeExpr itemParentScope, int itemIndex)>();
             for (var i = 0; i < Items.Count; i++) {
                 Expr item = Items[i];
                 if (item is T expr) {
                     _outs.Add((expr, this, i));
                 }
                 else {
-                    IEnumerable<PropertyInfo> childProps = item
-                                                           .GetType()
-                                                           .GetProperties()
-                                                           .Where(
-                                                               p => p.PropertyType
-                                                                 == typeof(ScopeExpr)
-                                                                 && p.Name != nameof(Parent)
-                                                           );
+                    IEnumerable<PropertyInfo> childProps = item.GetType()
+                        .GetProperties()
+                        .Where(
+                            p => p.PropertyType == typeof(ScopeExpr)
+                              && p.Name         != nameof(Parent)
+                        );
                     foreach (PropertyInfo prop in childProps) {
-                        var b = (ScopeExpr) prop.GetValue(item);
+                        var b = (ScopeExpr?) prop.GetValue(item);
                         b?.FindItemsOfType(_outs);
                     }
                 }
@@ -111,26 +111,28 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return _outs;
         }
 
-        public (ScopeExpr? itemParentScope, int itemIndex) IndexOf<T>(T expression)
-            where T : Expr {
+        public (ScopeExpr? itemParentScope, int itemIndex) IndexOf<T>(
+            T expression
+        ) where T : Expr {
             for (var i = 0; i < Items.Count; i++) {
                 Expr item = Items[i];
                 if (item == expression) {
                     return (this, i);
                 }
 
-                IEnumerable<PropertyInfo> childProps = item
-                                                       .GetType()
-                                                       .GetProperties()
-                                                       .Where(
-                                                           p => p.PropertyType == typeof(ScopeExpr)
-                                                             && p.Name         != nameof(Parent)
-                                                       );
+                var childProps = item.GetType()
+                                     .GetProperties()
+                                     .Where(
+                                         p => p.PropertyType
+                                           == typeof(ScopeExpr)
+                                           && p.Name != nameof(Parent)
+                                     );
                 foreach (PropertyInfo prop in childProps) {
-                    var                                         b = (ScopeExpr) prop.GetValue(item);
-                    (ScopeExpr itemParentScope, int itemIndex)? idx = b?.IndexOf(expression);
-                    if (idx != null && idx != (null, -1)) {
-                        return ((ScopeExpr itemParentScope, int itemIndex)) idx;
+                    var b = (ScopeExpr?) prop.GetValue(item);
+                    (ScopeExpr? itemParentScope, int itemIndex) idx =
+                        b?.IndexOf(expression) ?? (null, -1);
+                    if (idx != (null, -1)) {
+                        return idx;
                     }
                 }
             }
@@ -138,28 +140,36 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return (null, -1);
         }
 
-        public ScopeExpr Parse(ScopeType type = ScopeType.Default) {
+        public ScopeExpr Parse() {
             if (!Stream.PeekIs(Spec.ScopeStartMarks)) {
                 return this;
             }
 
             SetSpan(
                 () => {
-                    TokenType terminator = ParseStart(this);
-
-                    if (terminator == Outdent && type.HasFlag(ScopeType.Lambda)) {
-                        LangException.Report(BlameType.IndentationBasedScopeNotAllowed, this);
-                    }
-
-                    if (terminator == Newline) {
+                    var scopeType = ParseStart(this);
+                    switch (scopeType) {
+                    case ScopeType.Single: {
                         Items.Add(AnyExpr.Parse(this));
+                        break;
                     }
-                    else {
-                        while (!Stream.MaybeEat(terminator)
-                            && !Stream.PeekIs(TokenType.End)
-                            && !(terminator == Newline && Stream.Token.Is(Newline))) {
+                    case ScopeType.Indented: {
+                        while (!Stream.MaybeEat(Outdent, TokenType.End)) {
                             Items.Add(AnyExpr.Parse(this));
                         }
+
+                        break;
+                    }
+                    case ScopeType.Embraced: {
+                        while (!Stream.MaybeEat(CloseBrace, TokenType.End)) {
+                            Items.Add(AnyExpr.Parse(this));
+                        }
+
+                        break;
+                    }
+                    default: {
+                        throw new NotSupportedException("Invalid scope type.");
+                    }
                     }
                 }
             );
@@ -168,49 +178,41 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         /// <summary>
         ///     Starts parsing the statement's scope,
-        ///     returns terminator what can be used to parse scope end.
+        ///     returns scope type that can be
+        ///     used to parse scope to the end.
         /// </summary>
-        private static TokenType ParseStart(Node parent) {
-            var s = parent.Source.TokenStream;
-            // colon
-            bool  hasColon   = s.MaybeEat(Colon);
-            Token scopeStart = s.Token;
-
+        private static ScopeType ParseStart(Node parent) {
+            var s = parent.Unit.TokenStream;
             // newline
-            bool hasNewline = hasColon ? s.MaybeEat(Newline) : scopeStart.Is(Newline);
+            bool hasNewline = s.MaybeEat(Newline);
 
             // '{'
             if (s.MaybeEat(OpenBrace)) {
-                if (hasColon) {
-                    // ':' '{'
-                    LangException.Report(BlameType.RedundantColonWithBraces, scopeStart);
-                }
-
-                return CloseBrace;
+                return ScopeType.Embraced;
             }
 
             // indent
             if (s.MaybeEat(Indent)) {
-                return Outdent;
+                return ScopeType.Indented;
             }
 
             if (hasNewline) {
                 // newline followed by not indent or '{'
-                LangException.Report(BlameType.ExpectedScopeDeclaration, s.Peek);
-            }
-            // exactly a 1-line scope
-            else if (!hasColon) {
-                // one line scope must have a colon
-                LangException.ReportUnexpectedSyntax(Colon, s.Peek);
+                LangException.Report(
+                    BlameType.ExpectedScopeDeclaration,
+                    s.Peek
+                );
             }
 
-            return Newline;
+            // exactly a 1-line scope
+            return ScopeType.Single;
         }
     }
 
     [Flags]
     public enum ScopeType {
-        Default,
-        Lambda
+        Indented,
+        Embraced,
+        Single
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,15 +8,16 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic {
     [DebuggerDisplay("{TokenIdx}: '{Token.Value}', then '{Peek.Value}'.")]
-    public class TokenStream {
-        public List<Token> Tokens   { get; }              = new List<Token>();
-        public int         TokenIdx { get; private set; } = -1;
+    public class TokenStream : IList<Token> {
+        public int TokenIdx { get; private set; } = -1;
 
         public Token Token =>
-            TokenIdx > -1 && TokenIdx < Tokens.Count ? Tokens[TokenIdx] : Tokens[^1];
+            TokenIdx > -1 && TokenIdx < tokens.Count
+                ? tokens[TokenIdx]
+                : tokens[^1];
 
         public Token ExactPeek =>
-            TokenIdx + 1 < Tokens.Count ? Tokens[TokenIdx + 1] : Tokens[^1];
+            TokenIdx + 1 < tokens.Count ? tokens[TokenIdx + 1] : tokens[^1];
 
         public Token Peek {
             get {
@@ -24,30 +26,33 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
+        public int Count => tokens.Count;
+
+        public bool IsReadOnly { get; } = false;
+
+        private readonly List<Token> tokens = new List<Token>();
+
         public bool PeekIs(params TokenType[] expected) {
             return PeekByIs(1, expected);
         }
 
         public bool PeekByIs(int peekBy, params TokenType[] expected) {
             SkipTrivial(expected);
-            if (TokenIdx + peekBy < Tokens.Count) {
-                Token peekN = Tokens[TokenIdx + peekBy];
-                foreach (TokenType t in expected) {
-                    if (peekN.Is(t)) {
-                        return true;
-                    }
-                }
+            if (TokenIdx + peekBy < tokens.Count) {
+                Token peekN = tokens[TokenIdx + peekBy];
+                return expected.Any(tt => peekN.Is(tt));
             }
 
-            return false;
+            // if went out of bounds then only end can match
+            return expected.Contains(End);
         }
 
         public Token EatAny(int pos = 1) {
-            if (TokenIdx + pos >= 0 && TokenIdx + pos < Tokens.Count) {
+            if (TokenIdx + pos >= 0 && TokenIdx + pos < tokens.Count) {
                 TokenIdx += pos;
             }
 
-            return Tokens[TokenIdx];
+            return tokens[TokenIdx];
         }
 
         /// <summary>
@@ -61,6 +66,7 @@ namespace Axion.Core.Processing.Syntactic {
             if (!Token.Is(types)) {
                 LangException.Report(BlameType.InvalidSyntax, Token);
             }
+
             return Token;
         }
 
@@ -85,20 +91,67 @@ namespace Axion.Core.Processing.Syntactic {
             if (ExactPeek.Value != value) {
                 return false;
             }
+
             EatAny();
             return true;
         }
 
         public void MoveAbsolute(int tokenIndex) {
-            Debug.Assert(tokenIndex >= -1 && tokenIndex < Tokens.Count);
+            Debug.Assert(tokenIndex >= -1 && tokenIndex < tokens.Count);
             TokenIdx = tokenIndex;
         }
 
         private void SkipTrivial(params TokenType[] wantedTypes) {
             bool skipNewlines = !wantedTypes.Contains(Newline);
-            while (ExactPeek.Type == Comment || ExactPeek.Type == Newline && skipNewlines) {
+            while (ExactPeek.Type == Comment
+                || ExactPeek.Type == Newline && skipNewlines) {
                 EatAny();
             }
+        }
+
+        public IEnumerator<Token> GetEnumerator() {
+            return tokens.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return GetEnumerator();
+        }
+
+        public void Add(Token item) {
+            tokens.Add(item);
+        }
+
+        public void Clear() {
+            tokens.Clear();
+        }
+
+        public bool Contains(Token item) {
+            return tokens.Contains(item);
+        }
+
+        public void CopyTo(Token[] array, int arrayIndex) {
+            tokens.CopyTo(array, arrayIndex);
+        }
+
+        public bool Remove(Token item) {
+            return tokens.Remove(item);
+        }
+
+        public int IndexOf(Token item) {
+            return tokens.IndexOf(item);
+        }
+
+        public void Insert(int index, Token item) {
+            tokens.Insert(index, item);
+        }
+
+        public void RemoveAt(int index) {
+            tokens.RemoveAt(index);
+        }
+
+        public Token this[int index] {
+            get => tokens[index];
+            set => tokens[index] = value;
         }
     }
 }

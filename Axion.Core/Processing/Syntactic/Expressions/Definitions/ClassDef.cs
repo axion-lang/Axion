@@ -60,7 +60,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public DecoratedExpr WithDecorators(params Expr[] items) {
             return new DecoratedExpr(Parent) {
-                Target = this, Decorators = new NodeList<Expr>(this, items)
+                Target     = this,
+                Decorators = new NodeList<Expr>(this, items)
             };
         }
 
@@ -89,7 +90,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
             // TODO: add generic classes
             if (Stream.MaybeEat(LeftArrow)) {
-                List<(TypeName? type, NameExpr? label)> types = TypeName.ParseNamedTypeArgs(this);
+                List<(TypeName type, NameExpr? label)> types =
+                    TypeName.ParseNamedTypeArgs(this);
                 foreach ((TypeName type, NameExpr? typeLabel) in types) {
                     if (typeLabel == null) {
                         Bases.Add(type);
@@ -104,6 +106,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             if (Stream.PeekIs(Spec.ScopeStartMarks)) {
                 Scope.Parse();
             }
+
             return this;
         }
     }

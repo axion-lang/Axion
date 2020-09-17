@@ -1,22 +1,40 @@
 using System;
-using Axion.Core.Source;
+using Axion.Core.Hierarchy;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Lexer {
     public partial class LexerTests {
         [Test]
-        public void TestVariousStrings() {
-            Unit src = MakeSourceFromCode(
+        public void TestRegularStrings() {
+            Unit src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1 = \"regular literal\"",
-                    "str2 = 'regular literal'",
-                    "",
-                    "",
+                    "str2 = 'regular literal'"
+                )
+            );
+            Lex(src);
+            Assert.AreEqual(0, src.Blames.Count);
+        }
+
+        [Test]
+        public void TestFormattedStrings() {
+            Unit src = TestUtils.UnitFromCode(
+                string.Join(
+                    Environment.NewLine,
                     "str1f = f\"{str1} formatted literal {str2}\"",
-                    "str2f = f'{str1} formatted literal {str2}'",
-                    "",
-                    "",
+                    "str2f = f'{str1} formatted literal {str2}'"
+                )
+            );
+            Lex(src);
+            Assert.AreEqual(0, src.Blames.Count);
+        }
+
+        [Test]
+        public void TestMultilineStrings() {
+            Unit src = TestUtils.UnitFromCode(
+                string.Join(
+                    Environment.NewLine,
                     "str1m = \"\"\"multiline literal\"\"\"",
                     "str2m = '''multiline literal'''",
                     "",
@@ -27,9 +45,18 @@ namespace Axion.Testing.NUnit.Lexer {
                     "",
                     "str2m_ = '''",
                     "multiline literal",
-                    "'''",
-                    "",
-                    "",
+                    "'''"
+                )
+            );
+            Lex(src);
+            Assert.AreEqual(0, src.Blames.Count);
+        }
+
+        [Test]
+        public void TestFormattedMultilineStrings() {
+            Unit src = TestUtils.UnitFromCode(
+                string.Join(
+                    Environment.NewLine,
                     "str1fm = f\"\"\"{str1} formatted multiline literal {str2}\"\"\"",
                     "str2fm = f'''{str1} formatted multiline literal {str2}'''",
                     "",
@@ -40,9 +67,18 @@ namespace Axion.Testing.NUnit.Lexer {
                     "",
                     "str2fm_ = f'''",
                     "{str1} formatted multiline literal {str2}",
-                    "'''",
-                    "",
-                    "",
+                    "'''"
+                )
+            );
+            Lex(src);
+            Assert.AreEqual(0, src.Blames.Count);
+        }
+
+        [Test]
+        public void TestEmptyStrings() {
+            Unit src = TestUtils.UnitFromCode(
+                string.Join(
+                    Environment.NewLine,
                     "str1e = \"\"",
                     "str2e = ''",
                     "",
@@ -68,16 +104,14 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestFailStringInvalidEscape() {
-            Unit src = MakeSourceFromCode(
-                string.Join(Environment.NewLine, "'invalid -> \\m <- escape!'")
-            );
+            Unit src = TestUtils.UnitFromCode("'invalid -> \\m <- escape!'");
             Lex(src);
             Assert.AreEqual(1, src.Blames.Count);
         }
 
         [Test]
         public void TestFailStringTruncatedUEscape() {
-            Unit src = MakeSourceFromCode(
+            Unit src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "'invalid -> \\U5 <- escape!'",
@@ -90,7 +124,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestStringEscSequences() {
-            Unit src = MakeSourceFromCode(
+            Unit src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1e = \"esc: \\r\\n\\f\\t\\v\"",

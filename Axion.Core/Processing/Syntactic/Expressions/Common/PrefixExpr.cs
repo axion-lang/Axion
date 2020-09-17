@@ -14,18 +14,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///     </c>
     /// </summary>
     public class PrefixExpr : InfixExpr {
-        protected PrefixExpr() { }
-
         protected PrefixExpr(Node parent) : base(parent) { }
 
         internal new static PrefixExpr Parse(Node parent) {
-            TokenStream s = parent.Source.TokenStream;
+            TokenStream s = parent.Unit.TokenStream;
 
             if (s.MaybeEat(Spec.PrefixOperators)) {
                 var op = (OperatorToken) s.Token;
                 op.Side = InputSide.Right;
                 return new UnaryExpr(parent) {
-                    Operator = op, Value = Parse(parent)
+                    Operator = op,
+                    Value    = Parse(parent)
                 };
             }
 

@@ -11,18 +11,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class IfExpr : Expr {
-        private Expr condition = null!;
+        private Expr? condition;
 
-        public Expr Condition {
+        public Expr? Condition {
             get => condition;
-            set => condition = Bind(value);
+            set => condition = BindNullable(value);
         }
 
-        private ScopeExpr thenScope = null!;
+        private ScopeExpr? thenScope;
 
-        public ScopeExpr ThenScope {
+        public ScopeExpr? ThenScope {
             get => thenScope;
-            set => thenScope = Bind(value);
+            set => thenScope = BindNullable(value);
         }
 
         private ScopeExpr? elseScope;

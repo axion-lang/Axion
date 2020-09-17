@@ -1,32 +1,42 @@
 using System;
 using System.Linq;
 using Axion.Core;
+using Axion.Core.Processing.Emitting;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Source;
+using Axion.Core.Specification;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Parser {
     public partial class SyntaxParserTests {
         [Test]
         public void TestPipelineOperator() {
-            Unit src1 = MakeSourceFromCode("person |> parseData |> getAge |> validateAge");
-            Parse(src1);
-            Assert.AreEqual(0, src1.Blames.Count);
+            var (mainUnit1, _) = TestUtils.ModuleFromCode(
+                "person |> parseData |> getAge |> validateAge"
+            );
+            var cw1 = (CodeWriter?) Compiler.Process(
+                mainUnit1,
+                new ProcessingOptions(Language.Axion) {
+                    Debug = true
+                }
+            );
 
-            Unit src2 = MakeSourceFromCode("validateAge(getAge(parseData(person)))");
-            Parse(src2);
-            Assert.AreEqual(0, src2.Blames.Count);
+            var (mainUnit2, _) = TestUtils.ModuleFromCode(
+                "validateAge(getAge(parseData(person)))"
+            );
+            var cw2 = (CodeWriter?) Compiler.Process(
+                mainUnit2,
+                new ProcessingOptions(Language.Axion) {
+                    Debug = true
+                }
+            );
 
-            Compiler.Process(src1, ProcessingMode.Transpilation, ProcessingOptions.Debug);
-            Compiler.Process(src2, ProcessingMode.Transpilation, ProcessingOptions.Debug);
-
-            Assert.AreEqual(src1.CodeWriter.ToString(), src2.CodeWriter.ToString());
+            Assert.AreEqual(cw1?.ToString(), cw2?.ToString());
         }
 
         [Test]
         public void TestTypeNames() {
-            Unit src = MakeSourceFromCode(
+            var (mainUnit, module) = TestUtils.ModuleFromCode(
                 string.Join(
                     Environment.NewLine,
                     "type0: A.Qualified.Name",
@@ -41,9 +51,11 @@ namespace Axion.Testing.NUnit.Parser {
                     "type9: List[Map[T1, T2]]| (Type1[Int, Type2[]][], (Array[] | AnotherType)[])"
                 )
             );
-            Parse(src);
-            Assert.AreEqual(0, src.Blames.Count);
-            TypeName[] stmts = src.Ast.Items.Select(s => ((VarDef) s).ValueType).ToArray();
+            Compiler.Process(module, new ProcessingOptions(Mode.Parsing));
+            Assert.AreEqual(0, module.Blames.Count);
+            TypeName?[] stmts = mainUnit.Ast.Items
+                                        .Select(s => ((VarDef) s).ValueType)
+                                        .ToArray();
             Assert.AreEqual(10, stmts.Length);
         }
     }

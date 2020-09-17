@@ -93,7 +93,7 @@ class Program
                     Use the arrow keys to move around.""".trim-indent()
                 )
                 do-add = do-write = false
-            #except ex
+            #catch ex
             #    c.clear()
             #    c.write-line(ex.message)
             #    c.write-line("Your score was " + score)

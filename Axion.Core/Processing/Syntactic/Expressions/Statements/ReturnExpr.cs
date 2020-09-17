@@ -36,6 +36,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             if (!Stream.PeekIs(Spec.NeverExprStartTypes)) {
                 Value = Multiple<InfixExpr>.ParseGenerally(this);
             }
+
             return this;
         }
     }

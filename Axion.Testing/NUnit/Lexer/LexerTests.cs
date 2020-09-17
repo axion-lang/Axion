@@ -1,31 +1,36 @@
 ﻿using Axion.Core;
-using Axion.Core.Source;
+using Axion.Core.Hierarchy;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Lexer {
     [TestFixture]
-    public partial class LexerTests : Tests {
-        private static void Lex(Unit source) {
-            Compiler.Process(source, ProcessingMode.Lexing, ProcessingOptions.Debug);
+    public partial class LexerTests {
+        private static void Lex(Unit unit) {
+            Compiler.Process(
+                unit,
+                new ProcessingOptions(Mode.Lexing) {
+                    Debug = true
+                }
+            );
         }
 
         [Test]
         public void TestDashIdentifier() {
-            const string id     = "ident-ifier-";
-            Unit   source = MakeSourceFromCode(id);
-            Lex(source);
+            const string id   = "ident-ifier-";
+            Unit         unit = TestUtils.UnitFromCode(id);
+            Lex(unit);
             // id, minus, EOC
-            Assert.AreEqual(3, source.TokenStream.Tokens.Count);
-            Assert.AreEqual("ident-ifier", source.TokenStream.Tokens[0].Value);
-            Assert.AreEqual("ident_ifier", source.TokenStream.Tokens[0].Content);
+            Assert.AreEqual(3, unit.TokenStream.Count);
+            Assert.AreEqual("ident-ifier", unit.TokenStream[0].Value);
+            Assert.AreEqual("ident_ifier", unit.TokenStream[0].Content);
         }
 
         [Test]
         public void TestMismatchingClosingBracket() {
-            Unit source = MakeSourceFromCode("}");
-            Lex(source);
+            Unit unit = TestUtils.UnitFromCode("}");
+            Lex(unit);
             // mismatching bracket
-            Assert.AreEqual(1, source.Blames.Count);
+            Assert.AreEqual(1, unit.Blames.Count);
         }
     }
 }

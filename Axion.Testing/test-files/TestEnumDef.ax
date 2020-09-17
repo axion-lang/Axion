@@ -1,13 +1,4 @@
 enum Enum1
-	item1,
-	item2 = 2,
-	item3(List[int]),
-	item4(int, int) = 4,
-	item5(complex.name1, complex.name2),
-	item6 = 6,
-	item7
-
-enum Enum2:
 	item2 = 2,
 	item3(int),
 	item4(int, int) = 4,
@@ -16,7 +7,7 @@ enum Enum2:
 	item1,
 	item7
 
-enum Enum3 {
+enum Enum2 {
 	item1,
 	item5(complex.name1, complex.name2),
 	item2 = 2,

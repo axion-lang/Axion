@@ -1,6 +1,6 @@
 using Axion.Core.Processing.Syntactic.Expressions;
 
-namespace Axion.Core.Processing.CodeGen {
+namespace Axion.Core.Processing.Emitting {
     public class ConverterToPascal : ConverterFromAxion {
         public override string OutputFileExtension => ".pas";
 

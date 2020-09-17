@@ -139,11 +139,15 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
     public static class TokenTypeExtensions {
         internal static bool IsOpenBracket(this TokenType type) {
-            return type == OpenParenthesis || type == OpenBracket || type == OpenBrace;
+            return type == OpenParenthesis
+                || type == OpenBracket
+                || type == OpenBrace;
         }
 
         internal static bool IsCloseBracket(this TokenType type) {
-            return type == CloseParenthesis || type == CloseBracket || type == CloseBrace;
+            return type == CloseParenthesis
+                || type == CloseBracket
+                || type == CloseBrace;
         }
 
         internal static TokenType GetMatchingBracket(this TokenType type) {
@@ -173,7 +177,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             }
 
             try {
-                return Spec.Operators.First(kvp => kvp.Value.Item1 == type).Key;
+                return Spec.Operators.First(kvp => kvp.Value.Type == type).Key;
             }
             catch {
                 // ignored

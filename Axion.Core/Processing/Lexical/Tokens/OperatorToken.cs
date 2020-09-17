@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Axion.Core.Source;
+using Axion.Core.Hierarchy;
 using Axion.Core.Specification;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -10,16 +10,20 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public InputSide Side       { get; set; }
 
         internal OperatorToken(
-            Unit      source,
+            Unit      unit,
             string    value     = "",
             TokenType tokenType = TokenType.None
-        ) : base(source, tokenType, value) {
+        ) : base(unit, tokenType, value) {
             if (tokenType != TokenType.None) {
-                Value = Spec.Operators.First(kvp => kvp.Value.Item1 == tokenType).Key;
+                Value = Spec.Operators.First(kvp => kvp.Value.Type == tokenType)
+                            .Key;
             }
 
             Content = Value;
-            if (Spec.Operators.TryGetValue(Value, out (TokenType, int, InputSide) properties)) {
+            if (Spec.Operators.TryGetValue(
+                Value,
+                out (TokenType, int, InputSide) properties
+            )) {
                 (Type, Precedence, Side) = properties;
             }
             else {

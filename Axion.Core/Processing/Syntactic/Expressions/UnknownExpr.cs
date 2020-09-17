@@ -26,6 +26,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             while (!Stream.PeekIs(Newline, TokenType.End)) {
                 Tokens.Add(Stream.Eat());
             }
+
             return this;
         }
     }

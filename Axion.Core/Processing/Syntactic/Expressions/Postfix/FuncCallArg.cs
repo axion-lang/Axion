@@ -39,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             FuncCallArg? first          = null,
             bool         allowGenerator = false
         ) {
-            var s    = parent.Source.TokenStream;
+            var s    = parent.Unit.TokenStream;
             var args = new NodeList<FuncCallArg>(parent);
 
             if (first != null) {
@@ -53,15 +53,22 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             while (true) {
                 FuncCallArg arg;
                 // named arg
-                if (s.PeekIs(TokenType.Identifier) && s.PeekByIs(2, TokenType.OpAssign)) {
+                if (s.PeekIs(TokenType.Identifier)
+                 && s.PeekByIs(2, TokenType.OpAssign)) {
                     var argName = (NameExpr) AtomExpr.Parse(parent);
                     s.Eat(TokenType.OpAssign);
                     InfixExpr argValue = InfixExpr.Parse(parent);
                     arg = new FuncCallArg(parent) {
-                        Name = argName, Value = argValue
+                        Name  = argName,
+                        Value = argValue
                     };
-                    if (args.Any(a => a.Name?.ToString() == argName.ToString())) {
-                        LangException.Report(BlameType.DuplicatedNamedArgument, arg);
+                    if (args.Any(
+                        a => a.Name?.ToString() == argName.ToString()
+                    )) {
+                        LangException.Report(
+                            BlameType.DuplicatedNamedArgument,
+                            arg
+                        );
                     }
                 }
                 else {
@@ -70,7 +77,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     if (s.PeekIs(TokenType.KeywordFor)) {
                         arg = new FuncCallArg(parent) {
                             Value = new ForComprehension(parent) {
-                                Target = argValue, IsGenerator = true
+                                Target      = argValue,
+                                IsGenerator = true
                             }.Parse()
                         };
                     }

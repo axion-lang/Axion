@@ -1,4 +1,4 @@
-﻿using Axion.Core.Source;
+﻿using Axion.Core.Hierarchy;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class CommentToken : Token {
@@ -6,13 +6,13 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public bool IsUnclosed  { get; }
 
         internal CommentToken(
-            Unit   source,
+            Unit   unit,
             string value       = "",
             string content     = "",
             bool   isMultiline = false,
             bool   isUnclosed  = false
         ) : base(
-            source,
+            unit,
             TokenType.Comment,
             value,
             content

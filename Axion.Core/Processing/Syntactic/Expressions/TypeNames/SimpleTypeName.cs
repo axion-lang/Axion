@@ -17,8 +17,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
         public SimpleTypeName(Node parent) : base(parent) { }
 
-        public SimpleTypeName(string name) {
-            Name = new NameExpr(name);
+        public SimpleTypeName(Node parent, string name) : base(parent) {
+            Name = new NameExpr(this, name);
         }
 
         public SimpleTypeName Parse() {

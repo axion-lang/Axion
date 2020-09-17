@@ -11,13 +11,16 @@ Built with .NET Standard.</Description>
         <AssemblyName>Axion.Core</AssemblyName>
         <RootNamespace>Axion.Core</RootNamespace>
         <LangVersion>8</LangVersion>
-        <AssemblyVersion>0.4.2.0</AssemblyVersion>
-        <FileVersion>0.4.2.0</FileVersion>
+        <AssemblyVersion>0.5.0.0</AssemblyVersion>
+        <FileVersion>0.5.0.0</FileVersion>
         <ProjectGuid>{B38A9261-F73C-40E4-83B6-46B8A2B1CDE5}</ProjectGuid>
         <TargetFramework>netstandard2.1</TargetFramework>
         <Title>Axion programming language toolset</Title>
-        <PackageVersion>0.4.2.0</PackageVersion>
+        <PackageVersion>0.5.0.0</PackageVersion>
         <Nullable>enable</Nullable>
+        <PackageProjectUrl>https://github.com/F1uctus/Axion</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/F1uctus/Axion/blob/csharp/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/F1uctus/Axion</RepositoryUrl>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,6 +37,8 @@ Built with .NET Standard.</Description>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+        <PackageReference Include="Nett" Version="0.15.0" />
+        <PackageReference Include="Nett.Coma" Version="0.15.0" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
         <PackageReference Include="NLog" Version="4.6.8" />
         <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />

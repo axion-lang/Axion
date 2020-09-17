@@ -76,8 +76,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                         else if (Stream.MaybeEat(KeywordUnless)) {
                             Conditions.Add(
                                 new UnaryExpr(this) {
-                                    Operator = new OperatorToken(Source, tokenType: OpNot),
-                                    Value    = Parse(this)
+                                    Operator = new OperatorToken(
+                                        Unit,
+                                        tokenType: OpNot
+                                    ),
+                                    Value = Parse(this)
                                 }
                             );
                         }
@@ -85,7 +88,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
                     if (Stream.PeekIs(KeywordFor)) {
                         Right = new ForComprehension(Parent!) {
-                            Target = this, IsNested = true
+                            Target   = this,
+                            IsNested = true
                         }.Parse();
                     }
                 }

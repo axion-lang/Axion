@@ -1,5 +1,5 @@
 using System.Web;
-using Axion.Core.Source;
+using Axion.Core.Hierarchy;
 using Newtonsoft.Json;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -18,14 +18,14 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         public string EndingWhite { get; set; }
 
         public Token(
-            Unit      source,
+            Unit      unit,
             TokenType type        = None,
             string    value       = "",
             string?   content     = null,
             string    endingWhite = "",
             Location  start       = default,
             Location  end         = default
-        ) : base(source, start, end) {
+        ) : base(unit, start, end) {
             Type        = type;
             Value       = value;
             Content     = content ?? value;

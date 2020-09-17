@@ -8,6 +8,7 @@ using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using static Axion.Core.Processing.Lexical.Tokens.InputSide;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Specification {
@@ -16,25 +17,29 @@ namespace Axion.Core.Specification {
     ///     (allowed operators, keywords, etc.)
     /// </summary>
     public static partial class Spec {
-        public const char   EndOfCode            = '\0';
-        public const string OneLineCommentMark   = "#";
+        public const char EndOfCode = '\0';
+        public const string OneLineCommentMark = "#";
         public const string MultiLineCommentMark = "###";
-        public const string CharacterQuote       = "`";
+        public const string CharacterQuote = "`";
 
         public static readonly char[] Eols = {
-            '\r', '\n'
+            '\r',
+            '\n'
         };
 
         public static readonly char[] StringQuotes = {
-            '"', '\''
+            '"',
+            '\''
         };
 
         public static readonly char[] StringPrefixes = {
-            'r', 'f'
+            'r',
+            'f'
         };
 
         public static readonly char[] White = {
-            ' ', '\t'
+            ' ',
+            '\t'
         };
 
         // @formatter:off
@@ -84,72 +89,74 @@ namespace Axion.Core.Specification {
             { '\'', "\'" }
         };
 
-        public static readonly Dictionary<string, (TokenType Type, int Precedence, InputSide Side)> Operators =
-        new Dictionary<string, (TokenType, int, InputSide)> {
-            { "of",      (OpOf,                 19,  InputSide.Unknown) },
-            { ".",       (OpDot,                19,  InputSide.Unknown) },
+        public static readonly Dictionary<
+            string,
+            (TokenType Type, int Precedence, InputSide Side)
+        > Operators = new Dictionary<string, (TokenType, int, InputSide)> {
+            { "of",      (OpOf,                 19,  Unknown) },
+            { ".",       (OpDot,                19,  Unknown) },
 
-            { "++",      (OpIncrement,          18,  InputSide.Unknown) },
-            { "--",      (OpDecrement,          18,  InputSide.Unknown) },
+            { "++",      (OpIncrement,          18,  Unknown) },
+            { "--",      (OpDecrement,          18,  Unknown) },
 
-            { "**",      (OpPower,              17,  InputSide.Both) },
+            { "**",      (OpPower,              17,  Both) },
 
-            { "not",     (OpNot,                16,  InputSide.Right) },
-            { "~",       (OpBitNot,             16,  InputSide.Right) },
+            { "not",     (OpNot,                16,  Right) },
+            { "~",       (OpBitNot,             16,  Right) },
 
-            { "*",       (OpMultiply,           15,  InputSide.Both) },
-            { "/",       (OpTrueDivide,         15,  InputSide.Both) },
-            { "//",      (OpFloorDivide,        15,  InputSide.Both) },
-            { "%",       (OpRemainder,          15,  InputSide.Both) },
+            { "*",       (OpMultiply,           15,  Both) },
+            { "/",       (OpTrueDivide,         15,  Both) },
+            { "//",      (OpFloorDivide,        15,  Both) },
+            { "%",       (OpRemainder,          15,  Both) },
 
-            { "+",       (OpPlus,               14,  InputSide.Unknown) },
-            { "-",       (OpMinus,              14,  InputSide.Unknown) },
+            { "+",       (OpPlus,               14,  Unknown) },
+            { "-",       (OpMinus,              14,  Unknown) },
 
-            { "<<",      (OpBitLeftShift,       13,  InputSide.Both) },
-            { ">>",      (OpBitRightShift,      13,  InputSide.Both) },
+            { "<<",      (OpBitLeftShift,       13,  Both) },
+            { ">>",      (OpBitRightShift,      13,  Both) },
 
-            { "...",     (Op3Dot,               12,  InputSide.Both) },
-            { "..",      (Op2Dot,               12,  InputSide.Both) },
+            { "...",     (Op3Dot,               12,  Both) },
+            { "..",      (Op2Dot,               12,  Both) },
 
-            { "<=>",     (Op3WayCompare,        11,  InputSide.Both) },
+            { "<=>",     (Op3WayCompare,        11,  Both) },
 
-            { "<",       (OpLess,               10,  InputSide.Both) },
-            { "<=",      (OpLessOrEqual,        10,  InputSide.Both) },
-            { ">",       (OpGreater,            10,  InputSide.Both) },
-            { ">=",      (OpGreaterOrEqual,     10,  InputSide.Both) },
+            { "<",       (OpLess,               10,  Both) },
+            { "<=",      (OpLessOrEqual,        10,  Both) },
+            { ">",       (OpGreater,            10,  Both) },
+            { ">=",      (OpGreaterOrEqual,     10,  Both) },
 
-            { "==",      (OpEqualsEquals,       9,   InputSide.Both) },
-            { "!=",      (OpNotEquals,          9,   InputSide.Both) },
+            { "==",      (OpEqualsEquals,       9,   Both) },
+            { "!=",      (OpNotEquals,          9,   Both) },
 
-            { "&",       (OpBitAnd,             8,   InputSide.Both) },
-            { "^",       (OpBitXor,             7,   InputSide.Both) },
-            { "|",       (OpBitOr,              6,   InputSide.Both) },
+            { "&",       (OpBitAnd,             8,   Both) },
+            { "^",       (OpBitXor,             7,   Both) },
+            { "|",       (OpBitOr,              6,   Both) },
 
-            { "is",      (OpIs,                 5,   InputSide.Both) },
-            { "in",      (OpIn,                 5,   InputSide.Both) },
+            { "is",      (OpIs,                 5,   Both) },
+            { "in",      (OpIn,                 5,   Both) },
 
-            { "|>",      (RightPipeline,        4,   InputSide.Both) },
+            { "|>",      (RightPipeline,        4,   Both) },
 
-            { "and",     (OpAnd,                3,   InputSide.Both) },
+            { "and",     (OpAnd,                3,   Both) },
 
-            { "or",      (OpOr,                 2,   InputSide.Both) },
+            { "or",      (OpOr,                 2,   Both) },
 
-            { "??",      (Op2Question,          1,   InputSide.Both) },
+            { "??",      (Op2Question,          1,   Both) },
 
-            { "=",       (OpAssign,             0,   InputSide.Both) },
-            { "+=",      (OpPlusAssign,         0,   InputSide.Both) },
-            { "-=",      (OpMinusAssign,        0,   InputSide.Both) },
-            { "**=",     (OpPowerAssign,        0,   InputSide.Both) },
-            { "*=",      (OpMultiplyAssign,     0,   InputSide.Both) },
-            { "/=",      (OpFloorDivideAssign,  0,   InputSide.Both) },
-            { "//=",     (OpTrueDivideAssign,   0,   InputSide.Both) },
-            { "%=",      (OpRemainderAssign,    0,   InputSide.Both) },
-            { "?=",      (OpQuestionAssign,     0,   InputSide.Both) },
-            { "<<=",     (OpBitLShiftAssign,    0,   InputSide.Both) },
-            { ">>=",     (OpBitRShiftAssign,    0,   InputSide.Both) },
-            { "&=",      (OpBitAndAssign,       0,   InputSide.Both) },
-            { "|=",      (OpBitOrAssign,        0,   InputSide.Both) },
-            { "^=",      (OpBitXorAssign,       0,   InputSide.Both) }
+            { "=",       (OpAssign,             0,   Both) },
+            { "+=",      (OpPlusAssign,         0,   Both) },
+            { "-=",      (OpMinusAssign,        0,   Both) },
+            { "**=",     (OpPowerAssign,        0,   Both) },
+            { "*=",      (OpMultiplyAssign,     0,   Both) },
+            { "/=",      (OpFloorDivideAssign,  0,   Both) },
+            { "//=",     (OpTrueDivideAssign,   0,   Both) },
+            { "%=",      (OpRemainderAssign,    0,   Both) },
+            { "?=",      (OpQuestionAssign,     0,   Both) },
+            { "<<=",     (OpBitLShiftAssign,    0,   Both) },
+            { ">>=",     (OpBitRShiftAssign,    0,   Both) },
+            { "&=",      (OpBitAndAssign,       0,   Both) },
+            { "|=",      (OpBitOrAssign,        0,   Both) },
+            { "^=",      (OpBitXorAssign,       0,   Both) }
         };
 
         public static readonly string[] OperatorsKeys =
@@ -193,7 +200,8 @@ namespace Axion.Core.Specification {
         ///     Token types that can start a scope expression.
         /// </summary>
         public static readonly TokenType[] ScopeStartMarks = {
-            Colon, OpenBrace, Indent
+            OpenBrace,
+            Indent
         };
 
         internal static readonly TokenType[] Constants = {
@@ -238,17 +246,21 @@ namespace Axion.Core.Specification {
         /// </summary>
         internal static readonly TokenType[] NeverExprStartTypes =
             Operators.Values
-                     .Where(op => op.Side == InputSide.Both)
+                     .Where(op => op.Side == Both)
                      .Select(op => op.Type)
                      .Union(
-                         Outdent, End, Comma, Question,
+                         Outdent, Comma, Question,
                          CloseBrace, DoubleCloseBrace, CloseBracket, CloseParenthesis,
                          KeywordElif, KeywordElse,
                          LeftArrow, RightArrow
                      );
 
-        internal static readonly TypeName CharType   = new SimpleTypeName("Char");
-        internal static readonly TypeName StringType = new SimpleTypeName("String");
+        internal const string CharType   = "Char";
+        internal const string StringType = "String";
+        internal const string VoidType = "void";
+        internal const string UnitType = "Unit";
+        internal const string UnionType = "Union";
+        internal const string UnknownType = "UNKNOWN_TYPE";
 
         internal static readonly Dictionary<string, Func<Node, Expr>> ParsingFunctions =
             new Dictionary<string, Func<Node, Expr>> {

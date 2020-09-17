@@ -23,11 +23,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             set => joiningMark = BindNullable(value);
         }
 
-        private TypeName returnType = null!;
+        private TypeName? returnType;
 
-        public TypeName ReturnType {
+        public TypeName? ReturnType {
             get => returnType;
-            set => returnType = Bind(value);
+            set => returnType = BindNullable(value);
         }
 
         public FuncTypeName(Node parent) : base(parent) { }

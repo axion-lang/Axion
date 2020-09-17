@@ -2,18 +2,18 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
-using Axion.Core.Source;
+using Axion.Core.Specification;
 
-namespace Axion.Core.Processing.CodeGen {
+namespace Axion.Core.Processing.Emitting {
     /// <summary>
     ///     A wrapper around an <see cref="IndentedTextWriter"/>
     ///     that helps to generate code from Axion expressions
     ///     for multiple target languages.
     /// </summary>
     public class CodeWriter : IDisposable {
-        private readonly StringWriter       baseWriter;
+        private readonly StringWriter baseWriter;
         private readonly IndentedTextWriter writer;
-        private          bool               lastLineEmpty;
+        private bool lastLineEmpty;
 
         private readonly ConverterFromAxion converter;
 
@@ -27,11 +27,11 @@ namespace Axion.Core.Processing.CodeGen {
         public CodeWriter(ProcessingOptions options) {
             baseWriter = new StringWriter();
             writer     = new IndentedTextWriter(baseWriter);
-            converter = options.TargetType switch {
-                "axion"  => new ConverterToAxion(this),
-                "csharp" => new ConverterToCSharp(this),
-                "python" => new ConverterToPython(this),
-                "pascal" => new ConverterToPascal(this),
+            converter = options.TargetLanguage switch {
+                Language.Axion  => new ConverterToAxion(this),
+                Language.CSharp => new ConverterToCSharp(this),
+                Language.Python => new ConverterToPython(this),
+                Language.Pascal => new ConverterToPascal(this),
                 _ => throw new NotSupportedException(
                     $"Code building for '{options:G}' mode is not supported."
                 )
@@ -67,8 +67,11 @@ namespace Axion.Core.Processing.CodeGen {
             }
         }
 
-        public void AddJoin<T>(string separator, IList<T> items, bool indent = false)
-            where T : Node {
+        public void AddJoin<T>(
+            string   separator,
+            IList<T> items,
+            bool     indent = false
+        ) where T : Node? {
             if (items.Count == 0) {
                 return;
             }

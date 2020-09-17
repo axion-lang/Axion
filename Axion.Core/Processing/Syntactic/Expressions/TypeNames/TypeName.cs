@@ -14,11 +14,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// </summary>
     public abstract class TypeName : Expr {
         internal TypeName(Node parent) : base(parent) { }
-        
-        protected TypeName() { }
 
         internal static TypeName Parse(Node parent) {
-            TokenStream s = parent.Source.TokenStream;
+            TokenStream s = parent.Unit.TokenStream;
             // leading
             TypeName leftTypeName;
             // tuple
@@ -32,7 +30,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             }
             else {
                 LangException.ReportUnexpectedSyntax(Identifier, s.Peek);
-                return new SimpleTypeName("UnknownType");
+                return new SimpleTypeName(parent, "UnknownType");
             }
 
             // middle
@@ -74,9 +72,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         ///     </c>
         ///     for class, enum, enum item.
         /// </summary>
-        internal static List<(TypeName? type, NameExpr? label)> ParseNamedTypeArgs(Node parent) {
-            TokenStream s        = parent.Source.TokenStream;
-            var         typeArgs = new List<(TypeName?, NameExpr?)>();
+        internal static List<(TypeName type, NameExpr? label)>
+            ParseNamedTypeArgs(Node parent) {
+            TokenStream s        = parent.Unit.TokenStream;
+            var         typeArgs = new List<(TypeName, NameExpr?)>();
             Token       start    = s.Peek;
 
             do {
@@ -99,7 +98,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                 // redundant parens
                 LangException.Report(
                     BlameType.RedundantEmptyListOfTypeArguments,
-                    new Node(parent.Source, start.Start, s.Token.End)
+                    start
                 );
             }
 

@@ -13,6 +13,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Patterns;
 using Axion.Core.Processing.Syntactic.Expressions.Postfix;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Specification;
 
 namespace Axion.Core.Processing.Traversal {
     public class NoPathTraversingAttribute : Attribute { }
@@ -24,9 +25,12 @@ namespace Axion.Core.Processing.Traversal {
         /// </summary>
         public static void Traverse(Node root) {
             // TODO: fix reducing of macros
-            if (root is MacroApplicationExpr || root is Pattern) {
+            if (root is MacroApplicationExpr
+             || root is Pattern
+             || root is Token) {
                 return;
             }
+
             if (!root.Path.Traversed) {
                 Walker(root.Path);
             }
@@ -35,13 +39,19 @@ namespace Axion.Core.Processing.Traversal {
             PropertyInfo[] nodeProps = root.GetType().GetProperties();
             IEnumerable<PropertyInfo> childProps = nodeProps.Where(
                 p => typeof(Node).IsAssignableFrom(p.PropertyType)
-                  && !Attribute.IsDefined(p, typeof(NoPathTraversingAttribute), true)
+                  && !Attribute.IsDefined(
+                         p,
+                         typeof(NoPathTraversingAttribute),
+                         true
+                     )
                   || p.PropertyType.IsGenericType
                   && p.PropertyType.GetInterfaces()
                       .Where(i => i.IsGenericType)
                       .Select(i => i.GetGenericTypeDefinition())
                       .Contains(typeof(IList<>))
-                  && typeof(Node).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0])
+                  && typeof(Node).IsAssignableFrom(
+                         p.PropertyType.GetGenericArguments()[0]
+                     )
             );
             foreach (PropertyInfo prop in childProps) {
                 object obj = prop.GetValue(root);
@@ -52,7 +62,8 @@ namespace Axion.Core.Processing.Traversal {
                     break;
                 default:
                     try {
-                        Node[] list = ((IEnumerable) obj).OfType<Node>().ToArray();
+                        Node[] list = ((IEnumerable) obj).OfType<Node>()
+                            .ToArray();
                         // for loop required, expressions collection
                         // can be modified.
                         // ReSharper disable once ForCanBeConvertedToForeach
@@ -63,6 +74,7 @@ namespace Axion.Core.Processing.Traversal {
                     catch (InvalidCastException) {
                         // ignored
                     }
+
                     break;
                 }
             }
@@ -76,7 +88,7 @@ namespace Axion.Core.Processing.Traversal {
         public static void Walker(ITreePath path) {
             switch (path.Node) {
             case TupleTypeName t when t.Types.Count == 0: {
-                path.Node      = new SimpleTypeName("UnitType");
+                path.Node      = new SimpleTypeName(t, Spec.UnitType);
                 path.Traversed = true;
                 break;
             }
@@ -84,9 +96,10 @@ namespace Axion.Core.Processing.Traversal {
             case UnionTypeName unionTypeName: {
                 // `LeftType | RightType` -> `Union[LeftType, RightType]`
                 path.Node = new GenericTypeName(path.Node.Parent) {
-                    Target = new SimpleTypeName("Union"),
+                    Target = new SimpleTypeName(path.Node, "Union"),
                     TypeArgs = new NodeList<TypeName>(path.Node) {
-                        unionTypeName.Left, unionTypeName.Right
+                        unionTypeName.Left,
+                        unionTypeName.Right
                     }
                 };
                 path.Traversed = true;
@@ -98,11 +111,17 @@ namespace Axion.Core.Processing.Traversal {
                                   && un.Operator.Is(TokenType.OpNot): {
                 // `x is (not (y))` -> `not (x is y)`
                 path.Node = new UnaryExpr(path.Node.Parent) {
-                    Operator = new OperatorToken(path.Node.Source, tokenType: TokenType.OpNot),
+                    Operator = new OperatorToken(
+                        path.Node.Unit,
+                        tokenType: TokenType.OpNot
+                    ),
                     Value = new BinaryExpr(path.Node) {
-                        Left     = bin.Left,
-                        Operator = new OperatorToken(path.Node.Source, tokenType: TokenType.OpIs),
-                        Right    = un.Value
+                        Left = bin.Left,
+                        Operator = new OperatorToken(
+                            path.Node.Unit,
+                            tokenType: TokenType.OpIs
+                        ),
+                        Right = un.Value
                     }
                 };
                 path.Traversed = true;
@@ -134,9 +153,13 @@ namespace Axion.Core.Processing.Traversal {
                 (_, int deconstructionIdx) = scope!.IndexOf(bin);
                 var deconstructionVar = new VarDef(
                     scope,
-                    new Token(bin.Source, TokenType.KeywordLet)
+                    new Token(bin.Unit, TokenType.KeywordLet)
                 ) {
-                    Name = new NameExpr(scope.CreateUniqueId("unwrapped{0}")), Value = bin.Right
+                    Name = new NameExpr(
+                        bin,
+                        scope.CreateUniqueId("unwrapped{0}")
+                    ),
+                    Value = bin.Right
                 };
                 scope.Items[deconstructionIdx] = deconstructionVar;
                 for (var i = 0; i < tpl.Expressions.Count; i++) {
@@ -145,7 +168,8 @@ namespace Axion.Core.Processing.Traversal {
                         new VarDef(scope) {
                             Name = (NameExpr) tpl.Expressions[i],
                             Value = new MemberAccessExpr(scope) {
-                                Target = deconstructionVar.Name, Member = tpl.Expressions[i]
+                                Target = deconstructionVar.Name,
+                                Member = tpl.Expressions[i]
                             }
                         }
                     );
@@ -179,29 +203,38 @@ namespace Axion.Core.Processing.Traversal {
                 //     do3()
                 var scope = path.Node.GetParent<ScopeExpr>();
                 (_, int whileIndex) = scope.IndexOf(whileExpr);
-                var flagName = new NameExpr(scope.CreateUniqueId("loop_{0}_nobreak"));
+                var flagName = new NameExpr(
+                    scope,
+                    scope.CreateUniqueId("loop_{0}_nobreak")
+                );
                 scope.Items.Insert(
                     whileIndex,
                     new VarDef(path.Node) {
-                        Name = flagName, Value = ConstantExpr.True(path.Node)
+                        Name  = flagName,
+                        Value = ConstantExpr.True(path.Node)
                     }
                 );
                 // index of while == whileIdx + 1
-                List<(BreakExpr item, ScopeExpr itemParentScope, int itemIndex)> breaks =
-                    whileExpr.Scope.FindItemsOfType<BreakExpr>();
+                List<(BreakExpr item, ScopeExpr itemParentScope, int itemIndex)>
+                    breaks = whileExpr.Scope.FindItemsOfType<BreakExpr>();
                 var boolSetter = new BinaryExpr(path.Node) {
-                    Left     = flagName,
-                    Operator = new OperatorToken(path.Node.Source, tokenType: TokenType.OpAssign),
-                    Right    = ConstantExpr.True(path.Node)
+                    Left = flagName,
+                    Operator = new OperatorToken(
+                        path.Node.Unit,
+                        tokenType: TokenType.OpAssign
+                    ),
+                    Right = ConstantExpr.True(path.Node)
                 };
-                foreach ((_, ScopeExpr itemParentScope, int itemIndex) in breaks) {
+                foreach ((_, ScopeExpr itemParentScope, int itemIndex) in breaks
+                ) {
                     itemParentScope.Items.Insert(itemIndex, boolSetter);
                 }
 
                 scope.Items.Insert(
                     whileIndex + 2,
                     new IfExpr(path.Node) {
-                        Condition = flagName, ThenScope = whileExpr.NoBreakScope
+                        Condition = flagName,
+                        ThenScope = whileExpr.NoBreakScope
                     }
                 );
                 whileExpr.NoBreakScope = null;
@@ -222,6 +255,7 @@ namespace Axion.Core.Processing.Traversal {
                 foreach (Expr dataMember in cls.DataMembers) {
                     cls.Scope.Items.Insert(0, dataMember);
                 }
+
                 cls.DataMembers.Clear();
                 path.Traversed = true;
                 break;
