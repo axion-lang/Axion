@@ -24,17 +24,17 @@
 
 | Directory                                               | Contents                                                                      | Platform         |
 |---------------------------------------------------------|-------------------------------------------------------------------------------|------------------|
-| [`Axion`](Axion)                                        | Interface for compiler: CLI, ScriptBench editor, interpreter (C# code runner) | NET Core         |
-| [`Axion.Modules`](Modules)                              | Built-in modules for language, written in Axion itself                        | Axion            |
-| [`Axion.Core`](Axion.Core)                              | Language core: lexer/parser/transpiler                                        | NET Standard     |
-| [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable)               | NET Core         |
+| [`Axion`](Axion)                                        | Interface for compiler: CLI, ScriptBench editor, interpreter (C# code runner) | .NET             |
+| [`Axion.Core`](Axion.Core)                              | Language core: lexer/parser/transpiler                                        | .NET Standard    |
+| [`Axion.Testing`](Axion.Testing)                        | NUnit-based unit tests for the toolset                                        | .NET             |
+| [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable)               | .NET             |
 | [`misc`](misc)                                          | Code examples, arts, etc.                                                     |                  |
 
 <h3 align="center">:dart: Key features</h3>
 
-- **Maximal expressiveness**
+- **Expressiveness**
 
-  Maintenance of the "ideal balance" (© Thanos) between usage of expressive symbols and readable names.
+  Maintaining the "perfect balance" (© Thanos) between usage of expressive symbols and readable names.
   <br>
   Support for language-oriented programming (LOP) and macros system allows you to:
 
