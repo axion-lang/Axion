@@ -39,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public CodeQuoteExpr Parse() {
             OpenQuote = Stream.Eat(DoubleOpenBrace);
             while (!Stream.PeekIs(DoubleCloseBrace, TokenType.End)) {
-                Scope.Items.Add(AnyExpr.Parse(this));
+                Scope.Items += AnyExpr.Parse(this);
             }
 
             CloseQuote = Stream.Eat(DoubleCloseBrace);

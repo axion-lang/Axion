@@ -52,7 +52,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
             };
             // tuple
             while (s.MaybeEat(Comma)) {
-                list.Add(parserFunc(parent));
+                list += parserFunc(parent);
             }
 
             if (hasParens) {

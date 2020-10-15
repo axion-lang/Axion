@@ -60,14 +60,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
 
                 // or pattern `x | y`
                 if (Stream.PeekIs(OpBitOr)) {
-                    Patterns.Add(
-                        new OrPattern(this) {
-                            Left = pattern
-                        }.Parse()
-                    );
+                    Patterns += new OrPattern(this) {
+                        Left = pattern
+                    }.Parse();
                 }
                 else {
-                    Patterns.Add(pattern);
+                    Patterns += pattern;
                 }
             } while (Stream.MaybeEat(Comma));
 

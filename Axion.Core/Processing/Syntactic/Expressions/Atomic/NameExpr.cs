@@ -32,26 +32,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
                 string[] qs = name.Split('.');
                 for (var i = 0; i < qs.Length; i++) {
                     string q = qs[i];
-                    Tokens.Add(new Token(Unit, Identifier, q));
+                    Tokens += new Token(Unit, Identifier, q);
                     if (i != qs.Length - 1) {
-                        Tokens.Add(new Token(Unit, OpDot, "."));
+                        Tokens += new Token(Unit, OpDot, ".");
                     }
                 }
             }
             else {
-                Tokens.Add(new Token(Unit, Identifier, name));
+                Tokens += new Token(Unit, Identifier, name);
             }
         }
 
         public NameExpr Parse(bool simple = false) {
-            Tokens.Add(Stream.Eat(Identifier));
+            Tokens += Stream.Eat(Identifier);
             if (simple) {
                 return this;
             }
 
             while (Stream.PeekIs(OpDot)) {
-                Tokens.Add(Stream.Eat());
-                Tokens.Add(Stream.Eat(Identifier));
+                Tokens += Stream.Eat();
+                Tokens += Stream.Eat(Identifier);
             }
 
             return this;

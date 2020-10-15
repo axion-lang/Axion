@@ -24,7 +24,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public UnknownExpr Parse() {
             while (!Stream.PeekIs(Newline, TokenType.End)) {
-                Tokens.Add(Stream.Eat());
+                Tokens += Stream.Eat();
             }
 
             return this;

@@ -301,7 +301,7 @@ namespace Axion.Core.Processing.Emitting {
                     rootFunctions.Add(expr);
                 }
                 else {
-                    rootItems.Add(expr);
+                    rootItems += expr;
                 }
             }
 

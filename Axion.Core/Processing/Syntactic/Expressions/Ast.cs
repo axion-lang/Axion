@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 () => {
                     while (!Stream.MaybeEat(TokenType.End)) {
                         Expr item = AnyExpr.Parse(this);
-                        Items.Add(item);
+                        Items += item;
                         if (item is IDefinitionExpr def) {
                             Unit.Module.AddDefinition(def);
                         }

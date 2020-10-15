@@ -36,7 +36,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             StartMark = Stream.Eat(OpenParenthesis);
             if (!Stream.PeekIs(CloseParenthesis)) {
                 do {
-                    Types.Add(Parse(this));
+                    Types += Parse(this);
                 } while (Stream.MaybeEat(Comma));
             }
 

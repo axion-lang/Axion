@@ -81,7 +81,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             if (Stream.MaybeEat(OpenParenthesis)) {
                 if (!Stream.PeekIs(CloseParenthesis)) {
                     do {
-                        DataMembers.Add(AnyExpr.Parse(this));
+                        DataMembers += AnyExpr.Parse(this);
                     } while (Stream.MaybeEat(Comma));
                 }
 
@@ -94,10 +94,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     TypeName.ParseNamedTypeArgs(this);
                 foreach ((TypeName type, NameExpr? typeLabel) in types) {
                     if (typeLabel == null) {
-                        Bases.Add(type);
+                        Bases += type;
                     }
                     else {
-                        Keywords.Add(type);
+                        Keywords += type;
                     }
                 }
             }

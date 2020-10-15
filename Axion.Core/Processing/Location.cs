@@ -14,10 +14,6 @@ namespace Axion.Core.Processing {
             Column = column;
         }
 
-        public Location Add(int line, int column) {
-            return new Location(Line + line, Column + column);
-        }
-
         public override string ToString() {
             return $"{Line + 1}, {Column + 1}";
         }
@@ -42,6 +38,13 @@ namespace Axion.Core.Processing {
 
         public static Location Max(Location a, Location b) {
             return a >= b ? a : b;
+        }
+
+        public static Location operator +(Location left, Location right) {
+            return new Location(
+                left.Line + right.Line, 
+                left.Column + right.Column
+            );
         }
 
         public static bool operator ==(Location left, Location right) {

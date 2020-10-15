@@ -43,7 +43,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             var args = new NodeList<FuncCallArg>(parent);
 
             if (first != null) {
-                args.Add(first);
+                args += first;
             }
 
             if (s.PeekIs(TokenType.CloseParenthesis)) {
@@ -91,7 +91,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     }
                 }
 
-                args.Add(arg);
+                args += arg;
                 if (!s.MaybeEat(TokenType.Comma)) {
                     break;
                 }

@@ -58,13 +58,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                                     step = InfixExpr.Parse(this);
                                 }
 
-                                expressions.Add(
-                                    new SliceExpr(this) {
-                                        From = start,
-                                        To   = stop,
-                                        Step = step
-                                    }
-                                );
+                                expressions += new SliceExpr(this) {
+                                    From = start,
+                                    To   = stop,
+                                    Step = step
+                                };
                                 break;
                             }
 
@@ -75,7 +73,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                                 );
                             }
                             else {
-                                expressions.Add(start);
+                                expressions += start;
                             }
 
                             if (Stream.PeekIs(CloseBracket)) {

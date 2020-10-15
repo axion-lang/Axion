@@ -150,19 +150,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     var scopeType = ParseStart(this);
                     switch (scopeType) {
                     case ScopeType.Single: {
-                        Items.Add(AnyExpr.Parse(this));
+                        Items += AnyExpr.Parse(this);
                         break;
                     }
                     case ScopeType.Indented: {
                         while (!Stream.MaybeEat(Outdent, TokenType.End)) {
-                            Items.Add(AnyExpr.Parse(this));
+                            Items += AnyExpr.Parse(this);
                         }
 
                         break;
                     }
                     case ScopeType.Embraced: {
                         while (!Stream.MaybeEat(CloseBrace, TokenType.End)) {
-                            Items.Add(AnyExpr.Parse(this));
+                            Items += AnyExpr.Parse(this);
                         }
 
                         break;

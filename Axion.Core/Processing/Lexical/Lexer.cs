@@ -196,7 +196,7 @@ namespace Axion.Core.Processing.Lexical {
                     new CodeSpan(
                         unit,
                         inconsistencyStart,
-                        stream.Location.Add(0, -1)
+                        stream.Location + (0, -1)
                     )
                 );
             }
@@ -441,7 +441,7 @@ namespace Axion.Core.Processing.Lexical {
                             ps,
                             ps,
                             "",
-                            stream.Location.Add(0, i)
+                            stream.Location + (0, i)
                         )
                     );
                     LangException.Report(BlameType.InvalidStringPrefix, token);
@@ -624,7 +624,7 @@ namespace Axion.Core.Processing.Lexical {
             void RaiseError(BlameType blameType) {
                 LangException.Report(
                     blameType,
-                    new CodeSpan(unit, escapeStart, stream.Location.Add(0, -1))
+                    new CodeSpan(unit, escapeStart, stream.Location + (0, -1))
                 );
                 value.Append(raw);
                 content.Append(raw);

@@ -25,13 +25,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     Stream.Eat(At);
                     if (Stream.MaybeEat(OpenBracket)) {
                         do {
-                            Decorators.Add(InfixExpr.Parse(this));
+                            Decorators += InfixExpr.Parse(this);
                         } while (Stream.MaybeEat(Comma));
 
                         Stream.Eat(CloseBracket);
                     }
                     else {
-                        Decorators.Add(PrefixExpr.Parse(this));
+                        Decorators += PrefixExpr.Parse(this);
                     }
 
                     Target = AnyExpr.Parse(this);

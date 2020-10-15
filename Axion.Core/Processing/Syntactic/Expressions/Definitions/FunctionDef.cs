@@ -113,7 +113,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             }
             // single expression: `fn (arg, ...) expr`
             else if (anonymous) {
-                Scope.Items.Add(AnyExpr.Parse(Scope));
+                Scope.Items += AnyExpr.Parse(Scope);
             }
 
             return this;

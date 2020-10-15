@@ -110,6 +110,10 @@ namespace Axion.Core.Processing.Syntactic {
             return this;
         }
 
+        public static NodeList<T> operator +(NodeList<T> list, T item) {
+            return list.Add(item);
+        }
+
         public int IndexOf(T item) {
             return items.IndexOf(item);
         }

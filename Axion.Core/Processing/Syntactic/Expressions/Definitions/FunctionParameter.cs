@@ -118,7 +118,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                         );
                     }
 
-                    parameters.Add(param);
+                    parameters += param;
                 }
 
                 if (s.PeekIs(terminators) || !s.MaybeEat(Comma)) {
@@ -137,11 +137,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             }
 
             if (listParameter != null) {
-                parameters.Add(listParameter);
+                parameters += listParameter;
             }
 
             if (mapParameter != null) {
-                parameters.Add(mapParameter);
+                parameters += mapParameter;
             }
 
             return parameters;

@@ -71,18 +71,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
                     while (Stream.PeekIs(KeywordIf, KeywordUnless)) {
                         if (Stream.MaybeEat(KeywordIf)) {
-                            Conditions.Add(Parse(this));
+                            Conditions += Parse(this);
                         }
                         else if (Stream.MaybeEat(KeywordUnless)) {
-                            Conditions.Add(
-                                new UnaryExpr(this) {
-                                    Operator = new OperatorToken(
-                                        Unit,
-                                        tokenType: OpNot
-                                    ),
-                                    Value = Parse(this)
-                                }
-                            );
+                            Conditions += new UnaryExpr(this) {
+                                Operator = new OperatorToken(
+                                    Unit,
+                                    tokenType: OpNot
+                                ),
+                                Value = Parse(this)
+                            };
                         }
                     }
 
