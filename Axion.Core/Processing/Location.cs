@@ -40,9 +40,16 @@ namespace Axion.Core.Processing {
             return a >= b ? a : b;
         }
 
+        public static Location operator -(Location left, Location right) {
+            return new Location(
+                left.Line   - right.Line, 
+                left.Column - right.Column
+            );
+        }
+        
         public static Location operator +(Location left, Location right) {
             return new Location(
-                left.Line + right.Line, 
+                left.Line   + right.Line, 
                 left.Column + right.Column
             );
         }

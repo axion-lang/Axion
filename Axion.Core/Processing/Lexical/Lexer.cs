@@ -24,10 +24,9 @@ namespace Axion.Core.Processing.Lexical {
         private int lastIndentLen;
         private int indentLevel;
 
-        public readonly Stack<Token> MismatchingPairs = new Stack<Token>();
+        public Stack<Token> MismatchingPairs { get; } = new Stack<Token>();
 
-        public readonly Stack<TokenType> ProcessTerminators =
-            new Stack<TokenType>();
+        public Stack<TokenType> ProcessTerminators { get; } = new Stack<TokenType>();
 
         public Lexer(Unit unit) {
             this.unit = unit;
@@ -196,7 +195,7 @@ namespace Axion.Core.Processing.Lexical {
                     new CodeSpan(
                         unit,
                         inconsistencyStart,
-                        stream.Location + (0, -1)
+                        stream.Location - (0, 1)
                     )
                 );
             }
@@ -624,7 +623,7 @@ namespace Axion.Core.Processing.Lexical {
             void RaiseError(BlameType blameType) {
                 LangException.Report(
                     blameType,
-                    new CodeSpan(unit, escapeStart, stream.Location + (0, -1))
+                    new CodeSpan(unit, escapeStart, stream.Location - (0, 1))
                 );
                 value.Append(raw);
                 content.Append(raw);

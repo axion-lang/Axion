@@ -75,9 +75,12 @@ namespace Axion.Core.Processing {
             Node p = this;
             while (true) {
                 p = p.Parent;
-                switch (p) {
-                case T node: return node;
-                case Ast _:  return null;
+                if (p is T node) {
+                    return node;
+                }
+
+                if (p is Ast) {
+                    return null;
                 }
             }
         }

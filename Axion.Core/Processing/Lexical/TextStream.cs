@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Lexical {
         private int lineIdx;
         private int columnIdx;
 
-        public readonly string Text;
+        public string Text { get; }
 
         /// <summary>
         ///     0-based (Line, Column) position of character in source code.
