@@ -7,7 +7,7 @@ using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     /// <summary>
     ///     <c>
-    ///         break-expr:
+    ///         import-expr:
     ///             'import' scope;
     ///     </c>
     ///     The `scope` can contain only `name-expr`-s.
