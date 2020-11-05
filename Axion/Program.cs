@@ -28,6 +28,7 @@ namespace Axion {
                 settings => {
                     settings.EnableDashDash = true;
                     settings.CaseSensitive  = false;
+                    settings.AutoHelp       = false;
                     settings.HelpWriter     = null;
                 }
             );
