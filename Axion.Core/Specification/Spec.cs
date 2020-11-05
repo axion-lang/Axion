@@ -264,19 +264,19 @@ namespace Axion.Core.Specification {
 
         internal static readonly Dictionary<string, Func<Node, Expr>> ParsingFunctions =
             new Dictionary<string, Func<Node, Expr>> {
-                { "Expr",          AnyExpr.Parse },
-                { "AnyExpr",       AnyExpr.Parse },
-                { "InfixExpr",     InfixExpr.Parse },
-                { "PrefixExpr",    PrefixExpr.Parse },
-                { "PostfixExpr",   PostfixExpr.Parse },
-                { "AtomExpr",      AtomExpr.Parse },
-                { "ConstantExpr",  ConstantExpr.ParseNew }
+                { "Expr",                AnyExpr.Parse },
+                { nameof(AnyExpr),       AnyExpr.Parse },
+                { nameof(InfixExpr),     InfixExpr.Parse },
+                { nameof(PrefixExpr),    PrefixExpr.Parse },
+                { nameof(PostfixExpr),   PostfixExpr.Parse },
+                { nameof(AtomExpr),      AtomExpr.Parse },
+                { nameof(ConstantExpr),  ConstantExpr.ParseNew }
             };
         
         internal static readonly Dictionary<string, Type> ParsingTypes =
             new Dictionary<string, Type> {
-                { "ScopeExpr", typeof(ScopeExpr) },
-                { "TypeName",  typeof(TypeName) }
+                { nameof(ScopeExpr), typeof(ScopeExpr) },
+                { nameof(TypeName),  typeof(TypeName) }
             };
         
         // @formatter:on
