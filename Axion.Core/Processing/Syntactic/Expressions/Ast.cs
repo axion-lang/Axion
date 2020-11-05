@@ -39,5 +39,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
             );
         }
+        
+        public override IDefinitionExpr? GetDefByName(string name) { 
+            IDefinitionExpr[] defs = GetScopedDefs();
+            return defs.FirstOrDefault(def => def.Name?.ToString() == name);
+        }
     }
 }

@@ -57,12 +57,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return GetDefByName(name.ToString());
         }
 
-        public IDefinitionExpr? GetDefByName(string name) {
-            if (!(this is Ast)) {
-                IDefinitionExpr? e = GetParent<ScopeExpr>()?.GetDefByName(name);
-                if (e != null) {
-                    return e;
-                }
+        public virtual IDefinitionExpr? GetDefByName(string name) {
+            IDefinitionExpr? e = GetParent<ScopeExpr>()?.GetDefByName(name);
+            if (e != null) {
+                return e;
             }
 
             IDefinitionExpr[] defs = GetScopedDefs();
