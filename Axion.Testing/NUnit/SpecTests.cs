@@ -18,7 +18,7 @@ namespace Axion.Testing.NUnit {
             LogManager.ReconfigExistingLoggers();
 
             // Clear debugging output
-            string dbg = Path.Combine(TestUtils.OutPath, "debug");
+            string dbg = Path.Join(TestUtils.OutPath, "debug");
             if (Directory.Exists(dbg)) {
                 foreach (FileInfo file in
                     new DirectoryInfo(dbg).EnumerateFiles()) {

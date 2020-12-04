@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Axion.Core;
 using Axion.Core.Hierarchy;
@@ -12,7 +12,7 @@ namespace Axion.Testing.NUnit {
             new DirectoryInfo(Environment.CurrentDirectory).Parent!.Parent!
                 .Parent!;
 
-        private static readonly string samplesPath = Path.Combine(
+        private static readonly string samplesPath = Path.Join(
             axionTestingDir.Parent!.FullName,
             "misc",
             "code-examples"
@@ -28,7 +28,7 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        private static readonly string outPath = Path.Combine(
+        private static readonly string outPath = Path.Join(
             axionTestingDir.FullName,
             "test-files",
             "out"
@@ -44,7 +44,7 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        private static readonly string inPath = Path.Combine(
+        private static readonly string inPath = Path.Join(
             axionTestingDir.FullName,
             "test-files"
         );
@@ -61,7 +61,7 @@ namespace Axion.Testing.NUnit {
 
         public static string StdLibPath {
             get {
-                var path = Path.Combine(inPath, "stdlib");
+                var path = Path.Join(inPath, "stdlib");
                 if (!Directory.Exists(path)) {
                     Directory.CreateDirectory(path);
                 }
@@ -98,6 +98,6 @@ namespace Axion.Testing.NUnit {
         }
 
         internal static readonly FileInfo StdLibMacrosFile =
-            new FileInfo(Path.Combine(StdLibPath, "macros.ax"));
+            new FileInfo(Path.Join(StdLibPath, "macros.ax"));
     }
 }
