@@ -82,12 +82,12 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        internal NodeList(Node parent) {
+        public NodeList(Node parent) {
             items  = new List<T>();
             Parent = parent;
         }
 
-        internal NodeList(Node parent, IEnumerable<T> collection) {
+        public NodeList(Node parent, IEnumerable<T> collection) {
             items  = collection.ToList();
             Parent = parent;
         }
