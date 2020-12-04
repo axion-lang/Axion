@@ -68,7 +68,6 @@ namespace Axion.Core.Hierarchy {
         ///     Any units or submodules of this module
         ///     are NOT automatically bound.
         /// </summary>
-        [Pure]
         public static Module RawFrom(DirectoryInfo dir) {
             if (!dir.Exists) {
                 throw new DirectoryNotFoundException(
@@ -84,7 +83,6 @@ namespace Axion.Core.Hierarchy {
         ///     and all it's child submodules from specified directory.
         ///     Returns cached module if it is already initialized.
         /// </summary>
-        [Pure]
         public static Module From(DirectoryInfo dir) {
             if (!dir.Exists) {
                 throw new DirectoryNotFoundException(
