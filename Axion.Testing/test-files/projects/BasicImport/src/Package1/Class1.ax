@@ -1,0 +1,5 @@
+class Class1
+    child: Class2
+
+    fn new (name: string)
+        this.child = new Class2(name)

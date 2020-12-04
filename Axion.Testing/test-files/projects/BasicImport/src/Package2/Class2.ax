@@ -1,0 +1,5 @@
+class Class2
+    name: string
+
+    fn new (name: string)
+        this.name = name
