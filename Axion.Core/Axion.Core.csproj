@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <Version>0.3.4.6</Version>
@@ -40,8 +40,8 @@ Built with .NET Standard.</Description>
         <PackageReference Include="Nett" Version="0.15.0" />
         <PackageReference Include="Nett.Coma" Version="0.15.0" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-        <PackageReference Include="NLog" Version="4.6.8" />
-        <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+        <PackageReference Include="NLog" Version="4.7.5" />
+        <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
