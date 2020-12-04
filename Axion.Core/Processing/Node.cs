@@ -46,7 +46,7 @@ namespace Axion.Core.Processing {
         [NoPathTraversing]
         public virtual TypeName? ValueType {
             get => valueType;
-            protected internal set => valueType = BindNullable(value);
+            set => valueType = BindNullable(value);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Axion.Core.Processing {
         ///     Reference to parent of this node.
         /// </summary>
         [NoPathTraversing]
-        protected internal Node Parent { get; set; } = null!;
+        public Node Parent { get; set; } = null!;
 
         protected Node(
             Unit     unit,
