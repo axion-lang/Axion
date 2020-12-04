@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,7 +30,7 @@ namespace Axion.Core.Hierarchy {
 
         /// <summary>
         ///     Path to directory where generated result is located.
-        ///     Defaults to [source-directory]/out.
+        ///     Defaults to [source-directory]/../out.
         /// </summary>
         public DirectoryInfo OutputDirectory {
             get {
@@ -52,8 +52,7 @@ namespace Axion.Core.Hierarchy {
 
         public Module? Module { get; set; }
 
-        public Dictionary<string, Unit> Imports { get; } =
-            new Dictionary<string, Unit>();
+        public Dictionary<string, Unit> Imports { get; } = new Dictionary<string, Unit>();
 
         public TextStream TextStream { get; private set; }
 
@@ -64,8 +63,7 @@ namespace Axion.Core.Hierarchy {
 
         public List<LangException> Blames { get; } = new List<LangException>();
 
-        public bool HasErrors =>
-            Blames.Any(b => b.Severity == BlameSeverity.Error);
+        public bool HasErrors => Blames.Any(b => b.Severity == BlameSeverity.Error);
 
         private Unit(
             string         code      = "",
@@ -95,10 +93,7 @@ namespace Axion.Core.Hierarchy {
             Compiler.Process(src, new ProcessingOptions(Mode.Reduction));
         }
 
-        public static Unit FromCode(
-            string         code,
-            DirectoryInfo? outputDir = null
-        ) {
+        public static Unit FromCode(string code, DirectoryInfo? outputDir = null) {
             return new Unit(code, outputDir: outputDir);
         }
 
@@ -114,9 +109,7 @@ namespace Axion.Core.Hierarchy {
             DirectoryInfo? outputDir = null
         ) {
             if (!sourceFile.Exists) {
-                throw new FileNotFoundException(
-                    $"'{sourceFile.Name}' does not exists."
-                );
+                throw new FileNotFoundException($"'{sourceFile.Name}' does not exists.");
             }
 
             if (sourceFile.Extension != Language.Axion.ToFileExtension()) {
@@ -125,11 +118,7 @@ namespace Axion.Core.Hierarchy {
                 );
             }
 
-            return new Unit(
-                File.ReadAllText(sourceFile.FullName),
-                sourceFile,
-                outputDir
-            );
+            return new Unit(File.ReadAllText(sourceFile.FullName), sourceFile, outputDir);
         }
 
         public static Unit FromInterpolation(Unit unit) {
