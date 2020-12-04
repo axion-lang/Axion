@@ -319,8 +319,8 @@ namespace Axion.Frontend.CSharp {
                 }
 
                 var rootItems     = new NodeList<Expr>(e);
-                var rootClasses   = new List<Expr>();
-                var rootFunctions = new List<Expr>();
+                var rootClasses   = new List<ClassDef>();
+                var rootFunctions = new List<FunctionDef>();
                 foreach (Expr expr in e.Items) {
                     Expr item = expr;
                     // decorator is just a wrapper,
@@ -329,17 +329,19 @@ namespace Axion.Frontend.CSharp {
                         item = dec.Target!;
                     }
 
-                    if (item is ModuleDef) {
-                        w.Write(expr);
-                    }
-                    else if (item is ClassDef) {
-                        rootClasses.Add(expr);
-                    }
-                    else if (item is FunctionDef) {
-                        rootFunctions.Add(expr);
-                    }
-                    else {
+                    switch (item) {
+                    case ModuleDef m:
+                        w.Write(m);
+                        break;
+                    case ClassDef c:
+                        rootClasses.Add(c);
+                        break;
+                    case FunctionDef f:
+                        rootFunctions.Add(f);
+                        break;
+                    default:
                         rootItems += expr;
+                        break;
                     }
                 }
 
@@ -368,7 +370,7 @@ namespace Axion.Frontend.CSharp {
                                          )
                                          .WithScope(rootItems)
                                          .WithDecorators(new NameExpr(e, "static"))
-                                }.Union(rootFunctions)
+                                }.Union<Expr>(rootFunctions)
                             )
                         }.Union(rootClasses)
                     )
