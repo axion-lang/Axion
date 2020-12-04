@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -168,8 +168,7 @@ namespace Axion.Core {
                 File.WriteAllText(
                     Path.Combine(
                         src.OutputDirectory.FullName,
-                        src.SourceFile.Name
-                      + options.TargetLanguage.ToFileExtension()
+                        Path.ChangeExtension(src.SourceFile.Name, cw.OutputFileExtension)
                     ),
                     code
                 );
