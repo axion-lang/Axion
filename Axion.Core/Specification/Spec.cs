@@ -17,6 +17,8 @@ namespace Axion.Core.Specification {
     ///     (allowed operators, keywords, etc.)
     /// </summary>
     public static partial class Spec {
+        public const string FileExtension = ".ax";
+        
         public const char EndOfCode = '\0';
         public const string OneLineCommentMark = "#";
         public const string MultiLineCommentMark = "###";
@@ -174,8 +176,8 @@ namespace Axion.Core.Specification {
             Enum.GetNames(typeof(TokenType))
                 .Where(n => n.StartsWith("Keyword"))
                 .Select(n => {
-                        Enum.TryParse(n, out TokenType type);
-                        return (n.Remove(0, 7).ToLower(), type);
+                    Enum.TryParse(n, out TokenType type);
+                    return (n.Remove(0, 7).ToLower(), type);
                 })
                 .ToDictionary(
                     x => x.Item1,
@@ -204,7 +206,7 @@ namespace Axion.Core.Specification {
             Indent
         };
 
-        internal static readonly TokenType[] Constants = {
+        public static readonly TokenType[] Constants = {
             TokenType.String,
             Character,
             Number,
@@ -244,7 +246,7 @@ namespace Axion.Core.Specification {
         /// <summary>
         ///     Token types that can't start an expression.
         /// </summary>
-        internal static readonly TokenType[] NeverExprStartTypes =
+        public static readonly TokenType[] NeverExprStartTypes =
             Operators.Values
                      .Where(op => op.Side == Both)
                      .Select(op => op.Type)
@@ -255,14 +257,14 @@ namespace Axion.Core.Specification {
                          LeftArrow, RightArrow
                      );
 
-        internal const string CharType   = "Char";
-        internal const string StringType = "String";
-        internal const string VoidType = "void";
-        internal const string UnitType = "Unit";
-        internal const string UnionType = "Union";
-        internal const string UnknownType = "UNKNOWN_TYPE";
+        public const string CharType   = "Char";
+        public const string StringType = "String";
+        public const string VoidType = "void";
+        public const string UnitType = "Unit";
+        public const string UnionType = "Union";
+        public const string UnknownType = "UNKNOWN_TYPE";
 
-        internal static readonly Dictionary<string, Func<Node, Expr>> ParsingFunctions =
+        public static readonly Dictionary<string, Func<Node, Expr>> ParsingFunctions =
             new Dictionary<string, Func<Node, Expr>> {
                 { "Expr",                AnyExpr.Parse },
                 { nameof(AnyExpr),       AnyExpr.Parse },
@@ -273,7 +275,7 @@ namespace Axion.Core.Specification {
                 { nameof(ConstantExpr),  ConstantExpr.ParseNew }
             };
         
-        internal static readonly Dictionary<string, Type> ParsingTypes =
+        public static readonly Dictionary<string, Type> ParsingTypes =
             new Dictionary<string, Type> {
                 { nameof(ScopeExpr), typeof(ScopeExpr) },
                 { nameof(TypeName),  typeof(TypeName) }
