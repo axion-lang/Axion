@@ -11,11 +11,39 @@ namespace Axion.Core.Hierarchy {
     public class Module {
         public DirectoryInfo Directory { get; }
 
+        private DirectoryInfo? outputDirectory;
+
+        /// <summary>
+        ///     Path to directory where generated result is located.
+        ///     Defaults to [source-directory]/../out.
+        /// </summary>
+        public DirectoryInfo OutputDirectory {
+            get {
+                if (outputDirectory != null) {
+                    return outputDirectory;
+                }
+
+                outputDirectory = new DirectoryInfo(
+                    Path.Combine(
+                        Root.Directory.Parent.FullName,
+                        "out",
+                        Path.GetRelativePath(
+                            Root.Directory.FullName,
+                            Directory.FullName!
+                        )
+                    )
+                );
+
+                Utilities.ResolvePath(outputDirectory.FullName);
+                return outputDirectory;
+            }
+        }
+
         public Module? Parent { get; private set; }
 
         public Module? Root {
             get {
-                Module? p = Parent;
+                Module? p = this;
                 while (p?.Parent != null) {
                     p = p.Parent;
                 }
@@ -27,16 +55,16 @@ namespace Axion.Core.Hierarchy {
         public Dictionary<string, Module> Submodules { get; } =
             new Dictionary<string, Module>();
 
-        public Dictionary<string, Unit> Units { get; } =
-            new Dictionary<string, Unit>();
+        public Dictionary<string, Unit> Units { get; } = new Dictionary<string, Unit>();
 
         public string Name => DirToModuleName(Directory);
 
         public string FullName =>
-            Parent == null ? Name : Parent.Name + "." + Name;
+            Parent == null || string.IsNullOrWhiteSpace(Parent.Name)
+                ? Name
+                : Parent.Name + "." + Name;
 
-        public bool IsEmpty =>
-            Units.Count == 0 && Submodules.Values.All(s => s.IsEmpty);
+        public bool IsEmpty => Units.Count == 0 && Submodules.Values.All(s => s.IsEmpty);
 
         public bool HasErrors => Units.Values.Any(u => u.HasErrors);
 
@@ -128,6 +156,27 @@ namespace Axion.Core.Hierarchy {
             return unit;
         }
 
+        public Module BindByName(string moduleName) {
+            string[] path   = moduleName.Split(".");
+            Module   module = this;
+            foreach (string step in path) {
+                if (module.Submodules.TryGetValue(step, out Module subModule)) {
+                    module = subModule;
+                }
+                else {
+                    module.Bind(
+                        From(
+                            new DirectoryInfo(
+                                Path.Combine(module.Directory.FullName, step)
+                            )
+                        )
+                    );
+                }
+            }
+
+            return module;
+        }
+
         public void AddDefinition(IDefinitionExpr def) {
             if (def.Name == null) {
                 throw new ArgumentException(
@@ -161,7 +210,8 @@ namespace Axion.Core.Hierarchy {
         }
 
         public static string DirToModuleName(DirectoryInfo dir) {
-            return dir.Name.Trim().ToLower();
+            var dn = dir.Name.Trim().ToLower();
+            return dn == "src" ? "" : dn;
         }
     }
 }
