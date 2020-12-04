@@ -373,5 +373,5 @@ FodyWeavers.xsd
 /Axion.Testing/test-files/out
 
 /docs
-
 out/
+*.ignore.*
