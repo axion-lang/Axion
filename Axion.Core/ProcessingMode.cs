@@ -27,6 +27,6 @@
         ///     Convert Axion source into source code
         ///     in another language.
         /// </summary>
-        Transpilation
+        Translation
     }
 }

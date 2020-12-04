@@ -32,10 +32,6 @@ Built with .NET Standard.</Description>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CodeConsole\CodeConsole\CodeConsole.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="Nett" Version="0.15.0" />
         <PackageReference Include="Nett.Coma" Version="0.15.0" />
@@ -45,8 +41,8 @@ Built with .NET Standard.</Description>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="NLog.config">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="NLog.config">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 </Project>

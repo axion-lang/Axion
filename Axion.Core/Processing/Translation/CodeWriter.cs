@@ -2,9 +2,8 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
-using Axion.Core.Specification;
 
-namespace Axion.Core.Processing.Emitting {
+namespace Axion.Core.Processing.Translation {
     /// <summary>
     ///     A wrapper around an <see cref="IndentedTextWriter"/>
     ///     that helps to generate code from Axion expressions
@@ -15,7 +14,7 @@ namespace Axion.Core.Processing.Emitting {
         private readonly IndentedTextWriter writer;
         private bool lastLineEmpty;
 
-        private readonly ConverterFromAxion converter;
+        private readonly INodeConverter converter;
 
         public string OutputFileExtension => converter.OutputFileExtension;
 
@@ -24,33 +23,23 @@ namespace Axion.Core.Processing.Emitting {
             set => writer.Indent = value;
         }
 
-        public CodeWriter(ProcessingOptions options) {
-            baseWriter = new StringWriter();
-            writer     = new IndentedTextWriter(baseWriter);
-            converter = options.TargetLanguage switch {
-                Language.Axion  => new ConverterToAxion(this),
-                Language.CSharp => new ConverterToCSharp(this),
-                Language.Python => new ConverterToPython(this),
-                Language.Pascal => new ConverterToPascal(this),
-                _ => throw new NotSupportedException(
-                    $"Code building for '{options:G}' mode is not supported."
-                )
-            };
+        public CodeWriter(INodeConverter converter) {
+            baseWriter     = new StringWriter();
+            writer         = new IndentedTextWriter(baseWriter);
+            this.converter = converter;
         }
 
         public void Write(params object?[] values) {
             lastLineEmpty = false;
-            foreach (object? val in values) {
-                if (val is Node translatable) {
-                    try {
-                        converter.Convert((dynamic) translatable);
-                    }
-                    catch {
-                        Write(translatable.ToString());
+            foreach (var v in values) {
+                if (v is IConvertibleNode convertible) {
+                    if (!converter.Convert(this, convertible)) {
+                        // NOTE: Fallback converter
+                        Compiler.converters["axion"].Convert(this, convertible);
                     }
                 }
                 else {
-                    writer.Write(val);
+                    writer.Write(v);
                 }
             }
         }
@@ -67,11 +56,8 @@ namespace Axion.Core.Processing.Emitting {
             }
         }
 
-        public void AddJoin<T>(
-            string   separator,
-            IList<T> items,
-            bool     indent = false
-        ) where T : Node? {
+        public void AddJoin<T>(string separator, IList<T> items, bool indent = false)
+            where T : IConvertibleNode? {
             if (items.Count == 0) {
                 return;
             }

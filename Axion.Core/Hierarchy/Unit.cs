@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -38,9 +38,22 @@ namespace Axion.Core.Hierarchy {
                     return outputDirectory;
                 }
 
-                outputDirectory = new DirectoryInfo(
-                    Path.Combine(SourceFile.Directory?.FullName ?? ".", "out")
-                );
+                if (Module == null)
+                    outputDirectory = new DirectoryInfo(
+                        Path.Join(SourceFile.Directory?.FullName!, "out")
+                    );
+                else {
+                    outputDirectory = new DirectoryInfo(
+                        Path.Join(
+                            Module.OutputDirectory.FullName!,
+                            Path.GetRelativePath(
+                                Module.Directory.FullName,
+                                SourceFile.DirectoryName
+                            )
+                        )
+                    );
+                }
+
                 Utilities.ResolvePath(outputDirectory.FullName);
                 return outputDirectory;
             }
@@ -112,9 +125,9 @@ namespace Axion.Core.Hierarchy {
                 throw new FileNotFoundException($"'{sourceFile.Name}' does not exists.");
             }
 
-            if (sourceFile.Extension != Language.Axion.ToFileExtension()) {
+            if (sourceFile.Extension != Spec.FileExtension) {
                 throw new ArgumentException(
-                    $"'{sourceFile.Name}' file must have {Language.Axion.ToFileExtension()} extension."
+                    $"'{sourceFile.Name}' file must have {Spec.FileExtension} extension."
                 );
             }
 

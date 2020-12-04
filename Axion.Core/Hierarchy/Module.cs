@@ -77,7 +77,7 @@ namespace Axion.Core.Hierarchy {
         public Dictionary<string, IDefinitionExpr> Definitions {
             get => definitions;
             set {
-                foreach ((string? name, IDefinitionExpr? def) in value) {
+                foreach ((string name, IDefinitionExpr def) in value) {
                     if (!definitions.ContainsKey(name)) {
                         definitions.Add(name, def);
                     }
@@ -127,7 +127,7 @@ namespace Axion.Core.Hierarchy {
             }
 
             foreach (FileInfo file in dir.EnumerateFiles()) {
-                if (file.Extension.Equals(Language.Axion.ToFileExtension())
+                if (file.Extension.Equals(Spec.FileExtension)
                  && Unit.NameFromFile(file) != null) {
                     module.Bind(Unit.FromFile(file));
                 }

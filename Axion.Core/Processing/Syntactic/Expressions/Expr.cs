@@ -1,8 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Axion.Core.Processing.Emitting;
-using Axion.Core.Specification;
+using Axion.Core.Processing.Translation;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
@@ -34,7 +33,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string debuggerDisplay {
             get {
-                var cw = new CodeWriter(new ProcessingOptions(Language.Axion));
+                var cw = new CodeWriter(Compiler.converters["axion"]);
                 cw.Write(this);
                 return cw.ToString();
             }

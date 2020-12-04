@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
 using Axion.Core;
-using Axion.Core.Processing.Emitting;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Specification;
+using Axion.Core.Processing.Translation;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Parser {
@@ -16,7 +15,7 @@ namespace Axion.Testing.NUnit.Parser {
             );
             var cw1 = (CodeWriter?) Compiler.Process(
                 mainUnit1,
-                new ProcessingOptions(Language.Axion) {
+                new ProcessingOptions("Axion") {
                     Debug = true
                 }
             );
@@ -26,7 +25,7 @@ namespace Axion.Testing.NUnit.Parser {
             );
             var cw2 = (CodeWriter?) Compiler.Process(
                 mainUnit2,
-                new ProcessingOptions(Language.Axion) {
+                new ProcessingOptions("Axion") {
                     Debug = true
                 }
             );

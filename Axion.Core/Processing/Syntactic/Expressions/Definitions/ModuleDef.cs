@@ -24,7 +24,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => scope = Bind(value);
         }
 
-        internal ModuleDef(Node parent) : base(parent) { }
+        public ModuleDef(Node parent) : base(parent) { }
 
         public DecoratedExpr WithDecorators(params Expr[] items) {
             return new DecoratedExpr(Parent) {

@@ -1,14 +1,15 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Axion.Core.Hierarchy;
-using Axion.Core.Processing.Emitting;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
+using Axion.Core.Processing.Translation;
 using Axion.Core.Processing.Traversal;
 using Axion.Core.Specification;
 using NLog;
@@ -16,49 +17,46 @@ using Module = Axion.Core.Hierarchy.Module;
 
 namespace Axion.Core {
     public class Compiler {
-        private static readonly Assembly coreAsm =
-            Assembly.GetExecutingAssembly();
+        private static readonly Assembly coreAsm = Assembly.GetExecutingAssembly();
 
-        public static readonly string Version =
-            coreAsm.GetName().Version.ToString();
+        public static readonly string Version = coreAsm.GetName().Version.ToString();
 
         /// <summary>
         ///     Path to directory where compiler executable is located.
         /// </summary>
-        public static readonly string WorkDir =
-            AppDomain.CurrentDomain.BaseDirectory;
+        public static readonly string WorkDir = AppDomain.CurrentDomain.BaseDirectory;
 
         /// <summary>
         ///     Path to directory where generated output is located.
         /// </summary>
-        public static readonly string OutDir = Path.Combine(WorkDir, "output");
+        public static readonly string OutDir = Path.Join(WorkDir, "output");
 
-        private static readonly Logger logger =
-            LogManager.GetCurrentClassLogger();
+        public static string[] Converters => converters.Keys.ToArray();
+
+        internal static readonly Dictionary<string, INodeConverter> converters =
+            new Dictionary<string, INodeConverter>();
+
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         public static string GetTempSourceFilePath() {
             return Path.Combine(
                 WorkDir,
                 "temp",
-                "tmp-"
-              + DateTime.Now.ToFileName()
-              + Language.Axion.ToFileExtension()
+                "tmp-" + DateTime.Now.ToFileName() + Spec.FileExtension
             );
         }
 
-        public static object? Process(
-            Project           project,
-            ProcessingOptions options
-        ) {
+        public static void AddConverter(string name, INodeConverter converter) {
+            converters[name.Trim().ToLower()] = converter;
+        }
+
+        public static object? Process(Project project, ProcessingOptions options) {
             logger.Info($"Processing project '{project.ConfigFile.Name}'");
             object? result = Process(project.MainModule, options);
             return result;
         }
 
-        public static object? Process(
-            Module            module,
-            ProcessingOptions options
-        ) {
+        public static object? Process(Module module, ProcessingOptions options) {
             logger.Info(
                 module.Parent == null
                     ? $"Processing module '{module.Name}'"
@@ -84,8 +82,7 @@ namespace Axion.Core {
             }
 
             object? result = null;
-            foreach ((var stepMode,
-                      Func<Unit, ProcessingOptions, object> stepAction) in
+            foreach ((var stepMode, Func<Unit, ProcessingOptions, object> stepAction) in
                 CompilationSteps) {
                 result = stepAction(src, options);
                 if (options.ProcessingMode == stepMode || src.HasErrors) {
@@ -95,16 +92,13 @@ namespace Axion.Core {
 
             var errCount = 0;
             foreach (LangException e in src.Blames) {
-                e.PrintToConsole();
-                Console.WriteLine();
+                logger.Error(e.ToString());
                 if (e.Severity == BlameSeverity.Error) {
                     errCount++;
                 }
             }
 
-            if (errCount > 0) {
-                logger.Info("Processing finished");
-            }
+            logger.Info(errCount > 0 ? "Processing aborted." : "Processing completed.");
 
             return result;
         }
@@ -116,7 +110,7 @@ namespace Axion.Core {
             { Mode.Lexing, Lex },
             { Mode.Parsing, Parse },
             { Mode.Reduction, Reduce },
-            { Mode.Transpilation, Transpile }
+            { Mode.Translation, Translate }
         };
 
         // @formatter:on
@@ -155,15 +149,16 @@ namespace Axion.Core {
             return src.Ast;
         }
 
-        private static CodeWriter Transpile(
-            Unit              src,
-            ProcessingOptions options
-        ) {
-            var cw = new CodeWriter(options);
+        private static CodeWriter? Translate(Unit src, ProcessingOptions options) {
+            if (!converters.TryGetValue(options.TargetLanguage, out INodeConverter ncv)) {
+                logger.Error($"No frontend with name {options.TargetLanguage}");
+                return null;
+            }
+
+            var cw = new CodeWriter(ncv);
             try {
                 cw.Write(src.Ast);
                 var code = cw.ToString();
-                logger.Debug("Transpiler output");
                 logger.Debug(code);
                 File.WriteAllText(
                     Path.Combine(
@@ -174,7 +169,7 @@ namespace Axion.Core {
                 );
             }
             catch (Exception ex) {
-                logger.Error("Transpiling failed:");
+                logger.Error("Translation failed:");
                 logger.Info(ex.Message);
             }
 

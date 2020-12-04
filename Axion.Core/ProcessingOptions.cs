@@ -1,7 +1,4 @@
-﻿using System;
-using Axion.Core.Specification;
-
-namespace Axion.Core {
+﻿namespace Axion.Core {
     /// <summary>
     ///     Defines some settings for source code processing.
     /// </summary>
@@ -14,7 +11,7 @@ namespace Axion.Core {
         /// <summary>
         ///     Target source to compile Axion code into.
         /// </summary>
-        public Language TargetLanguage { get; }
+        public string TargetLanguage { get; }
 
         /// <summary>
         ///     Check code against inconsistent
@@ -26,26 +23,12 @@ namespace Axion.Core {
 
         public ProcessingOptions(Mode processingMode) {
             ProcessingMode = processingMode;
-            TargetLanguage = Language.Axion;
-        }
-
-        public ProcessingOptions(Language targetLanguage) {
-            ProcessingMode = Mode.Transpilation;
-            TargetLanguage = targetLanguage;
+            TargetLanguage = "axion";
         }
 
         public ProcessingOptions(string targetLanguage) {
-            ProcessingMode = Mode.Transpilation;
-            TargetLanguage = targetLanguage.Trim().ToUpper() switch {
-                "AXION"  => Language.Axion,
-                "C#"     => Language.CSharp,
-                "CSHARP" => Language.CSharp,
-                "PYTHON" => Language.Python,
-                "PASCAL" => Language.Pascal,
-                _ => throw new ArgumentException(
-                    $"Invalid target language: {targetLanguage}."
-                ),
-            };
+            ProcessingMode = Mode.Translation;
+            TargetLanguage = targetLanguage.Trim().ToLower();
         }
     }
 }

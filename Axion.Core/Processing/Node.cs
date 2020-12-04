@@ -5,6 +5,7 @@ using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Core.Processing.Translation;
 using Axion.Core.Processing.Traversal;
 using Newtonsoft.Json;
 
@@ -12,7 +13,7 @@ namespace Axion.Core.Processing {
     /// <summary>
     ///     Span of source code / Tree leaf with parent and children nodes.
     /// </summary>
-    public abstract class Node : CodeSpan {
+    public abstract class Node : CodeSpan, IConvertibleNode {
         private Ast? ast;
 
         /// <summary>

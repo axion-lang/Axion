@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using Axion.Core;
 using Axion.Core.Hierarchy;
@@ -76,7 +76,7 @@ namespace Axion.Testing.NUnit {
             return new FileInfo(
                 Path.Combine(
                     InPath,
-                    fileName + Language.Axion.ToFileExtension()
+                    fileName + Spec.FileExtension
                 )
             );
         }
