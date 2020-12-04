@@ -14,8 +14,7 @@ namespace Axion.Core.Processing.Errors {
         Warning,
 
         /// <summary>
-        ///     Errors that prevent the source code from
-        ///     successful compiling/transpiling.
+        ///     Errors that prevent the source code from successful compiling.
         /// </summary>
         Error
     }
