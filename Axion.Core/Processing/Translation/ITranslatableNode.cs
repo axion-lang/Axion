@@ -1,3 +1,3 @@
 ﻿namespace Axion.Core.Processing.Translation {
-    public interface IConvertibleNode { }
+    public interface ITranslatableNode { }
 }

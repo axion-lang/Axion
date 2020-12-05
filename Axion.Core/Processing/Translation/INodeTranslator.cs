@@ -1,7 +1,7 @@
 ﻿namespace Axion.Core.Processing.Translation {
-    public interface INodeConverter {
+    public interface INodeTranslator {
         public string OutputFileExtension { get; }
 
-        public bool Convert(CodeWriter writer, IConvertibleNode node);
+        public bool Translate(CodeWriter writer, ITranslatableNode node);
     }
 }

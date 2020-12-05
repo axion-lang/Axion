@@ -13,7 +13,7 @@ namespace Axion.Core.Processing {
     /// <summary>
     ///     Span of source code / Tree leaf with parent and children nodes.
     /// </summary>
-    public abstract class Node : CodeSpan, IConvertibleNode {
+    public abstract class Node : CodeSpan, ITranslatableNode {
         private Ast? ast;
 
         /// <summary>

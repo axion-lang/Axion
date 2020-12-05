@@ -15,10 +15,10 @@ using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Frontend.CSharp {
-    public class Converter : INodeConverter {
+    public class Translator : INodeTranslator {
         public string OutputFileExtension => ".cs";
 
-        public bool Convert(CodeWriter w, IConvertibleNode node) {
+        public bool Translate(CodeWriter w, ITranslatableNode node) {
             switch (node) {
             case CharToken e: {
                 w.Write("'", HttpUtility.JavaScriptStringEncode(e.Content));

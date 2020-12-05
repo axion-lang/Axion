@@ -11,10 +11,10 @@ using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Translation;
 
 namespace Axion.Frontend.Axion {
-    public class Converter : INodeConverter {
+    public class Translator : INodeTranslator {
         public string OutputFileExtension => ".ax";
 
-        public bool Convert(CodeWriter w, IConvertibleNode node) {
+        public bool Translate(CodeWriter w, ITranslatableNode node) {
             switch (node) {
             case Token e: {
                 // NOTE: all saved token.Value's are valid Axion code.

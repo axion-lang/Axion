@@ -67,7 +67,7 @@ namespace Axion {
                     var asm = new FrontendLoadContext(fileInfo.FullName)
                         .LoadFromAssemblyName(asmName);
                     shortName = shortName.Replace("Axion.Frontend.", "");
-                    Compiler.AddConverter(shortName, LoadConverter(asm));
+                    Compiler.AddTranslator(shortName, LoadTranslator(asm));
                 }
                 catch (Exception e) {
                     logger.Error(
@@ -131,7 +131,7 @@ namespace Axion {
             }
 
             static int ListFrontends() {
-                Console.WriteLine(string.Join("\n", Compiler.Converters));
+                Console.WriteLine(string.Join("\n", Compiler.Translators));
                 return 0;
             }
 
@@ -483,10 +483,10 @@ namespace Axion {
             }
         }
 
-        private static INodeConverter LoadConverter(Assembly assembly) {
+        private static INodeTranslator LoadTranslator(Assembly assembly) {
             foreach (var type in assembly.GetTypes()) {
-                if (typeof(INodeConverter).IsAssignableFrom(type)
-                 && Activator.CreateInstance(type) is INodeConverter ncv)
+                if (typeof(INodeTranslator).IsAssignableFrom(type)
+                 && Activator.CreateInstance(type) is INodeTranslator ncv)
                     return ncv;
             }
 
@@ -495,7 +495,7 @@ namespace Axion {
                 assembly.GetTypes().Select(t => t.FullName)
             );
             throw new ApplicationException(
-                $"Can't find any type which implements {nameof(INodeConverter)}"
+                $"Can't find any type which implements {nameof(INodeTranslator)}"
               + $"in {assembly} from {assembly.Location}.\n"
               + $"Available types: {availableTypes}"
             );

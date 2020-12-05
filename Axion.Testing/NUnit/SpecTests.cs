@@ -29,8 +29,8 @@ namespace Axion.Testing.NUnit {
             else {
                 Directory.CreateDirectory(dbg);
             }
-            
-            Compiler.AddConverter("axion", new Converter());
+
+            Compiler.AddTranslator("axion", new Translator());
         }
 
         /// <summary>

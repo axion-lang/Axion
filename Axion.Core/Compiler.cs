@@ -33,10 +33,11 @@ namespace Axion.Core {
         /// </summary>
         public static readonly string OutDir = Path.Join(WorkDir, "output");
 
-        public static string[] Converters => converters.Keys.ToArray();
+        public static string[] Translators => translators.Keys.ToArray();
 
-        internal static readonly Dictionary<string, INodeConverter> converters =
-            new Dictionary<string, INodeConverter>();
+        internal static readonly Dictionary<string, INodeTranslator> translators
+            =
+            new Dictionary<string, INodeTranslator>();
 
         private static readonly Logger logger =
             LogManager.GetCurrentClassLogger();
@@ -49,8 +50,11 @@ namespace Axion.Core {
             );
         }
 
-        public static void AddConverter(string name, INodeConverter converter) {
-            converters[name.Trim().ToLower()] = converter;
+        public static void AddTranslator(
+            string          name,
+            INodeTranslator translator
+        ) {
+            translators[name.Trim().ToLower()] = translator;
         }
 
         public static object? Process(
@@ -162,7 +166,7 @@ namespace Axion.Core {
             Unit              src,
             ProcessingOptions options
         ) {
-            if (!converters.TryGetValue(
+            if (!translators.TryGetValue(
                 options.TargetLanguage,
                 out var ncv
             )) {

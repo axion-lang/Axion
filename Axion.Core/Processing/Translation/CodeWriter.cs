@@ -14,9 +14,9 @@ namespace Axion.Core.Processing.Translation {
         private readonly IndentedTextWriter writer;
         private bool lastLineEmpty;
 
-        private readonly INodeConverter converter;
+        private readonly INodeTranslator translator;
 
-        public string OutputFileExtension => converter.OutputFileExtension;
+        public string OutputFileExtension => translator.OutputFileExtension;
 
         public int IndentLevel {
             get => writer.Indent;
@@ -24,21 +24,21 @@ namespace Axion.Core.Processing.Translation {
         }
 
         public static readonly CodeWriter Default =
-            new CodeWriter(Compiler.converters["axion"]);
+            new CodeWriter(Compiler.translators["axion"]);
 
-        public CodeWriter(INodeConverter converter) {
-            baseWriter     = new StringWriter();
-            writer         = new IndentedTextWriter(baseWriter);
-            this.converter = converter;
+        public CodeWriter(INodeTranslator translator) {
+            baseWriter      = new StringWriter();
+            writer          = new IndentedTextWriter(baseWriter);
+            this.translator = translator;
         }
 
         public void Write(params object?[] values) {
             lastLineEmpty = false;
             foreach (var v in values) {
-                if (v is IConvertibleNode convertible) {
-                    if (!converter.Convert(this, convertible)) {
+                if (v is ITranslatableNode node) {
+                    if (!translator.Translate(this, node)) {
                         // NOTE: Fallback converter
-                        Compiler.converters["axion"].Convert(this, convertible);
+                        Compiler.translators["axion"].Translate(this, node);
                     }
                 }
                 else {
@@ -63,7 +63,7 @@ namespace Axion.Core.Processing.Translation {
             string   separator,
             IList<T> items,
             bool     indent = false
-        ) where T : IConvertibleNode? {
+        ) where T : ITranslatableNode? {
             if (items.Count == 0) {
                 return;
             }

@@ -7,10 +7,10 @@ using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Translation;
 
 namespace Axion.Frontend.Python {
-    public class Converter : INodeConverter {
+    public class Translator : INodeTranslator {
         public string OutputFileExtension => ".py";
 
-        public bool Convert(CodeWriter w, IConvertibleNode node) {
+        public bool Translate(CodeWriter w, ITranslatableNode node) {
             switch (node) {
             case CommentToken e: {
                 w.Write("#", e.Content);
