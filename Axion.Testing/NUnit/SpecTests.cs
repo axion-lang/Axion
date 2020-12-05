@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
@@ -18,9 +17,9 @@ namespace Axion.Testing.NUnit {
             LogManager.ReconfigExistingLoggers();
 
             // Clear debugging output
-            string dbg = Path.Join(TestUtils.OutPath, "debug");
+            var dbg = Path.Join(TestUtils.OutPath, "debug");
             if (Directory.Exists(dbg)) {
-                foreach (FileInfo file in
+                foreach (var file in
                     new DirectoryInfo(dbg).EnumerateFiles()) {
                     file.Delete();
                 }
@@ -37,13 +36,13 @@ namespace Axion.Testing.NUnit {
         [Test]
         public static void SpecificationCheck() {
             // check keywords completeness
-            IEnumerable<string> definedKws = Enum.GetNames(typeof(TokenType))
-                                                 .Where(
-                                                     name => name.ToUpper()
-                                                         .StartsWith("KEYWORD")
-                                                 );
+            var definedKws = Enum.GetNames(typeof(TokenType))
+                                 .Where(
+                                     name => name.ToUpper()
+                                                 .StartsWith("KEYWORD")
+                                 );
 
-            foreach (string kw in definedKws) {
+            foreach (var kw in definedKws) {
                 Enum.TryParse(kw, out TokenType type);
                 Assert.That(
                     Spec.Keywords.ContainsValue(type),

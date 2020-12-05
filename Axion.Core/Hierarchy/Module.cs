@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using Axion.Core.Processing.Errors;
@@ -43,7 +42,7 @@ namespace Axion.Core.Hierarchy {
 
         public Module? Root {
             get {
-                Module? p = this;
+                var p = this;
                 while (p?.Parent != null) {
                     p = p.Parent;
                 }
@@ -55,7 +54,8 @@ namespace Axion.Core.Hierarchy {
         public Dictionary<string, Module> Submodules { get; } =
             new Dictionary<string, Module>();
 
-        public Dictionary<string, Unit> Units { get; } = new Dictionary<string, Unit>();
+        public Dictionary<string, Unit> Units { get; } =
+            new Dictionary<string, Unit>();
 
         public string Name => DirToModuleName(Directory);
 
@@ -64,7 +64,8 @@ namespace Axion.Core.Hierarchy {
                 ? Name
                 : Parent.Name + "." + Name;
 
-        public bool IsEmpty => Units.Count == 0 && Submodules.Values.All(s => s.IsEmpty);
+        public bool IsEmpty =>
+            Units.Count == 0 && Submodules.Values.All(s => s.IsEmpty);
 
         public bool HasErrors => Units.Values.Any(u => u.HasErrors);
 
@@ -77,7 +78,7 @@ namespace Axion.Core.Hierarchy {
         public Dictionary<string, IDefinitionExpr> Definitions {
             get => definitions;
             set {
-                foreach ((string name, IDefinitionExpr def) in value) {
+                foreach (var (name, def) in value) {
                     if (!definitions.ContainsKey(name)) {
                         definitions.Add(name, def);
                     }
@@ -119,14 +120,14 @@ namespace Axion.Core.Hierarchy {
             }
 
             var module = new Module(dir);
-            foreach (DirectoryInfo subDir in dir.EnumerateDirectories()) {
-                Module subModule = From(subDir);
+            foreach (var subDir in dir.EnumerateDirectories()) {
+                var subModule = From(subDir);
                 if (!subModule.IsEmpty) {
                     module.Bind(subModule);
                 }
             }
 
-            foreach (FileInfo file in dir.EnumerateFiles()) {
+            foreach (var file in dir.EnumerateFiles()) {
                 if (file.Extension.Equals(Spec.FileExtension)
                  && Unit.NameFromFile(file) != null) {
                     module.Bind(Unit.FromFile(file));
@@ -137,7 +138,7 @@ namespace Axion.Core.Hierarchy {
         }
 
         public Module Bind(Module module) {
-            if (Submodules.TryGetValue(module.Name, out Module cached)) {
+            if (Submodules.TryGetValue(module.Name, out var cached)) {
                 return cached;
             }
 
@@ -147,7 +148,7 @@ namespace Axion.Core.Hierarchy {
         }
 
         public Unit Bind(Unit unit) {
-            if (Units.TryGetValue(unit.Name, out Unit cached)) {
+            if (Units.TryGetValue(unit.Name, out var cached)) {
                 return cached;
             }
 
@@ -157,10 +158,10 @@ namespace Axion.Core.Hierarchy {
         }
 
         public Module BindByName(string moduleName) {
-            string[] path   = moduleName.Split(".");
-            Module   module = this;
-            foreach (string step in path) {
-                if (module.Submodules.TryGetValue(step, out Module subModule)) {
+            var path   = moduleName.Split(".");
+            var module = this;
+            foreach (var step in path) {
+                if (module.Submodules.TryGetValue(step, out var subModule)) {
                     module = subModule;
                 }
                 else {
@@ -195,7 +196,7 @@ namespace Axion.Core.Hierarchy {
         }
 
         public IDefinitionExpr? FindDefinitionByName(string name) {
-            IDefinitionExpr? def =
+            var def =
                 Definitions.FirstOrDefault(kvp => kvp.Key == name).Value
              ?? Parent?.FindDefinitionByName(name);
             return def;

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
@@ -58,17 +57,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public virtual IDefinitionExpr? GetDefByName(string name) {
-            IDefinitionExpr? e = GetParent<ScopeExpr>()?.GetDefByName(name);
+            var e = GetParent<ScopeExpr>()?.GetDefByName(name);
             if (e != null) {
                 return e;
             }
 
-            IDefinitionExpr[] defs = GetScopedDefs();
+            var defs = GetScopedDefs();
             return defs.FirstOrDefault(def => def.Name?.ToString() == name);
         }
 
         public IDefinitionExpr[] GetScopedDefs() {
-            List<IDefinitionExpr> defs =
+            var defs =
                 Items.OfType<IDefinitionExpr>().ToList();
 
             // Add parameters of function if inside it.
@@ -88,18 +87,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             _outs ??=
                 new List<(T item, ScopeExpr itemParentScope, int itemIndex)>();
             for (var i = 0; i < Items.Count; i++) {
-                Expr item = Items[i];
+                var item = Items[i];
                 if (item is T expr) {
                     _outs.Add((expr, this, i));
                 }
                 else {
-                    IEnumerable<PropertyInfo> childProps = item.GetType()
-                        .GetProperties()
-                        .Where(
-                            p => p.PropertyType == typeof(ScopeExpr)
-                              && p.Name         != nameof(Parent)
-                        );
-                    foreach (PropertyInfo prop in childProps) {
+                    var childProps = item.GetType()
+                                         .GetProperties()
+                                         .Where(
+                                             p => p.PropertyType
+                                               == typeof(ScopeExpr)
+                                               && p.Name != nameof(Parent)
+                                         );
+                    foreach (var prop in childProps) {
                         var b = (ScopeExpr?) prop.GetValue(item);
                         b?.FindItemsOfType(_outs);
                     }
@@ -113,21 +113,22 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             T expression
         ) where T : Expr {
             for (var i = 0; i < Items.Count; i++) {
-                Expr item = Items[i];
+                var item = Items[i];
                 if (item == expression) {
                     return (this, i);
                 }
 
-                var childProps = item.GetType()
-                                     .GetProperties()
-                                     .Where(
-                                         p => p.PropertyType
-                                           == typeof(ScopeExpr)
-                                           && p.Name != nameof(Parent)
-                                     );
-                foreach (PropertyInfo prop in childProps) {
+                var childProps =
+                    item.GetType()
+                        .GetProperties()
+                        .Where(
+                            p => p.PropertyType
+                              == typeof(ScopeExpr)
+                              && p.Name != nameof(Parent)
+                        );
+                foreach (var prop in childProps) {
                     var b = (ScopeExpr?) prop.GetValue(item);
-                    (ScopeExpr? itemParentScope, int itemIndex) idx =
+                    var idx =
                         b?.IndexOf(expression) ?? (null, -1);
                     if (idx != (null, -1)) {
                         return idx;
@@ -182,7 +183,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         private static ScopeType ParseStart(Node parent) {
             var s = parent.Unit.TokenStream;
             // newline
-            bool hasNewline = s.MaybeEat(Newline);
+            var hasNewline = s.MaybeEat(Newline);
 
             // '{'
             if (s.MaybeEat(OpenBrace)) {

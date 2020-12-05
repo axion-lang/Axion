@@ -36,7 +36,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             SetSpan(
                 () => {
                     Ast.MacroApplicationParts.Push(this);
-                    int startIdx = Stream.TokenIdx;
+                    var startIdx = Stream.TokenIdx;
 
                     Macro = Ast.Macros.FirstOrDefault(
                         m => m.Syntax.Patterns.Count > 1

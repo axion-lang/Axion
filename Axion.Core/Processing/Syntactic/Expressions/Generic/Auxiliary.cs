@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
             Func<Node, Expr> parserFunc = AnyExpr.Parse;
             if (Spec.ParsingFunctions.TryGetValue(
                 typeof(T).Name,
-                out Func<Node, Expr> specialParsingFunc
+                out var specialParsingFunc
             )) {
                 parserFunc = specialParsingFunc;
             }

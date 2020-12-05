@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
         protected PrefixExpr(Node parent) : base(parent) { }
 
         internal new static PrefixExpr Parse(Node parent) {
-            TokenStream s = parent.Unit.TokenStream;
+            var s = parent.Unit.TokenStream;
 
             if (s.MaybeEat(Spec.PrefixOperators)) {
                 var op = (OperatorToken) s.Token;

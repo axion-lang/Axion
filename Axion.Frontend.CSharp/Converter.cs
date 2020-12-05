@@ -165,7 +165,8 @@ namespace Axion.Frontend.CSharp {
                             ".Contains(",
                             e.Left,
                             ") ",
-                            Spec.CSharp.BinaryOperators[collections.Operator.Type],
+                            Spec.CSharp.BinaryOperators[
+                                collections.Operator.Type],
                             " ",
                             collections.Left,
                             ".Contains(",
@@ -185,7 +186,7 @@ namespace Axion.Frontend.CSharp {
                 else {
                     if (!Spec.CSharp.BinaryOperators.TryGetValue(
                         e.Operator.Type,
-                        out string op
+                        out var op
                     )) {
                         op = e.Operator.Value;
                     }
@@ -218,7 +219,7 @@ namespace Axion.Frontend.CSharp {
                 break;
             }
             case UnaryExpr e: {
-                string op = e.Operator.Value;
+                var op = e.Operator.Value;
                 if (op == "not") {
                     op = "!";
                 }
@@ -314,15 +315,15 @@ namespace Axion.Frontend.CSharp {
                     "System.Collections",
                     "System.Collections.Generic"
                 };
-                foreach (string directive in defaultDirectives) {
+                foreach (var directive in defaultDirectives) {
                     w.WriteLine($"using {directive};");
                 }
 
                 var rootItems     = new NodeList<Expr>(e);
                 var rootClasses   = new List<ClassDef>();
                 var rootFunctions = new List<FunctionDef>();
-                foreach (Expr expr in e.Items) {
-                    Expr item = expr;
+                foreach (var expr in e.Items) {
+                    var item = expr;
                     // decorator is just a wrapper,
                     // so we need to unpack it's content.
                     if (expr is DecoratedExpr dec) {
@@ -355,21 +356,26 @@ namespace Axion.Frontend.CSharp {
                             }.WithScope(
                                 new[] {
                                     new FunctionDef(e) {
-                                            Name      = new NameExpr(e, "Main"),
-                                            ValueType = new SimpleTypeName(e, "void")
+                                            Name = new NameExpr(e, "Main"),
+                                            ValueType =
+                                                new SimpleTypeName(e, "void")
                                         }.WithParameters(
                                              new FunctionParameter(e) {
                                                  Name = new NameExpr(e, "args"),
-                                                 ValueType = new ArrayTypeName(e) {
-                                                     ElementType = new SimpleTypeName(
-                                                         e,
-                                                         Spec.StringType
-                                                     )
-                                                 }
+                                                 ValueType =
+                                                     new ArrayTypeName(e) {
+                                                         ElementType =
+                                                             new SimpleTypeName(
+                                                                 e,
+                                                                 Spec.StringType
+                                                             )
+                                                     }
                                              }
                                          )
                                          .WithScope(rootItems)
-                                         .WithDecorators(new NameExpr(e, "static"))
+                                         .WithDecorators(
+                                             new NameExpr(e, "static")
+                                         )
                                 }.Union<Expr>(rootFunctions)
                             )
                         }.Union(rootClasses)
@@ -378,7 +384,7 @@ namespace Axion.Frontend.CSharp {
                 break;
             }
             case DecoratedExpr e: {
-                foreach (Expr decorator in e.Decorators) {
+                foreach (var decorator in e.Decorators) {
                     if (decorator is NameExpr n
                      && Spec.CSharp.AllowedModifiers.Contains(n.ToString())) {
                         w.Write(n, " ");
@@ -403,7 +409,7 @@ namespace Axion.Frontend.CSharp {
             case ScopeExpr e: {
                 w.WriteLine("{");
                 w.IndentLevel++;
-                foreach (Expr item in e.Items) {
+                foreach (var item in e.Items) {
                     w.Write(item);
                     if (!(e.Parent is ClassDef || e.Parent is ModuleDef)
                      && !(item is IDefinitionExpr

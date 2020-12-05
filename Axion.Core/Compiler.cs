@@ -6,7 +6,6 @@ using System.Reflection;
 using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Translation;
@@ -17,14 +16,17 @@ using Module = Axion.Core.Hierarchy.Module;
 
 namespace Axion.Core {
     public class Compiler {
-        private static readonly Assembly coreAsm = Assembly.GetExecutingAssembly();
+        private static readonly Assembly coreAsm =
+            Assembly.GetExecutingAssembly();
 
-        public static readonly string Version = coreAsm.GetName().Version.ToString();
+        public static readonly string Version =
+            coreAsm.GetName().Version.ToString();
 
         /// <summary>
         ///     Path to directory where compiler executable is located.
         /// </summary>
-        public static readonly string WorkDir = AppDomain.CurrentDomain.BaseDirectory;
+        public static readonly string WorkDir =
+            AppDomain.CurrentDomain.BaseDirectory;
 
         /// <summary>
         ///     Path to directory where generated output is located.
@@ -36,7 +38,8 @@ namespace Axion.Core {
         internal static readonly Dictionary<string, INodeConverter> converters =
             new Dictionary<string, INodeConverter>();
 
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger =
+            LogManager.GetCurrentClassLogger();
 
         public static string GetTempSourceFilePath() {
             return Path.Combine(
@@ -50,24 +53,30 @@ namespace Axion.Core {
             converters[name.Trim().ToLower()] = converter;
         }
 
-        public static object? Process(Project project, ProcessingOptions options) {
+        public static object? Process(
+            Project           project,
+            ProcessingOptions options
+        ) {
             logger.Info($"Processing project '{project.ConfigFile.Name}'");
-            object? result = Process(project.MainModule, options);
+            var result = Process(project.MainModule, options);
             return result;
         }
 
-        public static object? Process(Module module, ProcessingOptions options) {
+        public static object? Process(
+            Module            module,
+            ProcessingOptions options
+        ) {
             logger.Info(
                 module.Parent == null
                     ? $"Processing module '{module.Name}'"
                     : $"Processing submodule '{module.Name}'"
             );
             object? result = null;
-            foreach ((_, Module subModule) in module.Submodules) {
+            foreach (var (_, subModule) in module.Submodules) {
                 result = Process(subModule, options);
             }
 
-            foreach ((_, Unit unit) in module.Units) {
+            foreach (var (_, unit) in module.Units) {
                 result = Process(unit, options);
             }
 
@@ -82,38 +91,38 @@ namespace Axion.Core {
             }
 
             object? result = null;
-            foreach ((var stepMode, Func<Unit, ProcessingOptions, object> stepAction) in
-                CompilationSteps) {
-                result = stepAction(src, options);
-                if (options.ProcessingMode == stepMode || src.HasErrors) {
+            foreach (var step in CompilationSteps) {
+                result = step.Value(src, options);
+                if (options.ProcessingMode == step.Key || src.HasErrors) {
                     break;
                 }
             }
 
             var errCount = 0;
-            foreach (LangException e in src.Blames) {
+            foreach (var e in src.Blames) {
                 logger.Error(e.ToString());
                 if (e.Severity == BlameSeverity.Error) {
                     errCount++;
                 }
             }
 
-            logger.Info(errCount > 0 ? "Processing aborted." : "Processing completed.");
+            logger.Info(
+                errCount > 0 ? "Processing aborted." : "Processing completed."
+            );
 
             return result;
         }
 
-        // @formatter:off
-
-        public static readonly Dictionary<Mode, Func<Unit, ProcessingOptions, object>> CompilationSteps =
-        new Dictionary<Mode, Func<Unit, ProcessingOptions, object>> {
-            { Mode.Lexing, Lex },
-            { Mode.Parsing, Parse },
-            { Mode.Reduction, Reduce },
-            { Mode.Translation, Translate }
-        };
-
-        // @formatter:on
+        public static readonly Dictionary<
+            Mode,
+            Func<Unit, ProcessingOptions, object>
+        > CompilationSteps =
+            new Dictionary<Mode, Func<Unit, ProcessingOptions, object>> {
+                { Mode.Lexing, Lex },
+                { Mode.Parsing, Parse },
+                { Mode.Reduction, Reduce },
+                { Mode.Translation, Translate }
+            };
 
         public static TokenStream Lex(Unit src, ProcessingOptions options) {
             logger.Debug("Tokens list generation");
@@ -130,7 +139,7 @@ namespace Axion.Core {
                 }
             }
 
-            foreach (Token mismatch in lexer.MismatchingPairs) {
+            foreach (var mismatch in lexer.MismatchingPairs) {
                 LangException.ReportMismatchedBracket(mismatch);
             }
 
@@ -149,10 +158,16 @@ namespace Axion.Core {
             return src.Ast;
         }
 
-        private static CodeWriter? Translate(Unit src, ProcessingOptions options) {
-            if (!converters.TryGetValue(options.TargetLanguage, out INodeConverter ncv)) {
+        private static CodeWriter Translate(
+            Unit              src,
+            ProcessingOptions options
+        ) {
+            if (!converters.TryGetValue(
+                options.TargetLanguage,
+                out var ncv
+            )) {
                 logger.Error($"No frontend with name {options.TargetLanguage}");
-                return null;
+                return CodeWriter.Default;
             }
 
             var cw = new CodeWriter(ncv);
@@ -163,7 +178,10 @@ namespace Axion.Core {
                 File.WriteAllText(
                     Path.Combine(
                         src.OutputDirectory.FullName,
-                        Path.ChangeExtension(src.SourceFile.Name, cw.OutputFileExtension)
+                        Path.ChangeExtension(
+                            src.SourceFile.Name,
+                            cw.OutputFileExtension
+                        )
                     ),
                     code
                 );

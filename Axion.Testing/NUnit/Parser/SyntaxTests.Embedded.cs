@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Axion.Core;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
-using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Translation;
 using NUnit.Framework;
 
@@ -52,10 +51,10 @@ namespace Axion.Testing.NUnit.Parser {
             );
             Compiler.Process(module, new ProcessingOptions(Mode.Parsing));
             Assert.AreEqual(0, module.Blames.Count);
-            TypeName?[] stmts = mainUnit.Ast.Items
-                                        .Select(s => ((VarDef) s).ValueType)
-                                        .ToArray();
-            Assert.AreEqual(10, stmts.Length);
+            var statements = mainUnit.Ast.Items
+                                     .Select(s => ((VarDef) s).ValueType)
+                                     .ToArray();
+            Assert.AreEqual(10, statements.Length);
         }
     }
 }

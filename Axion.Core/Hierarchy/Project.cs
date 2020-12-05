@@ -9,7 +9,10 @@ namespace Axion.Core.Hierarchy {
         public List<string> ImportedMacros {
             get {
                 try {
-                    List<string>? result = config.Get(c => c.ImportedMacros, null);
+                    var result = config.Get(
+                        c => c.ImportedMacros,
+                        null
+                    );
                     if (result == null) {
                         result = new List<string>();
                         config.Set(c => c.ImportedMacros, result);
@@ -64,17 +67,19 @@ namespace Axion.Core.Hierarchy {
                                store => store.File(ConfigFile.FullName)
                                              .AccessedBySource(
                                                  "project",
-                                                 out IConfigSource _
+                                                 out var _
                                              )
                            )
                            .UseTomlConfiguration(settings)
                            .Initialize();
 
             MainModule = Module.From(
-                new DirectoryInfo(Path.Join(ConfigFile.Directory!.FullName, "src"))
+                new DirectoryInfo(
+                    Path.Join(ConfigFile.Directory!.FullName, "src")
+                )
             );
             for (var i = 0; i < ImportedMacros.Count; i++) {
-                string macro = ImportedMacros[i];
+                var macro = ImportedMacros[i];
                 if (!Path.IsPathRooted(macro)) {
                     macro = Path.Combine(ConfigFile.Directory.FullName, macro);
                 }
@@ -88,12 +93,15 @@ namespace Axion.Core.Hierarchy {
             var stdLibPath = StdLibPath;
             if (stdLibPath != null) {
                 if (!Path.IsPathRooted(stdLibPath)) {
-                    stdLibPath = Path.Combine(ConfigFile.Directory.FullName, stdLibPath);
+                    stdLibPath = Path.Combine(
+                        ConfigFile.Directory.FullName,
+                        stdLibPath
+                    );
                 }
 
                 var dir = new DirectoryInfo(stdLibPath);
                 if (dir.Exists) {
-                    Module stdModule = Module.From(dir);
+                    var stdModule = Module.From(dir);
                     MainModule.Bind(stdModule);
                 }
             }

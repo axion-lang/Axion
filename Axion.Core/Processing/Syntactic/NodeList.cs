@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Syntactic {
                     return;
                 }
 
-                foreach (T item in items) {
+                foreach (var item in items) {
                     if (item != null) {
                         item.Parent = parent;
                     }
@@ -48,8 +48,8 @@ namespace Axion.Core.Processing.Syntactic {
             return items.Remove(item);
         }
 
-        public int  Count      => items.Count;
-        
+        public int Count => items.Count;
+
         public bool IsReadOnly { get; } = false;
 
         public T First {
@@ -99,7 +99,7 @@ namespace Axion.Core.Processing.Syntactic {
             else {
                 Parent?.Bind(item, this, index);
                 items.Insert(index, item);
-                for (int i = index; i < Count; i++) {
+                for (var i = index; i < Count; i++) {
                     ((NodeListTreePath<T>) items[i].Path).IndexInList = i;
                 }
             }

@@ -26,7 +26,8 @@ namespace Axion.Core.Processing.Lexical {
 
         public Stack<Token> MismatchingPairs { get; } = new Stack<Token>();
 
-        public Stack<TokenType> ProcessTerminators { get; } = new Stack<TokenType>();
+        public Stack<TokenType> ProcessTerminators { get; } =
+            new Stack<TokenType>();
 
         public Lexer(Unit unit) {
             this.unit = unit;
@@ -35,16 +36,11 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private bool TryAddChar(char expected, bool isContent = true) {
-            return TryAddChar(
-                new[] {
-                    expected
-                },
-                isContent
-            );
+            return TryAddChar(new[] { expected }, isContent);
         }
 
         private bool TryAddChar(char[] expect, bool isContent = true) {
-            string eaten = stream.Eat(expect) ?? "";
+            var eaten = stream.Eat(expect) ?? "";
             value.Append(eaten);
             if (isContent) {
                 content.Append(eaten);
@@ -54,7 +50,7 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private bool AddNext(bool isContent = true, params string[] expect) {
-            string eaten = stream.Eat(expect) ?? "";
+            var eaten = stream.Eat(expect) ?? "";
             value.Append(eaten);
             if (isContent) {
                 content.Append(eaten);
@@ -94,7 +90,7 @@ namespace Axion.Core.Processing.Lexical {
                 return ReadWhite();
             }
 
-            if (stream.Peek().IsIdStart()) {
+            if (stream.Peek().IsValidIdStart()) {
                 return ReadId();
             }
 
@@ -136,7 +132,7 @@ namespace Axion.Core.Processing.Lexical {
 
             // invalid character token
             AddNext();
-            Token t = NewTokenFromContext();
+            var t = NewTokenFromContext();
             LangException.Report(BlameType.InvalidCharacter, t);
             return t;
         }
@@ -153,7 +149,7 @@ namespace Axion.Core.Processing.Lexical {
                 return NewTokenFromContext();
             }
 
-            string ln = stream.RestOfLine;
+            var ln = stream.RestOfLine;
             // check that whitespace is not meaningful here
             if (!unit.TokenStream[^1].Is(Newline)
              || string.IsNullOrWhiteSpace(ln)
@@ -175,7 +171,7 @@ namespace Axion.Core.Processing.Lexical {
             Location inconsistencyStart = default;
             var      newIndentLen       = 0;
             for (var i = 0; i < value.Length; i++) {
-                char ch = value[i];
+                var ch = value[i];
                 if (consistent && ch != indentChar) {
                     inconsistencyStart = new Location(startLoc.Line, i);
                     consistent         = false;
@@ -316,7 +312,7 @@ namespace Axion.Core.Processing.Lexical {
         private Token ReadPunctuation() {
             AddNext(expect: PunctuationKeys);
             type = Punctuation[value.ToString()];
-            Token t = NewTokenFromContext();
+            var t = NewTokenFromContext();
             if (type.IsOpenBracket()) {
                 MismatchingPairs.Push(t);
             }
@@ -338,7 +334,7 @@ namespace Axion.Core.Processing.Lexical {
             AddNext(false, CharacterQuote);
             while (!AddNext(false, CharacterQuote)) {
                 if (stream.AtEndOfLine) {
-                    CharToken unclosed = BindSpan(
+                    var unclosed = BindSpan(
                         new CharToken(
                             unit,
                             value.ToString(),
@@ -361,7 +357,7 @@ namespace Axion.Core.Processing.Lexical {
                 }
             }
 
-            CharToken t = BindSpan(
+            var t = BindSpan(
                 new CharToken(unit, value.ToString(), content.ToString())
             );
 
@@ -390,7 +386,7 @@ namespace Axion.Core.Processing.Lexical {
             AddNext(false, MultiLineCommentMark);
             while (!stream.PeekIs(MultiLineCommentMark)) {
                 if (stream.PeekIs(EndOfCode)) {
-                    CommentToken t = BindSpan(
+                    var t = BindSpan(
                         new CommentToken(
                             unit,
                             value.ToString(),
@@ -427,13 +423,13 @@ namespace Axion.Core.Processing.Lexical {
                 value.Clear().Append(prefixes);
                 content.Clear();
                 for (var i = 0; i < prefixes.Length; i++) {
-                    char p = prefixes[i];
+                    var p = prefixes[i];
                     if (StringPrefixes.Contains(char.ToLower(p))) {
                         continue;
                     }
 
                     var ps = p.ToString();
-                    Token token = BindSpan(
+                    var token = BindSpan(
                         new Token(
                             unit,
                             Invalid,
@@ -448,13 +444,13 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             TryAddChar(StringQuotes, false);
-            var    quote        = value[^1].ToString();
-            string closingQuote = quote;
+            var quote        = value[^1].ToString();
+            var closingQuote = quote;
             if (AddNext(false, quote.Multiply(2))) {
                 quote = quote.Multiply(3);
             }
             else if (AddNext(false, quote)) {
-                StringToken se = BindSpan(
+                var se = BindSpan(
                     new StringToken(
                         unit,
                         value.ToString(),
@@ -500,7 +496,7 @@ namespace Axion.Core.Processing.Lexical {
                 }
             }
 
-            StringToken s = BindSpan(
+            var s = BindSpan(
                 new StringToken(
                     unit,
                     value.ToString(),
@@ -523,13 +519,13 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private StringInterpolation ReadStringInterpolation() {
-            var  interpolation = new StringInterpolation(unit);
-            Unit iSrc          = interpolation.Unit;
-            var  lexer         = new Lexer(interpolation.Unit);
+            var interpolation = new StringInterpolation(unit);
+            var iSrc          = interpolation.Unit;
+            var lexer         = new Lexer(interpolation.Unit);
 
             lexer.ProcessTerminators.Push(CloseBrace);
             while (true) {
-                Token? token = lexer.Read();
+                var token = lexer.Read();
                 if (token == null) {
                     continue;
                 }
@@ -540,7 +536,7 @@ namespace Axion.Core.Processing.Lexical {
                 }
             }
 
-            foreach (Token mismatch in lexer.MismatchingPairs) {
+            foreach (var mismatch in lexer.MismatchingPairs) {
                 LangException.ReportMismatchedBracket(mismatch);
             }
 
@@ -551,9 +547,9 @@ namespace Axion.Core.Processing.Lexical {
         }
 
         private void ReadEscapeSeq() {
-            Location escapeStart = stream.Location;
-            string   raw         = stream.Eat('\\')!;
-            var      escaped     = "";
+            var escapeStart = stream.Location;
+            var raw         = stream.Eat('\\')!;
+            var escaped     = "";
             // \t, \n, etc
             if (stream.Eat(EscapeSequences.Keys.ToArray()) != null) {
                 raw     += stream.Char;
@@ -561,9 +557,9 @@ namespace Axion.Core.Processing.Lexical {
             }
             // \u h{4} or \U h{8}
             else if (stream.Eat("u", "U") != null) {
-                char u = stream.Char;
+                var u = stream.Char;
                 raw += u;
-                int uEscapeLen = u == 'u' ? 4 : 8;
+                var uEscapeLen = u == 'u' ? 4 : 8;
                 var escapeLen  = 0;
                 while (escapeLen < uEscapeLen) {
                     if (stream.Eat(NumbersHex) != null) {
@@ -576,7 +572,7 @@ namespace Axion.Core.Processing.Lexical {
                     }
                 }
 
-                int? num = Utilities.ParseInt(raw.Substring(2), 16);
+                var num = Utilities.ParseInt(raw.Substring(2), 16);
                 if (num != null) {
                     const int unicodeUpperBound = 0x10ffff;
                     if (0 <= num && num <= unicodeUpperBound) {
@@ -603,7 +599,7 @@ namespace Axion.Core.Processing.Lexical {
                     return;
                 }
 
-                int? num = Utilities.ParseInt(raw.Substring(2), 16);
+                var num = Utilities.ParseInt(raw.Substring(2), 16);
                 if (num != null) {
                     escaped += num;
                 }

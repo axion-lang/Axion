@@ -24,9 +24,14 @@ namespace Axion.Core.Processing.Errors {
         public Unit TargetUnit { get; }
 
         [JsonProperty]
-        public string Time { get; } = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+        public string Time { get; } =
+            DateTime.Now.ToString(CultureInfo.InvariantCulture);
 
-        private LangException(string message, BlameSeverity severity, CodeSpan span) {
+        private LangException(
+            string        message,
+            BlameSeverity severity,
+            CodeSpan      span
+        ) {
             Severity   = severity;
             Message    = message;
             ErrorSpan  = span;
@@ -54,7 +59,11 @@ namespace Axion.Core.Processing.Errors {
                 );
             }
 
-            var ex = new LangException(blameType.Description, blameType.Severity, expr);
+            var ex = new LangException(
+                blameType.Description,
+                blameType.Severity,
+                expr
+            );
             expr.Unit.Blames.Add(ex);
         }
 
@@ -68,7 +77,10 @@ namespace Axion.Core.Processing.Errors {
             bracket.Unit.Blames.Add(ex);
         }
 
-        public static void ReportUnexpectedSyntax(TokenType expected, CodeSpan span) {
+        public static void ReportUnexpectedSyntax(
+            TokenType expected,
+            CodeSpan  span
+        ) {
             var ex = new LangException(
                 $"Invalid syntax, expected `{expected.GetValue()}`, got `{span.Unit.TokenStream.Peek.Type.GetValue()}`.",
                 BlameSeverity.Error,

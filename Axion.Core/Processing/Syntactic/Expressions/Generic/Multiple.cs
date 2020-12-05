@@ -1,4 +1,3 @@
-using System;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
@@ -21,9 +20,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
         ///     reports errors if any of them is not compliant to T.
         /// </summary>
         internal static AtomExpr ParseGenerally(Node parent) {
-            AtomExpr e = Multiple<Expr>.Parse(parent);
+            var e = Multiple<Expr>.Parse(parent);
             if (e is TupleExpr tpl) {
-                foreach (Expr expr in tpl.Expressions) {
+                foreach (var expr in tpl.Expressions) {
                     if (!(expr is T)) {
                         LangException.ReportUnexpectedType(typeof(T), expr);
                     }
@@ -44,9 +43,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
         ///     (e.g. tuples)
         /// </summary>
         internal new static AtomExpr Parse(Node parent) {
-            TokenStream      s          = parent.Unit.TokenStream;
-            Func<Node, Expr> parserFunc = Auxiliary.GetParsingFunction<T>();
-            var              hasParens  = s.MaybeEat(OpenParenthesis);
+            var s          = parent.Unit.TokenStream;
+            var parserFunc = Auxiliary.GetParsingFunction<T>();
+            var hasParens  = s.MaybeEat(OpenParenthesis);
             var list = new NodeList<Expr>(parent) {
                 parserFunc(parent)
             };

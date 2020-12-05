@@ -94,7 +94,7 @@ namespace Axion.Frontend.Python {
                 break;
             }
             case DecoratedExpr e: {
-                foreach (Expr decorator in e.Decorators) {
+                foreach (var decorator in e.Decorators) {
                     w.WriteLine("@", decorator);
                 }
 

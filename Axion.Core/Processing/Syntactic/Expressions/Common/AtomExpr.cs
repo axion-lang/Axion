@@ -32,7 +32,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
         protected AtomExpr(Node parent) : base(parent) { }
 
         internal new static AtomExpr Parse(Node parent) {
-            TokenStream s = parent.Unit.TokenStream;
+            var s = parent.Unit.TokenStream;
 
             if (s.PeekIs(Identifier)
              && !parent.Unit.Module.CustomKeywords.Contains(s.Peek.Content)) {
@@ -68,7 +68,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 return new ConstantExpr(parent).Parse();
             }
 
-            MacroApplicationExpr macro =
+            var macro =
                 new MacroApplicationExpr(parent).Parse();
             if (macro.Macro != null) {
                 return macro;

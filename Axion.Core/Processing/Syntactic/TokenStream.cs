@@ -39,7 +39,7 @@ namespace Axion.Core.Processing.Syntactic {
         public bool PeekByIs(int peekBy, params TokenType[] expected) {
             SkipTrivial(expected);
             if (TokenIdx + peekBy < tokens.Count) {
-                Token peekN = tokens[TokenIdx + peekBy];
+                var peekN = tokens[TokenIdx + peekBy];
                 return expected.Any(tt => peekN.Is(tt));
             }
 
@@ -102,7 +102,7 @@ namespace Axion.Core.Processing.Syntactic {
         }
 
         private void SkipTrivial(params TokenType[] wantedTypes) {
-            bool skipNewlines = !wantedTypes.Contains(Newline);
+            var skipNewlines = !wantedTypes.Contains(Newline);
             while (ExactPeek.Type == Comment
                 || ExactPeek.Type == Newline && skipNewlines) {
                 EatAny();

@@ -18,7 +18,7 @@ namespace Axion.Core.Specification {
     /// </summary>
     public static partial class Spec {
         public const string FileExtension = ".ax";
-        
+
         public const char EndOfCode = '\0';
         public const string OneLineCommentMark = "#";
         public const string MultiLineCommentMark = "###";
@@ -240,47 +240,54 @@ namespace Axion.Core.Specification {
                 { ":",  Colon },
                 { ";",  Semicolon }
             };
+        
+        // @formatter:on
 
-        public static readonly string[] PunctuationKeys = Punctuation.Keys.ToArray();
+        public static readonly string[] PunctuationKeys =
+            Punctuation.Keys.ToArray();
 
         /// <summary>
         ///     Token types that can't start an expression.
         /// </summary>
-        public static readonly TokenType[] NeverExprStartTypes =
-            Operators.Values
-                     .Where(op => op.Side == Both)
-                     .Select(op => op.Type)
-                     .Union(
-                         Outdent, Comma, Question,
-                         CloseBrace, DoubleCloseBrace, CloseBracket, CloseParenthesis,
-                         KeywordElif, KeywordElse,
-                         LeftArrow, RightArrow
-                     );
+        public static readonly TokenType[] NeverExprStartTypes = Operators
+            .Values.Where(op => op.Side == Both)
+            .Select(op => op.Type)
+            .Union(
+                Outdent,
+                Comma,
+                Question,
+                CloseBrace,
+                DoubleCloseBrace,
+                CloseBracket,
+                CloseParenthesis,
+                KeywordElif,
+                KeywordElse,
+                LeftArrow,
+                RightArrow
+            );
 
-        public const string CharType   = "Char";
+        public const string CharType = "Char";
         public const string StringType = "String";
         public const string VoidType = "void";
         public const string UnitType = "Unit";
         public const string UnionType = "Union";
         public const string UnknownType = "UNKNOWN_TYPE";
 
-        public static readonly Dictionary<string, Func<Node, Expr>> ParsingFunctions =
-            new Dictionary<string, Func<Node, Expr>> {
-                { "Expr",                AnyExpr.Parse },
-                { nameof(AnyExpr),       AnyExpr.Parse },
-                { nameof(InfixExpr),     InfixExpr.Parse },
-                { nameof(PrefixExpr),    PrefixExpr.Parse },
-                { nameof(PostfixExpr),   PostfixExpr.Parse },
-                { nameof(AtomExpr),      AtomExpr.Parse },
-                { nameof(ConstantExpr),  ConstantExpr.ParseNew }
+        public static readonly Dictionary<string, Func<Node, Expr>>
+            ParsingFunctions = new Dictionary<string, Func<Node, Expr>> {
+                { "Expr", AnyExpr.Parse },
+                { nameof(AnyExpr), AnyExpr.Parse },
+                { nameof(InfixExpr), InfixExpr.Parse },
+                { nameof(PrefixExpr), PrefixExpr.Parse },
+                { nameof(PostfixExpr), PostfixExpr.Parse },
+                { nameof(AtomExpr), AtomExpr.Parse },
+                { nameof(ConstantExpr), ConstantExpr.ParseNew }
             };
-        
+
         public static readonly Dictionary<string, Type> ParsingTypes =
             new Dictionary<string, Type> {
                 { nameof(ScopeExpr), typeof(ScopeExpr) },
-                { nameof(TypeName),  typeof(TypeName) }
+                { nameof(TypeName), typeof(TypeName) }
             };
-        
-        // @formatter:on
     }
 }

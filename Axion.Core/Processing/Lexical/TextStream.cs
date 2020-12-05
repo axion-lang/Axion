@@ -28,8 +28,8 @@ namespace Axion.Core.Processing.Lexical {
 
         public string RestOfLine {
             get {
-                string textFromCurrent = Text.Substring(charIdx + 1);
-                int    i               = textFromCurrent.IndexOf('\n');
+                var textFromCurrent = Text.Substring(charIdx + 1);
+                var i               = textFromCurrent.IndexOf('\n');
                 if (i == -1) {
                     return textFromCurrent;
                 }
@@ -101,8 +101,8 @@ namespace Axion.Core.Processing.Lexical {
                 return Char.ToString();
             }
 
-            foreach (string value in expected) {
-                string nxt = Peek(value.Length);
+            foreach (var value in expected) {
+                var nxt = Peek(value.Length);
                 if (nxt == value) {
                     Move(nxt.Length);
                     return nxt;
@@ -122,7 +122,7 @@ namespace Axion.Core.Processing.Lexical {
                 return Char.ToString();
             }
 
-            char nxt = Peek();
+            var nxt = Peek();
             if (expected.Contains(nxt)) {
                 Move();
                 return nxt.ToString();

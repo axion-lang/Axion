@@ -30,7 +30,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             SetSpan(
                 () => {
                     while (!Stream.MaybeEat(TokenType.End)) {
-                        Expr item = AnyExpr.Parse(this);
+                        var item = AnyExpr.Parse(this);
                         Items += item;
                         if (item is IDefinitionExpr def) {
                             Unit.Module.AddDefinition(def);
@@ -39,9 +39,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
             );
         }
-        
-        public override IDefinitionExpr? GetDefByName(string name) { 
-            IDefinitionExpr[] defs = GetScopedDefs();
+
+        public override IDefinitionExpr? GetDefByName(string name) {
+            var defs = GetScopedDefs();
             return defs.FirstOrDefault(def => def.Name?.ToString() == name);
         }
     }

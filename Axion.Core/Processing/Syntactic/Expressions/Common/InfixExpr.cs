@@ -28,7 +28,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
         protected InfixExpr(Node parent) : base(parent) { }
 
         internal static InfixExpr Parse(Node parent) {
-            TokenStream s = parent.Unit.TokenStream;
+            var s = parent.Unit.TokenStream;
 
             InfixExpr ParseInfix(int precedence) {
                 InfixExpr leftExpr = PrefixExpr.Parse(parent);
@@ -39,14 +39,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 }
 
                 // expr (keyword | expr) expr?
-                MacroApplicationExpr macro =
+                var macro =
                     new MacroApplicationExpr(parent).Parse(leftExpr);
                 if (macro.Macro != null) {
                     return macro;
                 }
 
                 while (true) {
-                    int newPrecedence = -1;
+                    var newPrecedence = -1;
                     if (s.Peek is OperatorToken opToken) {
                         newPrecedence = opToken.Precedence;
                     }

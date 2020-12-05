@@ -21,7 +21,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
         protected PostfixExpr(Node parent) : base(parent) { }
 
         internal new static PostfixExpr Parse(Node parent) {
-            TokenStream s = parent.Unit.TokenStream;
+            var s = parent.Unit.TokenStream;
 
             // TODO: look about it.
             var isUnquoted =
@@ -29,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             PostfixExpr value = AtomExpr.Parse(parent);
 
             while (true) {
-                Token exactPeek = s.ExactPeek;
+                var exactPeek = s.ExactPeek;
                 if (s.PeekIs(OpDot)) {
                     value = new MemberAccessExpr(parent) {
                         Target = value

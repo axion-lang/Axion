@@ -57,7 +57,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                  && s.PeekByIs(2, TokenType.OpAssign)) {
                     var argName = (NameExpr) AtomExpr.Parse(parent);
                     s.Eat(TokenType.OpAssign);
-                    InfixExpr argValue = InfixExpr.Parse(parent);
+                    var argValue = InfixExpr.Parse(parent);
                     arg = new FuncCallArg(parent) {
                         Name  = argName,
                         Value = argValue

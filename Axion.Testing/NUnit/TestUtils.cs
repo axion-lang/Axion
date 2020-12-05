@@ -74,10 +74,7 @@ namespace Axion.Testing.NUnit {
 
         internal static FileInfo FileFromTestName(string fileName) {
             return new FileInfo(
-                Path.Combine(
-                    InPath,
-                    fileName + Spec.FileExtension
-                )
+                Path.Combine(InPath, fileName + Spec.FileExtension)
             );
         }
 
@@ -90,8 +87,8 @@ namespace Axion.Testing.NUnit {
         }
 
         internal static (Unit, Module) ModuleFromCode(string code) {
-            var    unit = Unit.FromCode(code);
-            Module root = Module.RawFrom(unit.SourceFile.Directory!);
+            var unit = Unit.FromCode(code);
+            var root = Module.RawFrom(unit.SourceFile.Directory!);
             root.Bind(unit);
             Compiler.Process(root, new ProcessingOptions(Mode.Parsing));
             return (unit, root);

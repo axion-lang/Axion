@@ -15,14 +15,15 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             TokenType tokenType = TokenType.None
         ) : base(unit, tokenType, value) {
             if (tokenType != TokenType.None) {
-                Value = Spec.Operators.First(kvp => kvp.Value.Type == tokenType)
+                Value = Spec.Operators
+                            .First(o => o.Value.Type == tokenType)
                             .Key;
             }
 
             Content = Value;
             if (Spec.Operators.TryGetValue(
                 Value,
-                out (TokenType, int, InputSide) properties
+                out var properties
             )) {
                 (Type, Precedence, Side) = properties;
             }

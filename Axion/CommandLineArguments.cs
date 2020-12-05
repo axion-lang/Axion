@@ -70,12 +70,7 @@ namespace Axion {
         [Option('v', "version")]
         public bool Version { get; set; }
 
-        [Verb(
-            "list",
-            aliases: new[] {
-                "l"
-            }
-        )]
+        [Verb("list", aliases: new[] { "l" })]
         public class ListVerb {
             [Option('f', "frontends")]
             public bool Frontends { get; set; }
@@ -102,12 +97,7 @@ namespace Axion {
         )]
         public class ClearVerb { }
 
-        [Verb(
-            "exit",
-            aliases: new[] {
-                "x"
-            }
-        )]
+        [Verb("exit", aliases: new[] { "x" })]
         public class ExitVerb { }
     }
 }

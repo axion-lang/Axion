@@ -23,6 +23,9 @@ namespace Axion.Core.Processing.Translation {
             set => writer.Indent = value;
         }
 
+        public static readonly CodeWriter Default =
+            new CodeWriter(Compiler.converters["axion"]);
+
         public CodeWriter(INodeConverter converter) {
             baseWriter     = new StringWriter();
             writer         = new IndentedTextWriter(baseWriter);
@@ -56,8 +59,11 @@ namespace Axion.Core.Processing.Translation {
             }
         }
 
-        public void AddJoin<T>(string separator, IList<T> items, bool indent = false)
-            where T : IConvertibleNode? {
+        public void AddJoin<T>(
+            string   separator,
+            IList<T> items,
+            bool     indent = false
+        ) where T : IConvertibleNode? {
             if (items.Count == 0) {
                 return;
             }

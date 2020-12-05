@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
@@ -36,8 +35,8 @@ namespace Axion.Core.Processing.Traversal {
             }
 
             root = root.Path.Node;
-            PropertyInfo[] nodeProps = root.GetType().GetProperties();
-            IEnumerable<PropertyInfo> childProps = nodeProps.Where(
+            var nodeProps = root.GetType().GetProperties();
+            var childProps = nodeProps.Where(
                 p => typeof(Node).IsAssignableFrom(p.PropertyType)
                   && !Attribute.IsDefined(
                          p,
@@ -53,8 +52,8 @@ namespace Axion.Core.Processing.Traversal {
                          p.PropertyType.GetGenericArguments()[0]
                      )
             );
-            foreach (PropertyInfo prop in childProps) {
-                object obj = prop.GetValue(root);
+            foreach (var prop in childProps) {
+                var obj = prop.GetValue(root);
                 switch (obj) {
                 case null: continue;
                 case Node n:
@@ -62,7 +61,7 @@ namespace Axion.Core.Processing.Traversal {
                     break;
                 default:
                     try {
-                        Node[] list = ((IEnumerable) obj).OfType<Node>()
+                        var list = ((IEnumerable) obj).OfType<Node>()
                             .ToArray();
                         // for loop required, expressions collection
                         // can be modified.
@@ -150,7 +149,7 @@ namespace Axion.Core.Processing.Traversal {
                 // x = unwrappedX.x
                 // y = unwrappedX.y
                 var scope = bin.GetParent<ScopeExpr>();
-                (_, int deconstructionIdx) = scope!.IndexOf(bin);
+                var (_, deconstructionIdx) = scope!.IndexOf(bin);
                 var deconstructionVar = new VarDef(
                     scope,
                     new Token(bin.Unit, TokenType.KeywordLet)
@@ -202,7 +201,7 @@ namespace Axion.Core.Processing.Traversal {
                 // if loop-X-nobreak
                 //     do3()
                 var scope = path.Node.GetParent<ScopeExpr>();
-                (_, int whileIndex) = scope.IndexOf(whileExpr);
+                var (_, whileIndex) = scope.IndexOf(whileExpr);
                 var flagName = new NameExpr(
                     scope,
                     scope.CreateUniqueId("loop_{0}_nobreak")
@@ -215,7 +214,7 @@ namespace Axion.Core.Processing.Traversal {
                     }
                 );
                 // index of while == whileIdx + 1
-                List<(BreakExpr item, ScopeExpr itemParentScope, int itemIndex)>
+                var
                     breaks = whileExpr.Scope.FindItemsOfType<BreakExpr>();
                 var boolSetter = new BinaryExpr(path.Node) {
                     Left = flagName,
@@ -225,7 +224,7 @@ namespace Axion.Core.Processing.Traversal {
                     ),
                     Right = ConstantExpr.True(path.Node)
                 };
-                foreach ((_, ScopeExpr itemParentScope, int itemIndex) in breaks
+                foreach (var (_, itemParentScope, itemIndex) in breaks
                 ) {
                     itemParentScope.Items.Insert(itemIndex, boolSetter);
                 }
@@ -252,7 +251,7 @@ namespace Axion.Core.Processing.Traversal {
                 //     y: int
                 //     fn print
                 //         print(x, y)
-                foreach (Expr dataMember in cls.DataMembers) {
+                foreach (var dataMember in cls.DataMembers) {
                     cls.Scope.Items.Insert(0, dataMember);
                 }
 

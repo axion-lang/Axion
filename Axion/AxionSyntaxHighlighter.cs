@@ -22,17 +22,17 @@ namespace Axion {
             out IReadOnlyList<Exception> blames
         ) {
             renderPosition = lastRenderEndPosition;
-            Unit src = Unit.FromLines(codeLines);
+            var src = Unit.FromLines(codeLines);
             // NOTE: direct call to Compiler.Lex works faster than Compiler.Process function chain.
             Compiler.Lex(src, ProcessingOptions.Default);
             blames = src.Blames;
-            List<ColoredValue> values = HighlightTokens(src.TokenStream);
+            var values = HighlightTokens(src.TokenStream);
             lastRenderEndPosition = renderPosition;
             return values;
         }
 
         public List<ColoredValue> Highlight(string code) {
-            Unit src = Unit.FromCode(code);
+            var src = Unit.FromCode(code);
             Compiler.Lex(src, ProcessingOptions.Default);
             return HighlightTokens(src.TokenStream);
         }
@@ -40,7 +40,7 @@ namespace Axion {
         private List<ColoredValue> HighlightTokens(IEnumerable<Token> tokens) {
             var values           = new List<ColoredValue>();
             var foundRenderStart = false;
-            foreach (Token token in tokens) {
+            foreach (var token in tokens) {
                 // check if token highlighting is not needed (already highlighted)
                 if (!foundRenderStart
                  && (token.End.Line < renderPosition.Y
@@ -64,7 +64,7 @@ namespace Axion {
                     break;
                 }
 
-                string       text = token.Value + token.EndingWhite;
+                var          text = token.Value + token.EndingWhite;
                 ConsoleColor newColor;
                 var          isWhite = false;
 

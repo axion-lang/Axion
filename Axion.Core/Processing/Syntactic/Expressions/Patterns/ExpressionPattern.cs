@@ -50,9 +50,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
         }
 
         public ExpressionPattern Parse() {
-            Token id          = Stream.Eat(Identifier);
-            var   namedParts  = GetParent<MacroDef>()!.NamedSyntaxParts;
-            bool  typeDefined = namedParts.ContainsKey(id.Content);
+            var id          = Stream.Eat(Identifier);
+            var namedParts  = GetParent<MacroDef>()!.NamedSyntaxParts;
+            var typeDefined = namedParts.ContainsKey(id.Content);
             if (typeDefined) {
                 PatternFromTypeName(namedParts[id.Content]);
             }
@@ -62,7 +62,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 if (!typeDefined
                  && tn is SimpleTypeName simpleTypeName
                  && simpleTypeName.Name.IsSimple) {
-                    string typeName = simpleTypeName.Name.Qualifiers[0].Content;
+                    var typeName = simpleTypeName.Name.Qualifiers[0].Content;
                     PatternFromTypeName(typeName);
                     namedParts.Add(id.Content, typeName);
                 }
@@ -86,12 +86,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 typeName += "Expr";
             }
 
-            if (Spec.ParsingTypes.TryGetValue(typeName, out Type t)) {
+            if (Spec.ParsingTypes.TryGetValue(typeName, out var t)) {
                 type = t;
             }
             else if (Spec.ParsingFunctions.TryGetValue(
                 typeName,
-                out Func<Node, Expr> fn
+                out var fn
             )) {
                 parseFunc = fn;
             }

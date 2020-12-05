@@ -15,7 +15,6 @@ using CodeConsole.ScriptBench;
 using CommandLine;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Scripting;
 using NLog;
 using NLog.Layouts;
@@ -23,7 +22,8 @@ using Module = Axion.Core.Hierarchy.Module;
 
 namespace Axion {
     public static class Program {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger =
+            LogManager.GetCurrentClassLogger();
 
         private static SimpleLayout logLevel {
             get => LogManager.Configuration.Variables["consoleLogLevel"];
@@ -50,11 +50,18 @@ namespace Axion {
             Console.ForegroundColor = ConsoleColor.White;
             PrintIntro();
 
-            foreach (var fileInfo in new DirectoryInfo(Compiler.WorkDir).EnumerateFiles()
-                .Where(
-                    fi => fi.Name.StartsWith("Axion.Frontend.") && fi.Extension == ".dll"
-                )) {
-                var shortName = Path.GetFileNameWithoutExtension(fileInfo.FullName);
+            var frontendDlls =
+                new DirectoryInfo(Compiler.WorkDir)
+                    .EnumerateFiles()
+                    .Where(
+                        fi => fi.Name.StartsWith("Axion.Frontend.")
+                           && fi.Extension
+                           == ".dll"
+                    );
+
+            foreach (var fileInfo in frontendDlls) {
+                var shortName =
+                    Path.GetFileNameWithoutExtension(fileInfo.FullName);
                 try {
                     var asmName = new AssemblyName(shortName);
                     var asm = new FrontendLoadContext(fileInfo.FullName)
@@ -63,7 +70,9 @@ namespace Axion {
                     Compiler.AddConverter(shortName, LoadConverter(asm));
                 }
                 catch (Exception e) {
-                    logger.Error($"Failed to load frontend from {shortName}.\n{e}");
+                    logger.Error(
+                        $"Failed to load frontend from {shortName}.\n{e}"
+                    );
                 }
             }
 
@@ -72,12 +81,15 @@ namespace Axion {
                 if (arguments.Length > 0) {
                     var result = cliParser
                         .ParseArguments<CommandLineArguments,
-                            CommandLineArguments.ListVerb, CommandLineArguments.HelpVerb,
-                            CommandLineArguments.ClearVerb, CommandLineArguments.ExitVerb
-                        >(arguments);
+                            CommandLineArguments.ListVerb,
+                            CommandLineArguments.HelpVerb,
+                            CommandLineArguments.ClearVerb,
+                            CommandLineArguments.ExitVerb>(arguments);
                     result
-                        .MapResult<CommandLineArguments, CommandLineArguments.ListVerb,
-                            CommandLineArguments.HelpVerb, CommandLineArguments.ClearVerb,
+                        .MapResult<CommandLineArguments,
+                            CommandLineArguments.ListVerb,
+                            CommandLineArguments.HelpVerb,
+                            CommandLineArguments.ClearVerb,
                             CommandLineArguments.ExitVerb, int>(
                             args => {
                                 if (args.Version) {
@@ -99,7 +111,7 @@ namespace Axion {
                             args => Clear(),
                             args => Exit(),
                             errors => {
-                                foreach (Error e in errors) {
+                                foreach (var e in errors) {
                                     logger.Error(e);
                                 }
 
@@ -148,7 +160,7 @@ namespace Axion {
                 Environment.Exit(0);
                 return 0;
             }
-            
+
             // This loop breaks only by 'exit' command.
             // ReSharper disable once FunctionNeverReturns
         }
@@ -171,16 +183,14 @@ namespace Axion {
 
 
         private static void PrintError(LangException e) {
-            string[] codeLines = e.TargetUnit.TextStream.Text.Split(
-                new[] {
-                    "\n"
-                },
+            var codeLines = e.TargetUnit.TextStream.Text.Split(
+                new[] { "\n" },
                 StringSplitOptions.None
             );
 
             var lines = new List<string>();
             // limit code piece by 5 lines
-            for (int i = e.ErrorSpan.Start.Line;
+            for (var i = e.ErrorSpan.Start.Line;
                  i < codeLines.Length && lines.Count < 4;
                  i++) {
                 lines.Add(codeLines[i].TrimEnd('\n', '\r', Spec.EndOfCode));
@@ -192,18 +202,19 @@ namespace Axion {
 
             // first line
             // <line number>| <code line>
-            int pointerTailLength = 8 + e.ErrorSpan.Start.Column;
+            var pointerTailLength = 8 + e.ErrorSpan.Start.Column;
             int errorTokenLength;
             if (e.ErrorSpan.End.Line > e.ErrorSpan.Start.Line) {
                 errorTokenLength = lines[0].Length - e.ErrorSpan.Start.Column;
             }
             else {
-                errorTokenLength = e.ErrorSpan.End.Column - e.ErrorSpan.Start.Column;
+                errorTokenLength =
+                    e.ErrorSpan.End.Column - e.ErrorSpan.Start.Column;
             }
 
             // underline, red-colored
-            string pointer = new string(' ', pointerTailLength)
-                           + new string('~', Math.Abs(errorTokenLength));
+            var pointer = new string(' ', pointerTailLength)
+                        + new string('~', Math.Abs(errorTokenLength));
 
             //=========Error template=========
             //
@@ -216,12 +227,14 @@ namespace Axion {
             //     3 │      123
             // ...
             //
-            ConsoleColor color = e.Severity == BlameSeverity.Error
+            var color = e.Severity == BlameSeverity.Error
                 ? ConsoleColor.Red
                 : ConsoleColor.DarkYellow;
 
             // <severity>: <message>.
-            ConsoleUtils.WriteLine((e.Severity.ToString("G") + ": " + e.Message, color));
+            ConsoleUtils.WriteLine(
+                (e.Severity.ToString("G") + ": " + e.Message, color)
+            );
             // file name
             ConsoleUtils.WriteLine(
                 $"--> {e.TargetUnit.SourceFile}:"
@@ -234,16 +247,16 @@ namespace Axion {
             // error pointer
             ConsoleUtils.WriteLine((pointer, color));
             // next lines
-            for (int i = e.ErrorSpan.Start.Line + 1; i < lines.Count; i++) {
+            for (var i = e.ErrorSpan.Start.Line + 1; i < lines.Count; i++) {
                 PrintLineNumber(i + 1);
                 ConsoleUtils.WriteLine(lines[i]);
             }
         }
 
         private static void PrintLineNumber(int lineNumber) {
-            var    strNum = lineNumber.ToString();
-            int    width  = Math.Max(strNum.Length, 4);
-            string view   = strNum.PadLeft(width + 1).PadRight(width + 2) + "│ ";
+            var strNum = lineNumber.ToString();
+            var width  = Math.Max(strNum.Length, 4);
+            var view   = strNum.PadLeft(width + 1).PadRight(width + 2) + "│ ";
             Console.Write(view);
         }
 
@@ -254,8 +267,8 @@ namespace Axion {
             );
             while (true) {
                 // code editor header
-                string rawInput = ConsoleUtils.Read("i> ");
-                string input    = rawInput.Trim().ToUpper();
+                var rawInput = ConsoleUtils.Read("i> ");
+                var input    = rawInput.Trim().ToUpper();
 
                 switch (input) {
                 case "":
@@ -276,7 +289,7 @@ namespace Axion {
                         firstCodeLine: rawInput,
                         highlighter: new AxionSyntaxHighlighter()
                     );
-                    string[] codeLines = editor.Run();
+                    var codeLines = editor.Run();
 
                     // Re-enable logging
                     logLevel = ll;
@@ -287,14 +300,16 @@ namespace Axion {
 
                     // interpret as source code and output result
                     var module = Module.RawFrom(
-                        new FileInfo(Compiler.GetTempSourceFilePath()).Directory!
+                        new FileInfo(Compiler.GetTempSourceFilePath())
+                            .Directory!
                     );
                     module.Bind(Unit.FromLines(codeLines));
                     var result = Compiler.Process(
                         module,
                         new ProcessingOptions("CSharp")
                     );
-                    if (module.HasErrors || !(result is CodeWriter codeWriter)) {
+                    if (module.HasErrors
+                     || !(result is CodeWriter codeWriter)) {
                         break;
                     }
 
@@ -303,7 +318,9 @@ namespace Axion {
                         ExecuteCSharp(codeWriter.ToString());
                     }
                     catch (CompilationErrorException e) {
-                        logger.Error(string.Join(Environment.NewLine, e.Diagnostics));
+                        logger.Error(
+                            string.Join(Environment.NewLine, e.Diagnostics)
+                        );
                     }
 
                     break;
@@ -325,7 +342,7 @@ namespace Axion {
 
             Module module;
             if (args.Files.Any()) {
-                int filesCount = args.Files.Count();
+                var filesCount = args.Files.Count();
                 if (filesCount > 1) {
                     logger.Error(
                         "Compiler doesn't support multiple files processing yet."
@@ -336,7 +353,10 @@ namespace Axion {
                 var inputFiles = new FileInfo[filesCount];
                 for (var i = 0; i < filesCount; i++) {
                     inputFiles[i] = new FileInfo(
-                        Utilities.TrimMatchingChars(args.Files.ElementAt(i), '"')
+                        Utilities.TrimMatchingChars(
+                            args.Files.ElementAt(i),
+                            '"'
+                        )
                     );
                 }
 
@@ -355,8 +375,11 @@ namespace Axion {
                 module = proj.MainModule;
             }
             else if (!string.IsNullOrWhiteSpace(args.Code)) {
-                var tempDir = new FileInfo(Compiler.GetTempSourceFilePath()).Directory!;
-                var unit    = Unit.FromCode(Utilities.TrimMatchingChars(args.Code, '"'));
+                var tempDir =
+                    new FileInfo(Compiler.GetTempSourceFilePath()).Directory!;
+                var unit = Unit.FromCode(
+                    Utilities.TrimMatchingChars(args.Code, '"')
+                );
                 module = Module.RawFrom(tempDir);
                 module.Bind(unit);
             }
@@ -369,7 +392,7 @@ namespace Axion {
 
             Compiler.Process(module, pOptions);
 
-            foreach (LangException e in module.Blames) {
+            foreach (var e in module.Blames) {
                 PrintError(e);
             }
         }
@@ -386,16 +409,20 @@ namespace Axion {
             );
 
             // Location of the .NET assemblies
-            string assemblyPath =
+            var assemblyPath =
                 Path.GetDirectoryName(typeof(object).Assembly.Location)!;
 
             // Adding some necessary .NET assemblies
             // These assemblies couldn't be loaded correctly via the same construction as above.
             refs.Add(
-                MetadataReference.CreateFromFile(Path.Join(assemblyPath, "mscorlib.dll"))
+                MetadataReference.CreateFromFile(
+                    Path.Join(assemblyPath, "mscorlib.dll")
+                )
             );
             refs.Add(
-                MetadataReference.CreateFromFile(Path.Join(assemblyPath, "System.dll"))
+                MetadataReference.CreateFromFile(
+                    Path.Join(assemblyPath, "System.dll")
+                )
             );
             refs.Add(
                 MetadataReference.CreateFromFile(
@@ -407,63 +434,63 @@ namespace Axion {
                     Path.Join(assemblyPath, "System.Runtime.dll")
                 )
             );
-            refs.Add(MetadataReference.CreateFromFile(typeof(Console).Assembly.Location));
+            refs.Add(
+                MetadataReference.CreateFromFile(
+                    typeof(Console).Assembly.Location
+                )
+            );
             refs.Add(
                 MetadataReference.CreateFromFile(
                     Path.Join(assemblyPath, "System.Private.CoreLib.dll")
                 )
             );
 
-            string     assemblyName = Path.GetRandomFileName();
-            SyntaxTree syntaxTree   = CSharpSyntaxTree.ParseText(csCode);
+            var assemblyName = Path.GetRandomFileName();
+            var syntaxTree   = CSharpSyntaxTree.ParseText(csCode);
 
             var compilation = CSharpCompilation.Create(
                 assemblyName,
-                new[] {
-                    syntaxTree
-                },
+                new[] { syntaxTree },
                 refs,
-                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                new CSharpCompilationOptions(
+                    OutputKind.DynamicallyLinkedLibrary
+                )
             );
 
-            using var  ms     = new MemoryStream();
-            EmitResult result = compilation.Emit(ms);
+            using var ms     = new MemoryStream();
+            var       result = compilation.Emit(ms);
 
             if (result.Success) {
                 ms.Seek(0, SeekOrigin.Begin);
-                Assembly assembly = Assembly.Load(ms.ToArray());
+                var assembly = Assembly.Load(ms.ToArray());
 
                 var type = assembly.GetType("__RootModule__.__RootClass__");
                 var main = type!.GetMethod("Main");
 
                 // Let's assume that compiler anyway 'd create Main method for us :)
-                main!.Invoke(
-                    null,
-                    new object[] {
-                        new string[0]
-                    }
-                );
+                main!.Invoke(null, new object[] { new string[0] });
             }
             else {
-                IEnumerable<Diagnostic> failures = result.Diagnostics.Where(
+                var failures = result.Diagnostics.Where(
                     diagnostic => diagnostic.IsWarningAsError
-                               || diagnostic.Severity == DiagnosticSeverity.Error
+                               || diagnostic.Severity
+                               == DiagnosticSeverity.Error
                 );
 
-                foreach (Diagnostic diagnostic in failures) {
+                foreach (var diagnostic in failures) {
                     logger.Error($"{diagnostic.Id}: {diagnostic.GetMessage()}");
                 }
             }
         }
 
         private static INodeConverter LoadConverter(Assembly assembly) {
-            foreach (Type type in assembly.GetTypes()) {
+            foreach (var type in assembly.GetTypes()) {
                 if (typeof(INodeConverter).IsAssignableFrom(type)
                  && Activator.CreateInstance(type) is INodeConverter ncv)
                     return ncv;
             }
 
-            string availableTypes = string.Join(
+            var availableTypes = string.Join(
                 ", ",
                 assembly.GetTypes().Select(t => t.FullName)
             );
@@ -484,11 +511,14 @@ namespace Axion {
 
         protected override Assembly? Load(AssemblyName assemblyName) {
             var assemblyPath = resolver.ResolveAssemblyToPath(assemblyName);
-            return assemblyPath != null ? LoadFromAssemblyPath(assemblyPath) : null;
+            return assemblyPath != null
+                ? LoadFromAssemblyPath(assemblyPath)
+                : null;
         }
 
         protected override IntPtr LoadUnmanagedDll(string unmanagedDllName) {
-            var libraryPath = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+            var libraryPath =
+                resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
             return libraryPath != null
                 ? LoadUnmanagedDllFromPath(libraryPath)
                 : IntPtr.Zero;

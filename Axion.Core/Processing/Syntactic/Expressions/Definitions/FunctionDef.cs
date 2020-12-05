@@ -46,7 +46,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         public override TypeName? ValueType {
             get {
                 try {
-                    List<(ReturnExpr item, ScopeExpr, int)> returns =
+                    var returns =
                         Scope.FindItemsOfType<ReturnExpr>();
                     // TODO: handle all possible returns (type unions)
                     if (returns.Count > 0) {

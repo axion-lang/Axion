@@ -33,7 +33,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string debuggerDisplay {
             get {
-                var cw = new CodeWriter(Compiler.converters["axion"]);
+                var cw = CodeWriter.Default;
                 cw.Write(this);
                 return cw.ToString();
             }

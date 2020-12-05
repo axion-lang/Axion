@@ -90,9 +90,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
             // TODO: add generic classes
             if (Stream.MaybeEat(LeftArrow)) {
-                List<(TypeName type, NameExpr? label)> types =
+                var types =
                     TypeName.ParseNamedTypeArgs(this);
-                foreach ((TypeName type, NameExpr? typeLabel) in types) {
+                foreach (var (type, typeLabel) in types) {
                     if (typeLabel == null) {
                         Bases += type;
                     }

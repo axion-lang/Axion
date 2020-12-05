@@ -1,4 +1,5 @@
-﻿using Axion.Core.Processing.Syntactic.Expressions.Common;
+﻿using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
@@ -11,6 +12,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class IfExpr : Expr {
+        private Token? branchKw;
+
+        public Token? BranchKw {
+            get => branchKw;
+            set => branchKw = BindNullable(value);
+        }
+
         private Expr? condition;
 
         public Expr? Condition {
@@ -35,27 +43,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         internal IfExpr(Node parent) : base(parent) { }
 
         public IfExpr Parse(bool elseIf = false) {
-            SetSpan(
-                () => {
-                    if (!elseIf) {
-                        Stream.Eat(KeywordIf);
-                    }
+            if (!elseIf) {
+                BranchKw = Stream.Eat(KeywordIf);
+            }
 
-                    Condition = InfixExpr.Parse(this);
-                    ThenScope = new ScopeExpr(this).Parse();
+            Condition = InfixExpr.Parse(this);
+            ThenScope = new ScopeExpr(this).Parse();
 
-                    if (Stream.MaybeEat(KeywordElse)) {
-                        ElseScope = new ScopeExpr(this).Parse();
+            if (Stream.MaybeEat(KeywordElse)) {
+                ElseScope = new ScopeExpr(this).Parse();
+            }
+            else if (Stream.MaybeEat(KeywordElif)) {
+                ElseScope = new ScopeExpr(this) {
+                    Items = new NodeList<Expr>(this) {
+                        new IfExpr(this) {
+                            BranchKw = Stream.Token
+                        }.Parse(true)
                     }
-                    else if (Stream.MaybeEat(KeywordElif)) {
-                        ElseScope = new ScopeExpr(this) {
-                            Items = new NodeList<Expr>(this) {
-                                new IfExpr(this).Parse(true)
-                            }
-                        };
-                    }
-                }
-            );
+                };
+            }
+
             return this;
         }
     }

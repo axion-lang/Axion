@@ -16,8 +16,9 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestDashIdentifier() {
-            const string id   = "ident-ifier-";
-            Unit         unit = TestUtils.UnitFromCode(id);
+            const string id = "ident-ifier-";
+
+            var unit = TestUtils.UnitFromCode(id);
             Lex(unit);
             // id, minus, EOC
             Assert.AreEqual(3, unit.TokenStream.Count);
@@ -27,7 +28,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestMismatchingClosingBracket() {
-            Unit unit = TestUtils.UnitFromCode("}");
+            var unit = TestUtils.UnitFromCode("}");
             Lex(unit);
             // mismatching bracket
             Assert.AreEqual(1, unit.Blames.Count);

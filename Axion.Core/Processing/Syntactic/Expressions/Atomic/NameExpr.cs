@@ -29,9 +29,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public NameExpr(Node parent, string name) : base(parent) {
             if (name.Contains('.')) {
-                string[] qs = name.Split('.');
+                var qs = name.Split('.');
                 for (var i = 0; i < qs.Length; i++) {
-                    string q = qs[i];
+                    var q = qs[i];
                     Tokens += new Token(Unit, Identifier, q);
                     if (i != qs.Length - 1) {
                         Tokens += new Token(Unit, OpDot, ".");

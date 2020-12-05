@@ -42,7 +42,9 @@ namespace Axion.Testing.NUnit {
 
         [Test]
         public void TestEmptyProject() {
-            var proj = new Project(Path.Join(testProjectsPath, "Empty", "project.toml"));
+            var proj = new Project(
+                Path.Join(testProjectsPath, "Empty", "project.toml")
+            );
             Assert.AreEqual(1, proj.ImportedMacros.Count);
             Assert.AreEqual("./macros.ax", proj.ImportedMacros[0]);
         }
@@ -55,7 +57,7 @@ namespace Axion.Testing.NUnit {
             Assert.AreEqual(1, proj.MainModule.Submodules.Count);
             var stdlibModule = proj.MainModule.Submodules["stdlib"];
             Assert.AreEqual(1, stdlibModule.Units.Count);
-            Unit stdMacrosUnit = stdlibModule.Units["macros"];
+            var stdMacrosUnit = stdlibModule.Units["macros"];
 
             Compiler.Process(proj, new ProcessingOptions(Mode.Parsing));
 

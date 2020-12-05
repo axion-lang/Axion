@@ -42,7 +42,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// </summary>
     public static class AnyExpr {
         internal static Expr Parse(Node parent) {
-            TokenStream s = parent.Unit.TokenStream;
+            var s = parent.Unit.TokenStream;
 
             if (s.PeekIs(KeywordClass)) {
                 return new ClassDef(parent).Parse();
@@ -96,8 +96,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 return new ScopeExpr(parent).Parse();
             }
 
-            var       immutableKw = s.MaybeEat(KeywordLet) ? s.Token : null;
-            InfixExpr infix       = InfixExpr.Parse(parent);
+            var immutableKw = s.MaybeEat(KeywordLet) ? s.Token : null;
+            var infix       = InfixExpr.Parse(parent);
 
             if (infix is BinaryExpr bin
              && (bin.Operator?.Is(OpAssign) ?? false)) {

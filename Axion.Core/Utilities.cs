@@ -40,8 +40,8 @@ namespace Axion.Core {
 
         public static int? ParseInt(string value, int radix) {
             var result = 0;
-            foreach (char c in value) {
-                int? oneChar = HexValue(c);
+            foreach (var c in value) {
+                var oneChar = HexValue(c);
                 if (oneChar != null && oneChar < radix) {
                     result = result * radix + (int) oneChar;
                 }
@@ -55,7 +55,7 @@ namespace Axion.Core {
 
         public static int? HexValue(char from) {
             if (char.IsDigit(from)) {
-                int.TryParse(from.ToString(), out int x);
+                int.TryParse(from.ToString(), out var x);
                 return x;
             }
 

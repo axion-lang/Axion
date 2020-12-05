@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -16,12 +15,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         internal TypeName(Node parent) : base(parent) { }
 
         internal static TypeName Parse(Node parent) {
-            TokenStream s = parent.Unit.TokenStream;
+            var s = parent.Unit.TokenStream;
             // leading
             TypeName leftTypeName;
             // tuple
             if (s.PeekIs(OpenParenthesis)) {
-                TupleTypeName tuple = new TupleTypeName(parent).Parse();
+                var tuple = new TupleTypeName(parent).Parse();
                 leftTypeName = tuple.Types.Count == 1 ? tuple.Types[0]! : tuple;
             }
             // simple
@@ -74,15 +73,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         /// </summary>
         internal static List<(TypeName type, NameExpr? label)>
             ParseNamedTypeArgs(Node parent) {
-            TokenStream s        = parent.Unit.TokenStream;
-            var         typeArgs = new List<(TypeName, NameExpr?)>();
-            Token       start    = s.Peek;
+            var s        = parent.Unit.TokenStream;
+            var typeArgs = new List<(TypeName, NameExpr?)>();
+            var start    = s.Peek;
 
             do {
                 NameExpr? name     = null;
-                int       startIdx = s.TokenIdx;
+                var       startIdx = s.TokenIdx;
                 if (s.PeekIs(Identifier)) {
-                    NameExpr typeLabel = new NameExpr(parent).Parse();
+                    var typeLabel = new NameExpr(parent).Parse();
                     if (s.MaybeEat(OpAssign)) {
                         name = typeLabel;
                     }

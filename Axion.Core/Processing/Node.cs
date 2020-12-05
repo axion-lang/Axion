@@ -28,7 +28,7 @@ namespace Axion.Core.Processing {
                     return ast;
                 }
 
-                Node p = this;
+                var p = this;
                 while (!(p is Ast)) {
                     p = p.Parent;
                 }
@@ -73,26 +73,20 @@ namespace Axion.Core.Processing {
         ///     (<code>null</code> if parent of given type is not exists).
         /// </summary>
         internal T? GetParent<T>() where T : Node {
-            Node p = this;
+            var p = this;
             while (true) {
                 p = p.Parent;
-                if (p is T node) {
-                    return node;
-                }
-
-                if (p is Ast) {
-                    return null;
+                switch (p) {
+                case T node: return node;
+                case Ast _:  return null;
                 }
             }
         }
 
         protected NodeList<T> InitIfNull<T>(ref NodeList<T>? list)
             where T : Node {
-            if (list == null) {
-                list = new NodeList<T>(this);
-            }
-
-            list = Bind(list);
+            list ??= new NodeList<T>(this);
+            list =   Bind(list);
             return list;
         }
 
@@ -126,11 +120,7 @@ namespace Axion.Core.Processing {
             T?                        value,
             [CallerMemberName] string propertyName = ""
         ) where T : Node {
-            if (value == null) {
-                return value;
-            }
-
-            return BindNode(value, propertyName);
+            return value == null ? value : BindNode(value, propertyName);
         }
 
         /// <summary>

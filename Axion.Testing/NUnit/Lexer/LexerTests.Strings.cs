@@ -1,12 +1,11 @@
 using System;
-using Axion.Core.Hierarchy;
 using NUnit.Framework;
 
 namespace Axion.Testing.NUnit.Lexer {
     public partial class LexerTests {
         [Test]
         public void TestRegularStrings() {
-            Unit src = TestUtils.UnitFromCode(
+            var src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1 = \"regular literal\"",
@@ -19,7 +18,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestFormattedStrings() {
-            Unit src = TestUtils.UnitFromCode(
+            var src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1f = f\"{str1} formatted literal {str2}\"",
@@ -32,7 +31,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestMultilineStrings() {
-            Unit src = TestUtils.UnitFromCode(
+            var src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1m = \"\"\"multiline literal\"\"\"",
@@ -54,7 +53,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestFormattedMultilineStrings() {
-            Unit src = TestUtils.UnitFromCode(
+            var src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1fm = f\"\"\"{str1} formatted multiline literal {str2}\"\"\"",
@@ -76,7 +75,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestEmptyStrings() {
-            Unit src = TestUtils.UnitFromCode(
+            var src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1e = \"\"",
@@ -104,14 +103,14 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestFailStringInvalidEscape() {
-            Unit src = TestUtils.UnitFromCode("'invalid -> \\m <- escape!'");
+            var src = TestUtils.UnitFromCode("'invalid -> \\m <- escape!'");
             Lex(src);
             Assert.AreEqual(1, src.Blames.Count);
         }
 
         [Test]
         public void TestFailStringTruncatedUEscape() {
-            Unit src = TestUtils.UnitFromCode(
+            var src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "'invalid -> \\U5 <- escape!'",
@@ -124,7 +123,7 @@ namespace Axion.Testing.NUnit.Lexer {
 
         [Test]
         public void TestStringEscSequences() {
-            Unit src = TestUtils.UnitFromCode(
+            var src = TestUtils.UnitFromCode(
                 string.Join(
                     Environment.NewLine,
                     "str1e = \"esc: \\r\\n\\f\\t\\v\"",

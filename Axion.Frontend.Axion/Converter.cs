@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
@@ -121,11 +121,7 @@ namespace Axion.Frontend.Axion {
                 break;
             }
             case BinaryExpr e: {
-                w.Write(
-                    e.Left,
-                    e.Operator!.Value,
-                    e.Right
-                );
+                w.Write(e.Left, e.Operator!.Value, e.Right);
                 break;
             }
             case TernaryExpr e: {
@@ -137,15 +133,9 @@ namespace Axion.Frontend.Axion {
             }
             case UnaryExpr e: {
                 if (e.Operator.Side == InputSide.Right)
-                    w.Write(
-                        e.Operator.Value,
-                        e.Value
-                    );
+                    w.Write(e.Operator.Value, e.Value);
                 else
-                    w.Write(
-                        e.Value,
-                        e.Operator.Value
-                    );
+                    w.Write(e.Value, e.Operator.Value);
 
                 break;
             }
@@ -284,9 +274,16 @@ namespace Axion.Frontend.Axion {
                 break;
             }
             case IfExpr e: {
-                w.Write("if ", e.Condition, e.ThenScope);
-                if (e.ElseScope != null)
-                    w.Write("else", e.ElseScope);
+                w.Write(e.BranchKw, e.Condition, e.ThenScope);
+                if (e.ElseScope != null) {
+                    if (e.ElseScope.Items.Count == 1
+                     && e.ElseScope.Items[0] is IfExpr elif) {
+                        w.Write(elif);
+                    }
+                    else {
+                        w.Write("else", e.ElseScope);
+                    }
+                }
 
                 break;
             }
@@ -299,7 +296,7 @@ namespace Axion.Frontend.Axion {
                 break;
             }
             case ScopeExpr e: {
-                bool inAnonFn = e.Parent is FunctionDef fn && fn.Name == null;
+                var inAnonFn = e.Parent is FunctionDef fn && fn.Name == null;
                 if (inAnonFn) {
                     w.WriteLine(" {");
                 }

@@ -46,7 +46,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
 
         private void BindImports(ScopeExpr scope, string namePrefix) {
             for (var i = 0; i < scope.Items.Count; i++) {
-                Expr e = scope.Items[i];
+                var e = scope.Items[i];
                 if (e is NameExpr importName) {
                     var fullName = importName.ToString();
                     if (fullName == Ast.Unit.Module.FullName) {
