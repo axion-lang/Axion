@@ -22,13 +22,16 @@
 
 <h3 align="center">:open_file_folder: Distribution</h3>
 
-| Directory                                               | Contents                                                                      | Platform         |
-|---------------------------------------------------------|-------------------------------------------------------------------------------|------------------|
-| [`Axion`](Axion)                                        | Interface for compiler: CLI, ScriptBench editor, interpreter (C# code runner) | .NET             |
-| [`Axion.Core`](Axion.Core)                              | Language core: lexer/parser/transpiler                                        | .NET Standard    |
-| [`Axion.Testing`](Axion.Testing)                        | NUnit-based unit tests for the toolset                                        | .NET             |
-| [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable)               | .NET             |
-| [`misc`](misc)                                          | Code examples, arts, etc.                                                     |                  |
+| Directory                                               | Contents                                                                | Platform         |
+|---------------------------------------------------------|-------------------------------------------------------------------------|------------------|
+| [`Axion`](Axion)                                        | User interface for compiler: CLI, ScriptBench editor, interpreter       | .NET             |
+| [`Axion.Core`](Axion.Core)                              | Language core, lexer, parser, frontend interface, compiler API          | .NET Standard    |
+| [`Axion.Frontend.Axion`](Axion.Frontend.Axion)          | Extension to translate Axion syntax tree back into Axion source code    | .NET Standard    |
+| [`Axion.Frontend.CSharp`](Axion.Frontend.CSharp)        | Extension to translate Axion AST into C# source code                    | .NET Standard    |
+| [`Axion.Frontend.Python`](Axion.Frontend.Python)        | Extension to translate Axion AST into Python source code                | .NET Standard    |
+| [`Axion.Testing`](Axion.Testing)                        | NUnit-based unit tests for the toolset                                  | .NET             |
+| [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable)         | .NET             |
+| [`misc`](misc)                                          | Code examples, arts, etc.                                               |                  |
 
 <h3 align="center">:dart: Key features</h3>
 
