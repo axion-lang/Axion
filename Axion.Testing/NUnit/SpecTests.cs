@@ -1,8 +1,10 @@
 using System;
 using System.IO;
 using System.Linq;
+using Axion.Core;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
+using Axion.Frontend.Axion;
 using NLog;
 using NUnit.Framework;
 
@@ -27,6 +29,8 @@ namespace Axion.Testing.NUnit {
             else {
                 Directory.CreateDirectory(dbg);
             }
+            
+            Compiler.AddConverter("axion", new Converter());
         }
 
         /// <summary>
