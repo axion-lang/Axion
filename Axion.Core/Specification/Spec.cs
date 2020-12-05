@@ -58,20 +58,20 @@ namespace Axion.Core.Specification {
         
         // @formatter:on
 
-        public static bool IsIdStart(this char c) {
+        public static bool IsValidIdStart(this char c) {
             return char.IsLetter(c) || c == '_';
         }
 
-        public static bool IsIdNonEnd(this char c) {
+        public static bool IsValidIdNonEnd(this char c) {
             return c == '-';
         }
 
-        public static bool IsIdAfterNonEnd(this char c) {
-            return c.IsIdStart() || char.IsDigit(c);
+        public static bool IsValidIdEnd(this char c) {
+            return c.IsValidIdStart() || char.IsDigit(c);
         }
 
-        public static bool IsIdPart(this char c) {
-            return c.IsIdAfterNonEnd() || c.IsIdNonEnd();
+        public static bool IsValidIdPart(this char c) {
+            return c.IsValidIdEnd() || c.IsValidIdNonEnd();
         }
 
         // @formatter:off

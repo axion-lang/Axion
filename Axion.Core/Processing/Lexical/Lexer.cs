@@ -229,9 +229,9 @@ namespace Axion.Core.Processing.Lexical {
         private Token ReadId() {
             do {
                 AddNext();
-            } while (stream.Peek().IsIdPart()
-                  && (!stream.Peek().IsIdNonEnd()
-                   || stream.Peek(2)[1].IsIdAfterNonEnd()));
+            } while (stream.Peek().IsValidIdPart()
+                  && (!stream.Peek().IsValidIdNonEnd()
+                   || stream.Peek(2)[1].IsValidIdEnd()));
 
             if (stream.PeekIs(StringQuotes)) {
                 return ReadString();
