@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions;
@@ -18,7 +18,7 @@ namespace Axion.Frontend.Axion {
             switch (node) {
             case Token e: {
                 // NOTE: all saved token.Value's are valid Axion code.
-                w.Write(e.Value);
+                w.Write(e.Value, e.EndingWhite);
                 break;
             }
             case AwaitExpr e: {
@@ -34,7 +34,7 @@ namespace Axion.Frontend.Axion {
                 break;
             }
             case NameExpr e: {
-                w.Write(string.Join("", e.Tokens.Select(t => t.Content)));
+                w.Write(string.Join("", e.Tokens.Select(t => t.Value)));
                 break;
             }
             case YieldExpr e: {
