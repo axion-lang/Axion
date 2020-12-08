@@ -49,7 +49,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
             // trailing
             // union
-            if (s.PeekIs(OpBitOr)) {
+            if (s.PeekIs(Pipe)) {
                 leftTypeName = new UnionTypeName(parent) {
                     Left = leftTypeName
                 }.Parse();
@@ -82,7 +82,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                 var       startIdx = s.TokenIdx;
                 if (s.PeekIs(Identifier)) {
                     var typeLabel = new NameExpr(parent).Parse();
-                    if (s.MaybeEat(OpAssign)) {
+                    if (s.MaybeEat(EqualsSign)) {
                         name = typeLabel;
                     }
                     else {

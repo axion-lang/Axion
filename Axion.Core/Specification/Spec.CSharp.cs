@@ -59,8 +59,8 @@ namespace Axion.Core.Specification {
             }.ToImmutableDictionary();
 
             public static readonly ImmutableDictionary<TokenType, string> BinaryOperators = new Dictionary<TokenType, string> {
-                { OpAnd,                "&&" },
-                { OpOr,                 "||" }
+                { And,                "&&" },
+                { Or,                 "||" }
             }.ToImmutableDictionary();
             
             // @formatter:on

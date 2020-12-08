@@ -105,20 +105,20 @@ namespace Axion.Core.Processing.Traversal {
                 break;
             }
 
-            case BinaryExpr bin when bin.Operator.Is(TokenType.OpIs)
+            case BinaryExpr bin when bin.Operator.Is(TokenType.Is)
                                   && bin.Right is UnaryExpr un
-                                  && un.Operator.Is(TokenType.OpNot): {
+                                  && un.Operator.Is(TokenType.Not): {
                 // `x is (not (y))` -> `not (x is y)`
                 path.Node = new UnaryExpr(path.Node.Parent) {
                     Operator = new OperatorToken(
                         path.Node.Unit,
-                        tokenType: TokenType.OpNot
+                        tokenType: TokenType.Not
                     ),
                     Value = new BinaryExpr(path.Node) {
                         Left = bin.Left,
                         Operator = new OperatorToken(
                             path.Node.Unit,
-                            tokenType: TokenType.OpIs
+                            tokenType: TokenType.Is
                         ),
                         Right = un.Value
                     }
@@ -127,7 +127,8 @@ namespace Axion.Core.Processing.Traversal {
                 break;
             }
 
-            case BinaryExpr bin when bin.Operator.Is(TokenType.RightPipeline): {
+            case BinaryExpr bin
+                when bin.Operator.Is(TokenType.PipeRightAngle): {
                 // `arg |> func` -> `func(arg)`
                 path.Node = new FuncCallExpr(path.Node.Parent) {
                     Target = bin.Right,
@@ -141,7 +142,7 @@ namespace Axion.Core.Processing.Traversal {
                 break;
             }
 
-            case BinaryExpr bin when bin.Operator.Is(TokenType.OpAssign)
+            case BinaryExpr bin when bin.Operator.Is(TokenType.EqualsSign)
                                   && bin.Left is TupleExpr tpl: {
                 // (x, y) = GetCoordinates()
                 // <=======================>
@@ -220,7 +221,7 @@ namespace Axion.Core.Processing.Traversal {
                     Left = flagName,
                     Operator = new OperatorToken(
                         path.Node.Unit,
-                        tokenType: TokenType.OpAssign
+                        tokenType: TokenType.EqualsSign
                     ),
                     Right = ConstantExpr.True(path.Node)
                 };

@@ -29,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             SetSpan(
                 () => {
                     Target ??= AtomExpr.Parse(this);
-                    Stream.Eat(OpDot);
+                    Stream.Eat(Dot);
                     Member = AtomExpr.Parse(this);
                 }
             );

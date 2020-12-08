@@ -15,63 +15,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         None,
         Invalid,
 
-        #region GEN_operators
-
-        OpBitAnd,
-        OpBitNot,
-        OpBitOr,
-        OpBitXor,
-        OpBitLeftShift,
-        OpBitRightShift,
-        OpOf,
-        OpDot,
-        Op2Dot,
-        Op3Dot,
-        OpAnd,
-        OpOr,
-        KeywordAs,
-        OpIs,
-        OpIsNot,
-        OpNot,
-        OpIn,
-        OpNotIn,
-        OpEqualsEquals,
-        OpNotEquals,
-        OpGreater,
-        OpGreaterOrEqual,
-        OpLess,
-        OpLessOrEqual,
-        OpPlus,
-        OpMinus,
-        OpIncrement,
-        OpDecrement,
-        OpMultiply,
-        OpPower,
-        OpTrueDivide,
-        OpFloorDivide,
-        OpRemainder,
-        Op3WayCompare,
-        Op2Question,
-
-        // assignment marks
-        OpBitAndAssign,
-        OpBitOrAssign,
-        OpBitXorAssign,
-        OpBitLShiftAssign,
-        OpBitRShiftAssign,
-        OpPlusAssign,
-        OpMinusAssign,
-        OpMultiplyAssign,
-        OpRemainderAssign,
-        OpFloorDivideAssign,
-        OpTrueDivideAssign,
-        OpPowerAssign,
-        OpQuestionAssign,
-        OpAssign,
-
-        #endregion
-
-        #region GEN_keywords
+        #region
 
         KeywordAwait,
         KeywordBreak,
@@ -98,27 +42,77 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         #endregion
 
-        #region GEN_symbols
+        #region
 
-        Question,
-        LeftArrow,
-        RightArrow,
-        RightPipeline,
+        Ampersand,
+        And,
+        Caret,
+        Dot,
+        DoubleDot,
+        DoubleEquals,
+        DoubleLeftAngle,
+        DoubleMinus,
+        DoublePlus,
+        DoubleQuestion,
+        DoubleRightAngle,
+        DoubleSlash,
+        DoubleStar,
+        ExclamationEquals,
+        In,
+        Is,
+        LeftAngle,
+        LeftAngleEquals,
+        LeftRightArrow,
+        LeftRightFatArrow,
+        Minus,
+        Not,
+        Of,
+        Or,
+        Percent,
+        Pipe,
+        PipeRightAngle,
+        Plus,
+        RightAngle,
+        RightAngleEquals,
+        Slash,
+        Star,
+        Tilde,
+        TripleDot,
+
+        AmpersandEquals,
+        CaretEquals,
+        DoubleLeftAngleEquals,
+        DoubleRightAngleEquals,
+        DoubleSlashEquals,
+        DoubleStarEquals,
+        EqualsSign,
+        MinusEquals,
+        PercentEquals,
+        PipeEquals,
+        PlusEquals,
+        QuestionEquals,
+        SlashEquals,
+        StarEquals,
+
+
         At,
-        Comma,
-        Semicolon,
         Colon,
+        Comma,
         Dollar,
+        LeftArrow,
+        Question,
+        RightArrow,
+        Semicolon,
 
         // brackets
-        OpenBrace,
-        DoubleOpenBrace,
-        OpenBracket,
-        OpenParenthesis,
         CloseBrace,
-        DoubleCloseBrace,
         CloseBracket,
         CloseParenthesis,
+        DoubleCloseBrace,
+        DoubleOpenBrace,
+        OpenBrace,
+        OpenBracket,
+        OpenParenthesis,
 
         #endregion
 
@@ -151,21 +145,17 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
 
         internal static TokenType GetMatchingBracket(this TokenType type) {
-            switch (type) {
-            // open : close
-            case OpenParenthesis: return CloseParenthesis;
-            case OpenBracket:     return CloseBracket;
-            case OpenBrace:       return CloseBrace;
-            // close : open
-            case CloseParenthesis: return OpenParenthesis;
-            case CloseBracket:     return OpenBracket;
-            case CloseBrace:       return OpenBrace;
-            // should never be thrown
-            default:
-                throw new InvalidOperationException(
+            return type switch {
+                CloseBrace       => OpenBrace,
+                CloseBracket     => OpenBracket,
+                CloseParenthesis => OpenParenthesis,
+                OpenBrace        => CloseBrace,
+                OpenBracket      => CloseBracket,
+                OpenParenthesis  => CloseParenthesis,
+                _ => throw new InvalidOperationException(
                     "Internal error: Cannot return matching bracket for non-bracket token type."
-                );
-            }
+                )
+            };
         }
 
         internal static string GetValue(this TokenType type) {

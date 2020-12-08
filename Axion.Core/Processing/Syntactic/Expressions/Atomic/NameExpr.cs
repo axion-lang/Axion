@@ -34,7 +34,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
                     var q = qs[i];
                     Tokens += new Token(Unit, Identifier, q);
                     if (i != qs.Length - 1) {
-                        Tokens += new Token(Unit, OpDot, ".");
+                        Tokens += new Token(Unit, Dot, ".");
                     }
                 }
             }
@@ -49,7 +49,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
                 return this;
             }
 
-            while (Stream.PeekIs(OpDot)) {
+            while (Stream.PeekIs(Dot)) {
                 Tokens += Stream.Eat();
                 Tokens += Stream.Eat(Identifier);
             }

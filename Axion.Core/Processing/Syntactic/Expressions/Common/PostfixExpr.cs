@@ -30,7 +30,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
 
             while (true) {
                 var exactPeek = s.ExactPeek;
-                if (s.PeekIs(OpDot)) {
+                if (s.PeekIs(Dot)) {
                     value = new MemberAccessExpr(parent) {
                         Target = value
                     }.Parse();
@@ -59,7 +59,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 }
             }
 
-            if (s.MaybeEat(OpIncrement, OpDecrement)) {
+            if (s.MaybeEat(DoublePlus, DoubleMinus)) {
                 var op = (OperatorToken) s.Token;
                 op.Side = InputSide.Left;
                 value = new UnaryExpr(parent) {

@@ -30,7 +30,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
 
         public OrPattern Parse() {
             Left ??= new CascadePattern(this).Parse();
-            Stream.Eat(OpBitOr);
+            Stream.Eat(Pipe);
             Right = new CascadePattern(this).Parse();
             return this;
         }

@@ -54,9 +54,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 FuncCallArg arg;
                 // named arg
                 if (s.PeekIs(TokenType.Identifier)
-                 && s.PeekByIs(2, TokenType.OpAssign)) {
+                 && s.PeekByIs(2, TokenType.EqualsSign)) {
                     var argName = (NameExpr) AtomExpr.Parse(parent);
-                    s.Eat(TokenType.OpAssign);
+                    s.Eat(TokenType.EqualsSign);
                     var argValue = InfixExpr.Parse(parent);
                     arg = new FuncCallArg(parent) {
                         Name  = argName,
@@ -84,7 +84,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     }
                     else {
                         // TODO: star args
-                        s.MaybeEat(TokenType.OpMultiply);
+                        s.MaybeEat(TokenType.Star);
                         arg = new FuncCallArg(parent) {
                             Value = argValue
                         };

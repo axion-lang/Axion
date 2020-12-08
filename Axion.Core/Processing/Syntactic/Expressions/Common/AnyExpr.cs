@@ -100,7 +100,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             var infix       = InfixExpr.Parse(parent);
 
             if (infix is BinaryExpr bin
-             && (bin.Operator?.Is(OpAssign) ?? false)) {
+             && (bin.Operator?.Is(EqualsSign) ?? false)) {
                 // ['let'] name '=' expr
                 // --------------------^
                 if (bin.Left is NameExpr name
@@ -131,7 +131,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
 
             var   type  = TypeName.Parse(parent);
             Expr? value = null;
-            if (s.MaybeEat(OpAssign)) {
+            if (s.MaybeEat(EqualsSign)) {
                 // ['let'] name ':' type-name '=' infix-expr
                 // -------------------------------^
                 value = InfixExpr.Parse(parent);

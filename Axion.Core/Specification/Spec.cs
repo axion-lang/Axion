@@ -95,70 +95,72 @@ namespace Axion.Core.Specification {
             string,
             (TokenType Type, int Precedence, InputSide Side)
         > Operators = new Dictionary<string, (TokenType, int, InputSide)> {
-            { "of",      (OpOf,                 19,  Unknown) },
-            { ".",       (OpDot,                19,  Unknown) },
+            { "of",      (Of,                      19,  Unknown) },
+            { ".",       (Dot,                     19,  Unknown) },
 
-            { "++",      (OpIncrement,          18,  Unknown) },
-            { "--",      (OpDecrement,          18,  Unknown) },
+            { "++",      (DoublePlus,              18,  Unknown) },
+            { "--",      (DoubleMinus,             18,  Unknown) },
 
-            { "**",      (OpPower,              17,  Both) },
+            { "**",      (DoubleStar,              17,  Both) },
 
-            { "not",     (OpNot,                16,  Right) },
-            { "~",       (OpBitNot,             16,  Right) },
+            { "not",     (Not,                     16,  Right) },
+            { "~",       (Tilde,                   16,  Right) },
 
-            { "*",       (OpMultiply,           15,  Both) },
-            { "/",       (OpTrueDivide,         15,  Both) },
-            { "//",      (OpFloorDivide,        15,  Both) },
-            { "%",       (OpRemainder,          15,  Both) },
+            { "*",       (Star,                    15,  Both) },
+            { "/",       (Slash,                   15,  Both) },
+            { "//",      (DoubleSlash,             15,  Both) },
+            { "%",       (Percent,                 15,  Both) },
 
-            { "+",       (OpPlus,               14,  Unknown) },
-            { "-",       (OpMinus,              14,  Unknown) },
+            { "+",       (Plus,                    14,  Unknown) },
+            { "-",       (Minus,                   14,  Unknown) },
 
-            { "<<",      (OpBitLeftShift,       13,  Both) },
-            { ">>",      (OpBitRightShift,      13,  Both) },
+            { "<<",      (DoubleLeftAngle,         13,  Both) },
+            { ">>",      (DoubleRightAngle,        13,  Both) },
 
-            { "...",     (Op3Dot,               12,  Both) },
-            { "..",      (Op2Dot,               12,  Both) },
+            { "...",     (TripleDot,               12,  Both) },
+            { "..",      (DoubleDot,               12,  Both) },
 
-            { "<=>",     (Op3WayCompare,        11,  Both) },
+            { "<=>",     (LeftRightFatArrow,       11,  Both) },
 
-            { "<",       (OpLess,               10,  Both) },
-            { "<=",      (OpLessOrEqual,        10,  Both) },
-            { ">",       (OpGreater,            10,  Both) },
-            { ">=",      (OpGreaterOrEqual,     10,  Both) },
+            { "<",       (LeftAngle,               10,  Both) },
+            { "<=",      (LeftAngleEquals,         10,  Both) },
+            { ">",       (RightAngle,              10,  Both) },
+            { ">=",      (RightAngleEquals,        10,  Both) },
 
-            { "==",      (OpEqualsEquals,       9,   Both) },
-            { "!=",      (OpNotEquals,          9,   Both) },
+            { "==",      (DoubleEquals,            9,   Both) },
+            { "!=",      (ExclamationEquals,       9,   Both) },
 
-            { "&",       (OpBitAnd,             8,   Both) },
-            { "^",       (OpBitXor,             7,   Both) },
-            { "|",       (OpBitOr,              6,   Both) },
+            { "&",       (Ampersand,               8,   Both) },
+            { "^",       (Caret,                   7,   Both) },
+            { "|",       (Pipe,                    6,   Both) },
 
-            { "is",      (OpIs,                 5,   Both) },
-            { "in",      (OpIn,                 5,   Both) },
+            { "is",      (Is,                      5,   Both) },
+            { "in",      (In,                      5,   Both) },
 
-            { "|>",      (RightPipeline,        4,   Both) },
+            { "|>",      (PipeRightAngle,          4,   Both) },
 
-            { "and",     (OpAnd,                3,   Both) },
+            { "and",     (And,                     3,   Both) },
 
-            { "or",      (OpOr,                 2,   Both) },
+            { "or",      (Or,                      2,   Both) },
 
-            { "??",      (Op2Question,          1,   Both) },
+            { "??",      (DoubleQuestion,          1,   Both) },
 
-            { "=",       (OpAssign,             0,   Both) },
-            { "+=",      (OpPlusAssign,         0,   Both) },
-            { "-=",      (OpMinusAssign,        0,   Both) },
-            { "**=",     (OpPowerAssign,        0,   Both) },
-            { "*=",      (OpMultiplyAssign,     0,   Both) },
-            { "/=",      (OpFloorDivideAssign,  0,   Both) },
-            { "//=",     (OpTrueDivideAssign,   0,   Both) },
-            { "%=",      (OpRemainderAssign,    0,   Both) },
-            { "?=",      (OpQuestionAssign,     0,   Both) },
-            { "<<=",     (OpBitLShiftAssign,    0,   Both) },
-            { ">>=",     (OpBitRShiftAssign,    0,   Both) },
-            { "&=",      (OpBitAndAssign,       0,   Both) },
-            { "|=",      (OpBitOrAssign,        0,   Both) },
-            { "^=",      (OpBitXorAssign,       0,   Both) }
+            { "=",       (EqualsSign,              0,   Both) },
+            { "+=",      (PlusEquals,              0,   Both) },
+            { "-=",      (MinusEquals,             0,   Both) },
+            { "**=",     (DoubleStarEquals,        0,   Both) },
+            { "*=",      (StarEquals,              0,   Both) },
+            { "/=",      (SlashEquals,             0,   Both) },
+            { "//=",     (DoubleSlashEquals,       0,   Both) },
+            { "%=",      (PercentEquals,           0,   Both) },
+            { "?=",      (QuestionEquals,          0,   Both) },
+            { "<<=",     (DoubleLeftAngleEquals,   0,   Both) },
+            { ">>=",     (DoubleRightAngleEquals,  0,   Both) },
+            { "&=",      (AmpersandEquals,         0,   Both) },
+            { "|=",      (PipeEquals,              0,   Both) },
+            { "^=",      (CaretEquals,             0,   Both) },
+            
+            { "<->",     (LeftRightArrow,          -1,  Both) }
         };
 
         public static readonly string[] OperatorsKeys =
@@ -190,12 +192,12 @@ namespace Axion.Core.Specification {
         ///     Token types that are applicable on the left side of expression.
         /// </summary>
         public static readonly TokenType[] PrefixOperators = {
-            OpIncrement,
-            OpDecrement,
-            OpPlus,
-            OpMinus,
-            OpNot,
-            OpBitNot
+            DoublePlus,
+            DoubleMinus,
+            Plus,
+            Minus,
+            Not,
+            Tilde
         };
 
         /// <summary>
@@ -253,16 +255,16 @@ namespace Axion.Core.Specification {
             .Values.Where(op => op.Side == Both)
             .Select(op => op.Type)
             .Union(
-                Outdent,
-                Comma,
-                Question,
                 CloseBrace,
-                DoubleCloseBrace,
                 CloseBracket,
                 CloseParenthesis,
+                Comma,
+                DoubleCloseBrace,
                 KeywordElif,
                 KeywordElse,
                 LeftArrow,
+                Outdent,
+                Question,
                 RightArrow
             );
 

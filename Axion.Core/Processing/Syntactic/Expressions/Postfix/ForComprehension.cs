@@ -66,7 +66,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
                     Stream.Eat(KeywordFor);
                     Item = Multiple<AtomExpr>.Parse(this);
-                    Stream.Eat(OpIn);
+                    Stream.Eat(In);
                     Iterable = Multiple<InfixExpr>.Parse(this);
 
                     while (Stream.PeekIs(KeywordIf, KeywordUnless)) {
@@ -77,7 +77,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                             Conditions += new UnaryExpr(this) {
                                 Operator = new OperatorToken(
                                     Unit,
-                                    tokenType: OpNot
+                                    tokenType: Not
                                 ),
                                 Value = Parse(this)
                             };

@@ -40,7 +40,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
                     names.Add(Name.ToString());
 
-                    if (Stream.MaybeEat(OpAssign)) {
+                    if (Stream.MaybeEat(EqualsSign)) {
                         Value = InfixExpr.Parse(this);
                     }
                 }
@@ -72,13 +72,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             FunctionParameter? mapParameter  = null;
             var                needDefault   = false;
             while (!s.PeekIs(terminators)) {
-                if (s.MaybeEat(OpPower)) {
+                if (s.MaybeEat(DoubleStar)) {
                     mapParameter = new FunctionParameter(parent).Parse(names);
                     s.Eat(terminators);
                     break;
                 }
 
-                if (s.MaybeEat(OpMultiply)) {
+                if (s.MaybeEat(Star)) {
                     if (haveMultiply) {
                         LangException.Report(
                             BlameType.CannotHaveMoreThan1ListParameter,

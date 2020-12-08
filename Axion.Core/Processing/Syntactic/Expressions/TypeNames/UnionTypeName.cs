@@ -35,7 +35,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         public UnionTypeName Parse() {
             Left ??= Parse(this);
 
-            JoiningMark = Stream.Eat(OpBitOr);
+            JoiningMark = Stream.Eat(Pipe);
             Right       = Parse(this);
             return this;
         }

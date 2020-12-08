@@ -146,7 +146,7 @@ namespace Axion.Frontend.CSharp {
                 break;
             }
             case BinaryExpr e: {
-                if (e.Operator!.Is(OpPower)) {
+                if (e.Operator!.Is(DoubleStar)) {
                     w.Write(
                         "Math.Pow(",
                         e.Left,
@@ -155,11 +155,11 @@ namespace Axion.Frontend.CSharp {
                         ")"
                     );
                 }
-                else if (e.Operator.Is(OpIn)) {
+                else if (e.Operator.Is(In)) {
                     // in (list1 or|and list2)
                     if (e.Right is ParenthesizedExpr paren
                      && paren.Value is BinaryExpr collections
-                     && collections.Operator!.Is(OpAnd, OpOr)) {
+                     && collections.Operator!.Is(And, Or)) {
                         w.Write(
                             collections.Right,
                             ".Contains(",

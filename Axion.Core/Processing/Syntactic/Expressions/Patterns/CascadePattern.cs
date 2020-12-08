@@ -59,7 +59,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 }
 
                 // or pattern `x | y`
-                if (Stream.PeekIs(OpBitOr)) {
+                if (Stream.PeekIs(Pipe)) {
                     Patterns += new OrPattern(this) {
                         Left = pattern
                     }.Parse();
