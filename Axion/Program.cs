@@ -131,7 +131,7 @@ namespace Axion {
             }
 
             static int ListFrontends() {
-                Console.WriteLine(string.Join("\n", Compiler.Translators));
+                Console.WriteLine(string.Join("\n", Compiler.Translators.Keys));
                 return 0;
             }
 

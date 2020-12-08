@@ -24,7 +24,7 @@ namespace Axion.Core.Processing.Translation {
         }
 
         public static readonly CodeWriter Default =
-            new CodeWriter(Compiler.translators["axion"]);
+            new CodeWriter(Compiler.Translators["axion"]);
 
         public CodeWriter(INodeTranslator translator) {
             baseWriter      = new StringWriter();
@@ -38,7 +38,7 @@ namespace Axion.Core.Processing.Translation {
                 if (v is ITranslatableNode node) {
                     if (!translator.Translate(this, node)) {
                         // NOTE: Fallback converter
-                        Compiler.translators["axion"].Translate(this, node);
+                        Compiler.Translators["axion"].Translate(this, node);
                     }
                 }
                 else {
