@@ -36,7 +36,7 @@ Built with .NET Standard.</Description>
         <PackageReference Include="Nett" Version="0.15.0" />
         <PackageReference Include="Nett.Coma" Version="0.15.0" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-        <PackageReference Include="NLog" Version="4.7.5" />
+        <PackageReference Include="NLog" Version="4.7.6" />
         <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
     </ItemGroup>
 

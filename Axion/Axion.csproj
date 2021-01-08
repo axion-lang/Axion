@@ -11,15 +11,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Axion.Core\Axion.Core.csproj"/>
-        <ProjectReference Include="..\CodeConsole\CodeConsole\CodeConsole.csproj"/>
+        <ProjectReference Include="..\Axion.Core\Axion.Core.csproj" />
+        <ProjectReference Include="..\CodeConsole\CodeConsole\CodeConsole.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommandLineParser" Version="2.9.0-preview1"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.8.0"/>
-        <PackageReference Include="NLog" Version="4.7.5"/>
-        <PackageReference Include="System.CodeDom" Version="5.0.0"/>
+        <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0-2.final" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.9.0-2.final" />
+        <PackageReference Include="NLog" Version="4.7.6" />
+        <PackageReference Include="System.CodeDom" Version="5.0.0" />
     </ItemGroup>
 </Project>
