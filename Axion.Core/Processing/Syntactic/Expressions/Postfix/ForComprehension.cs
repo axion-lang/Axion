@@ -58,40 +58,36 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public ForComprehension(Node parent) : base(parent) { }
 
         public ForComprehension Parse() {
-            SetSpan(
-                () => {
-                    if (Target == null && !IsNested) {
-                        Target = Parse(this);
-                    }
+            if (Target == null && !IsNested) {
+                Target = Parse(this);
+            }
 
-                    Stream.Eat(KeywordFor);
-                    Item = Multiple<AtomExpr>.Parse(this);
-                    Stream.Eat(In);
-                    Iterable = Multiple<InfixExpr>.Parse(this);
+            Stream.Eat(KeywordFor);
+            Item = Multiple<AtomExpr>.Parse(this);
+            Stream.Eat(In);
+            Iterable = Multiple<InfixExpr>.Parse(this);
 
-                    while (Stream.PeekIs(KeywordIf, KeywordUnless)) {
-                        if (Stream.MaybeEat(KeywordIf)) {
-                            Conditions += Parse(this);
-                        }
-                        else if (Stream.MaybeEat(KeywordUnless)) {
-                            Conditions += new UnaryExpr(this) {
-                                Operator = new OperatorToken(
-                                    Unit,
-                                    tokenType: Not
-                                ),
-                                Value = Parse(this)
-                            };
-                        }
-                    }
-
-                    if (Stream.PeekIs(KeywordFor)) {
-                        Right = new ForComprehension(Parent!) {
-                            Target   = this,
-                            IsNested = true
-                        }.Parse();
-                    }
+            while (Stream.PeekIs(KeywordIf, KeywordUnless)) {
+                if (Stream.MaybeEat(KeywordIf)) {
+                    Conditions += Parse(this);
                 }
-            );
+                else if (Stream.MaybeEat(KeywordUnless)) {
+                    Conditions += new UnaryExpr(this) {
+                        Operator = new OperatorToken(
+                            Unit,
+                            tokenType: Not
+                        ),
+                        Value = Parse(this)
+                    };
+                }
+            }
+
+            if (Stream.PeekIs(KeywordFor)) {
+                Right = new ForComprehension(Parent!) {
+                    Target   = this,
+                    IsNested = true
+                }.Parse();
+            }
             return this;
         }
     }

@@ -27,17 +27,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         internal new void Parse() {
-            SetSpan(
-                () => {
-                    while (!Stream.MaybeEat(TokenType.End)) {
-                        var item = AnyExpr.Parse(this);
-                        Items += item;
-                        if (item is IDefinitionExpr def) {
-                            Unit.Module.AddDefinition(def);
-                        }
-                    }
+            Start = Stream[0].Start;
+            End   = Stream[^1].End;
+
+            while (!Stream.MaybeEat(TokenType.End)) {
+                var item = AnyExpr.Parse(this);
+                Items += item;
+                if (item is IDefinitionExpr def) {
+                    Unit.Module.AddDefinition(def);
                 }
-            );
+            }
         }
 
         public override IDefinitionExpr? GetDefByName(string name) {

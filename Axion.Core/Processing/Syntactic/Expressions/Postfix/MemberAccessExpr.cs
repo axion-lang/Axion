@@ -26,13 +26,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public MemberAccessExpr(Node parent) : base(parent) { }
 
         public MemberAccessExpr Parse() {
-            SetSpan(
-                () => {
-                    Target ??= AtomExpr.Parse(this);
-                    Stream.Eat(Dot);
-                    Member = AtomExpr.Parse(this);
-                }
-            );
+            Target ??= AtomExpr.Parse(this);
+            Stream.Eat(Dot);
+            Member = AtomExpr.Parse(this);
             return this;
         }
 

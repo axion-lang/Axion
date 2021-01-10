@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Patterns;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
@@ -11,6 +12,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public class MacroDef : Expr, IDefinitionExpr {
+        private Token? kwMacro;
+
+        public Token? KwMacro {
+            get => kwMacro;
+            set => kwMacro = BindNullable(value);
+        }
+
         private NameExpr? name;
 
         public NameExpr? Name {
@@ -38,40 +46,36 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         internal MacroDef(Node parent) : base(parent) { }
 
         public MacroDef Parse() {
-            SetSpan(
-                () => {
-                    // TODO: find code, that can be replaced with macro by patterns
-                    // Example:
-                    // ========
-                    // macro post-condition-loop (
-                    //     'do',
-                    //     scope: Scope,
-                    //     ('while' | 'until'),
-                    //     condition: Infix
-                    // )
-                    //     if syntax[2] == 'while'
-                    //         condition = {{ not $condition }}
-                    // 
-                    //     return {{
-                    //         while true {
-                    //             $scope
-                    //             if $condition {
-                    //                 break
-                    //             }
-                    //         }
-                    //     }}
-                    Stream.Eat(KeywordMacro);
-                    Name   = new NameExpr(this).Parse(true);
-                    Syntax = new CascadePattern(this);
-                    // EBNF-based syntax definition
-                    if (Stream.MaybeEat(OpenParenthesis)) {
-                        Syntax.Parse();
-                        Stream.Eat(CloseParenthesis);
-                    }
+            // TODO: find code, that can be replaced with macro by patterns
+            // Example:
+            // ========
+            // macro post-condition-loop (
+            //     'do',
+            //     scope: Scope,
+            //     ('while' | 'until'),
+            //     condition: Infix
+            // )
+            //     if syntax[2] == 'while'
+            //         condition = {{ not $condition }}
+            // 
+            //     return {{
+            //         while true {
+            //             $scope
+            //             if $condition {
+            //                 break
+            //             }
+            //         }
+            //     }}
+            KwMacro = Stream.Eat(KeywordMacro);
+            Name    = new NameExpr(this).Parse(true);
+            Syntax  = new CascadePattern(this);
+            // EBNF-based syntax definition
+            if (Stream.MaybeEat(OpenParenthesis)) {
+                Syntax.Parse();
+                Stream.Eat(CloseParenthesis);
+            }
 
-                    Scope = new ScopeExpr(this).Parse();
-                }
-            );
+            Scope = new ScopeExpr(this).Parse();
             return this;
         }
     }

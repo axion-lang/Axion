@@ -18,33 +18,29 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         public FunctionParameter(Node parent) : base(parent) { }
 
         public FunctionParameter Parse(HashSet<string> names) {
-            SetSpan(
-                () => {
-                    Name = new NameExpr(this).Parse();
-                    if (Stream.MaybeEat(Colon)) {
-                        ValueType = TypeName.Parse(this);
-                    }
-                    else {
-                        LangException.Report(
-                            BlameType.ImpossibleToInferType,
-                            Name
-                        );
-                    }
+            Name = new NameExpr(this).Parse();
+            if (Stream.MaybeEat(Colon)) {
+                ValueType = TypeName.Parse(this);
+            }
+            else {
+                LangException.Report(
+                    BlameType.ImpossibleToInferType,
+                    Name
+                );
+            }
 
-                    if (names.Contains(Name.ToString())) {
-                        LangException.Report(
-                            BlameType.DuplicatedParameterInFunction,
-                            Name
-                        );
-                    }
+            if (names.Contains(Name.ToString())) {
+                LangException.Report(
+                    BlameType.DuplicatedParameterInFunction,
+                    Name
+                );
+            }
 
-                    names.Add(Name.ToString());
+            names.Add(Name.ToString());
 
-                    if (Stream.MaybeEat(EqualsSign)) {
-                        Value = InfixExpr.Parse(this);
-                    }
-                }
-            );
+            if (Stream.MaybeEat(EqualsSign)) {
+                Value = InfixExpr.Parse(this);
+            }
             return this;
         }
 
@@ -63,9 +59,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         ) {
             var s = parent.Unit.TokenStream;
 
-            var parameters = new NodeList<FunctionParameter>(parent);
-            var names = new HashSet<string>(StringComparer.Ordinal);
-            var haveMultiply = false;
+            var parameters               = new NodeList<FunctionParameter>(parent);
+            var names                    = new HashSet<string>(StringComparer.Ordinal);
+            var haveMultiply             = false;
             var haveKeywordOnlyParameter = false;
             // we want these to be the last two parameters
             FunctionParameter? listParameter = null;

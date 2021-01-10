@@ -144,34 +144,29 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 return this;
             }
 
-            SetSpan(
-                () => {
-                    var scopeType = ParseStart(this);
-                    switch (scopeType) {
-                    case ScopeType.Single: {
-                        Items += AnyExpr.Parse(this);
-                        break;
-                    }
-                    case ScopeType.Indented: {
-                        while (!Stream.MaybeEat(Outdent, TokenType.End)) {
-                            Items += AnyExpr.Parse(this);
-                        }
-
-                        break;
-                    }
-                    case ScopeType.Embraced: {
-                        while (!Stream.MaybeEat(CloseBrace, TokenType.End)) {
-                            Items += AnyExpr.Parse(this);
-                        }
-
-                        break;
-                    }
-                    default: {
-                        throw new NotSupportedException("Invalid scope type.");
-                    }
-                    }
+            var scopeType = ParseStart(this);
+            Start = Stream.Token.Start;
+            switch (scopeType) {
+            case ScopeType.Single: {
+                Items += AnyExpr.Parse(this);
+                break;
+            }
+            case ScopeType.Indented: {
+                while (!Stream.MaybeEat(Outdent, TokenType.End)) {
+                    Items += AnyExpr.Parse(this);
                 }
-            );
+                break;
+            }
+            case ScopeType.Embraced: {
+                while (!Stream.MaybeEat(CloseBrace, TokenType.End)) {
+                    Items += AnyExpr.Parse(this);
+                }
+                break;
+            }
+            default: {
+                throw new NotSupportedException("Invalid scope type.");
+            }
+            }
             return this;
         }
 
@@ -182,15 +177,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         /// </summary>
         private static ScopeType ParseStart(Node parent) {
             var s = parent.Unit.TokenStream;
-            // newline
+
             var hasNewline = s.MaybeEat(Newline);
 
-            // '{'
             if (s.MaybeEat(OpenBrace)) {
                 return ScopeType.Embraced;
             }
 
-            // indent
             if (s.MaybeEat(Indent)) {
                 return ScopeType.Indented;
             }
@@ -208,7 +201,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
     }
 
-    [Flags]
     public enum ScopeType {
         Indented,
         Embraced,

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -10,6 +11,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///     </c>
     /// </summary>
     public class ModuleDef : Expr, IDefinitionExpr, IDecorableExpr {
+        private Token? kwModule;
+
+        public Token? KwModule {
+            get => kwModule;
+            set => kwModule = BindNullable(value);
+        }
+
         private NameExpr? name;
 
         public NameExpr? Name {
@@ -43,13 +51,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         public ModuleDef Parse() {
-            SetSpan(
-                () => {
-                    Stream.Eat(KeywordModule);
-                    Name  = new NameExpr(this).Parse();
-                    Scope = new ScopeExpr(this).Parse();
-                }
-            );
+            KwModule = Stream.Eat(KeywordModule);
+            Name     = new NameExpr(this).Parse();
+            Scope    = new ScopeExpr(this).Parse();
             return this;
         }
     }

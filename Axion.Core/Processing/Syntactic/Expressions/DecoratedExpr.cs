@@ -1,8 +1,16 @@
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     public class DecoratedExpr : Expr {
+        private Token? startMark;
+
+        public Token? StartMark {
+            get => startMark;
+            set => startMark = BindNullable(value);
+        }
+
         private NodeList<Expr>? decorators;
 
         public NodeList<Expr> Decorators {
@@ -20,23 +28,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         internal DecoratedExpr(Node parent) : base(parent) { }
 
         public DecoratedExpr Parse() {
-            SetSpan(
-                () => {
-                    Stream.Eat(At);
-                    if (Stream.MaybeEat(OpenBracket)) {
-                        do {
-                            Decorators += InfixExpr.Parse(this);
-                        } while (Stream.MaybeEat(Comma));
+            StartMark = Stream.Eat(At);
+            if (Stream.MaybeEat(OpenBracket)) {
+                do {
+                    Decorators += InfixExpr.Parse(this);
+                } while (Stream.MaybeEat(Comma));
 
-                        Stream.Eat(CloseBracket);
-                    }
-                    else {
-                        Decorators += PrefixExpr.Parse(this);
-                    }
+                Stream.Eat(CloseBracket);
+            }
+            else {
+                Decorators += PrefixExpr.Parse(this);
+            }
 
-                    Target = AnyExpr.Parse(this);
-                }
-            );
+            Target = AnyExpr.Parse(this);
             return this;
         }
     }

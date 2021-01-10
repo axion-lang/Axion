@@ -26,16 +26,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public FuncCallExpr(Node parent) : base(parent) { }
 
         public FuncCallExpr Parse(bool allowGenerator = false) {
-            SetSpan(
-                () => {
-                    Stream.Eat(OpenParenthesis);
-                    Args = FuncCallArg.ParseArgList(
-                        this,
-                        allowGenerator: allowGenerator
-                    );
-                    Stream.Eat(CloseParenthesis);
-                }
+            Stream.Eat(OpenParenthesis);
+            Args = FuncCallArg.ParseArgList(
+                this,
+                allowGenerator: allowGenerator
             );
+            End = Stream.Eat(CloseParenthesis).End;
             return this;
         }
     }

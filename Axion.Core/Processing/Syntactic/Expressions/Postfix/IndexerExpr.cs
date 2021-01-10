@@ -6,9 +6,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
     ///         index-expr:
-    ///         atom '[' (infix-expr | slice) {',' (infix-expr | slice)} [','] ']';
+    ///             atom '[' (infix-expr | slice) {',' (infix-expr | slice)} [','] ']';
     ///         slice:
-    ///         [infix-expr] ':' [infix-expr] [':' [infix-expr]];
+    ///             [infix-expr] ':' [infix-expr] [':' [infix-expr]];
     ///     </c>
     /// </summary>
     public class IndexerExpr : PostfixExpr {
@@ -30,68 +30,63 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public IndexerExpr Parse() {
             Target ??= AtomExpr.Parse(this);
-
-            SetSpan(
-                () => {
-                    var expressions = new NodeList<Expr>(this);
-                    Stream.Eat(OpenBracket);
-                    if (!Stream.PeekIs(CloseBracket)) {
-                        while (true) {
-                            Expr? start = null;
-                            if (!Stream.PeekIs(Colon)) {
-                                start = InfixExpr.Parse(this);
-                            }
-
-                            if (Stream.MaybeEat(Colon)) {
-                                Expr? stop = null;
-                                if (!Stream.PeekIs(
-                                    Colon,
-                                    Comma,
-                                    CloseBracket
-                                )) {
-                                    stop = InfixExpr.Parse(this);
-                                }
-
-                                Expr? step = null;
-                                if (Stream.MaybeEat(Colon)
-                                 && !Stream.PeekIs(Comma, CloseBracket)) {
-                                    step = InfixExpr.Parse(this);
-                                }
-
-                                expressions += new SliceExpr(this) {
-                                    From = start,
-                                    To   = stop,
-                                    Step = step
-                                };
-                                break;
-                            }
-
-                            if (start == null) {
-                                LangException.Report(
-                                    BlameType.InvalidIndexerExpression,
-                                    Stream.Token
-                                );
-                            }
-                            else {
-                                expressions += start;
-                            }
-
-                            if (Stream.PeekIs(CloseBracket)) {
-                                break;
-                            }
-
-                            Stream.Eat(Comma);
-                        }
+            var expressions = new NodeList<Expr>(this);
+            Stream.Eat(OpenBracket);
+            if (!Stream.PeekIs(CloseBracket)) {
+                while (true) {
+                    Expr? start = null;
+                    if (!Stream.PeekIs(Colon)) {
+                        start = InfixExpr.Parse(this);
                     }
 
-                    Index = expressions.Count == 1
-                        ? expressions[0]
-                        : new TupleExpr(this) {
-                            Expressions = expressions
+                    if (Stream.MaybeEat(Colon)) {
+                        Expr? stop = null;
+                        if (!Stream.PeekIs(
+                            Colon,
+                            Comma,
+                            CloseBracket
+                        )) {
+                            stop = InfixExpr.Parse(this);
+                        }
+
+                        Expr? step = null;
+                        if (Stream.MaybeEat(Colon)
+                         && !Stream.PeekIs(Comma, CloseBracket)) {
+                            step = InfixExpr.Parse(this);
+                        }
+
+                        expressions += new SliceExpr(this) {
+                            From = start,
+                            To   = stop,
+                            Step = step
                         };
-                    Stream.Eat(CloseBracket);
+                        break;
+                    }
+
+                    if (start == null) {
+                        LangException.Report(
+                            BlameType.InvalidIndexerExpression,
+                            Stream.Token
+                        );
+                    }
+                    else {
+                        expressions += start;
+                    }
+
+                    if (Stream.PeekIs(CloseBracket)) {
+                        break;
+                    }
+
+                    Stream.Eat(Comma);
                 }
-            );
+            }
+
+            Index = expressions.Count == 1
+                ? expressions[0]
+                : new TupleExpr(this) {
+                    Expressions = expressions
+                };
+            End = Stream.Eat(CloseBracket).End;
             return this;
         }
     }

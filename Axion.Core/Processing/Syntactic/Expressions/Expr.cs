@@ -55,11 +55,5 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             n =   Bind(n, propertyName);
             return n;
         }
-
-        protected void SetSpan(Action constructor) {
-            Start = Stream.Peek.Start;
-            constructor();
-            End = Stream.Token.End;
-        }
     }
 }

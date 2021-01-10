@@ -10,6 +10,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///     </c>
     /// </summary>
     public class CodeUnquotedExpr : PostfixExpr {
+        private Token? startMark;
+
+        public Token? StartMark {
+            get => startMark;
+            set => startMark = BindNullable(value);
+        }
+
         private Expr val = null!;
 
         public Expr Value {
@@ -22,12 +29,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         public CodeUnquotedExpr(Node parent) : base(parent) { }
 
         public CodeUnquotedExpr Parse() {
-            SetSpan(
-                () => {
-                    Stream.Eat(TokenType.Dollar);
-                    Value = Parse(this);
-                }
-            );
+            StartMark = Stream.Eat(TokenType.Dollar);
+            Value     = Parse(this);
             return this;
         }
     }
