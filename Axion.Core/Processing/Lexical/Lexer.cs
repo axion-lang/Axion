@@ -567,7 +567,7 @@ namespace Axion.Core.Processing.Lexical {
                         escapeLen++;
                     }
                     else {
-                        RaiseError(BlameType.TruncatedEscapeSequence);
+                        MarkBlame(BlameType.TruncatedEscapeSequence);
                         return;
                     }
                 }
@@ -579,12 +579,12 @@ namespace Axion.Core.Processing.Lexical {
                         escaped += num;
                     }
                     else {
-                        RaiseError(BlameType.IllegalUnicodeCharacter);
+                        MarkBlame(BlameType.IllegalUnicodeCharacter);
                         return;
                     }
                 }
                 else {
-                    RaiseError(BlameType.InvalidEscapeSequence);
+                    MarkBlame(BlameType.InvalidEscapeSequence);
                     return;
                 }
             }
@@ -595,7 +595,7 @@ namespace Axion.Core.Processing.Lexical {
                 }
 
                 if (raw.Length != 4) {
-                    RaiseError(BlameType.InvalidXEscapeFormat);
+                    MarkBlame(BlameType.InvalidXEscapeFormat);
                     return;
                 }
 
@@ -604,20 +604,20 @@ namespace Axion.Core.Processing.Lexical {
                     escaped += num;
                 }
                 else {
-                    RaiseError(BlameType.InvalidEscapeSequence);
+                    MarkBlame(BlameType.InvalidEscapeSequence);
                     return;
                 }
             }
             else if (stream.AtEndOfLine) {
-                RaiseError(BlameType.TruncatedEscapeSequence);
+                MarkBlame(BlameType.TruncatedEscapeSequence);
                 return;
             }
             else {
-                RaiseError(BlameType.InvalidEscapeSequence);
+                MarkBlame(BlameType.InvalidEscapeSequence);
                 return;
             }
 
-            void RaiseError(BlameType blameType) {
+            void MarkBlame(BlameType blameType) {
                 LangException.Report(
                     blameType,
                     new CodeSpan(unit, escapeStart, stream.Location - (0, 1))
