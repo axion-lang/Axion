@@ -30,7 +30,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         public bool IsReadOnly { get; } = false;
 
-        private readonly List<Token> tokens = new List<Token>();
+        private readonly List<Token> tokens = new();
 
         public bool PeekIs(params TokenType[] expected) {
             return PeekByIs(1, expected);
@@ -64,7 +64,7 @@ namespace Axion.Core.Processing.Syntactic {
             SkipTrivial(types);
             EatAny();
             if (!Token.Is(types)) {
-                LangException.Report(BlameType.InvalidSyntax, Token);
+                LanguageReport.To(BlameType.InvalidSyntax, Token);
             }
 
             return Token;
@@ -88,7 +88,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         public bool MaybeEat(string value) {
             SkipTrivial();
-            if (ExactPeek.Value != value) {
+            if (ExactPeek.Content != value) {
                 return false;
             }
 

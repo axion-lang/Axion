@@ -65,7 +65,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     if (args.Any(
                         a => a.Name?.ToString() == argName.ToString()
                     )) {
-                        LangException.Report(
+                        LanguageReport.To(
                             BlameType.DuplicatedNamedArgument,
                             arg
                         );

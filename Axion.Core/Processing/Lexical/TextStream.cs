@@ -18,7 +18,7 @@ namespace Axion.Core.Processing.Lexical {
         /// <summary>
         ///     0-based (Line, Column) position of character in source code.
         /// </summary>
-        public Location Location => new Location(lineIdx, columnIdx);
+        public Location Location => new(lineIdx, columnIdx);
 
         /// <summary>
         ///     Checks that next character is line/source terminator.

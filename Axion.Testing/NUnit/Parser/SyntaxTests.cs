@@ -95,6 +95,12 @@ namespace Axion.Testing.NUnit.Parser {
             var unit = ParseTestFile();
             Assert.AreEqual(2, unit.Blames.Count);
         }
+        
+        [Test]
+        public void TestImports() {
+            var unit = ParseTestFile();
+            Assert.AreEqual(0, unit.Blames.Count);
+        }
 
         [Test]
         public void TestMatchMacro() {

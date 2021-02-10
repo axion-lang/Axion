@@ -26,9 +26,9 @@
 |---------------------------------------------------------|-------------------------------------------------------------------------|------------------|
 | [`Axion`](Axion)                                        | User interface for compiler: CLI, ScriptBench editor, interpreter       | .NET             |
 | [`Axion.Core`](Axion.Core)                              | Language core, lexer, parser, frontend interface, compiler API          | .NET Standard    |
-| [`Axion.Frontend.Axion`](Axion.Frontend.Axion)          | Extension to translate Axion syntax tree back into Axion source code    | .NET Standard    |
-| [`Axion.Frontend.CSharp`](Axion.Frontend.CSharp)        | Extension to translate Axion AST into C# source code                    | .NET Standard    |
-| [`Axion.Frontend.Python`](Axion.Frontend.Python)        | Extension to translate Axion AST into Python source code                | .NET Standard    |
+| [`Axion.Emitter.Axion`](Axion.Emitter.Axion)          | Extension to translate Axion syntax tree back into Axion source code    | .NET Standard    |
+| [`Axion.Emitter.CSharp`](Axion.Emitter.CSharp)        | Extension to translate Axion AST into C# source code                    | .NET Standard    |
+| [`Axion.Emitter.Python`](Axion.Emitter.Python)        | Extension to translate Axion AST into Python source code                | .NET Standard    |
 | [`Axion.Testing`](Axion.Testing)                        | NUnit-based unit tests for the toolset                                  | .NET             |
 | [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable)         | .NET             |
 | [`misc`](misc)                                          | Code examples, arts, etc.                                               |                  |

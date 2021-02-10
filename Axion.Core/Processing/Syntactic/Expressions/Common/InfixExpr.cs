@@ -49,10 +49,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                     var newPrecedence = -1;
                     if (s.Peek is OperatorToken opToken) {
                         newPrecedence = opToken.Precedence;
-                    }
-                    // NOTE: this condition disallows identifiers on newline to be used as operators.
-                    else if (!s.Token.Is(Newline, Outdent)
-                          && s.PeekIs(Identifier)) {
+                    } 
+                    // NOTE: this condition disallows identifiers
+                    //  on newline to be used as operators.
+                    else if (!s.Token.Is(Newline, Outdent) && s.PeekIs(Identifier)) {
                         newPrecedence = 4;
                     }
 

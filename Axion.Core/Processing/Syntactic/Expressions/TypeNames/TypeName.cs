@@ -28,7 +28,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                 leftTypeName = new SimpleTypeName(parent).Parse();
             }
             else {
-                LangException.ReportUnexpectedSyntax(Identifier, s.Peek);
+                LanguageReport.UnexpectedSyntax(Identifier, s.Peek);
                 return new SimpleTypeName(parent, "UnknownType");
             }
 
@@ -95,7 +95,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
 
             if (typeArgs.Count == 0) {
                 // redundant parens
-                LangException.Report(
+                LanguageReport.To(
                     BlameType.RedundantEmptyListOfTypeArguments,
                     start
                 );

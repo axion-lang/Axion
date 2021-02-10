@@ -54,7 +54,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 }
                 else {
                     // TODO error
-                    LangException.Report(BlameType.InvalidSyntax, Stream.Peek);
+                    LanguageReport.To(BlameType.InvalidSyntax, Stream.Peek);
                     continue;
                 }
 

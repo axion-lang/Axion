@@ -22,19 +22,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public ConstantExpr(Node parent) : base(parent) { }
 
         public static ConstantExpr True(Node parent) {
-            return new ConstantExpr(parent) {
+            return new(parent) {
                 Literal = new Token(parent.Unit, TokenType.KeywordTrue)
             };
         }
 
         public static ConstantExpr False(Node parent) {
-            return new ConstantExpr(parent) {
+            return new(parent) {
                 Literal = new Token(parent.Unit, TokenType.KeywordFalse)
             };
         }
 
         public static ConstantExpr Nil(Node parent) {
-            return new ConstantExpr(parent) {
+            return new(parent) {
                 Literal = new Token(parent.Unit, TokenType.KeywordNil)
             };
         }

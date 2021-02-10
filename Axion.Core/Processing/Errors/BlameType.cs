@@ -7,52 +7,52 @@
             Description = description;
             Severity    = severity;
         }
-
+        // TODO: replace blame severities with class hierarchy
         // @formatter:off
-        public static readonly BlameType InvalidCharacter                         = new BlameType("unknown character",                                               BlameSeverity.Error);
-        public static readonly BlameType UnclosedMultilineComment                 = new BlameType("multiline comment has no closing scope",                          BlameSeverity.Error);
-        public static readonly BlameType UnclosedString                           = new BlameType("string has no matching ending quote",                             BlameSeverity.Error);
-        public static readonly BlameType UnclosedCharacterLiteral                 = new BlameType("character literal has no matching ending quote",                  BlameSeverity.Error);
-        public static readonly BlameType CharacterLiteralTooLong                  = new BlameType("character literal exceeds max allowed length",                    BlameSeverity.Error);
-        public static readonly BlameType EmptyCharacterLiteral                    = new BlameType("character literal cannot be empty",                               BlameSeverity.Error);
-        public static readonly BlameType InvalidEscapeSequence                    = new BlameType("invalid character escaped by '\\'",                               BlameSeverity.Error);
-        public static readonly BlameType IllegalUnicodeCharacter                  = new BlameType("literal has illegal unicode character",                           BlameSeverity.Error);
-        public static readonly BlameType InvalidXEscapeFormat                     = new BlameType("invalid '\\x'-escape format",                                     BlameSeverity.Error);
-        public static readonly BlameType TruncatedEscapeSequence                  = new BlameType("truncated escape sequence",                                       BlameSeverity.Error);
-        public static readonly BlameType InvalidNumberRadix                       = new BlameType("number's base must be a number in range [1..36]",                 BlameSeverity.Error);
-        public static readonly BlameType InvalidDigit                             = new BlameType("expected a decimal digit",                                        BlameSeverity.Error);
-        public static readonly BlameType ExpectedNumberValueAfterNumberBase       = new BlameType("expected number value after base specifier",                      BlameSeverity.Error);
-        public static readonly BlameType DigitValueIsAboveNumberRadix             = new BlameType("this digit is above number base",                                 BlameSeverity.Error);
-        public static readonly BlameType DuplicatedParameterInFunction            = new BlameType("duplicated parameter in function definition",                     BlameSeverity.Error);
-        public static readonly BlameType DuplicatedNamedArgument                  = new BlameType("duplicated named argument",                                       BlameSeverity.Error);
-        public static readonly BlameType ExpectedDefaultParameterValue            = new BlameType("expected a default parameter value",                              BlameSeverity.Error);
-        public static readonly BlameType ExpectedScopeDeclaration                 = new BlameType("scope expected",                                                  BlameSeverity.Error);
-        public static readonly BlameType InvalidSyntax                            = new BlameType("invalid syntax",                                                  BlameSeverity.Error);
-        public static readonly BlameType InvalidIndexerExpression                 = new BlameType("invalid indexer format",                                          BlameSeverity.Error);
-        public static readonly BlameType IndentationBasedScopeNotAllowed          = new BlameType("scope based on indentation is not allowed in this context",       BlameSeverity.Error);
-        public static readonly BlameType CannotHaveMoreThan1ListParameter         = new BlameType("only 1 list parameter is allowed",                                BlameSeverity.Error);
-        public static readonly BlameType NamedArgsMustFollowBareStar              = new BlameType("named arguments must follow bare *",                              BlameSeverity.Error);
-        public static readonly BlameType InvalidStringPrefix                      = new BlameType("invalid string prefix",                                           BlameSeverity.Error);
-        public static readonly BlameType ExpectedVarName                          = new BlameType("variable name expected",                                          BlameSeverity.Error);
-        public static readonly BlameType ExpectedImportedModuleName               = new BlameType("imported module name expected",                                   BlameSeverity.Error);
-        public static readonly BlameType ImpossibleToInferType                    = new BlameType("impossible to infer type in this context",                        BlameSeverity.Error);
-        public static readonly BlameType NameIsAlreadyDefined                     = new BlameType("this name is already defined above",                              BlameSeverity.Error);
-        public static readonly BlameType InvalidMacroParameter                    = new BlameType("invalid parameter for macro",                                     BlameSeverity.Error);
-        public static readonly BlameType ModuleSelfImport                         = new BlameType("can't import module from itself",                                 BlameSeverity.Error);
+        public static readonly BlameType InvalidCharacter                         = new("unknown character",                                               BlameSeverity.Error);
+        public static readonly BlameType UnclosedMultilineComment                 = new("multiline comment has no closing scope",                          BlameSeverity.Error);
+        public static readonly BlameType UnclosedString                           = new("string has no matching ending quote",                             BlameSeverity.Error);
+        public static readonly BlameType UnclosedCharacterLiteral                 = new("character literal has no matching ending quote",                  BlameSeverity.Error);
+        public static readonly BlameType CharacterLiteralTooLong                  = new("character literal exceeds max allowed length",                    BlameSeverity.Error);
+        public static readonly BlameType EmptyCharacterLiteral                    = new("character literal cannot be empty",                               BlameSeverity.Error);
+        public static readonly BlameType InvalidEscapeSequence                    = new("invalid character escaped by '\\'",                               BlameSeverity.Error);
+        public static readonly BlameType IllegalUnicodeCharacter                  = new("literal has illegal unicode character",                           BlameSeverity.Error);
+        public static readonly BlameType InvalidXEscapeFormat                     = new("invalid '\\x'-escape format",                                     BlameSeverity.Error);
+        public static readonly BlameType TruncatedEscapeSequence                  = new("truncated escape sequence",                                       BlameSeverity.Error);
+        public static readonly BlameType InvalidNumberRadix                       = new("number's base must be a number in range [1..36]",                 BlameSeverity.Error);
+        public static readonly BlameType InvalidDigit                             = new("expected a decimal digit",                                        BlameSeverity.Error);
+        public static readonly BlameType ExpectedNumberValueAfterNumberBase       = new("expected number value after base specifier",                      BlameSeverity.Error);
+        public static readonly BlameType DigitValueIsAboveNumberRadix             = new("this digit is above number base",                                 BlameSeverity.Error);
+        public static readonly BlameType DuplicatedParameterInFunction            = new("duplicated parameter in function definition",                     BlameSeverity.Error);
+        public static readonly BlameType DuplicatedNamedArgument                  = new("duplicated named argument",                                       BlameSeverity.Error);
+        public static readonly BlameType ExpectedDefaultParameterValue            = new("expected a default parameter value",                              BlameSeverity.Error);
+        public static readonly BlameType ExpectedScopeDeclaration                 = new("scope expected",                                                  BlameSeverity.Error);
+        public static readonly BlameType InvalidSyntax                            = new("invalid syntax",                                                  BlameSeverity.Error);
+        public static readonly BlameType InvalidIndexerExpression                 = new("invalid indexer format",                                          BlameSeverity.Error);
+        public static readonly BlameType IndentationBasedScopeNotAllowed          = new("scope based on indentation is not allowed in this context",       BlameSeverity.Error);
+        public static readonly BlameType CannotHaveMoreThan1ListParameter         = new("only 1 list parameter is allowed",                                BlameSeverity.Error);
+        public static readonly BlameType NamedArgsMustFollowBareStar              = new("named arguments must follow bare *",                              BlameSeverity.Error);
+        public static readonly BlameType InvalidStringPrefix                      = new("invalid string prefix",                                           BlameSeverity.Error);
+        public static readonly BlameType ExpectedVarName                          = new("variable name expected",                                          BlameSeverity.Error);
+        public static readonly BlameType ExpectedImportedModuleName               = new("imported module name expected",                                   BlameSeverity.Error);
+        public static readonly BlameType ImpossibleToInferType                    = new("impossible to infer type in this context",                        BlameSeverity.Error);
+        public static readonly BlameType NameIsAlreadyDefined                     = new("this name is already defined above",                              BlameSeverity.Error);
+        public static readonly BlameType InvalidMacroParameter                    = new("invalid parameter for macro",                                     BlameSeverity.Error);
+        public static readonly BlameType ModuleSelfImport                         = new("can't import module from itself",                                 BlameSeverity.Error);
 
-        public static readonly BlameType ExpectedAtomExpr                         = new BlameType("atomic expression expected",                                      BlameSeverity.Error);
-        public static readonly BlameType ExpectedPostfixExpr                      = new BlameType("postfix expression expected",                                     BlameSeverity.Error);
-        public static readonly BlameType ExpectedPrefixExpr                       = new BlameType("prefix expression expected",                                      BlameSeverity.Error);
-        public static readonly BlameType ExpectedInfixExpr                        = new BlameType("infix expression expected",                                       BlameSeverity.Error);
+        public static readonly BlameType ExpectedAtomExpr                         = new("atomic expression expected",                                      BlameSeverity.Error);
+        public static readonly BlameType ExpectedPostfixExpr                      = new("postfix expression expected",                                     BlameSeverity.Error);
+        public static readonly BlameType ExpectedPrefixExpr                       = new("prefix expression expected",                                      BlameSeverity.Error);
+        public static readonly BlameType ExpectedInfixExpr                        = new("infix expression expected",                                       BlameSeverity.Error);
 
-        public static readonly BlameType DuplicatedImport                         = new BlameType("module is already imported",                                      BlameSeverity.Warning);
-        public static readonly BlameType Redundant10Radix                         = new BlameType("redundant specifier, number radix is 10 by default",              BlameSeverity.Warning);
-        public static readonly BlameType RedundantEmptyListOfTypeArguments        = new BlameType("empty list of type arguments is redundant",                       BlameSeverity.Warning);
+        public static readonly BlameType DuplicatedImport                         = new("module is already imported",                                      BlameSeverity.Warning);
+        public static readonly BlameType Redundant10Radix                         = new("redundant specifier, number radix is 10 by default",              BlameSeverity.Warning);
+        public static readonly BlameType RedundantEmptyListOfTypeArguments        = new("empty list of type arguments is redundant",                       BlameSeverity.Warning);
         
-        public static readonly BlameType InconsistentIndentation                  = new BlameType("mixed indentation (spaces and tabs)",                             BlameSeverity.Info);
-        public static readonly BlameType RedundantStringFormat                    = new BlameType("string has format prefix but does not have any interpolation",    BlameSeverity.Info);
-        public static readonly BlameType RedundantPrefixesForEmptyString          = new BlameType("prefixes are redundant for empty string",                         BlameSeverity.Info);
-        public static readonly BlameType RedundantColonWithBraces                 = new BlameType("':' is not needed when scope is specified by braces",             BlameSeverity.Info);
+        public static readonly BlameType InconsistentIndentation                  = new("mixed indentation (spaces and tabs)",                             BlameSeverity.Info);
+        public static readonly BlameType RedundantStringFormat                    = new("string has format prefix but does not have any interpolation",    BlameSeverity.Info);
+        public static readonly BlameType RedundantPrefixesForEmptyString          = new("prefixes are redundant for empty string",                         BlameSeverity.Info);
+        public static readonly BlameType RedundantParentheses                     = new("parentheses around single expression are not needed",             BlameSeverity.Info);
         // @formatter:on
     }
 }

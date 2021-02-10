@@ -111,6 +111,13 @@ namespace Axion.Core.Processing.Syntactic {
             return this;
         }
 
+        public NodeList<T> AddRange(IEnumerable<T> list) {
+            foreach (T item in list) {
+                items.Add(item);
+            }
+            return this;
+        }
+
         public static NodeList<T> operator +(NodeList<T> list, T item) {
             return list.Add(item);
         }

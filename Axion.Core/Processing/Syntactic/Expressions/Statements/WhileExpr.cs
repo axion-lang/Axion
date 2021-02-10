@@ -49,7 +49,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
         public WhileExpr(Node parent) : base(parent) { }
 
         public DecoratedExpr WithDecorators(params Expr[] items) {
-            return new DecoratedExpr(Parent) {
+            return new(Parent) {
                 Target     = this,
                 Decorators = new NodeList<Expr>(this, items)
             };

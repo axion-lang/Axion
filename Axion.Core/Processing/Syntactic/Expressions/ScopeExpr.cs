@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Axion.Core.Processing.Errors;
@@ -26,7 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => items = Bind(value);
         }
 
-        internal ScopeExpr(Node parent) : base(parent) { }
+        public ScopeExpr(Node parent) : base(parent) { }
 
         public ScopeExpr WithItems(IEnumerable<Expr> list) {
             Items = new NodeList<Expr>(this, list);
@@ -144,60 +143,29 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 return this;
             }
 
-            var scopeType = ParseStart(this);
-            Start = Stream.Token.Start;
-            switch (scopeType) {
-            case ScopeType.Single: {
-                Items += AnyExpr.Parse(this);
-                break;
-            }
-            case ScopeType.Indented: {
-                while (!Stream.MaybeEat(Outdent, TokenType.End)) {
-                    Items += AnyExpr.Parse(this);
-                }
-                break;
-            }
-            case ScopeType.Embraced: {
+            Start = Stream.Peek.Start;
+            var hasNewline = Stream.MaybeEat(Newline);
+            if (Stream.MaybeEat(OpenBrace)) {
                 while (!Stream.MaybeEat(CloseBrace, TokenType.End)) {
                     Items += AnyExpr.Parse(this);
                 }
-                break;
             }
-            default: {
-                throw new NotSupportedException("Invalid scope type.");
+            else if (Stream.MaybeEat(Indent)) {
+                while (!Stream.MaybeEat(Outdent, TokenType.End)) {
+                    Items += AnyExpr.Parse(this);
+                }
             }
-            }
-            return this;
-        }
-
-        /// <summary>
-        ///     Starts parsing the statement's scope,
-        ///     returns scope type that can be
-        ///     used to parse scope to the end.
-        /// </summary>
-        private static ScopeType ParseStart(Node parent) {
-            var s = parent.Unit.TokenStream;
-
-            var hasNewline = s.MaybeEat(Newline);
-
-            if (s.MaybeEat(OpenBrace)) {
-                return ScopeType.Embraced;
-            }
-
-            if (s.MaybeEat(Indent)) {
-                return ScopeType.Indented;
-            }
-
-            if (hasNewline) {
+            else if (hasNewline) {
                 // newline followed by not indent or '{'
-                LangException.Report(
+                LanguageReport.To(
                     BlameType.ExpectedScopeDeclaration,
-                    s.Peek
+                    Stream.Peek
                 );
             }
-
-            // exactly a 1-line scope
-            return ScopeType.Single;
+            else {
+                Items += AnyExpr.Parse(this);
+            }
+            return this;
         }
     }
 

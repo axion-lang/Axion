@@ -14,8 +14,8 @@ namespace Axion.Core.Processing.Lexical {
 
         // Variables for current token creation
         private TokenType type;
-        private readonly StringBuilder value = new StringBuilder();
-        private readonly StringBuilder content = new StringBuilder();
+        private readonly StringBuilder value = new();
+        private readonly StringBuilder content = new();
         private Location startLoc;
 
         // Variables for indentation analysis
@@ -24,10 +24,9 @@ namespace Axion.Core.Processing.Lexical {
         private int lastIndentLen;
         private int indentLevel;
 
-        public Stack<Token> MismatchingPairs { get; } = new Stack<Token>();
+        public Stack<Token> MismatchingPairs { get; } = new();
 
-        public Stack<TokenType> ProcessTerminators { get; } =
-            new Stack<TokenType>();
+        public Stack<TokenType> ProcessTerminators { get; } = new();
 
         public Lexer(Unit unit) {
             this.unit = unit;
@@ -133,7 +132,7 @@ namespace Axion.Core.Processing.Lexical {
             // invalid character token
             AddNext();
             var t = NewTokenFromContext();
-            LangException.Report(BlameType.InvalidCharacter, t);
+            LanguageReport.To(BlameType.InvalidCharacter, t);
             return t;
         }
 
@@ -186,7 +185,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             if (!consistent) {
-                LangException.Report(
+                LanguageReport.To(
                     BlameType.InconsistentIndentation,
                     new CodeSpan(
                         unit,
@@ -342,7 +341,7 @@ namespace Axion.Core.Processing.Lexical {
                             true
                         )
                     );
-                    LangException.Report(
+                    LanguageReport.To(
                         BlameType.UnclosedCharacterLiteral,
                         unclosed
                     );
@@ -362,10 +361,10 @@ namespace Axion.Core.Processing.Lexical {
             );
 
             if (content.Length == 0) {
-                LangException.Report(BlameType.EmptyCharacterLiteral, t);
+                LanguageReport.To(BlameType.EmptyCharacterLiteral, t);
             }
             else if (content.Replace("\\", "").Length != 1) {
-                LangException.Report(BlameType.CharacterLiteralTooLong, t);
+                LanguageReport.To(BlameType.CharacterLiteralTooLong, t);
             }
 
             return t;
@@ -395,7 +394,7 @@ namespace Axion.Core.Processing.Lexical {
                             true
                         )
                     );
-                    LangException.Report(BlameType.UnclosedMultilineComment, t);
+                    LanguageReport.To(BlameType.UnclosedMultilineComment, t);
                     return t;
                 }
 
@@ -439,7 +438,7 @@ namespace Axion.Core.Processing.Lexical {
                             stream.Location + (0, i)
                         )
                     );
-                    LangException.Report(BlameType.InvalidStringPrefix, token);
+                    LanguageReport.To(BlameType.InvalidStringPrefix, token);
                 }
             }
 
@@ -461,7 +460,7 @@ namespace Axion.Core.Processing.Lexical {
                     )
                 );
                 if (prefixes.Length > 0) {
-                    LangException.Report(
+                    LanguageReport.To(
                         BlameType.RedundantPrefixesForEmptyString,
                         se
                     );
@@ -508,11 +507,11 @@ namespace Axion.Core.Processing.Lexical {
                 )
             );
             if (prefixes.Contains("f") && interpolations.Count == 0) {
-                LangException.Report(BlameType.RedundantStringFormat, s);
+                LanguageReport.To(BlameType.RedundantStringFormat, s);
             }
 
             if (unclosed) {
-                LangException.Report(BlameType.UnclosedString, s);
+                LanguageReport.To(BlameType.UnclosedString, s);
             }
 
             return s;
@@ -537,7 +536,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             foreach (var mismatch in lexer.MismatchingPairs) {
-                LangException.ReportMismatchedBracket(mismatch);
+                LanguageReport.MismatchedBracket(mismatch);
             }
 
             // remove '{' '}'
@@ -618,7 +617,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             void MarkBlame(BlameType blameType) {
-                LangException.Report(
+                LanguageReport.To(
                     blameType,
                     new CodeSpan(unit, escapeStart, stream.Location - (0, 1))
                 );

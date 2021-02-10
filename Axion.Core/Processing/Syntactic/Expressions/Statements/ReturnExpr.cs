@@ -34,7 +34,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
         public ReturnExpr Parse() {
             KwReturn = Stream.Eat(KeywordReturn);
             if (!Stream.PeekIs(Spec.NeverExprStartTypes)) {
-                Value = Multiple<InfixExpr>.ParseGenerally(this);
+                Value = Multiple.ParsePermissively<InfixExpr>(this);
             }
 
             return this;

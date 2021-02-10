@@ -1,0 +1,3 @@
+class FileNames
+    first = 'hello'
+    second = 'goodbye'

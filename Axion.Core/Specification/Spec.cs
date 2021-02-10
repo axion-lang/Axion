@@ -76,8 +76,7 @@ namespace Axion.Core.Specification {
 
         // @formatter:off
 
-        public static readonly Dictionary<char, string> EscapeSequences =
-        new Dictionary<char, string> {
+        public static readonly Dictionary<char, string> EscapeSequences = new() {
             { '0', "\u0000" },
             { 'a', "\u0007" },
             { 'b', "\u0008" },
@@ -91,10 +90,8 @@ namespace Axion.Core.Specification {
             { '\'', "\'" }
         };
 
-        public static readonly Dictionary<
-            string,
-            (TokenType Type, int Precedence, InputSide Side)
-        > Operators = new Dictionary<string, (TokenType, int, InputSide)> {
+        public static readonly Dictionary<string,(TokenType Type, int Precedence, InputSide Side)>
+            Operators = new() {
             { "of",      (Of,                      19,  Unknown) },
             { ".",       (Dot,                     19,  Unknown) },
 
@@ -166,7 +163,7 @@ namespace Axion.Core.Specification {
         public static readonly string[] OperatorsKeys =
             Operators.Keys.OrderByDescending(k => k.Length).ToArray();
 
-        public static readonly Regex NonIndentRegex = new Regex(
+        public static readonly Regex NonIndentRegex = new(
             $@"^(?:{string.Join("|", OperatorsKeys.Select(Regex.Escape))})[^\w\d]",
             RegexOptions.Compiled | RegexOptions.CultureInvariant
         );
@@ -219,8 +216,7 @@ namespace Axion.Core.Specification {
 
         // @formatter:off
 
-        public static readonly Dictionary<string, TokenType> Punctuation =
-            new Dictionary<string, TokenType> {
+        public static readonly Dictionary<string, TokenType> Punctuation = new() {
                 // Order of keys makes sense here.
                 // Longer tokens must be above shorter ones.
                 // (Lexer's character stream functions
@@ -245,8 +241,7 @@ namespace Axion.Core.Specification {
         
         // @formatter:on
 
-        public static readonly string[] PunctuationKeys =
-            Punctuation.Keys.ToArray();
+        public static readonly string[] PunctuationKeys = Punctuation.Keys.ToArray();
 
         /// <summary>
         ///     Token types that can't start an expression.
@@ -276,7 +271,7 @@ namespace Axion.Core.Specification {
         public const string UnknownType = "UNKNOWN_TYPE";
 
         public static readonly Dictionary<string, Func<Node, Expr>>
-            ParsingFunctions = new Dictionary<string, Func<Node, Expr>> {
+            ParsingFunctions = new() {
                 { "Expr", AnyExpr.Parse },
                 { nameof(AnyExpr), AnyExpr.Parse },
                 { nameof(InfixExpr), InfixExpr.Parse },
@@ -286,10 +281,9 @@ namespace Axion.Core.Specification {
                 { nameof(ConstantExpr), ConstantExpr.ParseNew }
             };
 
-        public static readonly Dictionary<string, Type> ParsingTypes =
-            new Dictionary<string, Type> {
-                { nameof(ScopeExpr), typeof(ScopeExpr) },
-                { nameof(TypeName), typeof(TypeName) }
-            };
+        public static readonly Dictionary<string, Type> ParsingTypes = new() {
+            { nameof(ScopeExpr), typeof(ScopeExpr) },
+            { nameof(TypeName), typeof(TypeName) }
+        };
     }
 }

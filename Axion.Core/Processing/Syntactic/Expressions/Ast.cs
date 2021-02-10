@@ -4,6 +4,7 @@ using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
+using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Traversal;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
@@ -14,10 +15,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         internal List<MacroDef> Macros =>
             Unit.Module.Definitions.Values.OfType<MacroDef>().ToList();
 
-        internal readonly Stack<MacroApplicationExpr> MacroApplicationParts =
-            new Stack<MacroApplicationExpr>();
+        internal readonly Stack<MacroApplicationExpr> MacroApplicationParts = new();
 
-        internal Ast(Unit src) : base(null!) {
+        public Ast(Unit src) : base(null!) {
             Unit   = src;
             Parent = this;
             Path = new NodeTreePath(
@@ -37,6 +37,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     Unit.Module.AddDefinition(def);
                 }
             }
+        }
+        
+        public void ImportDefinitions(ImportExpr.Entry importEntry) {
+            if (importEntry.Alias != null) {
+                
+            }
+            //Def.Add(src.SourceFile.ToString(), src);
         }
 
         public override IDefinitionExpr? GetDefByName(string name) {

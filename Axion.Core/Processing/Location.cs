@@ -41,14 +41,14 @@ namespace Axion.Core.Processing {
         }
 
         public static Location operator -(Location left, Location right) {
-            return new Location(
+            return new(
                 left.Line   - right.Line,
                 left.Column - right.Column
             );
         }
 
         public static Location operator +(Location left, Location right) {
-            return new Location(
+            return new(
                 left.Line   + right.Line,
                 left.Column + right.Column
             );

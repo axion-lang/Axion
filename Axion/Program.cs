@@ -50,23 +50,21 @@ namespace Axion {
             Console.ForegroundColor = ConsoleColor.White;
             PrintIntro();
 
-            var frontendDlls =
-                new DirectoryInfo(Compiler.WorkDir)
-                    .EnumerateFiles()
-                    .Where(
-                        fi => fi.Name.StartsWith("Axion.Frontend.")
-                           && fi.Extension
-                           == ".dll"
-                    );
+            const string namespacePrefix = "Axion.Emitter.";
 
-            foreach (var fileInfo in frontendDlls) {
+            var dlls = new DirectoryInfo(Compiler.WorkDir)
+                       .EnumerateFiles()
+                       .Where(fi => fi.Name.StartsWith(namespacePrefix)
+                                 && fi.Extension == ".dll");
+
+            foreach (var fileInfo in dlls) {
                 var shortName =
                     Path.GetFileNameWithoutExtension(fileInfo.FullName);
                 try {
                     var asmName = new AssemblyName(shortName);
-                    var asm = new FrontendLoadContext(fileInfo.FullName)
+                    var asm = new EmitterLoadContext(fileInfo.FullName)
                         .LoadFromAssemblyName(asmName);
-                    shortName = shortName.Replace("Axion.Frontend.", "");
+                    shortName = shortName.Replace(namespacePrefix, "");
                     Compiler.AddTranslator(shortName, LoadTranslator(asm));
                 }
                 catch (Exception e) {
@@ -182,7 +180,7 @@ namespace Axion {
         }
 
 
-        private static void PrintError(LangException e) {
+        private static void PrintError(LanguageReport e) {
             var codeLines = e.TargetUnit.TextStream.Text.Split(
                 new[] { "\n" },
                 StringSplitOptions.None
@@ -502,10 +500,10 @@ namespace Axion {
         }
     }
 
-    public class FrontendLoadContext : AssemblyLoadContext {
+    public class EmitterLoadContext : AssemblyLoadContext {
         private readonly AssemblyDependencyResolver resolver;
 
-        public FrontendLoadContext(string pluginPath) {
+        public EmitterLoadContext(string pluginPath) {
             resolver = new AssemblyDependencyResolver(pluginPath);
         }
 

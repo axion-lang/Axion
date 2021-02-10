@@ -51,11 +51,9 @@ namespace Axion.Core.Hierarchy {
             }
         }
 
-        public Dictionary<string, Module> Submodules { get; } =
-            new Dictionary<string, Module>();
+        public Dictionary<string, Module> Submodules { get; } = new();
 
-        public Dictionary<string, Unit> Units { get; } =
-            new Dictionary<string, Unit>();
+        public Dictionary<string, Unit> Units { get; } = new();
 
         public string Name => DirToModuleName(Directory);
 
@@ -69,11 +67,10 @@ namespace Axion.Core.Hierarchy {
 
         public bool HasErrors => Units.Values.Any(u => u.HasErrors);
 
-        public List<LangException> Blames =>
+        public List<LanguageReport> Blames =>
             Units.Values.Select(u => u.Blames).SelectMany(x => x).ToList();
 
-        private readonly Dictionary<string, IDefinitionExpr> definitions =
-            new Dictionary<string, IDefinitionExpr>();
+        private readonly Dictionary<string, IDefinitionExpr> definitions = new();
 
         public Dictionary<string, IDefinitionExpr> Definitions {
             get => definitions;
@@ -86,7 +83,7 @@ namespace Axion.Core.Hierarchy {
             }
         }
 
-        public HashSet<string> CustomKeywords { get; } = new HashSet<string>();
+        public HashSet<string> CustomKeywords { get; } = new();
 
         private Module(DirectoryInfo dir) {
             Directory = dir;
@@ -188,7 +185,7 @@ namespace Axion.Core.Hierarchy {
 
             var name = def.Name.ToString();
             if (Definitions.ContainsKey(name)) {
-                LangException.Report(BlameType.NameIsAlreadyDefined, def.Name);
+                LanguageReport.To(BlameType.NameIsAlreadyDefined, def.Name);
             }
             else {
                 Definitions.Add(name, def);

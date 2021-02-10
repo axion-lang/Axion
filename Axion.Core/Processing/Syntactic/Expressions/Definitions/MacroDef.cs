@@ -40,8 +40,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => scope = Bind(value);
         }
 
-        public Dictionary<string, string> NamedSyntaxParts { get; } =
-            new Dictionary<string, string>();
+        public Dictionary<string, string> NamedSyntaxParts { get; } = new();
 
         internal MacroDef(Node parent) : base(parent) { }
 

@@ -63,9 +63,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             }
 
             Stream.Eat(KeywordFor);
-            Item = Multiple<AtomExpr>.Parse(this);
+            Item = Multiple.Parse<AtomExpr>(this);
             Stream.Eat(In);
-            Iterable = Multiple<InfixExpr>.Parse(this);
+            Iterable = Multiple.Parse<InfixExpr>(this);
 
             while (Stream.PeekIs(KeywordIf, KeywordUnless)) {
                 if (Stream.MaybeEat(KeywordIf)) {

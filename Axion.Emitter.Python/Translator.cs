@@ -6,7 +6,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Translation;
 
-namespace Axion.Frontend.Python {
+namespace Axion.Emitter.Python {
     public class Translator : INodeTranslator {
         public string OutputFileExtension => ".py";
 

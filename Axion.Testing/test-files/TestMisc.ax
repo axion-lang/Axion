@@ -50,11 +50,11 @@ until x >= 10 { Console.println(x) }
 #     f.write(0b1)
 
 # generators
-g = (yield i for i in 1..5)
-g = ((yield i) for i in 1..5)
+#g = (yield i for i in 1..5)
+#g = ((yield i) for i in 1..5)
 
 # async/await
-await (GetStringAsync(), GetGuidAsync())
+#await (GetStringAsync(), GetGuidAsync())
 
 # multiple assignment
 x = y = z = 3

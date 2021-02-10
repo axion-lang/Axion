@@ -23,8 +23,7 @@ namespace Axion.Core.Processing.Translation {
             set => writer.Indent = value;
         }
 
-        public static readonly CodeWriter Default =
-            new CodeWriter(Compiler.Translators["axion"]);
+        public static readonly CodeWriter Default = new(Compiler.Translators["axion"]);
 
         public CodeWriter(INodeTranslator translator) {
             baseWriter      = new StringWriter();

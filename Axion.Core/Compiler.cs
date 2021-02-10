@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Errors;
@@ -32,9 +31,8 @@ namespace Axion.Core {
         ///     Path to directory where generated output is located.
         /// </summary>
         public static readonly string OutDir = Path.Join(WorkDir, "output");
-        
-        public static readonly Dictionary<string, INodeTranslator> Translators
-            = new Dictionary<string, INodeTranslator>();
+
+        public static readonly Dictionary<string, INodeTranslator> Translators = new();
 
         private static readonly Logger logger =
             LogManager.GetCurrentClassLogger();
@@ -58,7 +56,7 @@ namespace Axion.Core {
             Project           project,
             ProcessingOptions options
         ) {
-            logger.Info($"Processing project '{project.ConfigFile.Name}'");
+            logger.Debug($"Processing project '{project.ConfigFile.Name}'");
             var result = Process(project.MainModule, options);
             return result;
         }
@@ -67,7 +65,7 @@ namespace Axion.Core {
             Module            module,
             ProcessingOptions options
         ) {
-            logger.Info(
+            logger.Debug(
                 module.Parent == null
                     ? $"Processing module '{module.Name}'"
                     : $"Processing submodule '{module.Name}'"
@@ -85,7 +83,7 @@ namespace Axion.Core {
         }
 
         public static object? Process(Unit src, ProcessingOptions options) {
-            logger.Info($"Processing '{src.SourceFile.Name}'");
+            logger.Debug($"Processing '{src.SourceFile.Name}'");
             if (src.TextStream.IsEmpty) {
                 logger.Error("Source is empty. Processing aborted.");
                 return null;
@@ -107,18 +105,15 @@ namespace Axion.Core {
                 }
             }
 
-            logger.Info(
+            logger.Debug(
                 errCount > 0 ? "Processing aborted." : "Processing completed."
             );
 
             return result;
         }
 
-        public static readonly Dictionary<
-            Mode,
-            Func<Unit, ProcessingOptions, object>
-        > CompilationSteps =
-            new Dictionary<Mode, Func<Unit, ProcessingOptions, object>> {
+        public static readonly Dictionary<Mode, Func<Unit, ProcessingOptions, object>>
+            CompilationSteps = new() {
                 { Mode.Lexing, Lex },
                 { Mode.Parsing, Parse },
                 { Mode.Reduction, Reduce },
@@ -141,7 +136,7 @@ namespace Axion.Core {
             }
 
             foreach (var mismatch in lexer.MismatchingPairs) {
-                LangException.ReportMismatchedBracket(mismatch);
+                LanguageReport.MismatchedBracket(mismatch);
             }
 
             return src.TokenStream;

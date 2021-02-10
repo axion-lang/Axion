@@ -65,8 +65,7 @@ namespace Axion.Core.Hierarchy {
 
         public Module? Module { get; set; }
 
-        public Dictionary<string, Unit> Imports { get; } =
-            new Dictionary<string, Unit>();
+        public Dictionary<string, Unit> Imports { get; } = new();
 
         public TextStream TextStream { get; private set; }
 
@@ -75,10 +74,9 @@ namespace Axion.Core.Hierarchy {
         [JsonProperty]
         public Ast Ast { get; }
 
-        public List<LangException> Blames { get; } = new List<LangException>();
+        public List<LanguageReport> Blames { get; } = new();
 
-        public bool HasErrors =>
-            Blames.Any(b => b.Severity == BlameSeverity.Error);
+        public bool HasErrors => Blames.Any(b => b.Severity == BlameSeverity.Error);
 
         private Unit(
             string         code      = "",
@@ -103,23 +101,18 @@ namespace Axion.Core.Hierarchy {
             Ast         = new Ast(this);
         }
 
-        public void AddDependency(Unit src) {
-            Imports.Add(src.SourceFile.ToString(), src);
-            Compiler.Process(src, new ProcessingOptions(Mode.Reduction));
-        }
-
         public static Unit FromCode(
             string         code,
             DirectoryInfo? outputDir = null
         ) {
-            return new Unit(code, outputDir: outputDir);
+            return new(code, outputDir: outputDir);
         }
 
         public static Unit FromLines(
             IEnumerable<string> lines,
             DirectoryInfo?      outputDir = null
         ) {
-            return new Unit(string.Join("\n", lines), outputDir: outputDir);
+            return new(string.Join("\n", lines), outputDir: outputDir);
         }
 
         public static Unit FromFile(
@@ -146,7 +139,7 @@ namespace Axion.Core.Hierarchy {
         }
 
         public static Unit FromInterpolation(Unit unit) {
-            return new Unit {
+            return new() {
                 TextStream = unit.TextStream,
                 Module     = unit.Module
             };

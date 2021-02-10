@@ -14,7 +14,7 @@ using Axion.Core.Processing.Translation;
 using Axion.Core.Specification;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
-namespace Axion.Frontend.CSharp {
+namespace Axion.Emitter.CSharp {
     public class Translator : INodeTranslator {
         public string OutputFileExtension => ".cs";
 
@@ -56,10 +56,6 @@ namespace Axion.Frontend.CSharp {
                 }
 
                 w.Write(string.Join("", e.Tokens.Select(t => t.Content)));
-                break;
-            }
-            case YieldExpr e: {
-                w.Write("yield return ", e.Value);
                 break;
             }
             case ClassDef e: {
@@ -157,8 +153,9 @@ namespace Axion.Frontend.CSharp {
                 }
                 else if (e.Operator.Is(In)) {
                     // in (list1 or|and list2)
-                    if (e.Right is ParenthesizedExpr paren
-                     && paren.Value is BinaryExpr collections
+                    if (e.Right is TupleExpr paren
+                     && paren.Expressions.Count == 1
+                     && paren.Expressions[0] is BinaryExpr collections
                      && collections.Operator!.Is(And, Or)) {
                         w.Write(
                             collections.Right,
@@ -428,12 +425,50 @@ namespace Axion.Frontend.CSharp {
                 w.MaybeWriteLine();
                 break;
             }
+            case ImportExpr e: {
+                foreach (var entry in e.Entries) {
+                    var children = entry.Children;
+                    foreach (var child in children) {
+                        TranslateImportEntry(w, "", child);
+                    }
+                }
+                break;
+            }
             default: {
                 return false;
             }
             }
 
             return true;
+        }
+
+        private static void TranslateImportEntry(
+            CodeWriter       w,
+            string           acc,
+            ImportExpr.Entry entry
+        ) {
+            if (entry.Children.Count > 0) {
+                foreach (var subEntry in entry.Children) {
+                    TranslateImportEntry(w, acc, subEntry);
+                }
+            }
+            else {
+                w.Write("using ");
+                if (entry.Alias != null) {
+                    w.Write(entry.Alias, " = ");
+                }
+                if (string.IsNullOrEmpty(acc)) {
+                    w.Write(entry.Name);
+                }
+                else {
+                    w.Write(
+                        acc,
+                        ".",
+                        entry.Name,
+                        ";"
+                    );
+                }
+            }
         }
     }
 }

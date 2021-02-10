@@ -1,0 +1,7 @@
+import
+    core.io
+    constants
+
+
+f1 = File(FileNames.first)
+f1.rename(FileNames.second)

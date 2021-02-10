@@ -4,7 +4,7 @@ using System.Linq;
 using Axion.Core;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Specification;
-using Axion.Frontend.Axion;
+using Axion.Emitter.Axion;
 using NLog;
 using NUnit.Framework;
 

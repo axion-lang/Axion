@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     public class MacroApplicationExpr : AtomExpr {
         public MacroDef? Macro { get; set; }
 
-        public List<Node> Expressions { get; } = new List<Node>();
+        public List<Node> Expressions { get; } = new();
 
         public MacroApplicationExpr(Node parent) : base(parent) { }
 

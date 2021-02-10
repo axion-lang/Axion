@@ -12,7 +12,7 @@ namespace Axion.Core.Processing.Errors {
     ///     Exception that occurs during invalid
     ///     Axion code processing.
     /// </summary>
-    public class LangException : Exception {
+    public class LanguageReport : Exception {
         public override string        Message    { get; }
         public override string        StackTrace { get; }
         public          BlameSeverity Severity   { get; }
@@ -27,7 +27,7 @@ namespace Axion.Core.Processing.Errors {
         public string Time { get; } =
             DateTime.Now.ToString(CultureInfo.InvariantCulture);
 
-        private LangException(
+        private LanguageReport(
             string        message,
             BlameSeverity severity,
             CodeSpan      span
@@ -39,7 +39,12 @@ namespace Axion.Core.Processing.Errors {
             StackTrace = new StackTrace(2).ToString();
         }
 
-        public static void ReportUnexpectedType(Type expectedType, Expr expr) {
+        public static void To(BlameType type, CodeSpan span) {
+            var ex = new LanguageReport(type.Description, type.Severity, span);
+            ex.TargetUnit.Blames.Add(ex);
+        }
+
+        public static void UnexpectedType(Type expectedType, Expr expr) {
             BlameType blameType;
             if (expectedType == typeof(AtomExpr)) {
                 blameType = BlameType.ExpectedAtomExpr;
@@ -59,7 +64,7 @@ namespace Axion.Core.Processing.Errors {
                 );
             }
 
-            var ex = new LangException(
+            var ex = new LanguageReport(
                 blameType.Description,
                 blameType.Severity,
                 expr
@@ -67,9 +72,9 @@ namespace Axion.Core.Processing.Errors {
             expr.Unit.Blames.Add(ex);
         }
 
-        public static void ReportMismatchedBracket(Token bracket) {
+        public static void MismatchedBracket(Token bracket) {
             var matchingBracket = bracket.Type.GetMatchingBracket();
-            var ex = new LangException(
+            var ex = new LanguageReport(
                 $"`{bracket.Value}` has no matching `{matchingBracket.GetValue()}`",
                 BlameSeverity.Error,
                 bracket
@@ -77,21 +82,16 @@ namespace Axion.Core.Processing.Errors {
             bracket.Unit.Blames.Add(ex);
         }
 
-        public static void ReportUnexpectedSyntax(
+        public static void UnexpectedSyntax(
             TokenType expected,
             CodeSpan  span
         ) {
-            var ex = new LangException(
+            var ex = new LanguageReport(
                 $"Invalid syntax, expected `{expected.GetValue()}`, got `{span.Unit.TokenStream.Peek.Type.GetValue()}`.",
                 BlameSeverity.Error,
                 span
             );
             span.Unit.Blames.Add(ex);
-        }
-
-        public static void Report(BlameType type, CodeSpan span) {
-            var ex = new LangException(type.Description, type.Severity, span);
-            ex.TargetUnit.Blames.Add(ex);
         }
 
         public override string ToString() {

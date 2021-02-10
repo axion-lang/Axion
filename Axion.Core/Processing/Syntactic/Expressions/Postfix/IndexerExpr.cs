@@ -64,7 +64,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     }
 
                     if (start == null) {
-                        LangException.Report(
+                        LanguageReport.To(
                             BlameType.InvalidIndexerExpression,
                             Stream.Token
                         );

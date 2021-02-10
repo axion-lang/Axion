@@ -133,7 +133,7 @@ namespace Axion.Core.Processing.Traversal {
                 path.Node = new FuncCallExpr(path.Node.Parent) {
                     Target = bin.Right,
                     Args = new NodeList<FuncCallArg>(path.Node.Parent) {
-                        new FuncCallArg(path.Node.Parent) {
+                        new(path.Node.Parent) {
                             Value = bin.Left
                         }
                     }

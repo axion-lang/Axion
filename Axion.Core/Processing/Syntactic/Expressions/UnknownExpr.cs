@@ -19,7 +19,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public UnknownExpr(Node parent) : base(parent) {
-            LangException.Report(BlameType.InvalidSyntax, this);
+            LanguageReport.To(BlameType.InvalidSyntax, this);
         }
 
         public UnknownExpr Parse() {

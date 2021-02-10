@@ -1,0 +1,8 @@
+
+StdLibPath = '../../stdlib'
+
+Dependencies = [
+    '../core'
+]
+
+ImportedMacros = []

@@ -10,7 +10,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Translation;
 
-namespace Axion.Frontend.Axion {
+namespace Axion.Emitter.Axion {
     public class Translator : INodeTranslator {
         public string OutputFileExtension => ".ax";
 
@@ -19,10 +19,6 @@ namespace Axion.Frontend.Axion {
             case Token e: {
                 // NOTE: all saved token.Value's are valid Axion code.
                 w.Write(e.Value, e.EndingWhite);
-                break;
-            }
-            case AwaitExpr e: {
-                w.Write("await ", e.Value);
                 break;
             }
             case CodeQuoteExpr e: {
@@ -35,14 +31,6 @@ namespace Axion.Frontend.Axion {
             }
             case NameExpr e: {
                 w.Write(string.Join("", e.Tokens.Select(t => t.Value)));
-                break;
-            }
-            case YieldExpr e: {
-                w.Write("yield ");
-                if (e.KwFrom != null)
-                    w.Write("from ");
-
-                w.Write(e.Value);
                 break;
             }
             case ClassDef _: {
@@ -289,10 +277,6 @@ namespace Axion.Frontend.Axion {
             }
             case MacroApplicationExpr e: {
                 w.AddJoin(" ", e.Expressions);
-                break;
-            }
-            case ParenthesizedExpr e: {
-                w.Write("(", e.Value, ")");
                 break;
             }
             case ScopeExpr e: {

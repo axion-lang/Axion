@@ -1,6 +1,5 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
-using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
@@ -64,7 +63,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             Condition =   Parse(this);
             if (Stream.MaybeEat(KeywordElse)) {
                 FalseMark = Stream.Token;
-                FalseExpr = Multiple<InfixExpr>.ParseGenerally(this);
+                FalseExpr = AnyExpr.Parse(this);
             }
 
             if (invert) {

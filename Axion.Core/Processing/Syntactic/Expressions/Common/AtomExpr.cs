@@ -38,15 +38,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
              && !parent.Unit.Module.CustomKeywords.Contains(s.Peek.Content)) {
                 return new NameExpr(parent).Parse(true);
             }
-
-            if (s.PeekIs(KeywordAwait)) {
-                return new AwaitExpr(parent).Parse();
-            }
-
-            if (s.PeekIs(KeywordYield)) {
-                return new YieldExpr(parent).Parse();
-            }
-
+            
             if (s.PeekIs(KeywordFn)) {
                 return new FunctionDef(parent).Parse(true);
             }
@@ -61,7 +53,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                     return new TupleExpr(parent).ParseEmpty();
                 }
 
-                return Multiple<InfixExpr>.ParseGenerally(parent);
+                return Multiple.ParsePermissively<InfixExpr>(parent);
             }
 
             if (Spec.Constants.Contains(s.Peek.Type)) {

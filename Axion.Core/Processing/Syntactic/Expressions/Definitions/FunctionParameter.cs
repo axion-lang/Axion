@@ -23,14 +23,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 ValueType = TypeName.Parse(this);
             }
             else {
-                LangException.Report(
+                LanguageReport.To(
                     BlameType.ImpossibleToInferType,
                     Name
                 );
             }
 
             if (names.Contains(Name.ToString())) {
-                LangException.Report(
+                LanguageReport.To(
                     BlameType.DuplicatedParameterInFunction,
                     Name
                 );
@@ -76,7 +76,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
                 if (s.MaybeEat(Star)) {
                     if (haveMultiply) {
-                        LangException.Report(
+                        LanguageReport.To(
                             BlameType.CannotHaveMoreThan1ListParameter,
                             s.Peek
                         );
@@ -108,7 +108,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                         needDefault = true;
                     }
                     else if (needDefault) {
-                        LangException.Report(
+                        LanguageReport.To(
                             BlameType.ExpectedDefaultParameterValue,
                             parent
                         );
@@ -126,7 +126,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
              && listParameter == null
              && mapParameter  != null
              && !haveKeywordOnlyParameter) {
-                LangException.Report(
+                LanguageReport.To(
                     BlameType.NamedArgsMustFollowBareStar,
                     s.Token
                 );

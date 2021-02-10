@@ -11,11 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Axion", "Axion\Axion.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeConsole", "CodeConsole\CodeConsole\CodeConsole.csproj", "{2A27FDE2-E014-480D-950E-55925D33BB34}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion.Frontend.CSharp", "Axion.Frontend.CSharp\Axion.Frontend.CSharp.csproj", "{364136F2-7AD7-42BF-95CB-E990E094EE57}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion.Emitter.CSharp", "Axion.Emitter.CSharp\Axion.Emitter.CSharp.csproj", "{364136F2-7AD7-42BF-95CB-E990E094EE57}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion.Frontend.Axion", "Axion.Frontend.Axion\Axion.Frontend.Axion.csproj", "{8BD61BC8-02FE-4912-81E6-C50C180C90A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion.Emitter.Axion", "Axion.Emitter.Axion\Axion.Emitter.Axion.csproj", "{8BD61BC8-02FE-4912-81E6-C50C180C90A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion.Frontend.Python", "Axion.Frontend.Python\Axion.Frontend.Python.csproj", "{43945174-1A43-4257-897D-55D48C818A4B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion.Emitter.Python", "Axion.Emitter.Python\Axion.Emitter.Python.csproj", "{43945174-1A43-4257-897D-55D48C818A4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

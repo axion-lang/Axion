@@ -3,8 +3,7 @@
     ///     Defines some settings for source code processing.
     /// </summary>
     public class ProcessingOptions {
-        public static readonly ProcessingOptions Default =
-            new ProcessingOptions(Mode.Default);
+        public static readonly ProcessingOptions Default = new(Mode.Default);
 
         public Mode ProcessingMode { get; }
 

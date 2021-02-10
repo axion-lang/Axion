@@ -125,7 +125,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             // ['let'] name ':' type-name ['=' infix-expr]
             // -----------------^
             if (!(infix is NameExpr varName)) {
-                LangException.Report(BlameType.ExpectedVarName, infix);
+                LanguageReport.To(BlameType.ExpectedVarName, infix);
                 return infix;
             }
 

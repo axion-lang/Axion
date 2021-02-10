@@ -67,15 +67,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                     namedParts.Add(id.Content, typeName);
                 }
                 else if (typeDefined) {
-                    LangException.Report(BlameType.NameIsAlreadyDefined, id);
+                    LanguageReport.To(BlameType.NameIsAlreadyDefined, id);
                 }
                 else {
-                    LangException.Report(BlameType.InvalidMacroParameter, id);
+                    LanguageReport.To(BlameType.InvalidMacroParameter, id);
                 }
             }
 
             if (type == null && parseFunc == null) {
-                LangException.Report(BlameType.ImpossibleToInferType, id);
+                LanguageReport.To(BlameType.ImpossibleToInferType, id);
             }
 
             return this;

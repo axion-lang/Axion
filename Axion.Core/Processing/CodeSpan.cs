@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 namespace Axion.Core.Processing {
     public class CodeSpan {
         [JsonIgnore]
-        public Unit Unit { get; private protected set; }
+        public Unit Unit { get; private protected init; }
 
         /// <summary>
         ///     Start location of this node's code span.
