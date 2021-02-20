@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
@@ -22,8 +23,7 @@ using Module = Axion.Core.Hierarchy.Module;
 
 namespace Axion {
     public static class Program {
-        private static readonly Logger logger =
-            LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private static SimpleLayout logLevel {
             get => LogManager.Configuration.Variables["consoleLogLevel"];
@@ -33,6 +33,11 @@ namespace Axion {
                 LogManager.ReconfigExistingLoggers();
             }
         }
+
+        public static readonly Assembly[] DefaultImports = {
+            typeof(Enumerable).Assembly,
+            typeof(BigInteger).Assembly
+        };
 
         public static void Main(string[] arguments) {
             var cliParser = new Parser(
@@ -58,8 +63,7 @@ namespace Axion {
                                  && fi.Extension == ".dll");
 
             foreach (var fileInfo in dlls) {
-                var shortName =
-                    Path.GetFileNameWithoutExtension(fileInfo.FullName);
+                var shortName = Path.GetFileNameWithoutExtension(fileInfo.FullName);
                 try {
                     var asmName = new AssemblyName(shortName);
                     var asm = new EmitterLoadContext(fileInfo.FullName)
@@ -178,7 +182,6 @@ namespace Axion {
                 "Type 'h', or 'help' to get documentation about launch arguments.\n"
             );
         }
-
 
         private static void PrintError(LanguageReport e) {
             var codeLines = e.TargetUnit.TextStream.Text.Split(
@@ -351,10 +354,7 @@ namespace Axion {
                 var inputFiles = new FileInfo[filesCount];
                 for (var i = 0; i < filesCount; i++) {
                     inputFiles[i] = new FileInfo(
-                        Utilities.TrimMatchingChars(
-                            args.Files.ElementAt(i),
-                            '"'
-                        )
+                        Utilities.TrimMatchingChars(args.Files.ElementAt(i), '"')
                     );
                 }
 
@@ -401,7 +401,7 @@ namespace Axion {
             }
 
             var refs = new List<MetadataReference>(
-                Spec.CSharp.DefaultImports.Select(
+                DefaultImports.Select(
                     asm => MetadataReference.CreateFromFile(asm.Location)
                 )
             );
@@ -515,8 +515,7 @@ namespace Axion {
         }
 
         protected override IntPtr LoadUnmanagedDll(string unmanagedDllName) {
-            var libraryPath =
-                resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+            var libraryPath = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
             return libraryPath != null
                 ? LoadUnmanagedDllFromPath(libraryPath)
                 : IntPtr.Zero;

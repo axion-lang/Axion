@@ -1,42 +1,34 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Numerics;
-using System.Reflection;
+using Axion.Core;
 using Axion.Core.Processing.Lexical.Tokens;
 using static Axion.Core.Processing.Lexical.Tokens.TokenType;
 
-namespace Axion.Core.Specification {
-    public static partial class Spec {
-        public class CSharp {
-            public static readonly Assembly[] DefaultImports = {
-                typeof(Enumerable).Assembly,
-                typeof(BigInteger).Assembly
-            };
+namespace Axion.Emitter.CSharp {
+    public class TargetSpecification {
+        public static readonly string[] AccessModifiers = {
+            "private",
+            "internal",
+            "protected",
+            "public",
+            "private-protected",
+            "protected-internal"
+        };
 
-            public static readonly string[] AccessModifiers = {
-                "private",
-                "internal",
-                "protected",
-                "public",
-                "private-protected",
-                "protected-internal"
-            };
-
-            public static readonly string[] AllowedModifiers =
-                AccessModifiers.Union(
-                    "abstract",
-                    "const",
-                    "extern",
-                    "override",
-                    "partial",
-                    "readonly",
-                    "sealed",
-                    "unsafe",
-                    "virtual",
-                    "volatile",
-                    "static"
-                );
+        public static readonly string[] AllowedModifiers =
+            AccessModifiers.Union(
+                "abstract",
+                "const",
+                "extern",
+                "override",
+                "partial",
+                "readonly",
+                "sealed",
+                "unsafe",
+                "virtual",
+                "volatile",
+                "static"
+            );
 
             // @formatter:off
 
@@ -62,8 +54,5 @@ namespace Axion.Core.Specification {
                 { And,                "&&" },
                 { Or,                 "||" }
             }.ToImmutableDictionary();
-            
-            // @formatter:on
-        }
     }
 }

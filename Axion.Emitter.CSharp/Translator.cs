@@ -162,8 +162,7 @@ namespace Axion.Emitter.CSharp {
                             ".Contains(",
                             e.Left,
                             ") ",
-                            Spec.CSharp.BinaryOperators[
-                                collections.Operator.Type],
+                            TargetSpecification.BinaryOperators[collections.Operator.Type],
                             " ",
                             collections.Left,
                             ".Contains(",
@@ -181,7 +180,7 @@ namespace Axion.Emitter.CSharp {
                     }
                 }
                 else {
-                    if (!Spec.CSharp.BinaryOperators.TryGetValue(
+                    if (!TargetSpecification.BinaryOperators.TryGetValue(
                         e.Operator.Type,
                         out var op
                     )) {
@@ -383,7 +382,7 @@ namespace Axion.Emitter.CSharp {
             case DecoratedExpr e: {
                 foreach (var decorator in e.Decorators) {
                     if (decorator is NameExpr n
-                     && Spec.CSharp.AllowedModifiers.Contains(n.ToString())) {
+                     && TargetSpecification.AllowedModifiers.Contains(n.ToString())) {
                         w.Write(n, " ");
                     }
                 }
