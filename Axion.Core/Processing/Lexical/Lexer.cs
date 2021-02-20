@@ -4,8 +4,9 @@ using System.Text;
 using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
-using static Axion.Core.Specification.Spec;
+using Axion.Specification;
+using static Axion.Specification.TokenType;
+using static Axion.Specification.Spec;
 
 namespace Axion.Core.Processing.Lexical {
     public class Lexer {

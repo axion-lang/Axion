@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using Axion.Core;
-using Axion.Core.Processing.Lexical.Tokens;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using System.Linq;
+using Axion.Specification;
+using static Axion.Specification.TokenType;
 
 namespace Axion.Emitter.CSharp {
-    public class TargetSpecification {
+    public static class TargetSpecification {
         public static readonly string[] AccessModifiers = {
             "private",
             "internal",
@@ -16,19 +16,20 @@ namespace Axion.Emitter.CSharp {
         };
 
         public static readonly string[] AllowedModifiers =
-            AccessModifiers.Union(
-                "abstract",
-                "const",
-                "extern",
-                "override",
-                "partial",
-                "readonly",
-                "sealed",
-                "unsafe",
-                "virtual",
-                "volatile",
-                "static"
-            );
+            AccessModifiers.Union(new[] {
+                               "abstract",
+                               "const",
+                               "extern",
+                               "override",
+                               "partial",
+                               "readonly",
+                               "sealed",
+                               "unsafe",
+                               "virtual",
+                               "volatile",
+                               "static"
+                           })
+                           .ToArray();
 
             // @formatter:off
 

@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using Axion.Core.Processing.Errors;
-using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Specification;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using Axion.Specification;
+using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     /// <summary>
@@ -16,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     /// </summary>
     public class ExpressionPattern : Pattern {
         private Func<Node, Expr>? parseFunc;
-        private Type type = null!;
+        private Type? type;
 
         public ExpressionPattern(Node parent) : base(parent) { }
 
@@ -41,7 +42,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 ? TypeName.Parse(parent)
                 : AnyExpr.Parse(parent);
 
-            if (type.IsInstanceOfType(e)) {
+            if (type?.IsInstanceOfType(e) ?? false) {
                 parent.Ast.MacroApplicationParts.Peek().Expressions.Add(e);
                 return true;
             }
@@ -86,15 +87,31 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 typeName += "Expr";
             }
 
-            if (Spec.ParsingTypes.TryGetValue(typeName, out var t)) {
+            if (ParsingTypes.TryGetValue(typeName, out var t)) {
                 type = t;
             }
-            else if (Spec.ParsingFunctions.TryGetValue(
+            else if (ParsingFunctions.TryGetValue(
                 typeName,
                 out var fn
             )) {
                 parseFunc = fn;
             }
         }
+        
+        public static readonly Dictionary<string, Func<Node, Expr>>
+            ParsingFunctions = new() {
+                { "Expr", AnyExpr.Parse },
+                { nameof(AnyExpr), AnyExpr.Parse },
+                { nameof(InfixExpr), InfixExpr.Parse },
+                { nameof(PrefixExpr), PrefixExpr.Parse },
+                { nameof(PostfixExpr), PostfixExpr.Parse },
+                { nameof(AtomExpr), AtomExpr.Parse },
+                { nameof(ConstantExpr), ConstantExpr.ParseNew }
+            };
+
+        public static readonly Dictionary<string, Type> ParsingTypes = new() {
+            { nameof(ScopeExpr), typeof(ScopeExpr) },
+            { nameof(TypeName), typeof(TypeName) }
+        };
     }
 }

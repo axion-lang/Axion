@@ -11,8 +11,8 @@ using Axion.Core.Processing.Syntactic.Expressions.Postfix;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Translation;
-using Axion.Core.Specification;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using Axion.Specification;
+using static Axion.Specification.TokenType;
 
 namespace Axion.Emitter.CSharp {
     public class Translator : INodeTranslator {
@@ -162,7 +162,8 @@ namespace Axion.Emitter.CSharp {
                             ".Contains(",
                             e.Left,
                             ") ",
-                            TargetSpecification.BinaryOperators[collections.Operator.Type],
+                            TargetSpecification.BinaryOperators
+                                [collections.Operator.Type],
                             " ",
                             collections.Left,
                             ".Contains(",

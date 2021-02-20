@@ -10,7 +10,7 @@ using Axion.Core;
 using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Translation;
-using Axion.Core.Specification;
+using Axion.Specification;
 using CodeConsole;
 using CodeConsole.ScriptBench;
 using CommandLine;

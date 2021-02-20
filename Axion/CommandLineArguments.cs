@@ -28,7 +28,7 @@ namespace Axion {
             "│     │ " + nameof(Reduction) + "        │ | Generate syntax tree and reduce it.                         │",
             "│     │ <language name>  │ | Translate Axion code into target language.                  │",
             "│     │                  │ | | Available languages:                                      │",
-            "│     │                  │ | | " + string.Join(", ", Compiler.Translators) + ".                                    │",
+            "│     │                  │ | | " + string.Join(", ", Compiler.Translators.Keys) + ".                                    │",
             "├─────┼──────────────────┼───────────────────────────────────────────────────────────────┤",
             "│ -d  │ --debug          │ Save debug information to compiler output directory.          │",
             "│ -v  │ --version        │ Display information about compiler version.                   │",

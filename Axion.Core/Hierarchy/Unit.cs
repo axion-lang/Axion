@@ -6,7 +6,7 @@ using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Specification;
+using Axion.Specification;
 using Newtonsoft.Json;
 
 namespace Axion.Core.Hierarchy {

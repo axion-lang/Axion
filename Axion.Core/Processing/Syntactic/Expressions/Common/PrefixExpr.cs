@@ -1,6 +1,6 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
-using Axion.Core.Specification;
+using Axion.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// <summary>

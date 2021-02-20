@@ -15,6 +15,8 @@ namespace Axion.Core.Processing.Translation {
         private bool lastLineEmpty;
 
         private readonly INodeTranslator translator;
+        private static readonly INodeTranslator fallbackTranslator =
+            Compiler.Translators["axion"];
 
         public string OutputFileExtension => translator.OutputFileExtension;
 
@@ -23,7 +25,7 @@ namespace Axion.Core.Processing.Translation {
             set => writer.Indent = value;
         }
 
-        public static readonly CodeWriter Default = new(Compiler.Translators["axion"]);
+        public static readonly CodeWriter Default = new(fallbackTranslator);
 
         public CodeWriter(INodeTranslator translator) {
             baseWriter      = new StringWriter();
@@ -37,7 +39,7 @@ namespace Axion.Core.Processing.Translation {
                 if (v is ITranslatableNode node) {
                     if (!translator.Translate(this, node)) {
                         // NOTE: Fallback converter
-                        Compiler.Translators["axion"].Translate(this, node);
+                        fallbackTranslator.Translate(this, node);
                     }
                 }
                 else {

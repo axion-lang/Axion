@@ -1,4 +1,5 @@
 ﻿using Axion.Core.Hierarchy;
+using Axion.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class CommentToken : Token {

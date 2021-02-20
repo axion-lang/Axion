@@ -12,7 +12,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Patterns;
 using Axion.Core.Processing.Syntactic.Expressions.Postfix;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Specification;
+using Axion.Specification;
 
 namespace Axion.Core.Processing.Traversal {
     public class NoPathTraversingAttribute : Attribute { }

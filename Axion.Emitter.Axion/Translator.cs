@@ -9,6 +9,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Postfix;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Translation;
+using Axion.Specification;
 
 namespace Axion.Emitter.Axion {
     public class Translator : INodeTranslator {

@@ -2,7 +2,7 @@
 using System.IO;
 using Axion.Core;
 using Axion.Core.Hierarchy;
-using Axion.Core.Specification;
+using Axion.Specification;
 
 namespace Axion.Testing.NUnit {
     public static class TestUtils {

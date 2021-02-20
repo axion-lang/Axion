@@ -4,7 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using Axion.Specification;
+using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic {
     [DebuggerDisplay("{TokenIdx}: '{Token.Value}', then '{Peek.Value}'.")]

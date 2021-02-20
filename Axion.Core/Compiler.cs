@@ -9,7 +9,7 @@ using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Translation;
 using Axion.Core.Processing.Traversal;
-using Axion.Core.Specification;
+using Axion.Specification;
 using NLog;
 using Module = Axion.Core.Hierarchy.Module;
 
@@ -160,13 +160,13 @@ namespace Axion.Core {
         ) {
             if (!Translators.TryGetValue(
                 options.TargetLanguage,
-                out var ncv
+                out var translator
             )) {
                 logger.Error($"No frontend with name {options.TargetLanguage}");
                 return CodeWriter.Default;
             }
 
-            var cw = new CodeWriter(ncv);
+            var cw = new CodeWriter(translator);
             try {
                 cw.Write(src.Ast);
                 var code = cw.ToString();
@@ -184,7 +184,7 @@ namespace Axion.Core {
             }
             catch (Exception ex) {
                 logger.Error("Translation failed:");
-                logger.Info(ex.Message);
+                logger.Info(ex);
             }
 
             return cw;

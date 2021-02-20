@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Patterns;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
@@ -49,22 +49,22 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             // Example:
             // ========
             // macro post-condition-loop (
-            //     'do',
-            //     scope: Scope,
-            //     ('while' | 'until'),
-            //     condition: Infix
+            //   'do',
+            //   scope: Scope,
+            //   ('while' | 'until'),
+            //   condition: Infix
             // )
-            //     if syntax[2] == 'while'
-            //         condition = {{ not $condition }}
+            //   if syntax[2] == 'while'
+            //     condition = {{ not $condition }}
             // 
-            //     return {{
-            //         while true {
-            //             $scope
-            //             if $condition {
-            //                 break
-            //             }
-            //         }
-            //     }}
+            //   return {{
+            //     while true {
+            //       $scope
+            //       if $condition {
+            //         break
+            //       }
+            //     }
+            //   }}
             KwMacro = Stream.Eat(KeywordMacro);
             Name    = new NameExpr(this).Parse(true);
             Syntax  = new CascadePattern(this);
