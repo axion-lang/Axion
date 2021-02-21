@@ -110,11 +110,12 @@ namespace Axion.Core {
         }
 
         public static string TrimMatchingChars(string input, char c) {
-            if (input.Length >= 2 && input[0] == c && input[^1] == c) {
-                return input.Substring(1, input.Length - 2);
+            while (true) {
+                if (input.Length >= 2 && input[0] == c && input[^1] == c)
+                    input = input[1..^2];
+                else
+                    return input;
             }
-
-            return input;
         }
 
         public static string Multiply(this string source, int multiplier) {
