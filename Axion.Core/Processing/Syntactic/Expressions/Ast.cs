@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     /// </summary>
     public class Ast : ScopeExpr {
         internal List<MacroDef> Macros =>
-            Unit.Module.Definitions.Values.OfType<MacroDef>().ToList();
+            Unit.Module.Definitions.OfType<MacroDef>().ToList();
 
         internal readonly Stack<MacroApplicationExpr> MacroApplicationParts = new();
 
