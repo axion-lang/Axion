@@ -20,12 +20,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
         public CascadePattern(Node parent) : base(parent) { }
 
         public override bool Match(Expr parent) {
-            var startIdx = Stream.TokenIdx;
+            var startIdx = parent.Stream.TokenIdx;
             if (Patterns.All(pattern => pattern.Match(parent))) {
                 return true;
             }
 
-            Stream.MoveAbsolute(startIdx);
+            parent.Stream.MoveAbsolute(startIdx);
             return false;
         }
 
