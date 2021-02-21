@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// <summary>
     ///     "Atom" expression has no detachable parts.
     ///     <br/>
-    ///     It meant to be embedded in other expressions.
+    ///     It is meant to be embedded in other expressions.
     ///     <br/>
     ///     Exceptions, like 'await' or 'yield' can appear
     ///     on the top level of <see cref="AnyExpr"/> if needed,
