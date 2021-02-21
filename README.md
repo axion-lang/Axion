@@ -71,7 +71,7 @@ and type `-h` in console to get support about arguments for compiler interface.
 
 At the moment toolset supports interpretation of the Axion source
 with `-i` CLI argument (through console code editor) and
-file processing with `-f "<path>.ax" -m <to-output_lang>` arguments.
+file processing with `-f "<path>.ax" -m <output lang>` arguments.
 
 Interpretation is performed by transpiling Axion to C# and running
 it through Roslyn (still incomplete and doesn't support some syntax).
