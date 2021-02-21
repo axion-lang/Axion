@@ -12,7 +12,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
 
         public TokenPattern(Node parent) : base(parent) { }
 
-        public override bool Match(Node parent) {
+        public override bool Match(Expr parent) {
             var s = parent.Unit.TokenStream;
             if (s.Peek.Content != Value?.Content) {
                 return false;

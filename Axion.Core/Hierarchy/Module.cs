@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using Axion.Core.Processing.Errors;
@@ -70,18 +72,16 @@ namespace Axion.Core.Hierarchy {
         public List<LanguageReport> Blames =>
             Units.Values.Select(u => u.Blames).SelectMany(x => x).ToList();
 
-        private readonly Dictionary<string, IDefinitionExpr> definitions = new();
+        private readonly List<IDefinitionExpr> definitions = new();
 
-        public Dictionary<string, IDefinitionExpr> Definitions {
-            get => definitions;
-            set {
-                foreach (var (name, def) in value) {
-                    if (!definitions.ContainsKey(name)) {
-                        definitions.Add(name, def);
-                    }
-                }
-            }
-        }
+        public ImmutableList<IDefinitionExpr> Definitions =>
+            definitions.Union(Submodules.Values
+                                        .Select(sm => sm.Definitions)
+                                        .SelectMany(x => x)
+                       )
+                       .ToImmutableList();
+
+        private readonly HashSet<string> customKeywords = new();
 
         public HashSet<string> CustomKeywords { get; } = new();
 
@@ -184,17 +184,17 @@ namespace Axion.Core.Hierarchy {
             }
 
             var name = def.Name.ToString();
-            if (Definitions.ContainsKey(name)) {
+            if (Definitions.Any(d => d.Name?.ToString() == name)) {
                 LanguageReport.To(BlameType.NameIsAlreadyDefined, def.Name);
             }
             else {
-                Definitions.Add(name, def);
+                definitions.Add(def);
             }
         }
 
         public IDefinitionExpr? FindDefinitionByName(string name) {
             var def =
-                Definitions.FirstOrDefault(kvp => kvp.Key == name).Value
+                Definitions.FirstOrDefault(d => d.Name?.ToString() == name)
              ?? Parent?.FindDefinitionByName(name);
             return def;
         }
