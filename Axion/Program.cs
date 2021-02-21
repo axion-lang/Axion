@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Scripting;
 using NLog;
+using NLog.Fluent;
 using NLog.Layouts;
 using Module = Axion.Core.Hierarchy.Module;
 
@@ -301,16 +302,14 @@ namespace Axion {
 
                     // interpret as source code and output result
                     var module = Module.RawFrom(
-                        new FileInfo(Compiler.GetTempSourceFilePath())
-                            .Directory!
+                        new FileInfo(Compiler.GetTempSourceFilePath()).Directory!
                     );
                     module.Bind(Unit.FromLines(codeLines));
                     var result = Compiler.Process(
                         module,
                         new ProcessingOptions("CSharp")
                     );
-                    if (module.HasErrors
-                     || !(result is CodeWriter codeWriter)) {
+                    if (module.HasErrors || result is not CodeWriter codeWriter) {
                         break;
                     }
 
@@ -358,19 +357,17 @@ namespace Axion {
                     );
                 }
 
-                try {
-                    module = Module.RawFrom(inputFiles[0].Directory);
-                    module.Bind(Unit.FromFile(inputFiles[0]));
-                }
-                catch (Exception e) {
-                    logger.Error(e);
-                    return;
-                }
+                module = Module.RawFrom(inputFiles[0].Directory);
+                module.Bind(Unit.FromFile(inputFiles[0]));
+                Compiler.Process(module, pOptions);
             }
             else if (!string.IsNullOrWhiteSpace(args.Project)) {
                 var proj = new Project(args.Project);
+                var ll   = logLevel.Text;
+                logLevel = "Fatal";
                 Compiler.Process(proj, pOptions);
-                module = proj.MainModule;
+                logLevel = ll;
+                module   = proj.MainModule;
             }
             else if (!string.IsNullOrWhiteSpace(args.Code)) {
                 var tempDir =
@@ -380,6 +377,7 @@ namespace Axion {
                 );
                 module = Module.RawFrom(tempDir);
                 module.Bind(unit);
+                Compiler.Process(module, pOptions);
             }
             else {
                 logger.Error(
@@ -387,9 +385,6 @@ namespace Axion {
                 );
                 return;
             }
-
-            Compiler.Process(module, pOptions);
-
             foreach (var e in module.Blames) {
                 PrintError(e);
             }
