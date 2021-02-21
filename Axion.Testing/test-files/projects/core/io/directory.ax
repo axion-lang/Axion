@@ -1,7 +1,7 @@
 class Directory <- FileSystemEntity
     name: String
 
-    fn File(name: String)
+    fn Directory(name: String)
         self.name = name
 
     fn rename(new-name: String)
