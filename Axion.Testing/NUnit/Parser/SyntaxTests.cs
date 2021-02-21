@@ -21,31 +21,31 @@ namespace Axion.Testing.NUnit.Parser {
         [Test]
         public void TestBisectAlgorithm() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
         public void TestClassDef() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
         public void TestConditionalExpression() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
         public void TestConsole2048() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
         public void TestConsoleSnake() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
@@ -57,31 +57,31 @@ namespace Axion.Testing.NUnit.Parser {
         [Test]
         public void TestDotExpressions() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
         public void TestDoWhileMacro() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
         public void TestFastFib() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
         public void TestFizzBuzz() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
         public void TestFuncCalls() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
@@ -99,13 +99,13 @@ namespace Axion.Testing.NUnit.Parser {
         [Test]
         public void TestImports() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
         public void TestMatchMacro() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
@@ -123,7 +123,7 @@ namespace Axion.Testing.NUnit.Parser {
         [Test]
         public void TestNestedForComprehension() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
@@ -135,7 +135,7 @@ namespace Axion.Testing.NUnit.Parser {
         [Test]
         public void TestWhileExpression() {
             var unit = ParseTestFile();
-            Assert.AreEqual(0, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
         }
     }
 }
