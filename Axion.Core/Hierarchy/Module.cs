@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using Axion.Core.Processing.Errors;
