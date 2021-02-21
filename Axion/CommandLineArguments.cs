@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using Axion.Core;
 using CommandLine;
 using static Axion.Core.Mode;
 
@@ -27,8 +26,7 @@ namespace Axion {
             "│     │ " + nameof(Parsing) + "          │ | Generate syntax tree.                                       │",
             "│     │ " + nameof(Reduction) + "        │ | Generate syntax tree and reduce it.                         │",
             "│     │ <language name>  │ | Translate Axion code into target language.                  │",
-            "│     │                  │ | | Available languages:                                      │",
-            "│     │                  │ | | " + string.Join(", ", Compiler.Translators.Keys) + ".                                    │",
+            "│     │                  │ | | Available languages can be listed with 'l -f'.            │",
             "├─────┼──────────────────┼───────────────────────────────────────────────────────────────┤",
             "│ -d  │ --debug          │ Save debug information to compiler output directory.          │",
             "│ -v  │ --version        │ Display information about compiler version.                   │",
