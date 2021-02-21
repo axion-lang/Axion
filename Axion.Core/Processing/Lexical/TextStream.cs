@@ -28,13 +28,13 @@ namespace Axion.Core.Processing.Lexical {
 
         public string RestOfLine {
             get {
-                var textFromCurrent = Text.Substring(charIdx + 1);
+                var textFromCurrent = Text[(charIdx + 1)..];
                 var i               = textFromCurrent.IndexOf('\n');
                 if (i == -1) {
                     return textFromCurrent;
                 }
 
-                return textFromCurrent.Substring(0, i + 1);
+                return textFromCurrent[..(i + 1)];
             }
         }
 

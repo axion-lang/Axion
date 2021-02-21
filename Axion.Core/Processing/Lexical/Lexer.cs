@@ -572,7 +572,7 @@ namespace Axion.Core.Processing.Lexical {
                     }
                 }
 
-                var num = Utilities.ParseInt(raw.Substring(2), 16);
+                var num = Utilities.ParseInt(raw[2..], 16);
                 if (num != null) {
                     const int unicodeUpperBound = 0x10ffff;
                     if (0 <= num && num <= unicodeUpperBound) {
@@ -599,7 +599,7 @@ namespace Axion.Core.Processing.Lexical {
                     return;
                 }
 
-                var num = Utilities.ParseInt(raw.Substring(2), 16);
+                var num = Utilities.ParseInt(raw[2..], 16);
                 if (num != null) {
                     escaped += num;
                 }

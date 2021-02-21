@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -106,7 +106,7 @@ namespace Axion.Core {
                 }
             }
 
-            yield return str.Substring(nextPiece);
+            yield return str[nextPiece..];
         }
 
         public static string TrimMatchingChars(string input, char c) {
