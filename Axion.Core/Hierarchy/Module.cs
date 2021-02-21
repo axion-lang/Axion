@@ -83,7 +83,12 @@ namespace Axion.Core.Hierarchy {
 
         private readonly HashSet<string> customKeywords = new();
 
-        public HashSet<string> CustomKeywords { get; } = new();
+        public ImmutableHashSet<string> CustomKeywords =>
+            customKeywords.Union(Submodules.Values
+                                           .Select(sm => sm.CustomKeywords)
+                                           .SelectMany(x => x)
+                          )
+                          .ToImmutableHashSet();
 
         private Module(DirectoryInfo dir) {
             Directory = dir;
@@ -203,7 +208,7 @@ namespace Axion.Core.Hierarchy {
             if (!Spec.Keywords.ContainsKey(keyword)
              && !Spec.Operators.ContainsKey(keyword)
              && !Spec.Punctuation.ContainsKey(keyword)) {
-                CustomKeywords.Add(keyword);
+                customKeywords.Add(keyword);
             }
         }
 
