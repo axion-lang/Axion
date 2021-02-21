@@ -18,7 +18,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Scripting;
 using NLog;
-using NLog.Fluent;
 using NLog.Layouts;
 using Module = Axion.Core.Hierarchy.Module;
 
