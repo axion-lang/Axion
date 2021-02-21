@@ -50,7 +50,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                     var newPrecedence = -1;
                     if (s.Peek is OperatorToken opToken) {
                         newPrecedence = opToken.Precedence;
-                    } 
+                    }
                     // NOTE: this condition disallows identifiers
                     //  on newline to be used as operators.
                     else if (!s.Token.Is(Newline, Outdent) && s.PeekIs(Identifier)) {
@@ -68,21 +68,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                         Right    = ParseInfix(newPrecedence + 1)
                     };
                 }
-
-                if (!s.Token.Is(Newline, Outdent)) {
-                    if (s.PeekIs(KeywordFor)) {
-                        leftExpr = new ForComprehension(parent) {
-                            Target = leftExpr
-                        }.Parse();
-                    }
-
-                    if (s.PeekIs(KeywordIf, KeywordUnless)) {
-                        return new TernaryExpr(parent) {
-                            TrueExpr = leftExpr
-                        }.Parse();
-                    }
+                if (s.Token.Is(Newline, Outdent)) {
+                    return leftExpr;
                 }
-
+                if (s.PeekIs(KeywordFor)) {
+                    leftExpr = new ForComprehension(parent) {
+                        Target = leftExpr
+                    }.Parse();
+                }
+                if (s.PeekIs(KeywordIf, KeywordUnless)) {
+                    return new TernaryExpr(parent) {
+                        TrueExpr = leftExpr
+                    }.Parse();
+                }
                 return leftExpr;
             }
 
