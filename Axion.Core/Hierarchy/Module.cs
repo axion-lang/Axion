@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
-using Axion.Core.Specification;
+using Axion.Specification;
 
 namespace Axion.Core.Hierarchy {
     public class Module {

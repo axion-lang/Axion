@@ -1,6 +1,7 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>

@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion.Emitter.Axion", "Axio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion.Emitter.Python", "Axion.Emitter.Python\Axion.Emitter.Python.csproj", "{43945174-1A43-4257-897D-55D48C818A4B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axion.Specification", "Axion.Specification\Axion.Specification.csproj", "{0E2D7CA0-49F6-4060-B901-F0D471E6C526}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{43945174-1A43-4257-897D-55D48C818A4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43945174-1A43-4257-897D-55D48C818A4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43945174-1A43-4257-897D-55D48C818A4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E2D7CA0-49F6-4060-B901-F0D471E6C526}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E2D7CA0-49F6-4060-B901-F0D471E6C526}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E2D7CA0-49F6-4060-B901-F0D471E6C526}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E2D7CA0-49F6-4060-B901-F0D471E6C526}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

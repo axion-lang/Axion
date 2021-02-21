@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Core.Specification;
+using Axion.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class StringToken : Token {

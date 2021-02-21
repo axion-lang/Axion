@@ -1,8 +1,6 @@
 ﻿using System.Linq;
 using Axion.Core.Hierarchy;
-using Axion.Core.Specification;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using Axion.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class OperatorToken : Token {
@@ -32,13 +30,5 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                 Side       = InputSide.Unknown;
             }
         }
-    }
-
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum InputSide {
-        Unknown,
-        Both,
-        Right,
-        Left
     }
 }

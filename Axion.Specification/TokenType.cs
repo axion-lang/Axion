@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
-using Axion.Core.Specification;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Processing.Lexical.Tokens {
+namespace Axion.Specification {
     /// <summary>
     ///     Contains all types of tokens
     ///     available in language specification.
@@ -132,19 +131,19 @@ namespace Axion.Core.Processing.Lexical.Tokens {
     }
 
     public static class TokenTypeExtensions {
-        internal static bool IsOpenBracket(this TokenType type) {
+        public static bool IsOpenBracket(this TokenType type) {
             return type == OpenParenthesis
                 || type == OpenBracket
                 || type == OpenBrace;
         }
 
-        internal static bool IsCloseBracket(this TokenType type) {
+        public static bool IsCloseBracket(this TokenType type) {
             return type == CloseParenthesis
                 || type == CloseBracket
                 || type == CloseBrace;
         }
 
-        internal static TokenType GetMatchingBracket(this TokenType type) {
+        public static TokenType GetMatchingBracket(this TokenType type) {
             return type switch {
                 CloseBrace       => OpenBrace,
                 CloseBracket     => OpenBracket,
@@ -158,7 +157,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             };
         }
 
-        internal static string GetValue(this TokenType type) {
+        public static string GetValue(this TokenType type) {
             try {
                 return Spec.Keywords.First(kvp => kvp.Value == type).Key;
             }

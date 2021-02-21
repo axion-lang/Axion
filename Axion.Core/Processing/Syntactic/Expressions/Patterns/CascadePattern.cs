@@ -1,6 +1,6 @@
 using System.Linq;
 using Axion.Core.Processing.Errors;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     /// <summary>

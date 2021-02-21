@@ -29,6 +29,7 @@ Built with .NET Standard.</Description>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <DebugType>portable</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
@@ -37,12 +38,15 @@ Built with .NET Standard.</Description>
         <PackageReference Include="Nett.Coma" Version="0.15.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1-beta1" />
         <PackageReference Include="NLog" Version="4.7.7" />
-        <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
         <None Update="NLog.config">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Axion.Specification\Axion.Specification.csproj" />
     </ItemGroup>
 </Project>

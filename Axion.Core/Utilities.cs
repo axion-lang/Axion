@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.Specification;
 
 namespace Axion.Core {
     public static class Utilities {
@@ -68,13 +69,6 @@ namespace Axion.Core {
             }
 
             return null;
-        }
-
-        public static T[] Union<T>(
-            this   IEnumerable<T> collection1,
-            params T[]            collection2
-        ) {
-            return Enumerable.Union(collection1, collection2).ToArray();
         }
 
         #region String utilities

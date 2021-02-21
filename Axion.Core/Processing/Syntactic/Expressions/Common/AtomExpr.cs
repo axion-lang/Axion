@@ -2,8 +2,8 @@ using System.Linq;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
-using Axion.Core.Specification;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using Axion.Specification;
+using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     /// <summary>

@@ -2,21 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Axion.Core.Processing;
-using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Processing.Syntactic.Expressions;
-using Axion.Core.Processing.Syntactic.Expressions.Atomic;
-using Axion.Core.Processing.Syntactic.Expressions.Common;
-using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using static Axion.Core.Processing.Lexical.Tokens.InputSide;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using static Axion.Specification.InputSide;
+using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Specification {
+namespace Axion.Specification {
     /// <summary>
     ///     Static class with language's grammar definitions
     ///     (allowed operators, keywords, etc.)
     /// </summary>
-    public static partial class Spec {
+    public static class Spec {
         public const string FileExtension = ".ax";
 
         public const char EndOfCode = '\0';
@@ -51,10 +45,10 @@ namespace Axion.Core.Specification {
             '5', '6', '7', '8', '9'
         };
 
-        public static readonly char[] NumbersHex = NumbersDec.Union(
+        public static readonly char[] NumbersHex = NumbersDec.Union(new [] {
             'a', 'b', 'c', 'd', 'e', 'f',
             'A', 'B', 'C', 'D', 'E', 'F'
-        );
+        }).ToArray();
         
         // @formatter:on
 
@@ -217,27 +211,27 @@ namespace Axion.Core.Specification {
         // @formatter:off
 
         public static readonly Dictionary<string, TokenType> Punctuation = new() {
-                // Order of keys makes sense here.
-                // Longer tokens must be above shorter ones.
-                // (Lexer's character stream functions
-                //  work correctly only with Dict-s sorted by length.)
-                { "->", RightArrow },
-                { "<-", LeftArrow },
-                { "{{", DoubleOpenBrace },
-                { "}}", DoubleCloseBrace },
-                { "@",  At },
-                { "?",  Question },
-                { "$",  Dollar },
-                { "(",  OpenParenthesis },
-                { ")",  CloseParenthesis },
-                { "[",  OpenBracket },
-                { "]",  CloseBracket },
-                { "{",  OpenBrace },
-                { "}",  CloseBrace },
-                { ",",  Comma },
-                { ":",  Colon },
-                { ";",  Semicolon }
-            };
+            // Order of keys makes sense here.
+            // Longer tokens must be above shorter ones.
+            // (Lexer's character stream functions
+            //  work correctly only with Dict-s sorted by length.)
+            { "->", RightArrow },
+            { "<-", LeftArrow },
+            { "{{", DoubleOpenBrace },
+            { "}}", DoubleCloseBrace },
+            { "@",  At },
+            { "?",  Question },
+            { "$",  Dollar },
+            { "(",  OpenParenthesis },
+            { ")",  CloseParenthesis },
+            { "[",  OpenBracket },
+            { "]",  CloseBracket },
+            { "{",  OpenBrace },
+            { "}",  CloseBrace },
+            { ",",  Comma },
+            { ":",  Colon },
+            { ";",  Semicolon }
+        };
         
         // @formatter:on
 
@@ -249,7 +243,7 @@ namespace Axion.Core.Specification {
         public static readonly TokenType[] NeverExprStartTypes = Operators
             .Values.Where(op => op.Side == Both)
             .Select(op => op.Type)
-            .Union(
+            .Union(new[] {
                 CloseBrace,
                 CloseBracket,
                 CloseParenthesis,
@@ -261,7 +255,8 @@ namespace Axion.Core.Specification {
                 Outdent,
                 Question,
                 RightArrow
-            );
+            })
+            .ToArray();
 
         public const string CharType = "Char";
         public const string StringType = "String";
@@ -269,21 +264,5 @@ namespace Axion.Core.Specification {
         public const string UnitType = "Unit";
         public const string UnionType = "Union";
         public const string UnknownType = "UNKNOWN_TYPE";
-
-        public static readonly Dictionary<string, Func<Node, Expr>>
-            ParsingFunctions = new() {
-                { "Expr", AnyExpr.Parse },
-                { nameof(AnyExpr), AnyExpr.Parse },
-                { nameof(InfixExpr), InfixExpr.Parse },
-                { nameof(PrefixExpr), PrefixExpr.Parse },
-                { nameof(PostfixExpr), PostfixExpr.Parse },
-                { nameof(AtomExpr), AtomExpr.Parse },
-                { nameof(ConstantExpr), ConstantExpr.ParseNew }
-            };
-
-        public static readonly Dictionary<string, Type> ParsingTypes = new() {
-            { nameof(ScopeExpr), typeof(ScopeExpr) },
-            { nameof(TypeName), typeof(TypeName) }
-        };
     }
 }

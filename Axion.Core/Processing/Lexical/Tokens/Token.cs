@@ -1,7 +1,9 @@
+using System.Linq;
 using System.Web;
 using Axion.Core.Hierarchy;
+using Axion.Specification;
 using Newtonsoft.Json;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class Token : Node {

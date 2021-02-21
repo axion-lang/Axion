@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Linq;
-using Axion.Core.Specification;
+using Axion.Specification;
 
 namespace Axion.Core.Processing.Lexical {
     /// <summary>

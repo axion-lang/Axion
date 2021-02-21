@@ -4,10 +4,10 @@ using System.Drawing;
 using Axion.Core;
 using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Specification;
+using Axion.Specification;
 using CodeConsole;
 using static System.ConsoleColor;
-using static Axion.Core.Processing.Lexical.Tokens.TokenType;
+using static Axion.Specification.TokenType;
 
 namespace Axion {
     /// <summary>

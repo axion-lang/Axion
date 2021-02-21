@@ -1,12 +1,12 @@
 using System;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
-using Axion.Core.Specification;
+using Axion.Core.Processing.Syntactic.Expressions.Patterns;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
     public static class Auxiliary {
         public static Func<Node, Expr> GetParsingFunction<T>() where T : Expr {
             Func<Node, Expr> parserFunc = AnyExpr.Parse;
-            if (Spec.ParsingFunctions.TryGetValue(
+            if (ExpressionPattern.ParsingFunctions.TryGetValue(
                 typeof(T).Name,
                 out var specialParsingFunc
             )) {
