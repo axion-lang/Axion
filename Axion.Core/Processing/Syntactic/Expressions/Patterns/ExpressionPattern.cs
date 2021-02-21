@@ -34,7 +34,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
             Expr? e;
             if (parseFunc != null) {
                 e = parseFunc(parent);
-                parent.Ast.MacroApplicationParts.Peek().Expressions.Add(e);
+                parent.Ast.MatchedMacros.Peek().Nodes.Add(e);
                 return true;
             }
 
@@ -43,7 +43,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 : AnyExpr.Parse(parent);
 
             if (type?.IsInstanceOfType(e) ?? false) {
-                parent.Ast.MacroApplicationParts.Peek().Expressions.Add(e);
+                parent.Ast.MatchedMacros.Peek().Nodes.Add(e);
                 return true;
             }
 

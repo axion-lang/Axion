@@ -18,7 +18,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 return false;
             }
 
-            parent.Ast.MacroApplicationParts.Peek().Expressions.Add(s.Eat());
+            parent.Ast.MatchedMacros.Peek().Nodes.Add(s.Eat());
             return true;
         }
 

@@ -412,7 +412,7 @@ namespace Axion.Emitter.CSharp {
                      && !(item is IDefinitionExpr
                        || item is IfExpr
                        || item is WhileExpr
-                       || item is MacroApplicationExpr)
+                       || item is MacroMatchExpr)
                      || item is VarDef) {
                         w.Write(";");
                     }

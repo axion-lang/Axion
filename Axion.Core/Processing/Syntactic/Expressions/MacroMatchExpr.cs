@@ -10,33 +10,33 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     but some piece of code defined as expression
     ///     by language macros.
     /// </summary>
-    public class MacroApplicationExpr : AtomExpr {
+    public class MacroMatchExpr : AtomExpr {
         public MacroDef? Macro { get; set; }
 
-        public List<Node> Expressions { get; } = new();
+        public List<Node> Nodes { get; } = new();
 
-        public MacroApplicationExpr(Node parent) : base(parent) { }
+        public MacroMatchExpr(Node parent) : base(parent) { }
 
-        public MacroApplicationExpr Parse() {
-            Ast.MacroApplicationParts.Push(this);
+        public MacroMatchExpr Parse() {
+            Ast.MatchedMacros.Push(this);
             Macro = Ast.Macros.FirstOrDefault(
                 m => m.Syntax.Patterns.Count > 0
                   && m.Syntax.Patterns[0] is TokenPattern
                   && m.Syntax.Match(this)
             );
-            if (Macro != default) {
-                Start = Expressions[0].Start;
-                End   = Expressions[^1].End;
+            if (Macro == default) {
+                Nodes.Clear();
             }
             else {
-                Expressions.Clear();
+                Start = Nodes[0].Start;
+                End   = Nodes[^1].End;
             }
-            Ast.MacroApplicationParts.Pop();
+            Ast.MatchedMacros.Pop();
             return this;
         }
 
-        public MacroApplicationExpr Parse(Expr leftExpr) {
-            Ast.MacroApplicationParts.Push(this);
+        public MacroMatchExpr Parse(Expr leftExpr) {
+            Ast.MatchedMacros.Push(this);
             var startIdx = Stream.TokenIdx;
 
             Macro = Ast.Macros.FirstOrDefault(
@@ -51,19 +51,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                         Macro.Syntax.Patterns.Skip(2)
                     )
                 };
-                Expressions.Insert(0, leftExpr);
+                Nodes.Insert(0, leftExpr);
                 if (restCascade.Match(this)) {
-                    Start = Expressions[0].Start;
-                    End   = Expressions[^1].End;
+                    Start = Nodes[0].Start;
+                    End   = Nodes[^1].End;
                 }
                 else {
                     Macro = null;
                     Stream.MoveAbsolute(startIdx);
-                    Expressions.Clear();
+                    Nodes.Clear();
                 }
             }
 
-            Ast.MacroApplicationParts.Pop();
+            Ast.MatchedMacros.Pop();
             return this;
         }
     }

@@ -38,7 +38,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
              && !parent.Unit.Module.CustomKeywords.Contains(s.Peek.Content)) {
                 return new NameExpr(parent).Parse(true);
             }
-            
+
             if (s.PeekIs(KeywordFn)) {
                 return new FunctionDef(parent).Parse(true);
             }
@@ -60,8 +60,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 return new ConstantExpr(parent).Parse();
             }
 
-            var macro =
-                new MacroApplicationExpr(parent).Parse();
+            var macro = new MacroMatchExpr(parent).Parse();
             if (macro.Macro != null) {
                 return macro;
             }

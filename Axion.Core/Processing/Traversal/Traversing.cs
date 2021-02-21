@@ -24,7 +24,7 @@ namespace Axion.Core.Processing.Traversal {
         /// </summary>
         public static void Traverse(Node root) {
             // TODO: fix reducing of macros
-            if (root is MacroApplicationExpr
+            if (root is MacroMatchExpr
              || root is Pattern
              || root is Token) {
                 return;

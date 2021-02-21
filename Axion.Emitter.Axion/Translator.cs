@@ -276,8 +276,8 @@ namespace Axion.Emitter.Axion {
 
                 break;
             }
-            case MacroApplicationExpr e: {
-                w.AddJoin(" ", e.Expressions);
+            case MacroMatchExpr e: {
+                w.AddJoin(" ", e.Nodes);
                 break;
             }
             case ScopeExpr e: {

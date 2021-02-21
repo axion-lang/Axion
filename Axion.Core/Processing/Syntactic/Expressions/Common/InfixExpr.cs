@@ -41,7 +41,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
 
                 // expr (keyword | expr) expr?
                 var macro =
-                    new MacroApplicationExpr(parent).Parse(leftExpr);
+                    new MacroMatchExpr(parent).Parse(leftExpr);
                 if (macro.Macro != null) {
                     return macro;
                 }
