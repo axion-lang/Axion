@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Axion.Core.Processing;
@@ -348,6 +348,17 @@ namespace Axion.Emitter.CSharp {
                     e.ReturnType,
                     ">"
                 );
+                break;
+            }
+            case TupleTypeName e: {
+                if (e.Types.Count == 0) {
+                    w.Write("void");
+                }
+                else {
+                    w.Write("(");
+                    w.AddJoin(", ", e.Types);
+                    w.Write(")");
+                }
                 break;
             }
             case GenericTypeName e: {
