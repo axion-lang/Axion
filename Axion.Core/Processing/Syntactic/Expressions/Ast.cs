@@ -3,7 +3,6 @@ using System.Linq;
 using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
-using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Traversal;
 using Axion.Specification;
 
@@ -37,13 +36,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
         }
         
-        public void ImportDefinitions(ImportExpr.Entry importEntry) {
-            if (importEntry.Alias != null) {
-                
-            }
-            //Def.Add(src.SourceFile.ToString(), src);
-        }
-
         public override IDefinitionExpr? GetDefByName(string name) {
             var defs = GetScopedDefs();
             return defs.FirstOrDefault(def => def.Name?.ToString() == name);
