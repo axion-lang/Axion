@@ -62,7 +62,7 @@ namespace Axion.Core.Processing.Traversal {
                 default:
                     try {
                         var list = ((IEnumerable) obj).OfType<Node>()
-                            .ToArray();
+                                                      .ToArray();
                         // for loop required, expressions collection
                         // can be modified.
                         // ReSharper disable once ForCanBeConvertedToForeach
@@ -86,12 +86,6 @@ namespace Axion.Core.Processing.Traversal {
         /// </summary>
         public static void Walker(ITreePath path) {
             switch (path.Node) {
-            case TupleTypeName t when t.Types.Count == 0: {
-                path.Node      = new SimpleTypeName(t, Spec.UnitType);
-                path.Traversed = true;
-                break;
-            }
-
             case UnionTypeName unionTypeName: {
                 // `LeftType | RightType` -> `Union[LeftType, RightType]`
                 path.Node = new GenericTypeName(path.Node.Parent) {
