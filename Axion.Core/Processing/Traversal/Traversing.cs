@@ -96,7 +96,7 @@ namespace Axion.Core.Processing.Traversal {
                 // `LeftType | RightType` -> `Union[LeftType, RightType]`
                 path.Node = new GenericTypeName(path.Node.Parent) {
                     Target = new SimpleTypeName(path.Node, "Union"),
-                    TypeArgs = new NodeList<TypeName>(path.Node) {
+                    TypeArgs = {
                         unionTypeName.Left,
                         unionTypeName.Right
                     }
@@ -132,8 +132,8 @@ namespace Axion.Core.Processing.Traversal {
                 // `arg |> func` -> `func(arg)`
                 path.Node = new FuncCallExpr(path.Node.Parent) {
                     Target = bin.Right,
-                    Args = new NodeList<FuncCallArg>(path.Node.Parent) {
-                        new(path.Node.Parent) {
+                    Args = {
+                        new FuncCallArg(path.Node.Parent) {
                             Value = bin.Left
                         }
                     }
@@ -179,7 +179,7 @@ namespace Axion.Core.Processing.Traversal {
                 break;
             }
 
-            case WhileExpr whileExpr when whileExpr.NoBreakScope != null: {
+            case WhileExpr { NoBreakScope: { } } whileExpr: {
                 // Add bool before loop, that indicates, was break reached or not.
                 // Find all 'break'-s in child scopes and set this
                 // bool to 'true' before exiting the loop.
@@ -215,8 +215,7 @@ namespace Axion.Core.Processing.Traversal {
                     }
                 );
                 // index of while == whileIdx + 1
-                var
-                    breaks = whileExpr.Scope.FindItemsOfType<BreakExpr>();
+                var breaks = whileExpr.Scope.FindItemsOfType<BreakExpr>();
                 var boolSetter = new BinaryExpr(path.Node) {
                     Left = flagName,
                     Operator = new OperatorToken(
@@ -225,8 +224,7 @@ namespace Axion.Core.Processing.Traversal {
                     ),
                     Right = ConstantExpr.True(path.Node)
                 };
-                foreach (var (_, itemParentScope, itemIndex) in breaks
-                ) {
+                foreach (var (_, itemParentScope, itemIndex) in breaks) {
                     itemParentScope.Items.Insert(itemIndex, boolSetter);
                 }
 
