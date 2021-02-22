@@ -1,0 +1,12 @@
+class Point1 [T]
+
+class Point2 [T: IComparable[T]]
+
+class Point3 [T1; T2]
+
+class Point4 [T1; T2: IComparable[T2]]
+
+class Point5 [
+    T1: IComparable[T1];
+    T2: IComparable[T2], IEquatable[T2]
+]

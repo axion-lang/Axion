@@ -29,6 +29,12 @@ namespace Axion.Testing.NUnit.Parser {
             var unit = ParseTestFile();
             Assert.IsEmpty(unit.Blames);
         }
+        
+        [Test]
+        public void TestClassDefGeneric() {
+            var unit = ParseTestFile();
+            Assert.IsEmpty(unit.Blames);
+        }
 
         [Test]
         public void TestConditionalExpression() {
@@ -85,9 +91,21 @@ namespace Axion.Testing.NUnit.Parser {
         }
 
         [Test]
-        public void TestFuncDef() {
+        public void TestFuncDefsSimple() {
             var unit = ParseTestFile();
-            Assert.AreEqual(15, unit.Blames.Count);
+            Assert.IsEmpty(unit.Blames);
+        }
+
+        [Test]
+        public void TestFuncDefsBraces() {
+            var unit = ParseTestFile();
+            Assert.IsEmpty(unit.Blames);
+        }
+
+        [Test]
+        public void TestFuncDefsGeneric() {
+            var unit = ParseTestFile();
+            Assert.IsEmpty(unit.Blames);
         }
 
         [Test]
@@ -95,7 +113,7 @@ namespace Axion.Testing.NUnit.Parser {
             var unit = ParseTestFile();
             Assert.AreEqual(2, unit.Blames.Count);
         }
-        
+
         [Test]
         public void TestImports() {
             var unit = ParseTestFile();

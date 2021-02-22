@@ -50,7 +50,7 @@ namespace Axion.Testing.NUnit.Parser {
                 )
             );
             Compiler.Process(module, new ProcessingOptions(Mode.Parsing));
-            Assert.AreEqual(0, module.Blames.Count);
+            Assert.IsEmpty(module.Blames);
             var statements = mainUnit.Ast.Items
                                      .Select(s => ((VarDef) s).ValueType)
                                      .ToArray();

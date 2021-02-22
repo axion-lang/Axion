@@ -1,0 +1,25 @@
+fn func1 [T] (
+	a: T
+)
+
+fn func2 [T: IComparable[T]] (
+    a: T
+)
+
+fn func3 [T1; T2] (
+	a: T1,
+	b: T2
+)
+
+fn func4 [T1; T2: IComparable[T2]] (
+	a: T1,
+	b: T2
+)
+
+fn func5 [
+    T1: IComparable[T1];
+    T2: IComparable[T2], IEquatable[T2]
+] (
+	a: T1,
+	b: T2
+)
