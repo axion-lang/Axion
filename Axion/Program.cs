@@ -487,7 +487,7 @@ namespace Axion {
                 ", ",
                 assembly.GetTypes().Select(t => t.FullName)
             );
-            throw new ApplicationException(
+            throw new ArgumentException(
                 $"Can't find any type which implements {nameof(INodeTranslator)}"
               + $"in {assembly} from {assembly.Location}.\n"
               + $"Available types: {availableTypes}"
