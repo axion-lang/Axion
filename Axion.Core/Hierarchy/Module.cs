@@ -212,7 +212,7 @@ namespace Axion.Core.Hierarchy {
         }
 
         public static string DirToModuleName(DirectoryInfo dir) {
-            var dn = dir.Name.Trim().ToLower();
+            var dn = dir.Name.Trim().ToLowerInvariant();
             return dn == "src" ? "" : dn;
         }
     }

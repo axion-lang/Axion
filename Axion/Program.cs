@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -269,7 +269,7 @@ namespace Axion {
             while (true) {
                 // code editor header
                 var rawInput = ConsoleUtils.Read("i> ");
-                var input    = rawInput.Trim().ToUpper();
+                var input    = rawInput.Trim().ToUpperInvariant();
 
                 switch (input) {
                 case "":

@@ -49,7 +49,7 @@ namespace Axion.Core {
             string          name,
             INodeTranslator translator
         ) {
-            Translators[name.Trim().ToLower()] = translator;
+            Translators[name.Trim().ToLowerInvariant()] = translator;
         }
 
         public static object? Process(

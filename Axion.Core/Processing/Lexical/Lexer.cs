@@ -424,7 +424,7 @@ namespace Axion.Core.Processing.Lexical {
                 content.Clear();
                 for (var i = 0; i < prefixes.Length; i++) {
                     var p = prefixes[i];
-                    if (StringPrefixes.Contains(char.ToLower(p))) {
+                    if (StringPrefixes.Contains(char.ToLowerInvariant(p))) {
                         continue;
                     }
 

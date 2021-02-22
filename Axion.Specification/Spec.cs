@@ -175,7 +175,7 @@ namespace Axion.Specification {
                 .Where(n => n.StartsWith("Keyword"))
                 .Select(n => {
                     Enum.TryParse(n, out TokenType type);
-                    return (n.Remove(0, 7).ToLower(), type);
+                    return (n.Remove(0, 7).ToLowerInvariant(), type);
                 })
                 .ToDictionary(
                     x => x.Item1,

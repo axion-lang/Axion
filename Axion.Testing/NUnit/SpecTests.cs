@@ -41,7 +41,7 @@ namespace Axion.Testing.NUnit {
             // check keywords completeness
             var definedKws = Enum.GetNames(typeof(TokenType))
                                  .Where(
-                                     name => name.ToUpper()
+                                     name => name.ToUpperInvariant()
                                                  .StartsWith("KEYWORD")
                                  );
 

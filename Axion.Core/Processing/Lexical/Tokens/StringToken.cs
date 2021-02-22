@@ -48,8 +48,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         }
 
         public bool HasPrefix(string prefix) {
-            return Prefixes.Contains(prefix.ToLower())
-                || Prefixes.Contains(prefix.ToUpper());
+            return Prefixes.Contains(prefix.ToLowerInvariant())
+                || Prefixes.Contains(prefix.ToUpperInvariant());
         }
     }
 
