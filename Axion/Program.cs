@@ -39,6 +39,9 @@ namespace Axion {
             typeof(BigInteger).Assembly
         };
 
+        internal static readonly AxionSyntaxHighlighter SyntaxHighlighter =
+            new AxionSyntaxHighlighter();
+
         public static void Main(string[] arguments) {
             var cliParser = new Parser(
                 settings => {
@@ -184,33 +187,25 @@ namespace Axion {
         }
 
         private static void PrintError(LanguageReport e) {
-            var codeLines = e.TargetUnit.TextStream.Text.Split(
-                new[] { "\n" },
-                StringSplitOptions.None
-            );
-
-            var lines = new List<string>();
-            // limit code piece by 5 lines
-            for (var i = e.ErrorSpan.Start.Line;
-                 i < codeLines.Length && lines.Count < 4;
-                 i++) {
-                lines.Add(codeLines[i].TrimEnd('\n', '\r', Spec.EndOfCode));
-            }
-
-            if (lines.Count > codeLines.Length - e.ErrorSpan.Start.Line) {
-                lines.Add("...");
-            }
-
+            var lines = SyntaxHighlighter
+                        .HighlightTokens(
+                            e.TargetUnit.TokenStream
+                             .SkipWhile(t => t.Start.Line < e.ErrorSpan.Start.Line)
+                             .TakeWhile(t => t.Start.Line - e.ErrorSpan.Start.Line < 4)
+                        )
+                        .GroupBy(ct => ct.Token.Start.Line)
+                        .Select(g => g.ToArray())
+                        .ToArray();
             // first line
             // <line number>| <code line>
             var pointerTailLength = 8 + e.ErrorSpan.Start.Column;
             int errorTokenLength;
             if (e.ErrorSpan.End.Line > e.ErrorSpan.Start.Line) {
-                errorTokenLength = lines[0].Length - e.ErrorSpan.Start.Column;
+                errorTokenLength = lines[0][0].Token.Start.Line
+                                 - e.ErrorSpan.Start.Column;
             }
             else {
-                errorTokenLength =
-                    e.ErrorSpan.End.Column - e.ErrorSpan.Start.Column;
+                errorTokenLength = e.ErrorSpan.End.Column - e.ErrorSpan.Start.Column;
             }
 
             // underline, red-colored
@@ -218,16 +213,15 @@ namespace Axion {
                         + new string('~', Math.Abs(errorTokenLength));
 
             //=========Error template=========
-            //
             // Error: mismatching parenthesis.
-            // --> C:\path\to\file.ax
             //
             //     1 │ func("string",
             //             ~
             //     2 │      'c',
             //     3 │      123
-            // ...
             //
+            // relative\file.ax,
+            // line 1, column 5.
             var color = e.Severity == BlameSeverity.Error
                 ? ConsoleColor.Red
                 : ConsoleColor.DarkYellow;
@@ -236,22 +230,47 @@ namespace Axion {
             ConsoleUtils.WriteLine(
                 (e.Severity.ToString("G") + ": " + e.Message, color)
             );
-            // file name
-            ConsoleUtils.WriteLine(
-                $"--> {e.TargetUnit.SourceFile}:"
-              + $"{e.ErrorSpan.Start.Line + 1},{e.ErrorSpan.Start.Column + 1}"
-            );
             Console.WriteLine();
             // line with error
             PrintLineNumber(e.ErrorSpan.Start.Line + 1);
-            ConsoleUtils.WriteLine(lines[0]);
+            // Prefix for not meaningful indentation.
+            var whitePrefix = "";
+            foreach (ColoredToken t in lines[0]) {
+                if (t.Token.Is(TokenType.Newline)) {
+                    whitePrefix = t.Token.EndingWhite;
+                    continue;
+                }
+                ConsoleUtils.Write((t.Value, t.Color));
+            }
+            Console.WriteLine();
             // error pointer
             ConsoleUtils.WriteLine((pointer, color));
             // next lines
-            for (var i = e.ErrorSpan.Start.Line + 1; i < lines.Count; i++) {
-                PrintLineNumber(i + 1);
-                ConsoleUtils.WriteLine(lines[i]);
+            for (var i = 1; i < lines.Length; i++) {
+                PrintLineNumber(e.ErrorSpan.Start.Line + i + 1);
+                Console.Write(whitePrefix);
+                whitePrefix = "";
+                foreach (ColoredToken t in lines[i]) {
+                    if (t.Token.Is(TokenType.Newline)) {
+                        whitePrefix = t.Token.EndingWhite;
+                        continue;
+                    }
+                    ConsoleUtils.Write((t.Value, t.Color));
+                }
+                Console.WriteLine();
             }
+            // file name
+            var relativeFileName = Path.GetRelativePath(
+                e.TargetUnit.Module?.Root?.Directory.Parent.ToString() ?? "",
+                e.TargetUnit.SourceFile.ToString()
+            );
+            Console.WriteLine();
+            Console.WriteLine($"{relativeFileName},");
+            // location
+            Console.WriteLine(
+                $"line {e.ErrorSpan.Start.Line     + 1}, "
+              + $"column {e.ErrorSpan.Start.Column + 1}."
+            );
         }
 
         private static void PrintLineNumber(int lineNumber) {
@@ -288,7 +307,7 @@ namespace Axion {
                     // initialize editor
                     var editor = new ScriptBench(
                         firstCodeLine: rawInput,
-                        highlighter: new AxionSyntaxHighlighter()
+                        highlighter: SyntaxHighlighter
                     );
                     var codeLines = editor.Run();
 
@@ -391,6 +410,7 @@ namespace Axion {
             }
             foreach (var e in module.Blames) {
                 PrintError(e);
+                Console.WriteLine();
             }
         }
 

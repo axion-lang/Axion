@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using Axion.Core;
 using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Lexical.Tokens;
@@ -28,17 +29,17 @@ namespace Axion {
             blames = src.Blames;
             var values = HighlightTokens(src.TokenStream);
             lastRenderEndPosition = renderPosition;
-            return values;
+            return values.Cast<ColoredValue>().ToList();
         }
 
         public List<ColoredValue> Highlight(string code) {
             var src = Unit.FromCode(code);
             Compiler.Lex(src, ProcessingOptions.Default);
-            return HighlightTokens(src.TokenStream);
+            return HighlightTokens(src.TokenStream).Cast<ColoredValue>().ToList();
         }
 
-        private List<ColoredValue> HighlightTokens(IEnumerable<Token> tokens) {
-            var values           = new List<ColoredValue>();
+        internal List<ColoredToken> HighlightTokens(IEnumerable<Token> tokens) {
+            var values           = new List<ColoredToken>();
             var foundRenderStart = false;
             foreach (var token in tokens) {
                 // check if token highlighting is not needed (already highlighted)
@@ -64,7 +65,6 @@ namespace Axion {
                     break;
                 }
 
-                var          text = token.Value + token.EndingWhite;
                 ConsoleColor newColor;
                 var          isWhite = false;
 
@@ -87,7 +87,7 @@ namespace Axion {
                     newColor = GetSimpleTokenColor(token);
                 }
 
-                values.Add(new ColoredValue(text, newColor, isWhite));
+                values.Add(new ColoredToken(token, newColor, isWhite));
             }
 
             return values;
