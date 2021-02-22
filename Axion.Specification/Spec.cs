@@ -20,7 +20,7 @@ namespace Axion.Specification {
         public static string MultiLineCommentMark => "###";
 
         public static string CharacterQuote => "`";
-        
+
         public static int MultilineStringQuotesCount => 3;
 
         public static readonly char[] Eols = {
@@ -263,11 +263,10 @@ namespace Axion.Specification {
             })
             .ToArray();
 
-        public const string CharType = "Char";
-        public const string StringType = "String";
-        public const string VoidType = "void";
-        public const string UnitType = "Unit";
-        public const string UnionType = "Union";
-        public const string UnknownType = "UNKNOWN_TYPE";
+        public static string CharType => "Char";
+
+        public static string StringType => "String";
+
+        public static string UnknownType => "UNKNOWN_TYPE";
     }
 }
