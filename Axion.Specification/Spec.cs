@@ -11,12 +11,17 @@ namespace Axion.Specification {
     ///     (allowed operators, keywords, etc.)
     /// </summary>
     public static class Spec {
-        public const string FileExtension = ".ax";
+        public static string FileExtension => ".ax";
 
-        public const char EndOfCode = '\0';
-        public const string OneLineCommentMark = "#";
-        public const string MultiLineCommentMark = "###";
-        public const string CharacterQuote = "`";
+        public static char EndOfCode => '\0';
+
+        public static string OneLineCommentMark => "#";
+
+        public static string MultiLineCommentMark => "###";
+
+        public static string CharacterQuote => "`";
+        
+        public static int MultilineStringQuotesCount => 3;
 
         public static readonly char[] Eols = {
             '\r',

@@ -18,7 +18,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             set => interpolations = Bind(value);
         }
 
-        public bool IsMultiline => Quote.Length == 3;
+        public bool IsMultiline => Quote.Length == Spec.MultilineStringQuotesCount;
 
         public override TypeName ValueType =>
             new SimpleTypeName(this, Spec.StringType);

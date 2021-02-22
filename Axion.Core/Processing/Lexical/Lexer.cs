@@ -446,8 +446,8 @@ namespace Axion.Core.Processing.Lexical {
             TryAddChar(StringQuotes, false);
             var quote        = value[^1].ToString();
             var closingQuote = quote;
-            if (AddNext(false, quote.Multiply(2))) {
-                quote = quote.Multiply(3);
+            if (AddNext(false, quote.Multiply(MultilineStringQuotesCount - 1))) {
+                quote = quote.Multiply(MultilineStringQuotesCount);
             }
             else if (AddNext(false, quote)) {
                 var se = BindSpan(
@@ -485,7 +485,10 @@ namespace Axion.Core.Processing.Lexical {
                     AddNext(false, closingQuote);
                     break;
                 }
-                else if (AddNext(false, closingQuote.Multiply(3))) {
+                else if (AddNext(
+                    false,
+                    closingQuote.Multiply(MultilineStringQuotesCount)
+                )) {
                     break;
                 }
                 else if (prefixes.Contains("f") && stream.PeekIs("{")) {
