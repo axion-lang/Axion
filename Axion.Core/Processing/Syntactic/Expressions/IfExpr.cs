@@ -55,7 +55,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             }
             else if (Stream.MaybeEat(KeywordElif)) {
                 ElseScope = new ScopeExpr(this) {
-                    Items = new NodeList<Expr>(this) {
+                    Items = {
                         new IfExpr(this) {
                             BranchKw = Stream.Token
                         }.Parse(true)

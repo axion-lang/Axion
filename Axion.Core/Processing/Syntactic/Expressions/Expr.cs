@@ -45,14 +45,5 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         ) {
             Parent = parent!;
         }
-
-        protected ScopeExpr InitIfNull(
-            ref                ScopeExpr? n,
-            [CallerMemberName] string     propertyName = ""
-        ) {
-            n ??= new ScopeExpr(this);
-            n =   Bind(n, propertyName);
-            return n;
-        }
     }
 }

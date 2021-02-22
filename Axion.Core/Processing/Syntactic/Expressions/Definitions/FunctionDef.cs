@@ -36,18 +36,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => parameters = Bind(value);
         }
 
-        private ScopeExpr? scope;
+        private ScopeExpr scope = null!;
 
         public ScopeExpr Scope {
-            get => InitIfNull(ref scope);
+            get => scope;
             set => scope = Bind(value);
         }
 
         public override TypeName? ValueType {
             get {
                 try {
-                    var returns =
-                        Scope.FindItemsOfType<ReturnExpr>();
+                    var returns = Scope.FindItemsOfType<ReturnExpr>();
                     // TODO: handle all possible returns (type unions)
                     if (returns.Count > 0) {
                         return returns[0].item.ValueType;
@@ -86,12 +85,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public FunctionDef Parse(bool anonymous = false) {
             KwFn = Stream.Eat(KeywordFn);
-
             // name
             if (!anonymous) {
                 Name = new NameExpr(this).Parse();
             }
-
             // parameters
             if (Stream.MaybeEat(OpenParenthesis)) {
                 // TODO: reworking parameter lists
@@ -101,13 +98,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                 );
                 Stream.Eat(CloseParenthesis);
             }
-
             // return type
             if (Stream.MaybeEat(RightArrow)) {
                 ValueType = TypeName.Parse(this);
             }
-
             // scope
+            Scope = new ScopeExpr(this);
             if (Stream.PeekIs(Spec.ScopeStartMarks)) {
                 Scope.Parse();
             }
@@ -115,7 +111,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             else if (anonymous) {
                 Scope.Items += AnyExpr.Parse(Scope);
             }
-
             return this;
         }
     }

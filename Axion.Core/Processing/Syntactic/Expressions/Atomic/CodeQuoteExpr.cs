@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         private ScopeExpr? scope;
 
         public ScopeExpr Scope {
-            get => InitIfNull(ref scope);
+            get => scope;
             set => scope = Bind(value);
         }
 
@@ -39,10 +39,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public CodeQuoteExpr Parse() {
             OpenQuote = Stream.Eat(DoubleOpenBrace);
+            Scope     = new ScopeExpr(this);
             while (!Stream.PeekIs(DoubleCloseBrace, TokenType.End)) {
                 Scope.Items += AnyExpr.Parse(this);
             }
-
             CloseQuote = Stream.Eat(DoubleCloseBrace);
             return this;
         }
