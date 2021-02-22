@@ -4,7 +4,8 @@
         <OutputType>Exe</OutputType>
         <LangVersion>9</LangVersion>
         <ProjectGuid>{7EF6B56D-A078-40F1-9BEB-906DE8B0D658}</ProjectGuid>
-        <Authors>F1uctus</Authors>
+        <Authors>Ilya Nikitin</Authors>
+        <Company>Fluctus Technologies</Company>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <Nullable>enable</Nullable>
         <TargetFramework>netcoreapp3.1</TargetFramework>

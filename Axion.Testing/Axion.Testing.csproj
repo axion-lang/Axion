@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <GenerateProgramFile>false</GenerateProgramFile>
-        <Authors>Nikitin Ilya</Authors>
-        <Company>Fluctus Studios</Company>
+        <Authors>Ilya Nikitin</Authors>
+        <Company>Fluctus Technologies</Company>
         <Product>Axion</Product>
         <PackageId>Axion</PackageId>
         <Description>.NET Core wrapper of Axion programming language toolset.</Description>
