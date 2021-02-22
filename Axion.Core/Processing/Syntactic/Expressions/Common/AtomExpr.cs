@@ -1,4 +1,5 @@
 using System.Linq;
+using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
@@ -39,12 +40,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 return new NameExpr(parent).Parse(true);
             }
 
+            // lambda
             if (s.PeekIs(KeywordFn)) {
                 return new FunctionDef(parent).Parse(true);
             }
 
             if (s.PeekIs(DoubleOpenBrace)) {
-                return new CodeQuoteExpr(parent).Parse();
+                var quote = new CodeQuoteExpr(parent).Parse();
+                if (parent.GetParent<MacroDef>() == null) {
+                    LanguageReport.To(BlameType.CodeQuoteOutsideMacroDef, quote);
+                }
+                return quote;
             }
 
             if (s.PeekIs(OpenParenthesis)) {
