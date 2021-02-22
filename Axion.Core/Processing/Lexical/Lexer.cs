@@ -152,11 +152,10 @@ namespace Axion.Core.Processing.Lexical {
             var ln = stream.RestOfLine;
             // check that whitespace is not meaningful here
             if (!unit.TokenStream[^1].Is(Newline)
-             || string.IsNullOrWhiteSpace(ln)
+             || ln.Trim().Length == 0
              || ln.StartsWith(OneLineCommentMark)
              || MismatchingPairs.Count > 0
-             || unit.TokenStream[^2] is OperatorToken op
-             && op.Side == InputSide.Both
+             || unit.TokenStream[^2] is OperatorToken { Side: InputSide.Both }
              || NonIndentRegex.IsMatch(ln)) {
                 unit.TokenStream[^1].EndingWhite += value;
                 return null;
