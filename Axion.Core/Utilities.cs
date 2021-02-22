@@ -111,10 +111,12 @@ namespace Axion.Core {
 
         public static string TrimMatchingChars(string input, char c) {
             while (true) {
-                if (input.Length >= 2 && input[0] == c && input[^1] == c)
+                if (input.Length >= 2 && input[0] == c && input[^1] == c) {
                     input = input[1..^1];
-                else
+                }
+                else {
                     return input;
+                }
             }
         }
 

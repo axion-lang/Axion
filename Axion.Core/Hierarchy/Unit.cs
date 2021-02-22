@@ -38,10 +38,11 @@ namespace Axion.Core.Hierarchy {
                     return outputDirectory;
                 }
 
-                if (Module == null)
+                if (Module == null) {
                     outputDirectory = new DirectoryInfo(
                         Path.Join(SourceFile.Directory?.FullName!, "out")
                     );
+                }
                 else {
                     outputDirectory = new DirectoryInfo(
                         Path.Join(
