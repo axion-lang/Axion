@@ -73,28 +73,25 @@ namespace Axion.Emitter.Axion {
             }
             case FunctionParameter e: {
                 w.Write(e.Name);
-                if (e.ValueType != null)
+                if (e.ValueType != null) {
                     w.Write(": ", e.ValueType);
-
-                if (e.Value != null)
+                }
+                if (e.Value != null) {
                     w.Write(" = ", e.Value);
-
+                }
                 break;
             }
             case VarDef e: {
                 if (e.IsImmutable) {
                     w.Write("let ");
                 }
-
                 w.Write(e.Name);
                 if (e.ValueType != null) {
                     w.Write(": ", e.ValueType);
                 }
-
                 if (e.Value != null) {
                     w.Write(" = ", e.Value);
                 }
-
                 break;
             }
             case NameDef e: {
@@ -102,11 +99,9 @@ namespace Axion.Emitter.Axion {
                 if (e.ValueType != null) {
                     w.Write(": ", e.ValueType);
                 }
-
                 if (e.Value != null) {
                     w.Write(" = ", e.Value);
                 }
-
                 break;
             }
             case BinaryExpr e: {
@@ -115,17 +110,18 @@ namespace Axion.Emitter.Axion {
             }
             case TernaryExpr e: {
                 w.Write(e.TrueExpr, " if ", e.Condition);
-                if (e.FalseExpr != null)
+                if (e.FalseExpr != null) {
                     w.Write(" else ", e.FalseExpr);
-
+                }
                 break;
             }
             case UnaryExpr e: {
-                if (e.Operator.Side == InputSide.Right)
+                if (e.Operator.Side == InputSide.Right) {
                     w.Write(e.Operator.Value, e.Value);
-                else
+                }
+                else {
                     w.Write(e.Value, e.Operator.Value);
-
+                }
                 break;
             }
             case CodeUnquotedExpr e: {
@@ -133,9 +129,9 @@ namespace Axion.Emitter.Axion {
                 break;
             }
             case ForComprehension e: {
-                if (!e.IsNested)
+                if (!e.IsNested) {
                     w.Write(e.Target);
-
+                }
                 w.Write(
                     " for ",
                     e.Item,
@@ -152,19 +148,21 @@ namespace Axion.Emitter.Axion {
                 break;
             }
             case FuncCallArg e: {
-                if (e.Name != null)
+                if (e.Name != null) {
                     w.Write(e.Name, " = ");
+                }
 
                 w.Write(e.Value);
                 break;
             }
             case IndexerExpr e: {
                 w.Write(e.Target);
-                if (e.Index is SliceExpr)
+                if (e.Index is SliceExpr) {
                     w.Write(e.Index);
-                else
+                }
+                else {
                     w.Write("[", e.Index, "]");
-
+                }
                 break;
             }
             case MemberAccessExpr e: {
@@ -196,7 +194,6 @@ namespace Axion.Emitter.Axion {
                 if (e.LoopName != null) {
                     w.Write(" ", e.LoopName);
                 }
-
                 break;
             }
             case EmptyExpr e: {
@@ -205,16 +202,16 @@ namespace Axion.Emitter.Axion {
             }
             case ReturnExpr e: {
                 w.Write("return");
-                if (e.Value != null)
+                if (e.Value != null) {
                     w.Write(" ", e.Value);
-
+                }
                 break;
             }
             case WhileExpr e: {
                 w.Write("while ", e.Condition, e.Scope);
-                if (e.NoBreakScope != null)
+                if (e.NoBreakScope != null) {
                     w.Write("nobreak", e.NoBreakScope);
-
+                }
                 break;
             }
             case ArrayTypeName e: {

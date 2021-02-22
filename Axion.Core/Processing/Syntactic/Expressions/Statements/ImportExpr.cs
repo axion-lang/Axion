@@ -81,20 +81,28 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             if (Stream.MaybeEat(Dot)) {
                 var hasParens = Stream.PeekIs(OpenParenthesis);
                 var es        = Multiple.Parse(this, _ => ParseEntry(rootName));
-                if (es is TupleExpr tpl) {
-                    if (tpl.Expressions.Count == 1 && hasParens) {
-                        LanguageReport.To(BlameType.RedundantParentheses, tpl);
+                if (es is not TupleExpr tpl) {
+                    return new Entry(
+                        this,
+                        rootName,
+                        subEntries,
+                        exceptions
+                    ) {
+                        Alias = alias
+                    };
+                }
+                if (tpl.Expressions.Count == 1 && hasParens) {
+                    LanguageReport.To(BlameType.RedundantParentheses, tpl);
+                }
+                foreach (Expr e in tpl.Expressions) {
+                    if (e is Entry name) {
+                        subEntries.Add(name);
                     }
-                    foreach (Expr e in tpl.Expressions) {
-                        if (e is Entry name) {
-                            subEntries.Add(name);
-                        }
-                        else {
-                            LanguageReport.To(
-                                BlameType.ExpectedImportedModuleName,
-                                e
-                            );
-                        }
+                    else {
+                        LanguageReport.To(
+                            BlameType.ExpectedImportedModuleName,
+                            e
+                        );
                     }
                 }
             }
@@ -129,19 +137,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
                 }
             }
 
-            // if (rootName.ToString() == Ast.Unit.Module.FullName) {
-            //     LanguageReport.To(BlameType.ModuleSelfImport, rootName);
-            //     return this;
-            // }
-            //
-            // if (Ast.Unit.Imports.ContainsKey(rootName.ToString())) {
-            //     LanguageReport.To(BlameType.DuplicatedImport, rootName);
-            //     return this;
-            // }
-            return new Entry(this,
-                             rootName,
-                             subEntries,
-                             exceptions) {
+            return new Entry(
+                this,
+                rootName,
+                subEntries,
+                exceptions
+            ) {
                 Alias = alias
             };
         }

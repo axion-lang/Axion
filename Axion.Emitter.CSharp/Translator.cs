@@ -42,13 +42,13 @@ namespace Axion.Emitter.CSharp {
                 break;
             }
             case StringToken e: {
-                if (e.HasPrefix("f"))
+                if (e.HasPrefix("f")) {
                     w.Write("$");
-
+                }
                 w.Write("\"", HttpUtility.JavaScriptStringEncode(e.Content));
-                if (!e.IsUnclosed)
+                if (!e.IsUnclosed) {
                     w.Write("\"");
-
+                }
                 break;
             }
             case NameExpr e: {
@@ -56,7 +56,6 @@ namespace Axion.Emitter.CSharp {
                     w.Write("this");
                     return true;
                 }
-
                 w.Write(string.Join("", e.Tokens.Select(t => t.Content)));
                 break;
             }
@@ -66,7 +65,6 @@ namespace Axion.Emitter.CSharp {
                     w.Write(" : ");
                     w.AddJoin(", ", e.Bases);
                 }
-
                 w.WriteLine();
                 w.Write(e.Scope);
                 break;
@@ -90,7 +88,6 @@ namespace Axion.Emitter.CSharp {
                     w.WriteLine(")");
                     w.Write(e.Scope);
                 }
-
                 break;
             }
             case ModuleDef e: {
@@ -112,19 +109,16 @@ namespace Axion.Emitter.CSharp {
                         e.Value
                     );
                 }
-
                 break;
             }
             case FunctionParameter e: {
                 if (!(e.Parent is FunctionDef f && f.Name == null)) {
                     w.Write(e.ValueType, " ");
                 }
-
                 w.Write(e.Name);
                 if (e.Value != null) {
                     w.Write(" = ", e.Value);
                 }
-
                 break;
             }
             case NameDef e: {
@@ -140,7 +134,6 @@ namespace Axion.Emitter.CSharp {
                         e.Value
                     );
                 }
-
                 break;
             }
             case BinaryExpr e: {
@@ -189,7 +182,6 @@ namespace Axion.Emitter.CSharp {
                     )) {
                         op = e.Operator.Value;
                     }
-
                     w.Write(
                         e.Left,
                         " ",
@@ -198,7 +190,6 @@ namespace Axion.Emitter.CSharp {
                         e.Right
                     );
                 }
-
                 break;
             }
             case TernaryExpr e: {
@@ -214,7 +205,6 @@ namespace Axion.Emitter.CSharp {
                 else {
                     w.Write(e.FalseExpr);
                 }
-
                 break;
             }
             case UnaryExpr e: {
@@ -222,7 +212,6 @@ namespace Axion.Emitter.CSharp {
                 if (op == "not") {
                     op = "!";
                 }
-
                 if (e.Operator.Side == InputSide.Right) {
                     w.Write(
                         op,
@@ -239,7 +228,6 @@ namespace Axion.Emitter.CSharp {
                         op
                     );
                 }
-
                 break;
             }
             case ForComprehension e: {
@@ -252,23 +240,19 @@ namespace Axion.Emitter.CSharp {
                 if (e.Right != null) {
                     w.Write(" ", e.Right);
                 }
-
                 if (e.Conditions.Count > 0) {
                     w.Write(" where ");
                     w.AddJoin(" && ", e.Conditions);
                 }
-
                 if (!e.IsNested) {
                     w.Write(" select ", e.Target);
                 }
-
                 break;
             }
             case FuncCallArg e: {
                 if (e.Name != null) {
                     w.Write(e.Name, ": ");
                 }
-
                 w.Write(e.Value);
                 break;
             }
@@ -389,7 +373,6 @@ namespace Axion.Emitter.CSharp {
                         w.Write(n, " ");
                     }
                 }
-
                 w.Write(e.Target);
                 break;
             }
@@ -400,7 +383,6 @@ namespace Axion.Emitter.CSharp {
                 if (e.ElseScope == null) {
                     return true;
                 }
-
                 w.WriteLine("else");
                 w.Write(e.ElseScope);
                 break;
@@ -421,7 +403,6 @@ namespace Axion.Emitter.CSharp {
 
                     w.MaybeWriteLine();
                 }
-
                 w.IndentLevel--;
                 w.Write("}");
                 w.MaybeWriteLine();

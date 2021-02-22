@@ -110,8 +110,8 @@ namespace Axion {
                             },
                             args => args.Frontends ? ListFrontends() : 0,
                             args => args.Editor ? EditorHelp() : Help(),
-                            args => Clear(),
-                            args => Exit(),
+                            _ => Clear(),
+                            _ => Exit(),
                             errors => {
                                 foreach (var e in errors) {
                                     logger.Error(e);
@@ -478,8 +478,9 @@ namespace Axion {
         private static INodeTranslator LoadTranslator(Assembly assembly) {
             foreach (var type in assembly.GetTypes()) {
                 if (typeof(INodeTranslator).IsAssignableFrom(type)
-                 && Activator.CreateInstance(type) is INodeTranslator ncv)
+                 && Activator.CreateInstance(type) is INodeTranslator ncv) {
                     return ncv;
+                }
             }
 
             var availableTypes = string.Join(
