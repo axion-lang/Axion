@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Axion.Core.Processing;
@@ -62,11 +62,47 @@ namespace Axion.Emitter.CSharp {
             }
             case ClassDef e: {
                 w.Write("public class ", e.Name);
+                var constrainedTypeParams = new List<GenericParameterTypeName>();
+                if (e.TypeParameters.Count > 0) {
+                    w.Write("<");
+                    for (var i = 0; i < e.TypeParameters.Count; i++) {
+                        var tp = e.TypeParameters[i];
+                        if (tp is GenericParameterTypeName gp) {
+                            constrainedTypeParams.Add(gp);
+                            w.Write(gp.Name);
+                        }
+                        else {
+                            w.Write(tp);
+                        }
+                        if (i != e.TypeParameters.Count - 1) {
+                            w.Write(", ");
+                        }
+                    }
+                    w.Write(">");
+                }
                 if (e.Bases.Count > 0) {
                     w.Write(" : ");
                     w.AddJoin(", ", e.Bases);
                 }
-                w.WriteLine();
+                if (constrainedTypeParams.Count > 0) {
+                    var multiline = constrainedTypeParams.Count > 1;
+                    if (multiline) {
+                        w.IndentLevel++;
+                        w.WriteLine();
+                    }
+                    else {
+                        w.Write(" ");
+                    }
+                    foreach (var ctp in constrainedTypeParams) {
+                        w.Write("where ", ctp.Name, " : ");
+                        w.AddJoin(", ", ctp.TypeConstraints);
+                        w.WriteLine();
+                    }
+                    if (multiline) {
+                        w.IndentLevel--;
+                    }
+                }
+                w.MaybeWriteLine();
                 w.Write(e.Scope);
                 break;
             }
@@ -82,11 +118,48 @@ namespace Axion.Emitter.CSharp {
                         "public ",
                         e.ValueType,
                         " ",
-                        e.Name,
-                        "("
+                        e.Name
                     );
+                    var constrainedTypeParams = new List<GenericParameterTypeName>();
+                    if (e.TypeParameters.Count > 0) {
+                        w.Write("<");
+                        for (var i = 0; i < e.TypeParameters.Count; i++) {
+                            var tp = e.TypeParameters[i];
+                            if (tp is GenericParameterTypeName gp) {
+                                constrainedTypeParams.Add(gp);
+                                w.Write(gp.Name);
+                            }
+                            else {
+                                w.Write(tp);
+                            }
+                            if (i != e.TypeParameters.Count - 1) {
+                                w.Write(", ");
+                            }
+                        }
+                        w.Write(">");
+                    }
+                    w.Write("(");
                     w.AddJoin(", ", e.Parameters);
-                    w.WriteLine(")");
+                    w.Write(")");
+                    if (constrainedTypeParams.Count > 0) {
+                        var multiline = constrainedTypeParams.Count > 1;
+                        if (multiline) {
+                            w.IndentLevel++;
+                            w.WriteLine();
+                        }
+                        else {
+                            w.Write(" ");
+                        }
+                        foreach (var ctp in constrainedTypeParams) {
+                            w.Write("where ", ctp.Name, " : ");
+                            w.AddJoin(", ", ctp.TypeConstraints);
+                            w.WriteLine();
+                        }
+                        if (multiline) {
+                            w.IndentLevel--;
+                        }
+                    }
+                    w.MaybeWriteLine();
                     w.Write(e.Scope);
                 }
                 break;
@@ -113,7 +186,7 @@ namespace Axion.Emitter.CSharp {
                 break;
             }
             case FunctionParameter e: {
-                if (!(e.Parent is FunctionDef f && f.Name == null)) {
+                if (e.Parent is not FunctionDef { Name: null }) {
                     w.Write(e.ValueType, " ");
                 }
                 w.Write(e.Name);

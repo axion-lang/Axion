@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
@@ -10,7 +11,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
     ///     <c>
     ///         class-def:
-    ///             'class' simple-name [type-args] ['&lt;-' type-multiple-arg] scope;
+    ///             'class' simple-name
+    ///             ['[' type-parameter [{',' type-parameter}] ']']
+    ///             ['&lt;-' type [{',' type}]]
+    ///             scope;
     ///     </c>
     /// </summary>
     public class ClassDef : Node, IDefinitionExpr, IDecorableExpr {
@@ -28,18 +32,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => name = BindNullable(value);
         }
 
+        private NodeList<TypeName>? typeParameters;
+
+        public NodeList<TypeName> TypeParameters {
+            get => InitIfNull(ref typeParameters);
+            set => typeParameters = Bind(value);
+        }
+
         private NodeList<TypeName>? bases;
 
         public NodeList<TypeName> Bases {
             get => InitIfNull(ref bases);
             set => bases = Bind(value);
-        }
-
-        private NodeList<Node>? keywords;
-
-        public NodeList<Node> Keywords {
-            get => InitIfNull(ref keywords);
-            set => keywords = Bind(value);
         }
 
         private ScopeExpr scope = null!;
@@ -77,7 +81,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         public ClassDef Parse() {
             KwClass = Stream.Eat(KeywordClass);
             Name    = new NameExpr(this).Parse(true);
-
             if (Stream.MaybeEat(OpenParenthesis)) {
                 if (!Stream.PeekIs(CloseParenthesis)) {
                     do {
@@ -87,26 +90,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
                 Stream.Eat(CloseParenthesis);
             }
-
-            // TODO: add generic classes
+            // generic type parameters list
+            if (Stream.PeekIs(OpenBracket)) {
+                TypeParameters = TypeName.ParseGenericTypeParametersList(this);
+            }
+            // base classes list
             if (Stream.MaybeEat(LeftArrow)) {
-                var types =
-                    TypeName.ParseNamedTypeArgs(this);
-                foreach (var (type, typeLabel) in types) {
-                    if (typeLabel == null) {
-                        Bases += type;
-                    }
-                    else {
-                        Keywords += type;
-                    }
+                // TODO: validation for previously declared generic types
+                do {
+                    Bases.Add(TypeName.Parse(this));
+                } while (Stream.MaybeEat(Comma));
+                if (Bases.Count == 0) {
+                    LanguageReport.To(
+                        BlameType.RedundantEmptyListOfTypeArguments,
+                        Stream.Token
+                    );
                 }
             }
-
             Scope = new ScopeExpr(this);
             if (Stream.PeekIs(Spec.ScopeStartMarks)) {
                 Scope.Parse();
             }
-
             return this;
         }
     }

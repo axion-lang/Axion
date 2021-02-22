@@ -40,6 +40,7 @@
         public static readonly BlameType InvalidMacroParameter                    = new("invalid parameter for macro",                                     BlameSeverity.Error);
         public static readonly BlameType ModuleSelfImport                         = new("can't import module from itself",                                 BlameSeverity.Error);
         public static readonly BlameType CodeQuoteOutsideMacroDef                 = new("code quotes are allowed only inside a macro definition",          BlameSeverity.Error);
+        public static readonly BlameType ExpectedTypeParameter                    = new("type parameter (e.g. 'T <- Type1, Type2') definition expected",   BlameSeverity.Error);
 
         public static readonly BlameType ExpectedAtomExpr                         = new("atomic expression expected",                                      BlameSeverity.Error);
         public static readonly BlameType ExpectedPostfixExpr                      = new("postfix expression expected",                                     BlameSeverity.Error);

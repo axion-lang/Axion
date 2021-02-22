@@ -32,6 +32,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
                 return new SimpleTypeName(parent, "UnknownType");
             }
 
+            if (s.PeekIs(Colon) && leftTypeName is SimpleTypeName st) {
+                return new GenericParameterTypeName(parent) {
+                    Name = st.Name
+                }.Parse();
+            }
+
             // middle
             // generic ('[' followed by not ']')
             if (s.PeekIs(OpenBracket) && !s.PeekByIs(2, CloseBracket)) {
@@ -64,45 +70,26 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             return leftTypeName;
         }
 
-        /// <summary>
-        ///     <c>
-        ///         multiple-type:
-        ///             [simple-name '='] type {',' [simple-name '='] type};
-        ///     </c>
-        ///     for class, enum, enum item.
-        /// </summary>
-        internal static List<(TypeName type, NameExpr? label)> ParseNamedTypeArgs(
-            Node parent
-        ) {
-            var s        = parent.Unit.TokenStream;
-            var typeArgs = new List<(TypeName, NameExpr?)>();
-            var start    = s.Peek;
-
+        internal static NodeList<TypeName> ParseGenericTypeParametersList(Node parent) {
+            var s   = parent.Stream;
+            var tps = new NodeList<TypeName>(parent);
+            s.Eat(OpenBracket);
             do {
-                NameExpr? name     = null;
-                var       startIdx = s.TokenIdx;
-                if (s.PeekIs(Identifier)) {
-                    var typeLabel = new NameExpr(parent).Parse();
-                    if (s.MaybeEat(EqualsSign)) {
-                        name = typeLabel;
-                    }
-                    else {
-                        s.MoveAbsolute(startIdx);
-                    }
+                var type = Parse(parent);
+                if (type is not ITypeParameter) {
+                    LanguageReport.To(BlameType.ExpectedTypeParameter, type);
                 }
-
-                typeArgs.Add((Parse(parent), name));
-            } while (s.MaybeEat(Comma));
-
-            if (typeArgs.Count == 0) {
-                // redundant parens
+                tps.Add(type);
+            } while (s.MaybeEat(Semicolon));
+            if (tps.Count == 0) {
                 LanguageReport.To(
-                    BlameType.RedundantEmptyListOfTypeArguments,
-                    start
+                    BlameType.RedundantParentheses,
+                    s.Token
                 );
             }
-
-            return typeArgs;
+            s.MaybeEat(Comma);
+            s.Eat(CloseBracket);
+            return tps;
         }
     }
 }

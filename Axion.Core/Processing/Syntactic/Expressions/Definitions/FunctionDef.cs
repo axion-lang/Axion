@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
@@ -11,7 +12,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
     ///     <c>
     ///         func-def:
-    ///             'fn' [name] ['(' [multiple-parameters] ')'] ['->' type] scope;
+    ///             'fn' [name]
+    ///             ['[' type-parameter [{',' type-parameter}] ']']
+    ///             ['(' [multiple-parameters] ')']
+    ///             ['->' type] scope;
     ///     </c>
     /// </summary>
     public class FunctionDef : AtomExpr, IDefinitionExpr, IDecorableExpr {
@@ -27,6 +31,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         public NameExpr? Name {
             get => name;
             set => name = BindNullable(value);
+        }
+
+        private NodeList<TypeName>? typeParameters;
+
+        public NodeList<TypeName> TypeParameters {
+            get => InitIfNull(ref typeParameters);
+            set => typeParameters = Bind(value);
         }
 
         private NodeList<FunctionParameter>? parameters;
@@ -88,6 +99,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             // name
             if (!anonymous) {
                 Name = new NameExpr(this).Parse();
+            }
+            // generic type parameters list
+            if (Stream.PeekIs(OpenBracket)) {
+                TypeParameters = TypeName.ParseGenericTypeParametersList(this);
             }
             // parameters
             if (Stream.MaybeEat(OpenParenthesis)) {

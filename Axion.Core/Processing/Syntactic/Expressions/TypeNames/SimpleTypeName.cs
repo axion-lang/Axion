@@ -7,7 +7,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///             name;
     ///     </c>
     /// </summary>
-    public class SimpleTypeName : TypeName {
+    public class SimpleTypeName : TypeName, ITypeParameter {
         private NameExpr name = null!;
 
         public NameExpr Name {
