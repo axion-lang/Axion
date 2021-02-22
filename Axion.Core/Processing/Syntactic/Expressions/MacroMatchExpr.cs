@@ -40,7 +40,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return this;
         }
 
-        public MacroMatchExpr Parse(Node leftExpr) {
+        public new MacroMatchExpr Parse(Node leftExpr) {
             var startIdx = Stream.TokenIdx;
 
             foreach (var macro in Ast.Macros) {
