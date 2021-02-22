@@ -5,7 +5,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
-    public sealed class FuncCallArg : Expr {
+    public sealed class FuncCallArg : Node {
         private NameExpr? name;
 
         public NameExpr? Name {
@@ -13,9 +13,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => name = BindNullable(value);
         }
 
-        private Expr val = null!;
+        private Node val = null!;
 
-        public Expr Value {
+        public Node Value {
             get => val;
             set => val = Bind(value);
         }
@@ -72,13 +72,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     }
                 }
                 else {
-                    Expr argValue = InfixExpr.Parse(parent);
+                    Node argValue = InfixExpr.Parse(parent);
                     // generator arg
                     if (s.PeekIs(TokenType.KeywordFor)) {
                         arg = new FuncCallArg(parent) {
                             Value = new ForComprehension(parent) {
-                                Target      = argValue,
-                                IsGenerator = true
+                                Target      = argValue
                             }.Parse()
                         };
                     }

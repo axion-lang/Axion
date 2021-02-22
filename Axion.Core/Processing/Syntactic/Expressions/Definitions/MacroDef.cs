@@ -11,7 +11,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///             'macro' simple-name syntax-description scope;
     ///     </c>
     /// </summary>
-    public class MacroDef : Expr, IDefinitionExpr {
+    public class MacroDef : Node, IDefinitionExpr {
         private Token? kwMacro;
 
         public Token? KwMacro {

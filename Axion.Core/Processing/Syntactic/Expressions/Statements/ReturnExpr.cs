@@ -12,7 +12,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///             'return' [multiple-expr];
     ///     </c>
     /// </summary>
-    public class ReturnExpr : Expr {
+    public class ReturnExpr : Node {
         private Token? kwReturn;
 
         public Token? KwReturn {
@@ -20,9 +20,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             set => kwReturn = BindNullable(value);
         }
 
-        private Expr? val;
+        private Node? val;
 
-        public Expr? Value {
+        public Node? Value {
             get => val;
             set => val = BindNullable(value);
         }

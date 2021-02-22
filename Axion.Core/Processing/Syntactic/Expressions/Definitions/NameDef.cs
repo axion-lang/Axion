@@ -1,7 +1,7 @@
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
-    public class NameDef : Expr, IDefinitionExpr, IDecorableExpr {
+    public class NameDef : Node, IDefinitionExpr, IDecorableExpr {
         private NameExpr? name;
 
         public NameExpr? Name {
@@ -9,19 +9,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => name = BindNullable(value);
         }
 
-        private Expr? val;
+        private Node? val;
 
-        public Expr? Value {
+        public Node? Value {
             get => val;
             set => val = BindNullable(value);
         }
 
         public NameDef(Node parent) : base(parent) { }
 
-        public DecoratedExpr WithDecorators(params Expr[] items) {
+        public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
                 Target     = this,
-                Decorators = new NodeList<Expr>(this, items)
+                Decorators = new NodeList<Node>(this, items)
             };
         }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -348,29 +348,34 @@ namespace Axion {
                     );
                     return;
                 }
-
-                var inputFiles = new FileInfo[filesCount];
-                for (var i = 0; i < filesCount; i++) {
-                    inputFiles[i] = new FileInfo(
-                        Utilities.TrimMatchingChars(args.Files.ElementAt(i), '"')
-                    );
-                }
-
+                var inputFiles =
+                    args.Files
+                        .Select(f => new FileInfo(Utilities.TrimMatchingChars(f, '"')))
+                        .ToArray();
                 module = Module.RawFrom(inputFiles[0].Directory);
                 module.Bind(Unit.FromFile(inputFiles[0]));
                 Compiler.Process(module, pOptions);
             }
             else if (!string.IsNullOrWhiteSpace(args.Project)) {
-                var proj = new Project(args.Project);
-                var ll   = logLevel.Text;
+                Project proj;
+                try {
+                    proj = new Project(Path.Join(args.Project, "project.toml"));
+                }
+                catch (FileNotFoundException) {
+                    logger.Error(
+                        "Specified path does not contain a valid Axion project definition."
+                    );
+                    return;
+                }
+
+                var ll = logLevel.Text;
                 logLevel = "Fatal";
                 Compiler.Process(proj, pOptions);
                 logLevel = ll;
                 module   = proj.MainModule;
             }
             else if (!string.IsNullOrWhiteSpace(args.Code)) {
-                var tempDir =
-                    new FileInfo(Compiler.GetTempSourceFilePath()).Directory!;
+                var tempDir = new FileInfo(Compiler.GetTempSourceFilePath()).Directory!;
                 var unit = Unit.FromCode(
                     Utilities.TrimMatchingChars(args.Code, '"')
                 );

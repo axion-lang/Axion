@@ -9,9 +9,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///     </c>
     /// </summary>
     public class FuncCallExpr : PostfixExpr {
-        private Expr target = null!;
+        private Node target = null!;
 
-        public Expr Target {
+        public Node Target {
             get => target;
             set => target = Bind(value);
         }

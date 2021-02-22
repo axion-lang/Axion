@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///         );
     ///     </c>
     /// </summary>
-    public class ImportExpr : Expr {
+    public class ImportExpr : Node {
         private Token? kwImport;
 
         public Token? KwImport {
@@ -94,7 +94,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
                 if (tpl.Expressions.Count == 1 && hasParens) {
                     LanguageReport.To(BlameType.RedundantParentheses, tpl);
                 }
-                foreach (Expr e in tpl.Expressions) {
+                foreach (Node e in tpl.Expressions) {
                     if (e is Entry name) {
                         subEntries.Add(name);
                     }
@@ -119,7 +119,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
                         if (tpl.Expressions.Count == 1 && hasParens) {
                             LanguageReport.To(BlameType.RedundantParentheses, tpl);
                         }
-                        foreach (Expr e in tpl.Expressions) {
+                        foreach (Node e in tpl.Expressions) {
                             if (e is NameExpr name) {
                                 exceptions.Add(name);
                             }
@@ -147,7 +147,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             };
         }
 
-        public class Entry : Expr {
+        public class Entry : Node {
             public NameExpr FullName => Parent is NameExpr pn
                 ? new NameExpr(this, pn.ToString())
                 : Name;

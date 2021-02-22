@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///             'break' [name];
     ///     </c>
     /// </summary>
-    public class BreakExpr : Expr {
+    public class BreakExpr : Node {
         private Token? kwBreak;
 
         public Token? KwBreak {

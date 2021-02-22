@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Globalization;
 using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Specification;
 using Newtonsoft.Json;
@@ -45,7 +44,7 @@ namespace Axion.Core.Processing.Errors {
             ex.TargetUnit.Blames.Add(ex);
         }
 
-        public static void UnexpectedType(Type expectedType, Expr expr) {
+        public static void UnexpectedType(Type expectedType, Node node) {
             BlameType blameType;
             if (expectedType == typeof(AtomExpr)) {
                 blameType = BlameType.ExpectedAtomExpr;
@@ -68,9 +67,9 @@ namespace Axion.Core.Processing.Errors {
             var ex = new LanguageReport(
                 blameType.Description,
                 blameType.Severity,
-                expr
+                node
             );
-            expr.Unit.Blames.Add(ex);
+            node.Unit.Blames.Add(ex);
         }
 
         public static void MismatchedBracket(Token bracket) {

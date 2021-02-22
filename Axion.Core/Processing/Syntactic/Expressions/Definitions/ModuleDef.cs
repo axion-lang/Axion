@@ -10,7 +10,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///             'module' name scope;
     ///     </c>
     /// </summary>
-    public class ModuleDef : Expr, IDefinitionExpr, IDecorableExpr {
+    public class ModuleDef : Node, IDefinitionExpr, IDecorableExpr {
         private Token? kwModule;
 
         public Token? KwModule {
@@ -34,18 +34,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public ModuleDef(Node parent) : base(parent) { }
 
-        public DecoratedExpr WithDecorators(params Expr[] items) {
+        public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
                 Target     = this,
-                Decorators = new NodeList<Expr>(this, items)
+                Decorators = new NodeList<Node>(this, items)
             };
         }
 
-        public ModuleDef WithScope(params Expr[] items) {
-            return WithScope((IEnumerable<Expr>) items);
+        public ModuleDef WithScope(params Node[] items) {
+            return WithScope((IEnumerable<Node>) items);
         }
 
-        public ModuleDef WithScope(IEnumerable<Expr> items) {
+        public ModuleDef WithScope(IEnumerable<Node> items) {
             Scope = new ScopeExpr(this).WithItems(items);
             return this;
         }

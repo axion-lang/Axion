@@ -14,44 +14,43 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///     </c>
     /// </summary>
     public class ForComprehension : InfixExpr {
-        private Expr? target;
+        private Node? target;
 
         [NoPathTraversing]
-        public Expr? Target {
+        public Node? Target {
             get => target;
             set => target = BindNullable(value);
         }
 
-        private Expr item = null!;
+        private Node item = null!;
 
-        public Expr Item {
+        public Node Item {
             get => item;
             set => item = Bind(value);
         }
 
-        private Expr iterable = null!;
+        private Node iterable = null!;
 
-        public Expr Iterable {
+        public Node Iterable {
             get => iterable;
             set => iterable = Bind(value);
         }
 
-        private NodeList<Expr>? conditions;
+        private NodeList<Node>? conditions;
 
-        public NodeList<Expr> Conditions {
+        public NodeList<Node> Conditions {
             get => InitIfNull(ref conditions);
             set => conditions = Bind(value);
         }
 
-        private Expr? right;
+        private Node? right;
 
-        public Expr? Right {
+        public Node? Right {
             get => right;
             set => right = BindNullable(value);
         }
 
-        public bool IsGenerator;
-        public bool IsNested;
+        public bool IsNested { get; private init; }
 
         public override TypeName? ValueType => Target?.ValueType;
 

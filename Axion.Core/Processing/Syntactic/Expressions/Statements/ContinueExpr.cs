@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///             'continue' [name];
     ///     </c>
     /// </summary>
-    public class ContinueExpr : Expr {
+    public class ContinueExpr : Node {
         private Token? kwContinue;
 
         public Token? KwContinue {

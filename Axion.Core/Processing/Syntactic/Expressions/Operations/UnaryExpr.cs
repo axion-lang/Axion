@@ -10,9 +10,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     ///     </c>
     /// </summary>
     public class UnaryExpr : PostfixExpr {
-        private Expr val = null!;
+        private Node val = null!;
 
-        public Expr Value {
+        public Node Value {
             get => val;
             set => val = Bind(value);
         }

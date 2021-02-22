@@ -11,9 +11,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     ///     </c>
     /// </summary>
     public class TernaryExpr : InfixExpr {
-        private Expr? condition;
+        private Node? condition;
 
-        public Expr? Condition {
+        public Node? Condition {
             get => condition;
             set => condition = BindNullable(value);
         }
@@ -25,9 +25,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             set => trueMark = BindNullable(value);
         }
 
-        private Expr? trueExpr;
+        private Node? trueExpr;
 
-        public Expr? TrueExpr {
+        public Node? TrueExpr {
             get => trueExpr;
             set => trueExpr = BindNullable(value);
         }
@@ -39,9 +39,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
             set => falseMark = BindNullable(value);
         }
 
-        private Expr? falseExpr;
+        private Node? falseExpr;
 
-        public Expr? FalseExpr {
+        public Node? FalseExpr {
             get => falseExpr;
             set => falseExpr = BindNullable(value);
         }

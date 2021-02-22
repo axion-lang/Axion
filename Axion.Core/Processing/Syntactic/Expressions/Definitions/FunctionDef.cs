@@ -62,18 +62,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public FunctionDef(Node parent) : base(parent) { }
 
-        public DecoratedExpr WithDecorators(params Expr[] items) {
+        public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
                 Target     = this,
-                Decorators = new NodeList<Expr>(this, items)
+                Decorators = new NodeList<Node>(this, items)
             };
         }
 
-        public FunctionDef WithScope(params Expr[] items) {
-            return WithScope((IEnumerable<Expr>) items);
+        public FunctionDef WithScope(params Node[] items) {
+            return WithScope((IEnumerable<Node>) items);
         }
 
-        public FunctionDef WithScope(IEnumerable<Expr> items) {
+        public FunctionDef WithScope(IEnumerable<Node> items) {
             Scope = new ScopeExpr(this).WithItems(items);
             return this;
         }

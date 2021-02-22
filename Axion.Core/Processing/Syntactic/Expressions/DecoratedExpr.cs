@@ -3,7 +3,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Common;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
-    public class DecoratedExpr : Expr {
+    public class DecoratedExpr : Node {
         private Token? startMark;
 
         public Token? StartMark {
@@ -11,16 +11,16 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => startMark = BindNullable(value);
         }
 
-        private NodeList<Expr>? decorators;
+        private NodeList<Node>? decorators;
 
-        public NodeList<Expr> Decorators {
+        public NodeList<Node> Decorators {
             get => InitIfNull(ref decorators);
             set => decorators = Bind(value);
         }
 
-        private Expr? target;
+        private Node? target;
 
-        public Expr? Target {
+        public Node? Target {
             get => target;
             set => target = BindNullable(value);
         }

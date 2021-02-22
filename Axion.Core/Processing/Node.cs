@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Axion.Core.Hierarchy;
+using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
@@ -12,6 +13,26 @@ using Newtonsoft.Json;
 namespace Axion.Core.Processing {
     /// <summary>
     ///     Span of source code / Tree leaf with parent and children nodes.
+    ///     <c>
+    ///         multiple-expr:
+    ///             expr {',' expr};
+    ///         multiple-infix:
+    ///             infix-expr {',' infix-expr};
+    ///         simple-multiple-name:
+    ///             simple-name-expr {',' simple-name-expr};
+    ///         single-expr:
+    ///             conditional-expr | while-expr | for-expr    |
+    ///             try-expr         | with-expr  | import-expr |
+    ///             decorated;
+    ///         decorated:
+    ///             module-def | class-def  | enum-def |
+    ///             func-def   | small-expr;
+    ///         small-expr:
+    ///             pass-expr | expr-expr | flow-expr;
+    ///         flow-expr:
+    ///             break-expr | continue-expr | return-expr |
+    ///             raise-expr | yield-expr;
+    ///     </c>
     /// </summary>
     public abstract class Node : CodeSpan, ITranslatableNode {
         private Ast? ast;
@@ -62,11 +83,25 @@ namespace Axion.Core.Processing {
         [NoPathTraversing]
         public Node Parent { get; set; } = null!;
 
+        /// <summary>
+        ///     Constructor for <see cref="Token"/>s. 
+        /// </summary>
         protected Node(
             Unit     unit,
             Location start = default,
             Location end   = default
         ) : base(unit, start, end) { }
+
+        /// <summary>
+        ///     Constructor for expressions.
+        /// </summary>
+        protected Node(Node? parent) : base(
+            parent?.Unit!,
+            parent?.Start ?? default,
+            parent?.End   ?? default
+        ) {
+            Parent = parent!;
+        }
 
         /// <summary>
         ///     Returns first parent of this node with given type.

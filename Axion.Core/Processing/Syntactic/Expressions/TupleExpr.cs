@@ -13,9 +13,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///     </c>
     /// </summary>
     public class TupleExpr : AtomExpr {
-        private NodeList<Expr>? expressions;
+        private NodeList<Node>? expressions;
 
-        public NodeList<Expr> Expressions {
+        public NodeList<Node> Expressions {
             get => InitIfNull(ref expressions);
             set => expressions = Bind(value);
         }

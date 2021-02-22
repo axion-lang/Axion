@@ -1,4 +1,4 @@
-namespace Axion.Core.Processing.Errors {
+﻿namespace Axion.Core.Processing.Errors {
     public class BlameType {
         public string        Description { get; }
         public BlameSeverity Severity    { get; }
@@ -35,7 +35,7 @@ namespace Axion.Core.Processing.Errors {
         public static readonly BlameType InvalidStringPrefix                      = new("invalid string prefix",                                           BlameSeverity.Error);
         public static readonly BlameType ExpectedVarName                          = new("variable name expected",                                          BlameSeverity.Error);
         public static readonly BlameType ExpectedImportedModuleName               = new("imported module name expected",                                   BlameSeverity.Error);
-        public static readonly BlameType ImpossibleToInferType                    = new("impossible to infer type in this context",                        BlameSeverity.Error);
+        public static readonly BlameType ImpossibleToInferType                    = new("impossible to infer type in this context",                        BlameSeverity.Warning);
         public static readonly BlameType NameIsAlreadyDefined                     = new("this name is already defined above",                              BlameSeverity.Error);
         public static readonly BlameType InvalidMacroParameter                    = new("invalid parameter for macro",                                     BlameSeverity.Error);
         public static readonly BlameType ModuleSelfImport                         = new("can't import module from itself",                                 BlameSeverity.Error);

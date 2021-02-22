@@ -11,7 +11,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///             | union-type   | func-type;
     ///     </c>
     /// </summary>
-    public class TypeName : Expr {
+    public class TypeName : Node {
         protected TypeName(Node parent) : base(parent) { }
 
         internal static TypeName Parse(Node parent) {

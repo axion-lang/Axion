@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///             ';' | 'pass';
     ///     </c>
     /// </summary>
-    public class EmptyExpr : Expr {
+    public class EmptyExpr : Node {
         private Token? mark;
 
         public Token? Mark {

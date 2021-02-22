@@ -18,9 +18,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             set => startMark = BindNullable(value);
         }
 
-        private Expr val = null!;
+        private Node val = null!;
 
-        public Expr Value {
+        public Node Value {
             get => val;
             set => val = Bind(value);
         }

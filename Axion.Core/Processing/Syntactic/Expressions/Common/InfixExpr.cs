@@ -25,7 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///             | ternary-expr;
     ///     </c>
     /// </summary>
-    public class InfixExpr : Expr {
+    public class InfixExpr : Node {
         protected InfixExpr(Node parent) : base(parent) { }
 
         internal static InfixExpr Parse(Node parent) {

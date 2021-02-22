@@ -5,24 +5,24 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///             [infix-expr] ':' [infix-expr] [':' [infix-expr]];
     ///     </c>
     /// </summary>
-    public class SliceExpr : Expr {
-        private Expr? from;
+    public class SliceExpr : Node {
+        private Node? from;
 
-        public Expr? From {
+        public Node? From {
             get => from;
             set => from = BindNullable(value);
         }
 
-        private Expr? to;
+        private Node? to;
 
-        public Expr? To {
+        public Node? To {
             get => to;
             set => to = BindNullable(value);
         }
 
-        private Expr? step;
+        private Node? step;
 
-        public Expr? Step {
+        public Node? Step {
             get => step;
             set => step = BindNullable(value);
         }

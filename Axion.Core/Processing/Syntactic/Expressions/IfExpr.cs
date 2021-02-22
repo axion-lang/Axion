@@ -11,7 +11,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///             ['else' scope];
     ///     </c>
     /// </summary>
-    public class IfExpr : Expr {
+    public class IfExpr : Node {
         private Token? branchKw;
 
         public Token? BranchKw {
@@ -19,9 +19,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             set => branchKw = BindNullable(value);
         }
 
-        private Expr? condition;
+        private Node? condition;
 
-        public Expr? Condition {
+        public Node? Condition {
             get => condition;
             set => condition = BindNullable(value);
         }

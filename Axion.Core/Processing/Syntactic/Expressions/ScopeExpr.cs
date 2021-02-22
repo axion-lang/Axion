@@ -16,18 +16,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///             | (NEWLINE INDENT expr+ OUTDENT);
     ///     </c>
     /// </summary>
-    public class ScopeExpr : Expr {
-        private NodeList<Expr>? items;
+    public class ScopeExpr : Node {
+        private NodeList<Node>? items;
 
-        public NodeList<Expr> Items {
+        public NodeList<Node> Items {
             get => InitIfNull(ref items);
             set => items = Bind(value);
         }
 
         public ScopeExpr(Node parent) : base(parent) { }
 
-        public ScopeExpr WithItems(IEnumerable<Expr> list) {
-            Items = new NodeList<Expr>(this, list);
+        public ScopeExpr WithItems(IEnumerable<Node> list) {
+            Items = new NodeList<Node>(this, list);
             return this;
         }
 
@@ -109,7 +109,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
 
         public (ScopeExpr? itemParentScope, int itemIndex) IndexOf<T>(
             T expression
-        ) where T : Expr {
+        ) where T : Node {
             for (var i = 0; i < Items.Count; i++) {
                 var item = Items[i];
                 if (item == expression) {

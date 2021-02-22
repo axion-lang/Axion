@@ -17,7 +17,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///     <br/>
     ///     This class is too general and it has no strict hierarchy,
     ///     that's why <see cref="Parse"/> method
-    ///     returns <see cref="Expr"/> and not <see cref="AnyExpr"/>.
+    ///     returns <see cref="Node"/> and not <see cref="AnyExpr"/>.
     ///     <c>
     ///         any
     ///             : class-def
@@ -41,7 +41,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///     </c>
     /// </summary>
     public static class AnyExpr {
-        internal static Expr Parse(Node parent) {
+        internal static Node Parse(Node parent) {
             var s = parent.Unit.TokenStream;
 
             if (s.PeekIs(KeywordClass)) {
@@ -130,7 +130,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             }
 
             var   type  = TypeName.Parse(parent);
-            Expr? value = null;
+            Node? value = null;
             if (s.MaybeEat(EqualsSign)) {
                 // ['let'] name ':' type-name '=' infix-expr
                 // -------------------------------^

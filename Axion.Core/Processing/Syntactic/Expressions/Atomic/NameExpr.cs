@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
         public bool    IsSimple   => Qualifiers.Length == 1;
 
         public override TypeName? ValueType =>
-            ((Expr?) GetParent<ScopeExpr>()?.GetDefByName(this))?.ValueType;
+            ((Node?) GetParent<ScopeExpr>()?.GetDefByName(this))?.ValueType;
 
         public NameExpr(Node parent) : base(parent) { }
 

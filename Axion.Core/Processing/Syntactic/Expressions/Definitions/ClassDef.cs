@@ -13,7 +13,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///             'class' simple-name [type-args] ['&lt;-' type-multiple-arg] scope;
     ///     </c>
     /// </summary>
-    public class ClassDef : Expr, IDefinitionExpr, IDecorableExpr {
+    public class ClassDef : Node, IDefinitionExpr, IDecorableExpr {
         private Token? kwClass;
 
         public Token? KwClass {
@@ -35,9 +35,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => bases = Bind(value);
         }
 
-        private NodeList<Expr>? keywords;
+        private NodeList<Node>? keywords;
 
-        public NodeList<Expr> Keywords {
+        public NodeList<Node> Keywords {
             get => InitIfNull(ref keywords);
             set => keywords = Bind(value);
         }
@@ -49,27 +49,27 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             set => scope = Bind(value);
         }
 
-        private NodeList<Expr>? dataMembers;
+        private NodeList<Node>? dataMembers;
 
-        public NodeList<Expr> DataMembers {
+        public NodeList<Node> DataMembers {
             get => InitIfNull(ref dataMembers);
             set => dataMembers = Bind(value);
         }
 
         public ClassDef(Node parent) : base(parent) { }
 
-        public DecoratedExpr WithDecorators(params Expr[] items) {
+        public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
                 Target     = this,
-                Decorators = new NodeList<Expr>(this, items)
+                Decorators = new NodeList<Node>(this, items)
             };
         }
 
-        public ClassDef WithScope(params Expr[] items) {
-            return WithScope((IEnumerable<Expr>) items);
+        public ClassDef WithScope(params Node[] items) {
+            return WithScope((IEnumerable<Node>) items);
         }
 
-        public ClassDef WithScope(IEnumerable<Expr> items) {
+        public ClassDef WithScope(IEnumerable<Node> items) {
             Scope = new ScopeExpr(this).WithItems(items);
             return this;
         }

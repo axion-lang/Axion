@@ -10,7 +10,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///             ['nobreak' scope];
     ///     </c>
     /// </summary>
-    public class WhileExpr : Expr, IDecorableExpr {
+    public class WhileExpr : Node, IDecorableExpr {
         private Token? kwWhile;
 
         public Token? KwWhile {
@@ -18,9 +18,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             set => kwWhile = BindNullable(value);
         }
 
-        private Expr condition = null!;
+        private Node condition = null!;
 
-        public Expr Condition {
+        public Node Condition {
             get => condition;
             set => condition = Bind(value);
         }
@@ -48,14 +48,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
 
         public WhileExpr(Node parent) : base(parent) { }
 
-        public DecoratedExpr WithDecorators(params Expr[] items) {
+        public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
                 Target     = this,
-                Decorators = new NodeList<Expr>(this, items)
+                Decorators = new NodeList<Node>(this, items)
             };
         }
 
-        public Expr Parse() {
+        public Node Parse() {
             KwWhile   = Stream.Eat(KeywordWhile);
             Condition = InfixExpr.Parse(this);
             Scope     = new ScopeExpr(this).Parse();

@@ -16,7 +16,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     ///     </c>
     /// </summary>
     public class ExpressionPattern : Pattern {
-        private Func<Node, Expr>? parseFunc;
+        private Func<Node, Node>? parseFunc;
         private Type? type;
 
         public ExpressionPattern(Node parent) : base(parent) { }
@@ -33,7 +33,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
 
             var startIdx = parent.Stream.TokenIdx;
 
-            Expr? e = null;
+            Node? e = null;
             if (parseFunc != null) {
                 e = parseFunc(parent);
             }
@@ -83,9 +83,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
             return this;
         }
 
+        private const string exprPostfix = "Expr";
+
         private void PatternFromTypeName(string typeName) {
-            if (!typeName.EndsWith("Expr") && !typeName.EndsWith("TypeName")) {
-                typeName += "Expr";
+            if (!typeName.EndsWith(exprPostfix) && !typeName.EndsWith("TypeName")) {
+                typeName += exprPostfix;
             }
 
             if (ParsingTypes.TryGetValue(typeName, out var t)) {
@@ -99,9 +101,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
             }
         }
 
-        public static readonly Dictionary<string, Func<Node, Expr>>
+        public static readonly Dictionary<string, Func<Node, Node>>
             ParsingFunctions = new() {
-                { "Expr", AnyExpr.Parse },
+                { exprPostfix, AnyExpr.Parse },
                 { nameof(AnyExpr), AnyExpr.Parse },
                 { nameof(InfixExpr), InfixExpr.Parse },
                 { nameof(PrefixExpr), PrefixExpr.Parse },

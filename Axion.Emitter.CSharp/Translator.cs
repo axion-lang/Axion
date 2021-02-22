@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Axion.Core.Processing;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
@@ -302,7 +303,7 @@ namespace Axion.Emitter.CSharp {
                     w.WriteLine($"using {directive};");
                 }
 
-                var rootItems     = new NodeList<Expr>(e);
+                var rootItems     = new NodeList<Node>(e);
                 var rootClasses   = new List<ClassDef>();
                 var rootFunctions = new List<FunctionDef>();
                 foreach (var expr in e.Items) {
@@ -359,7 +360,7 @@ namespace Axion.Emitter.CSharp {
                                          .WithDecorators(
                                              new NameExpr(e, "static")
                                          )
-                                }.Union<Expr>(rootFunctions)
+                                }.Union<Node>(rootFunctions)
                             )
                         }.Union(rootClasses)
                     )
