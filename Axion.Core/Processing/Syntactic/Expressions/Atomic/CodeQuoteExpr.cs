@@ -19,7 +19,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
             set => openQuote = BindNullable(value);
         }
 
-        private ScopeExpr? scope;
+        private ScopeExpr scope = null!;
 
         public ScopeExpr Scope {
             get => scope;
