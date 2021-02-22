@@ -52,7 +52,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                         return returns[0].item.ValueType;
                     }
 
-                    return new SimpleTypeName(this, Spec.VoidType);
+                    return new TupleTypeName(this);
                 }
                 catch {
                     return new SimpleTypeName(this, Spec.UnknownType);
