@@ -24,13 +24,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
             var e = Parse<Expr>(parent);
             if (e is TupleExpr tpl) {
                 foreach (var expr in tpl.Expressions) {
-                    if (!(expr is T)) {
+                    if (expr is not T) {
                         LanguageReport.UnexpectedType(typeof(T), expr);
                     }
                 }
             }
             else {
-                if (!(e is T)) {
+                if (e is not T) {
                     LanguageReport.UnexpectedType(typeof(T), e);
                 }
             }

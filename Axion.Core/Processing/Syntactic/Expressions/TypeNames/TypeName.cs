@@ -11,8 +11,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///             | union-type   | func-type;
     ///     </c>
     /// </summary>
-    public abstract class TypeName : Expr {
-        internal TypeName(Node parent) : base(parent) { }
+    public class TypeName : Expr {
+        protected TypeName(Node parent) : base(parent) { }
 
         internal static TypeName Parse(Node parent) {
             var s = parent.Unit.TokenStream;
@@ -71,8 +71,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         ///     </c>
         ///     for class, enum, enum item.
         /// </summary>
-        internal static List<(TypeName type, NameExpr? label)>
-            ParseNamedTypeArgs(Node parent) {
+        internal static List<(TypeName type, NameExpr? label)> ParseNamedTypeArgs(
+            Node parent
+        ) {
             var s        = parent.Unit.TokenStream;
             var typeArgs = new List<(TypeName, NameExpr?)>();
             var start    = s.Peek;

@@ -22,16 +22,18 @@ namespace Axion.Emitter.CSharp {
             switch (node) {
             case CharToken e: {
                 w.Write("'", HttpUtility.JavaScriptStringEncode(e.Content));
-                if (!e.IsUnclosed)
+                if (!e.IsUnclosed) {
                     w.Write("'");
+                }
 
                 break;
             }
             case CommentToken e: {
                 if (e.IsMultiline) {
                     w.Write("/*" + e.Content);
-                    if (!e.IsUnclosed)
+                    if (!e.IsUnclosed) {
                         w.Write("*/");
+                    }
                 }
                 else {
                     w.Write("//" + e.Content);

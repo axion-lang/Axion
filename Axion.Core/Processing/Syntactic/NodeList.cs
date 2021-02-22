@@ -50,7 +50,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         public int Count => items.Count;
 
-        public bool IsReadOnly { get; } = false;
+        public bool IsReadOnly => false;
 
         public T First {
             get =>

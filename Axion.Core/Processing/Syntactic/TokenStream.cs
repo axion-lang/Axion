@@ -29,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         public int Count => tokens.Count;
 
-        public bool IsReadOnly { get; } = false;
+        public bool IsReadOnly => false;
 
         private readonly List<Token> tokens = new();
 
