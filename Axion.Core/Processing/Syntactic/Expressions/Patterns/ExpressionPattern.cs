@@ -21,32 +21,33 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
 
         public ExpressionPattern(Node parent) : base(parent) { }
 
-        public override bool Match(Expr parent) {
-            if (parent.Unit.TokenStream.PeekIs(TokenType.End)) {
+        public override bool Match(MacroMatchExpr parent) {
+            if (parent.Stream.PeekIs(TokenType.End)) {
                 return false;
             }
 
             // leave expression non-starters to next token pattern.
-            if (parent.Unit.TokenStream.PeekIs(Spec.NeverExprStartTypes)) {
+            if (parent.Stream.PeekIs(Spec.NeverExprStartTypes)) {
                 return true;
             }
 
-            Expr? e;
+            var startIdx = parent.Stream.TokenIdx;
+
+            Expr? e = null;
             if (parseFunc != null) {
                 e = parseFunc(parent);
-                parent.Ast.MatchedMacros.Peek().Nodes.Add(e);
-                return true;
+            }
+            else if (type != null) {
+                e = typeof(TypeName).IsAssignableFrom(type)
+                    ? TypeName.Parse(parent)
+                    : AnyExpr.Parse(parent);
             }
 
-            e = typeof(TypeName).IsAssignableFrom(type)
-                ? TypeName.Parse(parent)
-                : AnyExpr.Parse(parent);
-
-            if (type?.IsInstanceOfType(e) ?? false) {
-                parent.Ast.MatchedMacros.Peek().Nodes.Add(e);
+            if (e != null && (type?.IsInstanceOfType(e) ?? parseFunc != null)) {
+                parent.Nodes.Add(e);
                 return true;
             }
-
+            parent.Stream.MoveAbsolute(startIdx);
             return false;
         }
 
@@ -97,7 +98,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
                 parseFunc = fn;
             }
         }
-        
+
         public static readonly Dictionary<string, Func<Node, Expr>>
             ParsingFunctions = new() {
                 { "Expr", AnyExpr.Parse },

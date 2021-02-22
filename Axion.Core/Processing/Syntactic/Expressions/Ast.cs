@@ -15,8 +15,6 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         internal List<MacroDef> Macros =>
             Unit.Module.Definitions.OfType<MacroDef>().ToList();
 
-        internal readonly Stack<MacroMatchExpr> MatchedMacros = new();
-
         public Ast(Unit src) : base(null!) {
             Unit   = src;
             Parent = this;

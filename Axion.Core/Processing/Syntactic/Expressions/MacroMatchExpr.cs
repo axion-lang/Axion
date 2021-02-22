@@ -18,52 +18,57 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         public MacroMatchExpr(Node parent) : base(parent) { }
 
         public MacroMatchExpr Parse() {
-            Ast.MatchedMacros.Push(this);
-            Macro = Ast.Macros.FirstOrDefault(
-                m => m.Syntax.Patterns.Count > 0
-                  && m.Syntax.Patterns[0] is TokenPattern
-                  && m.Syntax.Match(this)
-            );
-            if (Macro == default) {
+            var startIdx = Stream.TokenIdx;
+
+            foreach (var macro in Ast.Macros) {
+                if (macro.Syntax.Patterns.Count > 0
+                 && macro.Syntax.Patterns[0] is TokenPattern
+                 && macro.Syntax.Match(this)) {
+                    Macro = macro;
+                    break;
+                }
+                // reset for next macro
                 Nodes.Clear();
+                Stream.MoveAbsolute(startIdx);
             }
-            else {
-                Start = Nodes[0].Start;
-                End   = Nodes[^1].End;
+            if (Macro == null) {
+                return this;
             }
-            Ast.MatchedMacros.Pop();
+
+            Start = Nodes[0].Start;
+            End   = Nodes[^1].End;
             return this;
         }
 
         public MacroMatchExpr Parse(Expr leftExpr) {
-            Ast.MatchedMacros.Push(this);
             var startIdx = Stream.TokenIdx;
 
-            Macro = Ast.Macros.FirstOrDefault(
-                m => m.Syntax.Patterns.Count > 1
-                  && m.Syntax.Patterns[1] is TokenPattern t
-                  && t.Match(this)
-            );
-            if (Macro != null) {
-                var restCascade = new CascadePattern(this) {
-                    Patterns = new NodeList<Pattern>(
-                        this,
-                        Macro.Syntax.Patterns.Skip(2)
-                    )
-                };
-                Nodes.Insert(0, leftExpr);
-                if (restCascade.Match(this)) {
-                    Start = Nodes[0].Start;
-                    End   = Nodes[^1].End;
+            foreach (var macro in Ast.Macros) {
+                if (macro.Syntax.Patterns.Count > 1
+                 && macro.Syntax.Patterns[1] is TokenPattern t
+                 && t.Match(this)) {
+                    Macro = macro;
+                    break;
                 }
-                else {
-                    Macro = null;
-                    Stream.MoveAbsolute(startIdx);
-                    Nodes.Clear();
-                }
+                // reset for next macro
+                Nodes.Clear();
+                Stream.MoveAbsolute(startIdx);
+            }
+            if (Macro == null) {
+                return this;
             }
 
-            Ast.MatchedMacros.Pop();
+            var restCascade = new CascadePattern(this) {
+                Patterns = new NodeList<Pattern>(
+                    this,
+                    Macro.Syntax.Patterns.Skip(2)
+                )
+            };
+            Nodes.Insert(0, leftExpr);
+            if (restCascade.Match(this)) {
+                Start = Nodes[0].Start;
+                End   = Nodes[^1].End;
+            }
             return this;
         }
     }

@@ -60,9 +60,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 return new ConstantExpr(parent).Parse();
             }
 
-            var macro = new MacroMatchExpr(parent).Parse();
-            if (macro.Macro != null) {
-                return macro;
+            var match = new MacroMatchExpr(parent).Parse();
+            if (match.Macro != null) {
+                return match;
             }
 
             return new UnknownExpr(parent).Parse();

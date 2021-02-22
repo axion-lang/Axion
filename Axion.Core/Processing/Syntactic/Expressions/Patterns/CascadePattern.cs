@@ -19,13 +19,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
 
         public CascadePattern(Node parent) : base(parent) { }
 
-        public override bool Match(Expr parent) {
+        public override bool Match(MacroMatchExpr parent) {
             var startIdx = parent.Stream.TokenIdx;
+            var nodesLen = parent.Nodes.Count;
             if (Patterns.All(pattern => pattern.Match(parent))) {
                 return true;
             }
-
             parent.Stream.MoveAbsolute(startIdx);
+            parent.Nodes.RemoveRange(nodesLen, parent.Nodes.Count - nodesLen);
             return false;
         }
 

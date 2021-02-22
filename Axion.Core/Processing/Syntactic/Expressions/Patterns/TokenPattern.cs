@@ -12,13 +12,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
 
         public TokenPattern(Node parent) : base(parent) { }
 
-        public override bool Match(Expr parent) {
+        public override bool Match(MacroMatchExpr parent) {
             var s = parent.Unit.TokenStream;
             if (s.Peek.Content != Value?.Content) {
                 return false;
             }
 
-            parent.Ast.MatchedMacros.Peek().Nodes.Add(s.Eat());
+            parent.Nodes.Add(s.Eat());
             return true;
         }
 
