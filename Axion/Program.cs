@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -39,8 +39,7 @@ namespace Axion {
             typeof(BigInteger).Assembly
         };
 
-        internal static readonly AxionSyntaxHighlighter SyntaxHighlighter =
-            new AxionSyntaxHighlighter();
+        internal static readonly AxionSyntaxHighlighter SyntaxHighlighter = new();
 
         public static void Main(string[] arguments) {
             var cliParser = new Parser(
@@ -430,7 +429,8 @@ namespace Axion {
                 Path.GetDirectoryName(typeof(object).Assembly.Location)!;
 
             // Adding some necessary .NET assemblies
-            // These assemblies couldn't be loaded correctly via the same construction as above.
+            // These assemblies couldn't be loaded correctly via
+            // the same construction as above.
             refs.Add(
                 MetadataReference.CreateFromFile(
                     Path.Join(assemblyPath, "mscorlib.dll")
