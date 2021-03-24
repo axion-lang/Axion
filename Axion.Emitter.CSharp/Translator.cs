@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Axion.Core.Processing;
@@ -388,25 +388,23 @@ namespace Axion.Emitter.CSharp {
                 }
 
                 var rootItems     = new NodeList<Node>(e);
-                var rootClasses   = new List<ClassDef>();
-                var rootFunctions = new List<FunctionDef>();
+                var rootClasses   = new List<Node>();
+                var rootFunctions = new List<Node>();
                 foreach (var expr in e.Items) {
-                    var item = expr;
-                    // decorator is just a wrapper,
-                    // so we need to unpack it's content.
+                    var actualType = expr;
                     if (expr is DecoratedExpr dec) {
-                        item = dec.Target!;
+                        actualType = dec.Target!;
                     }
 
-                    switch (item) {
-                    case ModuleDef m:
-                        w.Write(m);
+                    switch (actualType) {
+                    case ModuleDef:
+                        w.Write(expr);
                         break;
-                    case ClassDef c:
-                        rootClasses.Add(c);
+                    case ClassDef:
+                        rootClasses.Add(expr);
                         break;
-                    case FunctionDef f:
-                        rootFunctions.Add(f);
+                    case FunctionDef:
+                        rootFunctions.Add(expr);
                         break;
                     default:
                         rootItems += expr;
