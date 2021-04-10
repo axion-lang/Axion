@@ -1,3 +1,4 @@
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
@@ -7,13 +8,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     ///             '[' syntax-pattern ']';
     ///     </c>
     /// </summary>
-    public class OptionalPattern : Pattern {
-        private Pattern pattern = null!;
-
-        public Pattern Pattern {
-            get => pattern;
-            set => pattern = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class OptionalPattern : Pattern {
+        [LeafSyntaxNode] Pattern pattern = null!;
 
         public OptionalPattern(Node parent) : base(parent) { }
 

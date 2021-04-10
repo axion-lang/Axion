@@ -1,4 +1,5 @@
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
@@ -8,27 +9,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///             '(' [type {',' type}] ')';
     ///     </c>
     /// </summary>
-    public class TupleTypeName : TypeName {
-        private Token? startMark;
-
-        public Token? StartMark {
-            get => startMark;
-            set => startMark = BindNullable(value);
-        }
-
-        private NodeList<TypeName>? types;
-
-        public NodeList<TypeName> Types {
-            get => InitIfNull(ref types);
-            set => types = Bind(value);
-        }
-
-        private Token? endMark;
-
-        public Token? EndMark {
-            get => endMark;
-            set => endMark = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class TupleTypeName : TypeName {
+        [LeafSyntaxNode] Token? startMark;
+        [LeafSyntaxNode] NodeList<TypeName>? types;
+        [LeafSyntaxNode] Token? endMark;
 
         public TupleTypeName(Node parent) : base(parent) { }
 

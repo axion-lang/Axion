@@ -1,5 +1,6 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.SourceGenerators;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     /// <summary>
@@ -9,20 +10,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     ///             | suffix-expr UNARY-RIGHT;
     ///     </c>
     /// </summary>
-    public class UnaryExpr : PostfixExpr {
-        private Node val = null!;
-
-        public Node Value {
-            get => val;
-            set => val = Bind(value);
-        }
-
-        private OperatorToken @operator = null!;
-
-        public OperatorToken Operator {
-            get => @operator;
-            set => @operator = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class UnaryExpr : PostfixExpr {
+        [LeafSyntaxNode] Node value = null!;
+        [LeafSyntaxNode] OperatorToken @operator = null!;
 
         public UnaryExpr(Node parent) : base(parent) { }
     }

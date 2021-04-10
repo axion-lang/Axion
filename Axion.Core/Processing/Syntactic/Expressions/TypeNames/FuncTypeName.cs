@@ -1,4 +1,5 @@
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
@@ -8,34 +9,18 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///             type '->' type
     ///     </c>
     /// </summary>
-    public class FuncTypeName : TypeName {
-        private TypeName? argsType;
-
-        public TypeName? ArgsType {
-            get => argsType;
-            set => argsType = BindNullable(value);
-        }
-
-        private Token? joiningMark;
-
-        public Token? JoiningMark {
-            get => joiningMark;
-            set => joiningMark = BindNullable(value);
-        }
-
-        private TypeName? returnType;
-
-        public TypeName? ReturnType {
-            get => returnType;
-            set => returnType = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class FuncTypeName : TypeName {
+        [LeafSyntaxNode] TypeName? argsType;
+        [LeafSyntaxNode] Token? joiningMark;
+        [LeafSyntaxNode] TypeName? returnType;
 
         public FuncTypeName(Node parent) : base(parent) { }
 
         public FuncTypeName Parse() {
-            ArgsType    ??= Parse(this);
-            JoiningMark =   Stream.Eat(RightArrow);
-            ReturnType  =   Parse(this);
+            ArgsType ??= Parse(this);
+            JoiningMark = Stream.Eat(RightArrow);
+            ReturnType = Parse(this);
             return this;
         }
     }

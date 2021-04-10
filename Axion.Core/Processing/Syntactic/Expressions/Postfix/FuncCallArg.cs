@@ -2,23 +2,14 @@ using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.SourceGenerators;
 using Axion.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
-    public sealed class FuncCallArg : Node {
-        private NameExpr? name;
-
-        public NameExpr? Name {
-            get => name;
-            set => name = BindNullable(value);
-        }
-
-        private Node val = null!;
-
-        public Node Value {
-            get => val;
-            set => val = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class FuncCallArg : Node {
+        [LeafSyntaxNode] NameExpr? name;
+        [LeafSyntaxNode] Node value = null!;
 
         internal FuncCallArg(Node parent) : base(parent) { }
 
@@ -39,7 +30,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
             FuncCallArg? first          = null,
             bool         allowGenerator = false
         ) {
-            var s    = parent.Unit.TokenStream;
+            var s = parent.Unit.TokenStream;
             var args = new NodeList<FuncCallArg>(parent);
 
             if (first != null) {
@@ -59,7 +50,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     s.Eat(TokenType.EqualsSign);
                     var argValue = InfixExpr.Parse(parent);
                     arg = new FuncCallArg(parent) {
-                        Name  = argName,
+                        Name = argName,
                         Value = argValue
                     };
                     if (args.Any(
@@ -77,7 +68,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     if (s.PeekIs(TokenType.KeywordFor)) {
                         arg = new FuncCallArg(parent) {
                             Value = new ForComprehension(parent) {
-                                Target      = argValue
+                                Target = argValue
                             }.Parse()
                         };
                     }

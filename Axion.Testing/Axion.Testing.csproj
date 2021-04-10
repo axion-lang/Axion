@@ -1,14 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
         <GenerateProgramFile>false</GenerateProgramFile>
         <Authors>Ilya Nikitin</Authors>
         <Company>Fluctus Technologies</Company>
         <Product>Axion</Product>
         <PackageId>Axion</PackageId>
-        <Description>.NET Core wrapper of Axion programming language toolset.</Description>
         <Version>1.0.0.0</Version>
         <AssemblyName>Axion.Testing</AssemblyName>
         <RootNamespace>Axion.Testing</RootNamespace>
@@ -23,9 +22,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.0-preview-20210127-04" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0-release-20210330-02" />
         <PackageReference Include="NUnit" Version="3.13.1" />
-        <PackageReference Include="NUnit3TestAdapter" Version="4.0.0-beta.1" />
     </ItemGroup>
 
     <ItemGroup>

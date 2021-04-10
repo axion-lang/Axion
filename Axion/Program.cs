@@ -23,9 +23,9 @@ using Module = Axion.Core.Hierarchy.Module;
 
 namespace Axion {
     public static class Program {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private static SimpleLayout logLevel {
+        static SimpleLayout logLevel {
             get => LogManager.Configuration.Variables["consoleLogLevel"];
             set {
                 LogManager.Configuration.Variables["consoleLogLevel"] = value;
@@ -169,7 +169,7 @@ namespace Axion {
             // ReSharper disable once FunctionNeverReturns
         }
 
-        private static void PrintIntro() {
+        static void PrintIntro() {
             const string header = "Axion programming language compiler toolset";
             Console.Title = header;
             ConsoleUtils.WriteLine(
@@ -185,7 +185,7 @@ namespace Axion {
             );
         }
 
-        private static void PrintError(LanguageReport e) {
+        static void PrintError(LanguageReport e) {
             var lines = SyntaxHighlighter
                         .HighlightTokens(
                             e.TargetUnit.TokenStream
@@ -272,14 +272,14 @@ namespace Axion {
             );
         }
 
-        private static void PrintLineNumber(int lineNumber) {
+        static void PrintLineNumber(int lineNumber) {
             var strNum = lineNumber.ToString();
             var width  = Math.Max(strNum.Length, 4);
             var view   = strNum.PadLeft(width + 1).PadRight(width + 2) + "│ ";
             Console.Write(view);
         }
 
-        private static void EnterInteractiveMode() {
+        static void EnterInteractiveMode() {
             logger.Info(
                 "Axion code editor & interpreter mode.\n"
               + "Type 'exit' or 'quit' to exit mode, 'cls' to clear screen."
@@ -345,7 +345,7 @@ namespace Axion {
             }
         }
 
-        private static void ProcessSources(CommandLineArguments args) {
+        static void ProcessSources(CommandLineArguments args) {
             ProcessingOptions? pOptions;
             if (string.IsNullOrWhiteSpace(args.Mode)) {
                 pOptions = new ProcessingOptions(Mode.Reduction);
@@ -413,7 +413,7 @@ namespace Axion {
             }
         }
 
-        private static void ExecuteCSharp(string csCode) {
+        static void ExecuteCSharp(string csCode) {
             if (string.IsNullOrWhiteSpace(csCode)) {
                 return;
             }
@@ -500,7 +500,7 @@ namespace Axion {
             }
         }
 
-        private static INodeTranslator LoadTranslator(Assembly assembly) {
+        static INodeTranslator LoadTranslator(Assembly assembly) {
             foreach (var type in assembly.GetTypes()) {
                 if (typeof(INodeTranslator).IsAssignableFrom(type)
                  && Activator.CreateInstance(type) is INodeTranslator ncv) {
@@ -521,7 +521,7 @@ namespace Axion {
     }
 
     public class EmitterLoadContext : AssemblyLoadContext {
-        private readonly AssemblyDependencyResolver resolver;
+        readonly AssemblyDependencyResolver resolver;
 
         public EmitterLoadContext(string pluginPath) {
             resolver = new AssemblyDependencyResolver(pluginPath);

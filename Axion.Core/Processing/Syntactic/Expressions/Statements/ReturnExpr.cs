@@ -2,6 +2,7 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.SourceGenerators;
 using Axion.Specification;
 using static Axion.Specification.TokenType;
 
@@ -12,20 +13,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///             'return' [multiple-expr];
     ///     </c>
     /// </summary>
-    public class ReturnExpr : Node {
-        private Token? kwReturn;
-
-        public Token? KwReturn {
-            get => kwReturn;
-            set => kwReturn = BindNullable(value);
-        }
-
-        private Node? val;
-
-        public Node? Value {
-            get => val;
-            set => val = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class ReturnExpr : Node {
+        [LeafSyntaxNode] Token? kwReturn;
+        [LeafSyntaxNode] Node? value;
 
         public override TypeName? ValueType => Value?.ValueType;
 

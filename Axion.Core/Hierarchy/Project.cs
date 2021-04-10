@@ -43,9 +43,9 @@ namespace Axion.Core.Hierarchy {
 
         public FileInfo ConfigFile { get; }
 
-        private readonly Config<ProjectConfig> config;
+        readonly Config<ProjectConfig> config;
 
-        private static readonly TomlSettings settings = TomlSettings.Create(
+        static readonly TomlSettings settings = TomlSettings.Create(
             s => s.ConfigurePropertyMapping(
                 m => m.UseTargetPropertySelector(
                     standardSelectors => standardSelectors.IgnoreCase

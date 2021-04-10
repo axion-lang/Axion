@@ -9,10 +9,10 @@ using Axion.Specification;
 
 namespace Axion.Core {
     public static class Utilities {
-        private static readonly DateTimeFormatInfo dateTimeFormat =
+        static readonly DateTimeFormatInfo dateTimeFormat =
             new CultureInfo("en-US").DateTimeFormat;
 
-        private const string timedFileNameFormat = "MMM-dd_HH-mm-ss";
+        const string timedFileNameFormat = "MMM-dd_HH-mm-ss";
 
         /// <summary>
         ///     Creates a file name from current date and time
@@ -93,7 +93,7 @@ namespace Axion.Core {
                    .Where(arg => !string.IsNullOrEmpty(arg));
         }
 
-        private static IEnumerable<string> Split(
+        static IEnumerable<string> Split(
             string           str,
             Func<char, bool> controller
         ) {

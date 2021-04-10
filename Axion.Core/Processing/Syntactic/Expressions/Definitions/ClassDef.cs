@@ -4,6 +4,7 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.SourceGenerators;
 using Axion.Specification;
 using static Axion.Specification.TokenType;
 
@@ -17,54 +18,20 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///             scope;
     ///     </c>
     /// </summary>
-    public class ClassDef : Node, IDefinitionExpr, IDecorableExpr {
-        private Token? kwClass;
-
-        public Token? KwClass {
-            get => kwClass;
-            set => kwClass = BindNullable(value);
-        }
-
-        private NameExpr? name;
-
-        public NameExpr? Name {
-            get => name;
-            set => name = BindNullable(value);
-        }
-
-        private NodeList<TypeName>? typeParameters;
-
-        public NodeList<TypeName> TypeParameters {
-            get => InitIfNull(ref typeParameters);
-            set => typeParameters = Bind(value);
-        }
-
-        private NodeList<TypeName>? bases;
-
-        public NodeList<TypeName> Bases {
-            get => InitIfNull(ref bases);
-            set => bases = Bind(value);
-        }
-
-        private ScopeExpr scope = null!;
-
-        public ScopeExpr Scope {
-            get => scope;
-            set => scope = Bind(value);
-        }
-
-        private NodeList<Node>? dataMembers;
-
-        public NodeList<Node> DataMembers {
-            get => InitIfNull(ref dataMembers);
-            set => dataMembers = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class ClassDef : Node, IDefinitionExpr, IDecorableExpr {
+        [LeafSyntaxNode] Token? kwClass;
+        [LeafSyntaxNode] NameExpr? name;
+        [LeafSyntaxNode] NodeList<TypeName>? typeParameters;
+        [LeafSyntaxNode] NodeList<TypeName>? bases;
+        [LeafSyntaxNode] ScopeExpr scope = null!;
+        [LeafSyntaxNode] NodeList<Node>? dataMembers;
 
         public ClassDef(Node parent) : base(parent) { }
 
         public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
-                Target     = this,
+                Target = this,
                 Decorators = new NodeList<Node>(this, items)
             };
         }
@@ -80,7 +47,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public ClassDef Parse() {
             KwClass = Stream.Eat(KeywordClass);
-            Name    = new NameExpr(this).Parse(true);
+            Name = new NameExpr(this).Parse(true);
             if (Stream.MaybeEat(OpenParenthesis)) {
                 if (!Stream.PeekIs(CloseParenthesis)) {
                     do {

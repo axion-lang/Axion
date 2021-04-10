@@ -11,7 +11,7 @@ namespace Axion.Core.Hierarchy {
     public class Module {
         public DirectoryInfo Directory { get; }
 
-        private DirectoryInfo? outputDirectory;
+        DirectoryInfo? outputDirectory;
 
         /// <summary>
         ///     Path to directory where generated result is located.
@@ -71,7 +71,7 @@ namespace Axion.Core.Hierarchy {
         public List<LanguageReport> Blames =>
             Units.Values.Select(u => u.Blames).SelectMany(x => x).ToList();
 
-        private readonly List<IDefinitionExpr> definitions = new();
+        readonly List<IDefinitionExpr> definitions = new();
 
         public ImmutableList<IDefinitionExpr> Definitions =>
             definitions.Union(Submodules.Values
@@ -80,7 +80,7 @@ namespace Axion.Core.Hierarchy {
                        )
                        .ToImmutableList();
 
-        private readonly HashSet<string> customKeywords = new();
+        readonly HashSet<string> customKeywords = new();
 
         public ImmutableHashSet<string> CustomKeywords =>
             customKeywords.Union(Submodules.Values
@@ -89,7 +89,7 @@ namespace Axion.Core.Hierarchy {
                           )
                           .ToImmutableHashSet();
 
-        private Module(DirectoryInfo dir) {
+        Module(DirectoryInfo dir) {
             Directory = dir;
         }
 

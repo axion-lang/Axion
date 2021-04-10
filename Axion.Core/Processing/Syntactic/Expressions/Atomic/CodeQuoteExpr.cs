@@ -1,6 +1,7 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.SourceGenerators;
 using Axion.Specification;
 using static Axion.Specification.TokenType;
 
@@ -11,27 +12,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///             '{{' any '}}';
     ///     </c>
     /// </summary>
-    public class CodeQuoteExpr : AtomExpr {
-        private Token? openQuote;
-
-        public Token? OpenQuote {
-            get => openQuote;
-            set => openQuote = BindNullable(value);
-        }
-
-        private ScopeExpr scope = null!;
-
-        public ScopeExpr Scope {
-            get => scope;
-            set => scope = Bind(value);
-        }
-
-        private Token? closeQuote;
-
-        public Token? CloseQuote {
-            get => closeQuote;
-            set => closeQuote = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class CodeQuoteExpr : AtomExpr {
+        [LeafSyntaxNode] Token? openQuote;
+        [LeafSyntaxNode] ScopeExpr scope = null!;
+        [LeafSyntaxNode] Token? closeQuote;
 
         public override TypeName? ValueType => Scope.ValueType;
 
@@ -39,7 +24,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public CodeQuoteExpr Parse() {
             OpenQuote = Stream.Eat(DoubleOpenBrace);
-            Scope     = new ScopeExpr(this);
+            Scope = new ScopeExpr(this);
             while (!Stream.PeekIs(DoubleCloseBrace, TokenType.End)) {
                 Scope.Items += AnyExpr.Parse(this);
             }

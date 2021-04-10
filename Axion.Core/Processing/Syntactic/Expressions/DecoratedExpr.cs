@@ -1,29 +1,14 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
-    public class DecoratedExpr : Node {
-        private Token? startMark;
-
-        public Token? StartMark {
-            get => startMark;
-            set => startMark = BindNullable(value);
-        }
-
-        private NodeList<Node>? decorators;
-
-        public NodeList<Node> Decorators {
-            get => InitIfNull(ref decorators);
-            set => decorators = Bind(value);
-        }
-
-        private Node? target;
-
-        public Node? Target {
-            get => target;
-            set => target = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class DecoratedExpr : Node {
+        [LeafSyntaxNode] Token? startMark;
+        [LeafSyntaxNode] NodeList<Node>? decorators;
+        [LeafSyntaxNode] Node? target;
 
         internal DecoratedExpr(Node parent) : base(parent) { }
 

@@ -1,4 +1,5 @@
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
@@ -8,13 +9,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///             ';' | 'pass';
     ///     </c>
     /// </summary>
-    public class EmptyExpr : Node {
-        private Token? mark;
-
-        public Token? Mark {
-            get => mark;
-            set => mark = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class EmptyExpr : Node {
+        [LeafSyntaxNode] Token? mark;
 
         public EmptyExpr(Node parent) : base(parent) { }
 

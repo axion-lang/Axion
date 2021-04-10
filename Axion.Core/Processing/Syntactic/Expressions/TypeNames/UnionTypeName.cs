@@ -1,4 +1,5 @@
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
@@ -8,27 +9,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///             type '|' type;
     ///     </c>
     /// </summary>
-    public class UnionTypeName : TypeName {
-        private TypeName? left;
-
-        public TypeName? Left {
-            get => left;
-            set => left = BindNullable(value);
-        }
-
-        private Token? joiningMark;
-
-        public Token? JoiningMark {
-            get => joiningMark;
-            set => joiningMark = BindNullable(value);
-        }
-
-        private TypeName? right;
-
-        public TypeName? Right {
-            get => right;
-            set => right = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class UnionTypeName : TypeName {
+        [LeafSyntaxNode] TypeName? left;
+        [LeafSyntaxNode] Token? joiningMark;
+        [LeafSyntaxNode] TypeName? right;
 
         public UnionTypeName(Node parent) : base(parent) { }
 
@@ -36,7 +21,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             Left ??= Parse(this);
 
             JoiningMark = Stream.Eat(Pipe);
-            Right       = Parse(this);
+            Right = Parse(this);
             return this;
         }
     }

@@ -15,7 +15,7 @@ namespace Axion {
     ///     Axion's (almost) semantic syntax highlighter for ScriptBench.
     /// </summary>
     internal class AxionSyntaxHighlighter : IScriptBenchSyntaxHighlighter {
-        private Point renderPosition;
+        Point renderPosition;
 
         public List<ColoredValue> Highlight(
             IEnumerable<string>          codeLines,
@@ -93,7 +93,7 @@ namespace Axion {
             return values;
         }
 
-        private static ConsoleColor GetSimpleTokenColor(Token token) {
+        static ConsoleColor GetSimpleTokenColor(Token token) {
             ConsoleColor tokenColor;
             if (token is OperatorToken) {
                 tokenColor = Red;

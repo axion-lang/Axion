@@ -1,5 +1,6 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
@@ -9,20 +10,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///             'continue' [name];
     ///     </c>
     /// </summary>
-    public class ContinueExpr : Node {
-        private Token? kwContinue;
-
-        public Token? KwContinue {
-            get => kwContinue;
-            set => kwContinue = BindNullable(value);
-        }
-
-        private NameExpr? loopName;
-
-        public NameExpr? LoopName {
-            get => loopName;
-            set => loopName = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class ContinueExpr : Node {
+        [LeafSyntaxNode] Token? kwContinue;
+        [LeafSyntaxNode] NameExpr? loopName;
 
         public ContinueExpr(Node parent) : base(parent) { }
 

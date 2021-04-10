@@ -1,10 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <Nullable>enable</Nullable>
         <LangVersion>9</LangVersion>
     </PropertyGroup>
+
+    <Target Name="Copy emitter to startup project" AfterTargets="Build">
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll;$(OutputPath)$(AssemblyName).pdb;$(OutputPath)$(AssemblyName).deps.json"
+              DestinationFolder="$(SolutionDir)\Axion\$(OutputPath)"/>
+    </Target>
 
     <ItemGroup>
         <ProjectReference Include="..\Axion.Core\Axion.Core.csproj">
@@ -15,9 +20,5 @@
             <Private>false</Private>
             <ExcludeAssets>runtime</ExcludeAssets>
         </ProjectReference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
     </ItemGroup>
 </Project>

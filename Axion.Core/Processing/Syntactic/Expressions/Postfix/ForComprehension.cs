@@ -4,6 +4,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Generic;
 using Axion.Core.Processing.Syntactic.Expressions.Operations;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Traversal;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
@@ -13,44 +14,15 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///             'for' multiple-name 'in' multiple-infix (('if'|'unless') condition)* [for-comprehension];
     ///     </c>
     /// </summary>
-    public class ForComprehension : InfixExpr {
-        private Node? target;
+    [SyntaxExpression]
+    public partial class ForComprehension : InfixExpr {
+        [NoPathTraversing, LeafSyntaxNode] Node? target;
+        [LeafSyntaxNode] Node item = null!;
+        [LeafSyntaxNode] Node iterable = null!;
+        [LeafSyntaxNode] NodeList<Node>? conditions;
+        [LeafSyntaxNode] Node? right;
 
-        [NoPathTraversing]
-        public Node? Target {
-            get => target;
-            set => target = BindNullable(value);
-        }
-
-        private Node item = null!;
-
-        public Node Item {
-            get => item;
-            set => item = Bind(value);
-        }
-
-        private Node iterable = null!;
-
-        public Node Iterable {
-            get => iterable;
-            set => iterable = Bind(value);
-        }
-
-        private NodeList<Node>? conditions;
-
-        public NodeList<Node> Conditions {
-            get => InitIfNull(ref conditions);
-            set => conditions = Bind(value);
-        }
-
-        private Node? right;
-
-        public Node? Right {
-            get => right;
-            set => right = BindNullable(value);
-        }
-
-        public bool IsNested { get; private init; }
+        public bool IsNested { get; init; }
 
         public override TypeName? ValueType => Target?.ValueType;
 
@@ -83,7 +55,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
             if (Stream.PeekIs(KeywordFor)) {
                 Right = new ForComprehension(Parent!) {
-                    Target   = this,
+                    Target = this,
                     IsNested = true
                 }.Parse();
             }

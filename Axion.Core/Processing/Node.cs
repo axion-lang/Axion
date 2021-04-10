@@ -35,7 +35,7 @@ namespace Axion.Core.Processing {
     ///     </c>
     /// </summary>
     public abstract class Node : CodeSpan, ITranslatableNode {
-        private Ast? ast;
+        Ast? ast;
 
         /// <summary>
         ///     Abstract Syntax Tree root of this node.
@@ -59,7 +59,7 @@ namespace Axion.Core.Processing {
             }
         }
 
-        private TypeName? valueType;
+        TypeName? valueType;
 
         /// <summary>
         ///     Language type-name of this node that can be inferred from context.
@@ -118,7 +118,7 @@ namespace Axion.Core.Processing {
             }
         }
 
-        protected NodeList<T> InitIfNull<T>(ref NodeList<T>? list)
+        protected internal NodeList<T> InitIfNull<T>(ref NodeList<T>? list)
             where T : Node {
             list ??= new NodeList<T>(this);
             list =   Bind(list);
@@ -151,7 +151,7 @@ namespace Axion.Core.Processing {
         ///     Binds given property value to parent node
         ///     and extends it's span if needed.
         /// </summary>
-        protected T? BindNullable<T>(
+        protected internal T? BindNullable<T>(
             T?                        value,
             [CallerMemberName] string propertyName = ""
         ) where T : Node {
@@ -162,7 +162,7 @@ namespace Axion.Core.Processing {
         ///     Internal node binding method.
         ///     Creates a path to parent attribute.
         /// </summary>
-        private T BindNode<T>(T value, string propertyName) where T : Node {
+        T BindNode<T>(T value, string propertyName) where T : Node {
             ExtendSpan(value);
 
             value.Parent = this;
@@ -228,7 +228,7 @@ namespace Axion.Core.Processing {
 
         #region Location marking methods
 
-        private bool firstTimeSpanMarking = true;
+        bool firstTimeSpanMarking = true;
 
         /// <summary>
         ///     Extends this span of code

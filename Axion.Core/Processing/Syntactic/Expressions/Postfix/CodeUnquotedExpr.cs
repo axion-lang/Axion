@@ -1,6 +1,7 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.SourceGenerators;
 using Axion.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
@@ -10,20 +11,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///             '$' expr;
     ///     </c>
     /// </summary>
-    public class CodeUnquotedExpr : PostfixExpr {
-        private Token? startMark;
-
-        public Token? StartMark {
-            get => startMark;
-            set => startMark = BindNullable(value);
-        }
-
-        private Node val = null!;
-
-        public Node Value {
-            get => val;
-            set => val = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class CodeUnquotedExpr : PostfixExpr {
+        [LeafSyntaxNode] Token? startMark;
+        [LeafSyntaxNode] Node value = null!;
 
         public override TypeName? ValueType => Value.ValueType;
 
@@ -31,7 +22,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public CodeUnquotedExpr Parse() {
             StartMark = Stream.Eat(TokenType.Dollar);
-            Value     = Parse(this);
+            Value = Parse(this);
             return this;
         }
     }

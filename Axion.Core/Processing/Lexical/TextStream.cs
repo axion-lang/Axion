@@ -9,9 +9,9 @@ namespace Axion.Core.Processing.Lexical {
     ///     and moving backwards.
     /// </summary>
     public class TextStream {
-        private int charIdx = -1;
-        private int lineIdx;
-        private int columnIdx;
+        int charIdx = -1;
+        int lineIdx;
+        int columnIdx;
 
         public string Text { get; }
 
@@ -131,7 +131,7 @@ namespace Axion.Core.Processing.Lexical {
             return null;
         }
 
-        private void Move(int by = 1) {
+        void Move(int by = 1) {
             Debug.Assert(by > 0);
             while (by > 0 && Peek() != Spec.EndOfCode) {
                 if (Peek() == '\n') {

@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Axion.Testing.NUnit.Lexer {
     [TestFixture]
     public partial class LexerTests {
-        private static void Lex(Unit unit) {
+        static void Lex(Unit unit) {
             Compiler.Process(
                 unit,
                 new ProcessingOptions(Mode.Lexing) {

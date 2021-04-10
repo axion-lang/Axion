@@ -10,20 +10,20 @@ using static Axion.Specification.Spec;
 
 namespace Axion.Core.Processing.Lexical {
     public class Lexer {
-        private readonly Unit unit;
-        private readonly TextStream stream;
+        readonly Unit unit;
+        readonly TextStream stream;
 
         // Variables for current token creation
-        private TokenType type;
-        private readonly StringBuilder value = new();
-        private readonly StringBuilder content = new();
-        private Location startLoc;
+        TokenType type;
+        readonly StringBuilder value = new();
+        readonly StringBuilder content = new();
+        Location startLoc;
 
         // Variables for indentation analysis
-        private char indentChar;
-        private int indentSize;
-        private int lastIndentLen;
-        private int indentLevel;
+        char indentChar;
+        int indentSize;
+        int lastIndentLen;
+        int indentLevel;
 
         public Stack<Token> MismatchingPairs { get; } = new();
 
@@ -35,11 +35,11 @@ namespace Axion.Core.Processing.Lexical {
             ProcessTerminators.Push(End);
         }
 
-        private bool TryAddChar(char expected, bool isContent = true) {
+        bool TryAddChar(char expected, bool isContent = true) {
             return TryAddChar(new[] { expected }, isContent);
         }
 
-        private bool TryAddChar(char[] expect, bool isContent = true) {
+        bool TryAddChar(char[] expect, bool isContent = true) {
             var eaten = stream.Eat(expect) ?? "";
             value.Append(eaten);
             if (isContent) {
@@ -49,7 +49,7 @@ namespace Axion.Core.Processing.Lexical {
             return eaten != "";
         }
 
-        private bool AddNext(bool isContent = true, params string[] expect) {
+        bool AddNext(bool isContent = true, params string[] expect) {
             var eaten = stream.Eat(expect) ?? "";
             value.Append(eaten);
             if (isContent) {
@@ -59,13 +59,13 @@ namespace Axion.Core.Processing.Lexical {
             return eaten != "";
         }
 
-        private T BindSpan<T>(T token) where T : Token {
+        T BindSpan<T>(T token) where T : Token {
             token.MarkStart(startLoc);
             token.MarkEnd(stream.Location);
             return token;
         }
 
-        private Token NewTokenFromContext() {
+        Token NewTokenFromContext() {
             var token = new Token(
                 unit,
                 type,
@@ -85,7 +85,7 @@ namespace Axion.Core.Processing.Lexical {
             return ReadInternal();
         }
 
-        private Token? ReadInternal() {
+        Token? ReadInternal() {
             if (stream.PeekIs(White)) {
                 return ReadWhite();
             }
@@ -137,7 +137,7 @@ namespace Axion.Core.Processing.Lexical {
             return t;
         }
 
-        private Token? ReadWhite() {
+        Token? ReadWhite() {
             bool addNext;
             do {
                 addNext = TryAddChar(White);
@@ -225,7 +225,7 @@ namespace Axion.Core.Processing.Lexical {
             return null;
         }
 
-        private Token ReadId() {
+        Token ReadId() {
             do {
                 AddNext();
             } while (stream.Peek().IsValidIdPart()
@@ -256,7 +256,7 @@ namespace Axion.Core.Processing.Lexical {
             return NewTokenFromContext();
         }
 
-        private Token? ReadNewline() {
+        Token? ReadNewline() {
             type = Newline;
 
             bool addNext;
@@ -282,13 +282,13 @@ namespace Axion.Core.Processing.Lexical {
             return null;
         }
 
-        private Token ReadEoc() {
+        Token ReadEoc() {
             type = End;
             TryAddChar(EndOfCode);
             return NewTokenFromContext();
         }
 
-        private NumberToken ReadNumber() {
+        NumberToken ReadNumber() {
             bool addNext;
             do {
                 addNext = TryAddChar('0');
@@ -303,12 +303,12 @@ namespace Axion.Core.Processing.Lexical {
             );
         }
 
-        private OperatorToken ReadOperator() {
+        OperatorToken ReadOperator() {
             AddNext(expect: OperatorsKeys);
             return BindSpan(new OperatorToken(unit, value.ToString()));
         }
 
-        private Token ReadPunctuation() {
+        Token ReadPunctuation() {
             AddNext(expect: PunctuationKeys);
             type = Punctuation[value.ToString()];
             var t = NewTokenFromContext();
@@ -329,7 +329,7 @@ namespace Axion.Core.Processing.Lexical {
             return t;
         }
 
-        private CharToken ReadChar() {
+        CharToken ReadChar() {
             AddNext(false, CharacterQuote);
             while (!AddNext(false, CharacterQuote)) {
                 if (stream.AtEndOfLine) {
@@ -370,7 +370,7 @@ namespace Axion.Core.Processing.Lexical {
             return t;
         }
 
-        private CommentToken ReadOneLineComment() {
+        CommentToken ReadOneLineComment() {
             AddNext(false, OneLineCommentMark);
             while (!stream.AtEndOfLine) {
                 AddNext();
@@ -381,7 +381,7 @@ namespace Axion.Core.Processing.Lexical {
             );
         }
 
-        private CommentToken ReadMultiLineComment() {
+        CommentToken ReadMultiLineComment() {
             AddNext(false, MultiLineCommentMark);
             while (!stream.PeekIs(MultiLineCommentMark)) {
                 if (stream.PeekIs(EndOfCode)) {
@@ -412,7 +412,7 @@ namespace Axion.Core.Processing.Lexical {
             );
         }
 
-        private Token ReadString() {
+        Token ReadString() {
             var prefixes = "";
             if (!string.IsNullOrWhiteSpace(value.ToString())) {
                 // if string has prefixes, then
@@ -520,7 +520,7 @@ namespace Axion.Core.Processing.Lexical {
             return s;
         }
 
-        private StringInterpolation ReadStringInterpolation() {
+        StringInterpolation ReadStringInterpolation() {
             var interpolation = new StringInterpolation(unit);
             var iSrc          = interpolation.Unit;
             var lexer         = new Lexer(interpolation.Unit);
@@ -548,7 +548,7 @@ namespace Axion.Core.Processing.Lexical {
             return interpolation;
         }
 
-        private void ReadEscapeSeq() {
+        void ReadEscapeSeq() {
             var escapeStart = stream.Location;
             var raw         = stream.Eat('\\')!;
             var escaped     = "";

@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Axion.Testing.NUnit.Parser {
     [TestFixture]
     public partial class SyntaxParserTests {
-        private static Unit ParseTestFile(
+        static Unit ParseTestFile(
             [CallerMemberName] string testName = null!
         ) {
             var file       = TestUtils.FileFromTestName(testName);

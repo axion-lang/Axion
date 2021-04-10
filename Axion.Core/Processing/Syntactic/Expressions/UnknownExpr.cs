@@ -1,6 +1,7 @@
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.SourceGenerators;
 using Axion.Specification;
 using static Axion.Specification.TokenType;
 
@@ -11,13 +12,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///             TOKEN* (NEWLINE | END);
     ///     </c>
     /// </summary>
-    public class UnknownExpr : AtomExpr {
-        private NodeList<Token>? tokens;
-
-        public NodeList<Token> Tokens {
-            get => InitIfNull(ref tokens);
-            set => tokens = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class UnknownExpr : AtomExpr {
+        [LeafSyntaxNode] NodeList<Token>? tokens;
 
         public UnknownExpr(Node parent) : base(parent) {
             LanguageReport.To(BlameType.InvalidSyntax, this);

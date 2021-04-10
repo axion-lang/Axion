@@ -12,7 +12,7 @@ namespace Axion.Core.Processing.Syntactic {
     ///     and provide some other useful methods.
     /// </summary>
     public class NodeList<T> : IList<T> where T : Node {
-        private Node? parent;
+        Node? parent;
 
         public Node? Parent {
             get => parent;
@@ -30,7 +30,7 @@ namespace Axion.Core.Processing.Syntactic {
             }
         }
 
-        private readonly IList<T> items;
+        readonly IList<T> items;
 
         void IList<T>.RemoveAt(int index) {
             items.RemoveAt(index);

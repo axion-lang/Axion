@@ -15,7 +15,7 @@ using Module = Axion.Core.Hierarchy.Module;
 
 namespace Axion.Core {
     public class Compiler {
-        private static readonly Assembly coreAsm =
+        static readonly Assembly coreAsm =
             Assembly.GetExecutingAssembly();
 
         public static readonly string Version =
@@ -34,7 +34,7 @@ namespace Axion.Core {
 
         public static readonly Dictionary<string, INodeTranslator> Translators = new();
 
-        private static readonly Logger logger =
+        static readonly Logger logger =
             LogManager.GetCurrentClassLogger();
 
         public static string GetTempSourceFilePath() {
@@ -142,19 +142,19 @@ namespace Axion.Core {
             return src.TokenStream;
         }
 
-        private static Ast Parse(Unit src, ProcessingOptions options) {
+        static Ast Parse(Unit src, ProcessingOptions options) {
             logger.Debug("Abstract Syntax Tree generation");
             src.Ast.Parse();
             return src.Ast;
         }
 
-        private static Ast Reduce(Unit src, ProcessingOptions options) {
+        static Ast Reduce(Unit src, ProcessingOptions options) {
             logger.Debug("Syntax tree reducing");
             Traversing.Traverse(src.Ast);
             return src.Ast;
         }
 
-        private static CodeWriter Translate(
+        static CodeWriter Translate(
             Unit              src,
             ProcessingOptions options
         ) {

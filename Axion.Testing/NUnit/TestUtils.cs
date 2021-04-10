@@ -8,11 +8,11 @@ namespace Axion.Testing.NUnit {
     public static class TestUtils {
         #region Test source files locations
 
-        private static readonly DirectoryInfo axionTestingDir =
+        static readonly DirectoryInfo axionTestingDir =
             new DirectoryInfo(Environment.CurrentDirectory).Parent!.Parent!
                 .Parent!;
 
-        private static readonly string samplesPath = Path.Join(
+        static readonly string samplesPath = Path.Join(
             axionTestingDir.Parent!.FullName,
             "misc",
             "code-examples"
@@ -28,7 +28,7 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        private static readonly string outPath = Path.Join(
+        static readonly string outPath = Path.Join(
             axionTestingDir.FullName,
             "test-files",
             "out"
@@ -44,7 +44,7 @@ namespace Axion.Testing.NUnit {
             }
         }
 
-        private static readonly string inPath = Path.Join(
+        static readonly string inPath = Path.Join(
             axionTestingDir.FullName,
             "test-files"
         );

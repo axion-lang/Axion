@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
@@ -10,33 +11,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///             'module' name scope;
     ///     </c>
     /// </summary>
-    public class ModuleDef : Node, IDefinitionExpr, IDecorableExpr {
-        private Token? kwModule;
-
-        public Token? KwModule {
-            get => kwModule;
-            set => kwModule = BindNullable(value);
-        }
-
-        private NameExpr? name;
-
-        public NameExpr? Name {
-            get => name;
-            set => name = BindNullable(value);
-        }
-
-        private ScopeExpr scope = null!;
-
-        public ScopeExpr Scope {
-            get => scope;
-            set => scope = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class ModuleDef : Node, IDefinitionExpr, IDecorableExpr {
+        [LeafSyntaxNode] Token? kwModule;
+        [LeafSyntaxNode] NameExpr? name;
+        [LeafSyntaxNode] ScopeExpr scope = null!;
 
         public ModuleDef(Node parent) : base(parent) { }
 
         public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
-                Target     = this,
+                Target = this,
                 Decorators = new NodeList<Node>(this, items)
             };
         }
@@ -52,8 +37,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public ModuleDef Parse() {
             KwModule = Stream.Eat(KeywordModule);
-            Name     = new NameExpr(this).Parse();
-            Scope    = new ScopeExpr(this).Parse();
+            Name = new NameExpr(this).Parse();
+            Scope = new ScopeExpr(this).Parse();
             return this;
         }
     }

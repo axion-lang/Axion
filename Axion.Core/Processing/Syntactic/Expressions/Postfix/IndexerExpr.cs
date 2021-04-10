@@ -1,5 +1,6 @@
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
@@ -11,20 +12,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///             [infix-expr] ':' [infix-expr] [':' [infix-expr]];
     ///     </c>
     /// </summary>
-    public class IndexerExpr : PostfixExpr {
-        private Node? index;
-
-        public Node? Index {
-            get => index;
-            set => index = BindNullable(value);
-        }
-
-        private Node? target;
-
-        public Node? Target {
-            get => target;
-            set => target = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class IndexerExpr : PostfixExpr {
+        [LeafSyntaxNode] Node? index;
+        [LeafSyntaxNode] Node? target;
 
         public IndexerExpr(Node parent) : base(parent) { }
 
@@ -57,7 +48,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
                         expressions += new SliceExpr(this) {
                             From = start,
-                            To   = stop,
+                            To = stop,
                             Step = step
                         };
                         break;

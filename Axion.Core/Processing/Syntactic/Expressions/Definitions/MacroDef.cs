@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Patterns;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
@@ -11,34 +12,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///             'macro' simple-name syntax-description scope;
     ///     </c>
     /// </summary>
-    public class MacroDef : Node, IDefinitionExpr {
-        private Token? kwMacro;
-
-        public Token? KwMacro {
-            get => kwMacro;
-            set => kwMacro = BindNullable(value);
-        }
-
-        private NameExpr? name;
-
-        public NameExpr? Name {
-            get => name;
-            set => name = BindNullable(value);
-        }
-
-        private CascadePattern syntax = null!;
-
-        public CascadePattern Syntax {
-            get => syntax;
-            set => syntax = Bind(value);
-        }
-
-        private ScopeExpr scope = null!;
-
-        public ScopeExpr Scope {
-            get => scope;
-            set => scope = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class MacroDef : Node, IDefinitionExpr {
+        [LeafSyntaxNode] Token? kwMacro;
+        [LeafSyntaxNode] NameExpr? name;
+        [LeafSyntaxNode] CascadePattern syntax = null!;
+        [LeafSyntaxNode] ScopeExpr scope = null!;
 
         public Dictionary<string, string> NamedSyntaxParts { get; } = new();
 
@@ -66,8 +45,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
             //     }
             //   }}
             KwMacro = Stream.Eat(KeywordMacro);
-            Name    = new NameExpr(this).Parse(true);
-            Syntax  = new CascadePattern(this);
+            Name = new NameExpr(this).Parse(true);
+            Syntax = new CascadePattern(this);
             // EBNF-based syntax definition
             if (Stream.MaybeEat(OpenParenthesis)) {
                 Syntax.Parse();

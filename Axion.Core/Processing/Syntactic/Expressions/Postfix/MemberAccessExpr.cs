@@ -1,4 +1,5 @@
 using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
@@ -8,20 +9,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///             atom '.' ID;
     ///     </c>
     /// </summary>
-    public class MemberAccessExpr : PostfixExpr {
-        private Node? target;
-
-        public Node? Target {
-            get => target;
-            set => target = BindNullable(value);
-        }
-
-        private Node? member;
-
-        public Node? Member {
-            get => member;
-            set => member = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class MemberAccessExpr : PostfixExpr {
+        [LeafSyntaxNode] Node? target;
+        [LeafSyntaxNode] Node? member;
 
         public MemberAccessExpr(Node parent) : base(parent) { }
 

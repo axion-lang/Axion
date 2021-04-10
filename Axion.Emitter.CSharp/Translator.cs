@@ -442,7 +442,7 @@ namespace Axion.Emitter.CSharp {
                                          .WithDecorators(
                                              new NameExpr(e, "static")
                                          )
-                                }.Union<Node>(rootFunctions)
+                                }.Union(rootFunctions)
                             )
                         }.Union(rootClasses)
                     )
@@ -508,7 +508,7 @@ namespace Axion.Emitter.CSharp {
             return true;
         }
 
-        private static void TranslateImportEntry(
+        static void TranslateImportEntry(
             CodeWriter       w,
             string           acc,
             ImportExpr.Entry entry

@@ -26,7 +26,7 @@ namespace Axion.Core.Hierarchy {
         /// </summary>
         public FileInfo SourceFile { get; }
 
-        private DirectoryInfo? outputDirectory;
+        DirectoryInfo? outputDirectory;
 
         /// <summary>
         ///     Path to directory where generated result is located.
@@ -79,14 +79,13 @@ namespace Axion.Core.Hierarchy {
 
         public bool HasErrors => Blames.Any(b => b.Severity == BlameSeverity.Error);
 
-        private Unit(
+        Unit(
             string         code      = "",
             FileInfo?      source    = null,
             DirectoryInfo? outputDir = null
         ) {
             if (source == null) {
                 source = new FileInfo(Compiler.GetTempSourceFilePath());
-                // ReSharper disable once PossibleNullReferenceException
                 Utilities.ResolvePath(source.Directory.FullName);
             }
 
@@ -148,11 +147,7 @@ namespace Axion.Core.Hierarchy {
 
         public static string? NameFromFile(FileInfo file) {
             var name = Path.GetFileNameWithoutExtension(file.FullName);
-            if (name == null || name.Any(c => !c.IsValidIdPart())) {
-                return null;
-            }
-
-            return name;
+            return name.Any(c => !c.IsValidIdPart()) ? null : name;
         }
     }
 }

@@ -1,4 +1,5 @@
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.SourceGenerators;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
@@ -7,13 +8,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///             name;
     ///     </c>
     /// </summary>
-    public class SimpleTypeName : TypeName, ITypeParameter {
-        private NameExpr name = null!;
-
-        public NameExpr Name {
-            get => name;
-            set => name = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class SimpleTypeName : TypeName, ITypeParameter {
+        [LeafSyntaxNode] NameExpr name = null!;
 
         public SimpleTypeName(Node parent) : base(parent) { }
 

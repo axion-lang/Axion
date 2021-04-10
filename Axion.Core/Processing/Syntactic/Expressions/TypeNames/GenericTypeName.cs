@@ -1,4 +1,5 @@
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
@@ -8,34 +9,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///             type '[' type {',' type} ']';
     ///     </c>
     /// </summary>
-    public class GenericTypeName : TypeName {
-        private TypeName? target;
-
-        public TypeName? Target {
-            get => target;
-            set => target = BindNullable(value);
-        }
-
-        private Token? typeArgsStartMark;
-
-        public Token? TypeArgsStartMark {
-            get => typeArgsStartMark;
-            set => typeArgsStartMark = BindNullable(value);
-        }
-
-        private NodeList<TypeName>? typeArgs;
-
-        public NodeList<TypeName> TypeArgs {
-            get => InitIfNull(ref typeArgs);
-            set => typeArgs = Bind(value);
-        }
-
-        private Token? typeArgsEndMark;
-
-        public Token? TypeArgsEndMark {
-            get => typeArgsEndMark;
-            set => typeArgsEndMark = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class GenericTypeName : TypeName {
+        [LeafSyntaxNode] TypeName? target;
+        [LeafSyntaxNode] Token? typeArgsStartMark;
+        [LeafSyntaxNode] NodeList<TypeName>? typeArgs;
+        [LeafSyntaxNode] Token? typeArgsEndMark;
 
         public GenericTypeName(Node parent) : base(parent) { }
 

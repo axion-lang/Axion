@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic {
 
         public bool IsReadOnly => false;
 
-        private readonly List<Token> tokens = new();
+        readonly List<Token> tokens = new();
 
         public bool PeekIs(params TokenType[] expected) {
             return PeekByIs(1, expected);
@@ -102,7 +102,7 @@ namespace Axion.Core.Processing.Syntactic {
             TokenIdx = tokenIndex;
         }
 
-        private void SkipTrivial(params TokenType[] wantedTypes) {
+        void SkipTrivial(params TokenType[] wantedTypes) {
             var skipNewlines = !wantedTypes.Contains(Newline);
             while (ExactPeek.Type == Comment
                 || ExactPeek.Type == Newline && skipNewlines) {

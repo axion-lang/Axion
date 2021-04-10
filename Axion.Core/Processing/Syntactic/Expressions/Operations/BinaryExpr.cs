@@ -1,5 +1,6 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.SourceGenerators;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     /// <summary>
@@ -8,27 +9,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     ///             infix OPERATOR infix;
     ///     </c>
     /// </summary>
-    public class BinaryExpr : InfixExpr {
-        private Node? left;
-
-        public Node? Left {
-            get => left;
-            set => left = BindNullable(value);
-        }
-
-        private Node? right;
-
-        public Node? Right {
-            get => right;
-            set => right = BindNullable(value);
-        }
-
-        private Token? @operator;
-
-        public Token? Operator {
-            get => @operator;
-            set => @operator = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class BinaryExpr : InfixExpr {
+        [LeafSyntaxNode] Node? left;
+        [LeafSyntaxNode] Node? right;
+        [LeafSyntaxNode] Token? @operator;
 
         public BinaryExpr(Node parent) : base(parent) { }
     }

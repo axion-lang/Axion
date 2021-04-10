@@ -4,6 +4,7 @@ using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
+using Axion.SourceGenerators;
 using Axion.Specification;
 using static Axion.Specification.TokenType;
 
@@ -16,13 +17,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///             | (NEWLINE INDENT expr+ OUTDENT);
     ///     </c>
     /// </summary>
-    public class ScopeExpr : Node {
-        private NodeList<Node>? items;
-
-        public NodeList<Node> Items {
-            get => InitIfNull(ref items);
-            set => items = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class ScopeExpr : Node {
+        [LeafSyntaxNode] NodeList<Node>? items;
 
         public ScopeExpr(Node parent) : base(parent) { }
 
@@ -32,7 +29,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public string CreateUniqueId(string formattedId) {
-            var    i = 0;
+            var i = 0;
             string id;
             do {
                 id = string.Format(formattedId, i);
@@ -91,12 +88,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 }
                 else {
                     var childProps = item.GetType()
-                                         .GetProperties()
-                                         .Where(
-                                             p => p.PropertyType
-                                               == typeof(ScopeExpr)
-                                               && p.Name != nameof(Parent)
-                                         );
+                        .GetProperties()
+                        .Where(
+                            p => p.PropertyType
+                              == typeof(ScopeExpr)
+                              && p.Name != nameof(Parent)
+                        );
                     foreach (var prop in childProps) {
                         var b = (ScopeExpr?) prop.GetValue(item);
                         b?.FindItemsOfType(_outs);

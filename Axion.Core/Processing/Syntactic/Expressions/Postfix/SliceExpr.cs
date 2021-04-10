@@ -1,3 +1,5 @@
+using Axion.SourceGenerators;
+
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
     ///     <c>
@@ -5,27 +7,11 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///             [infix-expr] ':' [infix-expr] [':' [infix-expr]];
     ///     </c>
     /// </summary>
-    public class SliceExpr : Node {
-        private Node? from;
-
-        public Node? From {
-            get => from;
-            set => from = BindNullable(value);
-        }
-
-        private Node? to;
-
-        public Node? To {
-            get => to;
-            set => to = BindNullable(value);
-        }
-
-        private Node? step;
-
-        public Node? Step {
-            get => step;
-            set => step = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class SliceExpr : Node {
+        [LeafSyntaxNode] Node? from;
+        [LeafSyntaxNode] Node? to;
+        [LeafSyntaxNode] Node? step;
 
         public SliceExpr(Node parent) : base(parent) { }
     }

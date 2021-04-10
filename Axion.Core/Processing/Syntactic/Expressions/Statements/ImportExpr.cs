@@ -3,6 +3,7 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Generic;
+using Axion.SourceGenerators;
 using Axion.Specification;
 using static Axion.Specification.TokenType;
 
@@ -16,20 +17,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     ///         );
     ///     </c>
     /// </summary>
-    public class ImportExpr : Node {
-        private Token? kwImport;
-
-        public Token? KwImport {
-            get => kwImport;
-            set => kwImport = BindNullable(value);
-        }
-
-        private NodeList<Entry>? entries;
-
-        public NodeList<Entry> Entries {
-            get => InitIfNull(ref entries);
-            set => entries = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class ImportExpr : Node {
+        [LeafSyntaxNode] Token? kwImport;
+        [LeafSyntaxNode] NodeList<Entry>? entries;
 
         public ImportExpr(Node parent) : base(parent) { }
 
@@ -66,7 +57,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
         ///         | (INDENT import-entry+ OUTDENT);
         ///     </c>
         /// </summary>
-        private Entry ParseEntry(NameExpr? prefixName = null) {
+        Entry ParseEntry(NameExpr? prefixName = null) {
             var rootNameTokens = new NodeList<Token>(this);
             if (prefixName != null) {
                 rootNameTokens.AddRange(prefixName.Tokens);
@@ -75,12 +66,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             var rootName = new NameExpr(this) {
                 Tokens = rootNameTokens
             };
-            var       subEntries = new NodeList<Entry>(this);
-            var       exceptions = new NodeList<NameExpr>(this);
-            NameExpr? alias      = null;
+            var subEntries = new NodeList<Entry>(this);
+            var exceptions = new NodeList<NameExpr>(this);
+            NameExpr? alias = null;
             if (Stream.MaybeEat(Dot)) {
                 var hasParens = Stream.PeekIs(OpenParenthesis);
-                var es        = Multiple.Parse(this, _ => ParseEntry(rootName));
+                var es = Multiple.Parse(this, _ => ParseEntry(rootName));
                 if (es is not TupleExpr tpl) {
                     return new Entry(
                         this,
@@ -113,7 +104,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
             }
             else {
                 if (Stream.MaybeEat("except")) {
-                    var hasParens        = Stream.PeekIs(OpenParenthesis);
+                    var hasParens = Stream.PeekIs(OpenParenthesis);
                     var importExceptions = Multiple.Parse<AtomExpr>(this);
                     if (importExceptions is TupleExpr tpl) {
                         if (tpl.Expressions.Count == 1 && hasParens) {
@@ -166,8 +157,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
                 NodeList<Entry>    children,
                 NodeList<NameExpr> exceptions
             ) : base(parent) {
-                Name       = name;
-                Children   = children;
+                Name = name;
+                Children = children;
                 Exceptions = exceptions;
             }
         }

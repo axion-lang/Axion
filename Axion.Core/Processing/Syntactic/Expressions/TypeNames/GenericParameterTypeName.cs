@@ -1,29 +1,14 @@
 ﻿using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
-    public class GenericParameterTypeName : TypeName, ITypeParameter {
-        private NameExpr name = null!;
-
-        public NameExpr Name {
-            get => name;
-            set => name = Bind(value);
-        }
-
-        private Token? typeConstraintsStartMark;
-
-        public Token? TypeConstraintsStartMark {
-            get => typeConstraintsStartMark;
-            set => typeConstraintsStartMark = BindNullable(value);
-        }
-
-        private NodeList<TypeName>? typeConstraints;
-
-        public NodeList<TypeName> TypeConstraints {
-            get => InitIfNull(ref typeConstraints);
-            set => typeConstraints = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class GenericParameterTypeName : TypeName, ITypeParameter {
+        [LeafSyntaxNode] NameExpr name = null!;
+        [LeafSyntaxNode] Token? typeConstraintsStartMark;
+        [LeafSyntaxNode] NodeList<TypeName>? typeConstraints;
 
         public GenericParameterTypeName(Node parent) : base(parent) { }
 

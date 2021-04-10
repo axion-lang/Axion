@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Axion.Testing.NUnit {
     [TestFixture]
     public class ProjectTests {
-        private static readonly string testProjectsPath = Path.Join(
+        static readonly string testProjectsPath = Path.Join(
             TestUtils.InPath,
             "projects"
         );

@@ -1,4 +1,5 @@
 using Axion.Core.Processing.Lexical.Tokens;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
@@ -8,27 +9,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     ///             type '[' ']';
     ///     </c>
     /// </summary>
-    public class ArrayTypeName : TypeName {
-        private TypeName? elementType;
+    [SyntaxExpression]
+    public partial class ArrayTypeName : TypeName {
+        [LeafSyntaxNode] TypeName? elementType;
 
-        public TypeName? ElementType {
-            get => elementType;
-            set => elementType = BindNullable(value);
-        }
+        [LeafSyntaxNode] Token? openingBracket;
 
-        private Token? openingBracket;
-
-        public Token? OpeningBracket {
-            get => openingBracket;
-            set => openingBracket = BindNullable(value);
-        }
-
-        private Token? closingBracket;
-
-        public Token? ClosingBracket {
-            get => closingBracket;
-            set => closingBracket = BindNullable(value);
-        }
+        [LeafSyntaxNode] Token? closingBracket;
 
         public ArrayTypeName(Node parent) : base(parent) { }
 

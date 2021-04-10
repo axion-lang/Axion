@@ -1,5 +1,6 @@
 using System.Linq;
 using Axion.Core.Processing.Errors;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
@@ -9,13 +10,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     ///             syntax-pattern {',' syntax-pattern};
     ///     </c>
     /// </summary>
-    public class CascadePattern : Pattern {
-        private NodeList<Pattern>? patterns;
-
-        internal NodeList<Pattern> Patterns {
-            get => InitIfNull(ref patterns);
-            set => patterns = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class CascadePattern : Pattern {
+        [LeafSyntaxNode] NodeList<Pattern>? patterns;
 
         public CascadePattern(Node parent) : base(parent) { }
 

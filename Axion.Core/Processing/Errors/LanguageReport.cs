@@ -27,7 +27,7 @@ namespace Axion.Core.Processing.Errors {
         public string Time { get; } =
             DateTime.Now.ToString(CultureInfo.InvariantCulture);
 
-        private LanguageReport(
+        LanguageReport(
             string        message,
             BlameSeverity severity,
             CodeSpan      span

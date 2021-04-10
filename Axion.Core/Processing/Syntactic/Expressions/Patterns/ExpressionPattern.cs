@@ -16,8 +16,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     ///     </c>
     /// </summary>
     public class ExpressionPattern : Pattern {
-        private Func<Node, Node>? parseFunc;
-        private Type? type;
+        Func<Node, Node>? parseFunc;
+        Type? type;
 
         public ExpressionPattern(Node parent) : base(parent) { }
 
@@ -83,9 +83,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
             return this;
         }
 
-        private const string exprPostfix = "Expr";
+        const string exprPostfix = "Expr";
 
-        private void PatternFromTypeName(string typeName) {
+        void PatternFromTypeName(string typeName) {
             if (!typeName.EndsWith(exprPostfix) && !typeName.EndsWith("TypeName")) {
                 typeName += exprPostfix;
             }

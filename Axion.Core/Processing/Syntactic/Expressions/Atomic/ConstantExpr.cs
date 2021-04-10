@@ -1,6 +1,7 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.SourceGenerators;
 using Axion.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
@@ -10,13 +11,9 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///             CONST-TOKEN | STRING+;
     ///     </c>
     /// </summary>
-    public class ConstantExpr : AtomExpr {
-        private Token? literal;
-
-        public Token? Literal {
-            get => literal;
-            set => literal = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class ConstantExpr : AtomExpr {
+        [LeafSyntaxNode] Token? literal;
 
         public override TypeName? ValueType => Literal?.ValueType;
 

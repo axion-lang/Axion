@@ -1,4 +1,5 @@
 using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
@@ -8,20 +9,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     ///             atom '(' [multiple-arg | (arg for-comprehension)] ')';
     ///     </c>
     /// </summary>
-    public class FuncCallExpr : PostfixExpr {
-        private Node target = null!;
-
-        public Node Target {
-            get => target;
-            set => target = Bind(value);
-        }
-
-        private NodeList<FuncCallArg>? args;
-
-        public NodeList<FuncCallArg> Args {
-            get => InitIfNull(ref args);
-            set => args = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class FuncCallExpr : PostfixExpr {
+        [LeafSyntaxNode] Node target = null!;
+        [LeafSyntaxNode] NodeList<FuncCallArg>? args;
 
         public FuncCallExpr(Node parent) : base(parent) { }
 

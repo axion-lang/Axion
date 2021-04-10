@@ -10,12 +10,12 @@ namespace Axion.Core.Processing.Translation {
     ///     for multiple target languages.
     /// </summary>
     public class CodeWriter : IDisposable {
-        private readonly StringWriter baseWriter;
-        private readonly IndentedTextWriter writer;
-        private bool lastLineEmpty;
+        readonly StringWriter baseWriter;
+        readonly IndentedTextWriter writer;
+        bool lastLineEmpty;
 
-        private readonly INodeTranslator translator;
-        private static readonly INodeTranslator fallbackTranslator =
+        readonly INodeTranslator translator;
+        static readonly INodeTranslator fallbackTranslator =
             Compiler.Translators["axion"];
 
         public string OutputFileExtension => translator.OutputFileExtension;

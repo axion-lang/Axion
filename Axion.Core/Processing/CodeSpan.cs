@@ -24,7 +24,7 @@ namespace Axion.Core.Processing {
         public Location End { get; private protected set; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string debuggerDisplay {
+        string debuggerDisplay {
             get {
                 var cw = CodeWriter.Default;
                 cw.Write(this);

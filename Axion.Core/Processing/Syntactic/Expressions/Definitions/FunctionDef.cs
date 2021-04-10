@@ -4,6 +4,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.SourceGenerators;
 using Axion.Specification;
 using static Axion.Specification.TokenType;
 
@@ -17,41 +18,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     ///             ['->' type] scope;
     ///     </c>
     /// </summary>
-    public class FunctionDef : AtomExpr, IDefinitionExpr, IDecorableExpr {
-        private Token? kwFn;
-
-        public Token? KwFn {
-            get => kwFn;
-            set => kwFn = BindNullable(value);
-        }
-
-        private NameExpr? name;
-
-        public NameExpr? Name {
-            get => name;
-            set => name = BindNullable(value);
-        }
-
-        private NodeList<TypeName>? typeParameters;
-
-        public NodeList<TypeName> TypeParameters {
-            get => InitIfNull(ref typeParameters);
-            set => typeParameters = Bind(value);
-        }
-
-        private NodeList<FunctionParameter>? parameters;
-
-        public NodeList<FunctionParameter> Parameters {
-            get => InitIfNull(ref parameters);
-            set => parameters = Bind(value);
-        }
-
-        private ScopeExpr scope = null!;
-
-        public ScopeExpr Scope {
-            get => scope;
-            set => scope = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class FunctionDef : AtomExpr, IDefinitionExpr, IDecorableExpr {
+        [LeafSyntaxNode] Token? kwFn;
+        [LeafSyntaxNode] NameExpr? name;
+        [LeafSyntaxNode] NodeList<TypeName>? typeParameters;
+        [LeafSyntaxNode] NodeList<FunctionParameter>? parameters;
+        [LeafSyntaxNode] ScopeExpr scope = null!;
 
         public override TypeName? ValueType {
             get {
@@ -74,7 +47,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
-                Target     = this,
+                Target = this,
                 Decorators = new NodeList<Node>(this, items)
             };
         }

@@ -2,6 +2,7 @@ using System.Linq;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
@@ -11,16 +12,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     ///             ID {'.' ID};
     ///     </c>
     /// </summary>
-    public class NameExpr : AtomExpr {
-        private NodeList<Token>? tokens;
-
-        public NodeList<Token> Tokens {
-            get => InitIfNull(ref tokens);
-            set => tokens = Bind(value);
-        }
+    [SyntaxExpression]
+    public partial class NameExpr : AtomExpr {
+        [LeafSyntaxNode] NodeList<Token>? tokens;
 
         public Token[] Qualifiers => Tokens.OfType(Identifier);
-        public bool    IsSimple   => Qualifiers.Length == 1;
+        public bool IsSimple => Qualifiers.Length == 1;
 
         public override TypeName? ValueType =>
             ((Node?) GetParent<ScopeExpr>()?.GetDefByName(this))?.ValueType;

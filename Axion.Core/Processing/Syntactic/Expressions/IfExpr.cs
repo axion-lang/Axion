@@ -1,5 +1,6 @@
 ﻿using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
+using Axion.SourceGenerators;
 using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
@@ -11,34 +12,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
     ///             ['else' scope];
     ///     </c>
     /// </summary>
-    public class IfExpr : Node {
-        private Token? branchKw;
-
-        public Token? BranchKw {
-            get => branchKw;
-            set => branchKw = BindNullable(value);
-        }
-
-        private Node? condition;
-
-        public Node? Condition {
-            get => condition;
-            set => condition = BindNullable(value);
-        }
-
-        private ScopeExpr? thenScope;
-
-        public ScopeExpr? ThenScope {
-            get => thenScope;
-            set => thenScope = BindNullable(value);
-        }
-
-        private ScopeExpr? elseScope;
-
-        public ScopeExpr? ElseScope {
-            get => elseScope;
-            set => elseScope = BindNullable(value);
-        }
+    [SyntaxExpression]
+    public partial class IfExpr : Node {
+        [LeafSyntaxNode] Token? branchKw;
+        [LeafSyntaxNode] Node? condition;
+        [LeafSyntaxNode] ScopeExpr? thenScope;
+        [LeafSyntaxNode] ScopeExpr? elseScope;
 
         internal IfExpr(Node parent) : base(parent) { }
 
