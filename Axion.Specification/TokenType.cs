@@ -132,15 +132,11 @@ namespace Axion.Specification {
 
     public static class TokenTypeExtensions {
         public static bool IsOpenBracket(this TokenType type) {
-            return type == OpenParenthesis
-                || type == OpenBracket
-                || type == OpenBrace;
+            return type is OpenParenthesis or OpenBracket or OpenBrace;
         }
 
         public static bool IsCloseBracket(this TokenType type) {
-            return type == CloseParenthesis
-                || type == CloseBracket
-                || type == CloseBrace;
+            return type is CloseParenthesis or CloseBracket or CloseBrace;
         }
 
         public static TokenType GetMatchingBracket(this TokenType type) {
@@ -164,21 +160,18 @@ namespace Axion.Specification {
             catch {
                 // ignored
             }
-
             try {
                 return Spec.Operators.First(kvp => kvp.Value.Type == type).Key;
             }
             catch {
                 // ignored
             }
-
             try {
                 return Spec.Punctuation.First(kvp => kvp.Value == type).Key;
             }
             catch {
                 // ignored
             }
-
             return type.ToString("G");
         }
     }

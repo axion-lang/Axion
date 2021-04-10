@@ -12,9 +12,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     [SyntaxExpression]
     public partial class ArrayTypeName : TypeName {
         [LeafSyntaxNode] TypeName? elementType;
-
         [LeafSyntaxNode] Token? openingBracket;
-
         [LeafSyntaxNode] Token? closingBracket;
 
         public ArrayTypeName(Node parent) : base(parent) { }

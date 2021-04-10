@@ -475,12 +475,12 @@ namespace Axion.Emitter.CSharp {
                 w.IndentLevel++;
                 foreach (var item in e.Items) {
                     w.Write(item);
-                    if (!(e.Parent is ClassDef || e.Parent is ModuleDef)
-                     && !(item is IDefinitionExpr
-                       || item is IfExpr
-                       || item is WhileExpr
-                       || item is MacroMatchExpr)
-                     || item is VarDef) {
+                    if (item is VarDef
+                     || e.Parent is not (ClassDef or ModuleDef)
+                     && item is not (IDefinitionExpr
+                            or IfExpr
+                            or WhileExpr
+                            or MacroMatchExpr)) {
                         w.Write(";");
                     }
 
