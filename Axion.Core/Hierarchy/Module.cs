@@ -25,7 +25,7 @@ namespace Axion.Core.Hierarchy {
 
                 outputDirectory = new DirectoryInfo(
                     Path.Combine(
-                        Root.Directory.Parent.FullName,
+                        Root.Directory.Parent!.FullName,
                         "out",
                         Path.GetRelativePath(
                             Root.Directory.FullName,
@@ -41,14 +41,14 @@ namespace Axion.Core.Hierarchy {
 
         public Module? Parent { get; private set; }
 
-        public Module? Root {
+        public Module Root {
             get {
                 var p = this;
                 while (p?.Parent != null) {
                     p = p.Parent;
                 }
 
-                return p;
+                return p!;
             }
         }
 

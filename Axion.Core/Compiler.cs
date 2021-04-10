@@ -19,7 +19,7 @@ namespace Axion.Core {
             Assembly.GetExecutingAssembly();
 
         public static readonly string Version =
-            coreAsm.GetName().Version.ToString();
+            coreAsm.GetName().Version!.ToString();
 
         /// <summary>
         ///     Path to directory where compiler executable is located.

@@ -6,8 +6,8 @@ namespace Axion.Core.Processing {
     ///     Convertible to (int, int) 2-tuple.
     /// </summary>
     public readonly struct Location : IEquatable<Location> {
-        public readonly int Line;
-        public readonly int Column;
+        public int Line { get; }
+        public int Column { get; }
 
         internal Location(int line, int column) {
             Line   = line;

@@ -40,7 +40,7 @@ namespace Axion.Core.Hierarchy {
 
                 if (Module == null) {
                     outputDirectory = new DirectoryInfo(
-                        Path.Join(SourceFile.Directory?.FullName!, "out")
+                        Path.Join(SourceFile.DirectoryName, "out")
                     );
                 }
                 else {
@@ -49,7 +49,7 @@ namespace Axion.Core.Hierarchy {
                             Module.OutputDirectory.FullName!,
                             Path.GetRelativePath(
                                 Module.Directory.FullName,
-                                SourceFile.DirectoryName
+                                SourceFile.DirectoryName!
                             )
                         )
                     );
@@ -62,7 +62,7 @@ namespace Axion.Core.Hierarchy {
 
         #endregion
 
-        public string Name;
+        public string Name { get; }
 
         public Module? Module { get; set; }
 
@@ -86,7 +86,7 @@ namespace Axion.Core.Hierarchy {
         ) {
             if (source == null) {
                 source = new FileInfo(Compiler.GetTempSourceFilePath());
-                Utilities.ResolvePath(source.Directory.FullName);
+                Utilities.ResolvePath(source.Directory!.FullName);
             }
 
             SourceFile = source;
