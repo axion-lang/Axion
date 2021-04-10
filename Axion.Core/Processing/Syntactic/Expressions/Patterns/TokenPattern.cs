@@ -2,10 +2,10 @@ using Axion.Core.Processing.Lexical.Tokens;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         token-pattern:
     ///             STRING;
-    ///     </c>
+    ///     </code>
     /// </summary>
     public class TokenPattern : Pattern {
         internal Token? Value;

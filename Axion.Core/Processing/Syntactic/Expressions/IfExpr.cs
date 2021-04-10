@@ -5,12 +5,12 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         conditional-expr:
     ///             'if' infix-expr scope
     ///             {'elif' infix-expr scope}
     ///             ['else' scope];
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class IfExpr : Node {

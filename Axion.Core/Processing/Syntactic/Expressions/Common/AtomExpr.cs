@@ -11,7 +11,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///     "Atom" expression has no detachable parts.
     ///     It is meant to be embedded in other expressions.
     ///     <br/>
-    ///     <c>
+    ///     <code>
     ///         atom
     ///             : name
     ///             | await-expr
@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///             | const-expr
     ///             | atom-macro-expr
     ///             | unknown-expr;
-    ///     </c>
+    ///     </code>
     /// </summary>
     public class AtomExpr : PostfixExpr {
         protected AtomExpr(Node parent) : base(parent) { }

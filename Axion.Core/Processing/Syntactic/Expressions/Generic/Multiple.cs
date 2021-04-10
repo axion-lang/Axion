@@ -5,11 +5,11 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         ('(' inner ')') | inner;
     ///         inner:
     ///             %expr {',' %expr}
-    ///     </c>
+    ///     </code>
     ///     Provides functions for comma-separated expression lists
     ///     parsing with automatic error reporting. 
     /// </summary>

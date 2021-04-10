@@ -5,11 +5,11 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         while-expr:
     ///             'while' infix-expr scope
     ///             ['nobreak' scope];
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class WhileExpr : Node, IDecorableExpr {

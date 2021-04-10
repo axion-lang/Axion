@@ -5,12 +5,12 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         index-expr:
     ///             atom '[' (infix-expr | slice) {',' (infix-expr | slice)} [','] ']';
     ///         slice:
     ///             [infix-expr] ':' [infix-expr] [':' [infix-expr]];
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class IndexerExpr : PostfixExpr {

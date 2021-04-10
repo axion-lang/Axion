@@ -5,10 +5,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         continue-expr:
     ///             'continue' [name];
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class ContinueExpr : Node {

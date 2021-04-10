@@ -8,10 +8,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///     coming after any count of allowed prefix operators.
     ///     <br/>
     ///     (e.g ++++++!x is valid expression)
-    ///     <c>
+    ///     <code>
     ///         prefix-expr:
     ///             (PREFIX-OPERATOR prefix) | postfix;
-    ///     </c>
+    ///     </code>
     /// </summary>
     public class PrefixExpr : InfixExpr {
         protected PrefixExpr(Node parent) : base(parent) { }

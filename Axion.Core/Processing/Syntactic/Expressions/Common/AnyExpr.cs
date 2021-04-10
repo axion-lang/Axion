@@ -18,7 +18,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///     This class is too general and it has no strict hierarchy,
     ///     that's why <see cref="Parse"/> method
     ///     returns <see cref="Node"/> and not <see cref="AnyExpr"/>.
-    ///     <c>
+    ///     <code>
     ///         any
     ///             : class-def
     ///             | fn-def
@@ -38,7 +38,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///             (['let'] assignable
     ///             [':' type]
     ///             ['=' multiple-infix]);
-    ///     </c>
+    ///     </code>
     /// </summary>
     public static class AnyExpr {
         internal static Node Parse(Node parent) {

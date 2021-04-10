@@ -10,12 +10,12 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         scope:
     ///             expr
     ///             | ('{' expr* '}')
     ///             | (NEWLINE INDENT expr+ OUTDENT);
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class ScopeExpr : Node {

@@ -10,13 +10,13 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         class-def:
     ///             'class' simple-name
     ///             ['[' type-parameter [{',' type-parameter}] ']']
     ///             ['&lt;-' type [{',' type}]]
     ///             scope;
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class ClassDef : Node, IDefinitionExpr, IDecorableExpr {

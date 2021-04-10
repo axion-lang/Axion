@@ -1,6 +1,6 @@
 namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         syntax-pattern
     ///             : cascade-pattern
     ///             | expression-pattern
@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     ///             | optional-pattern
     ///             | or-pattern
     ///             | token-pattern;
-    ///     </c>
+    ///     </code>
     /// </summary>
     public abstract class Pattern : Node {
         // NOTE: here Match uses parent parameter because

@@ -4,10 +4,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         member-expr:
     ///             atom '.' ID;
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class MemberAccessExpr : PostfixExpr {

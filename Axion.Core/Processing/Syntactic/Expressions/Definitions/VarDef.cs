@@ -1,11 +1,11 @@
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         variable-definition-expr:
     ///             ['let'] simple-multiple-name
     ///             [':' type]
     ///             ['=' multiple-expr];
-    ///     </c>
+    ///     </code>
     /// </summary>
     public class VarDef : NameDef {
         public bool IsImmutable { get; }

@@ -10,13 +10,13 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         func-def:
     ///             'fn' [name]
     ///             ['[' type-parameter [{',' type-parameter}] ']']
     ///             ['(' [multiple-parameters] ')']
     ///             ['->' type] scope;
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class FunctionDef : AtomExpr, IDefinitionExpr, IDecorableExpr {

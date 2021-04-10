@@ -4,10 +4,10 @@ using Axion.SourceGenerators;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         binary-expr:
     ///             infix OPERATOR infix;
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class BinaryExpr : InfixExpr {

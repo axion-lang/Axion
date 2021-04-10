@@ -6,10 +6,10 @@ using Axion.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         code-unquoted-expr:
     ///             '$' expr;
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class CodeUnquotedExpr : PostfixExpr {

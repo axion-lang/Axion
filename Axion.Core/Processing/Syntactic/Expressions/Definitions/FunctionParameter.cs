@@ -9,10 +9,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         func-parameter:
     ///             ID ':' type ['=' infix-expr]
-    ///     </c>
+    ///     </code>
     /// </summary>
     public sealed class FunctionParameter : NameDef {
         public FunctionParameter(Node parent) : base(parent) { }
@@ -45,13 +45,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         }
 
         /// <summary>
-        ///     <c>
+        ///     <code>
         ///         multiple-parameter:
         ///         {named-parameter ","}
         ///         ( "*" [parameter] ("," named-parameter)* ["," "**" parameter]
         ///         | "**" parameter
         ///         | named-parameter[","] )
-        ///     </c>
+        ///     </code>
         /// </summary>
         public static NodeList<FunctionParameter> ParseList(
             Node               parent,

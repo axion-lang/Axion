@@ -9,14 +9,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///     "Postfix" expression is any <see cref="AtomExpr"/>
     ///     that may be followed by non-infix (terminal) token
     ///     and maybe other next parts.
-    ///     <c>
+    ///     <code>
     ///         postfix:
     ///             atom
     ///             { member
     ///             | call-expr
     ///             | index-expr }
     ///             ['++' | '--'];
-    ///     </c>
+    ///     </code>
     /// </summary>
     public class PostfixExpr : PrefixExpr {
         protected PostfixExpr(Node parent) : base(parent) { }

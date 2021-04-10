@@ -4,10 +4,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         empty-expr:
     ///             ';' | 'pass';
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class EmptyExpr : Node {

@@ -6,10 +6,10 @@ using Axion.Specification;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         const-expr:
     ///             CONST-TOKEN | STRING+;
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class ConstantExpr : AtomExpr {

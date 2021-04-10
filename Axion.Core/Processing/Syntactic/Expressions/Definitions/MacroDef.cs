@@ -7,10 +7,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         macro-def:
     ///             'macro' simple-name syntax-description scope;
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class MacroDef : Node, IDefinitionExpr {

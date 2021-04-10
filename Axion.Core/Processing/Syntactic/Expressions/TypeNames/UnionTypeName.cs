@@ -4,10 +4,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         union-type:
     ///             type '|' type;
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class UnionTypeName : TypeName {

@@ -9,13 +9,13 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///     import-expr:
     ///         'import' (
     ///             (INDENT import-entry+ OUTDENT)
     ///           | import-entry
     ///         );
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class ImportExpr : Node {
@@ -44,7 +44,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
         }
 
         /// <summary>
-        ///     <c>
+        ///     <code>
         ///     import-entry:
         ///         name (
         ///             ['.' (
@@ -55,7 +55,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
         ///             ['except' name [(',' name)* [',']]]
         ///         )
         ///         | (INDENT import-entry+ OUTDENT);
-        ///     </c>
+        ///     </code>
         /// </summary>
         Entry ParseEntry(NameExpr? prefixName = null) {
             var rootNameTokens = new NodeList<Token>(this);

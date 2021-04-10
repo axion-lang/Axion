@@ -8,10 +8,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         return-expr:
     ///             'return' [multiple-expr];
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class ReturnExpr : Node {

@@ -6,12 +6,12 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         tuple-expr:
     ///             tuple-paren-expr | (multiple-expr [',']);
     ///         tuple-paren-expr:
     ///             '(' multiple-expr [','] ')';
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class TupleExpr : AtomExpr {

@@ -4,11 +4,11 @@ using Axion.SourceGenerators;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         unary-expr:
     ///             UNARY-LEFT prefix-expr
     ///             | suffix-expr UNARY-RIGHT;
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class UnaryExpr : PostfixExpr {

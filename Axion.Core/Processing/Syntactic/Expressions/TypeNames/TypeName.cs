@@ -3,11 +3,11 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         type: simple-type  | tuple-type
     ///             | generic-type | array-type
     ///             | union-type   | func-type;
-    ///     </c>
+    ///     </code>
     /// </summary>
     public class TypeName : Node {
         protected TypeName(Node parent) : base(parent) { }

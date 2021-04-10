@@ -18,12 +18,12 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
     ///     - Infix-macros (that start with an expression, then token);
     ///     <br/>
     ///     - And also any <see cref="PrefixExpr"/>.
-    ///     <c>
+    ///     <code>
     ///         infix
     ///             : prefix (ID | SYMBOL) infix
     ///             | for-comprehension
     ///             | ternary-expr;
-    ///     </c>
+    ///     </code>
     /// </summary>
     public class InfixExpr : Node {
         protected InfixExpr(Node parent) : base(parent) { }

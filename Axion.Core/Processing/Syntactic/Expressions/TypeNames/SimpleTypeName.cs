@@ -3,10 +3,10 @@ using Axion.SourceGenerators;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         simple-type:
     ///             name;
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class SimpleTypeName : TypeName, ITypeParameter {

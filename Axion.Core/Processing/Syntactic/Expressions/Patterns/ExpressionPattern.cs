@@ -10,10 +10,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         expression-pattern:
     ///             name-expr [':' type-name];
-    ///     </c>
+    ///     </code>
     /// </summary>
     public class ExpressionPattern : Pattern {
         Func<Node, Node>? parseFunc;

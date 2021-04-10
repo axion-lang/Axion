@@ -7,10 +7,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         code-quote-expr:
     ///             '{{' any '}}';
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class CodeQuoteExpr : AtomExpr {

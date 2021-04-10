@@ -7,10 +7,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         name-expr:
     ///             ID {'.' ID};
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class NameExpr : AtomExpr {

@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 namespace Axion.Core.Processing {
     /// <summary>
     ///     Span of source code / Tree leaf with parent and children nodes.
-    ///     <c>
+    ///     <code>
     ///         multiple-expr:
     ///             expr {',' expr};
     ///         multiple-infix:
@@ -32,7 +32,7 @@ namespace Axion.Core.Processing {
     ///         flow-expr:
     ///             break-expr | continue-expr | return-expr |
     ///             raise-expr | yield-expr;
-    ///     </c>
+    ///     </code>
     /// </summary>
     public abstract class Node : CodeSpan, ITranslatableNode {
         Ast? ast;

@@ -9,10 +9,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         for-comprehension:
     ///             'for' multiple-name 'in' multiple-infix (('if'|'unless') condition)* [for-comprehension];
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class ForComprehension : InfixExpr {

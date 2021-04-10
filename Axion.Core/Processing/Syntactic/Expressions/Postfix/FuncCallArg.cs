@@ -14,7 +14,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         internal FuncCallArg(Node parent) : base(parent) { }
 
         /// <summary>
-        ///     <c>
+        ///     <code>
         ///         multiple-arg:
         ///             comprehension
         ///             | ({ argument ',' }
@@ -23,7 +23,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
         ///                | '**' expr ));
         ///         argument:
         ///             expr ['=' expr];
-        ///     </c>
+        ///     </code>
         /// </summary>
         internal static NodeList<FuncCallArg> ParseArgList(
             Node         parent,

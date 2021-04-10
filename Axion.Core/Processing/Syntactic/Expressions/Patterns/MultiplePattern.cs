@@ -3,10 +3,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         multiple-pattern:
     ///             '{' syntax-pattern '}'
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class MultiplePattern : Pattern {

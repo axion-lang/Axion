@@ -6,10 +6,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         ternary-expr:
     ///             multiple-expr ('if' | 'unless') infix-expr ['else' multiple-expr];
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class TernaryExpr : InfixExpr {

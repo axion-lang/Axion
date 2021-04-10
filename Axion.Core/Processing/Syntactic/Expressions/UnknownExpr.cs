@@ -7,10 +7,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         unknown-expr:
     ///             TOKEN* (NEWLINE | END);
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class UnknownExpr : AtomExpr {

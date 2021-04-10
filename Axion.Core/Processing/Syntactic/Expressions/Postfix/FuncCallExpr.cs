@@ -4,10 +4,10 @@ using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     /// <summary>
-    ///     <c>
+    ///     <code>
     ///         func-call-expr:
     ///             atom '(' [multiple-arg | (arg for-comprehension)] ')';
-    ///     </c>
+    ///     </code>
     /// </summary>
     [SyntaxExpression]
     public partial class FuncCallExpr : PostfixExpr {
