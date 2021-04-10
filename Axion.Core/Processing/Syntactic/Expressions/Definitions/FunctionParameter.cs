@@ -84,8 +84,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
                     }
 
                     if (!s.PeekIs(Comma)) {
-                        listParameter =
-                            new FunctionParameter(parent).Parse(names);
+                        listParameter = new FunctionParameter(parent).Parse(names);
                     }
                     // else got ", *,"
 

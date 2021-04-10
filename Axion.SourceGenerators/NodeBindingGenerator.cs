@@ -147,15 +147,15 @@ namespace {namespaceName}
         string GeneratePropertyCode(IFieldSymbol field) {
             string propertyName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
             var isList = field.Type.Name.StartsWith("NodeList");
-            string[] attributes =
-                field.GetAttributes()
-                    .Where(a => !a.AttributeClass!.DefaultEquals(leafSyntaxNodeAttribute))
-                    .Select(a => "[" + a + "]")
-                    .ToArray();
+            string[] attributes = field.GetAttributes()
+                .Where(a => !a.AttributeClass!.DefaultEquals(leafSyntaxNodeAttribute))
+                .Select(a => "[" + a + "]")
+                .ToArray();
             string type =
-                field.Type.WithNullableAnnotation(isList
-                        ? NullableAnnotation.NotAnnotated
-                        : field.Type.NullableAnnotation
+                field.Type.WithNullableAnnotation(
+                        isList
+                            ? NullableAnnotation.NotAnnotated
+                            : field.Type.NullableAnnotation
                     )
                     .ToString();
             string bindMethodName =

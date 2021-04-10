@@ -62,8 +62,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
         }
 
         public IDefinitionExpr[] GetScopedDefs() {
-            var defs =
-                Items.OfType<IDefinitionExpr>().ToList();
+            var defs = Items.OfType<IDefinitionExpr>().ToList();
 
             // Add parameters of function if inside it.
             var parentFn = GetParent<FunctionDef>();
@@ -74,13 +73,10 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return defs.ToArray();
         }
 
-        public List<(T item, ScopeExpr itemParentScope, int itemIndex)>
-            FindItemsOfType<T>(
-                List<(T item, ScopeExpr itemParentScope, int itemIndex)>? _outs
-                    = null
-            ) {
-            _outs ??=
-                new List<(T item, ScopeExpr itemParentScope, int itemIndex)>();
+        public List<(T item, ScopeExpr parentScope, int index)> FindItemsOfType<T>(
+            List<(T item, ScopeExpr parentScope, int index)>? _outs = null
+        ) {
+            _outs ??= new List<(T item, ScopeExpr itemParentScope, int itemIndex)>();
             for (var i = 0; i < Items.Count; i++) {
                 var item = Items[i];
                 if (item is T expr) {
@@ -89,11 +85,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                 else {
                     var childProps = item.GetType()
                         .GetProperties()
-                        .Where(
-                            p => p.PropertyType
-                              == typeof(ScopeExpr)
-                              && p.Name != nameof(Parent)
-                        );
+                        .Where(p => p.PropertyType == typeof(ScopeExpr)
+                                 && p.Name != nameof(Parent));
                     foreach (var prop in childProps) {
                         var b = (ScopeExpr?) prop.GetValue(item);
                         b?.FindItemsOfType(_outs);
@@ -113,18 +106,13 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
                     return (this, i);
                 }
 
-                var childProps =
-                    item.GetType()
-                        .GetProperties()
-                        .Where(
-                            p => p.PropertyType
-                              == typeof(ScopeExpr)
-                              && p.Name != nameof(Parent)
-                        );
+                var childProps = item.GetType()
+                    .GetProperties()
+                    .Where(p => p.PropertyType == typeof(ScopeExpr)
+                             && p.Name != nameof(Parent));
                 foreach (var prop in childProps) {
                     var b = (ScopeExpr?) prop.GetValue(item);
-                    var idx =
-                        b?.IndexOf(expression) ?? (null, -1);
+                    var idx = b?.IndexOf(expression) ?? (null, -1);
                     if (idx != (null, -1)) {
                         return idx;
                     }

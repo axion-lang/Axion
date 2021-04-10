@@ -366,10 +366,9 @@ namespace Axion {
                     );
                     return;
                 }
-                var inputFiles =
-                    args.Files
-                        .Select(f => new FileInfo(Utilities.TrimMatchingChars(f, '"')))
-                        .ToArray();
+                var inputFiles = args.Files
+                    .Select(f => new FileInfo(Utilities.TrimMatchingChars(f, '"')))
+                    .ToArray();
                 module = Module.RawFrom(inputFiles[0].Directory);
                 module.Bind(Unit.FromFile(inputFiles[0]));
                 Compiler.Process(module, pOptions);
@@ -425,8 +424,7 @@ namespace Axion {
             );
 
             // Location of the .NET assemblies
-            var assemblyPath =
-                Path.GetDirectoryName(typeof(object).Assembly.Location)!;
+            var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
 
             // Adding some necessary .NET assemblies
             // These assemblies couldn't be loaded correctly via

@@ -8,8 +8,7 @@ namespace Syntax.Bindings {
     ///     Created on demand before each generation pass
     /// </summary>
     internal class SyntaxReceiver : ISyntaxReceiver {
-        public IList<ClassDeclarationSyntax> CandidateClasses { get; } =
-            new List<ClassDeclarationSyntax>();
+        public List<ClassDeclarationSyntax> CandidateClasses { get; } = new();
 
         /// <summary>
         ///     Called for every syntax node in the compilation,

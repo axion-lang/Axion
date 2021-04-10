@@ -15,45 +15,46 @@ namespace Axion.Emitter.CSharp {
             "protected-internal"
         };
 
-        public static readonly string[] AllowedModifiers =
-            AccessModifiers.Union(new[] {
-                    "abstract",
-                    "const",
-                    "extern",
-                    "override",
-                    "partial",
-                    "readonly",
-                    "sealed",
-                    "unsafe",
-                    "virtual",
-                    "volatile",
-                    "static"
-                })
-                .ToArray();
+        public static readonly string[] AllowedModifiers = AccessModifiers.Union(new[] {
+                "abstract",
+                "const",
+                "extern",
+                "override",
+                "partial",
+                "readonly",
+                "sealed",
+                "unsafe",
+                "virtual",
+                "volatile",
+                "static"
+            })
+            .ToArray();
 
-            // @formatter:off
+        // @formatter:off
+        
+        public static readonly ImmutableDictionary<string, string> BuiltInNames = new Dictionary<string, string> {
+            { "Int8",         "sbyte" },
+            { "UInt8",        "byte" },
+            { "Int16",        "short" },
+            { "UInt16",       "ushort" },
+            { "Int32",        "int" },
+            { "UInt32",       "uint" },
+            { "Int64",        "long" },
+            { "UInt64",       "ulong" },
+            { "Float32",      "float" },
+            { "Float64",      "double" },
+            { "Float128",     "decimal" },
+            { "Char",         "char" },
+            { "Bool",         "bool" },
+            { "Object",       "object" },
+            { "self",         "this" }
+        }.ToImmutableDictionary();
 
-            public static readonly ImmutableDictionary<string, string> BuiltInNames = new Dictionary<string, string> {
-                { "Int8",         "sbyte" },
-                { "UInt8",        "byte" },
-                { "Int16",        "short" },
-                { "UInt16",       "ushort" },
-                { "Int32",        "int" },
-                { "UInt32",       "uint" },
-                { "Int64",        "long" },
-                { "UInt64",       "ulong" },
-                { "Float32",      "float" },
-                { "Float64",      "double" },
-                { "Float128",     "decimal" },
-                { "Char",         "char" },
-                { "Bool",         "bool" },
-                { "Object",       "object" },
-                { "self",         "this" }
-            }.ToImmutableDictionary();
-
-            public static readonly ImmutableDictionary<TokenType, string> BinaryOperators = new Dictionary<TokenType, string> {
-                { And,                "&&" },
-                { Or,                 "||" }
-            }.ToImmutableDictionary();
+        public static readonly ImmutableDictionary<TokenType, string> BinaryOperators = new Dictionary<TokenType, string> {
+            { And,                "&&" },
+            { Or,                 "||" }
+        }.ToImmutableDictionary();
+        
+        // @formatter:on
     }
 }

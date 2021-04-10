@@ -25,8 +25,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             var s = parent.Unit.TokenStream;
 
             // TODO: look about it.
-            var isUnquoted =
-                !s.PeekByIs(2, OpenParenthesis) && s.MaybeEat(Dollar);
+            var isUnquoted = !s.PeekByIs(2, OpenParenthesis) && s.MaybeEat(Dollar);
             PostfixExpr value = AtomExpr.Parse(parent);
 
             while (true) {

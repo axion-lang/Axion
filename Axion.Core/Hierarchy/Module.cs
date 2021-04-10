@@ -197,9 +197,8 @@ namespace Axion.Core.Hierarchy {
         }
 
         public IDefinitionExpr? FindDefinitionByName(string name) {
-            var def =
-                Definitions.FirstOrDefault(d => d.Name?.ToString() == name)
-             ?? Parent?.FindDefinitionByName(name);
+            var def = Definitions.FirstOrDefault(d => d.Name?.ToString() == name)
+                   ?? Parent?.FindDefinitionByName(name);
             return def;
         }
 

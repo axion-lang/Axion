@@ -21,14 +21,13 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             new SimpleTypeName(this, Spec.StringType);
 
         internal StringToken(
-            Unit   unit,
-            string value      = "",
-            string content    = "",
-            bool   isUnclosed = false,
-            string prefixes   = "",
-            string quote      = "\"",
-            IEnumerable<StringInterpolation>? interpolations =
-                null
+            Unit                              unit,
+            string                            value          = "",
+            string                            content        = "",
+            bool                              isUnclosed     = false,
+            string                            prefixes       = "",
+            string                            quote          = "\"",
+            IEnumerable<StringInterpolation>? interpolations = null
         ) : base(
             unit,
             TokenType.String,

@@ -24,8 +24,7 @@ namespace Axion.Core.Processing.Errors {
         public Unit TargetUnit { get; }
 
         [JsonProperty]
-        public string Time { get; } =
-            DateTime.Now.ToString(CultureInfo.InvariantCulture);
+        public string Time { get; } = DateTime.Now.ToString(CultureInfo.InvariantCulture);
 
         LanguageReport(
             string        message,

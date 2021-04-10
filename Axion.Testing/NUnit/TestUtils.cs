@@ -9,8 +9,7 @@ namespace Axion.Testing.NUnit {
         #region Test source files locations
 
         static readonly DirectoryInfo axionTestingDir =
-            new DirectoryInfo(Environment.CurrentDirectory).Parent!.Parent!
-                .Parent!;
+            new DirectoryInfo(Environment.CurrentDirectory).Parent!.Parent!.Parent!;
 
         static readonly string samplesPath = Path.Join(
             axionTestingDir.Parent!.FullName,

@@ -33,21 +33,21 @@ namespace Axion.Core.Processing.Traversal {
 
             root = root.Path.Node;
             var nodeProps = root.GetType().GetProperties();
-            var childProps = nodeProps.Where(
-                p => typeof(Node).IsAssignableFrom(p.PropertyType)
-                  && !Attribute.IsDefined(
-                         p,
-                         typeof(NoPathTraversingAttribute),
-                         true
-                     )
-                  || p.PropertyType.IsGenericType
-                  && p.PropertyType.GetInterfaces()
-                         .Where(i => i.IsGenericType)
-                         .Select(i => i.GetGenericTypeDefinition())
-                         .Contains(typeof(IList<>))
-                  && typeof(Node).IsAssignableFrom(
-                         p.PropertyType.GetGenericArguments()[0]
-                     )
+            var childProps = nodeProps.Where(p =>
+                typeof(Node).IsAssignableFrom(p.PropertyType)
+             && !Attribute.IsDefined(
+                    p,
+                    typeof(NoPathTraversingAttribute),
+                    true
+                )
+             || p.PropertyType.IsGenericType
+             && p.PropertyType.GetInterfaces()
+                    .Where(i => i.IsGenericType)
+                    .Select(i => i.GetGenericTypeDefinition())
+                    .Contains(typeof(IList<>))
+             && typeof(Node).IsAssignableFrom(
+                    p.PropertyType.GetGenericArguments()[0]
+                )
             );
             foreach (var prop in childProps) {
                 var obj = prop.GetValue(root);
@@ -215,8 +215,8 @@ namespace Axion.Core.Processing.Traversal {
                     ),
                     Right = ConstantExpr.True(path.Node)
                 };
-                foreach (var (_, itemParentScope, itemIndex) in breaks) {
-                    itemParentScope.Items.Insert(itemIndex, boolSetter);
+                foreach (var (_, parentScope, itemIndex) in breaks) {
+                    parentScope.Items.Insert(itemIndex, boolSetter);
                 }
 
                 scope.Items.Insert(

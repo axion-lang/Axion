@@ -201,7 +201,7 @@ namespace Axion.Core.Processing {
         ///     [ONLY-INSIDE-PROPERTY]
         ///     Binds given property value to parent node
         ///     and extends it's span if needed.
-        /// </summary>=
+        /// </summary>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if provided property value is null.
         /// </exception>

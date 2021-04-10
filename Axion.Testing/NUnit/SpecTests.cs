@@ -40,10 +40,7 @@ namespace Axion.Testing.NUnit {
         public static void SpecificationCheck() {
             // check keywords completeness
             var definedKws = Enum.GetNames(typeof(TokenType))
-                .Where(
-                    name => name.ToUpperInvariant()
-                        .StartsWith("KEYWORD")
-                );
+                .Where(name => name.ToUpperInvariant().StartsWith("KEYWORD"));
 
             foreach (var kw in definedKws) {
                 Enum.TryParse(kw, out TokenType type);

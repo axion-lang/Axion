@@ -415,37 +415,26 @@ namespace Axion.Emitter.CSharp {
                 w.Write(
                     new ModuleDef(e) {
                         Name = new NameExpr(e, "__RootModule__")
-                    }.WithScope(
-                        new[] {
-                            new ClassDef(e) {
-                                Name = new NameExpr(e, "__RootClass__")
-                            }.WithScope(
-                                new[] {
-                                    new FunctionDef(e) {
-                                            Name = new NameExpr(e, "Main"),
-                                            ValueType =
-                                                new SimpleTypeName(e, "void")
-                                        }.WithParameters(
-                                            new FunctionParameter(e) {
-                                                Name = new NameExpr(e, "args"),
-                                                ValueType =
-                                                    new ArrayTypeName(e) {
-                                                        ElementType =
-                                                            new SimpleTypeName(
-                                                                e,
-                                                                Spec.StringType
-                                                            )
-                                                    }
-                                            }
+                    }.WithScope(new[] {
+                        new ClassDef(e) {
+                            Name = new NameExpr(e, "__RootClass__")
+                        }.WithScope(new[] {
+                            new FunctionDef(e) {
+                                    Name      = new NameExpr(e, "Main"),
+                                    ValueType = new SimpleTypeName(e, "void")
+                                }.WithParameters(new FunctionParameter(e) {
+                                    Name = new NameExpr(e, "args"),
+                                    ValueType = new ArrayTypeName(e) {
+                                        ElementType = new SimpleTypeName(
+                                            e,
+                                            Spec.StringType
                                         )
-                                        .WithScope(rootItems)
-                                        .WithDecorators(
-                                            new NameExpr(e, "static")
-                                        )
-                                }.Union(rootFunctions)
-                            )
-                        }.Union(rootClasses)
-                    )
+                                    }
+                                })
+                                .WithScope(rootItems)
+                                .WithDecorators(new NameExpr(e, "static"))
+                        }.Union(rootFunctions))
+                    }.Union(rootClasses))
                 );
                 break;
             }

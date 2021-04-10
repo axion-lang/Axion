@@ -8,7 +8,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
     ///     </code>
     /// </summary>
     public class TokenPattern : Pattern {
-        internal Token? Value;
+        internal Token? Value { get; set; }
 
         public TokenPattern(Node parent) : base(parent) { }
 

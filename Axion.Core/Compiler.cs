@@ -15,17 +15,14 @@ using Module = Axion.Core.Hierarchy.Module;
 
 namespace Axion.Core {
     public static class Compiler {
-        static readonly Assembly coreAsm =
-            Assembly.GetExecutingAssembly();
+        static readonly Assembly coreAsm = Assembly.GetExecutingAssembly();
 
-        public static readonly string Version =
-            coreAsm.GetName().Version!.ToString();
+        public static readonly string Version = coreAsm.GetName().Version!.ToString();
 
         /// <summary>
         ///     Path to directory where compiler executable is located.
         /// </summary>
-        public static readonly string WorkDir =
-            AppDomain.CurrentDomain.BaseDirectory;
+        public static readonly string WorkDir = AppDomain.CurrentDomain.BaseDirectory;
 
         /// <summary>
         ///     Path to directory where generated output is located.
@@ -34,8 +31,7 @@ namespace Axion.Core {
 
         public static readonly Dictionary<string, INodeTranslator> Translators = new();
 
-        static readonly Logger logger =
-            LogManager.GetCurrentClassLogger();
+        static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         public static string GetTempSourceFilePath() {
             return Path.Combine(
