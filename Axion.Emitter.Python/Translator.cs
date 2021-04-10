@@ -71,7 +71,7 @@ namespace Axion.Emitter.Python {
 
                 break;
             }
-            case EmptyExpr _: {
+            case EmptyExpr: {
                 w.Write("pass");
                 break;
             }

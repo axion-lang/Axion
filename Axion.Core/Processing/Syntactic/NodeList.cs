@@ -12,11 +12,11 @@ namespace Axion.Core.Processing.Syntactic {
     ///     and provide some other useful methods.
     /// </summary>
     public class NodeList<T> : IList<T> where T : Node {
-        Node? parent;
+        readonly Node? parent;
 
         public Node? Parent {
             get => parent;
-            set {
+            init {
                 parent = value;
                 if (parent == null) {
                     return;

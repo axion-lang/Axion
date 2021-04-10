@@ -118,6 +118,9 @@ namespace Axion.Core.Processing {
             }
         }
 
+        // Following are used by source generators.
+        // ReSharper disable UnusedMember.Global
+        
         protected internal NodeList<T> InitIfNull<T>(ref NodeList<T>? list)
             where T : Node {
             list ??= new NodeList<T>(this);
@@ -223,6 +226,8 @@ namespace Axion.Core.Processing {
 
             return list;
         }
+        
+        // ReSharper restore UnusedMember.Global
 
         #endregion
 

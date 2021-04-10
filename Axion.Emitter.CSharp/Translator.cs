@@ -330,7 +330,7 @@ namespace Axion.Emitter.CSharp {
                 w.Write(e.Value);
                 break;
             }
-            case EmptyExpr _: {
+            case EmptyExpr: {
                 // Don't write anything, semicolon is inserted at the scope level.
                 break;
             }

@@ -260,7 +260,7 @@ namespace Axion {
             }
             // file name
             var relativeFileName = Path.GetRelativePath(
-                e.TargetUnit.Module?.Root?.Directory.Parent.ToString() ?? "",
+                e.TargetUnit.Module?.Root.Directory.Parent?.ToString() ?? "",
                 e.TargetUnit.SourceFile.ToString()
             );
             Console.WriteLine();
@@ -485,7 +485,7 @@ namespace Axion {
                 var main = type!.GetMethod("Main");
 
                 // Let's assume that compiler anyway 'd create Main method for us :)
-                main!.Invoke(null, new object[] { new string[0] });
+                main!.Invoke(null, new object[] { Array.Empty<string>() });
             }
             else {
                 var failures = result.Diagnostics.Where(

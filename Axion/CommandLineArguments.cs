@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using CommandLine;
 using static Axion.Core.Mode;
 
@@ -9,6 +10,7 @@ namespace Axion {
     ///     user arguments in command line.
     /// </summary>
     [Verb("axion", true)]
+    [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
     public class CommandLineArguments {
         // @formatter:off
         public static readonly string HelpText = string.Join(

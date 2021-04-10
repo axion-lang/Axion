@@ -34,7 +34,7 @@ namespace Axion.Emitter.Axion {
                 w.Write(string.Join("", e.Tokens.Select(t => t.Value)));
                 break;
             }
-            case ClassDef _: {
+            case ClassDef: {
                 throw new NotSupportedException();
             }
             case FunctionDef e: {
@@ -278,7 +278,7 @@ namespace Axion.Emitter.Axion {
                 break;
             }
             case ScopeExpr e: {
-                var inAnonFn = e.Parent is FunctionDef fn && fn.Name == null;
+                var inAnonFn = e.Parent is FunctionDef { Name: null };
                 if (inAnonFn) {
                     w.WriteLine(" {");
                 }

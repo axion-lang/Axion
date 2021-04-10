@@ -41,9 +41,8 @@ namespace Axion.Core {
 
         public static int? ParseInt(string value, int radix) {
             var result = 0;
-            foreach (var c in value) {
-                var oneChar = HexValue(c);
-                if (oneChar != null && oneChar < radix) {
+            foreach (var oneChar in value.Select(HexValue)) {
+                if (oneChar < radix) {
                     result = result * radix + (int) oneChar;
                 }
                 else {
@@ -60,15 +59,11 @@ namespace Axion.Core {
                 return x;
             }
 
-            if ('a' <= from && from <= 'z') {
-                return from - 'a' + 10;
-            }
-
-            if ('A' <= from && from <= 'Z') {
-                return from - 'A' + 10;
-            }
-
-            return null;
+            return from switch {
+                >= 'a' and <= 'z' => from - 'a' + 10,
+                >= 'A' and <= 'Z' => from - 'A' + 10,
+                _                 => null
+            };
         }
 
         #region String utilities

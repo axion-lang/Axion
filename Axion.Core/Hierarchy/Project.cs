@@ -67,7 +67,7 @@ namespace Axion.Core.Hierarchy {
                     store => store.File(ConfigFile.FullName)
                         .AccessedBySource(
                             "project",
-                            out var _
+                            out _
                         )
                 )
                 .UseTomlConfiguration(settings)

@@ -577,7 +577,7 @@ namespace Axion.Core.Processing.Lexical {
                 var num = Utilities.ParseInt(raw[2..], 16);
                 if (num != null) {
                     const int unicodeUpperBound = 0x10ffff;
-                    if (0 <= num && num <= unicodeUpperBound) {
+                    if (num is >= 0 and <= unicodeUpperBound) {
                         escaped += num;
                     }
                     else {

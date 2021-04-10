@@ -14,7 +14,7 @@ using NLog;
 using Module = Axion.Core.Hierarchy.Module;
 
 namespace Axion.Core {
-    public class Compiler {
+    public static class Compiler {
         static readonly Assembly coreAsm =
             Assembly.GetExecutingAssembly();
 

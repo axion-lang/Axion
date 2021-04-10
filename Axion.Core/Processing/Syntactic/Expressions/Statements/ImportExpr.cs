@@ -149,7 +149,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
 
             public NodeList<NameExpr> Exceptions { get; }
 
-            public NameExpr? Alias { get; set; }
+            public NameExpr? Alias { get; init; }
 
             public Entry(
                 Node?              parent,

@@ -164,10 +164,4 @@ namespace Axion.Core.Processing.Syntactic.Expressions {
             return this;
         }
     }
-
-    public enum ScopeType {
-        Indented,
-        Embraced,
-        Single
-    }
 }
