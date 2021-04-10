@@ -9,10 +9,7 @@ namespace Axion.Core.Hierarchy {
         public List<string> ImportedMacros {
             get {
                 try {
-                    var result = config.Get(
-                        c => c.ImportedMacros,
-                        null
-                    );
+                    var result = config.Get(c => c.ImportedMacros, null);
                     if (result == null) {
                         result = new List<string>();
                         config.Set(c => c.ImportedMacros, result);
@@ -46,11 +43,9 @@ namespace Axion.Core.Hierarchy {
         readonly Config<ProjectConfig> config;
 
         static readonly TomlSettings settings = TomlSettings.Create(
-            s => s.ConfigurePropertyMapping(
-                m => m.UseTargetPropertySelector(
-                    standardSelectors => standardSelectors.IgnoreCase
-                )
-            )
+            s => s.ConfigurePropertyMapping(m => m.UseTargetPropertySelector(
+                standardSelectors => standardSelectors.IgnoreCase
+            ))
         );
 
         public Project(string configPath) {
@@ -63,13 +58,11 @@ namespace Axion.Core.Hierarchy {
 
             config = Config.CreateAs()
                 .MappedToType(() => new ProjectConfig())
-                .StoredAs(
-                    store => store.File(ConfigFile.FullName)
-                        .AccessedBySource(
-                            "project",
-                            out _
-                        )
-                )
+                .StoredAs(store => store.File(ConfigFile.FullName)
+                    .AccessedBySource(
+                        "project",
+                        out _
+                    ))
                 .UseTomlConfiguration(settings)
                 .Initialize();
 

@@ -53,9 +53,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                         Name  = argName,
                         Value = argValue
                     };
-                    if (args.Any(
-                        a => a.Name?.ToString() == argName.ToString()
-                    )) {
+                    if (args.Any(a => a.Name?.ToString() == argName.ToString())) {
                         LanguageReport.To(
                             BlameType.DuplicatedNamedArgument,
                             arg

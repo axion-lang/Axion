@@ -158,6 +158,8 @@ namespace Axion.Specification {
             
             { "<->",     (LeftRightArrow,          -1,  Both) }
         };
+        
+        // @formatter:on
 
         public static readonly string[] OperatorsKeys =
             Operators.Keys.OrderByDescending(k => k.Length).ToArray();
@@ -177,12 +179,7 @@ namespace Axion.Specification {
                     Enum.TryParse(n, out TokenType type);
                     return (n.Remove(0, 7).ToLowerInvariant(), type);
                 })
-                .ToDictionary(
-                    x => x.Item1,
-                    x => x.Item2
-                );
-        
-        // @formatter:on
+                .ToDictionary(x => x.Item1, x => x.Item2);
 
         /// <summary>
         ///     Token types that are applicable on the left side of expression.

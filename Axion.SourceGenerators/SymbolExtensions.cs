@@ -26,12 +26,10 @@ namespace Axion.SourceGenerators {
             INamedTypeSymbol attributeType
         ) {
             return symbol.GetAttributes()
-                .Any(
-                    a => SymbolEqualityComparer.Default.Equals(
-                        a.AttributeClass,
-                        attributeType
-                    )
-                );
+                .Any(a => SymbolEqualityComparer.Default.Equals(
+                    a.AttributeClass,
+                    attributeType
+                ));
         }
     }
 }

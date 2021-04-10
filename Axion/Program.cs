@@ -42,15 +42,13 @@ namespace Axion {
         internal static readonly AxionSyntaxHighlighter SyntaxHighlighter = new();
 
         public static void Main(string[] arguments) {
-            var cliParser = new Parser(
-                settings => {
-                    settings.EnableDashDash = true;
-                    settings.CaseSensitive  = false;
-                    settings.AutoHelp       = false;
-                    settings.AutoVersion    = false;
-                    settings.HelpWriter     = null;
-                }
-            );
+            var cliParser = new Parser(settings => {
+                settings.EnableDashDash = true;
+                settings.CaseSensitive  = false;
+                settings.AutoHelp       = false;
+                settings.AutoVersion    = false;
+                settings.HelpWriter     = null;
+            });
             Directory.CreateDirectory(Compiler.OutDir);
 
             Console.InputEncoding   = Console.OutputEncoding = Encoding.UTF8;
@@ -83,21 +81,19 @@ namespace Axion {
             // main processing loop
             while (true) {
                 if (arguments.Length > 0) {
-                    var result = cliParser
-                        .ParseArguments<CommandLineArguments,
-                            CommandLineArguments.ListVerb,
-                            CommandLineArguments.HelpVerb,
-                            CommandLineArguments.ClearVerb,
-                            CommandLineArguments.ExitVerb>(arguments);
-                    result
-                        .MapResult<CommandLineArguments,
-                            CommandLineArguments.ListVerb,
-                            CommandLineArguments.HelpVerb,
-                            CommandLineArguments.ClearVerb,
-                            CommandLineArguments.ExitVerb, int>(
-                            args => {
-                                if (args.Version) {
-                                    return Version();
+                    var result = cliParser.ParseArguments<CommandLineArguments,
+                        CommandLineArguments.ListVerb,
+                        CommandLineArguments.HelpVerb,
+                        CommandLineArguments.ClearVerb,
+                        CommandLineArguments.ExitVerb>(arguments);
+                    result.MapResult<CommandLineArguments,
+                        CommandLineArguments.ListVerb,
+                        CommandLineArguments.HelpVerb,
+                        CommandLineArguments.ClearVerb,
+                        CommandLineArguments.ExitVerb, int>(
+                        args => {
+                            if (args.Version) {
+                                return Version();
                                 }
 
                                 if (args.Interactive) {
@@ -429,36 +425,24 @@ namespace Axion {
             // Adding some necessary .NET assemblies
             // These assemblies couldn't be loaded correctly via
             // the same construction as above.
-            refs.Add(
-                MetadataReference.CreateFromFile(
-                    Path.Join(assemblyPath, "mscorlib.dll")
-                )
-            );
-            refs.Add(
-                MetadataReference.CreateFromFile(
-                    Path.Join(assemblyPath, "System.dll")
-                )
-            );
-            refs.Add(
-                MetadataReference.CreateFromFile(
-                    Path.Join(assemblyPath, "System.Core.dll")
-                )
-            );
-            refs.Add(
-                MetadataReference.CreateFromFile(
-                    Path.Join(assemblyPath, "System.Runtime.dll")
-                )
-            );
-            refs.Add(
-                MetadataReference.CreateFromFile(
-                    typeof(Console).Assembly.Location
-                )
-            );
-            refs.Add(
-                MetadataReference.CreateFromFile(
-                    Path.Join(assemblyPath, "System.Private.CoreLib.dll")
-                )
-            );
+            refs.Add(MetadataReference.CreateFromFile(
+                Path.Join(assemblyPath, "mscorlib.dll")
+            ));
+            refs.Add(MetadataReference.CreateFromFile(
+                Path.Join(assemblyPath, "System.dll")
+            ));
+            refs.Add(MetadataReference.CreateFromFile(
+                Path.Join(assemblyPath, "System.Core.dll")
+            ));
+            refs.Add(MetadataReference.CreateFromFile(
+                Path.Join(assemblyPath, "System.Runtime.dll")
+            ));
+            refs.Add(MetadataReference.CreateFromFile(
+                typeof(Console).Assembly.Location
+            ));
+            refs.Add(MetadataReference.CreateFromFile(
+                Path.Join(assemblyPath, "System.Private.CoreLib.dll")
+            ));
 
             var assemblyName = Path.GetRandomFileName();
             var syntaxTree = CSharpSyntaxTree.ParseText(csCode);
