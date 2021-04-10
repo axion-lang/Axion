@@ -113,7 +113,6 @@ namespace Axion.Emitter.CSharp {
                     w.Write(") => ", e.Scope);
                 }
                 else {
-                    // BUG type inference stuck in infinite loop (get-value in TestMathExprParser)
                     w.Write(
                         "public ",
                         e.ValueType,
