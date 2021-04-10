@@ -39,13 +39,13 @@ namespace Axion {
         }
 
         internal List<ColoredToken> HighlightTokens(IEnumerable<Token> tokens) {
-            var values           = new List<ColoredToken>();
+            var values = new List<ColoredToken>();
             var foundRenderStart = false;
             foreach (var token in tokens) {
                 // check if token highlighting is not needed (already highlighted)
                 if (!foundRenderStart
                  && (token.End.Line < renderPosition.Y
-                  || token.End.Line   == renderPosition.Y
+                  || token.End.Line == renderPosition.Y
                   && token.End.Column <= renderPosition.X
                   && !token.Is(Newline))) {
                     continue;
@@ -66,7 +66,7 @@ namespace Axion {
                 }
 
                 ConsoleColor newColor;
-                var          isWhite = false;
+                var isWhite = false;
 
                 if (token.Is(
                     Newline,

@@ -4,8 +4,8 @@ using Axion.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class OperatorToken : Token {
-        public int       Precedence { get; }
-        public InputSide Side       { get; set; }
+        public int Precedence { get; }
+        public InputSide Side { get; set; }
 
         internal OperatorToken(
             Unit      unit,
@@ -14,8 +14,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
         ) : base(unit, tokenType, value) {
             if (tokenType != TokenType.None) {
                 Value = Spec.Operators
-                            .First(o => o.Value.Type == tokenType)
-                            .Key;
+                    .First(o => o.Value.Type == tokenType)
+                    .Key;
             }
 
             Content = Value;

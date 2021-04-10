@@ -52,8 +52,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
         }
 
         public ExpressionPattern Parse() {
-            var id          = Stream.Eat(Identifier);
-            var namedParts  = GetParent<MacroDef>()!.NamedSyntaxParts;
+            var id = Stream.Eat(Identifier);
+            var namedParts = GetParent<MacroDef>()!.NamedSyntaxParts;
             var typeDefined = namedParts.ContainsKey(id.Content);
             if (typeDefined) {
                 PatternFromTypeName(namedParts[id.Content]);

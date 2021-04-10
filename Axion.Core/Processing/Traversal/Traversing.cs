@@ -44,9 +44,9 @@ namespace Axion.Core.Processing.Traversal {
                      )
                   || p.PropertyType.IsGenericType
                   && p.PropertyType.GetInterfaces()
-                      .Where(i => i.IsGenericType)
-                      .Select(i => i.GetGenericTypeDefinition())
-                      .Contains(typeof(IList<>))
+                         .Where(i => i.IsGenericType)
+                         .Select(i => i.GetGenericTypeDefinition())
+                         .Contains(typeof(IList<>))
                   && typeof(Node).IsAssignableFrom(
                          p.PropertyType.GetGenericArguments()[0]
                      )
@@ -61,7 +61,7 @@ namespace Axion.Core.Processing.Traversal {
                 default:
                     try {
                         var list = ((IEnumerable) obj).OfType<Node>()
-                                                      .ToArray();
+                            .ToArray();
                         // for loop required, expressions collection
                         // can be modified.
                         // ReSharper disable once ForCanBeConvertedToForeach

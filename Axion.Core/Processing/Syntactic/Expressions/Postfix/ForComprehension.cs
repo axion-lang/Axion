@@ -55,7 +55,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
             if (Stream.PeekIs(KeywordFor)) {
                 Right = new ForComprehension(Parent!) {
-                    Target = this,
+                    Target   = this,
                     IsNested = true
                 }.Parse();
             }

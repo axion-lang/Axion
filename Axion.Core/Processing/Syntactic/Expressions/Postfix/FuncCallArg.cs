@@ -50,7 +50,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     s.Eat(TokenType.EqualsSign);
                     var argValue = InfixExpr.Parse(parent);
                     arg = new FuncCallArg(parent) {
-                        Name = argName,
+                        Name  = argName,
                         Value = argValue
                     };
                     if (args.Any(

@@ -31,7 +31,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
-                Target = this,
+                Target     = this,
                 Decorators = new NodeList<Node>(this, items)
             };
         }
@@ -47,7 +47,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public ClassDef Parse() {
             KwClass = Stream.Eat(KeywordClass);
-            Name = new NameExpr(this).Parse(true);
+            Name    = new NameExpr(this).Parse(true);
             if (Stream.MaybeEat(OpenParenthesis)) {
                 if (!Stream.PeekIs(CloseParenthesis)) {
                     do {

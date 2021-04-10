@@ -17,19 +17,19 @@ namespace Axion.Emitter.CSharp {
 
         public static readonly string[] AllowedModifiers =
             AccessModifiers.Union(new[] {
-                               "abstract",
-                               "const",
-                               "extern",
-                               "override",
-                               "partial",
-                               "readonly",
-                               "sealed",
-                               "unsafe",
-                               "virtual",
-                               "volatile",
-                               "static"
-                           })
-                           .ToArray();
+                    "abstract",
+                    "const",
+                    "extern",
+                    "override",
+                    "partial",
+                    "readonly",
+                    "sealed",
+                    "unsafe",
+                    "virtual",
+                    "volatile",
+                    "static"
+                })
+                .ToArray();
 
             // @formatter:off
 

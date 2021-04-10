@@ -59,14 +59,14 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
         ) {
             var s = parent.Unit.TokenStream;
 
-            var parameters               = new NodeList<FunctionParameter>(parent);
-            var names                    = new HashSet<string>(StringComparer.Ordinal);
-            var haveMultiply             = false;
+            var parameters = new NodeList<FunctionParameter>(parent);
+            var names = new HashSet<string>(StringComparer.Ordinal);
+            var haveMultiply = false;
             var haveKeywordOnlyParameter = false;
             // we want these to be the last two parameters
             FunctionParameter? listParameter = null;
-            FunctionParameter? mapParameter  = null;
-            var                needDefault   = false;
+            FunctionParameter? mapParameter = null;
+            var needDefault = false;
             while (!s.PeekIs(terminators)) {
                 if (s.MaybeEat(DoubleStar)) {
                     mapParameter = new FunctionParameter(parent).Parse(names);
@@ -124,7 +124,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
             if (haveMultiply
              && listParameter == null
-             && mapParameter  != null
+             && mapParameter != null
              && !haveKeywordOnlyParameter) {
                 LanguageReport.To(
                     BlameType.NamedArgsMustFollowBareStar,

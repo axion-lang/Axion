@@ -98,7 +98,7 @@ namespace Axion.Core.Processing {
         protected Node(Node? parent) : base(
             parent?.Unit!,
             parent?.Start ?? default,
-            parent?.End   ?? default
+            parent?.End ?? default
         ) {
             Parent = parent!;
         }

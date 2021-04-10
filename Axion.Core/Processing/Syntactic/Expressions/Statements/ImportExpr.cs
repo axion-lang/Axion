@@ -157,8 +157,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
                 NodeList<Entry>    children,
                 NodeList<NameExpr> exceptions
             ) : base(parent) {
-                Name = name;
-                Children = children;
+                Name       = name;
+                Children   = children;
                 Exceptions = exceptions;
             }
         }

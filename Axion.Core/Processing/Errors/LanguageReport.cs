@@ -13,9 +13,9 @@ namespace Axion.Core.Processing.Errors {
     ///     Axion code processing.
     /// </summary>
     public class LanguageReport : Exception {
-        public override string        Message    { get; }
-        public override string        StackTrace { get; }
-        public          BlameSeverity Severity   { get; }
+        public override string Message { get; }
+        public override string StackTrace { get; }
+        public BlameSeverity Severity { get; }
 
         [JsonProperty]
         public CodeSpan ErrorSpan { get; }

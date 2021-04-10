@@ -60,9 +60,9 @@ namespace Axion {
             const string namespacePrefix = "Axion.Emitter.";
 
             var dlls = new DirectoryInfo(Compiler.WorkDir)
-                       .EnumerateFiles()
-                       .Where(fi => fi.Name.StartsWith(namespacePrefix)
-                                 && fi.Extension == ".dll");
+                .EnumerateFiles()
+                .Where(fi => fi.Name.StartsWith(namespacePrefix)
+                          && fi.Extension == ".dll");
 
             foreach (var fileInfo in dlls) {
                 var shortName = Path.GetFileNameWithoutExtension(fileInfo.FullName);
@@ -187,14 +187,14 @@ namespace Axion {
 
         static void PrintError(LanguageReport e) {
             var lines = SyntaxHighlighter
-                        .HighlightTokens(
-                            e.TargetUnit.TokenStream
-                             .SkipWhile(t => t.Start.Line < e.ErrorSpan.Start.Line)
-                             .TakeWhile(t => t.Start.Line - e.ErrorSpan.Start.Line < 4)
-                        )
-                        .GroupBy(ct => ct.Token.Start.Line)
-                        .Select(g => g.ToArray())
-                        .ToArray();
+                .HighlightTokens(
+                    e.TargetUnit.TokenStream
+                        .SkipWhile(t => t.Start.Line < e.ErrorSpan.Start.Line)
+                        .TakeWhile(t => t.Start.Line - e.ErrorSpan.Start.Line < 4)
+                )
+                .GroupBy(ct => ct.Token.Start.Line)
+                .Select(g => g.ToArray())
+                .ToArray();
             // first line
             // <line number>| <code line>
             var pointerTailLength = 8 + e.ErrorSpan.Start.Column;
@@ -267,15 +267,15 @@ namespace Axion {
             Console.WriteLine($"{relativeFileName},");
             // location
             Console.WriteLine(
-                $"line {e.ErrorSpan.Start.Line     + 1}, "
+                $"line {e.ErrorSpan.Start.Line + 1}, "
               + $"column {e.ErrorSpan.Start.Column + 1}."
             );
         }
 
         static void PrintLineNumber(int lineNumber) {
             var strNum = lineNumber.ToString();
-            var width  = Math.Max(strNum.Length, 4);
-            var view   = strNum.PadLeft(width + 1).PadRight(width + 2) + "│ ";
+            var width = Math.Max(strNum.Length, 4);
+            var view = strNum.PadLeft(width + 1).PadRight(width + 2) + "│ ";
             Console.Write(view);
         }
 
@@ -287,7 +287,7 @@ namespace Axion {
             while (true) {
                 // code editor header
                 var rawInput = ConsoleUtils.Read("i> ");
-                var input    = rawInput.Trim().ToUpperInvariant();
+                var input = rawInput.Trim().ToUpperInvariant();
 
                 switch (input) {
                 case "":
@@ -463,7 +463,7 @@ namespace Axion {
             );
 
             var assemblyName = Path.GetRandomFileName();
-            var syntaxTree   = CSharpSyntaxTree.ParseText(csCode);
+            var syntaxTree = CSharpSyntaxTree.ParseText(csCode);
 
             var compilation = CSharpCompilation.Create(
                 assemblyName,
@@ -474,8 +474,8 @@ namespace Axion {
                 )
             );
 
-            using var ms     = new MemoryStream();
-            var       result = compilation.Emit(ms);
+            using var ms = new MemoryStream();
+            var result = compilation.Emit(ms);
 
             if (result.Success) {
                 ms.Seek(0, SeekOrigin.Begin);

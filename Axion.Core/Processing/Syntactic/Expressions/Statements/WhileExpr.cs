@@ -23,17 +23,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
 
         public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
-                Target = this,
+                Target     = this,
                 Decorators = new NodeList<Node>(this, items)
             };
         }
 
         public Node Parse() {
-            KwWhile = Stream.Eat(KeywordWhile);
+            KwWhile   = Stream.Eat(KeywordWhile);
             Condition = InfixExpr.Parse(this);
-            Scope = new ScopeExpr(this).Parse();
+            Scope     = new ScopeExpr(this).Parse();
             if (Stream.MaybeEat("no-break")) {
-                KwNoBreak = Stream.Token;
+                KwNoBreak    = Stream.Token;
                 NoBreakScope = new ScopeExpr(this).Parse();
             }
 

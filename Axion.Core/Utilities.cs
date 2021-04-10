@@ -80,17 +80,17 @@ namespace Axion.Core {
         public static IEnumerable<string> SplitLaunchArguments(string input) {
             var inQuotes = false;
             return Split(
-                       input,
-                       c => {
-                           if (c == '\"') {
-                               inQuotes = !inQuotes;
-                           }
+                    input,
+                    c => {
+                        if (c == '\"') {
+                            inQuotes = !inQuotes;
+                        }
 
-                           return !inQuotes && char.IsWhiteSpace(c);
-                       }
-                   )
-                   .Select(arg => TrimMatchingChars(arg.Trim(), '\"'))
-                   .Where(arg => !string.IsNullOrEmpty(arg));
+                        return !inQuotes && char.IsWhiteSpace(c);
+                    }
+                )
+                .Select(arg => TrimMatchingChars(arg.Trim(), '\"'))
+                .Where(arg => !string.IsNullOrEmpty(arg));
         }
 
         static IEnumerable<string> Split(

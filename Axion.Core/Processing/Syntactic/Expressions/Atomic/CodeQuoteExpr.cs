@@ -24,7 +24,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public CodeQuoteExpr Parse() {
             OpenQuote = Stream.Eat(DoubleOpenBrace);
-            Scope = new ScopeExpr(this);
+            Scope     = new ScopeExpr(this);
             while (!Stream.PeekIs(DoubleCloseBrace, TokenType.End)) {
                 Scope.Items += AnyExpr.Parse(this);
             }

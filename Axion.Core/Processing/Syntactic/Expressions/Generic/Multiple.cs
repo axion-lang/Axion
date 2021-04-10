@@ -54,7 +54,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Generic {
         ///     (e.g. tuples)
         /// </summary>
         internal static AtomExpr Parse(Node parent, Func<Node, Node> parserFunc) {
-            var s         = parent.Unit.TokenStream;
+            var s = parent.Unit.TokenStream;
             var hasParens = s.MaybeEat(OpenParenthesis);
             var list = new NodeList<Node>(parent) {
                 parserFunc(parent)

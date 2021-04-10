@@ -4,7 +4,7 @@ using Axion.Specification;
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class CommentToken : Token {
         public bool IsMultiline { get; }
-        public bool IsUnclosed  { get; }
+        public bool IsUnclosed { get; }
 
         internal CommentToken(
             Unit   unit,

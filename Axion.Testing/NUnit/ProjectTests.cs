@@ -45,7 +45,7 @@ namespace Axion.Testing.NUnit {
             var proj = new Project(
                 Path.Join(testProjectsPath, "Empty", "project.toml")
             );
-            Assert.AreEqual(1, proj.ImportedMacros.Count);
+            Assert.AreEqual(1,             proj.ImportedMacros.Count);
             Assert.AreEqual("./macros.ax", proj.ImportedMacros[0]);
         }
 

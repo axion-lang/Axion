@@ -21,7 +21,7 @@ namespace Axion.Testing.NUnit.Lexer {
             var unit = TestUtils.UnitFromCode(id);
             Lex(unit);
             // id, minus, EOC
-            Assert.AreEqual(3, unit.TokenStream.Count);
+            Assert.AreEqual(3,             unit.TokenStream.Count);
             Assert.AreEqual("ident-ifier", unit.TokenStream[0].Value);
             Assert.AreEqual("ident_ifier", unit.TokenStream[0].Content);
         }

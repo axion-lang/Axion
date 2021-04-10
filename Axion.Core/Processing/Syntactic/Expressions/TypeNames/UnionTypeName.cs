@@ -21,7 +21,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
             Left ??= Parse(this);
 
             JoiningMark = Stream.Eat(Pipe);
-            Right = Parse(this);
+            Right       = Parse(this);
             return this;
         }
     }

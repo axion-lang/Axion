@@ -62,16 +62,16 @@ namespace Axion.Core.Hierarchy {
             }
 
             config = Config.CreateAs()
-                           .MappedToType(() => new ProjectConfig())
-                           .StoredAs(
-                               store => store.File(ConfigFile.FullName)
-                                             .AccessedBySource(
-                                                 "project",
-                                                 out var _
-                                             )
-                           )
-                           .UseTomlConfiguration(settings)
-                           .Initialize();
+                .MappedToType(() => new ProjectConfig())
+                .StoredAs(
+                    store => store.File(ConfigFile.FullName)
+                        .AccessedBySource(
+                            "project",
+                            out var _
+                        )
+                )
+                .UseTomlConfiguration(settings)
+                .Initialize();
 
             MainModule = Module.From(
                 new DirectoryInfo(
@@ -111,6 +111,6 @@ namespace Axion.Core.Hierarchy {
     [SuppressMessage("ReSharper", "UnassignedGetOnlyAutoProperty")]
     public class ProjectConfig {
         public List<string>? ImportedMacros { get; }
-        public string?       StdLibPath     { get; }
+        public string? StdLibPath { get; }
     }
 }

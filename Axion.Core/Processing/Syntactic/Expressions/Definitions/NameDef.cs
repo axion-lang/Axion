@@ -11,7 +11,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
-                Target = this,
+                Target     = this,
                 Decorators = new NodeList<Node>(this, items)
             };
         }

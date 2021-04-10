@@ -22,7 +22,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
         public CodeUnquotedExpr Parse() {
             StartMark = Stream.Eat(TokenType.Dollar);
-            Value = Parse(this);
+            Value     = Parse(this);
             return this;
         }
     }

@@ -75,19 +75,19 @@ namespace Axion.Core.Hierarchy {
 
         public ImmutableList<IDefinitionExpr> Definitions =>
             definitions.Union(Submodules.Values
-                                        .Select(sm => sm.Definitions)
-                                        .SelectMany(x => x)
-                       )
-                       .ToImmutableList();
+                    .Select(sm => sm.Definitions)
+                    .SelectMany(x => x)
+                )
+                .ToImmutableList();
 
         readonly HashSet<string> customKeywords = new();
 
         public ImmutableHashSet<string> CustomKeywords =>
             customKeywords.Union(Submodules.Values
-                                           .Select(sm => sm.CustomKeywords)
-                                           .SelectMany(x => x)
-                          )
-                          .ToImmutableHashSet();
+                    .Select(sm => sm.CustomKeywords)
+                    .SelectMany(x => x)
+                )
+                .ToImmutableHashSet();
 
         Module(DirectoryInfo dir) {
             Directory = dir;
@@ -159,7 +159,7 @@ namespace Axion.Core.Hierarchy {
         }
 
         public Module BindByName(string moduleName) {
-            var path   = moduleName.Split(".");
+            var path = moduleName.Split(".");
             var module = this;
             foreach (var step in path) {
                 if (module.Submodules.TryGetValue(step, out var subModule)) {

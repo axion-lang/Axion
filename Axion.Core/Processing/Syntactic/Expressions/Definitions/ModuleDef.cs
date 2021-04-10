@@ -21,7 +21,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public DecoratedExpr WithDecorators(params Node[] items) {
             return new(Parent) {
-                Target = this,
+                Target     = this,
                 Decorators = new NodeList<Node>(this, items)
             };
         }
@@ -37,8 +37,8 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
 
         public ModuleDef Parse() {
             KwModule = Stream.Eat(KeywordModule);
-            Name = new NameExpr(this).Parse();
-            Scope = new ScopeExpr(this).Parse();
+            Name     = new NameExpr(this).Parse();
+            Scope    = new ScopeExpr(this).Parse();
             return this;
         }
     }

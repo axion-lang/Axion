@@ -97,7 +97,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
             }
 
             var immutableKw = s.MaybeEat(KeywordLet) ? s.Token : null;
-            var infix       = InfixExpr.Parse(parent);
+            var infix = InfixExpr.Parse(parent);
 
             if (infix is BinaryExpr bin
              && (bin.Operator?.Is(EqualsSign) ?? false)) {
@@ -129,7 +129,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Common {
                 return infix;
             }
 
-            var   type  = TypeName.Parse(parent);
+            var type = TypeName.Parse(parent);
             Node? value = null;
             if (s.MaybeEat(EqualsSign)) {
                 // ['let'] name ':' type-name '=' infix-expr

@@ -9,7 +9,7 @@ namespace Axion.Testing.NUnit.Parser {
         static Unit ParseTestFile(
             [CallerMemberName] string testName = null!
         ) {
-            var file       = TestUtils.FileFromTestName(testName);
+            var file = TestUtils.FileFromTestName(testName);
             var rootModule = Module.RawFrom(file.Directory!);
             rootModule.Bind(Unit.FromFile(TestUtils.StdLibMacrosFile));
             var unit = TestUtils.UnitFromFile(testName);
@@ -29,7 +29,7 @@ namespace Axion.Testing.NUnit.Parser {
             var unit = ParseTestFile();
             Assert.IsEmpty(unit.Blames);
         }
-        
+
         [Test]
         public void TestClassDefGeneric() {
             var unit = ParseTestFile();

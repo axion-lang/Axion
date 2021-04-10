@@ -36,8 +36,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             content
         ) {
             IsUnclosed = isUnclosed;
-            Prefixes = prefixes;
-            Quote = quote;
+            Prefixes   = prefixes;
+            Quote      = quote;
             Interpolations = interpolations == null
                 ? new NodeList<StringInterpolation>(this)
                 : new NodeList<StringInterpolation>(this, interpolations);

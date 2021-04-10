@@ -69,7 +69,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
         }
 
         internal static NodeList<TypeName> ParseGenericTypeParametersList(Node parent) {
-            var s   = parent.Stream;
+            var s = parent.Stream;
             var tps = new NodeList<TypeName>(parent);
             s.Eat(OpenBracket);
             do {

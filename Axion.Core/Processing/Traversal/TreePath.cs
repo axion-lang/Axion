@@ -9,7 +9,7 @@ namespace Axion.Core.Processing.Traversal {
     /// </summary>
     public interface ITreePath {
         bool Traversed { get; set; }
-        Node Node      { get; set; }
+        Node Node { get; set; }
     }
 
     public class NodeTreePath : ITreePath {

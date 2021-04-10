@@ -48,7 +48,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
 
                         expressions += new SliceExpr(this) {
                             From = start,
-                            To = stop,
+                            To   = stop,
                             Step = step
                         };
                         break;

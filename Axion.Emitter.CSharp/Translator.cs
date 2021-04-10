@@ -387,8 +387,8 @@ namespace Axion.Emitter.CSharp {
                     w.WriteLine($"using {directive};");
                 }
 
-                var rootItems     = new NodeList<Node>(e);
-                var rootClasses   = new List<Node>();
+                var rootItems = new NodeList<Node>(e);
+                var rootClasses = new List<Node>();
                 var rootFunctions = new List<Node>();
                 foreach (var expr in e.Items) {
                     var actualType = expr;
@@ -426,22 +426,22 @@ namespace Axion.Emitter.CSharp {
                                             ValueType =
                                                 new SimpleTypeName(e, "void")
                                         }.WithParameters(
-                                             new FunctionParameter(e) {
-                                                 Name = new NameExpr(e, "args"),
-                                                 ValueType =
-                                                     new ArrayTypeName(e) {
-                                                         ElementType =
-                                                             new SimpleTypeName(
-                                                                 e,
-                                                                 Spec.StringType
-                                                             )
-                                                     }
-                                             }
-                                         )
-                                         .WithScope(rootItems)
-                                         .WithDecorators(
-                                             new NameExpr(e, "static")
-                                         )
+                                            new FunctionParameter(e) {
+                                                Name = new NameExpr(e, "args"),
+                                                ValueType =
+                                                    new ArrayTypeName(e) {
+                                                        ElementType =
+                                                            new SimpleTypeName(
+                                                                e,
+                                                                Spec.StringType
+                                                            )
+                                                    }
+                                            }
+                                        )
+                                        .WithScope(rootItems)
+                                        .WithDecorators(
+                                            new NameExpr(e, "static")
+                                        )
                                 }.Union(rootFunctions)
                             )
                         }.Union(rootClasses)

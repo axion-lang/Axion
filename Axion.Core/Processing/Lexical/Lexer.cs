@@ -166,9 +166,9 @@ namespace Axion.Core.Processing.Lexical {
                 indentChar = value[0];
             }
 
-            var      consistent         = true;
+            var consistent = true;
             Location inconsistencyStart = default;
-            var      newIndentLen       = 0;
+            var newIndentLen = 0;
             for (var i = 0; i < value.Length; i++) {
                 var ch = value[i];
                 if (consistent && ch != indentChar) {
@@ -443,7 +443,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             TryAddChar(StringQuotes, false);
-            var quote        = value[^1].ToString();
+            var quote = value[^1].ToString();
             var closingQuote = quote;
             if (AddNext(false, quote.Multiply(MultilineStringQuotesCount - 1))) {
                 quote = quote.Multiply(MultilineStringQuotesCount);
@@ -470,7 +470,7 @@ namespace Axion.Core.Processing.Lexical {
             }
 
             var interpolations = new List<StringInterpolation>();
-            var unclosed       = false;
+            var unclosed = false;
             while (true) {
                 if (stream.PeekIs('\\') && !prefixes.Contains("r")) {
                     ReadEscapeSeq();
@@ -522,8 +522,8 @@ namespace Axion.Core.Processing.Lexical {
 
         StringInterpolation ReadStringInterpolation() {
             var interpolation = new StringInterpolation(unit);
-            var iSrc          = interpolation.Unit;
-            var lexer         = new Lexer(interpolation.Unit);
+            var iSrc = interpolation.Unit;
+            var lexer = new Lexer(interpolation.Unit);
 
             lexer.ProcessTerminators.Push(CloseBrace);
             while (true) {
@@ -550,8 +550,8 @@ namespace Axion.Core.Processing.Lexical {
 
         void ReadEscapeSeq() {
             var escapeStart = stream.Location;
-            var raw         = stream.Eat('\\')!;
-            var escaped     = "";
+            var raw = stream.Eat('\\')!;
+            var escaped = "";
             // \t, \n, etc
             if (stream.Eat(EscapeSequences.Keys.ToArray()) != null) {
                 raw     += stream.Char;
@@ -562,7 +562,7 @@ namespace Axion.Core.Processing.Lexical {
                 var u = stream.Char;
                 raw += u;
                 var uEscapeLen = u == 'u' ? 4 : 8;
-                var escapeLen  = 0;
+                var escapeLen = 0;
                 while (escapeLen < uEscapeLen) {
                     if (stream.Eat(NumbersHex) != null) {
                         raw += stream.Char;
