@@ -7,6 +7,7 @@
             Description = description;
             Severity    = severity;
         }
+
         // TODO: replace blame severities with class hierarchy
         // @formatter:off
         public static readonly BlameType InvalidCharacter                         = new("unknown character",                                               BlameSeverity.Error);
