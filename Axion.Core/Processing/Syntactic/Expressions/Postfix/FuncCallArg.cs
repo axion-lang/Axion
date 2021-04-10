@@ -3,7 +3,7 @@ using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.SourceGenerators;
-using Axion.Specification;
+using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
     [SyntaxExpression]
@@ -37,17 +37,17 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 args += first;
             }
 
-            if (s.PeekIs(TokenType.CloseParenthesis)) {
+            if (s.PeekIs(CloseParenthesis)) {
                 return args;
             }
 
             while (true) {
                 FuncCallArg arg;
                 // named arg
-                if (s.PeekIs(TokenType.Identifier)
-                 && s.PeekByIs(2, TokenType.EqualsSign)) {
+                if (s.PeekIs(Identifier)
+                 && s.PeekByIs(2, EqualsSign)) {
                     var argName = (NameExpr) AtomExpr.Parse(parent);
-                    s.Eat(TokenType.EqualsSign);
+                    s.Eat(EqualsSign);
                     var argValue = InfixExpr.Parse(parent);
                     arg = new FuncCallArg(parent) {
                         Name  = argName,
@@ -63,7 +63,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 else {
                     Node argValue = InfixExpr.Parse(parent);
                     // generator arg
-                    if (s.PeekIs(TokenType.KeywordFor)) {
+                    if (s.PeekIs(KeywordFor)) {
                         arg = new FuncCallArg(parent) {
                             Value = new ForComprehension(parent) {
                                 Target = argValue
@@ -72,7 +72,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                     }
                     else {
                         // TODO: star args
-                        s.MaybeEat(TokenType.Star);
+                        s.MaybeEat(Star);
                         arg = new FuncCallArg(parent) {
                             Value = argValue
                         };
@@ -80,7 +80,7 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
                 }
 
                 args += arg;
-                if (!s.MaybeEat(TokenType.Comma)) {
+                if (!s.MaybeEat(Comma)) {
                     break;
                 }
             }

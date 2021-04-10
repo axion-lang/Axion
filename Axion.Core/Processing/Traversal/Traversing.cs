@@ -11,7 +11,7 @@ using Axion.Core.Processing.Syntactic.Expressions.Patterns;
 using Axion.Core.Processing.Syntactic.Expressions.Postfix;
 using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.Specification;
+using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Traversal {
     public class NoPathTraversingAttribute : Attribute { }
@@ -96,20 +96,20 @@ namespace Axion.Core.Processing.Traversal {
                 break;
             }
 
-            case BinaryExpr bin when bin.Operator.Is(TokenType.Is)
+            case BinaryExpr bin when bin.Operator.Is(Is)
                                   && bin.Right is UnaryExpr un
-                                  && un.Operator.Is(TokenType.Not): {
+                                  && un.Operator.Is(Not): {
                 // `x is (not (y))` -> `not (x is y)`
                 path.Node = new UnaryExpr(path.Node.Parent) {
                     Operator = new OperatorToken(
                         path.Node.Unit,
-                        tokenType: TokenType.Not
+                        tokenType: Not
                     ),
                     Value = new BinaryExpr(path.Node) {
                         Left = bin.Left,
                         Operator = new OperatorToken(
                             path.Node.Unit,
-                            tokenType: TokenType.Is
+                            tokenType: Is
                         ),
                         Right = un.Value
                     }
@@ -119,7 +119,7 @@ namespace Axion.Core.Processing.Traversal {
             }
 
             case BinaryExpr bin
-                when bin.Operator.Is(TokenType.PipeRightAngle): {
+                when bin.Operator.Is(PipeRightAngle): {
                 // `arg |> func` -> `func(arg)`
                 path.Node = new FuncCallExpr(path.Node.Parent) {
                     Target = bin.Right,
@@ -133,7 +133,7 @@ namespace Axion.Core.Processing.Traversal {
                 break;
             }
 
-            case BinaryExpr bin when bin.Operator.Is(TokenType.EqualsSign)
+            case BinaryExpr bin when bin.Operator.Is(EqualsSign)
                                   && bin.Left is TupleExpr tpl: {
                 // (x, y) = GetCoordinates()
                 // <=======================>
@@ -144,7 +144,7 @@ namespace Axion.Core.Processing.Traversal {
                 var (_, deconstructionIdx) = scope!.IndexOf(bin);
                 var deconstructionVar = new VarDef(
                     scope,
-                    new Token(bin.Unit, TokenType.KeywordLet)
+                    new Token(bin.Unit, KeywordLet)
                 ) {
                     Name = new NameExpr(
                         bin,
@@ -211,7 +211,7 @@ namespace Axion.Core.Processing.Traversal {
                     Left = flagName,
                     Operator = new OperatorToken(
                         path.Node.Unit,
-                        tokenType: TokenType.EqualsSign
+                        tokenType: EqualsSign
                     ),
                     Right = ConstantExpr.True(path.Node)
                 };

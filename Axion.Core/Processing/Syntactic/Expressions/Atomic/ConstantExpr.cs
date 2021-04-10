@@ -2,7 +2,7 @@ using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.SourceGenerators;
-using Axion.Specification;
+using static Axion.Specification.TokenType;
 
 namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
     /// <summary>
@@ -21,19 +21,19 @@ namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
 
         public static ConstantExpr True(Node parent) {
             return new(parent) {
-                Literal = new Token(parent.Unit, TokenType.KeywordTrue)
+                Literal = new Token(parent.Unit, KeywordTrue)
             };
         }
 
         public static ConstantExpr False(Node parent) {
             return new(parent) {
-                Literal = new Token(parent.Unit, TokenType.KeywordFalse)
+                Literal = new Token(parent.Unit, KeywordFalse)
             };
         }
 
         public static ConstantExpr Nil(Node parent) {
             return new(parent) {
-                Literal = new Token(parent.Unit, TokenType.KeywordNil)
+                Literal = new Token(parent.Unit, KeywordNil)
             };
         }
 
