@@ -8,7 +8,6 @@
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
         <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>D:\Desktop\GeneratedFiles</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
