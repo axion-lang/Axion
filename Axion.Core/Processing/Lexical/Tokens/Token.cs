@@ -7,13 +7,13 @@ using static Axion.Specification.TokenType;
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class Token : Node {
         [JsonProperty(Order = 1)]
-        public TokenType Type { get; set; }
+        public TokenType Type { get; init; }
 
         [JsonProperty(Order = 2)]
-        public string Value { get; protected set; }
+        public string Value { get; init; }
 
         [JsonProperty(Order = 3)]
-        public string Content { get; protected set; }
+        public string Content { get; init; }
 
         [JsonProperty(Order = 4)]
         public string EndingWhite { get; set; }
@@ -37,9 +37,9 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             if (types.Length == 0) {
                 return true;
             }
-
+            var t = Type;
             for (var i = 0; i < types.Length; i++) {
-                if (Type == types[i]) {
+                if (t == types[i]) {
                     return true;
                 }
             }

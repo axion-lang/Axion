@@ -18,8 +18,8 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             value,
             content
         ) {
-            IsUnclosed  = isUnclosed;
             IsMultiline = isMultiline;
+            IsUnclosed  = isUnclosed;
         }
     }
 }

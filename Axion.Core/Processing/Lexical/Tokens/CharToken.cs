@@ -4,8 +4,9 @@ using Axion.Specification;
 
 namespace Axion.Core.Processing.Lexical.Tokens {
     public class CharToken : Token {
-        public override TypeName ValueType =>
-            new SimpleTypeName(this, Spec.CharType);
+        readonly SimpleTypeName typeName;
+
+        public override TypeName ValueType => typeName;
 
         public bool IsUnclosed { get; }
 
@@ -21,6 +22,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
             content
         ) {
             IsUnclosed = isUnclosed;
+            typeName   = new SimpleTypeName(this, Spec.CharType);
         }
     }
 }

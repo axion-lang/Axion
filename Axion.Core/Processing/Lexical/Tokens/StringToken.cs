@@ -17,8 +17,9 @@ namespace Axion.Core.Processing.Lexical.Tokens {
 
         public bool IsMultiline => Quote.Length == Spec.MultilineStringQuotesCount;
 
-        public override TypeName ValueType =>
-            new SimpleTypeName(this, Spec.StringType);
+        public override TypeName ValueType => typeName;
+
+        readonly SimpleTypeName typeName;
 
         internal StringToken(
             Unit                              unit,
@@ -41,6 +42,7 @@ namespace Axion.Core.Processing.Lexical.Tokens {
                 ? new NodeList<StringInterpolation>(this)
                 : new NodeList<StringInterpolation>(this, interpolations);
             EndingQuotes = "";
+            typeName     = new SimpleTypeName(this, Spec.StringType);
         }
 
         public bool HasPrefix(string prefix) {
