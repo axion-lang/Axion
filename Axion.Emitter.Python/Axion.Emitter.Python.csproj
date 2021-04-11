@@ -7,7 +7,7 @@
 
     <Target Name="Copy emitter to startup project" AfterTargets="Build">
         <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll;$(OutputPath)$(AssemblyName).pdb;$(OutputPath)$(AssemblyName).deps.json"
-              DestinationFolder="$(SolutionDir)\Axion\$(OutputPath)"/>
+              DestinationFolder="..\Axion\$(OutputPath)" />
     </Target>
 
     <ItemGroup>
