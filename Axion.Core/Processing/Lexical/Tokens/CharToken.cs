@@ -2,27 +2,27 @@ using Axion.Core.Hierarchy;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Specification;
 
-namespace Axion.Core.Processing.Lexical.Tokens {
-    public class CharToken : Token {
-        readonly SimpleTypeName typeName;
+namespace Axion.Core.Processing.Lexical.Tokens;
 
-        public override TypeName ValueType => typeName;
+public class CharToken : Token {
+    readonly SimpleTypeName typeName;
 
-        public bool IsUnclosed { get; }
+    public override TypeName InferredType => typeName;
 
-        internal CharToken(
-            Unit   unit,
-            string value      = "",
-            string content    = "",
-            bool   isUnclosed = false
-        ) : base(
-            unit,
-            TokenType.Character,
-            value,
-            content
-        ) {
-            IsUnclosed = isUnclosed;
-            typeName   = new SimpleTypeName(this, Spec.CharType);
-        }
+    public bool IsUnclosed { get; }
+
+    internal CharToken(
+        Unit   unit,
+        string value      = "",
+        string content    = "",
+        bool   isUnclosed = false
+    ) : base(
+        unit,
+        TokenType.Character,
+        value,
+        content
+    ) {
+        IsUnclosed = isUnclosed;
+        typeName   = new SimpleTypeName(this, Spec.CharType);
     }
 }

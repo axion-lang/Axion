@@ -1,59 +1,61 @@
 using System.Collections.Generic;
 using Axion.Core.Hierarchy;
-using Axion.Core.Processing.Syntactic;
+using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.SourceGenerators;
 using Axion.Specification;
+using Magnolia.Attributes;
+using Magnolia.Trees;
 
-namespace Axion.Core.Processing.Lexical.Tokens {
-    [SyntaxExpression]
-    public partial class StringToken : Token {
-        public bool IsUnclosed { get; }
-        public string Prefixes { get; }
-        public string Quote { get; }
-        public string EndingQuotes { get; }
+namespace Axion.Core.Processing.Lexical.Tokens;
 
-        [LeafSyntaxNode] NodeList<StringInterpolation>? interpolations;
+[Branch]
+public partial class StringToken : Token {
+    readonly SimpleTypeName typeName;
 
-        public bool IsMultiline => Quote.Length == Spec.MultilineStringQuotesCount;
+    [Leaf] NodeList<StringInterpolation, Ast>? interpolations;
 
-        public override TypeName ValueType => typeName;
+    public bool IsUnclosed { get; }
+    public string Prefixes { get; }
+    public string Quote { get; }
+    public string EndingQuotes { get; }
 
-        readonly SimpleTypeName typeName;
+    public bool IsMultiline => Quote.Length == Spec.MultilineStringQuotesCount;
 
-        internal StringToken(
-            Unit                              unit,
-            string                            value          = "",
-            string                            content        = "",
-            bool                              isUnclosed     = false,
-            string                            prefixes       = "",
-            string                            quote          = "\"",
-            IEnumerable<StringInterpolation>? interpolations = null
-        ) : base(
-            unit,
-            TokenType.String,
-            value,
-            content
-        ) {
-            IsUnclosed = isUnclosed;
-            Prefixes   = prefixes;
-            Quote      = quote;
-            Interpolations = interpolations == null
-                ? new NodeList<StringInterpolation>(this)
-                : new NodeList<StringInterpolation>(this, interpolations);
-            EndingQuotes = "";
-            typeName     = new SimpleTypeName(this, Spec.StringType);
-        }
+    public override TypeName InferredType => typeName;
 
-        public bool HasPrefix(string prefix) {
-            return Prefixes.Contains(prefix.ToLowerInvariant())
-                || Prefixes.Contains(prefix.ToUpperInvariant());
-        }
+    internal StringToken(
+        Unit                              unit,
+        string                            value          = "",
+        string                            content        = "",
+        bool                              isUnclosed     = false,
+        string                            prefixes       = "",
+        string                            quote          = "\"",
+        IEnumerable<StringInterpolation>? interpolations = null
+    ) : base(
+        unit,
+        TokenType.String,
+        value,
+        content
+    ) {
+        IsUnclosed = isUnclosed;
+        Prefixes   = prefixes;
+        Quote      = quote;
+        Interpolations = interpolations == null
+            ? new NodeList<StringInterpolation, Ast>(this)
+            : new NodeList<StringInterpolation, Ast>(this, interpolations);
+        EndingQuotes = "";
+        typeName     = new SimpleTypeName(this, Spec.StringType);
     }
 
-    public class StringInterpolation : Node {
-        public StringInterpolation(Unit unit) : base(
-            Unit.FromInterpolation(unit)
-        ) { }
+    public bool HasPrefix(string prefix) {
+        return Prefixes.Contains(prefix.ToLowerInvariant())
+            || Prefixes.Contains(prefix.ToUpperInvariant());
     }
+}
+
+[Branch]
+public partial class StringInterpolation : Node {
+    public StringInterpolation(Unit unit) : base(
+        Unit.FromInterpolation(unit)
+    ) { }
 }

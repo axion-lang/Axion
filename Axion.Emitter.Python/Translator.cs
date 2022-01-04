@@ -6,12 +6,13 @@ using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Translation;
 
-namespace Axion.Emitter.Python {
-    public class Translator : INodeTranslator {
-        public string OutputFileExtension => ".py";
+namespace Axion.Emitter.Python;
 
-        public bool Translate(CodeWriter w, ITranslatableNode node) {
-            switch (node) {
+public class Translator : INodeTranslator {
+    public string OutputFileExtension => ".py";
+
+    public bool Translate(CodeWriter w, ITranslatableNode node) {
+        switch (node) {
             case CommentToken e: {
                 w.Write("#", e.Content);
                 break;
@@ -48,8 +49,8 @@ namespace Axion.Emitter.Python {
                 w.Write("def ", e.Name, "(");
                 w.AddJoin(", ", e.Parameters);
                 w.Write(")");
-                if (e.ValueType != null) {
-                    w.Write(" -> ", e.ValueType);
+                if (e.InferredType != null) {
+                    w.Write(" -> ", e.InferredType);
                 }
 
                 w.Write(e.Scope);
@@ -61,8 +62,8 @@ namespace Axion.Emitter.Python {
             }
             case NameDef e: {
                 w.Write(e.Name);
-                if (e.ValueType != null) {
-                    w.Write(": ", e.ValueType);
+                if (e.InferredType != null) {
+                    w.Write(": ", e.InferredType);
                 }
 
                 if (e.Value != null) {
@@ -117,9 +118,8 @@ namespace Axion.Emitter.Python {
             default: {
                 return false;
             }
-            }
-
-            return true;
         }
+
+        return true;
     }
 }

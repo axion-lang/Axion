@@ -1,28 +1,28 @@
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
 using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
-    /// <summary>
-    ///     <code>
-    ///         array-type:
-    ///             type '[' ']';
-    ///     </code>
-    /// </summary>
-    [SyntaxExpression]
-    public partial class ArrayTypeName : TypeName {
-        [LeafSyntaxNode] TypeName? elementType;
-        [LeafSyntaxNode] Token? openingBracket;
-        [LeafSyntaxNode] Token? closingBracket;
+namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
-        public ArrayTypeName(Node parent) : base(parent) { }
+/// <summary>
+///     <code>
+///         array-type:
+///             type '[' ']';
+///     </code>
+/// </summary>
+[Branch]
+public partial class ArrayTypeName : TypeName {
+    [Leaf] Token? closingBracket;
+    [Leaf] TypeName? elementType;
+    [Leaf] Token? openingBracket;
 
-        public ArrayTypeName Parse() {
-            ElementType ??= Parse(this);
+    public ArrayTypeName(Node parent) : base(parent) { }
 
-            OpeningBracket = Stream.Eat(OpenBracket);
-            ClosingBracket = Stream.Eat(CloseBracket);
-            return this;
-        }
+    public ArrayTypeName Parse() {
+        ElementType ??= Parse(this);
+
+        OpeningBracket = Stream.Eat(OpenBracket);
+        ClosingBracket = Stream.Eat(CloseBracket);
+        return this;
     }
 }

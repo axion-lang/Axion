@@ -7,94 +7,94 @@ using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Specification;
 using Newtonsoft.Json;
 
-namespace Axion.Core.Processing.Errors {
-    /// <summary>
-    ///     Exception that occurs during invalid
-    ///     Axion code processing.
-    /// </summary>
-    public class LanguageReport : Exception {
-        public override string Message { get; }
-        public override string StackTrace { get; }
-        public BlameSeverity Severity { get; }
+namespace Axion.Core.Processing.Errors;
 
-        [JsonProperty]
-        public CodeSpan ErrorSpan { get; }
+/// <summary>
+///     Exception that occurs during invalid
+///     Axion code processing.
+/// </summary>
+public class LanguageReport : Exception {
+    public override string Message { get; }
+    public override string StackTrace { get; }
+    public BlameSeverity Severity { get; }
 
-        [JsonProperty]
-        public Unit TargetUnit { get; }
+    [JsonProperty]
+    public ICodeSpan ErrorSpan { get; }
 
-        [JsonProperty]
-        public string Time { get; } = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+    [JsonProperty]
+    public Unit TargetUnit { get; }
 
-        LanguageReport(
-            string        message,
-            BlameSeverity severity,
-            CodeSpan      span
-        ) {
-            Severity   = severity;
-            Message    = message;
-            ErrorSpan  = span;
-            TargetUnit = span.Unit;
-            StackTrace = new StackTrace(2).ToString();
+    [JsonProperty]
+    public string Time { get; } = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+
+    LanguageReport(
+        string        message,
+        BlameSeverity severity,
+        ICodeSpan     span
+    ) {
+        Severity   = severity;
+        Message    = message;
+        ErrorSpan  = span;
+        TargetUnit = span.Unit;
+        StackTrace = new StackTrace(2).ToString();
+    }
+
+    public static void To(BlameType type, ICodeSpan span) {
+        var ex = new LanguageReport(type.Description, type.Severity, span);
+        ex.TargetUnit.Blames.Add(ex);
+    }
+
+    public static void UnexpectedType(Type expectedType, Node node) {
+        BlameType blameType;
+        if (expectedType == typeof(AtomExpr)) {
+            blameType = BlameType.ExpectedAtomExpr;
         }
-
-        public static void To(BlameType type, CodeSpan span) {
-            var ex = new LanguageReport(type.Description, type.Severity, span);
-            ex.TargetUnit.Blames.Add(ex);
+        else if (expectedType == typeof(PostfixExpr)) {
+            blameType = BlameType.ExpectedPostfixExpr;
         }
-
-        public static void UnexpectedType(Type expectedType, Node node) {
-            BlameType blameType;
-            if (expectedType == typeof(AtomExpr)) {
-                blameType = BlameType.ExpectedAtomExpr;
-            }
-            else if (expectedType == typeof(PostfixExpr)) {
-                blameType = BlameType.ExpectedPostfixExpr;
-            }
-            else if (expectedType == typeof(PrefixExpr)) {
-                blameType = BlameType.ExpectedPrefixExpr;
-            }
-            else if (expectedType == typeof(InfixExpr)) {
-                blameType = BlameType.ExpectedInfixExpr;
-            }
-            else {
-                throw new ArgumentException(
-                    $"Cannot get blame type for {expectedType.Name}"
-                );
-            }
-
-            var ex = new LanguageReport(
-                blameType.Description,
-                blameType.Severity,
-                node
+        else if (expectedType == typeof(PrefixExpr)) {
+            blameType = BlameType.ExpectedPrefixExpr;
+        }
+        else if (expectedType == typeof(InfixExpr)) {
+            blameType = BlameType.ExpectedInfixExpr;
+        }
+        else {
+            throw new ArgumentException(
+                $"Cannot get blame type for {expectedType.Name}"
             );
-            node.Unit.Blames.Add(ex);
         }
 
-        public static void MismatchedBracket(Token bracket) {
-            var matchingBracket = bracket.Type.GetMatchingBracket();
-            var ex = new LanguageReport(
-                $"`{bracket.Value}` has no matching `{matchingBracket.GetValue()}`",
-                BlameSeverity.Error,
-                bracket
-            );
-            bracket.Unit.Blames.Add(ex);
-        }
+        var ex = new LanguageReport(
+            blameType.Description,
+            blameType.Severity,
+            node
+        );
+        node.Unit.Blames.Add(ex);
+    }
 
-        public static void UnexpectedSyntax(
-            TokenType expected,
-            CodeSpan  span
-        ) {
-            var ex = new LanguageReport(
-                $"Invalid syntax, expected `{expected.GetValue()}`, got `{span.Unit.TokenStream.Peek.Type.GetValue()}`.",
-                BlameSeverity.Error,
-                span
-            );
-            span.Unit.Blames.Add(ex);
-        }
+    public static void MismatchedBracket(Token bracket) {
+        var matchingBracket = bracket.Type.GetMatchingBracket();
+        var ex = new LanguageReport(
+            $"`{bracket.Value}` has no matching `{matchingBracket.GetValue()}`",
+            BlameSeverity.Error,
+            bracket
+        );
+        bracket.Unit.Blames.Add(ex);
+    }
 
-        public override string ToString() {
-            return $"{Severity}: {Message} ({ErrorSpan.Start})";
-        }
+    public static void UnexpectedSyntax(
+        TokenType expected,
+        ICodeSpan span
+    ) {
+        var ex = new LanguageReport(
+            $"Invalid syntax, expected `{expected.GetValue()}`, got `{span.Unit.TokenStream.Peek.Type.GetValue()}`.",
+            BlameSeverity.Error,
+            span
+        );
+        span.Unit.Blames.Add(ex);
+    }
+
+    public override string ToString() {
+        return $"{Severity}: {Message} ({ErrorSpan.Start})";
     }
 }

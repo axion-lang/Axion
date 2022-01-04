@@ -1,18 +1,18 @@
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
-    /// <summary>
-    ///     <code>
-    ///         slice-expr:
-    ///             [infix-expr] ':' [infix-expr] [':' [infix-expr]];
-    ///     </code>
-    /// </summary>
-    [SyntaxExpression]
-    public partial class SliceExpr : Node {
-        [LeafSyntaxNode] Node? from;
-        [LeafSyntaxNode] Node? to;
-        [LeafSyntaxNode] Node? step;
+namespace Axion.Core.Processing.Syntactic.Expressions.Postfix;
 
-        public SliceExpr(Node parent) : base(parent) { }
-    }
+/// <summary>
+///     <code>
+///         slice-expr:
+///             [infix-expr] ':' [infix-expr] [':' [infix-expr]];
+///     </code>
+/// </summary>
+[Branch]
+public partial class SliceExpr : Node {
+    [Leaf] Node? from;
+    [Leaf] Node? step;
+    [Leaf] Node? to;
+
+    public SliceExpr(Node parent) : base(parent) { }
 }

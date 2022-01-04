@@ -1,29 +1,29 @@
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
 using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
-    /// <summary>
-    ///     <code>
-    ///         or-pattern:
-    ///             syntax-pattern '|' syntax-pattern;
-    ///     </code>
-    /// </summary>
-    [SyntaxExpression]
-    public partial class OrPattern : Pattern {
-        [LeafSyntaxNode] Pattern? left;
-        [LeafSyntaxNode] Pattern right = null!;
+namespace Axion.Core.Processing.Syntactic.Expressions.Patterns;
 
-        public OrPattern(Node parent) : base(parent) { }
+/// <summary>
+///     <code>
+///         or-pattern:
+///             syntax-pattern '|' syntax-pattern;
+///     </code>
+/// </summary>
+[Branch]
+public partial class OrPattern : Pattern {
+    [Leaf] Pattern? left;
+    [Leaf] Pattern right = null!;
 
-        public override bool Match(MacroMatchExpr parent) {
-            return (Left?.Match(parent) ?? false) || Right.Match(parent);
-        }
+    public OrPattern(Node parent) : base(parent) { }
 
-        public OrPattern Parse() {
-            Left ??= new CascadePattern(this).Parse();
-            Stream.Eat(Pipe);
-            Right = new CascadePattern(this).Parse();
-            return this;
-        }
+    public override bool Match(MacroMatchExpr match) {
+        return (Left?.Match(match) ?? false) || Right.Match(match);
+    }
+
+    public OrPattern Parse() {
+        Left ??= new CascadePattern(this).Parse();
+        Stream.Eat(Pipe);
+        Right = new CascadePattern(this).Parse();
+        return this;
     }
 }

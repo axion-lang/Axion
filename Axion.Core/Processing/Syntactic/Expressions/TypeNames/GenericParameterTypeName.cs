@@ -1,23 +1,24 @@
 ﻿using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
+using Magnolia.Trees;
 using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
-    [SyntaxExpression]
-    public partial class GenericParameterTypeName : TypeName, ITypeParameter {
-        [LeafSyntaxNode] NameExpr name = null!;
-        [LeafSyntaxNode] Token? typeConstraintsStartMark;
-        [LeafSyntaxNode] NodeList<TypeName>? typeConstraints;
+namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
-        public GenericParameterTypeName(Node parent) : base(parent) { }
+[Branch]
+public partial class GenericParameterTypeName : TypeName, ITypeParameter {
+    [Leaf] NameExpr name = null!;
+    [Leaf] NodeList<TypeName, Ast>? typeConstraints;
+    [Leaf] Token? typeConstraintsStartMark;
 
-        public GenericParameterTypeName Parse() {
-            TypeConstraintsStartMark = Stream.Eat(Colon);
-            do {
-                TypeConstraints += Parse(this);
-            } while (Stream.MaybeEat(Comma));
-            return this;
-        }
+    public GenericParameterTypeName(Node parent) : base(parent) { }
+
+    public GenericParameterTypeName Parse() {
+        TypeConstraintsStartMark = Stream.Eat(Colon);
+        do {
+            TypeConstraints += Parse(this);
+        } while (Stream.MaybeEat(Comma));
+        return this;
     }
 }

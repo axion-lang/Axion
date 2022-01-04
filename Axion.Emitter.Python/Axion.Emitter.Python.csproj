@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <Target Name="Copy emitter to startup project" AfterTargets="Build">
-        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll;$(OutputPath)$(AssemblyName).pdb;$(OutputPath)$(AssemblyName).deps.json"
-              DestinationFolder="..\Axion\$(OutputPath)" />
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll;$(OutputPath)$(AssemblyName).pdb;$(OutputPath)$(AssemblyName).deps.json" DestinationFolder="..\Axion\$(OutputPath)"/>
     </Target>
 
     <ItemGroup>

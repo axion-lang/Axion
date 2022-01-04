@@ -9,145 +9,145 @@ using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Specification;
 using Newtonsoft.Json;
 
-namespace Axion.Core.Hierarchy {
-    /// <summary>
-    ///     Container of Axion source code;
-    ///     different kinds of code processing
-    ///     are performed with that class.
-    /// </summary>
-    [JsonObject(MemberSerialization.OptIn)]
-    public sealed class Unit {
-        #region File paths
+namespace Axion.Core.Hierarchy;
 
-        /// <summary>
-        ///     Path to file where source code is located.
-        ///     If not specified in constructor, file name
-        ///     assigned to date and time of instance creation.
-        /// </summary>
-        public FileInfo SourceFile { get; }
+/// <summary>
+///     Container of Axion source code;
+///     different kinds of code processing
+///     are performed with that class.
+/// </summary>
+[JsonObject(MemberSerialization.OptIn)]
+public sealed class Unit {
+    public string Name { get; }
 
-        DirectoryInfo? outputDirectory;
+    public Module? Module { get; set; }
 
-        /// <summary>
-        ///     Path to directory where generated result is located.
-        ///     Defaults to [source-directory]/../out.
-        /// </summary>
-        public DirectoryInfo OutputDirectory {
-            get {
-                if (outputDirectory != null) {
-                    return outputDirectory;
-                }
+    public Dictionary<string, Unit> Imports { get; } = new();
 
-                if (Module == null) {
-                    outputDirectory = new DirectoryInfo(
-                        Path.Join(SourceFile.DirectoryName, "out")
-                    );
-                }
-                else {
-                    outputDirectory = new DirectoryInfo(
-                        Path.Join(
-                            Module.OutputDirectory.FullName!,
-                            Path.GetRelativePath(
-                                Module.Directory.FullName,
-                                SourceFile.DirectoryName!
-                            )
-                        )
-                    );
-                }
+    public TextStream TextStream { get; private set; }
 
-                Utilities.ResolvePath(outputDirectory.FullName);
-                return outputDirectory;
-            }
+    public TokenStream TokenStream { get; }
+
+    [JsonProperty]
+    public Ast Ast { get; }
+
+    public List<LanguageReport> Blames { get; } = new();
+
+    public bool HasErrors => Blames.Any(b => b.Severity == BlameSeverity.Error);
+
+    Unit(
+        string         code      = "",
+        FileInfo?      source    = null,
+        DirectoryInfo? outputDir = null
+    ) {
+        if (source == null) {
+            source = new FileInfo(Compiler.GetTempSourceFilePath());
+            Utilities.ResolvePath(source.Directory!.FullName);
         }
 
-        #endregion
+        SourceFile = source;
+        Name       = NameFromFile(SourceFile)!;
 
-        public string Name { get; }
-
-        public Module? Module { get; set; }
-
-        public Dictionary<string, Unit> Imports { get; } = new();
-
-        public TextStream TextStream { get; private set; }
-
-        public TokenStream TokenStream { get; }
-
-        [JsonProperty]
-        public Ast Ast { get; }
-
-        public List<LanguageReport> Blames { get; } = new();
-
-        public bool HasErrors => Blames.Any(b => b.Severity == BlameSeverity.Error);
-
-        Unit(
-            string         code      = "",
-            FileInfo?      source    = null,
-            DirectoryInfo? outputDir = null
-        ) {
-            if (source == null) {
-                source = new FileInfo(Compiler.GetTempSourceFilePath());
-                Utilities.ResolvePath(source.Directory!.FullName);
-            }
-
-            SourceFile = source;
-            Name       = NameFromFile(SourceFile)!;
-
-            if (outputDir != null) {
-                outputDirectory = outputDir;
-            }
-
-            TextStream  = new TextStream(code);
-            TokenStream = new TokenStream();
-            Ast         = new Ast(this);
+        if (outputDir != null) {
+            outputDirectory = outputDir;
         }
 
-        public static Unit FromCode(
-            string         code,
-            DirectoryInfo? outputDir = null
-        ) {
-            return new(code, outputDir: outputDir);
-        }
+        TextStream  = new TextStream(code);
+        TokenStream = new TokenStream();
+        Ast         = new Ast(this);
+    }
 
-        public static Unit FromLines(
-            IEnumerable<string> lines,
-            DirectoryInfo?      outputDir = null
-        ) {
-            return new(string.Join("\n", lines), outputDir: outputDir);
-        }
+    public static Unit FromCode(
+        string         code,
+        DirectoryInfo? outputDir = null
+    ) {
+        return new(code, outputDir: outputDir);
+    }
 
-        public static Unit FromFile(
-            FileInfo       sourceFile,
-            DirectoryInfo? outputDir = null
-        ) {
-            if (!sourceFile.Exists) {
-                throw new FileNotFoundException(
-                    $"'{sourceFile.Name}' does not exists."
-                );
-            }
+    public static Unit FromLines(
+        IEnumerable<string> lines,
+        DirectoryInfo?      outputDir = null
+    ) {
+        return new(string.Join("\n", lines), outputDir: outputDir);
+    }
 
-            if (sourceFile.Extension != Spec.FileExtension) {
-                throw new ArgumentException(
-                    $"'{sourceFile.Name}' file must have {Spec.FileExtension} extension."
-                );
-            }
-
-            return new Unit(
-                File.ReadAllText(sourceFile.FullName),
-                sourceFile,
-                outputDir
+    public static Unit FromFile(
+        FileInfo       sourceFile,
+        DirectoryInfo? outputDir = null
+    ) {
+        if (!sourceFile.Exists) {
+            throw new FileNotFoundException(
+                $"'{sourceFile.Name}' does not exists."
             );
         }
 
-        public static Unit FromInterpolation(Unit unit) {
-            return new() {
-                TextStream = unit.TextStream,
-                Module     = unit.Module
-            };
+        if (sourceFile.Extension != Spec.FileExtension) {
+            throw new ArgumentException(
+                $"'{sourceFile.Name}' file must have {Spec.FileExtension} extension."
+            );
         }
 
-        public static string? NameFromFile(FileInfo file) {
-            var name = Path.GetFileNameWithoutExtension(file.FullName);
-            return name.Any(c => !c.IsValidIdPart()) ? null : name;
+        return new Unit(
+            File.ReadAllText(sourceFile.FullName),
+            sourceFile,
+            outputDir
+        );
+    }
+
+    public static Unit FromInterpolation(Unit unit) {
+        return new() {
+            TextStream = unit.TextStream,
+            Module     = unit.Module
+        };
+    }
+
+    public static string? NameFromFile(FileInfo file) {
+        var name = Path.GetFileNameWithoutExtension(file.FullName);
+        return name.Any(c => !c.IsValidIdPart()) ? null : name;
+    }
+
+    #region File paths
+
+    /// <summary>
+    ///     Path to file where source code is located.
+    ///     If not specified in constructor, file name
+    ///     assigned to date and time of instance creation.
+    /// </summary>
+    public FileInfo SourceFile { get; }
+
+    DirectoryInfo? outputDirectory;
+
+    /// <summary>
+    ///     Path to directory where generated result is located.
+    ///     Defaults to [source-directory]/../out.
+    /// </summary>
+    public DirectoryInfo OutputDirectory {
+        get {
+            if (outputDirectory != null) {
+                return outputDirectory;
+            }
+
+            if (Module == null) {
+                outputDirectory = new DirectoryInfo(
+                    Path.Join(SourceFile.DirectoryName, "out")
+                );
+            }
+            else {
+                outputDirectory = new DirectoryInfo(
+                    Path.Join(
+                        Module.OutputDirectory.FullName,
+                        Path.GetRelativePath(
+                            Module.Directory.FullName,
+                            SourceFile.DirectoryName!
+                        )
+                    )
+                );
+            }
+
+            Utilities.ResolvePath(outputDirectory.FullName);
+            return outputDirectory;
         }
     }
+
+    #endregion
 }

@@ -3,89 +3,90 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Axion.Core.Processing.Translation {
-    /// <summary>
-    ///     A wrapper around an <see cref="IndentedTextWriter"/>
-    ///     that helps to generate code from Axion expressions
-    ///     for multiple target languages.
-    /// </summary>
-    public class CodeWriter : IDisposable {
-        readonly StringWriter baseWriter;
-        readonly IndentedTextWriter writer;
-        bool lastLineEmpty;
+namespace Axion.Core.Processing.Translation;
 
-        readonly INodeTranslator translator;
-        static readonly INodeTranslator fallbackTranslator =
-            Compiler.Translators["axion"];
+/// <summary>
+///     A wrapper around an <see cref="IndentedTextWriter" />
+///     that helps to generate code from Axion expressions
+///     for multiple target languages.
+/// </summary>
+public class CodeWriter : IDisposable {
+    static readonly INodeTranslator fallbackTranslator =
+        Compiler.Translators["axion"];
 
-        public string OutputFileExtension => translator.OutputFileExtension;
+    public static readonly CodeWriter Default = new(fallbackTranslator);
 
-        public int IndentLevel {
-            get => writer.Indent;
-            set => writer.Indent = value;
-        }
+    readonly StringWriter baseWriter;
+    readonly INodeTranslator translator;
+    readonly IndentedTextWriter writer;
+    bool lastLineEmpty;
 
-        public static readonly CodeWriter Default = new(fallbackTranslator);
+    public string OutputFileExtension => translator.OutputFileExtension;
 
-        public CodeWriter(INodeTranslator translator) {
-            baseWriter      = new StringWriter();
-            writer          = new IndentedTextWriter(baseWriter);
-            this.translator = translator;
-        }
+    public int IndentLevel {
+        get => writer.Indent;
+        set => writer.Indent = value;
+    }
 
-        public void Write(params object?[] values) {
-            lastLineEmpty = false;
-            foreach (var v in values) {
-                if (v is ITranslatableNode node) {
-                    if (!translator.Translate(this, node)) {
-                        // NOTE: Fallback converter
-                        fallbackTranslator.Translate(this, node);
-                    }
-                }
-                else {
-                    writer.Write(v);
-                }
-            }
-        }
+    public CodeWriter(INodeTranslator translator) {
+        baseWriter      = new StringWriter();
+        writer          = new IndentedTextWriter(baseWriter);
+        this.translator = translator;
+    }
 
-        public void WriteLine(params object[] values) {
-            Write(values);
-            writer.WriteLine();
-            lastLineEmpty = true;
-        }
+    public void Dispose() {
+        GC.SuppressFinalize(this);
+        baseWriter.Dispose();
+        writer.Dispose();
+    }
 
-        public void MaybeWriteLine() {
-            if (!lastLineEmpty) {
-                WriteLine();
-            }
-        }
-
-        public void AddJoin<T>(
-            string   separator,
-            IList<T> items,
-            bool     indent = false
-        ) where T : ITranslatableNode? {
-            if (items.Count == 0) {
-                return;
-            }
-
-            for (var i = 0; i < items.Count - 1; i++) {
-                Write(items[i], separator);
-                if (indent) {
-                    writer.WriteLine();
+    public void Write(params object?[] values) {
+        lastLineEmpty = false;
+        foreach (var v in values) {
+            if (v is ITranslatableNode node) {
+                if (!translator.Translate(this, node)) // NOTE: Fallback converter
+                {
+                    fallbackTranslator.Translate(this, node);
                 }
             }
+            else {
+                writer.Write(v);
+            }
+        }
+    }
 
-            Write(items[^1]);
+    public void WriteLine(params object[] values) {
+        Write(values);
+        writer.WriteLine();
+        lastLineEmpty = true;
+    }
+
+    public void MaybeWriteLine() {
+        if (!lastLineEmpty) {
+            WriteLine();
+        }
+    }
+
+    public void AddJoin<T>(
+        string   separator,
+        IList<T> items,
+        bool     indent = false
+    ) where T : ITranslatableNode? {
+        if (items.Count == 0) {
+            return;
         }
 
-        public override string ToString() {
-            return baseWriter.ToString();
+        for (var i = 0; i < items.Count - 1; i++) {
+            Write(items[i], separator);
+            if (indent) {
+                writer.WriteLine();
+            }
         }
 
-        public void Dispose() {
-            baseWriter.Dispose();
-            writer.Dispose();
-        }
+        Write(items[^1]);
+    }
+
+    public override string ToString() {
+        return baseWriter.ToString();
     }
 }

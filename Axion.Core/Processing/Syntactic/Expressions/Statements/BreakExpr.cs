@@ -1,29 +1,29 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
 using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Statements {
-    /// <summary>
-    ///     <code>
-    ///         break-expr:
-    ///             'break' [name];
-    ///     </code>
-    /// </summary>
-    [SyntaxExpression]
-    public partial class BreakExpr : Node {
-        [LeafSyntaxNode] Token? kwBreak;
-        [LeafSyntaxNode] NameExpr? loopName;
+namespace Axion.Core.Processing.Syntactic.Expressions.Statements;
 
-        public BreakExpr(Node parent) : base(parent) { }
+/// <summary>
+///     <code>
+///         break-expr:
+///             'break' [name];
+///     </code>
+/// </summary>
+[Branch]
+public partial class BreakExpr : Node {
+    [Leaf] Token? kwBreak;
+    [Leaf] NameExpr? loopName;
 
-        public BreakExpr Parse() {
-            KwBreak = Stream.Eat(KeywordBreak);
-            if (Stream.PeekIs(Identifier)) {
-                LoopName = new NameExpr(this).Parse();
-            }
+    public BreakExpr(Node parent) : base(parent) { }
 
-            return this;
+    public BreakExpr Parse() {
+        KwBreak = Stream.Eat(KeywordBreak);
+        if (Stream.PeekIs(Identifier)) {
+            LoopName = new NameExpr(this).Parse();
         }
+
+        return this;
     }
 }

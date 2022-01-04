@@ -11,12 +11,13 @@ using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Translation;
 using Axion.Specification;
 
-namespace Axion.Emitter.Axion {
-    public class Translator : INodeTranslator {
-        public string OutputFileExtension => ".ax";
+namespace Axion.Emitter.Axion;
 
-        public bool Translate(CodeWriter w, ITranslatableNode node) {
-            switch (node) {
+public class Translator : INodeTranslator {
+    public string OutputFileExtension => ".ax";
+
+    public bool Translate(CodeWriter w, ITranslatableNode node) {
+        switch (node) {
             case Token e: {
                 // NOTE: all saved token.Value's are valid Axion code.
                 w.Write(e.Value, e.EndingWhite);
@@ -49,8 +50,8 @@ namespace Axion.Emitter.Axion {
                     w.Write(") ");
                 }
 
-                if (e.ValueType != null) {
-                    w.Write("-> ", e.ValueType);
+                if (e.InferredType != null) {
+                    w.Write("-> ", e.InferredType);
                 }
 
                 w.Write(e.Scope);
@@ -73,8 +74,8 @@ namespace Axion.Emitter.Axion {
             }
             case FunctionParameter e: {
                 w.Write(e.Name);
-                if (e.ValueType != null) {
-                    w.Write(": ", e.ValueType);
+                if (e.InferredType != null) {
+                    w.Write(": ", e.InferredType);
                 }
                 if (e.Value != null) {
                     w.Write(" = ", e.Value);
@@ -86,8 +87,8 @@ namespace Axion.Emitter.Axion {
                     w.Write("let ");
                 }
                 w.Write(e.Name);
-                if (e.ValueType != null) {
-                    w.Write(": ", e.ValueType);
+                if (e.InferredType != null) {
+                    w.Write(": ", e.InferredType);
                 }
                 if (e.Value != null) {
                     w.Write(" = ", e.Value);
@@ -96,8 +97,8 @@ namespace Axion.Emitter.Axion {
             }
             case NameDef e: {
                 w.Write(e.Name);
-                if (e.ValueType != null) {
-                    w.Write(": ", e.ValueType);
+                if (e.InferredType != null) {
+                    w.Write(": ", e.InferredType);
                 }
                 if (e.Value != null) {
                     w.Write(" = ", e.Value);
@@ -304,9 +305,8 @@ namespace Axion.Emitter.Axion {
             default: {
                 return false;
             }
-            }
-
-            return true;
         }
+
+        return true;
     }
 }

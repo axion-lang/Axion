@@ -2,13 +2,13 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <LangVersion>9</LangVersion>
+        <LangVersion>10</LangVersion>
         <ProjectGuid>{7EF6B56D-A078-40F1-9BEB-906DE8B0D658}</ProjectGuid>
         <Authors>Ilya Nikitin</Authors>
         <Company>Fluctus Technologies</Company>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <Nullable>enable</Nullable>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,10 +18,7 @@
 
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.10.0-1.final" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.10.0-1.final" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="3.10.0-1.final" />
-        <PackageReference Include="NLog" Version="4.7.9" />
-        <PackageReference Include="System.CodeDom" Version="6.0.0-preview.3.21201.4" />
+        <PackageReference Include="NLog" Version="4.7.13" />
+        <PackageReference Include="System.CodeDom" Version="6.0.0" />
     </ItemGroup>
 </Project>

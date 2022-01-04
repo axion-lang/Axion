@@ -2,90 +2,93 @@ using System.Linq;
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
+using Magnolia.Trees;
 using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Postfix {
-    [SyntaxExpression]
-    public partial class FuncCallArg : Node {
-        [LeafSyntaxNode] NameExpr? name;
-        [LeafSyntaxNode] Node value = null!;
+namespace Axion.Core.Processing.Syntactic.Expressions.Postfix;
 
-        internal FuncCallArg(Node parent) : base(parent) { }
+[Branch]
+public partial class FuncCallArg : Node {
+    [Leaf] NameExpr? name;
+    [Leaf] Node value = null!;
 
-        /// <summary>
-        ///     <code>
-        ///         multiple-arg:
-        ///             comprehension
-        ///             | ({ argument ',' }
-        ///                (argument [',']
-        ///                | '*' expr [',' '**' expr]
-        ///                | '**' expr ));
-        ///         argument:
-        ///             expr ['=' expr];
-        ///     </code>
-        /// </summary>
-        internal static NodeList<FuncCallArg> ParseArgList(
-            Node         parent,
-            FuncCallArg? first          = null,
-            bool         allowGenerator = false
-        ) {
-            var s = parent.Unit.TokenStream;
-            var args = new NodeList<FuncCallArg>(parent);
+    public FuncCallArg() : base(null) { }
 
-            if (first != null) {
-                args += first;
-            }
+    internal FuncCallArg(Node? parent) : base(parent) { }
 
-            if (s.PeekIs(CloseParenthesis)) {
-                return args;
-            }
+    /// <summary>
+    ///     <code>
+    ///         multiple-arg:
+    ///             comprehension
+    ///             | ({ argument ',' }
+    ///                (argument [',']
+    ///                | '*' expr [',' '**' expr]
+    ///                | '**' expr ));
+    ///         argument:
+    ///             expr ['=' expr];
+    ///     </code>
+    /// </summary>
+    internal static NodeList<FuncCallArg, Ast> ParseArgList(
+        Node         parent,
+        FuncCallArg? first          = null,
+        bool         allowGenerator = false
+    ) {
+        var s = parent.Unit.TokenStream;
+        var args = new NodeList<FuncCallArg, Ast>(parent);
 
-            while (true) {
-                FuncCallArg arg;
-                // named arg
-                if (s.PeekIs(Identifier)
-                 && s.PeekByIs(2, EqualsSign)) {
-                    var argName = (NameExpr) AtomExpr.Parse(parent);
-                    s.Eat(EqualsSign);
-                    var argValue = InfixExpr.Parse(parent);
-                    arg = new FuncCallArg(parent) {
-                        Name  = argName,
-                        Value = argValue
-                    };
-                    if (args.Any(a => a.Name?.ToString() == argName.ToString())) {
-                        LanguageReport.To(
-                            BlameType.DuplicatedNamedArgument,
-                            arg
-                        );
-                    }
-                }
-                else {
-                    Node argValue = InfixExpr.Parse(parent);
-                    // generator arg
-                    if (s.PeekIs(KeywordFor)) {
-                        arg = new FuncCallArg(parent) {
-                            Value = new ForComprehension(parent) {
-                                Target = argValue
-                            }.Parse()
-                        };
-                    }
-                    else {
-                        // TODO: star args
-                        s.MaybeEat(Star);
-                        arg = new FuncCallArg(parent) {
-                            Value = argValue
-                        };
-                    }
-                }
+        if (first != null) {
+            args += first;
+        }
 
-                args += arg;
-                if (!s.MaybeEat(Comma)) {
-                    break;
-                }
-            }
-
+        if (s.PeekIs(CloseParenthesis)) {
             return args;
         }
+
+        while (true) {
+            FuncCallArg arg;
+            // named arg
+            if (s.PeekIs(Identifier)
+             && s.PeekByIs(2, EqualsSign)) {
+                var argName = (NameExpr) AtomExpr.Parse(parent);
+                s.Eat(EqualsSign);
+                var argValue = InfixExpr.Parse(parent);
+                arg = new FuncCallArg(parent) {
+                    Name  = argName,
+                    Value = argValue
+                };
+                if (args.Any(a => a.Name?.ToString() == argName.ToString())) {
+                    LanguageReport.To(
+                        BlameType.DuplicatedNamedArgument,
+                        arg
+                    );
+                }
+            }
+            else {
+                Node argValue = InfixExpr.Parse(parent);
+                // generator arg
+                if (s.PeekIs(KeywordFor)) {
+                    arg = new FuncCallArg(parent) {
+                        Value = new ForComprehension(parent) {
+                            Target = argValue
+                        }.Parse()
+                    };
+                }
+                else {
+                    // TODO: star args
+                    s.MaybeEat(Star);
+                    arg = new FuncCallArg(parent) {
+                        Value = argValue
+                    };
+                }
+            }
+
+            args += arg;
+            if (!s.MaybeEat(Comma)) {
+                break;
+            }
+        }
+
+        return args;
     }
 }

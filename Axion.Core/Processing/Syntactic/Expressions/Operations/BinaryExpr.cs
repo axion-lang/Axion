@@ -1,20 +1,20 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Operations {
-    /// <summary>
-    ///     <code>
-    ///         binary-expr:
-    ///             infix OPERATOR infix;
-    ///     </code>
-    /// </summary>
-    [SyntaxExpression]
-    public partial class BinaryExpr : InfixExpr {
-        [LeafSyntaxNode] Node? left;
-        [LeafSyntaxNode] Node? right;
-        [LeafSyntaxNode] Token? @operator;
+namespace Axion.Core.Processing.Syntactic.Expressions.Operations;
 
-        public BinaryExpr(Node parent) : base(parent) { }
-    }
+/// <summary>
+///     <code>
+///         binary-expr:
+///             infix OPERATOR infix;
+///     </code>
+/// </summary>
+[Branch]
+public partial class BinaryExpr : InfixExpr {
+    [Leaf] Node? left;
+    [Leaf] Token? @operator;
+    [Leaf] Node? right;
+
+    public BinaryExpr(Node parent) : base(parent) { }
 }

@@ -1,21 +1,22 @@
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
+using Magnolia.Trees;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Definitions {
-    [SyntaxExpression]
-    public partial class NameDef : Node, IDefinitionExpr, IDecorableExpr {
-        [LeafSyntaxNode] NameExpr? name;
-        [LeafSyntaxNode] Node? value;
+namespace Axion.Core.Processing.Syntactic.Expressions.Definitions;
 
-        public NameDef(Node parent) : base(parent) { }
+[Branch]
+public partial class NameDef : Node, IDefinitionExpr, IDecorableExpr {
+    [Leaf] NameExpr? name;
+    [Leaf] Node? value;
 
-        public DecoratedExpr WithDecorators(params Node[] items) {
-            return new(Parent) {
-                Target     = this,
-                Decorators = new NodeList<Node>(this, items)
-            };
-        }
+    public NameDef(Node parent) : base(parent) { }
 
-        // TODO: all name references as property
+    public DecoratedExpr WithDecorators(params Node[] items) {
+        return new(Parent) {
+            Target     = this,
+            Decorators = new NodeList<Node, Ast>(this, items)
+        };
     }
+
+    // TODO: all name references as property
 }

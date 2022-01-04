@@ -1,31 +1,30 @@
 using Axion.Core.Processing.Errors;
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
-using Axion.SourceGenerators;
 using Axion.Specification;
+using Magnolia.Attributes;
+using Magnolia.Trees;
 using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions {
-    /// <summary>
-    ///     <code>
-    ///         unknown-expr:
-    ///             TOKEN* (NEWLINE | END);
-    ///     </code>
-    /// </summary>
-    [SyntaxExpression]
-    public partial class UnknownExpr : AtomExpr {
-        [LeafSyntaxNode] NodeList<Token>? tokens;
+namespace Axion.Core.Processing.Syntactic.Expressions;
 
-        public UnknownExpr(Node parent) : base(parent) {
-            LanguageReport.To(BlameType.InvalidSyntax, this);
+/// <summary>
+///     <code>
+///         unknown-expr:
+///             TOKEN* (NEWLINE | END);
+///     </code>
+/// </summary>
+[Branch]
+public partial class UnknownExpr : AtomExpr {
+    [Leaf] NodeList<Token, Ast>? tokens;
+
+    public UnknownExpr(Node parent) : base(parent) { }
+
+    public UnknownExpr Parse() {
+        while (!Stream.PeekIs(Newline, TokenType.End)) {
+            Tokens += Stream.Eat();
         }
-
-        public UnknownExpr Parse() {
-            while (!Stream.PeekIs(Newline, TokenType.End)) {
-                Tokens += Stream.Eat();
-            }
-
-            return this;
-        }
+        LanguageReport.To(BlameType.InvalidSyntax, this);
+        return this;
     }
 }

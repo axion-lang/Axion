@@ -1,28 +1,28 @@
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
 using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Patterns {
-    /// <summary>
-    ///     <code>
-    ///         group-pattern:
-    ///             '(' syntax-pattern ')';
-    ///     </code>
-    /// </summary>
-    [SyntaxExpression]
-    public partial class GroupPattern : Pattern {
-        [LeafSyntaxNode] Pattern pattern = null!;
+namespace Axion.Core.Processing.Syntactic.Expressions.Patterns;
 
-        public GroupPattern(Node parent) : base(parent) { }
+/// <summary>
+///     <code>
+///         group-pattern:
+///             '(' syntax-pattern ')';
+///     </code>
+/// </summary>
+[Branch]
+public partial class GroupPattern : Pattern {
+    [Leaf] Pattern pattern = null!;
 
-        public override bool Match(MacroMatchExpr parent) {
-            return Pattern.Match(parent);
-        }
+    public GroupPattern(Node parent) : base(parent) { }
 
-        public GroupPattern Parse() {
-            Stream.Eat(OpenParenthesis);
-            Pattern = new CascadePattern(this).Parse();
-            Stream.Eat(CloseParenthesis);
-            return this;
-        }
+    public override bool Match(MacroMatchExpr match) {
+        return Pattern.Match(match);
+    }
+
+    public GroupPattern Parse() {
+        Stream.Eat(OpenParenthesis);
+        Pattern = new CascadePattern(this).Parse();
+        Stream.Eat(CloseParenthesis);
+        return this;
     }
 }

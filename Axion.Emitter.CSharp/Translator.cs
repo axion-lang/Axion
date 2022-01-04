@@ -3,7 +3,6 @@ using System.Linq;
 using System.Web;
 using Axion.Core.Processing;
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.Core.Processing.Syntactic;
 using Axion.Core.Processing.Syntactic.Expressions;
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
 using Axion.Core.Processing.Syntactic.Expressions.Definitions;
@@ -13,14 +12,16 @@ using Axion.Core.Processing.Syntactic.Expressions.Statements;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 using Axion.Core.Processing.Translation;
 using Axion.Specification;
+using Magnolia.Trees;
 using static Axion.Specification.TokenType;
 
-namespace Axion.Emitter.CSharp {
-    public class Translator : INodeTranslator {
-        public string OutputFileExtension => ".cs";
+namespace Axion.Emitter.CSharp;
 
-        public bool Translate(CodeWriter w, ITranslatableNode node) {
-            switch (node) {
+public class Translator : INodeTranslator {
+    public string OutputFileExtension => ".cs";
+
+    public bool Translate(CodeWriter w, ITranslatableNode node) {
+        switch (node) {
             case CharToken e: {
                 w.Write("'", HttpUtility.JavaScriptStringEncode(e.Content));
                 if (!e.IsUnclosed) {
@@ -115,7 +116,7 @@ namespace Axion.Emitter.CSharp {
                 else {
                     w.Write(
                         "public ",
-                        e.ValueType,
+                        e.InferredType,
                         " ",
                         e.Name
                     );
@@ -171,11 +172,11 @@ namespace Axion.Emitter.CSharp {
             }
             case VarDef e: {
                 if (e.Value == null) {
-                    w.Write(e.ValueType, " ", e.Name);
+                    w.Write(e.InferredType, " ", e.Name);
                 }
                 else {
                     w.Write(
-                        (object?) e.ValueType ?? "var",
+                        (object?) e.InferredType ?? "var",
                         " ",
                         e.Name,
                         " = ",
@@ -186,7 +187,7 @@ namespace Axion.Emitter.CSharp {
             }
             case FunctionParameter e: {
                 if (e.Parent is not FunctionDef { Name: null }) {
-                    w.Write(e.ValueType, " ");
+                    w.Write(e.InferredType, " ");
                 }
                 w.Write(e.Name);
                 if (e.Value != null) {
@@ -196,11 +197,11 @@ namespace Axion.Emitter.CSharp {
             }
             case NameDef e: {
                 if (e.Value == null) {
-                    w.Write(e.ValueType, " ", e.Name);
+                    w.Write(e.InferredType, " ", e.Name);
                 }
                 else {
                     w.Write(
-                        (object?) e.ValueType ?? "var",
+                        (object?) e.InferredType ?? "var",
                         " ",
                         e.Name,
                         " = ",
@@ -250,9 +251,9 @@ namespace Axion.Emitter.CSharp {
                 }
                 else {
                     if (!TargetSpecification.BinaryOperators.TryGetValue(
-                        e.Operator.Type,
-                        out var op
-                    )) {
+                            e.Operator.Type,
+                            out var op
+                        )) {
                         op = e.Operator.Value;
                     }
                     w.Write(
@@ -386,7 +387,7 @@ namespace Axion.Emitter.CSharp {
                     w.WriteLine($"using {directive};");
                 }
 
-                var rootItems = new NodeList<Node>(e);
+                var rootItems = new NodeList<Node, Ast>(e);
                 var rootClasses = new List<Node>();
                 var rootFunctions = new List<Node>();
                 foreach (var expr in e.Items) {
@@ -396,44 +397,51 @@ namespace Axion.Emitter.CSharp {
                     }
 
                     switch (actualType) {
-                    case ModuleDef:
-                        w.Write(expr);
-                        break;
-                    case ClassDef:
-                        rootClasses.Add(expr);
-                        break;
-                    case FunctionDef:
-                        rootFunctions.Add(expr);
-                        break;
-                    default:
-                        rootItems += expr;
-                        break;
+                        case ModuleDef:
+                            w.Write(expr);
+                            break;
+                        case ClassDef:
+                            rootClasses.Add(expr);
+                            break;
+                        case FunctionDef:
+                            rootFunctions.Add(expr);
+                            break;
+                        default:
+                            rootItems += expr;
+                            break;
                     }
                 }
 
                 w.Write(
                     new ModuleDef(e) {
-                        Name = new NameExpr(e, "__RootModule__")
-                    }.WithScope(new[] {
-                        new ClassDef(e) {
-                            Name = new NameExpr(e, "__RootClass__")
-                        }.WithScope(new[] {
-                            new FunctionDef(e) {
-                                    Name      = new NameExpr(e, "Main"),
-                                    ValueType = new SimpleTypeName(e, "void")
-                                }.WithParameters(new FunctionParameter(e) {
-                                    Name = new NameExpr(e, "args"),
-                                    ValueType = new ArrayTypeName(e) {
-                                        ElementType = new SimpleTypeName(
-                                            e,
-                                            Spec.StringType
-                                        )
-                                    }
-                                })
-                                .WithScope(rootItems)
-                                .WithDecorators(new NameExpr(e, "static"))
-                        }.Union(rootFunctions))
-                    }.Union(rootClasses))
+                        Name = "__RootModule__"
+                    }.WithScope(
+                        new[] {
+                            new ClassDef(e) {
+                                Name = "__RootClass__"
+                            }.WithScope(
+                                new[] {
+                                    new FunctionDef(e) {
+                                            Name         = "Main",
+                                            InferredType = new SimpleTypeName(e, "void"),
+                                            Parameters = {
+                                                new FunctionParameter(e) {
+                                                    Name = "args",
+                                                    InferredType = new ArrayTypeName(e) {
+                                                        ElementType = new SimpleTypeName(
+                                                            e,
+                                                            Spec.StringType
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .WithScope(rootItems)
+                                        .WithDecorators(new NameExpr(e, "static"))
+                                }.Concat(rootFunctions)
+                            )
+                        }.Concat(rootClasses)
+                    )
                 );
                 break;
             }
@@ -454,6 +462,7 @@ namespace Axion.Emitter.CSharp {
                 if (e.ElseScope == null) {
                     return true;
                 }
+
                 w.WriteLine("else");
                 w.Write(e.ElseScope);
                 break;
@@ -491,37 +500,36 @@ namespace Axion.Emitter.CSharp {
             default: {
                 return false;
             }
-            }
-
-            return true;
         }
 
-        static void TranslateImportEntry(
-            CodeWriter       w,
-            string           acc,
-            ImportExpr.Entry entry
-        ) {
-            if (entry.Children.Count > 0) {
-                foreach (var subEntry in entry.Children) {
-                    TranslateImportEntry(w, acc, subEntry);
-                }
+        return true;
+    }
+
+    static void TranslateImportEntry(
+        CodeWriter  w,
+        string      acc,
+        ImportEntry entry
+    ) {
+        if (entry.Children.Count > 0) {
+            foreach (var subEntry in entry.Children) {
+                TranslateImportEntry(w, acc, subEntry);
+            }
+        }
+        else {
+            w.Write("using ");
+            if (entry.Alias != null) {
+                w.Write(entry.Alias, " = ");
+            }
+            if (string.IsNullOrEmpty(acc)) {
+                w.Write(entry.Name);
             }
             else {
-                w.Write("using ");
-                if (entry.Alias != null) {
-                    w.Write(entry.Alias, " = ");
-                }
-                if (string.IsNullOrEmpty(acc)) {
-                    w.Write(entry.Name);
-                }
-                else {
-                    w.Write(
-                        acc,
-                        ".",
-                        entry.Name,
-                        ";"
-                    );
-                }
+                w.Write(
+                    acc,
+                    ".",
+                    entry.Name,
+                    ";"
+                );
             }
         }
     }

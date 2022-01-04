@@ -1,32 +1,33 @@
 using Axion.Core.Processing.Lexical.Tokens;
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
+using Magnolia.Trees;
 using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
-    /// <summary>
-    ///     <code>
-    ///         tuple-type:
-    ///             '(' [type {',' type}] ')';
-    ///     </code>
-    /// </summary>
-    [SyntaxExpression]
-    public partial class TupleTypeName : TypeName {
-        [LeafSyntaxNode] Token? startMark;
-        [LeafSyntaxNode] NodeList<TypeName>? types;
-        [LeafSyntaxNode] Token? endMark;
+namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
-        public TupleTypeName(Node parent) : base(parent) { }
+/// <summary>
+///     <code>
+///         tuple-type:
+///             '(' [type {',' type}] ')';
+///     </code>
+/// </summary>
+[Branch]
+public partial class TupleTypeName : TypeName {
+    [Leaf] Token? endMark;
+    [Leaf] Token? startMark;
+    [Leaf] NodeList<TypeName, Ast>? types;
 
-        public TupleTypeName Parse() {
-            StartMark = Stream.Eat(OpenParenthesis);
-            if (!Stream.PeekIs(CloseParenthesis)) {
-                do {
-                    Types += Parse(this);
-                } while (Stream.MaybeEat(Comma));
-            }
+    public TupleTypeName(Node parent) : base(parent) { }
 
-            EndMark = Stream.Eat(CloseParenthesis);
-            return this;
+    public TupleTypeName Parse() {
+        StartMark = Stream.Eat(OpenParenthesis);
+        if (!Stream.PeekIs(CloseParenthesis)) {
+            do {
+                Types += Parse(this);
+            } while (Stream.MaybeEat(Comma));
         }
+
+        EndMark = Stream.Eat(CloseParenthesis);
+        return this;
     }
 }

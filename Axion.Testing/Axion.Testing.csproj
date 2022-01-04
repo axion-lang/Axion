@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Library</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <GenerateProgramFile>false</GenerateProgramFile>
         <Authors>Ilya Nikitin</Authors>
         <Company>Fluctus Technologies</Company>
@@ -13,7 +13,7 @@
         <RootNamespace>Axion.Testing</RootNamespace>
         <ProjectGuid>{61D72E66-C571-44BE-BC6C-08192B34037D}</ProjectGuid>
         <Nullable>enable</Nullable>
-        <LangVersion>8</LangVersion>
+        <LangVersion>10</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -22,8 +22,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0-release-20210330-02" />
-        <PackageReference Include="NUnit" Version="3.13.1" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+        <PackageReference Include="NUnit" Version="3.13.2" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.2.0" />
     </ItemGroup>
 
     <ItemGroup>

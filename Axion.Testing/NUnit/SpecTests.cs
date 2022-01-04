@@ -7,48 +7,48 @@ using Axion.Specification;
 using NLog;
 using NUnit.Framework;
 
-namespace Axion.Testing.NUnit {
-    [SetUpFixture]
-    public class SpecTests {
-        [OneTimeSetUp]
-        public void Setup() {
-            // Initialize logging
-            LogManager.Configuration.Variables["consoleLogLevel"] = "Fatal";
-            LogManager.Configuration.Variables["fileLogLevel"]    = "Fatal";
-            LogManager.ReconfigExistingLoggers();
+namespace Axion.Testing.NUnit;
 
-            // Clear debugging output
-            var dbg = Path.Join(TestUtils.OutPath, "debug");
-            if (Directory.Exists(dbg)) {
-                foreach (var file in
-                    new DirectoryInfo(dbg).EnumerateFiles()) {
-                    file.Delete();
-                }
-            }
-            else {
-                Directory.CreateDirectory(dbg);
-            }
+[TestFixture, SetUpFixture]
+public class SpecTests {
+    [OneTimeSetUp]
+    public void Setup() {
+        // Initialize logging
+        LogManager.Configuration.Variables["consoleLogLevel"] = "Fatal";
+        LogManager.Configuration.Variables["fileLogLevel"]    = "Fatal";
+        LogManager.ReconfigExistingLoggers();
 
-            Compiler.AddTranslator("axion", new Translator());
+        // Clear debugging output
+        var dbg = Path.Join(TestUtils.OutPath, "debug");
+        if (Directory.Exists(dbg)) {
+            foreach (var file in
+                     new DirectoryInfo(dbg).EnumerateFiles()) {
+                file.Delete();
+            }
+        }
+        else {
+            Directory.CreateDirectory(dbg);
         }
 
-        /// <summary>
-        ///     First barrier preventing silly errors.
-        ///     Checks that all keywords are defined in specification.
-        /// </summary>
-        [Test]
-        public static void SpecificationCheck() {
-            // check keywords completeness
-            var definedKws = Enum.GetNames(typeof(TokenType))
-                .Where(name => name.ToUpperInvariant().StartsWith("KEYWORD"));
+        Compiler.AddTranslator("axion", new Translator());
+    }
 
-            foreach (var kw in definedKws) {
-                Enum.TryParse(kw, out TokenType type);
-                Assert.That(
-                    Spec.Keywords.ContainsValue(type),
-                    "Keyword '" + kw + "' is not defined in specification."
-                );
-            }
+    /// <summary>
+    ///     First barrier preventing silly errors.
+    ///     Checks that all keywords are defined in specification.
+    /// </summary>
+    [Test]
+    public static void SpecificationCheck() {
+        // check keywords completeness
+        var definedKws = Enum.GetNames(typeof(TokenType))
+            .Where(name => name.ToUpperInvariant().StartsWith("KEYWORD"));
+
+        foreach (var kw in definedKws) {
+            Enum.TryParse(kw, out TokenType type);
+            Assert.That(
+                Spec.Keywords.ContainsValue(type),
+                "Keyword '" + kw + "' is not defined in specification."
+            );
         }
     }
 }

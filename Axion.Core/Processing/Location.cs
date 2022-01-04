@@ -1,90 +1,90 @@
 using System;
 
-namespace Axion.Core.Processing {
-    /// <summary>
-    ///     (line, column) position of code in source (0-based).
-    ///     Convertible to (int, int) 2-tuple.
-    /// </summary>
-    public readonly struct Location : IEquatable<Location> {
-        public int Line { get; }
-        public int Column { get; }
+namespace Axion.Core.Processing;
 
-        internal Location(int line, int column) {
-            Line   = line;
-            Column = column;
-        }
+/// <summary>
+///     (line, column) position of code in source (0-based).
+///     Convertible to (int, int) 2-tuple.
+/// </summary>
+public readonly struct Location : IEquatable<Location> {
+    public int Line { get; }
+    public int Column { get; }
 
-        public override string ToString() {
-            return $"{Line + 1}, {Column + 1}";
-        }
+    internal Location(int line, int column) {
+        Line   = line;
+        Column = column;
+    }
 
-        public bool Equals(Location other) {
-            return Line == other.Line && Column == other.Column;
-        }
+    public override string ToString() {
+        return $"{Line + 1}, {Column + 1}";
+    }
 
-        public override bool Equals(object? obj) {
-            return obj is Location other && Equals(other);
-        }
+    public bool Equals(Location other) {
+        return Line == other.Line && Column == other.Column;
+    }
 
-        public override int GetHashCode() {
-            unchecked {
-                return (Line * 397) ^ Column;
-            }
-        }
+    public override bool Equals(object? obj) {
+        return obj is Location other && Equals(other);
+    }
 
-        public static Location Min(Location a, Location b) {
-            return a <= b ? a : b;
+    public override int GetHashCode() {
+        unchecked {
+            return (Line * 397) ^ Column;
         }
+    }
 
-        public static Location Max(Location a, Location b) {
-            return a >= b ? a : b;
-        }
+    public static Location Min(Location a, Location b) {
+        return a <= b ? a : b;
+    }
 
-        public static Location operator -(Location left, Location right) {
-            return new(
-                left.Line - right.Line,
-                left.Column - right.Column
-            );
-        }
+    public static Location Max(Location a, Location b) {
+        return a >= b ? a : b;
+    }
 
-        public static Location operator +(Location left, Location right) {
-            return new(
-                left.Line + right.Line,
-                left.Column + right.Column
-            );
-        }
+    public static Location operator -(Location left, Location right) {
+        return new(
+            left.Line - right.Line,
+            left.Column - right.Column
+        );
+    }
 
-        public static bool operator ==(Location left, Location right) {
-            return left.Equals(right);
-        }
+    public static Location operator +(Location left, Location right) {
+        return new(
+            left.Line + right.Line,
+            left.Column + right.Column
+        );
+    }
 
-        public static bool operator !=(Location left, Location right) {
-            return !left.Equals(right);
-        }
+    public static bool operator ==(Location left, Location right) {
+        return left.Equals(right);
+    }
 
-        public static bool operator <(Location left, Location right) {
-            return left.Line < right.Line
-                || left.Line == right.Line && left.Column < right.Column;
-        }
+    public static bool operator !=(Location left, Location right) {
+        return !left.Equals(right);
+    }
 
-        public static bool operator >(Location left, Location right) {
-            return left.Line > right.Line
-                || left.Line == right.Line && left.Column > right.Column;
-        }
+    public static bool operator <(Location left, Location right) {
+        return left.Line < right.Line
+            || left.Line == right.Line && left.Column < right.Column;
+    }
 
-        public static bool operator <=(Location left, Location right) {
-            return left.Line < right.Line
-                || left.Line == right.Line && left.Column <= right.Column;
-        }
+    public static bool operator >(Location left, Location right) {
+        return left.Line > right.Line
+            || left.Line == right.Line && left.Column > right.Column;
+    }
 
-        public static bool operator >=(Location left, Location right) {
-            return left.Line > right.Line
-                || left.Line == right.Line && left.Column >= right.Column;
-        }
+    public static bool operator <=(Location left, Location right) {
+        return left.Line < right.Line
+            || left.Line == right.Line && left.Column <= right.Column;
+    }
 
-        public static implicit operator Location((int, int) position) {
-            var (line, column) = position;
-            return new Location(line, column);
-        }
+    public static bool operator >=(Location left, Location right) {
+        return left.Line > right.Line
+            || left.Line == right.Line && left.Column >= right.Column;
+    }
+
+    public static implicit operator Location((int, int) position) {
+        var (line, column) = position;
+        return new Location(line, column);
     }
 }

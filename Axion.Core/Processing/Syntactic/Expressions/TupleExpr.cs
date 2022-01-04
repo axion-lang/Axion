@@ -1,37 +1,38 @@
 using System.Linq;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
+using Magnolia.Trees;
 using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions {
-    /// <summary>
-    ///     <code>
-    ///         tuple-expr:
-    ///             tuple-paren-expr | (multiple-expr [',']);
-    ///         tuple-paren-expr:
-    ///             '(' multiple-expr [','] ')';
-    ///     </code>
-    /// </summary>
-    [SyntaxExpression]
-    public partial class TupleExpr : AtomExpr {
-        [LeafSyntaxNode] NodeList<Node>? expressions;
+namespace Axion.Core.Processing.Syntactic.Expressions;
 
-        public override TypeName ValueType =>
-            new TupleTypeName(this) {
-                Types = new NodeList<TypeName>(
-                    this,
-                    Expressions.Where(e => e.ValueType != null)
-                        .Select(e => e.ValueType!)
-                )
-            };
+/// <summary>
+///     <code>
+///         tuple-expr:
+///             tuple-paren-expr | (multiple-expr [',']);
+///         tuple-paren-expr:
+///             '(' multiple-expr [','] ')';
+///     </code>
+/// </summary>
+[Branch]
+public partial class TupleExpr : AtomExpr {
+    [Leaf] NodeList<Node, Ast>? expressions;
 
-        internal TupleExpr(Node parent) : base(parent) { }
+    public override TypeName InferredType =>
+        new TupleTypeName(this) {
+            Types = new NodeList<TypeName, Ast>(
+                this,
+                Expressions.Where(e => e.InferredType != null)
+                    .Select(e => e.InferredType!)
+            )
+        };
 
-        public TupleExpr ParseEmpty() {
-            Stream.Eat(OpenParenthesis);
-            Stream.Eat(CloseParenthesis);
-            return this;
-        }
+    internal TupleExpr(Node parent) : base(parent) { }
+
+    public TupleExpr ParseEmpty() {
+        Stream.Eat(OpenParenthesis);
+        Stream.Eat(CloseParenthesis);
+        return this;
     }
 }

@@ -18,7 +18,7 @@ fn Root3 -> int
     return 3
 
 File.WriteAllText(
-    "E:\\Desktop\\test.txt",
+    "C:\\test.txt",
     "Hello from Axion!"
 )
 Console.ForegroundColor = ConsoleColor.Yellow

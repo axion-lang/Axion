@@ -1,26 +1,26 @@
 using Axion.Core.Processing.Syntactic.Expressions.Atomic;
-using Axion.SourceGenerators;
+using Magnolia.Attributes;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames {
-    /// <summary>
-    ///     <code>
-    ///         simple-type:
-    ///             name;
-    ///     </code>
-    /// </summary>
-    [SyntaxExpression]
-    public partial class SimpleTypeName : TypeName, ITypeParameter {
-        [LeafSyntaxNode] NameExpr name = null!;
+namespace Axion.Core.Processing.Syntactic.Expressions.TypeNames;
 
-        public SimpleTypeName(Node parent) : base(parent) { }
+/// <summary>
+///     <code>
+///         simple-type:
+///             name;
+///     </code>
+/// </summary>
+[Branch]
+public partial class SimpleTypeName : TypeName, ITypeParameter {
+    [Leaf] NameExpr name = null!;
 
-        public SimpleTypeName(Node parent, string name) : base(parent) {
-            Name = new NameExpr(this, name);
-        }
+    public SimpleTypeName(Node parent) : base(parent) { }
 
-        public SimpleTypeName Parse() {
-            Name = new NameExpr(this).Parse();
-            return this;
-        }
+    public SimpleTypeName(Node parent, string name) : base(parent) {
+        Name = new NameExpr(this, name);
+    }
+
+    public SimpleTypeName Parse() {
+        Name = new NameExpr(this).Parse();
+        return this;
     }
 }

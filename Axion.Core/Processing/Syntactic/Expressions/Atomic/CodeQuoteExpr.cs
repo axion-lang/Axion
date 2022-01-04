@@ -1,35 +1,35 @@
 using Axion.Core.Processing.Lexical.Tokens;
 using Axion.Core.Processing.Syntactic.Expressions.Common;
 using Axion.Core.Processing.Syntactic.Expressions.TypeNames;
-using Axion.SourceGenerators;
 using Axion.Specification;
+using Magnolia.Attributes;
 using static Axion.Specification.TokenType;
 
-namespace Axion.Core.Processing.Syntactic.Expressions.Atomic {
-    /// <summary>
-    ///     <code>
-    ///         code-quote-expr:
-    ///             '{{' any '}}';
-    ///     </code>
-    /// </summary>
-    [SyntaxExpression]
-    public partial class CodeQuoteExpr : AtomExpr {
-        [LeafSyntaxNode] Token? openQuote;
-        [LeafSyntaxNode] ScopeExpr scope = null!;
-        [LeafSyntaxNode] Token? closeQuote;
+namespace Axion.Core.Processing.Syntactic.Expressions.Atomic;
 
-        public override TypeName? ValueType => Scope.ValueType;
+/// <summary>
+///     <code>
+///         code-quote-expr:
+///             '{{' any '}}';
+///     </code>
+/// </summary>
+[Branch]
+public partial class CodeQuoteExpr : AtomExpr {
+    [Leaf] Token? closeQuote;
+    [Leaf] Token? openQuote;
+    [Leaf] ScopeExpr scope = null!;
 
-        public CodeQuoteExpr(Node parent) : base(parent) { }
+    public override TypeName? InferredType => Scope.InferredType;
 
-        public CodeQuoteExpr Parse() {
-            OpenQuote = Stream.Eat(DoubleOpenBrace);
-            Scope     = new ScopeExpr(this);
-            while (!Stream.PeekIs(DoubleCloseBrace, TokenType.End)) {
-                Scope.Items += AnyExpr.Parse(this);
-            }
-            CloseQuote = Stream.Eat(DoubleCloseBrace);
-            return this;
+    public CodeQuoteExpr(Node parent) : base(parent) { }
+
+    public CodeQuoteExpr Parse() {
+        OpenQuote = Stream.Eat(DoubleOpenBrace);
+        Scope     = new ScopeExpr(this);
+        while (!Stream.PeekIs(DoubleCloseBrace, TokenType.End)) {
+            Scope.Items += AnyExpr.Parse(this);
         }
+        CloseQuote = Stream.Eat(DoubleCloseBrace);
+        return this;
     }
 }
