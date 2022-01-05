@@ -22,16 +22,18 @@
 
 <h3 align="center">:open_file_folder: Distribution</h3>
 
-| Directory                                               | Contents                                                                | Platform         |
-|---------------------------------------------------------|-------------------------------------------------------------------------|------------------|
-| [`Axion`](Axion)                                        | User interface for compiler: CLI, ScriptBench editor, interpreter       | .NET             |
-| [`Axion.Core`](Axion.Core)                              | Language core, lexer, parser, frontend interface, compiler API          | .NET Standard    |
-| [`Axion.Emitter.Axion`](Axion.Emitter.Axion)          | Extension to translate Axion syntax tree back into Axion source code    | .NET Standard    |
-| [`Axion.Emitter.CSharp`](Axion.Emitter.CSharp)        | Extension to translate Axion AST into C# source code                    | .NET Standard    |
-| [`Axion.Emitter.Python`](Axion.Emitter.Python)        | Extension to translate Axion AST into Python source code                | .NET Standard    |
-| [`Axion.Testing`](Axion.Testing)                        | NUnit-based unit tests for the toolset                                  | .NET             |
-| [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable)         | .NET             |
-| [`misc`](misc)                                          | Code examples, arts, etc.                                               |                  |
+Entire codebase is implemented in .NET 6 (+ .NET Standard 2.1)
+
+| Directory                                               | Contents                                                                |
+|---------------------------------------------------------|-------------------------------------------------------------------------|
+| [`Axion`](Axion)                                        | User interface for compiler: CLI, ScriptBench editor, interpreter       |
+| [`Axion.Core`](Axion.Core)                              | Language core, lexer, parser, frontend interface, compiler API          |
+| [`Axion.Emitter.Axion`](Axion.Emitter.Axion)          | Extension to translate Axion syntax tree back into Axion source code    |
+| [`Axion.Emitter.CSharp`](Axion.Emitter.CSharp)        | Extension to translate Axion AST into C# source code                    |
+| [`Axion.Emitter.Python`](Axion.Emitter.Python)        | Extension to translate Axion AST into Python source code                |
+| [`Axion.Testing`](Axion.Testing)                        | NUnit-based unit tests for the toolset                                  |
+| [`CodeConsole`](https://github.com/F1uctus/CodeConsole) | Sub-repo for ScriptBench - console code editor (still unstable)         |
+| [`misc`](misc)                                          | Code examples, arts, etc.                                               |
 
 <h3 align="center">:dart: Key features</h3>
 
