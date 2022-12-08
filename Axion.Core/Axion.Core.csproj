@@ -31,7 +31,7 @@
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="Nett" Version="0.15.0" />
         <PackageReference Include="Nett.Coma" Version="0.15.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
         <PackageReference Include="NLog" Version="4.7.13" />
         <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
     </ItemGroup>
