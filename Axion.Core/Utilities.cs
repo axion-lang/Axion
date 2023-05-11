@@ -115,12 +115,7 @@ public static class Utilities {
     }
 
     public static string Multiply(this string source, int multiplier) {
-        var sb = new StringBuilder(multiplier * source.Length);
-        for (var i = 0; i < multiplier; i++) {
-            sb.Append(source);
-        }
-
-        return sb.ToString();
+        return new string(source, multiplier);
     }
 
     #endregion
